@@ -31,12 +31,12 @@ function block(ctx, W, H, p, c) {
   roundRect(ctx, cx - s / 2, cy - s / 2, s, s, 6); ctx.fill();
   ctx.globalAlpha = 1;
   ctx.fillStyle = '#fff'; ctx.font = '600 14px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  if (p.mass !== undefined) ctx.fillText(`${p.mass} kg`, cx, cy);
+  if (p.mass !== undefined) ctx.fillText(massText(p.mass), cx, cy);
   const L = Math.min(W, H) * 0.36;
   for (const f of p.forces || []) {
     const a = (f.dir * Math.PI) / 180;
-    const len = Math.max(18, L * (f.size ?? 1));
     const ox = cx + Math.cos(a) * s * 0.5, oy = cy - Math.sin(a) * s * 0.5;
+    const len = fit(ox, oy, a, Math.max(18, L * (f.size ?? 1)), W, H);
     arrow(ctx, ox, oy, ox + Math.cos(a) * len, oy - Math.sin(a) * len, colorFor(f, c), f.label);
   }
 }
@@ -55,16 +55,30 @@ function incline(ctx, W, H, p, c) {
   ctx.save(); ctx.translate(bx, by); ctx.rotate(-th);
   ctx.fillStyle = c.accent; ctx.globalAlpha = 0.85; roundRect(ctx, -s / 2, -s, s, s, 5); ctx.fill(); ctx.globalAlpha = 1;
   ctx.fillStyle = '#fff'; ctx.font = '600 12px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  if (p.mass !== undefined) ctx.fillText(`${p.mass} kg`, 0, -s / 2);
+  if (p.mass !== undefined) ctx.fillText(massText(p.mass), 0, -s / 2);
   ctx.restore();
   const cx = bx - Math.sin(th) * s / 2, cy = by - Math.cos(th) * s / 2;
   const L = Math.min(W, H) * 0.3;
   for (const f of p.forces || []) {
-    // directions: 'down' (gravity), 'normal', 'up-slope', 'down-slope'
-    const a = { down: -Math.PI / 2, normal: Math.PI / 2 - th, 'up-slope': th, 'down-slope': Math.PI + th }[f.dir] ?? 0;
-    const len = Math.max(18, L * (f.size ?? 1));
+    // directions: 'down' (gravity), 'normal' (out of the slope), 'into-slope', 'up-slope', 'down-slope'
+    const a = { down: -Math.PI / 2, normal: Math.PI / 2 - th, 'into-slope': -Math.PI / 2 - th, 'up-slope': th, 'down-slope': Math.PI + th }[f.dir] ?? 0;
+    const len = fit(cx, cy, a, Math.max(18, L * (f.size ?? 1)), W, H);
     arrow(ctx, cx, cy, cx + Math.cos(a) * len, cy - Math.sin(a) * len, colorFor(f, c), f.label);
   }
+}
+
+// a number is a mass in kg; a string is shown as written ("m", "2m", "5.0 kg")
+const massText = (m) => (typeof m === 'number' ? `${m} kg` : String(m));
+
+// shorten an arrow from (x, y) at angle a so its head and label stay on the canvas
+function fit(x, y, a, len, W, H, margin = 24) {
+  const dx = Math.cos(a), dy = -Math.sin(a);
+  let room = Infinity;
+  if (dx > 1e-6) room = Math.min(room, (W - margin - x) / dx);
+  if (dx < -1e-6) room = Math.min(room, (margin - x) / dx);
+  if (dy > 1e-6) room = Math.min(room, (H - margin - y) / dy);
+  if (dy < -1e-6) room = Math.min(room, (margin - y) / dy);
+  return Math.max(14, Math.min(len, room));
 }
 
 function colorFor(f, c) {

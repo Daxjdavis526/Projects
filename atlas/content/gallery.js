@@ -28,6 +28,8 @@ export default [
   { id: 'ibp', title: 'Integration by parts as areas', track: 'math', blurb: 'Two areas that always add up to uv.', spec: { type: 'ibp-area', params: {} } },
   { id: 'series', title: 'Series: converge or refuse to', track: 'math', blurb: 'Partial sums, error bands and convergence tests: watch a series converge — or refuse to.', lesson: 'math1220.C2-4.9' },
   { id: 'alternating', title: 'The alternating-series error band', track: 'math', blurb: 'Each partial sum overshoots and the next pulls back; the sum is trapped in the band.', lesson: 'math1220.C2-4.7' },
+  { id: 'quadrature', title: 'Numerical integration and its error', track: 'math', blurb: 'Rectangles, trapezoids or Simpson’s parabolas — watch the error fall like 1/n² and 1/n⁴.', lesson: 'math1220.C2-2.10' },
+  { id: 'vectors3d', title: 'Vectors, lines and planes in 3D', track: 'math', blurb: 'Turn vectors, planes and lines in 3D: components, cross products, orbital planes.', lesson: 'math1220.C2-7.4' },
   { id: 'revolve', title: 'Solids of revolution', track: 'math', blurb: 'Sweep a flat region around an axis into a solid; see its disks, washers and shells.', lesson: 'math1220.C2-1.2' },
   { id: 'light-clock', title: 'Light clocks and time dilation', track: 'gr', blurb: 'Two identical clocks, one moving: same light speed, longer path, slower ticks.', spec: { type: 'gr-light-clock', params: {} } },
   { id: 'coordinates', title: 'Coordinates are labels', track: 'gr', blurb: 'One flat plane, three sets of labels: lengths agree, components don’t, the grid turns.', spec: { type: 'gr-coordinates', params: {} } },

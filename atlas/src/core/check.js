@@ -144,14 +144,16 @@ export function gradeNumeric(item, input) {
 
 function genericNumericSlip(v, t, rel, abs) {
   const near = (a, b) => Math.abs(a - b) <= abs + Math.max(rel, 0.005) * Math.abs(b);
+  // a ratio is a pure number: the item's absolute tolerance (in its units) does not apply
+  const nearRatio = (r, x) => Math.abs(r - x) <= Math.max(rel, 0.005) * Math.abs(x);
   if (t !== 0 && near(-v, t)) return 'The size is right but the sign is wrong.';
   if (t !== 0) {
     const r = v / t;
     for (const k of [-6, -3, -2, -1, 1, 2, 3, 6]) {
-      if (near(r, 10 ** k)) return `That is off by a factor of 10${k > 0 ? '' : '⁻'}${String(Math.abs(k)).replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])} — check unit conversions and powers of ten.`;
+      if (nearRatio(r, 10 ** k)) return `That is off by a factor of 10${k > 0 ? '' : '⁻'}${String(Math.abs(k)).replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])} — check unit conversions and powers of ten.`;
     }
-    if (near(r, 2) || near(r, 0.5)) return 'Off by a factor of 2 — check for a missing or extra ½ or 2.';
-    if (near(r, 180 / Math.PI) || near(r, Math.PI / 180)) return 'That looks like degrees and radians mixed up.';
+    if (nearRatio(r, 2) || nearRatio(r, 0.5)) return 'Off by a factor of 2 — check for a missing or extra ½ or 2.';
+    if (nearRatio(r, 180 / Math.PI) || nearRatio(r, Math.PI / 180)) return 'That looks like degrees and radians mixed up.';
     if (near(v, t * t) || near(v * v, t)) return 'That looks like a square or square root slipped in or out.';
   }
   return '';

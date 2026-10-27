@@ -15,6 +15,8 @@ import { mathIn } from '../src/core/markup.js';
 import { scan, render as renderLoads } from '../tools/register.mjs';
 import ACHIEVEMENTS from '../content/achievements.js';
 import GALLERY from '../content/gallery.js';
+import { parse, compile } from '../src/core/expr.js';
+import { makeRng } from '../src/core/rng.js';
 
 const require = createRequire(import.meta.url);
 const katex = require('../vendor/katex-0.19.0/katex.min.js');
@@ -41,6 +43,11 @@ async function checkVisual(where, spec) {
   let mod;
   try { mod = await simCache.get(spec.type); } catch (e) { check(`${where}: sim ${spec.type} loads`, false, e.message); return; }
   if (typeof mod.mount !== 'function') { check(`${where}: sim ${spec.type} exports mount`, false); return; }
+  // strings drawn on a canvas (labels) are never checked by KaTeX: catch escape damage here
+  const strings = [];
+  (function walk(v) { if (typeof v === 'string') strings.push(v); else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x); })(spec.params || {});
+  const damaged = strings.find((x) => /[\t\f\v\b\r]/.test(x));
+  if (damaged !== undefined) check(`${where}: visual text has no control characters`, false, `“${damaged.slice(0, 40).replace(/[\t\f\v\b\r]/g, '�')}” — a backslash was eaten by a JS string escape; use String.raw`);
   if (mod.validate) {
     let p;
     try { p = mod.validate({ ...(mod.defaults || {}), ...(spec.params || {}) }); } catch (e) { p = [`validate threw: ${e.message}`]; }
@@ -50,6 +57,68 @@ async function checkVisual(where, spec) {
     if (!s) continue;
     for (const m of mathIn(s)) { try { tex(m.tex, m.display); } catch (e) { check(`${where}: visual text TeX`, false, `${m.tex}: ${e.message}`); } }
   }
+}
+
+// ∫_a^b g by tanh–sinh quadrature, which shrugs off integrable endpoint
+// singularities (x^(-2/3) at 0); infinite limits are mapped onto finite ones
+function integral(g, a, b) {
+  if (a === -Infinity && b === Infinity) return integral(g, -Infinity, 0) + integral(g, 0, Infinity);
+  if (b === Infinity) return tanhSinh((t) => g(a + t / (1 - t)) / (1 - t) ** 2, 0, 1);
+  if (a === -Infinity) return tanhSinh((t) => g(b - t / (1 - t)) / (1 - t) ** 2, 0, 1);
+  return tanhSinh(g, a, b);
+}
+function tanhSinh(g, a, b) {
+  const h = 1 / 64, r = (b - a) / 2;
+  let s = 0;
+  for (let k = -256; k <= 256; k++) {
+    const t = k * h, u = (Math.PI / 2) * Math.sinh(t);
+    const w = ((Math.PI / 2) * Math.cosh(t)) / Math.cosh(u) ** 2;
+    if (!(w > 1e-300)) continue;
+    // distance from the nearer end, computed without cancellation
+    const e = Math.exp(-2 * Math.abs(u)), d = (2 * e) / (1 + e);
+    const x = u < 0 ? a + r * d : b - r * d;
+    const y = g(x);
+    if (Number.isFinite(y)) s += w * y;
+  }
+  return r * h * s;
+}
+
+// Calculus keys checked by calculus: an expression answer with `integrand`
+// must differentiate back to it; one with `derivativeOf` must be the
+// derivative of that; a numeric answer with `integrand` and `limits` must be
+// the integral (numerically, to quadrature accuracy).
+function calculusProblem(item) {
+  if (!item.integrand && !item.derivativeOf) return null;
+  const domains = item.vars && !Array.isArray(item.vars) ? item.vars : Object.fromEntries((item.vars || ['x']).map((v) => [v, [-2, 2]]));
+  const names = Object.keys(domains);
+  const wrt = item.wrt || names[0] || 'x';
+  const f = (src) => { const g = compile(parse(String(src), { vars: names })); return (env) => g(env); };
+  const rng = makeRng(99);
+  if (item.type === 'expression') {
+    const A = f(item.answer), T = f(item.integrand || item.derivativeOf);
+    let tested = 0;
+    for (let k = 0; k < 60 && tested < 8; k++) {
+      const env = {};
+      for (const n of names) { const [lo, hi] = domains[n]; env[n] = lo + (hi - lo) * (0.05 + 0.9 * rng.next()); }
+      const x = env[wrt], hh = 1e-4 * Math.max(1, Math.abs(x));
+      const d = (F) => (F({ ...env, [wrt]: x + hh }) - F({ ...env, [wrt]: x - hh })) / (2 * hh);
+      const [got, want] = item.integrand ? [d(A), T(env)] : [A(env), d(T)];
+      if (![got, want].every(Number.isFinite)) continue;
+      tested++;
+      if (Math.abs(got - want) > 2e-5 * Math.max(1, Math.abs(want))) return `the key ${item.integrand ? 'differentiates to' : 'is'} ${got.toPrecision(6)} at ${wrt} = ${x.toPrecision(4)}, but the ${item.integrand ? 'integrand' : 'derivative'} is ${want.toPrecision(6)}`;
+    }
+    return tested ? null : 'the calculus check found no point where both sides are defined';
+  }
+  if (item.type === 'numeric' && item.integrand && item.limits) {
+    const g = f(item.integrand);
+    const val = (v) => (typeof v === 'number' ? v : compile(parse(String(v), { vars: [] }))({}));
+    const [a, b] = item.limits.map(val);
+    const G = (x) => g({ [wrt]: x });
+    const I = integral(G, a, b), tol = 1e-6;
+    const ans = item.answer;
+    if (Math.abs(I - ans) > tol * Math.max(1e-9, Math.abs(ans)) + 1e-9) return `the integral of ${item.integrand} over [${item.limits.join(', ')}] is ${I.toPrecision(7)} numerically, but the key is ${ans}`;
+  }
+  return null;
 }
 
 // the lesson registry must match the files on disk (whole-suite runs only:
@@ -104,6 +173,8 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       instances++;
       seen.add(JSON.stringify([item.prompt, item.answer]));
       const p = validateItem(item, tex);
+      const calc = calculusProblem(item);
+      if (calc) p.push(calc);
       if (p.length) { firstProblem = `variant ${v}: ${p.join('; ')}`; break; }
       if (item.visual || item.diagram) hasVisual = true;
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
@@ -111,7 +182,7 @@ for (const L0 of Object.values(CATALOG.lessons)) {
     if (hasVisual) withVisual++;
     lessonItems++; if (hasVisual) lessonVisual++;
     check(`${L0.id}/${def.id} (${context})`, !firstProblem, firstProblem || '');
-    if (def.gen && n > 5) check(`${L0.id}/${def.id}: generator varies`, seen.size > 1, 'every variant was identical');
+    if (def.gen && n > 5 && !firstProblem) check(`${L0.id}/${def.id}: generator varies`, seen.size > 1, 'every variant was identical');
   }
   if (lessonItems && lessonVisual / lessonItems < 0.6) lowVisual.push(`${L0.id} ${lessonVisual}/${lessonItems}`);
 }

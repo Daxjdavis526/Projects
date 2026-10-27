@@ -186,7 +186,9 @@ export function answerText(item) {
     case 'numeric': return h('span', { html: tex(`${fmtNum(item.answer)}${item.units ? '\\;' + unitTeX(item.units) : ''}`) });
     case 'expression': return item.answerTeX ? math(item.answerTeX) : h('span', { html: tex(previewExpression(item.answer, item.vars).tex || item.answer) });
     case 'mcq': return mdi(item.choices[item.answer]);
-    case 'multi': return h('span', item.answer.map((i) => item.choices[i]).join('; '));
+    case 'multi': return h('span', item.answer.map((i, k) => [k ? '; ' : '', mdi(item.choices[i])]));
+    case 'order': return h('ol.small', { style: { margin: '.3rem 0 0', paddingLeft: '1.3rem' } }, item.items.map((x) => h('li', mdi(x))));
+    case 'match': case 'label': return h('ul.small', { style: { margin: '.3rem 0 0', paddingLeft: '1.1rem' } }, item.left.map((l, i) => h('li', mdi(l), ' → ', mdi(item.right[item.answer[i]]))));
     case 'slider': return h('span', `between ${item.answer[0]} and ${item.answer[1]}`);
     case 'point': return h('span', { html: tex(`(${fmtNum(item.answer.x)},\\ ${fmtNum(item.answer.y)})`) });
     case 'code': return h('pre.code-answer', item.answer);

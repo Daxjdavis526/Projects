@@ -23,7 +23,10 @@
 // Any element may carry `when: 'expr'` and is drawn only while that is nonzero
 // (choice values should be numbers; toggles count as 1 and 0). Labels are TeX,
 // placed in the overlay above the canvas. Arrows are drawn to scale in the
-// axes' units. The geometry lives in model/calc-vectors3d.js.
+// axes' units. The camera starts in the textbook view and frames everything
+// the scene draws at the starting values (lines by their anchor point only);
+// `yaw`, `pitch`, `scale`, `target` and `dist` override it. The geometry and
+// the framing live in model/calc-vectors3d.js.
 
 import { View3D } from '../three-d.js';
 import { fn } from '../model/exprfn.js';

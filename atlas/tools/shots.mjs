@@ -121,13 +121,18 @@ for (const theme of themes) {
         if (input) await input.fill('1');
         for (const sel of await page.$$('.stage .match-row select')) await sel.selectOption({ index: 1 });
       }
-      const check = await page.$('.stage button.btn.primary:has-text("Check")');
-      if (check && await check.isEnabled()) {
+      for (const attempt of ['1', 'x = 1', 'x', 'y = x']) {
+        const check = await page.$('.stage button.btn.primary:has-text("Check")');
+        if (!check || !(await check.isEnabled())) break;
         await check.click(); await page.waitForTimeout(150);
         const conf = await page.$('.stage .confidence button');
         if (conf) { await conf.click(); await page.waitForTimeout(150); }
         // a coding exercise runs Python: wait for it to finish
         await page.waitForFunction(() => ![...document.querySelectorAll('.stage button')].some((b) => b.textContent.includes('Running')), null, { timeout: 120000 }).catch(() => {});
+        if (!(await page.$('.stage .feedback.info .head:has-text("Not quite readable")'))) break;
+        const input = await page.$('.stage .answer input');
+        if (!input) break;
+        await input.fill(attempt === '1' ? 'x = 1' : attempt === 'x = 1' ? 'x' : 'y = x');
       }
       const give = await page.$('.stage button:has-text("Show solution")');
       if (give) { await give.click(); await page.waitForTimeout(400); }

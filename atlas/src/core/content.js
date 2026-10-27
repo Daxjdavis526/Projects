@@ -95,7 +95,7 @@ export function keyResponse(item) {
   switch (item.type) {
     case 'mcq': return item.answer;
     case 'multi': return item.answer;
-    case 'numeric': return String(item.answer);
+    case 'numeric': return item.unitMode === 'typed' && item.units ? `${item.answer} ${item.units}` : String(item.answer);
     case 'expression': return item.answer;
     case 'order': return item.items.map((_, k) => k);
     case 'match': case 'label': return Object.fromEntries(item.answer.map((r, l) => [l, r]));

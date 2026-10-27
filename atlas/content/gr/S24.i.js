@@ -45,6 +45,129 @@ const lightCurve = (u0) => ({
   caption: 'A microlensing event: a star in our Galaxy drifts in front of a more distant one (Einstein-radius crossing time 20 days). The two images are far too close to separate, so all you see is the combined brightening.',
 });
 
+// starlight bent by a round body of radius 1, angles hugely exaggerated. Each ray comes in level at
+// height b and leaves bent by a: y = b − a(x + √(x² + b²))/2. With an observer, the dashed line is
+// the direction the star is seen in.
+const bendPic = ({ rays, body = 'Sun', observer = false, caption }) => {
+  const X0 = -7, X1 = 9;
+  const path = ({ b, a }) => `${round(b, 4)} - ${round(a, 4)}*(x + sqrt(x^2 + ${round(b * b, 5)}))/2`;
+  const y = ({ b, a }, x) => b - (a * (x + Math.hypot(x, b))) / 2;
+  const curves = [], points = [];
+  for (const r of rays) {
+    curves.push({ fn: String(round(r.b, 4)), domain: [-1.5, X1], color: 'ink4', dash: true, width: 1 });
+    curves.push({ fn: path(r), domain: [X0, X1], color: r.color || 'gold', label: r.label, labelAt: X0 + 0.2 });
+  }
+  let low = -1.4;
+  if (observer) {
+    const r = rays[0], yE = y(r, X1), s = (-r.a * (1 + X1 / Math.hypot(X1, r.b))) / 2;
+    curves.push({ fn: `${round(yE, 5)} + ${round(s, 5)}*(x - ${X1})`, domain: [X0, X1], color: 'accent', dash: true, width: 1.4 });
+    points.push({ x: X1, y: round(yE, 4), color: 'teal', label: 'you' }, { x: X0 + 0.1, y: round(yE + s * (X0 + 0.1 - X1) + 0.15, 4), r: 0.5, color: 'accent', label: 'where the star is seen' });
+    low = Math.min(low, yE - 0.5);
+  }
+  points.push({ x: -0.55, y: -1.55, r: 0.5, color: 'gold', label: body });
+  const top = Math.max(...rays.map((r) => r.b)) + (observer ? 1.7 : 0.8);
+  return {
+    type: 'graph',
+    params: {
+      x: [X0 - 0.3, X1 + 1.4], y: [round(low - 0.5, 3), round(top, 3)], equal: true, grid: false, axes: false,
+      shade: [{ fn: 'sqrt(max(1 - x^2, 0))', lower: '-sqrt(max(1 - x^2, 0))', from: -1, to: 1, color: 'gold', alpha: 0.8 }],
+      curves, points,
+    },
+    caption,
+  };
+};
+const GRAZE = { b: 1.08, a: 0.16 };
+
+// Gaia's geometry: Earth at (−1, 0), the Sun at the origin, starlight arriving at angle Φ from the Sun's direction
+const elongationPic = (ph) => {
+  const p = (ph * Math.PI) / 180, ux = Math.cos(p), uy = Math.sin(p), L = 2.1;
+  const fx = -1 + ux * Math.cos(p), fy = uy * Math.cos(p);           // the closest approach to the Sun
+  const sx = -1 + L * ux, sy = L * uy;                                // far along the ray, toward the star
+  const xs = [-1, 0, fx, sx], ys = [0, fy, sy];
+  return {
+    type: 'graph',
+    params: {
+      x: [round(Math.min(...xs) - 0.45, 3), round(Math.max(...xs) + 0.75, 3)], y: [round(Math.min(...ys, 0) - 0.35, 3), round(Math.max(...ys) + 0.3, 3)],
+      equal: true, grid: false, axes: false,
+      curves: [
+        { param: [`-1 + t*${round(ux, 5)}`, `t*${round(uy, 5)}`], t: [Math.min(0, round(Math.cos(p), 5)), 0], color: 'ink3', dash: true, width: 1.2 },
+        { param: ['t', '0'], t: [-1, 0], color: 'ink4', dash: true, width: 1 },
+        { param: [`${round(fx, 5)}*t`, `${round(fy, 5)}*t`], t: [0, 1], color: 'bad', width: 1.6 },
+      ],
+      arrows: [{ from: [round(sx, 4), round(sy, 4)], to: [round(-1 + 0.06 * ux, 4), round(0.06 * uy, 4)], color: 'gold' }],
+      points: [
+        { x: 0, y: 0, color: 'gold', r: 7, label: 'Sun' }, { x: -1, y: 0, color: 'accent', r: 5 }, { x: -1.42, y: -0.17, r: 0.5, color: 'accent', label: 'Earth' },
+        { x: round(fx, 4), y: round(fy, 4), color: 'bad', r: 3.5 }, { x: round(fx / 2 + 0.04, 4), y: round(fy / 2, 4), r: 0.5, color: 'bad', label: 'b' },
+        { x: round(sx, 4), y: round(sy, 4), r: 0.5, color: 'gold', label: 'from the star' },
+        { x: round(-1 + 0.5 * Math.cos(p / 2) - 0.08, 4), y: round(0.5 * Math.sin(p / 2) - 0.07, 4), r: 0.5, color: 'ink2', label: `Φ = ${ph}°` },
+      ],
+    },
+    caption: 'Seen from above the plane: starlight (gold) reaches Earth at angle Φ from the direction of the Sun. Red: the ray’s closest approach to the Sun, b = (1 AU) sin Φ — on the far side of Earth when Φ is more than 90°.',
+  };
+};
+
+// the lens seen side-on: light from the source reaches you from both sides of the lens (2D cut of a ring)
+const lensSide = (dl, m) => {
+  const h = 0.2 * dl, top = (8 * h) / dl;
+  const ray = (sg) => [
+    { fn: `${round(sg * h / dl, 5)}*x`, domain: [0, dl], color: 'gold' },
+    { fn: `${round(sg * h, 4)}*(8 - x)/${8 - dl}`, domain: [dl, 8], color: 'gold' },
+    { fn: `${round(sg * h / dl, 5)}*x`, domain: [dl, 8], color: 'accent', dash: true, width: 1.2 },
+  ];
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.9, 9.0], y: [-2.05, 2.05], grid: false, axes: false,
+      curves: [{ fn: '0', domain: [0, 8], color: 'ink4', dash: true, width: 1 }, ...ray(1), ...ray(-1)],
+      points: [
+        { x: 0, y: 0, color: 'teal' }, { x: -0.85, y: -0.3, r: 0.5, color: 'teal', label: 'you' },
+        { x: dl, y: 0, color: 'ink', r: 6 }, { x: dl - 0.35, y: round(-h - 0.45, 3), r: 0.5, color: 'ink2', label: `lens, ${m} M☉` },
+        { x: 8, y: 0, color: 'gold', label: 'source' },
+        { x: 8, y: round(top, 4), color: 'accent', r: 3, label: 'image' }, { x: 8, y: round(-top, 4), color: 'accent', r: 3 },
+      ],
+    },
+    caption: 'Side view, angles hugely exaggerated. Light from the source bends at the lens and reaches you from both sides — in three dimensions, from a whole ring. θE is the angle between the lens and that ring as you see it.',
+  };
+};
+
+// the Sun as a lens: rays at ±b meet on the axis behind it (not to scale)
+const focusPic = (k) => {
+  const b = 1.1 * k, F = 7.5, a = (2 * b) / (F + Math.hypot(F, b));
+  const ray = (sg) => ({ fn: `${sg * round(b, 4)} - ${sg * round(a, 5)}*(x + sqrt(x^2 + ${round(b * b, 5)}))/2`, domain: [-6.5, F + 1.6], color: 'gold' });
+  return {
+    type: 'graph',
+    params: {
+      x: [-6.8, F + 2.2], y: [round(-b - 0.9, 3), round(b + 0.9, 3)], equal: true, grid: false, axes: false,
+      shade: [{ fn: 'sqrt(max(1 - x^2, 0))', lower: '-sqrt(max(1 - x^2, 0))', from: -1, to: 1, color: 'gold', alpha: 0.8 }],
+      curves: [{ fn: '0', domain: [-6.5, F + 2], color: 'ink4', dash: true, width: 1 }, ray(1), ray(-1)],
+      arrows: [{ from: [0, round(-b - 0.45, 3)], to: [F, round(-b - 0.45, 3)], color: 'ink2', label: 'd = ?' }],
+      points: [{ x: F, y: 0, color: 'accent', r: 5 }, { x: F + 0.05, y: -0.75, r: 0.5, color: 'accent', label: 'focus' }, { x: -0.5, y: round(b + 0.25, 3), r: 0.5, color: 'gold', label: `b = ${k} R☉` }],
+    },
+    caption: 'The Sun as a lens, hugely out of scale: light passing at distance b on every side is bent inward and meets on the axis behind the Sun.',
+  };
+};
+
+// what a black-hole image shows, with the real sizes overlaid (units of GM/c², non-spinning hole)
+const imagePicture = {
+  type: 'graph',
+  params: {
+    x: [-9.5, 9.5], y: [-7.4, 7.4], equal: true, grid: false, axes: false,
+    curves: [
+      { param: ['5.75cos(t)', '5.75sin(t)'], t: [0, 6.2832], color: 'gold', width: 13 },
+      { param: ['3cos(t)', '3sin(t)'], t: [0, 6.2832], color: 'accent', dash: true, width: 1.6 },
+      { param: ['2cos(t)', '2sin(t)'], t: [0, 6.2832], color: 'bad', width: 1.8 },
+      { param: ['-2.819 - 4.6t', '-1.026 - 2.3t'], t: [0, 1], color: 'accent', width: 1 },
+    ],
+    shade: [{ fn: 'sqrt(max(27 - x^2, 0))', lower: '-sqrt(max(27 - x^2, 0))', from: -5.197, to: 5.197, color: '#000000', alpha: 0.9 }],
+    points: [
+      { x: -1.15, y: -0.25, r: 0.5, color: 'bad', label: 'horizon' },
+      { x: -9.6, y: -3.75, r: 0.5, color: 'accent', label: 'photon sphere' },
+      { x: 4.3, y: 5.6, r: 0.5, color: 'gold', label: 'dark region’s edge' },
+    ],
+  },
+  caption: 'Sketch of a black-hole image with sizes to scale for a non-spinning hole: the dark region (radius 3√3 ≈ 5.2 GM/c²), the photon sphere (3) and the horizon (2). The glow of the ring is not to scale.',
+};
+
 export default lesson({
   id: 'gr.S24.i',
   title: 'Light bends: eclipses, lenses and Einstein rings',
@@ -100,6 +223,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
       hints: ['In general relativity, what replaces the force of gravity for anything moving freely?'],
       teach: 'Light bends because it follows null geodesics of curved spacetime, not because a force acts on a mass.',
       explain: 'Everything moving freely follows geodesics; for light they are the ones with zero proper time. Near a mass those geodesics are bent — by curved time and curved space equally — giving 4GM/(c²b).',
+      visual: bendPic({ rays: [{ ...GRAZE, label: 'starlight' }], observer: true, caption: 'Starlight grazing the Sun, with the bending exaggerated about 18 000 times. Grey dashed: its path if the Sun were not there. You see the star along the direction the light finally arrives from.' }),
     }),
     num({
       id: 'grazing', difficulty: 2,
@@ -111,7 +235,9 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
           ['the Sun, passing at twice its radius', M_SUN, 2 * R_SUN, t`1.391\times10^{9}`],
         ]);
         const a = bend(M, R) * RAD_TO_ARCSEC;
+        const short = what.split(' (')[0].replace(/, passing.*$/, '').replace(/^a white dwarf.*$/, 'white dwarf');
         return {
+          visual: bendPic({ rays: [{ ...GRAZE, label: 'starlight' }], body: short.charAt(0).toUpperCase() + short.slice(1), caption: 'A ray of starlight skimming the body, with the bending hugely exaggerated. Grey dashed: its path if the body were not there.' }),
           prompt: t`A ray of starlight just skims ${what}. By how many arcseconds is it bent? ($b = ${rtex}$ m)`,
           answer: a, units: 'arcsec', tol: { rel: 0.01 },
           errors: [{ value: a / 2, feedback: 'That is the Newtonian (equivalence-principle) half. General relativity’s bending is 4GM/(c²b).' }, { value: bend(M, R), feedback: 'That is in radians. Multiply by 206 265 to get arcseconds.' }],
@@ -128,6 +254,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
         const p = (ph * Math.PI) / 180, b = AU * Math.sin(p);
         const d = bendSeenFrom(M_SUN, AU, p) * MAS;
         return {
+          visual: elongationPic(ph),
           prompt: t`Satellites such as Gaia measure the bending of starlight all over the sky. Seen from Earth, a star ${ph}° from the Sun has its light pass the Sun at $b = (1\ \text{AU})\sin ${ph}^\circ$, and only the bending that happens before the light reaches us counts: $\delta\theta = \dfrac{4GM_\odot}{c^2 b}\cdot\dfrac{1 + \cos\Phi}{2}$, with $\Phi = ${ph}^\circ$. Find $\delta\theta$ in milliarcseconds. ($4GM_\odot/c^2 = ${sci(4 * M1, 4)}$ m, 1 AU $= 1.496\times10^{11}$ m)`,
           answer: d, units: 'mas', tol: { rel: 0.01 },
           errors: [{ value: bend(M_SUN, b) * MAS, feedback: 'You used the full bending 4GM/(c²b). The light still had part of its path to go — multiply by (1 + cos Φ)/2.' }, { value: bend(M_SUN, AU) * MAS * ((1 + Math.cos(p)) / 2), feedback: 'b is the closest approach, (1 AU) sin Φ, not 1 AU itself.' }].filter((e) => Math.abs(e.value - d) > 0.02 * d),
@@ -163,6 +290,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
         const m = r.pick([0.3, 0.5, 1.0]), dl = r.pick([2, 4, 6]);
         const th = einsteinRadius(m * M_SUN, dl * 1e3 * PC, 8e3 * PC) * MAS;
         return {
+          visual: lensSide(dl, m),
           prompt: t`A ${m}-solar-mass star ${dl} kpc away passes in front of a star 8 kpc away, near the centre of our Galaxy. What is its Einstein radius, in milliarcseconds? (1 kpc $= 3.086\times10^{19}$ m; $GM_\odot/c^2 = ${sci(M1, 4)}$ m)`,
           answer: th, units: 'mas', tol: { rel: 0.01 },
           errors: [{ value: th / Math.SQRT2, feedback: 'Use 4GM/c² — twice the Schwarzschild radius — not 2GM/c².' }, { value: th * th, feedback: 'Take the square root at the end.' }].filter((e) => Math.abs(e.value - th) > 0.02 * th),
@@ -211,6 +339,10 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
       gen(r) {
         const k = r.pick([1, 2, 3, 5]);
         return {
+          visual: bendPic({
+            rays: k === 1 ? [{ ...GRAZE, label: 'grazing' }] : [{ ...GRAZE, label: 'grazing' }, { b: GRAZE.b * k, a: GRAZE.a / k, color: 'accent', label: `${k} solar radii out` }],
+            caption: 'Starlight passing the Sun, with the bending hugely exaggerated. Grey dashed: the paths the light would take without the Sun.',
+          }),
           prompt: t`Starlight passes the Sun at ${k === 1 ? 'its very edge' : `${k} solar radii from its centre`}. By how many arcseconds is it bent? (Grazing the edge gives $${sci(LIMB)}''$.)`,
           answer: LIMB / k, units: 'arcsec', tol: { rel: 0.01 },
           hints: [t`$\alpha = 4GM/(c^2 b)$ falls off as $1/b$.`],
@@ -237,6 +369,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
       hints: ['Light passing closer than the critical impact parameter, 3√3 GM/c², is captured.'],
       teach: 'Black-hole images show a shadow ringed by lensed light; the shadow is about 2.6 times the horizon’s size.',
       explain: 'Rays aimed closer than 3√3 GM/c² spiral in, so that patch of sky is dark. The bright ring around it is glowing gas whose light has been bent around the hole. The horizon itself is never seen.',
+      visual: imagePicture,
     }),
     num({
       id: 'cp-focus', difficulty: 3, transfer: true,
@@ -244,6 +377,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
         const k = r.pick([1, 1.5, 2]);
         const d = focalDistance(M_SUN, k * R_SUN) / AU;
         return {
+          visual: focusPic(k),
           prompt: t`The Sun is a lens. Light from a distant star passing the Sun at $b = ${k}\,R_\odot$ is bent by $\alpha = 4GM_\odot/(c^2 b)$ and crosses the axis behind the Sun at distance $d = b/\alpha$. How far away is that, in AU? ($4GM_\odot/c^2 = ${sci(4 * M1, 4)}$ m, $R_\odot = 6.957\times10^{8}$ m)`,
           answer: d, units: 'AU', tol: { rel: 0.01 },
           errors: [{ value: d * AU, feedback: 'That is in metres. Convert to AU: 1 AU = 1.496×10¹¹ m.' }, { value: d / k, feedback: 'Both b and α depend on b: d = b/α = b²c²/(4GM).' }].filter((e) => Math.abs(e.value - d) > 0.02 * d),

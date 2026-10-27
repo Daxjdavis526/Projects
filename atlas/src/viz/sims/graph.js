@@ -78,6 +78,12 @@ export function mount(F, P) {
       E.riemann = riemannSum;
       E.integral = simpson((x) => f({ ...E, x }), a, b, 400);
     }
+    // an integral readout without Riemann rectangles: integral: { fn, from, to }
+    if (P.integral && !P.riemann) {
+      const f = fn(P.integral.fn, vars);
+      const a = ev(P.integral.from, E, vars), b = ev(P.integral.to, E, vars);
+      E.integral = simpson((x) => f({ ...E, x }), a, b, 400);
+    }
     // curves
     (P.curves || []).forEach((c, k) => {
       const color = c.color || PALETTE[k % PALETTE.length];
@@ -96,8 +102,12 @@ export function mount(F, P) {
         plot.fn((x) => { let s = 0; for (let j = k0; j <= k1; j++) s += term({ ...E, x, k: j }); return s; }, style);
       }
       if (c.label && c.labelAt !== undefined) {
-        const lx = ev(c.labelAt, E, vars);
-        const ly = c.fn ? fn(c.fn, vars)({ ...E, x: lx }) : 0;
+        // labelAt is x for fn curves, t for param curves, θ for polar ones
+        const at = ev(c.labelAt, E, vars);
+        let lx = at, ly = 0;
+        if (c.fn) ly = fn(c.fn, vars)({ ...E, x: at });
+        else if (c.param) { lx = fn(c.param[0], ['t', ...vars])({ ...E, t: at }); ly = fn(c.param[1], ['t', ...vars])({ ...E, t: at }); }
+        else if (c.polar) { const r = fn(c.polar, ['theta', ...vars])({ ...E, theta: at }); lx = r * Math.cos(at); ly = r * Math.sin(at); }
         plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650 });
       }
     });
@@ -155,6 +165,7 @@ export function validate(P) {
   }
   for (const s of P.shade || []) { tryParse(s.fn, [], 'shade'); tryParse(s.from); tryParse(s.to); if (s.lower) tryParse(s.lower); }
   if (P.riemann) { tryParse(P.riemann.fn, [], 'riemann'); tryParse(P.riemann.from); tryParse(P.riemann.to); tryParse(P.riemann.n); }
+  if (P.integral) { tryParse(P.integral.fn, [], 'integral'); tryParse(P.integral.from); tryParse(P.integral.to); }
   if (P.tangent) { tryParse(P.tangent.fn, [], 'tangent'); if (P.tangent.secant) tryParse(P.tangent.secant); }
   for (const p of P.points || []) { tryParse(p.x, [], 'point'); tryParse(p.y, [], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
   for (const l of P.vlines || []) tryParse(l.x, [], 'vline');

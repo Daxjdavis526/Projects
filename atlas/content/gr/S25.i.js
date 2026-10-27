@@ -269,7 +269,7 @@ export default lesson({
           points: [
             { x: 0, y: 0, color: 'ink', r: 5, label: 'star' },
             { x: -1.1, y: 1.0, r: 0.5, color: 'accent', label: 'size a' },
-            { x: -0.62, y: 0.42, r: 0.5, color: 'gold', label: 'size a/2' },
+            { x: -0.36, y: 0.57, r: 0.5, color: 'gold', label: 'size a/2' },
           ],
         },
         caption: 'Two orbits of the same shape (same eccentricity) around the same star, one half the size of the other.',
@@ -281,14 +281,14 @@ export default lesson({
       id: 'cp-century', difficulty: 2,
       gen(r) {
         const pl = r.pick(PLANETS.slice(0, 2)), [name, , , P] = pl;
-        const step = round(perOrbit(pl), 4), X1 = round(5.4 * P, 1);
+        const step = round(perOrbit(pl), 4), X1 = round(5.4 * P, 5);
         return {
           visual: {
             type: 'graph',
             params: {
               x: [0, X1], y: [0, round(5.7 * step, 4)], xlabel: 'days', ylabel: 'total advance (″)',
               curves: [{ fn: `${step}*floor(x/${P})`, domain: [0, X1], color: 'gold' }],
-              points: [1, 2, 3, 4, 5].map((k) => ({ x: round(k * P, 2), y: round(k * step, 4), color: 'gold', r: 3.5 })),
+              points: [1, 2, 3, 4, 5].map((k) => ({ x: round(k * P, 6), y: round(k * step, 4), color: 'gold', r: 3.5 })),
             },
             caption: `Each perihelion passage, every ${P} days, adds one more step of ${step}″. The first five orbits are shown.`,
           },

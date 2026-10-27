@@ -57,6 +57,8 @@ function inline(text, math) {
       .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
       .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, (m, label, url) =>
         `<a href="${url}"${url.startsWith('#') ? '' : ' target="_blank" rel="noopener"'}>${label}</a>`)
+      // punctuation right after math stays on its line ("onto $\vec b$." never orphans the full stop)
+      .replace(/\u0002(\d+)\u0002([.,;:!?)\]’”]+)/g, (m, k, p) => `<span class="nowrap">${maths[+k]}${p}</span>`)
       .replace(/\u0002(\d+)\u0002/g, (m, k) => maths[+k]);
   }).join('');
 }

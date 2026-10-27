@@ -68,6 +68,7 @@ export const LESSONS = {
   'math1220.C2-6.1': () => import('./math1220/C2-6.1.js'),
   'math1220.C2-6.2': () => import('./math1220/C2-6.2.js'),
   'math1220.C2-6.3': () => import('./math1220/C2-6.3.js'),
+  'math1220.C2-6.4': () => import('./math1220/C2-6.4.js'),
   'math1220.C2-7.1': () => import('./math1220/C2-7.1.js'),
   'math1220.C2-7.2': () => import('./math1220/C2-7.2.js'),
   'math1220.C2-7.3': () => import('./math1220/C2-7.3.js'),

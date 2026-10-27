@@ -229,6 +229,23 @@ them in `vars` with the underscore). **`log` is base 10; `ln` is natural.**
 `a/bc` means (a/b)·c, as on a calculator. A name ending in a digit after
 letters (`x2`) is rejected as ambiguous unless declared (`v0`).
 
+### Let the test check your calculus
+
+Give a calculus problem the function it is about, and the content test
+verifies the key by calculus — it has caught real slips:
+
+- `expr({ …, integrand: 'x*e^(2x)' })` — the answer, differentiated
+  numerically, must equal the integrand at sample points (any `+C` is fine);
+- `expr({ …, derivativeOf: 'x^3*sin(x)' })` — the answer must equal the
+  derivative of that function;
+- `num({ …, integrand: 'x^2*e^(-x)', limits: [0, 'inf'] })` — the answer must
+  equal the definite integral (computed by tanh–sinh quadrature, which copes
+  with infinite limits and integrable endpoint singularities).
+
+The functions use the item's `vars` (the first one is the variable of
+differentiation or integration; set `wrt` to choose another). The player
+ignores these fields.
+
 ### Ordering — `order`
 
 `items` listed **in the correct order** (3+); the player shuffles them.
@@ -237,7 +254,10 @@ Good for the steps of a derivation or an experimental procedure.
 ### Matching — `match`
 
 `left` (2+), `right` (at least as many), `answer: [rightIndexForLeft0, …]`.
-Optional `diagram`: an inline SVG string shown above the rows.
+Optional `diagram`: an inline SVG string shown above the rows. The `left`
+entries are markup (TeX works); the `right` options appear in a drop-down,
+which cannot show TeX — write them as plain text (Unicode is fine: x², √x,
+π, θ, ∫).
 
 ### Slider and point (answer *in* the picture)
 
@@ -358,6 +378,7 @@ Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an
 `explain` — one line saying what the parameter means physically.
 
+A visual's `caption` replaces the simulation's default caption.
 **Captions must say what is simplified or not to scale.** "Arrows show
 direction only." "Drag is quadratic with a fixed coefficient; real drag
 varies with speed." That honesty is the house style.
