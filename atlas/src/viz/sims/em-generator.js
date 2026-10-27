@@ -231,7 +231,7 @@ export async function mount(F, P0) {
     if (want.includes('f')) rows.push(['frequency $f$', qty(s.rpm / 60, 'Hz')]);
     if (want.includes('emf')) rows.push([s.ring === 'split' ? 'output now' : 'emf now', qty(M.output(s.N, s.B, s.A, s.w, s.t, s.ring), 'V')]);
     if (want.includes('flux')) rows.push(['flux linkage $N\\Phi$', qty(M.linkage(s.N, s.B, s.A, s.th), 'Wb')]);
-    if (want.includes('torque')) rows.push(['torque now $\\tau$', qty(M.torque(s.N, s.I, s.A, s.B, s.th, s.ring), 'N\\,m')]);
+    if (want.includes('torque')) rows.push(['size of the torque now $|\\tau|$', qty(Math.abs(M.torque(s.N, s.I, s.A, s.B, s.th, s.ring)), 'N\\,m')]);
     if (want.includes('tmax')) rows.push(['largest torque $NIAB$', qty(s.N * s.I * s.A * s.B, 'N\\,m')]);
     if (want.includes('mu')) rows.push(['magnetic moment $\\mu = NIA$', qty(s.N * s.I * s.A, 'A\\,m^2')]);
     if (want.includes('angle')) rows.push([motor ? 'angle between $\\vec\\mu$ and $\\vec B$' : 'angle between $\\hat n$ and $\\vec B$', `${Math.round(folded)}^\\circ`]);

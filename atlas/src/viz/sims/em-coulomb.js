@@ -37,7 +37,7 @@ const UNITS = { m: 1, cm: 0.01, mm: 0.001 };
 const QUNITS = { uC: 1e-6, nC: 1e-9 };
 const QTEXT = { uC: 'µC', nC: 'nC' };
 const QTEX = { uC: '\\mu\\mathrm{C}', nC: '\\mathrm{nC}' };
-const SOURCE_COLORS = ['violet', 'teal', 'warn', 'good'];
+const SOURCE_COLORS = ['violet', 'teal', 'good', 'ink2'];   // never gold (the net force), red or blue (the charges)
 export const defaults = {
   mode: 'free', unit: 'cm', qunit: 'uC', x: [-10, 10], y: [-6, 6], aspect: '', target: 0, q1: 3, q2: -2, r: 10,
   charges: [{ x: -5, y: -2, q: 2, label: 'A' }, { x: 4, y: -2, q: -3, label: 'B' }, { x: -1, y: 3.5, q: 1, label: 'C' }],
@@ -105,6 +105,13 @@ export function mount(F, P0) {
     const k = Math.min(len, cap) / len;
     plot.arrow(x, y, x + (Fx / scale) * k, y + (Fy / scale) * k, o);
     if (len > cap) plot.text('off scale', x + (Fx / scale) * k, y + (Fy / scale) * k, { dx: 6, dy: 14, color: o.color, size: 11 });
+  }
+  function ring(x, y) {
+    const g = plot.ctx;
+    g.save();
+    g.strokeStyle = plot.col.accent2; g.lineWidth = 1.5; g.setLineDash([3, 3]);
+    g.beginPath(); g.arc(plot.X(x), plot.Y(y), 16, 0, 2 * Math.PI); g.stroke();
+    g.restore();
   }
   function disc(x, y, q, label) {
     const col = q > 0 ? 'bad' : q < 0 ? 'accent' : 'ink3';
@@ -177,8 +184,8 @@ export function mount(F, P0) {
         if (!P.ask && Fn > 0) plot.text(P.values ? `net: ${fmtF(Fn)}` : 'net', c0.x + (net[0] / scale) * k2, c0.y + (net[1] / scale) * k2, { dx: 8, dy: -10, color: 'gold', size: 12.5, weight: 700 });
       }
       if (F.params.components && P.net && Fn > 0) {
-        arrowTo(c0.x, c0.y, net[0], 0, { color: 'warn', width: 1.6, head: 7, dash: [3, 3] });
-        arrowTo(c0.x + net[0] / scale, c0.y, 0, net[1], { color: 'good', width: 1.6, head: 7, dash: [3, 3] });
+        arrowTo(c0.x, c0.y, net[0], 0, { color: 'ink2', width: 1.6, head: 7, dash: [3, 3] });
+        arrowTo(c0.x + net[0] / scale, c0.y, 0, net[1], { color: 'ink2', width: 1.6, head: 7, dash: [3, 3] });
       }
       if (P.readout !== false && !P.ask) {
         const ang = (Math.atan2(net[1], net[0]) * 180) / Math.PI;
@@ -189,8 +196,9 @@ export function mount(F, P0) {
         ]);
       }
     }
+    // a dashed ring marks each charge you can drag (the plot's own handle marker would hide the charge)
+    if (live) st.charges.forEach((c) => { if (c.drag !== false) ring(c.x, c.y); });
     st.charges.forEach((c, i) => disc(c.x, c.y, F.params[`q${i}`], P.ask ? c.label : `${c.label}: ${signed(F.params[`q${i}`])} ${QTEXT[P.qunit]}`));
-    plot.drawHandles();
   }
   F.draw(draw);
   F.caption(pair

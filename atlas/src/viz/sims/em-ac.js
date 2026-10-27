@@ -23,7 +23,7 @@
 //       //        graphs: ['I', 'emf'] (drop 'emf' to show the current alone)
 //       // rl:    E (V), R (Ω), L (H), on: true (switch to the battery; false: to the short, decaying from ℰ/R),
 //       //        panel: 'v' | 'energy' (what the lower graph shows), graphs: ['i', 'v'] (fewer, or [] for the circuit alone)
-//       // lc:    L (H), C (F), R (Ω, default 0), V0 (V, the capacitor's starting voltage), analog: true (the spring–mass twin),
+//       // lc:    L (H), C (F), R (Ω, default 0), V0 (V, the capacitor's starting voltage), analog: true (the spring–mass twin; 'always' shows it in a problem's picture too),
 //       //        graphs: ['q', 'i'] (fewer, or []), bars: true (the energy bars)
 //       // ac:    elements: 'R' | 'L' | 'C' | 'RL' | 'RC' | 'LC' | 'RLC', elementChoice: false (offer R / L / C),
 //       //        V0 (V, amplitude), f (Hz), R, L, C, phasors / traces: lists of v i R L C (default: all that apply),
@@ -569,7 +569,7 @@ export function mount(F, P0) {
     const q = c.q(t), i = c.i(t), Q0 = seg.C * seg.V0, I0 = Q0 * c.w0;
     const Qref = sticky('Q', axisUp(1.08 * Q0)), Iref = sticky('I', axisUp(1.08 * I0));
     const showR = (val('R') ?? 0) > 0 || CONTROLS.lc.includes('R') && wanted.includes('R');
-    const analog = P.analog && !compact;
+    const analog = P.analog === 'always' || (P.analog && !compact);
     const gs = P.graphs ?? ['q', 'i'], showBars = P.bars ?? true;
     // layout: picture (schematic + analog) | graphs | energy bars
     let pic, gr, bars;
