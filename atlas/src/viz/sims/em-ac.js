@@ -549,7 +549,7 @@ export function mount(F, P0) {
       graph(bot, { x0: 0, x1: windowT, xfac: tf, xunit: `t (${tu})`, y0: 0, y1: Uref, title: 'energy since t = 0 (J)', vl: vls, cursor: t, curves: [
         ...(seg.on ? [{ f: c.work, color: C.ink2, width: 2.2, dash: [6, 4], label: [['battery’s work', 0]], ldy: -10 }] : []),
         { f: c.stored, color: C.teal, width: 2.6, label: [['stored ½Li²', 0]], ldy: seg.on ? -10 : -10 },
-        { f: c.heat, color: C.warn, width: 2.4, label: [['heat in R', 0]], ldy: seg.on ? 13 : -10 },
+        { f: c.heat, color: C.warn, width: 2.4, label: [['heat in R', 0]], ...(seg.on ? { lx: windowT * 0.58, ly: c.heat(windowT * 0.58) - Uref * 0.1 } : { ldy: -10 }) },
       ] });
     } else {
       const Vref = sticky('V', axisUp(1.1 * seg.E));

@@ -204,12 +204,12 @@ The time–time component turns into **Poisson's equation**, $\nabla^2\Phi = 4\p
       answer: 0,
       why: {
         1: t`Slow bodies barely feel it: in their geodesic equation it enters multiplied by $v^2/c^2$. Light, with $v = c$, feels it fully.`,
-        2: t`It is curvature, measured: the 1919 eclipse expeditions and modern radio interferometry (to 0.01%) see the full 1.75 arcseconds.`,
+        2: t`It is curvature, measured: the 1919 eclipse expeditions and modern radio interferometry (to about 0.01%) see the full 1.75 arcseconds.`,
         3: t`That is the time part, $g_{00}$: gravitational time dilation, which Newton's potential already describes.`,
       },
       hints: [t`Which kind of motion is fast enough to feel the space–space part of the metric?`, t`In a geodesic equation, $g_{ij}$ enters through velocities $v^iv^j/c^2$ — tiny for planets, 1 for light.`],
       teach: t`Newton is the $g_{00}$ part of general relativity; the matching spatial curvature is invisible to slow orbits but doubles the deflection of light.`,
-      explain: t`For light, $g_{00}$ and $g_{ij}$ contribute equally, each $2GM/(c^2b)$: total $4GM/(c^2b) = 1.75''$ at the Sun's limb. A "Newtonian" calculation — Soldner in 1801, Einstein himself in 1911 — gets only the first half, $0.875''$.`,
+      explain: t`For light, $g_{00}$ and $g_{ij}$ contribute equally, each $2GM/(c^2b)$: total $4GM/(c^2b) = 1.75''$ at the Sun's limb. A Newtonian-style calculation — Soldner's in 1801, Einstein's own in 1911 — gets only the first half ($0.875''$ with today's values; with theirs, $0.84''$ and $0.83''$).`,
       visual: bentRay,
     }),
     num({
@@ -235,7 +235,7 @@ The time–time component turns into **Poisson's equation**, $\nabla^2\Phi = 4\p
           prompt: t`Treat ${name} as a uniform ball ($GM = ${sci(GM, 4)}$ m³/s², radius ${Rkm.toLocaleString('en-US')} km). Solving $\nabla^2\Phi = 4\pi G\rho$ inside gives $\Phi = -\dfrac{GM}{2R}\left(3 - \dfrac{r^2}{R^2}\right)$. A clock runs at $d\tau/dt \approx 1 + \Phi/c^2$. How many milliseconds per year does a clock at the centre fall behind one on the surface?`,
           answer: ms, units: 'ms', tol: { rel: 0.01 },
           errors: [
-            { value: 2 * ms, feedback: t`At the surface $\Phi = -GM/R$, not 0: the difference is $\Phi(0) - \Phi(R) = -\tfrac32GM/R + GM/R = -GM/2R$.` },
+            { value: 2 * ms, feedback: t`The difference is $\Phi(0) - \Phi(R) = -\tfrac32GM/R + GM/R = -GM/2R$: half of $GM/R$, not all of it.` },
             { value: 3 * ms, feedback: t`That compares the centre with a clock far away. The question compares it with the surface, where $\Phi = -GM/R$.` },
           ],
           hints: [t`$\Phi(0) - \Phi(R) = -\dfrac{GM}{2R}$.`, t`Fraction behind: $GM/(2Rc^2)$; a year is $3.156\times10^7$ s.`],

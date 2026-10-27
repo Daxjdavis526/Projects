@@ -114,6 +114,8 @@ export function escapeDamage(text, { prose = true } = {}) {
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
   }
+  // an odd number of unescaped $ leaves one open: everything after it reads as math
+  if (prose && (withoutCode(s).replace(/\\\$/g, '').match(/\$/g) || []).length % 2) return 'has an odd number of $ signs — one opens math that never closes (a stray $ after an interpolation?)';
   // a TeX command in prose prints literally: it belongs inside $…$
   if (prose) for (const g of segments(withoutCode(s))) {
     if (g.t !== 'text') continue;
@@ -123,8 +125,11 @@ export function escapeDamage(text, { prose = true } = {}) {
     const sci = /(?<![\w.])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(g.v);
     if (sci) return `“${sci[1]}” is computer notation — write it as a power of ten (format it with tex() inside $…$)`;
     // a subscript in prose (I_cm, v_0) prints its underscore: it belongs in math (link targets excepted)
-    const sub = /(?<![\w\\/.-])([A-Za-z]_(?:\{[^}]*\}|[A-Za-z0-9]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
-    if (sub) return `“${sub[1]}” is a subscript outside $…$ and would print its underscore — write $${sub[1]}$`;
+    // (a symbol: a base of one or two letters — v_0, mL_f, PV^γ, e^{3x}; longer snake_case
+    // names like kinetic_energy are identifiers and print as written)
+    const sub = /(?<![\w\\/.-])([A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
+    if (sub) return `“${sub[1]}” is a subscript or power outside $…$ and would print literally — write $${sub[1]}$`;
+    if (/\{,\}/.test(g.v)) return 'a “{,}” sits outside $…$ and would print literally — a TeX thousands separator belongs in math';
   }
   return null;
 }

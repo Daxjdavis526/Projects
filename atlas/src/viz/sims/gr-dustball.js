@@ -224,7 +224,8 @@ export function mount(F, P) {
 
   function drawSide(st, tau, narrow) {
     const pl = side, M = deform(st, tau);
-    if (st.m === 'matter' || st.m === 'both') {
+    // (with no matter — Λ alone — there is nothing to shade or name)
+    if ((st.m === 'matter' || st.m === 'both') && (F.params.rho ?? P.rho) > 0) {
       pl.rect(pl.vx0, pl.vy0, pl.vx1 - pl.vx0, pl.vy1 - pl.vy0, { color: 'gold', alpha: 0.07, stroke: false });
       const words = narrow ? (st.m === 'both' ? 'matter, and a mass' : 'uniform matter') : st.m === 'both' ? 'uniform matter all round, and a mass' : 'uniform matter all round the ball';
       pl.text(words, pl.vx1 - 0.08, pl.vy0 + 0.18, { color: 'gold', size: narrow ? 10 : 11, align: 'right' });

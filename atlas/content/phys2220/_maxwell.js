@@ -73,7 +73,7 @@ export const pwl = (pts, opts) => pts.slice(1).map((p, k) => seg(pts[k], p, opts
  * diameter d dimensioned, the turn count above; optionally the field inside
  * and the current in the leads.
  */
-export function solenoidPic({ len = '?', d = '?', N = '?', field = false, current = null, caption, loops = 12 }) {
+export function solenoidPic({ len = '?', d = '?', N = '?', field = false, current = null, caption, loops = 12, raw = false }) {
   const x0 = -2.4, x1 = 2.4, ry = 0.85, rx = 0.17;
   const curves = [];
   for (let k = 0; k < loops; k++) {
@@ -90,7 +90,7 @@ export function solenoidPic({ len = '?', d = '?', N = '?', field = false, curren
   ];
   if (field) arrows.push({ from: [x1 + 0.2, 0], to: [x1 + 0.75, 0], color: COL.B, label: 'B', labelDx: 6, labelDy: -8 });
   if (current) arrows.push({ from: [-3.3, -1.25], to: [-2.75, -1.25], color: COL.i, label: current, labelDx: -30, labelDy: 14 });
-  const points = [lab(0, -1.7, `ℓ = ${len}`, 'ink', 0, -11), lab(-3.15, 0, `d = ${d}`, 'ink', 0, 0, 'right'), lab(0, 1.18, `N = ${N}`, 'ink')];
+  const points = [lab(0, -1.7, raw ? len : `ℓ = ${len}`, 'ink', 0, -11), lab(-3.15, 0, raw ? d : `d = ${d}`, 'ink', 0, 0, 'right'), ...(N === null ? [] : [lab(0, 1.18, raw ? N : `N = ${N}`, 'ink')])];
   return {
     type: 'graph',
     params: { x: [-4.9, 4], y: [-2.05, 1.5], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves, arrows, points },

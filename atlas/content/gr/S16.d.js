@@ -199,7 +199,7 @@ Here it is built from the bottom up: for **dust** (particles all moving together
       id: 'streams', difficulty: 2,
       gen(r) {
         const [what, vText, b, note] = r.pick([
-          ['protons at the Sun’s centre', t`$6.2\times10^5$ m/s`, 6.2e5 / C, 'The electrons add as much pressure again but almost no energy: at the Sun’s centre pressure adds about three parts in a million to the source of gravity. Newton’s ρ alone is an excellent approximation.'],
+          ['protons at the Sun’s centre', t`$6.2\times10^5$ m/s`, 6.2e5 / C, 'The electrons add about as much pressure again but almost no energy; even so, at the Sun’s centre pressure raises the source of gravity, ρ + 3p/c², by less than one part in a hundred thousand. Newton’s ρ alone is an excellent approximation.'],
           ['neutrons in a neutron star’s core', t`$0.3c$`, 0.3, 'In a neutron star the pressure is a few per cent of the energy density or more: enough that pressure’s own gravity matters, and general relativity rather than Newton sets the largest mass such a star can have.'],
           ['electrons in a white dwarf', t`$0.6c$`, 0.6, 'That is the electron gas alone. The star’s mass is carried by nuclei that hardly move, so for the star as a whole p/ρc² is thousands of times smaller.'],
         ]);

@@ -95,13 +95,18 @@ not put `prereqs` in a lesson file — it would be ignored.
 ### Markup
 
 Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
-`solution`, `choices`, `why`, `errors[].feedback`, `intro`, captions — except
+`solution`, `choices`, `why`, `errors[].feedback`, coding `tests[].name`,
+`intro`, captions — except a worked-example step's short `label` (plain
+uppercase text: no TeX), and
 the right-hand options of a matching problem (plain text in a drop-down) and
 labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it.
 Formatting helpers that return TeX (`tex(x)`, `frac(x)`, `polyTeX`, a
 `×10ⁿ` number) must land inside `$…$` (`t\`about $${tex(x)}$ m\``); labels that
-a simulation draws on its canvas are plain text, so give them plain numbers.
+a simulation draws on its canvas — graph point, curve and arrow labels among
+them — are plain text, not TeX, and the test does not read them: give them
+plain numbers and Unicode symbols (eᵣ, rₛ, η, θ, ², ⁻¹). Unicode has subscript
+digits and only some letters (ₐ ₑ ₒ ₓ ₕ ₖ ₗ ₘ ₙ ₚ ₛ ₜ), so write "v (drift)", not v_d.
 Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
 as typed — put every symbol, subscript and thin space inside math, and the
 whole phrase around it ("the ratio $E_n / E_{2n}$", not "the ratio E_n/E_2n").
@@ -432,6 +437,11 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `gr-chirp` | a gravitational-wave chirp and what it does to a detector's arms |
 | `mech-tank`, `mech-flow` | pressure in vessels of any shape, manometers, buoyancy; flow through a narrowing pipe, Bernoulli, a Pitot-static probe |
 | `therm-gas` | a 3D hard-sphere gas: pressure from wall impacts against nRT/V, a live speed histogram against Maxwell–Boltzmann, mixtures |
+| `therm-pv` | PV diagrams: processes with work as area, cycles (Carnot, Otto, Brayton) and refrigerators, energy flows, a T–S panel |
+| `mech-collide`, `mech-rotor` | 1D/2D collisions with momentum and energy charts; rigid bodies about an axis, torque, the parallel-axis theorem |
+| `em-circuit` | nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
+| `em-capacitor` | a parallel-plate capacitor with a sliding dielectric, battery connected or not: Q, V, C and stored energy |
+| `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an

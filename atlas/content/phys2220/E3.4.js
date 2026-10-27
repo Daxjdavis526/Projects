@@ -65,11 +65,11 @@ $$E = \frac{\sigma}{\varepsilon_0}$$
       ],
       preset: 'cavity', readouts: ['E', 'flux', 'Qenc'], arrows: false, fieldLines: true, density: 12,
     },
-    caption: 'Charges in nC; the uniform field is 3000 N/C. The surface charges are exact (the method of image charges), and the flux is integrated numerically over the 3D Gaussian sphere.',
+    caption: 'Charges in nC; in the last arrangement the uniform field is 3000 N/C. The surface charges are exact (the method of image charges), and the flux is integrated numerically over the 3D Gaussian sphere.',
   },
   example: {
     prompt: t`A neutral metal shell has inner radius 4.0 cm and outer radius 6.0 cm. A $+3.0$ nC point charge sits at the centre of its hollow. Find (a) the charge and the surface charge density on the inner and the outer surface, and (b) the field 2.0 cm, 5.0 cm and 10 cm from the centre.`,
-    visual: field({ unit: 'cm', x: [-12, 12], y: [-7.5, 7.5], conductor: { x: 0, y: 0, R: 6, a: 4, Q: 0 }, charges: [{ x: 0, y: 0, q: 3 }], fieldLines: true, density: 12, notes: { points: [{ ...ray(2), label: '2 cm', color: 'gold' }, { ...ray(5), label: '5 cm', color: 'gold' }, { ...ray(10), label: '10 cm', color: 'gold' }] } }, 'The shell in cross-section, with the charge it gathers on each surface and its field lines: they stop at the inner wall and start again at the outer surface. Gold dots: the three points.'),
+    visual: field({ unit: 'cm', x: [-12, 12], y: [-7.5, 7.5], conductor: { x: 0, y: 0, R: 6, a: 4, Q: 0 }, charges: [{ x: 0, y: 0, q: 3 }], fieldLines: true, density: 12, notes: { points: [{ ...ray(2), label: '2 cm', color: 'gold' }, { ...ray(5), label: '5 cm', color: 'gold', ldx: 4, ldy: 16 }, { ...ray(10), label: '10 cm', color: 'gold' }] } }, 'The shell in cross-section, with the charge it gathers on each surface and its field lines: they stop at the inner wall and start again at the outer surface. Gold dots: the three points.'),
     steps: [
       { label: 'In the metal', text: t`The field in the metal is zero, so a Gaussian sphere of radius 5.0 cm, lying in the metal, has no flux and encloses no net charge. It encloses the $+3.0$ nC, so the inner surface must carry $-3.0$ nC.` },
       { label: 'Outer surface', text: t`The shell is neutral: $-3.0$ nC on the inside leaves $+3.0$ nC on the outside. Spread over each sphere: $\sigma_\text{in} = \dfrac{-3.0\times10^{-9}}{4\pi(0.040)^2} = ${tn(WX.sin)}$ C/m², $\sigma_\text{out} = \dfrac{3.0\times10^{-9}}{4\pi(0.060)^2} = ${tn(WX.sout)}$ C/m².` },
@@ -149,7 +149,7 @@ $$E = \frac{\sigma}{\varepsilon_0}$$
         do { q = r.pick([2, 3, -2]); Q = r.pick([0, 5, -1, 4]); } while (Q + q === 0 || Q === -2 * q);
         const out = Q + q;
         return {
-          prompt: t`A metal shell carries a net charge of $${Q}$ nC. A $${q > 0 ? '+' : ''}${q}$ nC point charge is placed in its hollow, without touching it. How much charge ends up on the shell's outer surface?`,
+          prompt: t`${Q === 0 ? 'A hollow metal shell carries no net charge.' : t`A metal shell carries a net charge of $${Q > 0 ? '+' : ''}${Q}$ nC.`} A $${q > 0 ? '+' : ''}${q}$ nC point charge is placed in its hollow, without touching it. How much charge ends up on the shell's outer surface?`,
           answer: out, units: 'nC', tol: { rel: 0, abs: 0.01 },
           errors: slips(out, [
             { value: Q, feedback: 'The shell’s own charge is not all of it: the charge in the hollow draws an equal and opposite charge onto the inner wall, and the shell must make that up from its outer surface.' },
@@ -228,7 +228,7 @@ $$E = \frac{\sigma}{\varepsilon_0}$$
         2: 'Grounding changes how much charge the outer surface carries, not the field within. The hollow is field-free either way.',
         3: 'The field of the outside charge does reach in — but the induced surface charge’s field cancels it exactly.',
       },
-      hints: ['The metal’s field is zero. Is there any charge in the hollow, or on its wall, to make a field there?'],
+      hints: ['The field in the metal is zero. Is there any charge in the hollow, or on its wall, to make a field there?'],
       teach: 'An empty hollow in a conductor is field-free, whatever charges sit outside: this is a Faraday cage.',
       explain: 'The outside charge induces − and + charge on the box’s outer surface, and their field cancels the outside charge’s field everywhere inside the outer surface — in the metal and in the hollow alike. The hollow holds no charge and its wall gathers none, so nothing else makes a field there: P feels none. This is a Faraday cage; screened rooms, cable shields and instrument cases work this way.',
       visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], conductor: { x: -2, y: 0, R: 4, a: 2.6, Q: 0 }, charges: [{ x: 5.5, y: 0.5, q: 4 }], probe: { x: -1.4, y: 0.7, label: 'P' }, probeArrow: false, fieldLines: false }, 'The metal box (drawn as a sphere, grey), the empty hollow with P in it, and the charged object outside.'),
@@ -247,7 +247,7 @@ $$E = \frac{\sigma}{\varepsilon_0}$$
           hints: [t`The plate is part of a conductor (the ground), so just above it $E = \sigma/\varepsilon_0$.`, t`$q = \sigma A = \varepsilon_0EA$, negative where the field points into the surface.`],
           teach: 'A grounded plate in a field E carries σ = ε₀E: a field mill measures E by collecting that charge.',
           explain: t`$|q| = \varepsilon_0EA = (8.854\times10^{-12})(${E})(${A}\times10^{-4}) = ${tn(-q / 1e-12)}$ pC, negative because the field ends on the plate. Covering the plate lets that charge flow back to the ground, so the spinning vane turns the field into an alternating current through a meter: a few picocoulombs each turn in fair weather. US launch rules hold a launch while nearby mills read more than about 1000 N/C.`,
-          visual: field({ unit: 'cm', x: [-10, 10], y: [-3, 9], sheets: [{ x: 0, y: 0, angle: 0, sigma: -1 }], uniform: [0, -56.47], fieldLines: true, density: 14, ref: [0, 0], notes: { lines: [{ from: [-2.5, 0.25], to: [2.5, 0.25], color: 'gold', width: 5 }], points: [{ x: 0, y: 0.25, label: 'sensor plate', color: 'gold', r: 0.1, ldx: -36, ldy: 20 }] } }, 'The field at the ground, pointing down; the ground and the plate are conductors, so the field lines end on negative charge at their surface. The vane is not drawn.'),
+          visual: field({ unit: 'cm', x: [-10, 10], y: [-3, 9], sheets: [{ x: 0, y: 0, angle: 0, sigma: -1 }], uniform: [0, -56.47], fieldLines: true, density: 14, ref: [0, 0], notes: { lines: [...Array.from({ length: 26 }, (_, k) => ({ from: [-10 + 0.8 * k, 0], to: [-10.7 + 0.8 * k, -0.7], color: 'ink3', width: 1.2 })), { from: [-2.5, 0.25], to: [2.5, 0.25], color: 'gold', width: 5 }], points: [{ x: 0, y: 0.25, label: 'sensor plate', color: 'gold', r: 0.1, ldx: -36, ldy: 20 }] } }, 'The field at the ground, pointing down; the ground and the plate are conductors, so the field lines end on negative charge at their surface. The vane is not drawn.'),
         };
       },
     }),
