@@ -108,7 +108,7 @@ The two forces of a pair act on **different** objects, so they never cancel each
     mcq({
       id: 'horse-cart', difficulty: 2,
       prompt: 'A horse pulls a cart. By the third law, the cart pulls back on the horse exactly as hard. So how can the horse and cart speed up?',
-      visual: bodyFBD([force('ground', 1400, 0, 'friction'), force('cart', 1000, 180, 'tension'), force('N', 5500, 90, 'normal'), force('mg', 5500, 270, 'weight')], { show: 'fbd', name: 'Forces on the horse', caption: 'The horse’s free-body diagram while speeding up: the ground pushes its hooves forward, the cart pulls it back. Illustrative sizes, to scale.' }),
+      visual: bodyFBD([force('ground', 1400, 0, 'friction'), force('cart', 1000, 180, 'tension')], { show: 'fbd', values: true, name: 'Horizontal forces on the horse', caption: 'The horse speeding up: the ground pushes its hooves forward, the cart pulls it back. Illustrative sizes; the vertical forces (weight, ground’s upward push) cancel and are left out.' }),
       choices: [
         'The pair acts on different bodies; the horse speeds up because the ground pushes it forward harder than the cart pulls it back',
         'The horse pulls on the cart slightly harder than the cart pulls on the horse',
@@ -206,7 +206,7 @@ The two forces of a pair act on **different** objects, so they never cancel each
         const dv = (F * days * 86400) / m;
         return {
           prompt: t`NASA’s Dawn spacecraft used ion engines: electric fields shove xenon ions out of the back. Suppose the thruster pushes the ions backward with ${F} N, and the spacecraft’s mass is ${m} kg. Far from any planet, how much does Dawn’s speed increase in ${days} day${days > 1 ? 's' : ''} of steady thrust?`,
-          visual: bodyFBD([force('ions push back', F, 0, 'thrust')], { icon: 'probe', show: 'both', v: [1, 0], name: 'Forces on the spacecraft', caption: 'The only force on the spacecraft: the push of the ions it expels. (Gravity far from planets is ignored.)' }),
+          visual: bodyFBD([force('push of the ions', F, 0, 'thrust')], { icon: 'probe', show: 'both', v: [1, 0], name: 'Forces on the spacecraft', caption: 'The only force on the spacecraft: the push of the ions it expels. (Gravity far from planets is ignored.)' }),
           answer: dv, units: 'm/s', tol: { rel: 0.01 },
           errors: [
             { value: F / m, feedback: 'That is the acceleration, in m/s². Multiply by the time, in seconds.' },

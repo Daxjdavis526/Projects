@@ -590,7 +590,7 @@ function icon(pl, kind, P) {
       fill([[-0.35, -0.35], [0.35, -0.35], [0.35, 0.35], [-0.35, 0.35]]);
       for (const k of [-1, 1]) { pl.line(0.35 * k, 0, 0.6 * k, 0, { color: 'ink2', width: 2 }); fill([[0.6 * k, -0.28], [1.5 * k, -0.28], [1.5 * k, 0.28], [0.6 * k, 0.28]], 'violet', 0.7); }
       pl.path(arcPts(0, 0.75, 0.3, 200, 340), { color: 'ink2', width: 2 });
-      return [1.5, 0.4];
+      return [1.5, 0.75];
     case 'none': pl.point(0, 0, { color: 'ink', r: 5 }); return [0.2, 0.2];
     default: block(pl, 0, 0, 1.2, 0.9, 0, P.m ? massText(P.m) : '', 'accent'); return [0.6, 0.45];
   }

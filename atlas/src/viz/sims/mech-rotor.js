@@ -97,7 +97,7 @@ export function mount(F, P0) {
     // stop when the block has dropped a few drum radii
     return Math.min(P.T, Math.sqrt((2 * maxDrop()) / Math.max(Mo.block.a, 1e-9)));
   };
-  const animated = P.play !== false && (P.alpha !== null || P.F > 0 || P.F2 > 0 || P.hang > 0 || P.omega0 !== 0 || sliders.some((s) => ['F', 'F2', 'alpha', 'omega0', 'hang'].includes(s.key)));
+  const animated = P.play !== false && !(compact && !sliders.length) && (P.alpha !== null || P.F > 0 || P.F2 > 0 || P.hang > 0 || P.omega0 !== 0 || sliders.some((s) => ['F', 'F2', 'alpha', 'omega0', 'hang'].includes(s.key)));
   const maxDrop = () => Math.max(0.5, 3.5 * RM.SHAPES[v('shape')].half({ R: v('R'), L: v('L'), s: v('s') }));
   let timeCtl = null;
   if (animated) timeCtl = F.slider({ key: 'time', label: 'Time $t$', min: 0, max: runT(), step: 0.01, value: Math.min(P.time, runT()), unit: '\\mathrm{s}', explain: 'Scrub through the motion, or press Play.' });
