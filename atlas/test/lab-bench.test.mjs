@@ -173,6 +173,10 @@ const exact = (id, opts = {}) => B.analyse(id, B.makeData(id, { noiseless: true,
   const r = exact('energy'), f = exact('energy', { sys: 'flag' });
   check('energy: K/U = 1 − μ cot θ for rolling friction', near(r.results[0].value, 1 - 0.004 / Math.tan(10 * D2R), 1e-9));
   check('energy: a wider flag scales v² by (2.50/2.60)²', near(f.results[0].value, r.results[0].value * (0.025 / 0.026) ** 2, 1e-9));
+  const s6 = exact('energy', { params: { theta: 6 } }), s15 = exact('energy', { params: { theta: 15 } });
+  check('energy: friction’s share μ cot θ grows on a shallower track', s6.results[0].value < r.results[0].value && r.results[0].value < s15.results[0].value);
+  const f6 = exact('energy', { params: { theta: 6 }, sys: 'flag' });
+  check('energy: the flag error’s factor does not depend on the angle', near(f6.results[0].value / s6.results[0].value, (0.025 / 0.026) ** 2, 1e-9));
 }
 {
   const r = exact('collision'), m = exact('collision', { sys: 'mass' });

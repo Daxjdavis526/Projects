@@ -16,6 +16,16 @@ export function themeColors() {
   };
 }
 
+// a tick label: plain below 10⁴, otherwise m×10ⁿ with superscript digits (never "1e+4")
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+export function tickLabel(t) {
+  const a = Math.abs(t);
+  if (!(a >= 1e4 || (a < 1e-3 && t !== 0))) return String(+t.toPrecision(6));
+  const e = Math.floor(Math.log10(a)), m = +(t / 10 ** e).toPrecision(3);
+  const pow = `10${String(e).replace('-', '⁻').replace(/\d/g, (d) => SUP[d])}`;
+  return m === 1 ? pow : m === -1 ? `−${pow}` : `${String(m).replace('-', '−')}×${pow}`;
+}
+
 export const PALETTE = ['accent', 'warn', 'good', 'violet', 'bad', 'teal', 'gold'];
 
 export class Plot {
@@ -102,7 +112,7 @@ export class Plot {
     g.beginPath(); g.moveTo(this.L, Math.round(y0) + 0.5); g.lineTo(this.R, Math.round(y0) + 0.5); g.stroke();
     g.beginPath(); g.moveTo(Math.round(x0) + 0.5, this.T); g.lineTo(Math.round(x0) + 0.5, this.B); g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'top';
-    const fmt = this.o.tickFormat || ((t) => (Math.abs(t) >= 1e4 || (Math.abs(t) < 1e-3 && t !== 0) ? t.toExponential(0) : String(+t.toPrecision(6))));
+    const fmt = this.o.tickFormat || tickLabel;
     for (const t of Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) {
       if (Math.abs(t) < 1e-12 && x0 > this.L) continue;
       const ly = Math.min(this.B + 4, Math.max(this.T, y0 + 4));

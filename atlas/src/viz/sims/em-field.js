@@ -14,6 +14,7 @@
 //       x: [-10, 10], y: [-6, 6],           // the view (in `unit`; the shorter range grows to keep scales equal)
 //       charges: [{ x: -3, y: 0, q: 2, label: 'A', drag: true }],   // q: a number or an expression of slider keys
 //       rods: [{ x1, y1, x2, y2, Q, pieces: 'n' }],                 // pieces ≥ 1: that many point charges instead
+//       fan: false,                         // with pieces: draw each piece's own field at the probe (up to 24)
 //       lines: [{ x, y, lambda }],          // line charges across the page; λ in qunit per metre
 //       sheets: [{ x, y, angle: 90, sigma, width }],                // sheets across the page; σ in qunit per m²; no width = infinite
 //       balls: [{ x, y, R, Q, shell: false }],
@@ -37,6 +38,7 @@
 //       toggles: ['arrows', 'fieldLines', 'equip'],                 // checkboxes for the layers
 //       readouts: ['E', 'V'],               // any of E Ex Ey Edir V F flux Qenc Qeps Eexact Vc speed K deflect time dVdx
 //       labels: true,                       // label charges with their values
+//       notes: { arrows: [{ from, to, label, color }], points: [{ x, y, label, color }], lines: [{ from, to, color, dash }] },   // extra marks, in `unit`
 //       static: false,                      // no dragging (a picture for a problem)
 //       sliders, choices, constants,        // as in graph: keys usable in q, Q, lambda, sigma, uniform, r, speed, …
 //       axes: true, grid: true, aspect: '' } }
@@ -53,7 +55,7 @@ export const defaults = {
   charges: [], rods: [], lines: [], sheets: [], balls: [], uniform: null, conductor: null, ref: null,
   arrows: true, fieldLines: true, equip: false, dV: null, levels: null, density: null,
   probe: null, test: null, gauss: null, shapes: null, normals: false, patch: null, particle: null,
-  profile: false, edit: false, presets: null, preset: null, toggles: null, readouts: ['E', 'V'], labels: false,
+  profile: false, edit: false, fan: false, presets: null, preset: null, toggles: null, readouts: ['E', 'V'], labels: false,
   static: false, axes: true, grid: true,
 };
 
@@ -71,23 +73,22 @@ const keysOf = (P) => [...(P.sliders || []).map((s) => s.key), ...(P.choices || 
 const SCENE_KEYS = ['charges', 'rods', 'lines', 'sheets', 'balls', 'uniform', 'conductor', 'ref', 'probe', 'gauss', 'patch', 'particle'];
 const clone = (v) => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
-// numbers for display: TeX with ×10ⁿ outside 0.01…99 999
+// numbers for display: n significant figures, as TeX with ×10ⁿ outside 0.01…9999
 function texNum(v, n = 3) {
   if (!Number.isFinite(v)) return '\\text{—}';
   if (v === 0) return '0';
-  const a = Math.abs(v);
-  if (a >= 1e5 || a < 1e-2) { const [m, e] = v.toExponential(n - 1).split('e'); return `${m} \\times 10^{${+e}}`; }
+  const r = +v.toPrecision(n), a = Math.abs(r);
+  if (a >= 1e4 || a < 1e-2) { const [m, e] = r.toExponential(n - 1).split('e'); return `${m} \\times 10^{${+e}}`; }
   const d = Math.max(0, n - 1 - Math.floor(Math.log10(a)));
-  return (+v.toFixed(d)).toFixed(d).replace(/^-/, '-');
+  return r.toFixed(d);
 }
 const qty = (v, unit, n) => `${texNum(v, n)}\\ \\mathrm{${unit}}`;
 // plain text for canvas labels
 function txtNum(v, n = 3) {
   if (v === 0) return '0';
-  const a = Math.abs(v);
-  if (a >= 1e5 || a < 1e-2) { const [m, e] = v.toExponential(n - 1).split('e'); return `${m}×10${sup(+e)}`.replace('-', '−'); }
-  const d = Math.max(0, n - 1 - Math.floor(Math.log10(a)));
-  return (+v.toFixed(d)).toString().replace('-', '−');
+  const r = +v.toPrecision(n), a = Math.abs(r);
+  if (a >= 1e5 || a < 1e-2) { const [m, e] = r.toExponential(n - 1).split('e'); return `${m}×10${sup(+e)}`.replace('-', '−'); }
+  return String(r).replace('-', '−');
 }
 const sup = (k) => String(k).split('').map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(c)] ?? (c === '-' ? '⁻' : c)).join('');
 const volts = (v) => (Math.abs(v) >= 1e4 ? `${txtNum(v / 1000)} kV` : `${txtNum(v)} V`);
@@ -235,7 +236,7 @@ export function mount(F, P0) {
   }
 
   F.onChange((key) => {
-    if (key === '_preset') { load({ ...P, ...presetOf(F.params._preset) }); for (const k of ['charges', 'rods', 'lines', 'sheets', 'balls']) st[k] = st[k] || []; wireHandles(); T.running = false; T.tau = 0; }
+    if (key === '_preset') { probeRef = 0; load({ ...P, ...presetOf(F.params._preset) }); for (const k of ['charges', 'rods', 'lines', 'sheets', 'balls']) st[k] = st[k] || []; wireHandles(); T.running = false; T.tau = 0; }
     draw();
   });
   plot.onDrag = () => { if (T.running) { T.running = false; if (playBtn) playBtn.textContent = 'Launch'; } T.tau = 0; draw(); F.notify('point'); };
@@ -245,6 +246,7 @@ export function mount(F, P0) {
   const pplot = prof ? new Plot(prof.canvas, { x: P.x, y: [0, 1], xlabel: `x (${ut})`, ylabel: 'V (V)', pad: { l: 58, r: 16, t: 10, b: 30 } }) : null;
 
   const cache = {};
+  let probeRef = 0;                // |E| where the probe started: sets the length of its arrow
   const memo = (name, sig, make) => { if (cache[name]?.sig !== sig) cache[name] = { sig, val: make() }; return cache[name].val; };
 
   function draw() {
@@ -266,14 +268,29 @@ export function mount(F, P0) {
       const lo = vals[Math.floor(vals.length * 0.015)], hi = vals[Math.floor(vals.length * 0.985)];
       let levels = P.levels;
       if (!levels) {
-        const step = P.dV ?? M.niceStep(grid, compact ? 10 : 13);
+        const step = P.dV ?? M.niceStep(grid, compact ? 8 : 10);
         levels = [];
         for (let k = Math.ceil(lo / step); k * step <= hi && levels.length < 80; k++) levels.push(k * step);
       }
       const vc = S.conductor ? M.conductorPotential(S) : NaN;
       const placed = [];
+      const step0 = levels.length > 1 ? Math.abs(levels[1] - levels[0]) : 1;
+      g.save(); g.font = `500 ${fs - 1.5}px Inter, system-ui, sans-serif`;
+      const widthOf = (t) => g.measureText(t).width; g.restore();
+      const clearOf = (px, py, w) => {
+        if (placed.some(([qx, qy, qw]) => Math.abs(qx - px) < (qw + w) / 2 + 6 && Math.abs(qy - py) < 15)) return false;
+        if (S.charges.some((q) => Math.hypot(plot.X(q.x / L) - px, plot.Y(q.y / L) - py) < 22 + w / 2)) return false;
+        for (const sh of S.sheets) {
+          const Lw = sh.w === Infinity ? 1e6 : sh.w / 2, wx = (px - plot.X(sh.x / L)) / pxPer * L, wy = -(py - plot.Y(sh.y / L)) / pxPer * L;
+          const t = wx * sh.ux + wy * sh.uy, d = Math.abs(wx * sh.nx + wy * sh.ny);
+          if (Math.abs(t) < Lw + (16 / pxPer) * L && d < ((w / 2 + 10) / pxPer) * L) return false;
+        }
+        if (S.conductor && Math.hypot(px - plot.X(S.conductor.x / L), py - plot.Y(S.conductor.y / L)) < S.conductor.R / L * pxPer + 12) return false;
+        return true;
+      };
       for (const lev0 of levels) {
-        const lev = Math.abs(lev0 - vc) < 1e-9 * Math.max(1, Math.abs(vc)) ? lev0 + 1e-7 * Math.max(1, Math.abs(lev0)) : lev0;
+        if (Math.abs(lev0 - vc) < 0.2 * step0) continue;           // the conductor itself is (nearly) that equipotential
+        const lev = lev0;
         const segs = M.contour(grid, lev);
         if (!segs.length) continue;
         g.save(); g.strokeStyle = c.violet; g.globalAlpha = 0.8; g.lineWidth = 1.3; g.setLineDash([5, 4]);
@@ -281,16 +298,22 @@ export function mount(F, P0) {
         for (const [x0, y0, x1, y1] of segs) { g.moveTo(plot.X(x0 / L), plot.Y(y0 / L)); g.lineTo(plot.X(x1 / L), plot.Y(y1 / L)); }
         g.stroke(); g.restore();
         if (P.equipLabels === false) continue;
-        // a label at the contour's highest point inside the frame, if there is room
-        let best = null;
+        // a label at the highest free point of the contour inside the frame
+        const text = volts(lev0), w = widthOf(text);
+        const ax0 = plot.vx0 <= 0 && plot.vx1 >= 0 && P.axes !== false ? plot.X(0) : -1e9, ay0 = plot.vy0 <= 0 && plot.vy1 >= 0 && P.axes !== false ? plot.Y(0) : -1e9;
+        const cands = [];
         for (const [x0, y0, x1, y1] of segs) {
-          const mx = (x0 + x1) / 2 / L, my = (y0 + y1) / 2 / L, px = plot.X(mx), py = plot.Y(my);
-          if (px < plot.L + 24 || px > plot.R - 30 || py < plot.T + 12 || py > plot.B - 10) continue;
-          if (!best || my > best[1]) best = [mx, my];
+          let px = plot.X((x0 + x1) / 2 / L), py = plot.Y((y0 + y1) / 2 / L) - 8;
+          if (Math.abs(px - ax0) < w / 2 + 4) px = ax0 + w / 2 + 6;          // beside the y axis, not on its numbers
+          if (Math.abs(py - ay0) < 9) py = ay0 - 10;
+          if (px - w / 2 < plot.L + 4 || px + w / 2 > plot.R - 4 || py < plot.T + 10 || py > plot.B - 8) continue;
+          cands.push([px, py]);
         }
-        if (best && placed.every(([px, py]) => Math.hypot(px - plot.X(best[0]), py - plot.Y(best[1])) > 34)) {
-          placed.push([plot.X(best[0]), plot.Y(best[1])]);
-          plot.text(volts(lev0), best[0], best[1], { color: 'violet', size: fs - 1.5, align: 'center', dy: -7 });
+        cands.sort((p1, p2) => p1[1] - p2[1]);
+        const spot = cands.find(([px, py]) => clearOf(px, py, w));
+        if (spot) {
+          placed.push([spot[0], spot[1], w]);
+          plot.text(text, spot[0], spot[1], { color: 'violet', size: fs - 1.5, align: 'center', screen: true });
         }
       }
     }
@@ -379,7 +402,7 @@ export function mount(F, P0) {
       const cx = C.x / L, cy = C.y / L, R = C.R / L, a = C.a / L;
       g.save(); g.fillStyle = c.ink3; g.globalAlpha = 0.32; g.beginPath();
       g.ellipse(plot.X(cx), plot.Y(cy), R * pxPer, R * pxPer, 0, 0, 2 * Math.PI);
-      if (a > 0) g.ellipse(plot.X(cx), plot.Y(cy), a * pxPer, a * pxPer, 0, 0, 2 * Math.PI);
+      if (a > 0) { g.moveTo(plot.X(cx) + a * pxPer, plot.Y(cy)); g.ellipse(plot.X(cx), plot.Y(cy), a * pxPer, a * pxPer, 0, 0, 2 * Math.PI); }
       g.fill('evenodd'); g.globalAlpha = 0.85; g.strokeStyle = c.ink2; g.lineWidth = 1.5; g.stroke(); g.restore();
       const rim = (rad, inner) => {
         const n = Math.max(12, Math.round((2 * Math.PI * rad * pxPer) / 13)), sig = [];
@@ -485,7 +508,8 @@ export function mount(F, P0) {
       if (!live && pa.path === false) k = 0;
       if (k > 0) plot.path(pts.slice(0, k + 1), { color: 'gold', width: 2.2, alpha: 0.9 });
       const [px, py] = pts[k];
-      plot.point(px, py, { color: q > 0 ? 'bad' : 'accent', r: 5.5, ring: 'gold' });
+      plot.point(px, py, { color: q > 0 ? 'bad' : 'accent', r: 6.5, ...(live && pa.drag !== false && k === 0 ? { ring: 'gold' } : {}) });
+      glyph(plot.X(px), plot.Y(py), q, 3, '#fff');
       const want = P.readouts || [];
       const last = tr.v[tr.v.length - 1], vEnd = Math.hypot(last[0], last[1]);
       if (want.includes('speed')) rows.push(['final speed', qty(vEnd, 'm/s', 3)]);
@@ -500,13 +524,39 @@ export function mount(F, P0) {
       const V = M.potential(S, pr.x * L, pr.y * L);
       const unitLen = 0.42 * ((v.x1 - v.x0) / Math.max(1, nxA || 18));
       if (Number.isFinite(m) && m > 0 && P.probeArrow !== false) {
-        const t = arrowsOn === 'linear' ? m / Eref : Math.min(2.2, (m / Eref) ** 0.4);
-        const len = unitLen * 2.4 * t * (arrowsOn === 'linear' ? 2 : 1);
-        plot.arrow(pr.x, pr.y, pr.x + (e[0] / m) * len, pr.y + (e[1] / m) * len, { color: 'gold', width: 2.8, head: 10, label: P.probeLabel === false ? '' : 'E', ldx: 6, ldy: -8 });
+        // the probe's own scale: a set length where the probe starts, then (square-root) compressed
+        if (!(probeRef > 0)) probeRef = m;
+        const t = arrowsOn === 'linear' ? m / Eref : Math.max(0.2, Math.min(2.4, Math.sqrt(m / probeRef)));
+        let len = arrowsOn === 'linear' ? unitLen * 2 * t : (P.probeLen ?? 0.12) * (v.x1 - v.x0) * t;
+        const fan = P.fan && S.pieces.length && S.pieces.length <= 24;
+        if (fan) {
+          // each piece's own field at the probe, added tip to tail: the chain ends where the total does.
+          // One scale for the chain and the total, as long as it stays in the picture
+          const dEs = S.pieces.map((pc) => M.field({ ...M.scene({}), charges: [pc] }, pr.x * L, pr.y * L, 0, [0, 0, 0]));
+          let f = (0.22 * (v.x1 - v.x0)) / m;
+          for (let it = 0; it < 30; it++) {
+            let ax = pr.x, ay = pr.y, inside = true;
+            for (const dE of dEs) { ax += dE[0] * f; ay += dE[1] * f; if (ax < v.x0 || ax > v.x1 || ay < v.y0 || ay > v.y1) inside = false; }
+            if (inside) break;
+            f *= 0.85;
+          }
+          let ax = pr.x, ay = pr.y;
+          for (const dE of dEs) { plot.arrow(ax, ay, ax + dE[0] * f, ay + dE[1] * f, { color: 'bad', width: 1.4, head: 6, alpha: 0.85 }); ax += dE[0] * f; ay += dE[1] * f; }
+          len = m * f;
+        }
+        // screen directions: along E, and across it (where the force arrow sits)
+        const sx = e[0] / m, sy = -e[1] / m, cx = sy, cy = -sx;
+        const tqv = num(P.test, E);
+        const lab = (k) => ({ ldx: 7 * sx + k * cx - 4, ldy: 7 * sy + k * cy });
+        plot.arrow(pr.x, pr.y, pr.x + (e[0] / m) * len, pr.y + (e[1] / m) * len, { color: 'gold', width: 2.8, head: 10, label: P.probeLabel === false ? '' : 'E', ...(tqv ? lab(-13) : { ldx: 6, ldy: -8 }) });
         const tq = num(P.test, E);
         if (tq) {
-          const Fv = tq * QF, flen = len * 0.8 * Math.sign(Fv);
-          plot.arrow(pr.x, pr.y, pr.x + (e[0] / m) * flen, pr.y + (e[1] / m) * flen, { color: tq > 0 ? 'bad' : 'accent', width: 2.2, head: 9, label: 'F', ldx: 6, ldy: 10 });
+          // the force on the test charge: along E or against it, its length in proportion to |q₀|
+          const sl = typeof P.test === 'string' ? (P.sliders || []).find((x) => x.key === P.test) : null;
+          const ref = sl ? Math.max(Math.abs(sl.min), Math.abs(sl.max)) : Math.abs(tq);
+          const flen = len * 1.1 * (Math.abs(tq) / ref) * Math.sign(tq);
+          const ox = (-e[1] / m) * (7 / pxPer), oy = (e[0] / m) * (7 / pxPer);    // beside the E arrow, not on it
+          plot.arrow(pr.x + ox, pr.y + oy, pr.x + ox + (e[0] / m) * flen, pr.y + oy + (e[1] / m) * flen, { color: tq > 0 ? 'bad' : 'accent', width: 2.4, head: 9, label: 'F', ...(tq > 0 ? lab(16) : { ldx: -7 * sx + 16 * cx - 4, ldy: -7 * sy + 16 * cy }) });
         }
       }
       // the probe itself
@@ -539,6 +589,9 @@ export function mount(F, P0) {
     if (C && (P.readouts || []).includes('Vc')) rows.push(['potential of the conductor', qty(M.conductorPotential(S), 'V')]);
     if (S.problems.length) rows.push(['note', `\\text{${S.problems[0].replace(/[{}\\$]/g, '')}}`]);
 
+    for (const l of P.notes?.lines || []) plot.line(l.from[0], l.from[1], l.to[0], l.to[1], { color: l.color || 'ink3', width: l.width || 1.6, dash: l.dash ? [6, 5] : [] });
+    for (const a of P.notes?.arrows || []) plot.arrow(a.from[0], a.from[1], a.to[0], a.to[1], { color: a.color || 'ink', width: a.width || 2.2, head: 9, label: a.label, ldx: a.ldx ?? 7, ldy: a.ldy ?? -7 });
+    for (const q of P.notes?.points || []) plot.point(q.x, q.y, { color: q.color || 'ink2', r: q.r ?? 4, label: q.label, ldx: q.ldx, ldy: q.ldy, lcolor: q.color || 'ink2' });
     drawHandles();
     F.readout(rows);
   }

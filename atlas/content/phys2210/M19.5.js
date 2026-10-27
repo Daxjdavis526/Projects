@@ -3,7 +3,7 @@
 // jet engine, rocket turbopump, heat at constant pressure) — efficiencies set by
 // the compression alone, and honest reasons real engines fall short.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { TD, molesOf, pvPic, one } from './_pv.js';
 
 const t = String.raw;
@@ -80,7 +80,7 @@ Both depend only on how hard the air is squeezed, and both equal $1 - T_1/T_2$: 
       { label: 'Against Carnot', text: t`$1 - ${EX.T1}/${EX.T3} = ${fmt(EX.carnot, 3)}$. The Otto cycle gets ${fmt(EX.e, 3)} because its heat goes in between ${fmt(EX.T2, 3)} K and ${EX.T3} K, not all at ${EX.T3} K: in effect it is a Carnot engine running only between $T_1$ and $T_2$.` },
       { label: 'Sense check', text: t`Real petrol engines of this compression ratio reach about 30–35 % at best: the hot gas has $\gamma$ nearer 1.3, combustion takes time, heat leaks into the cooled cylinder walls, and pumping and friction take their cut. The ideal cycle is the ceiling those losses are measured against.` },
     ],
-    answer: t`(a) ${fmt(EX.T2, 3)} K; (b) $e = ${fmt(EX.e, 3)}$; (c) about ${fmt(EX.A.W, 3)} J per cycle; (d) Carnot would allow ${fmt(EX.carnot, 2)}.`,
+    answer: t`(a) ${fmt(EX.T2, 3)} K; (b) $e = ${fmt(EX.e, 3)}$; (c) about ${fmt(EX.A.W, 3)} J per cycle; (d) Carnot would allow ${fmt(EX.carnot, 3)}.`,
   },
   practice: [
     num({
@@ -188,16 +188,17 @@ Both depend only on how hard the air is squeezed, and both equal $1 - T_1/T_2$: 
     num({
       id: 'pump-work', difficulty: 3,
       gen(r) {
-        const [name, rho] = r.pick([['liquid oxygen', 1141], ['kerosene (RP-1)', 810]]), p1 = 0.3, p2 = r.pick([10, 15, 20]);
+        const [name, rho, short] = r.pick([['liquid oxygen', 1141, 'LOX'], ['RP-1 kerosene', 810, 'RP-1']]), p1 = 0.3, p2 = r.pick([10, 15, 20]);
         const w = ((p2 - p1) * 1e6) / rho / 1000;          // kJ/kg
+        const wIso = (TD.R / 0.028965) * 300 * Math.log(p2 / p1) / 1000;   // kJ/kg: air between the same pressures, isothermal at 300 K (the least it could take)
         return {
           prompt: t`A rocket engine's turbopump raises the pressure of ${name} (density ${rho} kg/m³) from ${p1} MPa to ${p2} MPa. What is the least work it must do per kilogram pumped? (A liquid barely changes volume: $W = V\,\Delta P$ for each kilogram's volume $V = 1/\rho$.)`,
           answer: w, units: 'kJ/kg', tol: { rel: 0.01 },
           errors: [{ value: (p2 * 1e6) / rho / 1000, feedback: t`Use the pressure *rise*, ${p2} − ${p1} MPa.` }, { value: ((p2 - p1) * 1e6 * rho) / 1000 / 1000, feedback: t`The volume of a kilogram is $1/\rho$, so divide by the density.` }],
           hints: [t`$V = 1/\rho$ per kilogram.`, t`$W = \Delta P/\rho = (${p2 - p1}\times10^6\ \text{Pa})/(${rho}\ \text{kg/m}^3)$.`],
           teach: 'Pumping a liquid costs very little work, because a kilogram of liquid has a tiny volume.',
-          explain: t`$W = \Delta P/\rho = ${fmt((p2 - p1) * 1e6, 3)}/${rho} = ${fmt(w, 3)}$ kJ/kg. Compressing a kilogram of *air* through a pressure ratio of 20 takes about 400 kJ — twenty or more times as much. That is the thermodynamic secret of the liquid rocket: its “compressor” works on liquid, so a small turbine can drive it, and nearly all the combustion energy is left for the nozzle.`,
-          visual: { type: 'graph', params: { x: [0, 1.5], y: [0, p2 * 1.2], aspect: 'wide', xlabel: 'volume of 1 kg (L)', ylabel: 'P (MPa)', alt: 'A liquid being pumped to high pressure at almost constant volume', curves: [{ param: [`${(1000 / rho).toFixed(4)}`, `${p1} + ${p2 - p1}*t`], t: [0, 1], color: 'accent', width: 3, label: `${name}: about ${fmt(1000 / rho, 2)} L/kg`, labelAt: 0.5, labelDx: 10, labelDy: 0 }], shade: [{ fn: String(p2), lower: String(p1), from: 0, to: +(1000 / rho).toFixed(4), color: 'gold', alpha: 0.3 }] }, caption: 'Pumping a liquid: the pressure rises at almost constant volume. The work per kilogram is the gold area V ΔP — thin, because a kilogram of liquid occupies only about a litre. (Not shown: a kilogram of air would occupy hundreds of litres.)' },
+          explain: t`$W = \Delta P/\rho = (${tex((p2 - p1) * 1e6, 3)}\ \text{Pa})/(${rho}\ \text{kg/m}^3) = ${fmt(w, 3)}$ kJ/kg. Compressing a kilogram of *air* between the same pressures would take at least ${fmt(wIso, 2)} kJ, even kept at 300 K throughout — ${fmt(wIso / w, 2)} times as much. That is the thermodynamic secret of the liquid rocket: its “compressor” works on liquid, so a small turbine can drive it, and nearly all the combustion energy is left for the nozzle.`,
+          visual: { type: 'graph', params: { x: [0, 2], y: [0, p2 * 1.2], aspect: 'wide', xlabel: 'volume of 1 kg (L)', ylabel: 'P (MPa)', alt: 'A liquid being pumped to high pressure at almost constant volume', curves: [{ param: [`${(1000 / rho).toFixed(4)}`, `${p1} + ${p2 - p1}*t`], t: [0, 1], color: 'accent', width: 3, label: `${short}: ${fmt(1000 / rho, 2)} L/kg`, labelAt: 0.5, labelDx: 10, labelDy: 0 }], shade: [{ fn: String(p2), lower: String(p1), from: 0, to: +(1000 / rho).toFixed(4), color: 'gold', alpha: 0.3 }] }, caption: t`Pumping a liquid: the pressure rises at almost constant volume. The work per kilogram is the gold area $V\,\Delta P$ — thin, because a kilogram of liquid occupies only about a litre. (Not shown: a kilogram of air at room conditions occupies more than 800 litres.)` },
         };
       },
     }),

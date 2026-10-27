@@ -180,7 +180,7 @@ On a curved space, a vector carried around a closed loop comes back **rotated**.
           answer: rate, units: 'mas', tol: { rel: 0.01 },
           errors: [{ value: rate * 2 / 3, feedback: t`Keep the $\tfrac32$: the per-orbit turn is $3\pi GM/(c^2r)$.` }, { value: rate * 1000, feedback: 'That is in microarcseconds. A milliarcsecond is 10⁻³ arcsecond = 4.848 × 10⁻⁹ rad.' }],
           hints: [t`$\Omega = 1.5\times(3.986\times10^{14})^{1.5}/\big((2.998\times10^{8})^2\times(${rkm}\times10^{3})^{2.5}\big)$ rad/s.`, t`Multiply by $3.156\times10^{7}$ s/yr, then divide by $4.848\times10^{-9}$ rad per mas.`],
-          teach: 'The geodetic precession of an orbiting gyroscope, Ω = (3/2)(GM)^{3/2}/(c²r^{5/2}), falls steeply with distance: thousands of milliarcseconds a year in low orbit, hundreds at GPS height.',
+          teach: t`The geodetic precession of an orbiting gyroscope, $\Omega = \tfrac32(GM)^{3/2}/(c^2r^{5/2})$, falls steeply with distance: thousands of milliarcseconds a year in low orbit, hundreds at GPS height.`,
           explain: t`$\Omega = ${sci(geodetic(rkm * 1e3), 3)}$ rad/s $= ${fmt(rate, 3)}$ mas/yr. The rate falls as $r^{-5/2}$, which is why Gravity Probe B flew in a low orbit, about 650 km up.`,
           visual: gpbPicture,
         };

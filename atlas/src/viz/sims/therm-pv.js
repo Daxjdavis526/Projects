@@ -244,8 +244,10 @@ export function mount(F, P0) {
 
   const { canvas, box } = F.canvas({ aspect: P.aspect ?? (P.mode === 'flow' ? '' : compact || P.ts ? 'wide' : ''), label: P.alt || (P.mode === 'flow' ? 'An energy-flow diagram' : 'A pressure–volume diagram of a gas') });
   const ctx = canvas.getContext('2d');
-  const pv = new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: `V (${vname})`, ylabel: `P (${pname})` });
-  const tsp = P.ts ? new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: 'S (J/K), zero arbitrary', ylabel: 'T (K)' }) : null;
+  // tick labels: 10 000 rather than 1e+4
+  const tickFormat = (v) => { const a = Math.abs(v); if (a >= 1e4 && a < 1e9) return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); if (a !== 0 && a < 1e-3) return v.toExponential(0); return String(+v.toPrecision(6)); };
+  const pv = new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: `V (${vname})`, ylabel: `P (${pname})`, tickFormat });
+  const tsp = P.ts ? new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: 'S (J/K), zero arbitrary', ylabel: 'T (K)', tickFormat }) : null;
 
   // ── build the picture's legs from the current parameters ───────────────────
   function build() {
@@ -368,6 +370,8 @@ export function mount(F, P0) {
       vr = vr || [0, nice(1.12 * vmax)];
       pr = pr || [0, nice(1.15 * pmax)];
     }
+    // room on the left for five-digit pressures
+    pv.o.pad = { ...pv.o.pad, l: pr[1] >= 1e4 ? 66 : pad.l };
     pv.setView(vr, pr);
     pv.clear();
 

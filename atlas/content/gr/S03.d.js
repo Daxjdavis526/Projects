@@ -160,7 +160,7 @@ Lorentz transformations are now *defined* as the linear maps that leave this exp
             { value: -ans, feedback: t`That is the $(+,-,-,-)$ convention. With Carroll’s $\eta = \mathrm{diag}(-1, 1, 1, 1)$, only the time term is negative.` },
           ],
           hints: [t`Only the diagonal of $\eta$ is non-zero, so the double sum keeps four terms: $\eta_{00}A^0B^0 + \eta_{11}A^1B^1 + \eta_{22}A^2B^2 + \eta_{33}A^3B^3$.`, t`$= -(${paren(A[0])})(${paren(B[0])}) + (${paren(A[1])})(${paren(B[1])}) + (${paren(A[2])})(${paren(B[2])}) + (${paren(A[3])})(${paren(B[3])})$.`],
-          teach: 'The Minkowski inner product η_μν A^μ B^ν is minus the product of the time components plus the products of the space components.',
+          teach: t`The Minkowski inner product $\eta_{\mu\nu}A^\mu B^\nu$ is minus the product of the time components plus the products of the space components.`,
           explain: t`$\eta_{\mu\nu}A^\mu B^\nu = -(${A[0] * B[0]}) + (${A[1] * B[1]}) + (${A[2] * B[2]}) + (${A[3] * B[3]}) = ${ans}$. Of the sixteen terms of the double sum, the twelve with $\mu \neq \nu$ vanish. Every inertial observer computes the same number, though each finds different components.`,
           visual: etaPicture(),
         };
@@ -247,7 +247,7 @@ Lorentz transformations are now *defined* as the linear maps that leave this exp
             { value: -1 - b * b, feedback: t`$\eta_{11} = +1$: the $(\Lambda^1{}_0)^2$ term is added.` },
           ],
           hints: [t`With $\mu = \nu = 0$ the double sum keeps $\eta_{00}(\Lambda^0{}_0)^2 + \eta_{11}(\Lambda^1{}_0)^2$.`, t`$\Lambda^0{}_0 = 1$ and $\Lambda^1{}_0 = -${b}$ (column 0 of the matrix).`],
-          teach: 'A map preserves the interval only if η_ρσ Λ^ρ_μ Λ^σ_ν = η_μν; Galileo’s boost fails the (0, 0) condition.',
+          teach: t`A map preserves the interval only if $\eta_{\rho\sigma}\Lambda^\rho{}_\mu\Lambda^\sigma{}_\nu = \eta_{\mu\nu}$; Galileo’s boost fails the $(0, 0)$ condition.`,
           explain: t`$-(1)^2 + (-${b})^2 = ${nice(ans)} \neq -1 = \eta_{00}$. Galileo’s boost does not preserve the interval: a clock at rest in $S$ ($dx = 0$) would get $ds'^2 = -(1 - \beta^2)c^2dt^2$, a different proper time in different frames. Only the Lorentz boost, with its $\gamma$’s, passes the test.`,
           visual: matrix([['1', '0'], ['−β', '1']], { colors: [['ink', ink3], ['bad', 'ink']], rowLabels: ['μ = 0', '1'], colLabels: ['ν = 0', '1'], left: 'Λ =', w: 1.2, h: 0.6, caption: t`Galileo’s boost as a matrix on $(ct, x)$: time is not mixed with position ($\Lambda^0{}_1 = 0$), but position is mixed with time.` }),
         };
@@ -263,8 +263,8 @@ Lorentz transformations are now *defined* as the linear maps that leave this exp
         t`Demand this equal $\eta_{\mu\nu}dx^\mu dx^\nu$ for every $dx$: $\eta_{\rho\sigma}\Lambda^\rho{}_\mu\Lambda^\sigma{}_\nu = \eta_{\mu\nu}$.`,
         t`Check the boost: the $(0, 0)$ component gives $-\gamma^2 + \gamma^2\beta^2 = -1$ ✓.`,
       ],
-      hints: ['Start from the interval written in the new frame’s coordinates.', 'The condition comes from comparing coefficients of dx^μ dx^ν.'],
-      teach: 'Lorentz transformations are defined as the linear maps with η_ρσ Λ^ρ_μ Λ^σ_ν = η_μν, which is the statement that ds² is the same in every inertial frame.',
+      hints: ['Start from the interval written in the new frame’s coordinates.', t`The condition comes from comparing coefficients of $dx^\mu dx^\nu$.`],
+      teach: t`Lorentz transformations are defined as the linear maps with $\eta_{\rho\sigma}\Lambda^\rho{}_\mu\Lambda^\sigma{}_\nu = \eta_{\mu\nu}$, which is the statement that $ds^2$ is the same in every inertial frame.`,
       explain: t`Write $ds^2$ in the new coordinates, substitute the transformation with fresh dummy indices, collect the coefficient of $dx^\mu dx^\nu$, and require it to be $\eta_{\mu\nu}$. The boost of step 2 satisfies all ten independent conditions because $\gamma^2(1 - \beta^2) = 1$.`,
       visual: hyperbola([0.5, -0.4], t`What the condition means: every Lorentz transformation keeps each event on its own hyperbola $(ct)^2 - x^2 = \text{const}$, the way rotations keep points on circles. Two boosted frames’ unit ticks shown.`),
     }),

@@ -109,6 +109,8 @@ export function escapeDamage(text, { prose = true } = {}) {
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
   if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(s) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
   for (const m of mathIn(s)) {
+    const sci = /(?<![\w.\\])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(m.tex);
+    if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
   }
@@ -117,6 +119,9 @@ export function escapeDamage(text, { prose = true } = {}) {
     if (g.t !== 'text') continue;
     const cmd = /\\([A-Za-z]{2,})/.exec(g.v);
     if (cmd) return `“\\${cmd[1]}” sits outside $…$, so it would print literally — put it inside math`;
+    // computer notation (1.97e7) is not for readers: ×10ⁿ, via format.js's tex()
+    const sci = /(?<![\w.])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(g.v);
+    if (sci) return `“${sci[1]}” is computer notation — write it as a power of ten (format it with tex() inside $…$)`;
     // a subscript in prose (I_cm, v_0) prints its underscore: it belongs in math (link targets excepted)
     const sub = /(?<![\w\\/.-])([A-Za-z]_(?:\{[^}]*\}|[A-Za-z0-9]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
     if (sub) return `“${sub[1]}” is a subscript outside $…$ and would print its underscore — write $${sub[1]}$`;

@@ -2,7 +2,7 @@
 // "the entropy of an isolated system never decreases"; S = k_B ln Ω, and why
 // "disorder" is only a loose description.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { R, C0, molesOf, pvPic, one, flowPic, freeBoxPic } from './_pv.js';
 import { bodiesPic } from './_thermal.js';
 
@@ -216,7 +216,7 @@ Entropy is a property of the state, like internal energy, so for an *irreversibl
           errors: [{ value: dSn, feedback: t`That is the nitrogen’s share. The lab loses that heat at its own temperature: add $-Q/T_\text{room}$.` }, { value: dSn - dSr, feedback: t`The lab *loses* heat: its change is $-Q/T_\text{room}$, so add a negative number.` }],
           hints: [t`Nitrogen: $+Q/T_b$. Lab: $-Q/T_\text{room}$.`, t`$Q = mL_v$.`],
           teach: t`Heat flowing into a very cold body creates a great deal of entropy, because $Q/T$ is large when $T$ is small.`,
-          explain: t`$Q = ${m}\times199$ kJ $= ${fmt(Q / 1000, 3)}$ kJ. Nitrogen: $+${fmt(Q, 4)}/77.36 = +${fmt(dSn, 4)}$ J/K; lab: $-${fmt(Q, 4)}/${Troom} = ${fmt(dSr, 4)}$ J/K; total $+${fmt(dSn + dSr, 4)}$ J/K. Heat leaking into a cryogen across such a large temperature gap is one of the most entropy-producing things in a lab — and the reason boil-off is so hard to stop.`,
+          explain: t`$Q = ${m}\times199$ kJ $= ${fmt(Q / 1000, 3)}$ kJ. Nitrogen: $+${tex(Q, 3)}\ \text{J}/77.36\ \text{K} = +${fmt(dSn, 4)}$ J/K; lab: $-${tex(Q, 3)}\ \text{J}/${Troom}\ \text{K} = ${fmt(dSr, 4)}$ J/K; total $+${fmt(dSn + dSr, 4)}$ J/K. Each joule that leaks in creates $1/77.36 - 1/${Troom} = ${fmt(1 / 77.36 - 1 / Troom, 3)}$ J/K of entropy, and that is the price of the leak: even a perfect refrigerator needs $T_\text{room}\,\Delta S = ${fmt(Troom / 77.36 - 1, 3)}$ J of work to pump that joule back out to the room, and a real cryocooler several times that.`,
           visual: bodiesPic({ bodies: [{ name: 'the lab', temp: `${Troom} K`, color: 'bad' }, { name: 'liquid nitrogen', temp: '77.36 K', color: 'accent' }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Heat leaks from the room into the boiling nitrogen. Not to scale.' }),
         };
       },

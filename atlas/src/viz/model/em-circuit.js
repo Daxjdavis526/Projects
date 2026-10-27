@@ -223,9 +223,13 @@ export function transient(circuit, v0 = {}) {
       charge: (t) => lin(t, (e) => st.I[e.id]), energy: (t) => lin(t, (e) => st.P[e.id]),
     };
   }
-  const i0 = ids.map((id) => base.I[id]);
-  const Y = ids.map((_, i) => ids.map((__, j) => -dI[j][ids[i]]));      // I_i = i0_i − Σ_j Y_ij v_j
-  const s = caps.map((c) => Math.sqrt(c.C));
+  // each state is a parallel group: its capacitance is the members' total, and its current is the
+  // members' total, I_g = I_rep·C_tot/C_rep. With those, the port admittance Y is symmetric.
+  const Ctot = caps.map((c) => allCaps.filter((m) => groups.get(m.id).rep === c.id).reduce((acc, m) => acc + m.C, 0));
+  const gain = caps.map((c, i) => Ctot[i] / c.C);
+  const i0 = ids.map((id, i) => base.I[id] * gain[i]);
+  const Y = ids.map((_, i) => ids.map((__, j) => -dI[j][ids[i]] * gain[i]));      // I_g,i = i0_i − Σ_j Y_ij v_j
+  const s = Ctot.map(Math.sqrt);
   const S = Y.map((row, i) => row.map((y, j) => y / (s[i] * s[j])));
   for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) S[i][j] = S[j][i] = (S[i][j] + S[j][i]) / 2;
   const { values, vectors: Q } = eigenSym(S);
@@ -340,7 +344,7 @@ const R = (id, o = {}) => ({ id, kind: o.lamp ? 'L' : 'R', ...o });
  *   ladder    {}                                   R1, R2 shunt, R3, R4 shunt
  *   bridge    { det: 'volt'|'galv', sw }           Wheatstone bridge: R1/R2 left, R3/R4 right
  *   twoloop   { flip }                             E1–R1, R3 in the middle, R2–E2 (flip: E2 reversed)
- *   rc        { net: 'single'|'series'|'parallel'|'combo' }   battery, two-way switch, R, capacitor network
+ *   rc        { net: 'single'|'series'|'parallel'|'combo', nc }   battery, two-way switch, R, capacitor network (nc: 2–3 in series, 2–4 in parallel)
  *   firing    {}                                   bus, arm switch, charging resistor, capacitor bank, fire switch, igniter
  * Every battery has an internal resistance key (r, r1, r2), default 0.
  */
@@ -448,9 +452,27 @@ export function preset(name, o = {}) {
     B.wire(Yc, Yg);
     const k = B.node(6.4, 4), kb = B.node(6.4, 0);
     B.el('R', 'R', Pv, k, { lab: 't' });
+    const nc = Math.max(2, Math.min(net === 'series' ? 3 : 4, o.nc ?? 2));
+    const cdef = [1e-3, 2e-3, 3e-3, 4e-3];
     if (net === 'single') { B.el('C', 'C', k, kb, { lab: 'r' }); Object.assign(P.defaults, { C: 1e-3 }); }
-    else if (net === 'series') { const m = B.node(6.4, 2); B.el('C1', 'C', k, m, { lab: 'r' }); B.el('C2', 'C', m, kb, { lab: 'r' }); Object.assign(P.defaults, { C1: 1e-3, C2: 2e-3 }); P.tags.push({ n: m, at: 'r' }); }
-    else if (net === 'parallel') { const k2 = B.node(8.8, 4), kb2 = B.node(8.8, 0); B.el('C1', 'C', k, kb, { lab: 'r' }); B.wire(k, k2); B.el('C2', 'C', k2, kb2, { lab: 'r' }); B.wire(kb2, kb); Object.assign(P.defaults, { C1: 1e-3, C2: 2e-3 }); }
+    else if (net === 'series') {
+      // a vertical stack: the nodes between the capacitors touch nothing else, so they keep their charge
+      let prev = k;
+      for (let i = 1; i <= nc; i++) {
+        const next = i === nc ? kb : B.node(6.4, 4 - (4 * i) / nc);
+        B.el(`C${i}`, 'C', prev, next, { lab: 'r' });
+        if (i < nc) P.tags.push({ n: next, at: 'r' });
+        prev = next;
+        P.defaults[`C${i}`] = cdef[i - 1];
+      }
+    } else if (net === 'parallel') {
+      let top = k, bot = kb;
+      for (let i = 1; i <= nc; i++) {
+        if (i > 1) { const t2 = B.node(6.4 + 2.3 * (i - 1), 4), b2 = B.node(6.4 + 2.3 * (i - 1), 0); B.wire(top, t2); B.wire(b2, bot); top = t2; bot = b2; }
+        B.el(`C${i}`, 'C', top, bot, { lab: 'r' });
+        P.defaults[`C${i}`] = cdef[i - 1];
+      }
+    }
     else if (net === 'combo') {
       // R ends at k; C1 across the top; C2 ∥ C3 down to the rail
       const m = B.node(8.6, 4), m2 = B.node(10.6, 4), mb = B.node(8.6, 0), mb2 = B.node(10.6, 0);

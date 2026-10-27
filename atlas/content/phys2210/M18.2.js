@@ -117,14 +117,15 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
       id: 'path-two', difficulty: 2,
       gen(r) {
         const PA = r.pick([300, 400]), PB = r.pick([100, 150]), VA = r.pick([1, 2]), VB = VA + r.pick([2, 3]);
-        const dU = dUof(HE, PA, VA, PB, VB), W1 = PA * (VB - VA), W2 = PB * (VB - VA), Q1 = dU + W1, Q2 = dU + W2;
+        // whole joules: every PV here is a multiple of 50 J, so ΔE_int is a multiple of 75 J
+        const dU = Math.round(dUof(HE, PA, VA, PB, VB)), W1 = PA * (VB - VA), W2 = PB * (VB - VA), Q1 = dU + W1, Q2 = dU + W2;
         return {
-          prompt: t`Helium goes from A to B along path 1 (A → C → B), taking in ${fmt(Q1, 4)} J of heat and doing ${W1} J of work. Along path 2 (A → D → B) it does ${W2} J of work. How much heat does it take in along path 2?`,
+          prompt: t`Helium goes from A to B along path 1 (A → C → B), taking in ${Q1} J of heat and doing ${W1} J of work. Along path 2 (A → D → B) it does ${W2} J of work. How much heat does it take in along path 2?`,
           answer: Q2, units: 'J', tol: { rel: 0.005, abs: 0.5 },
           errors: [{ value: Q1, feedback: t`Heat depends on the path. What is the same on both paths is $\Delta E_\text{int} = Q - W$.` }, { value: dU, feedback: t`That is $\Delta E_\text{int}$. Now add the work done along path 2: $Q_2 = \Delta E_\text{int} + W_2$.` }],
           hints: [t`Find $\Delta E_\text{int}$ from path 1: $Q_1 - W_1$.`, t`Path 2 has the same $\Delta E_\text{int}$, so $Q_2 = \Delta E_\text{int} + W_2$.`],
           teach: t`Use one path to find $\Delta E_\text{int}$, which every path between the same states shares, then apply the first law along the other.`,
-          explain: t`$\Delta E_\text{int} = ${fmt(Q1, 4)} - ${W1} = ${fmt(dU, 4)}$ J on either path. Along path 2, $Q_2 = ${fmt(dU, 4)} + ${W2} = ${fmt(Q2, 4)}$ J${Q2 < 0 ? ' — negative: along path 2 the gas gives out heat overall' : ''}.`,
+          explain: t`$\Delta E_\text{int} = ${Q1} - ${W1} = ${dU}$ J on either path. Along path 2, $Q_2 = ${dU} + ${W2} = ${Q2}$ J${Q2 < 0 ? ' — negative: along path 2 the gas gives out heat overall' : Q2 === 0 ? ' — zero: along path 2 the heat the gas gives out at constant volume exactly balances the heat it takes in at constant pressure' : ''}.`,
           visual: pvPic({ gas: 'He', n: 0.1, states: { A: { P: PA, V: VA }, B: { P: PB, V: VB }, C: { P: PA, V: VB }, D: { P: PB, V: VA } }, paths: [{ from: 'A', legs: [['isobaric', 'C'], ['isochoric', 'B']] }, { from: 'A', legs: [['isochoric', 'D'], ['isobaric', 'B']] }], show: 'all', shade: false, vrange: [0, VB + 1], prange: [0, PA * 1.3], caption: 'Path 1: A → C → B. Path 2: A → D → B.' }),
         };
       },

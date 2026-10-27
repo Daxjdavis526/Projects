@@ -39,9 +39,10 @@ export const defaults = {
   circuit: 'series', opts: {}, values: {}, sliders: [], switches: {}, controls: null, show: null, hide: [], names: {},
   flow: null, carriers: 'conventional', carrierToggle: false, potential: null, graph: null, t: null, v0: {},
   loop: null, loopChoice: false, junction: false, arrows: null, wire: null, energy: false, readout: null, speed: 1.6,
+  glow: true, netChoice: false, mark: true,
 };
 
-const OPT_KEYS = ['n', 'sw', 'amm', 'volt', 'lamp', 'wire', 'line', 'lineName', 'bsw', 'det', 'flip', 'net'];
+const OPT_KEYS = ['n', 'sw', 'amm', 'volt', 'lamp', 'wire', 'line', 'lineName', 'bsw', 'det', 'flip', 'net', 'nc'];
 const MATERIAL_KEYS = Object.keys(M.MATERIALS);
 
 // ─── numbers for canvas labels (plain text) and readouts (TeX) ─────────────
@@ -87,8 +88,8 @@ function texKey(k) {
 export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
   const compact = F.compact;
-  const pre = M.preset(P.circuit, P.opts);
-  const kindOf = Object.fromEntries(pre.elements.map((e) => [e.id, e]));
+  let pre = M.preset(P.circuit, P.opts);
+  let kindOf = Object.fromEntries(pre.elements.map((e) => [e.id, e]));
   const keyKind = {};
   for (const e of pre.elements) { if (e.kind === 'B') { keyKind[e.id] = 'emf'; keyKind[e.rKey] = 'r'; } else if (UNIT[e.kind]) keyKind[e.id] = e.kind === 'C' ? 'C' : 'R'; }
   const base = { ...pre.defaults, ...P.values };
@@ -145,6 +146,7 @@ export function mount(F, P0) {
       }
     }
   }
+  if (P.netChoice && P.circuit === 'rc') F.choice({ key: 'net', label: 'Capacitors', options: [['series', 'in series'], ['parallel', 'in parallel']], value: P.opts.net === 'parallel' ? 'parallel' : 'series', explain: 'In parallel they share one voltage and their charges add. In series they carry equal charges and their voltages add.' });
   if (P.carrierToggle) F.choice({ key: 'carriers', label: 'Show the moving charges as', options: [['conventional', 'positive (conventional current)'], ['electrons', 'electrons']], value: P.carriers, explain: 'In a metal the movers are electrons, drifting against the current arrow. Conventional current pretends positive charges move the other way: the effect is the same.' });
   if (P.loopChoice && Object.keys(pre.loops).length) F.choice({ key: 'loop', label: 'Trace a loop', options: [['none', 'none'], ...Object.keys(pre.loops).map((k) => [k, k])], value: P.loop || 'none', explain: 'Walk round the loop adding each change in potential: up across a battery from − to +, down by $IR$ across a resistor in the direction of the current. The sum is always zero.' });
 
@@ -197,6 +199,13 @@ export function mount(F, P0) {
 
   F.onChange((key) => {
     if (key === 'carriers' || key === 'loop') return draw();
+    if (key === 'net') {
+      pre = M.preset('rc', { ...P.opts, net: F.params.net });
+      kindOf = Object.fromEntries(pre.elements.map((e) => [e.id, e]));
+      sized = { w: 0, tries: 0 };
+      restart(); S.running = true; draw();
+      return;
+    }
     const cur = S.seg && S.seg.tr ? S.seg.tr.vAt(S.seg.t) : startV(swNow(), valuesNow());
     if (key === 'mode' || /^sw_/.test(key)) newSegment(cur);
     else newSegment(hasCaps ? cur : {});
@@ -589,7 +598,7 @@ export function mount(F, P0) {
   function lamp(e, g, st) {
     const u = A.X(1) - A.X(0), r = 0.36 * u;
     // brightness on a perceptual (square-root) scale of the power
-    const b = Math.sqrt(Math.max(0, Math.min(1, Math.abs(st.P[e.id]) / lampRef())));
+    const b = P.glow === false ? 0 : Math.sqrt(Math.max(0, Math.min(1, Math.abs(st.P[e.id]) / lampRef())));
     if (b > 0.03) {
       const R = r * (1.5 + 2.3 * b);
       const glow = ctx.createRadialGradient(g.cx, g.cy, r * 0.9, g.cx, g.cy, R);
@@ -729,7 +738,7 @@ export function mount(F, P0) {
       for (let i = 0; i <= n; i++) { const t = (tEnd * i) / n; pts.push([t * tf, seg.tr.vAt(t)[id]]); }
       G.path(pts, { color: col, width: 2.4 });
       const tt = still ? P.t : seg.t;
-      if (tt <= Tmax * 1.0001) G.point(Math.min(tt, Tmax) * tf, seg.tr.vAt(tt)[id], { color: col, r: 4.5 });
+      if (((!still && graphMode !== 'static') || (still && P.mark !== false)) && tt <= Tmax * 1.0001) G.point(Math.min(tt, Tmax) * tf, seg.tr.vAt(tt)[id], { color: col, r: 4.5 });
       if (capIds.length > 1) G.text(P.names[id] ?? M.nameOf(id), Tmax * tf, vinf, { dx: -4, dy: -9, align: 'right', color: col, size: fsS, weight: 650 });
     });
   }

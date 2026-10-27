@@ -110,7 +110,7 @@ export function mount(F, P) {
         if (c.fn) ly = fn(c.fn, vars)({ ...E, x: at });
         else if (c.param) { lx = fn(c.param[0], ['t', ...vars])({ ...E, t: at }); ly = fn(c.param[1], ['t', ...vars])({ ...E, t: at }); }
         else if (c.polar) { const r = fn(c.polar, ['theta', ...vars])({ ...E, theta: at }); lx = r * Math.cos(at); ly = r * Math.sin(at); }
-        plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650 });
+        plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650, align: c.labelAlign });
       }
     });
     for (const l of P.vlines || []) { if (!shown(l)) continue; const x = ev(l.x, E, vars); plot.line(x, plot.vy0, x, plot.vy1, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, x, plot.vy1, { dx: 4, dy: 10, color: l.color || 'ink3' }); }

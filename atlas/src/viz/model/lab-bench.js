@@ -246,7 +246,7 @@ export const EXPERIMENTS = {
   freefall: {
     title: 'A steel ball dropped from an electromagnet',
     apparatus: 'freefall',
-    note: 'Air resistance is left out: for a 2 cm steel ball it lengthens a 1.3 m fall by about 0.06 % (0.3 ms). Heights are read to ±1 mm; the timer scatters by 1.5 ms and reads to 1 ms.',
+    note: 'Air resistance is left out: for a 2 cm steel ball it lengthens a 1.3 m fall by about 0.06% (0.3 ms). Heights are read to ±1 mm; the timer scatters by 1.5 ms and reads to 1 ms.',
     defaults: { g: G_LOCAL, delay: 0.012, st: 0.0015, sh: 0.001 },
     setting: { key: 'h', sym: 'h', label: 'Drop height $h$', unit: 'm', min: 0.1, max: 1.5, step: 0.05, value: 0.7, series: [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3], explain: 'From the bottom of the ball to the trapdoor, read off a metre rule to ±1 mm.' },
     nz: 2,
@@ -275,7 +275,7 @@ export const EXPERIMENTS = {
   launcher: {
     title: 'A spring launcher fired at different angles',
     apparatus: 'launcher',
-    note: 'No air resistance, and the ball lands at the height it left the muzzle. Shot-to-shot launch speed varies by 0.5 %; the tape reads to 2 mm.',
+    note: 'No air resistance, and the ball lands at the height it left the muzzle. Shot-to-shot launch speed varies by 0.5%; the tape reads to 2 mm.',
     defaults: { v0: 4.20, g: G_LOCAL, sv: 0.005, sr: 0.002, offset: 0.060 },
     setting: { key: 'theta', sym: 'θ', label: 'Launch angle $\\theta$', unit: '°', min: 10, max: 80, step: 5, value: 30, series: [10, 20, 30, 40, 50, 60, 70, 80], explain: 'Above the horizontal, read from the launcher’s protractor.' },
     nz: 2,
@@ -311,7 +311,7 @@ export const EXPERIMENTS = {
     series: [{ key: 'a', sym: 'a', label: 'acceleration', unit: 'm/s²', res: 0.001, sigma: (s, P) => P.sa }],
     axes: {
       aF: {
-        label: 'a against F', slopeUnit: '1/kg', x: { sym: 'F = mg', unit: 'N', of: (m, R, P) => m * P.g }, ys: [{ sym: 'a', unit: 'm/s²', of: (m, R) => R[0], sigma: (m, R, P) => P.sa }],
+        label: 'a against F', slopeUnit: '1/kg', expectLabel: 'a = F/M: no friction', x: { sym: 'F = mg', unit: 'N', of: (m, R, P) => m * P.g }, ys: [{ sym: 'a', unit: 'm/s²', of: (m, R) => R[0], sigma: (m, R, P) => P.sa }],
         expect: (P) => ({ a: 0, b: 1 / P.M }),
         results: [{ sym: 'M', name: 'accelerated mass', unit: 'kg', of: (f) => 1 / f.b, sigma: (f) => f.sb / f.b ** 2, accepted: (P) => P.M, acceptedLabel: 'balance' }],
         intercept: { sym: 'a₀', name: 'intercept', unit: 'm/s²' },
@@ -326,7 +326,7 @@ export const EXPERIMENTS = {
   friction: {
     title: 'A loaded block pulled across a board',
     apparatus: 'friction',
-    note: 'Friction is modelled as exactly proportional to the normal force; the peak (static) force scatters by 4 % from pull to pull, the sliding (kinetic) force by 2 %. Real surfaces wear and vary more.',
+    note: 'Friction is modelled as exactly proportional to the normal force; the peak (static) force scatters by 4% from pull to pull, the sliding (kinetic) force by 2%. Real surfaces wear and vary more.',
     defaults: { mb: 0.250, mus: 0.42, muk: 0.30, g: G_LOCAL, angle: 20, zero: 0.20 },
     setting: { key: 'm', sym: 'm', label: 'Load on the block $m$', unit: 'kg', min: 0, max: 1.5, step: 0.05, value: 0.5, series: [0, 0.25, 0.5, 0.75, 1.0, 1.25], explain: 'Added to the 0.250 kg block.' },
     nz: 2,
@@ -383,6 +383,7 @@ export const EXPERIMENTS = {
     apparatus: 'energy',
     note: 'Rolling friction (μ = 0.004) is the only loss; the wheels’ spin energy is ignored. The gate times the 2.50 cm flag to ±0.1 ms; the release point varies by ±2 mm along the track.',
     defaults: { theta: 10, mu: 0.004, w: 0.025, wTrue: 0.026, g: G_LOCAL, st: 0.0001, sd: 0.002 },
+    options: [{ key: 'theta', label: 'Track angle', choices: [[6, '6°'], [10, '10°'], [15, '15°']], explain: 'Tilt the track more or less steeply. The same heights then mean shorter or longer runs along the track.' }],
     setting: { key: 'h', sym: 'h', label: 'Release height $h$', unit: 'm', min: 0.02, max: 0.20, step: 0.01, value: 0.12, series: [0.03, 0.06, 0.09, 0.12, 0.15, 0.18], explain: 'Height of the release point above the photogate, h = d sin θ.' },
     nz: 2,
     read: (h, P, sys, z) => {
@@ -393,7 +394,7 @@ export const EXPERIMENTS = {
     series: [{ key: 'dt', sym: 'Δt', label: 'blocking time', unit: 's', res: 0.0001, sigma: (h, P) => P.st }],
     axes: {
       v2h: {
-        label: 'v² against h', slopeUnit: 'm/s²', x: { sym: 'h', unit: 'm', of: (h) => h },
+        label: 'v² against h', slopeUnit: 'm/s²', expectLabel: 'v² = 2gh: no energy lost', x: { sym: 'h', unit: 'm', of: (h) => h },
         ys: [{ sym: 'v²', unit: 'm²/s²', of: (h, R, P) => (P.w / R[0]) ** 2, sigma: (h, R, P) => { const v2 = (P.w / R[0]) ** 2, th = P.theta * D2R; return Math.hypot((2 * v2 * Math.hypot(P.st, resolutionU(0.0001))) / R[0], (2 * P.g * P.sd * (Math.sin(th) - P.mu * Math.cos(th)))); } }],
         expect: (P) => ({ a: 0, b: 2 * P.g }),
         results: [{ sym: 'K/U', name: 'share of the energy that reaches the gate', unit: '', of: (f, P) => f.b / (2 * P.g), sigma: (f, P) => f.sb / (2 * P.g), accepted: () => 1, acceptedLabel: 'no losses' }],
@@ -409,7 +410,7 @@ export const EXPERIMENTS = {
   collision: {
     title: 'Two carts that stick together',
     apparatus: 'collision',
-    note: 'The push varies by 4 % from run to run; each photogate speed is good to 0.5 %. Friction between the gates is ignored.',
+    note: 'The push varies by 4% from run to run; each photogate speed is good to 0.5%. Friction between the gates is ignored.',
     defaults: { m1: 0.500, m2: 0.500, extra: 0.100, sv: 0.005, push: 0.04 },
     setting: { key: 'u', sym: 'u', label: 'Push speed (roughly) $u$', unit: 'm/s', min: 0.2, max: 1.0, step: 0.05, value: 0.5, series: [0.3, 0.4, 0.5, 0.6, 0.7, 0.8], explain: 'How hard you push cart 1; gate A measures what it really got.' },
     nz: 3,
@@ -425,15 +426,15 @@ export const EXPERIMENTS = {
     ],
     axes: {
       pp: {
-        label: 'p after against p before', slopeUnit: '',
+        label: 'p after against p before', slopeUnit: '', expectLabel: 'momentum conserved',
         x: { sym: 'p before = m₁u₁', unit: 'kg·m/s', of: (u, R, P) => P.m1 * R[0], sigma: (u, R, P) => P.m1 * P.sv * R[0] },
         ys: [{ sym: 'p after = (m₁+m₂)v', unit: 'kg·m/s', of: (u, R, P) => (P.m1 + P.m2) * R[1], sigma: (u, R, P) => (P.m1 + P.m2) * P.sv * R[1] }],
         expect: () => ({ a: 0, b: 1 }),
-        results: [{ sym: 'p_after/p_before', name: 'momentum ratio (slope)', unit: '', of: (f) => f.b, sigma: (f) => f.sb, accepted: () => 1, acceptedLabel: 'conserved' }],
+        results: [{ sym: 'p after ÷ p before', name: 'momentum ratio (slope)', unit: '', of: (f) => f.b, sigma: (f) => f.sb, accepted: () => 1, acceptedLabel: 'conserved' }],
       },
     },
     defaultAxes: 'pp',
-    repeat: { sym: 'p_after/p_before', label: 'momentum ratio', unit: '', of: (u, R, P) => ((P.m1 + P.m2) * R[1]) / (P.m1 * R[0]), sigma: (u, R, P) => Math.SQRT2 * P.sv * ((P.m1 + P.m2) * R[1]) / (P.m1 * R[0]), accepted: () => 1, acceptedLabel: 'conserved' },
+    repeat: { sym: 'p after ÷ p before', label: 'momentum ratio', unit: '', of: (u, R, P) => ((P.m1 + P.m2) * R[1]) / (P.m1 * R[0]), sigma: (u, R, P) => Math.SQRT2 * P.sv * ((P.m1 + P.m2) * R[1]) / (P.m1 * R[0]), accepted: () => 1, acceptedLabel: 'conserved' },
     systematics: { mass: { label: 'Cart 2 carries a 0.100 kg bar that was never weighed', short: 'mass not recorded', explain: 'Cart 2 really has 0.600 kg, but your table says 0.500 kg.' } },
     defaultSys: 'mass',
   },
@@ -442,8 +443,9 @@ export const EXPERIMENTS = {
   rotary: {
     title: 'A disc spun up by a falling mass',
     apparatus: 'rotary',
-    note: 'The string is light and does not slip; the pulley’s own inertia is ignored. The rotary sensor gives α to 1 %.',
+    note: 'The string is light and does not slip; the pulley’s own inertia is ignored. The rotary sensor gives α to 1%.',
     defaults: { M: 1.400, R: 0.1140, r: 0.0240, ring: false, Mr: 0.470, R1: 0.0540, R2: 0.0640, g: G_LOCAL, tf: 0.0015, sa: 0.01 },
+    options: [{ key: 'ring', label: 'On the axle', choices: [[false, 'Disc'], [true, 'Disc + ring']], explain: 'Add a 0.470 kg ring (radii 5.40 and 6.40 cm) on top of the disc.' }],
     setting: { key: 'm', sym: 'm', label: 'Hanging mass $m$', unit: 'kg', min: 0.01, max: 0.15, step: 0.005, value: 0.06, series: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12], explain: 'On a string wound round the 2.40 cm step of the pulley.' },
     nz: 1,
     read: (m, P, sys, z) => {
@@ -483,7 +485,7 @@ export const EXPERIMENTS = {
     series: [{ key: 't10', sym: 't₁₀', label: 'time for 10 swings', unit: 's', res: 0.01, sigma: (L, P) => P.react }],
     axes: {
       square: {
-        label: 'T² against L', slopeUnit: 's²/m', x: { sym: 'L', unit: 'm', of: (L) => L }, ys: [{ sym: 'T²', unit: 's²', of: (L, R) => (R[0] / 10) ** 2, sigma: (L, R, P) => (2 * (R[0] / 10) * P.react) / 10 }],
+        label: 'T² against L', slopeUnit: 's²/m', expectLabel: 'T² = 4π²L/g', x: { sym: 'L', unit: 'm', of: (L) => L }, ys: [{ sym: 'T²', unit: 's²', of: (L, R) => (R[0] / 10) ** 2, sigma: (L, R, P) => (2 * (R[0] / 10) * P.react) / 10 }],
         expect: (P) => ({ a: 0, b: (4 * Math.PI ** 2) / P.g }),
         results: [{ sym: 'g', name: 'free-fall acceleration', unit: 'm/s²', of: (f) => (4 * Math.PI ** 2) / f.b, sigma: (f) => ((4 * Math.PI ** 2) / f.b ** 2) * f.sb, accepted: (P) => P.g, acceptedLabel: 'local g' }],
         intercept: { sym: 'T²₀', name: 'intercept', unit: 's²' },
@@ -498,7 +500,7 @@ export const EXPERIMENTS = {
     defaultAxes: 'square',
     systematics: {
       knot: { label: 'Lengths measured to the top of the bob, 2.5 cm short of its centre', short: 'length offset', explain: 'Every length you wrote down is 2.5 cm shorter than the real pivot-to-centre length.' },
-      amplitude: { label: 'Big swings: released at 40° instead of 5°', short: 'large amplitude', explain: 'At 40° the small-angle formula no longer holds: every period is about 3 % long.' },
+      amplitude: { label: 'Big swings: released at 40° instead of 5°', short: 'large amplitude', explain: 'At 40° the small-angle formula no longer holds: every period is about 3% long.' },
     },
     defaultSys: 'knot',
   },
@@ -566,7 +568,7 @@ export const EXPERIMENTS = {
     series: [{ key: 'T', sym: 'T', label: 'temperature', unit: '°C', res: 0.1, sigma: (t, P) => Math.hypot(P.sT, resolutionU(0.1)) }],
     axes: {
       Tt: {
-        label: 'T against t', slopeUnit: 'K/s', x: { sym: 't', unit: 's', of: (t) => t }, ys: [{ sym: 'T', unit: '°C', of: (t, R) => R[0], sigma: (t, R, P) => Math.hypot(P.sT, resolutionU(0.1)) }],
+        label: 'T against t', slopeUnit: 'K/s', expectLabel: 'no heat leak', x: { sym: 't', unit: 's', of: (t) => t }, ys: [{ sym: 'T', unit: '°C', of: (t, R) => R[0], sigma: (t, R, P) => Math.hypot(P.sT, resolutionU(0.1)) }],
         expect: (P) => ({ a: P.T0, b: (P.V * P.I) / (P.m * P.c) }),
         results: [{
           sym: 'c', name: 'specific heat', unit: 'J/(kg·K)', of: (f, P) => (P.V * P.I) / (P.m * f.b), sigma: (f, P) => ((P.V * P.I) / (P.m * f.b)) * (f.sb / f.b), accepted: (P) => P.c, acceptedLabel: 'aluminium',

@@ -83,14 +83,25 @@ export function mount(F, P) {
   else F.params.size = P.size;
 
   const key0 = F.params.surface;
-  const view = new View3D(canvas, { yaw: P.yaw ?? U0, pitch: P.pitch ?? VIEW[key0].pitch, dist: VIEW[key0].dist, target: VIEW[key0].target });
+  // A loop on the torus is seen best from low down when P is on the outer side and from higher up when it is
+  // on the inner side (drawn on the far wall, through the hole): there the camera tilts as P moves, by the
+  // change in this preferred pitch, on top of any tilt the reader has dragged in.
+  const vAtPos = () => { const [a, b] = SURFACES[F.params.surface].vRange; return fixedV ? P.v : a + (b - a) * F.params.pos; };
+  const prefPitch = () => (P.mode === 'loop' && F.params.surface === 'torus' ? 0.55 - 0.2 * Math.cos(vAtPos()) : VIEW[F.params.surface].pitch);
+  let lastPref = prefPitch();
+  const view = new View3D(canvas, { yaw: P.yaw ?? U0, pitch: P.pitch ?? lastPref, dist: VIEW[key0].dist, target: VIEW[key0].target });
   view.onChange = () => draw();
   let lastSurface = key0;
   F.onChange((k) => {
     if (k === 'surface' && F.params.surface !== lastSurface) {
       const V = VIEW[F.params.surface];
-      view.dist = V.dist; view.pitch = V.pitch; view.target = V.target; view.yaw = U0;
+      lastPref = prefPitch();
+      view.dist = V.dist; view.pitch = lastPref; view.target = V.target; view.yaw = U0;
       lastSurface = F.params.surface;
+    } else if (k === 'pos') {
+      const pref = prefPitch();
+      view.pitch = Math.max(-1.45, Math.min(1.45, view.pitch + pref - lastPref));
+      lastPref = pref;
     }
     draw();
   });

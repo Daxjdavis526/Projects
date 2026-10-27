@@ -350,7 +350,7 @@ The **Einstein equivalence principle** (EEP) adds two statements about a small f
       },
       hints: ['Different materials carry different fractions of their mass as nuclear binding energy.', 'Which test compares different materials?'],
       teach: 'Any coupling of gravity to a particular form of energy makes the free-fall acceleration depend on composition — exactly what Eötvös-type tests look for.',
-      explain: 'Nuclear binding energy is a different fraction of the mass in titanium and in platinum. If gravity treated it differently, m_g/m_i would differ between them, and MICROSCOPE would have seen η ≠ 0. That is why test materials are chosen to differ as much as possible in composition.',
+      explain: t`Nuclear binding energy is a different fraction of the mass in titanium and in platinum. If gravity treated it differently, $m_g/m_i$ would differ between them, and MICROSCOPE would have seen $\eta \neq 0$. That is why test materials are chosen to differ as much as possible in composition.`,
       visual: wepHistory('The tightening limits on composition dependence in free fall. Any coupling of gravity to one particular form of energy would have shown up as a non-zero η.'),
     }),
     num({

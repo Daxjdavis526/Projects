@@ -68,7 +68,7 @@ export function unitTeX(u) {
 }
 /** A canvas axis label from a symbol and unit: 't² (s²)'. */
 const axisLabel = (sym, unit) => (unit ? `${sym} (${unit})` : sym);
-const SYM_TEX = { 'θ': '\\theta', 'α': '\\alpha', 'μs': '\\mu_s', 'μk': '\\mu_k', 'τ_f': '\\tau_f', 'δ': '\\delta', 'Δt': '\\Delta t', 'v₀': 'v_0', 'x₀': 'x_0', 'R₀': 'R_0', 'a₀': 'a_0', 'T₀': 'T_0', 'T²₀': 'T^2_0', 'F₀': 'F_0', 'v²₀': 'v^2_0', 'θc': '\\theta_c', 't₁₀': 't_{10}', 'u₁': 'u_1', 'K/U': 'K/U', 'p_after/p_before': 'p_\\text{after}/p_\\text{before}' };
+const SYM_TEX = { 'θ': '\\theta', 'α': '\\alpha', 'μs': '\\mu_s', 'μk': '\\mu_k', 'τ_f': '\\tau_f', 'δ': '\\delta', 'Δt': '\\Delta t', 'v₀': 'v_0', 'x₀': 'x_0', 'R₀': 'R_0', 'a₀': 'a_0', 'T₀': 'T_0', 'T²₀': 'T^2_0', 'F₀': 'F_0', 'v²₀': 'v^2_0', 'θc': '\\theta_c', 't₁₀': 't_{10}', 'u₁': 'u_1', 'K/U': 'K/U', 'p after ÷ p before': 'p_\\text{after}/p_\\text{before}' };
 const symTeX = (s) => SYM_TEX[s] ?? s;
 /** “value ± σ unit” as TeX, σ rounded to two figures and the value to match. */
 function pmTeX(v, s, unit) {
@@ -283,7 +283,7 @@ export function mount(F, P0) {
     if (an && an.series.length === 1 && (P.expected || anO) && pts.length) legend(pl, [
       P.fit ? ['line', 'gold', 'least-squares line'] : null,
       anO && P.fit ? ['dot', 'warn', 'line forced through (0, 0)'] : null,
-      P.expected && exs.length ? ['dash', 'good', 'expected, no systematic'] : null,
+      P.expected && exs.length ? ['dash', 'good', A.expectLabel || 'expected, without the systematic error'] : null,
     ]);
     if (!pts.length) pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
     else if (A.curved && P.fit && bench) pl.text('Curved: a straight line is the wrong model on these axes', pl.R - 6, pl.T + 12, { screen: true, align: 'right', color: 'ink3', size: 11.5 });
@@ -707,8 +707,8 @@ const APPARATUS = {
     if (st.labels) {
       const R = st.row?.R;
       display(pl, 13.2, 8.6, [`peak  ${R ? R[0].toFixed(2) : '—'} N`, `slide ${R ? R[1].toFixed(2) : '—'} N`], { compact: o.compact, title: 'force sensor' });
-      if (sys === 'angle') sysTag(pl, 8.6, y + 3.3, 'string pulled 20° above horizontal');
-      if (sys === 'zero') sysTag(pl, 10.6, y + 2.2, 'sensor reads 0.20 N with no pull');
+      if (sys === 'angle') sysTag(pl, 0.8, 9.2, `string pulled ${P.angle}° above horizontal`);
+      if (sys === 'zero') sysTag(pl, 0.8, 9.2, `sensor reads ${P.zero.toFixed(2)} N with no pull`);
     }
   },
 
@@ -756,7 +756,7 @@ const APPARATUS = {
       pl.text('photogate', gate[0] - 1.4, gate[1] + 2.2, { color: 'violet', size: 11 });
       pl.text(`θ = ${P.theta}°`, top[0] + 1.0, top[1] - 1.3, { color: 'ink3', size: 11 });
       const dt = st.row?.R?.[0];
-      display(pl, 13.4, 8.6, [`Δt = ${Number.isFinite(dt) ? (dt * 1000).toFixed(1) : '—'} ms`, `v = w/Δt = ${Number.isFinite(dt) ? (P.w / dt).toFixed(3) : '—'} m/s`], { compact: o.compact, title: 'gate timer (w = 2.50 cm assumed)' });
+      display(pl, 13.4, 8.6, [`Δt = ${Number.isFinite(dt) ? (dt * 1000).toFixed(1) : '—'} ms`], { compact: o.compact, title: 'photogate timer' });
       if (sys === 'flag') sysTag(pl, ft[0] - 0.5, ft[1] + 0.6, 'flag really 2.60 cm wide');
     }
   },
@@ -767,7 +767,7 @@ const APPARATUS = {
     pl.line(0.5, y, 19.5, y, { color: 'ink2', width: 3 });
     const gateAt = (x, name) => { pl.path([[x - 0.35, y - 0.2], [x - 0.35, y + 2.3], [x + 0.35, y + 2.3], [x + 0.35, y - 0.2]], { color: 'violet', width: 3 }); pl.text(name, x - 0.55, y + 2.8, { color: 'violet', size: 11 }); };
     gateAt(5.5, 'gate A'); gateAt(14.5, 'gate B');
-    const cart = (x, col, label) => { block(pl, x, y + 0.2, 2.6, 0.9, col, 0.85); pl.circle(x + 0.5, y + 0.15, 0.15, { fill: 'ink2', stroke: false }); pl.circle(x + 2.1, y + 0.15, 0.15, { fill: 'ink2', stroke: false }); pl.text(label, x + 1.3, y - 0.6, { color: 'ink2', size: 11, align: 'center' }); };
+    const cart = (x, col, label) => { block(pl, x, y + 0.2, 2.6, 0.9, col, 0.85); pl.circle(x + 0.5, y + 0.15, 0.15, { fill: 'ink2', stroke: false }); pl.circle(x + 2.1, y + 0.15, 0.15, { fill: 'ink2', stroke: false }); if (st.labels) pl.text(label, x + 1.3, y - 0.6, { color: 'ink2', size: 11, align: 'center' }); };
     cart(1.6, 'accent', `cart 1, ${fx(P.m1, 3)} kg`);
     cart(8.6, 'violet', `cart 2, ${fx(P.m2, 3)} kg`);
     pl.rect(4.2, y + 0.3, 0.12, 0.7, { fill: 'ink', alpha: 0.5, stroke: false });

@@ -7,6 +7,8 @@
 
 import * as W from '../src/viz/model/wave-physics.js';
 import { validate as validateString } from '../src/viz/sims/wave-string.js';
+import { validate as validateSound, harmonicOf } from '../src/viz/sims/wave-sound.js';
+import { validate as validateDoppler } from '../src/viz/sims/wave-doppler.js';
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {
@@ -164,6 +166,12 @@ check('beat frequency |f₁ − f₂|', near(W.beatFrequency(440, 444), 4) && ne
 // ─── the simulation’s parameter check ──────────────────────────────────────
 check('wave-string validate accepts its defaults', validateString({}).length === 0, validateString({}).join('; '));
 check('wave-string validate rejects an unknown mode', validateString({ mode: 'nope' }).length > 0);
+for (const mode of ['travel', 'pipe', 'beats']) check(`wave-sound validate accepts ${mode} defaults`, validateSound({ mode }).length === 0, validateSound({ mode }).join('; '));
+check('wave-sound validate rejects a pipe with no such ends', validateSound({ mode: 'pipe', ends: 'open-shut' }).length > 0);
+check('a closed–open pipe’s resonances are harmonics 1, 3, 5, 7, 9', [1, 2, 3, 4, 5].map((k) => harmonicOf('closed-open', k)).join() === '1,3,5,7,9');
+check('wave-doppler validate accepts its defaults', validateDoppler({}).length === 0, validateDoppler({}).join('; '));
+check('wave-doppler validate rejects Mach 3', validateDoppler({ M: 3 }).length > 0);
+check('an open–open pipe’s resonances are harmonics 1, 2, 3, 4, 5', [1, 2, 3, 4, 5].map((k) => harmonicOf('open-open', k)).join() === '1,2,3,4,5');
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

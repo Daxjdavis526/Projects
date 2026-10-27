@@ -1,7 +1,7 @@
 // Heat engines: heat in from a hot reservoir, work out, heat rejected to a cold
 // one; e = W/Q_h = 1 − Q_c/Q_h; the Kelvin–Planck statement of the second law.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { TD, molesOf, pvPic, one, flowPic } from './_pv.js';
 
 const t = String.raw;
@@ -140,7 +140,7 @@ The **second law of thermodynamics**, in Kelvin and Planck's form, says $Q_c$ ca
           errors: [{ value: ((P * 1000) / (L * 1e6)) * 1000, feedback: 'The fuel must supply the heat input, P/e, not just the work output.' }],
           hints: [t`The heat input rate is $P/e$.`, t`Fuel rate = (heat input rate)/(44 MJ/kg).`],
           teach: 'An engine’s fuel supplies its heat input, which is its power divided by its efficiency.',
-          explain: t`Heat input $= ${P}/${e} = ${fmt(P / e, 3)}$ kW; fuel $= ${fmt((P * 1000) / e, 3)}\ \text{W} / (44\times10^{6}\ \text{J/kg}) = ${fmt(mdot, 3)}$ g/s, about ${fmt((mdot * 3.6) / 0.74, 2)} litres an hour.`,
+          explain: t`Heat input $= ${P}/${e} = ${fmt(P / e, 3)}$ kW; fuel $= ${tex((P * 1000) / e, 3)}\ \text{W} / (44\times10^{6}\ \text{J/kg}) = ${fmt(mdot, 3)}$ g/s, about ${fmt((mdot * 3.6) / 0.74, 2)} litres an hour.`,
           visual: flowPic({ Qh: P / e, Qc: P / e - P, W: P, labels: { Qh: 'fuel’s heat = ?', Qc: 'exhaust + radiator', W: `${P} kW`, hot: 'burning petrol', cold: 'the air' }, caption: 'Power flows, widths to scale.' }),
         };
       },

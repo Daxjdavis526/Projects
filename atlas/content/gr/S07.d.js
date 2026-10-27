@@ -137,7 +137,7 @@ export default lesson({
             ? [{ value: Vt * R, feedback: t`That is $rV^\theta$, the speed around in m/s. The component $V^\theta$ is in radians per second: divide by $r$.` }, { value: -Vt, feedback: t`Check the signs: $\partial\theta/\partial x = -\sin\theta/r$, $\partial\theta/\partial y = +\cos\theta/r$.` }].filter((e) => Math.abs(e.value - ans) > 0.02)
             : [{ value: -Math.sin(th) * Vx + Math.cos(th) * Vy, feedback: t`That is the component around ($rV^\theta$). Outward is $V^r = \cos\theta\,V^x + \sin\theta\,V^y$.` }].filter((e) => Math.abs(e.value - ans) > 0.02),
           hints: [askTheta ? t`$V^\theta = \dfrac{\partial\theta}{\partial x}V^x + \dfrac{\partial\theta}{\partial y}V^y = \dfrac{-\sin\theta\,V^x + \cos\theta\,V^y}{r}$.` : t`$V^r = \dfrac{\partial r}{\partial x}V^x + \dfrac{\partial r}{\partial y}V^y = \cos\theta\,V^x + \sin\theta\,V^y$.`, t`$\cos ${thd}^\circ = ${fmt(Math.cos(th), 4)}$, $\sin ${thd}^\circ = ${fmt(Math.sin(th), 4)}$.`],
-          teach: 'Upper-index components transform with the Jacobian ∂x′/∂x: V^r = cos θ V^x + sin θ V^y, V^θ = (−sin θ V^x + cos θ V^y)/r.',
+          teach: t`Upper-index components transform with the Jacobian $\partial x'/\partial x$: $V^r = \cos\theta\,V^x + \sin\theta\,V^y$ and $V^\theta = (-\sin\theta\,V^x + \cos\theta\,V^y)/r$.`,
           explain: t`$V^r = ${fmt(Vr, 4)}$ m/s and $V^\theta = ${fmt(Vt, 4)}$ rad/s. Check: $(V^r)^2 + r^2(V^\theta)^2 = ${fmt(Vr * Vr + R * R * Vt * Vt, 4)} = (V^x)^2 + (V^y)^2 = ${Vx * Vx + Vy * Vy}$ ✓.`,
           visual: polarScene(R * Math.cos(th), R * Math.sin(th), Math.atan2(Vy, Vx) / DEG, t`The particle at P with its velocity direction (gold, length not to scale) and the polar basis vectors there.`),
         };
@@ -167,7 +167,7 @@ export default lesson({
               curves: [...polarGrid(), ...[-6, -4, -2, 0, 2, 4, 6].map((k) => (b !== 0 ? { fn: `(${k} - ${a}*x)/${b}`, color: 'teal', width: 1.3 } : { param: [`${k}/${a}`, 't'], t: [-4, 4], color: 'teal', width: 1.3 }))],
               points: [{ x: r4(R * Math.cos(th)), y: r4(R * Math.sin(th)), color: 'gold', r: 5, label: 'P' }],
             },
-            caption: t`Level lines of $f$ (teal, every 2 units) over the polar grid. $\omega_\theta$ counts how many of them you cross per radian going around through P.`,
+            caption: t`Level lines of $f$ (teal, every 2 units) over the polar grid. $\omega_\theta$ is how fast $f$ changes, per radian, as you go around the circle through P — the farther out P is, the more lines a radian of arc crosses.`,
           },
         };
       },
@@ -185,7 +185,7 @@ export default lesson({
       why: {
         1: t`Then $\omega'_\mu V'^\mu$ would pick up two Jacobians instead of a Jacobian and its inverse, and would change from chart to chart.`,
         2: t`Reversed. Differentiate $x'^\mu(x(\lambda))$ with the chain rule: the velocity gets $\partial x'^\mu/\partial x^\nu$. Differentiate $f(x(x'))$: the gradient gets $\partial x^\nu/\partial x'^\mu$.`,
-        3: 'Polar components are perfectly good — the drone’s V^θ = −0.25 rad/s is exactly how fast its angle changes.',
+        3: t`Polar components are perfectly good — the drone’s $V^\theta = -0.25$ rad/s is exactly how fast its angle changes.`,
       },
       hints: [t`Apply the chain rule to $\dfrac{d}{d\lambda}x'^\mu(x(\lambda))$.`, t`Apply it to $\dfrac{\partial}{\partial x'^\mu}f(x(x'))$.`],
       teach: 'Vectors (upper index) transform with ∂x′/∂x, covectors (lower index) with ∂x/∂x′: both are just the chain rule.',
@@ -209,8 +209,12 @@ export default lesson({
       visual: {
         type: 'calc-vectors3d',
         params: {
-          range: 3,
-          spheres: [{ centre: [0, 0, 0], radius: 2, color: 'teal' }],
+          range: 3.6, yaw: -0.85, pitch: 0.85, scale: 1.9,
+          curves: [
+            { param: ['2*cos(t)', '2*sin(t)', 0], t: [0, 6.2832], color: 'teal' },
+            { param: ['1.6829*cos(t)', '1.6829*sin(t)', 1.0806], t: [0, 6.2832], color: 'gold' },
+            { param: ['1.6507*sin(t)', '1.1293*sin(t)', '2*cos(t)'], t: [0, 3.1416], color: 'violet' },
+          ],
           segments: [{ from: [0, 0, 0], to: [1.389, 0.9503, 1.0806], color: 'ink3', dash: true }],
           points: [{ at: [1.389, 0.9503, 1.0806], color: 'ink', label: 'P' }],
           vectors: [
@@ -219,7 +223,7 @@ export default lesson({
             { from: [1.389, 0.9503, 1.0806], to: [0.9139, 1.6448, 1.0806], color: 'gold', label: '\\tfrac12\\mathbf e_\\phi' },
           ],
         },
-        caption: t`The coordinate basis vectors at a point P on a sphere of radius $r = 2$ (θ = 57°, φ = 34°): $\mathbf e_r$ has length 1, $\mathbf e_\theta$ length $r$ and $\mathbf e_\phi$ length $r\sin\theta$ (the last two drawn at half length). Drag to rotate.`,
+        caption: t`The coordinate basis vectors at a point P on a sphere of radius $r = 2$ ($\theta = 57^\circ$, $\phi = 34^\circ$): $\mathbf e_r$ has length 1, $\mathbf e_\theta$ length $r$ and $\mathbf e_\phi$ length $r\sin\theta$ (the last two drawn at half length). $\mathbf e_\theta$ runs along P’s meridian (violet, $\phi$ fixed), $\mathbf e_\phi$ along its circle of latitude (gold, $\theta$ fixed); teal is the equator. Drag to rotate.`,
       },
     }),
     num({
@@ -275,7 +279,7 @@ export default lesson({
       hints: ['What are components measured against?', t`Look at the blue “out” arrow $\mathbf e_r$ at A and at B in the picture.`],
       teach: 'Components change with the basis; a constant field has varying components in curvilinear coordinates — which is why plain derivatives of components mislead (step 10).',
       explain: t`At each point $\vec V = V^r\mathbf e_r + V^\theta\mathbf e_\theta$, and $\mathbf e_r$, $\mathbf e_\theta$ turn and stretch from place to place, so the numbers $V^r, V^\theta$ must change to describe the same arrow. Comparing components at two different points is therefore not the same as comparing the arrows — the problem the covariant derivative solves in step 10.`,
-      visual: { type: 'gr-coordinates', params: { mode: 'field', alpha: 0, a: [3, 0.5], b: [-1, 3], naive: false, readout: false }, caption: 'A constant field of arrows (grey and gold) on a polar grid. At A and B the grid’s own unit arrows (blue “out”, violet “around”) point different ways, so the same gold arrow has different components there. Drag A and B.' },
+      visual: { type: 'gr-coordinates', params: { mode: 'field', alpha: 0, a: [3, 0.5], b: [2.5, -2.5], naive: false, readout: false }, caption: 'A constant field of arrows (grey and gold) on a polar grid. At A and B the grid’s own unit arrows (blue “out”, violet “around”) point different ways, so the same gold arrow has different components there. Drag A and B.' },
     }),
   ],
   checkpoint: [
@@ -335,14 +339,14 @@ export default lesson({
         const [xk, yk, v] = r.pick([[10, 10, 250], [20, 10, 250], [5, 8, 200], [15, 12, 240]]);
         const vth = (-(yk * 1e3) * v) / ((xk * 1e3) ** 2 + (yk * 1e3) ** 2), ans = Math.abs(vth) / DEG;
         return {
-          prompt: t`An air-traffic radar at the origin tracks an aircraft flying due east at ${v} m/s along the line ${yk} km north of the radar. At the moment it is ${xk} km east of the radar, how fast is its bearing angle $\theta$ changing, in degrees per second? (Use $V^\theta = \dfrac{-\sin\theta\,V^x + \cos\theta\,V^y}{r}$; give the size of the rate.)`,
+          prompt: t`An air-traffic radar at the origin tracks an aircraft flying due east at ${v} m/s along the line ${yk} km north of the radar. At the moment it is ${xk} km east of the radar, how fast is the angle $\theta$ of the radar’s line of sight (measured from east, as in the picture) changing, in degrees per second? (Use $V^\theta = \dfrac{-\sin\theta\,V^x + \cos\theta\,V^y}{r}$; give the size of the rate.)`,
           answer: ans, units: 'deg/s', tol: { rel: 0.01 },
           errors: [
             { value: Math.abs(vth), feedback: 'That is in radians per second; convert: 1 rad = 57.3°.' },
             { value: (v / Math.hypot(xk * 1e3, yk * 1e3)) / DEG, feedback: t`That treats the whole speed as sideways ($v/r$). Only the part across the line of sight turns the bearing: $v\sin\theta/r$.` },
           ],
           hints: [t`$r = \sqrt{${xk}^2 + ${yk}^2}$ km and $\sin\theta = ${yk}/r$; with $V^x = ${v}$ m/s and $V^y = 0$, $V^\theta = -\dfrac{\sin\theta\,V^x}{r} = -\dfrac{y\,V^x}{r^2}$.`, t`$|V^\theta| = \dfrac{${yk * 1e3}\times${v}}{${(xk * 1e3) ** 2 + (yk * 1e3) ** 2}}$ rad/s; multiply by $180/\pi$.`],
-          teach: 'A radar’s bearing rate is the θ-component of the target’s velocity, V^θ = (−sin θ V^x + cos θ V^y)/r — falling off as the target recedes.',
+          teach: t`A radar’s bearing rate is the $\theta$-component of the target’s velocity, $V^\theta = (-\sin\theta\,V^x + \cos\theta\,V^y)/r$ — falling off as the target recedes.`,
           explain: t`$|V^\theta| = \dfrac{y\,V^x}{r^2} = ${sci(Math.abs(vth))}$ rad/s $= ${fmt(ans, 3)}^\circ$/s (negative: the bearing swings clockwise, from north-east toward east). Radar antennas and missile seekers track exactly this angular rate.`,
           visual: {
             type: 'graph',

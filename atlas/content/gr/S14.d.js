@@ -14,6 +14,7 @@ import { rnd, surfacePic, spherePic, halfPlane } from './_tensors.js';
 const t = String.raw;
 const DEG = Math.PI / 180;
 const A_EARTH = 6371;                                            // km
+const GM_EARTH = 3.986e14;                                       // m³ s⁻²
 
 // the 6 × 6 grid of antisymmetric index pairs (4D): symmetric under exchanging pairs, so 21 cells count
 const PAIRS = ['01', '02', '03', '12', '13', '23'];
@@ -40,6 +41,13 @@ const meridians = spherePic([
   { param: ['cos(t)*cos(0.35)', 'cos(t)*sin(0.35)', 'sin(t)'], t: [0, 1.5708], color: 'gold', width: 2.6 },
   { param: ['cos(t)', 'sin(t)', '0'], t: [-0.4, 0.75], color: 'ink3', width: 1.4 },
 ], 'Two meridians leaving the equator side by side, both heading due north: geodesics that start parallel and converge, with no force between them. Separation exaggerated. Drag to rotate.', { yaw: -0.25, pitch: 0.3, dist: 4 });
+
+// two polar orbits crossing the equator side by side and meeting over the pole (separation exaggerated)
+const orbitsPic = (k) => spherePic([
+  { param: [`${rnd(k, 4)}*cos(t)`, '0', `${rnd(k, 4)}*sin(t)`], t: [-0.5, 1.5708], color: 'gold', width: 2.6 },
+  { param: [`${rnd(k, 4)}*cos(t)*cos(0.35)`, `${rnd(k, 4)}*cos(t)*sin(0.35)`, `${rnd(k, 4)}*sin(t)`], t: [-0.5, 1.5708], color: 'gold', width: 2.6 },
+  { param: ['cos(t)', 'sin(t)', '0'], t: [-0.4, 0.75], color: 'ink3', width: 1.4 },
+], 'Two polar orbits a few hundred kilometres above the Earth, separation exaggerated: they cross the equator side by side, heading north, and free fall alone brings them together over the pole a quarter of an orbit later.', { yaw: -0.25, pitch: 0.3, dist: 4.4 });
 
 export default lesson({
   id: 'gr.S14.d',
@@ -223,18 +231,22 @@ print('K =', sp.simplify(torus[0, 0]*riemann(torus, [u, v], 0, 1, 0, 1)/torus.de
   ],
   checkpoint: [
     num({
-      id: 'cp-flight', difficulty: 3, transfer: true,
+      id: 'cp-orbits', difficulty: 3, transfer: true,
       gen(r) {
-        const ratio = r.pick([0.5, 0.75, 0.9]);
-        const s = A_EARTH * Math.acos(ratio);
+        const rk = r.pick([6771, 6971, 7171]), ratio = r.pick([0.5, 0.75, 0.9]);
+        const w = Math.sqrt(GM_EARTH / (rk * 1e3) ** 3), ts = Math.acos(ratio) / w, tm = ts / 60, T = (2 * Math.PI) / w;
         return {
-          prompt: t`Two aircraft leave the equator side by side, a short distance apart, and both fly due north along meridians. Their separation obeys the geodesic deviation equation on a sphere of radius ${A_EARTH} km, $\xi'' = -\xi/a^2$, with $\xi'(0) = 0$. After how many kilometres has their separation shrunk to ${ratio * 100}% of its starting value?`,
-          answer: s, units: 'km', tol: { rel: 0.005 },
-          errors: [{ value: A_EARTH * (1 - ratio), feedback: t`The separation shrinks as $\cos(s/a)$, not linearly: solve $\cos(s/a) = ${ratio}$.` }, { value: A_EARTH * Math.acos(ratio) * 180 / Math.PI, feedback: t`Take $\arccos$ in radians before multiplying by $a$.` }],
-          hints: [t`$\xi = \xi_0\cos(s/a)$, so $\cos(s/a) = ${ratio}$.`, t`$s = a\arccos(${ratio})$, with the angle in radians.`],
-          teach: 'Geodesic deviation turns curvature into distances: on a sphere of radius a, parallel geodesics close in as cos(s/a).',
-          explain: t`$s = ${A_EARTH}\times\arccos(${ratio}) = ${fmt(s, 4)}$ km. Navigators meet this every day: lines of longitude, parallel at the equator, close in toward the poles with nothing pushing them.`,
-          visual: meridians,
+          prompt: t`Two satellites in circular polar orbits of radius $r = ${rk}$ km cross the equator side by side, a few kilometres apart, both heading north. Their sideways separation $\xi$ obeys geodesic deviation in the spacetime around the Earth, $\ddot\xi = -R^x{}_{txt}\,\xi$ with $R^x{}_{txt} = GM/r^3$ ($GM = 3.986\times10^{14}$ m³ s⁻², $t$ in seconds) and $\dot\xi(0) = 0$. After how many minutes has their separation shrunk to ${ratio * 100}% of its starting value?`,
+          answer: tm, units: 'min', tol: { rel: 0.005 },
+          errors: [
+            { value: ts, feedback: 'That is the time in seconds; the question asks for minutes.' },
+            { value: (Math.acos(ratio) * 180) / Math.PI / w / 60, feedback: t`Take $\arccos$ in radians: $\omega t$ is an angle in radians.` },
+            { value: Math.acos(ratio) / (GM_EARTH / (rk * 1e3) ** 3) / 60, feedback: t`The rate is the square root: $\omega = \sqrt{GM/r^3}$.` },
+          ],
+          hints: [t`As for meridians, $\xi = \xi_0\cos\omega t$, now with $\omega = \sqrt{GM/r^3}$.`, t`$\omega = ${fmt(w, 4)}$ rad/s, and $t = \arccos(${ratio})/\omega$.`],
+          teach: t`Geodesic deviation is the tide: free-falling paths that start parallel close in at a rate set by the Riemann tensor — near a mass, $R^x{}_{txt} = GM/r^3$.`,
+          explain: t`$\omega = \sqrt{GM/r^3} = ${fmt(w, 4)}$ rad/s, so $t = \arccos(${ratio})/\omega = ${fmt(ts, 4)}$ s $= ${fmt(tm, 4)}$ min. The two orbits meet over the pole when $\omega t = \pi/2$, a quarter of the ${fmt(T / 60, 3)}-minute orbit — just as meridians meet on a globe: the same equation, with spacetime's curvature $GM/r^3$ in place of the sphere's $1/a^2$.`,
+          visual: orbitsPic(rk / A_EARTH),
         };
       },
     }),
@@ -259,20 +271,20 @@ print('K =', sp.simplify(torus[0, 0]*riemann(torus, [u, v], 0, 1, 0, 1)/torus.de
       id: 'cp-scalar', difficulty: 2,
       prompt: t`The Riemann tensor measures $[\nabla_\mu, \nabla_\nu]V^\rho$. What does the commutator give acting on a scalar field $f$, with the torsion-free connection of general relativity?`,
       choices: [
-        t`Zero: $\nabla_\mu\nabla_\nu f - \nabla_\nu\nabla_\mu f = -(\Gamma^\lambda{}_{\mu\nu} - \Gamma^\lambda{}_{\nu\mu})\,\partial_\lambda f = 0$`,
+        'Zero',
         t`$R_{\mu\nu}f$, the Ricci tensor times $f$`,
-        t`$\Gamma^\lambda{}_{\mu\nu}\,\partial_\lambda f$`,
-        t`$\partial_\mu\partial_\nu f$`,
+        t`$-2\Gamma^\lambda{}_{\mu\nu}\,\partial_\lambda f$`,
+        t`$\partial_\mu\partial_\nu f - \partial_\nu\partial_\mu f$, which is not zero in curved coordinates`,
       ],
       answer: 0,
       why: {
         1: 'A scalar has no components to turn, so there is nothing for curvature to act on.',
-        2: t`The Christoffel terms come in as a difference, $\Gamma^\lambda{}_{\mu\nu} - \Gamma^\lambda{}_{\nu\mu}$, which is zero for a symmetric connection.`,
-        3: t`Partial derivatives commute, and the commutator is a difference: $\partial_\mu\partial_\nu f$ cancels against $\partial_\nu\partial_\mu f$.`,
+        2: t`The two orders bring $-\Gamma^\lambda{}_{\mu\nu}\partial_\lambda f$ and $+\Gamma^\lambda{}_{\nu\mu}\partial_\lambda f$: for a symmetric connection they cancel rather than add.`,
+        3: 'Partial derivatives of a smooth function commute in any coordinates. Coordinates enter only through the Γ terms, and those cancel.',
       },
       hints: [t`$\nabla_\nu f = \partial_\nu f$, a covector; then $\nabla_\mu(\partial_\nu f) = \partial_\mu\partial_\nu f - \Gamma^\lambda{}_{\mu\nu}\partial_\lambda f$.`],
       teach: 'On a scalar, covariant derivatives commute (no torsion); on a vector, their commutator is the Riemann tensor.',
-      explain: t`The second derivatives cancel and the $\Gamma$ terms leave the torsion, zero here. Only objects with directions — vectors, covectors, tensors — feel curvature through the commutator, one Riemann term per index.`,
+      explain: t`$\nabla_\mu\nabla_\nu f - \nabla_\nu\nabla_\mu f = -(\Gamma^\lambda{}_{\mu\nu} - \Gamma^\lambda{}_{\nu\mu})\,\partial_\lambda f = 0$: the second derivatives cancel and the $\Gamma$ terms leave only the torsion, zero here. Only objects with directions — vectors, covectors, tensors — feel curvature through the commutator, one Riemann term per index.`,
     }),
   ],
   sources: [

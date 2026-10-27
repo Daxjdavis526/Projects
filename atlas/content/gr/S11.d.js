@@ -215,7 +215,7 @@ print(sp.simplify(christoffel(torus, [u, v], 1, 0, 0)))
         3: 'Symbols depend on the coordinates; with latitude–longitude angles they are not zero, even though every point of a sphere is like every other.',
       },
       hints: ['Check the position of the indices on the metric in the formula.', t`A sense check: should a symbol for angle coordinates depend on the radius $a$ at all?`],
-      teach: 'The Christoffel formula raises an index with the inverse metric; on a diagonal metric that means dividing by g_λλ, never multiplying.',
+      teach: t`The Christoffel formula raises an index with the inverse metric; on a diagonal metric that means dividing by $g_{\lambda\lambda}$, never multiplying.`,
       explain: t`With $g^{\phi\phi} = 1/(a^2\sin^2\theta)$: $\Gamma^\phi{}_{\theta\phi} = \tfrac12\cdot\tfrac{1}{a^2\sin^2\theta}\cdot2a^2\sin\theta\cos\theta = \cot\theta$. The student's answer carries units of $a^4$ — impossible for a symbol whose indices are all angles.`,
       visual: sphereBasis(0.7, t`The sphere's basis vectors at P: $\mathbf e_\phi$ (blue) has length $a\sin\theta$, $\mathbf e_\theta$ (violet) length $a$.`),
     }),

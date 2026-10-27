@@ -146,7 +146,7 @@ Energy and momentum are the time and space parts of one four-vector, conserved t
         { answer: 'v^2 - c^2', feedback: t`Each component carries a factor $\gamma$, so the sum carries $\gamma^2$: $\gamma^2(v^2 - c^2)$.` },
       ],
       hints: [t`$\eta_{\mu\nu}u^\mu u^\nu = -(u^0)^2 + (u^1)^2 = -\gamma^2c^2 + \gamma^2v^2$.`, t`$\gamma^2(v^2 - c^2) = -\gamma^2c^2(1 - v^2/c^2)$, and $\gamma^2(1 - v^2/c^2) = 1$.`],
-      teach: 'Every four-velocity has the same length: η_μν u^μ u^ν = −c², whatever the speed.',
+      teach: t`Every four-velocity has the same length: $\eta_{\mu\nu}u^\mu u^\nu = -c^2$, whatever the speed.`,
       explain: t`$-\gamma^2c^2 + \gamma^2v^2 = -\gamma^2c^2\left(1 - \dfrac{v^2}{c^2}\right) = -c^2$. No speed appears: $u^\mu$ is the tangent to the worldline scaled to unit proper time, so its length is fixed. Divided by $c$, every four-velocity ends on the hyperbola $(ct)^2 - x^2 = 1$.`,
       visual: uPicture([0.6], t`A worldline at $0.6c$ and its four-velocity divided by $c$ (gold): the arrow ends on the grey hyperbola $(ct)^2 - x^2 = 1$, as every four-velocity does.`),
     }),
@@ -163,7 +163,7 @@ Energy and momentum are the time and space parts of one four-vector, conserved t
             { value: 1 / g, feedback: t`Square $\gamma$: $1 - \beta \approx 1/(2\gamma^2)$.` },
           ],
           hints: [t`$\gamma = E/(mc^2) = ${ETeV}\times10^{6}\ \text{MeV}/938.272\ \text{MeV} = ${fmt(g, 4)}$.`, t`$1 - \beta^2 = 1/\gamma^2$, and $1 - \beta^2 = (1 - \beta)(1 + \beta) \approx 2(1 - \beta)$.`],
-          teach: 'For γ ≫ 1 the shortfall from light speed is 1 − β ≈ 1/(2γ²): the time component of p^μ fixes γ, and γ fixes β.',
+          teach: t`For $\gamma \gg 1$ the shortfall from light speed is $1 - \beta \approx 1/(2\gamma^2)$: the time component of $p^\mu$ fixes $\gamma$, and $\gamma$ fixes $\beta$.`,
           explain: t`$\gamma = E/mc^2 = ${fmt(g, 4)}$, so $1 - \beta \approx \dfrac{1}{2\gamma^2} = ${sci(ans)}$: the proton trails a light beam by about ${fmt(ans * 299792458, 2)} m every second. Its energy is ${fmt(g, 4)} times its rest energy, yet its speed is only a few billionths short of $c$ — energy is what grows, not speed.`,
           visual: {
             type: 'graph',
@@ -296,7 +296,7 @@ Energy and momentum are the time and space parts of one four-vector, conserved t
         { value: (1e5 * YEAR) / (3.2e14 / M_P) ** 2, feedback: t`Divide by $\gamma$ once: proper time $= t/\gamma$.` },
       ],
       hints: [t`$\gamma = E/(mc^2) = 3.2\times10^{20}\ \text{eV}/9.383\times10^{8}\ \text{eV}$.`, t`At $\beta \approx 1$ the crossing takes $t = 10^5$ years in the galaxy’s frame; the proton’s proper time is $t/\gamma$.`],
-      teach: 'The time component of p^μ gives γ = E/(mc²), and proper time along the worldline is coordinate time divided by γ.',
+      teach: t`The time component of $p^\mu$ gives $\gamma = E/(mc^2)$, and proper time along the worldline is coordinate time divided by $\gamma$.`,
       explain: t`$\gamma = ${sci(3.2e14 / M_P)}$, and $10^5$ years is $${sci(1e5 * YEAR)}$ s, so the proton’s clock records $${sci(1e5 * YEAR)}/${sci(3.2e14 / M_P)} = ${fmt((1e5 * YEAR) / (3.2e14 / M_P), 3)}$ s. In its own frame the galaxy is contracted to about $${sci((1e5 * 9.4607e15) / (3.2e14 / M_P) / 1e3, 2)}$ km — roughly ${Math.round((1e5 * 9.4607e15) / (3.2e14 / M_P) / 3.844e8)} times the Earth–Moon distance.`,
       visual: {
         type: 'graph',

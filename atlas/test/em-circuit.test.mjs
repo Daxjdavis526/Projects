@@ -209,7 +209,7 @@ check('a floating part is referred to its own node, not an error', (() => { cons
     ['single', {}], ['single', { sw: true, amm: true, volt: true, lamp: true }], ['series', { n: 2 }], ['series', { n: 3, sw: true, amm: true, lamp: true }],
     ['parallel', { n: 2 }], ['parallel', { n: 3, sw: true, line: true, bsw: true, lamp: true }], ['combo', { sw: true }], ['ladder', {}],
     ['bridge', { det: 'volt', sw: true }], ['bridge', { det: 'galv' }], ['twoloop', {}], ['twoloop', { flip: true }],
-    ['rc', { net: 'single' }], ['rc', { net: 'series' }], ['rc', { net: 'parallel' }], ['rc', { net: 'combo' }], ['firing', {}],
+    ['rc', { net: 'single' }], ['rc', { net: 'series' }], ['rc', { net: 'parallel' }], ['rc', { net: 'combo' }], ['rc', { net: 'series', nc: 3 }], ['rc', { net: 'parallel', nc: 4 }], ['firing', {}],
   ];
   let worst = 0, count = 0, ok = true;
   for (const [name, o] of variants) {
@@ -264,6 +264,10 @@ check('a floating part is referred to its own node, not an error', (() => { cons
 }
 {
   const E = 10, Rv = 1000, C1 = 1e-3, C2 = 3e-3;
+  const par4 = M.transient(M.circuitOf(M.preset('rc', { net: 'parallel', nc: 4 }), { E, R: Rv, C1, C2, C3: 5e-4, C4: 2.2e-3 }, { mode: 'charge' }), {});
+  check('four capacitors in parallel: one time constant R(C₁+C₂+C₃+C₄)', par4.tau.length === 1 && near(par4.tau[0], Rv * (C1 + C2 + 5e-4 + 2.2e-3)));
+  const ser3 = M.transient(M.circuitOf(M.preset('rc', { net: 'series', nc: 3 }), { E, R: Rv, C1, C2, C3: 6e-3 }, { mode: 'charge' }), {});
+  check('three capacitors in series: τ = R/(1/C₁ + 1/C₂ + 1/C₃), equal charges', near(ser3.tau[0], Rv * M.seriesC(C1, C2, 6e-3)) && near(C1 * ser3.final.C1, 6e-3 * ser3.final.C3, 1e-11));
   const par = M.transient(M.circuitOf(M.preset('rc', { net: 'parallel' }), { E, R: Rv, C1, C2 }, { mode: 'charge' }), {});
   check('parallel capacitors charge as one: τ = R(C₁ + C₂)', par.tau.length === 1 && near(par.tau[0], Rv * (C1 + C2)));
   check('parallel capacitors: the same voltage, charge in proportion to C', [0.2, 1, 4].every((t) => near(par.vAt(t).C1, par.vAt(t).C2, 1e-12, 1e-14)));
@@ -276,6 +280,38 @@ check('a floating part is referred to its own node, not an error', (() => { cons
   const ser2 = M.transient(M.circuitOf(M.preset('rc', { net: 'series' }), { E, R: Rv, C1, C2 }, { mode: 'charge' }), { C1: 2, C2: 5 });
   const trapped = (v) => C2 * v.C2 - C1 * v.C1;
   check('series capacitors: charge on the node between them is conserved (a λ = 0 mode)', [0, 0.3, 1, 5, 50].every((t) => near(trapped(ser2.vAt(t)), C2 * 5 - C1 * 2, 1e-11)));
+}
+{
+  // a capacitor in series with a parallel pair: C_eq = C₁(C₂+C₃)/(C₁+C₂+C₃), one time constant, equal charge on C₁ and on the pair
+  for (const [C1, C2, C3] of [[6e-6, 2e-6, 4e-6], [1e-3, 3e-3, 5e-4], [2.2e-6, 2.2e-6, 2.2e-6]]) {
+    const E = 12, Rv = 1500;
+    const tr = M.transient(M.circuitOf(M.preset('rc', { net: 'combo' }), { E, R: Rv, C1, C2, C3 }, { mode: 'charge' }), {});
+    const Ceq = M.seriesC(C1, C2 + C3), Q = Ceq * E;
+    check(`series + parallel capacitors ${C1}/${C2}/${C3}: τ = R·C₁(C₂+C₃)/(C₁+C₂+C₃)`, tr.tau.length === 1 && near(tr.tau[0], Rv * Ceq, 1e-11), `${tr.tau} vs ${Rv * Ceq}`);
+    check(`series + parallel capacitors ${C1}/${C2}/${C3}: Q₁ = Q₂ + Q₃ = C_eq·E, the pair at one voltage`, near(C1 * tr.final.C1, Q, 1e-11) && near(C2 * tr.final.C2 + C3 * tr.final.C3, Q, 1e-11) && near(tr.final.C2, tr.final.C3, 1e-12));
+    const v = tr.vAt(0.4 * tr.tau[0]);
+    check(`series + parallel capacitors ${C1}/${C2}/${C3}: charge conservation on the middle node at every instant`, near(C1 * v.C1, C2 * v.C2 + C3 * v.C3, 1e-11));
+  }
+  // three in parallel beside a series capacitor, discharging from unequal start: against RK4
+  {
+    const c = { nodes: 4, elements: [
+      { id: 'E', kind: 'B', a: 0, b: 1, emf: 9, r: 0.2 }, { id: 'R1', kind: 'R', a: 1, b: 2, R: 470 }, { id: 'Ca', kind: 'C', a: 2, b: 3, C: 2e-4 },
+      { id: 'Cb', kind: 'C', a: 3, b: 0, C: 1e-4 }, { id: 'Cc', kind: 'C', a: 3, b: 0, C: 3.3e-4 }, { id: 'Cd', kind: 'C', a: 0, b: 3, C: 1.5e-4 }, { id: 'R2', kind: 'R', a: 3, b: 0, R: 2200 }] };
+    const tr = M.transient(c, { Ca: 1, Cb: 2, Cc: 2, Cd: -2 });
+    const f = (v) => { const st = M.solve(c, { Ca: v[0], Cb: v[1] }); return [st.I.Ca / 2e-4, (st.I.Cb + st.I.Cc - st.I.Cd) / (1e-4 + 3.3e-4 + 1.5e-4)]; };
+    let v = [1, 2], t = 0, worst = 0;
+    const h = 1e-4;
+    while (t < 1.5 - 1e-12) {
+      const k1 = f(v), k2 = f(v.map((x, i) => x + (h / 2) * k1[i])), k3 = f(v.map((x, i) => x + (h / 2) * k2[i])), k4 = f(v.map((x, i) => x + h * k3[i]));
+      v = v.map((x, i) => x + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i])); t += h;
+      if (Math.abs(t * 4 - Math.round(t * 4)) < 1e-9) { const ex = tr.vAt(t); worst = Math.max(worst, Math.abs(ex.Ca - v[0]), Math.abs(ex.Cb - v[1]), Math.abs(ex.Cd + v[1])); }
+    }
+    check(`a parallel group (one member reversed) beside a series capacitor matches RK4 to 1e-9 V (worst ${worst.toExponential(1)})`, worst < 1e-9);
+    const st = tr.state(0.3), k = kirchhoff(c, st, tr.vAt(0.3));
+    check('a parallel group beside a series capacitor: Kirchhoff to 1e-12', k.kcl < 1e-12 && k.kvl < 1e-12 && k.tellegen < 1e-12);
+    const en = Object.values(tr.energy(0.9));
+    check('a parallel group beside a series capacitor: energy balances exactly', Math.abs(en.reduce((a, b) => a + b, 0)) < 1e-12 * en.reduce((a, b) => a + Math.abs(b), 0));
+  }
 }
 {
   // a capacitor bridged by a resistor: Thevenin, τ = (R₁∥R₂)C, V∞ = E R₂/(R₁+R₂)

@@ -166,11 +166,11 @@ Two practical gifts come with it. The shortcut $L = \tfrac12 g_{\mu\nu}\dot x^\m
           answer: 100 * (1 - E), units: '%', tol: { rel: 0.01 },
           errors: [{ value: 100 * E, feedback: t`That is $E$ itself, the energy the mass still has. The winch receives $1 - E$.` }, { value: 100 / (2 * k), feedback: t`That is the Newtonian estimate, $GM/(rc^2) = r_s/(2r)$. Use $1 - \sqrt{1 - r_s/r}$.` }],
           hints: [t`$2M/r = r_s/r = 1/${k}$.`, t`$1 - E = 1 - \sqrt{1 - 1/${k}}$.`],
-          teach: 'A coordinate the metric does not contain gives a conserved momentum: t gives the energy E, which for a static mass is √(1 − r_s/r).',
+          teach: t`A coordinate the metric does not contain gives a conserved momentum: $t$ gives the energy $E$, which per unit of $mc^2$ is $\sqrt{1 - r_s/r}$ for a mass at rest at $r$.`,
           explain: t`$E = \sqrt{1 - 1/${k}} = ${fmt(E, 4)}$, so $1 - E = ${fmt(100 * (1 - E), 3)}\%$ of the rest energy. Lowered all the way to the horizon it would approach 100% — though no real rope could survive the tension; it is a thought experiment that shows what $E$ means.`,
           visual: {
             type: 'graph',
-            params: { x: [0, 12], y: [0, 1.05], xlabel: 'r / r_s', ylabel: 'E (per unit rest energy)', curves: [{ fn: 'sqrt(1 - 1/x)', domain: [1, 12], color: 'accent' }], vlines: [{ x: 1, label: 'horizon', color: 'ink' }, { x: k, color: 'gold' }] },
+            params: { x: [0, 12], y: [0, 1.05], xlabel: 'r / rₛ', ylabel: 'E (per unit rest energy)', curves: [{ fn: 'sqrt(1 - 1/x)', domain: [1, 12], color: 'accent' }], vlines: [{ x: 1, label: 'horizon', color: 'ink' }, { x: k, color: 'gold' }] },
             caption: t`The conserved energy of a mass held at rest, against its distance in horizon radii; the gold line marks $r = ${k}\,r_s$.`,
           },
         };

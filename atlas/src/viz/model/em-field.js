@@ -837,7 +837,8 @@ export function fieldLines(S, box, o = {}) {
       if (hitX) {
         // carry on through only if the field beyond still points onward
         const bx = hitX.x + k1[0] * rHit * 0.3, by = hitX.y + k1[1] * rHit * 0.3, k = dirAt(bx, by);
-        if (!k || k[0] * k1[0] + k[1] * k1[1] <= 0) { line.push([hitX.x, hitX.y]); end = hitX.key; addArrival(arrivals, hitX.key, [hitX.x, hitX.y]); return { pts: line, from, to: end }; }
+        // (the arrival is recorded a little before the crossing, on the face the line came in on)
+        if (!k || k[0] * k1[0] + k[1] * k1[1] <= 0) { line.push([hitX.x, hitX.y]); end = hitX.key; addArrival(arrivals, hitX.key, [hitX.x - k1[0] * rHit * 0.3, hitX.y - k1[1] * rHit * 0.3]); return { pts: line, from, to: end }; }
         line.push([bx, by]); prevDx = bx - px; prevDy = by - py; px = bx; py = by;
         continue;
       }
@@ -848,7 +849,7 @@ export function fieldLines(S, box, o = {}) {
       if (step > 0 && dx * prevDx + dy * prevDy < -0.3 * h * h) { end = 'stall'; break; }   // turned back: a null point
       let nx = px + dx, ny = py + dy;
       hitX = crossExtended(S, px, py, nx, ny);
-      if (hitX) { line.push([hitX.x, hitX.y]); end = hitX.key; addArrival(arrivals, hitX.key, [hitX.x, hitX.y]); return { pts: line, from, to: end }; }
+      if (hitX) { line.push([hitX.x, hitX.y]); end = hitX.key; addArrival(arrivals, hitX.key, [px, py]); return { pts: line, from, to: end }; }
       if (C) {
         const w = region(S, nx, ny, 0);
         if (w === 'metal') {

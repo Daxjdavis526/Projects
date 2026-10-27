@@ -52,7 +52,7 @@ if (jobs.length) {
       const dir = new URL('../vendor/pyodide-314.0.7/wheels/', import.meta.url);
       const manifest = JSON.parse(readFileSync(new URL('wheels.json', dir), 'utf8'));
       const file = Object.keys(manifest).find((f) => f.startsWith(pkg + '-'));
-      py.unpackArchive(readFileSync(new URL(file, dir)), 'wheel');
+      py.unpackArchive(new Uint8Array(readFileSync(new URL(file, dir))), 'wheel');   // Pyodide wants a plain byte array, not a Buffer
       loaded.add(pkg);
     }
   }

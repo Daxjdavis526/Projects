@@ -105,7 +105,10 @@ a simulation draws on its canvas are plain text, so give them plain numbers.
 Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
 as typed — put every symbol, subscript and thin space inside math, and the
 whole phrase around it ("the ratio $E_n / E_{2n}$", not "the ratio E_n/E_2n").
-The test flags TeX commands and subscripts it finds in prose.
+The test flags TeX commands and subscripts it finds in prose — and that
+includes Explore `lead`s, `tasks` and captions, which are markup too — and
+computer notation (`1.97e7`) anywhere a reader sees it: write powers of ten
+with `tex(x)` inside math.
 Show the lesson's main equation once: either as `equation` (the large
 display above the intro) or as a `$$…$$` line inside `intro`, not both.
 

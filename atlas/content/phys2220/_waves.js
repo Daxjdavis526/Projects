@@ -177,3 +177,50 @@ export function michelson({ caption, arm = 'one arm moves by ΔL' } = {}) {
     caption: caption ?? 'A Michelson interferometer from above: the beam splitter sends light down two arms; the beams return, recombine, and reach the detector. Not to scale.',
   };
 }
+
+/**
+ * A point source with two spheres around it, seen in cross-section, at radii in the ratio r2/r1
+ * (drawn to scale up to a ratio of 4). Labels are plain text.
+ */
+export function spheres({ ratio = 2, l1 = 'r₁', l2 = 'r₂', who = '', caption } = {}) {
+  const b = 2.8, a = b / Math.min(4, ratio);
+  const inner = l1 !== '';                       // no label: draw only the outer sphere
+  const curves = [...(inner ? [circle(0, 0, a, { color: 'accent', width: 1.8 }), seg([0, 0], [a * 0.707, a * 0.707], { color: 'accent', width: 1.4 })] : []),
+    circle(0, 0, b, { color: 'violet', width: 1.8 }), seg([0, 0], [b * 0.866, -b * 0.5], { color: 'violet', width: 1.4 })];
+  const points = [{ x: 0, y: 0, color: 'warn', r: 6 }, ...(inner ? [label(a * 0.38, a * 0.58, l1, 'accent', 6, -4)] : []), label(b * 0.52, -b * 0.36, l2, 'violet', 6, 8)];
+  if (who) points.push({ x: r6(b * 0.866), y: r6(-b * 0.5), color: 'good', r: 5, label: who });
+  return {
+    type: 'graph',
+    params: { aspect: 'wide', x: [-3.2, 6.4], y: [-3.1, 3.1], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves, points },
+    caption: caption ?? 'A small source (orange) radiating equally in all directions: the same power crosses every sphere around it. Spheres seen in cross-section.',
+  };
+}
+
+/** The speed of sound against altitude in the 1976 US Standard Atmosphere, 0–20 km (air, γ = 1.4). */
+export function soundAltitude({ numbers = true, mark = null, caption } = {}) {
+  const curves = [{ param: ['sqrt(1.4*287.05*(288.15 - 6.5*min(t, 11)))', 't'], t: [0, 20], color: 'accent', width: 2.4 }];
+  const points = mark ? [{ x: r6(mark.v), y: r6(mark.h), color: 'gold', r: 5, label: mark.label }] : [];
+  return {
+    type: 'graph',
+    params: { aspect: 'wide', x: [280, 350], y: [0, 20], xlabel: 'speed of sound (m/s)', ylabel: 'altitude (km)', ...(numbers ? {} : { xticks: 0.001, yticks: 0.001 }), curves, points },
+    caption: caption ?? 'The speed of sound against altitude: √(γRT/M) with the temperatures of the 1976 US Standard Atmosphere. It falls with the temperature up to 11 km, then stays constant in the isothermal layer above.',
+  };
+}
+
+/**
+ * A ladder of typical sound levels, 0–140 dB (rough, typical values), with optional gold marks
+ * [{ b, label }] on the right. y numbers are shown; there is no x axis to read.
+ */
+export function dbLadder({ marks = [], caption } = {}) {
+  const refs = [[0, 'threshold of hearing (1 kHz)'], [30, 'whisper'], [60, 'conversation, 1 m away'], [85, 'damages hearing over hours'], [120, 'threshold of pain'], [140, 'jet engine close by']];
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', x: [0, 10], y: [-10, 150], xlabel: '', ylabel: 'level (dB)', xticks: 0.001,
+      curves: [seg([0.5, 0], [0.5, 140], { color: 'ink3', width: 3 })],
+      points: [...refs.map(([b, txt]) => ({ x: 0.5, y: b, color: 'ink2', r: 4, label: `${b} dB: ${txt}` })),
+        ...marks.map((m) => ({ x: 5.4, y: r6(m.b), color: 'gold', r: 6, label: m.label }))],
+    },
+    caption: caption ?? 'Typical sound levels (rough: real sounds vary by many decibels).',
+  };
+}
