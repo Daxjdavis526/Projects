@@ -4,7 +4,11 @@
 export const LESSONS = {
   'gr.EQ.1': () => import('./gr/EQ.1.js'),
   'gr.S09.i': () => import('./gr/S09.i.js'),
+  'math1220.C2-0.1': () => import('./math1220/C2-0.1.js'),
   'math1220.C2-2.1': () => import('./math1220/C2-2.1.js'),
+  'math1220.C2-3.1': () => import('./math1220/C2-3.1.js'),
+  'math1220.C2-5.1': () => import('./math1220/C2-5.1.js'),
+  'phys2210.M3.1': () => import('./phys2210/M3.1.js'),
   'phys2210.M5.3': () => import('./phys2210/M5.3.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
 };
