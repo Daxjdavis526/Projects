@@ -43,7 +43,8 @@ USU's catalog organizes the Professional Emphasis into these parts, with C- or b
   - "Professional Emphasis Additional Required Courses (26 credits)"
 
   Source: [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826).
-- [excerpt] Research: "A total of 4 credits of PHYS 4900: Research in Physics (CI) is required for the Professional Emphasis." — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). It is also reported from the [new-format program page](https://catalog.usu.edu/programs/PHYX-PHYX_PROF_BS-MAJOR). "CI" is USU's Communications Intensive designation.
+- [excerpt; cross-ref] The parallel math/CS researcher's snippet of the same page shows the 26-credit block heading with its own grade rule: "Professional Emphasis Additional Required Courses (26 credits) All courses must be passed with a grade of C- or better." — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). See `usu_math_cs_and_advanced_courses.md` in this folder.
+- [excerpt] Research: "A total of 4 credits of PHYS 4900: Research in Physics (CI) is required for the Professional Emphasis." — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). It is also reported from the [new-format program page](https://catalog.usu.edu/programs/PHYX-PHYX_PROF_BS-MAJOR). "CI" most likely means USU's Communications Intensive designation; that reading comes from background knowledge and is unverified here. The "QI" (Quantitative Intensive) designation is confirmed by [USU Mathematics/Statistics (Composite)](https://catalog.usu.edu/preview_program.php?catoid=39&poid=39014) and "BPS" (Breadth Physical Sciences) by [USU BPS page](https://catalog.usu.edu/content.php?catoid=35&navoid=26471) [summary].
 - [summary] "College of Science Sequence" (6–8 credits): the student selects one full science series — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). Which series qualify was not recovered.
 - [excerpt] "The highest math requirement for this degree is MATH 2280: Ordinary Differential Equations (QI)." — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826).
 - [summary] General Education: complete at least 2 credits of approved 3000-level-or-above courses in each of Depth Humanities and Creative Arts (DHA) and Depth Social Sciences (DSS) — [Acalog catoid=40 program page](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). The USU-wide rules are on the new-format [General Education Requirements](https://catalog.usu.edu/pages/NFsYhFKHElZgu9CKB8ts) and [University Studies Requirements](https://catalog.usu.edu/pages/ShVXpzR2DU7vtADWQu6S) pages [listing].
@@ -63,7 +64,8 @@ USU's catalog organizes the Professional Emphasis into these parts, with C- or b
   - the plain B.S. in Physics at 83 credits
   - older course numbers such as "Physics 3650"
 
-  The page is undated and the search tool judged it likely outdated.
+  The page is undated and the search tool judged it likely outdated. The parallel researcher's snippet of the same page reports "a 68-credit common core that includes PHYS 2210 and 'Mathematics 2210: Multivariate Calculus (3 credits)'" [cross-ref, summary].
+- [excerpt; cross-ref] The plain Physics – BS (catoid=40) contains an elective rule: "Select 6 additional Physics credits at the 3500 level and above." — [Acalog catoid=40 Physics – BS](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40337). This is the sibling program, not the Professional Emphasis. No equivalent sentence was found for the Professional Emphasis.
 
 **Non-PHYS supporting courses confirmed by name**
 Detailed treatment belongs to the other researcher.
@@ -74,7 +76,7 @@ Detailed treatment belongs to the other researcher.
 - Elsewhere in the USU catalog, a different program states that "both MATH 2270 and MATH 2280 may be taken in place of MATH 2250" [summary] — [Mechanical Engineering: Aerospace Emphasis](https://catalog.usu.edu/preview_program.php?catoid=39&poid=39206&returnto=30341). No CS, chemistry or statistics course was confirmed as required. The only other science requirement found is the "College of Science Sequence".
 
 ### Inferences
-- [INF] **13-credit math block.** MATH 1220 (4) + MATH 2210 (3) + MATH 2270 (3) + MATH 2280 (3) = 13 fits exactly. This uses USU's usual credit values from background knowledge, not from this session. If MATH 2250 (4) is chosen instead of MATH 2270 + 2280 (6), the block would come to 11. A block printed as a fixed "13 credits" suggests the 2270/2280 path is the one that is listed. This is a hypothesis only.
+- [INF] **13-credit math block.** MATH 1220 (4) + MATH 2210 (3) + MATH 2270 (3) + MATH 2280 (3) = 13 fits exactly. The parallel researcher reports these credit values from the new-format course pages: [MATH1220](https://catalog.usu.edu/courses/MATH1220) 4, [MATH2210](https://catalog.usu.edu/courses/MATH2210) 3, [MATH2280](https://catalog.usu.edu/courses/MATH2280) 3 and [MATH2250](https://catalog.usu.edu/courses/MATH2250) 4. MATH 2270's credit value is still unverified. If MATH 2250 (4) replaces MATH 2270 + 2280 (6), the block would come to 11. A block printed as a fixed "13 credits" suggests the 2270/2280 path is the listed default. This is a hypothesis only; the other researcher reached the same reading independently.
 - [INF] **Credit total conflict.** 28 + 13 + 26 + (6 to 8) = 73–75. That does not match the "74–76" reported for the current page. Either one block changed by a credit between editions, or a credit is counted outside the blocks. Unresolved.
 - [INF] **PHYS 4900 credits.** The catalog says "a total of 4 credits" and the department page puts 2 credits in the common core. That pattern is consistent with 2 credits sitting in the shared 28-credit major block and 2 more required by the emphasis. Unverified.
 - [INF] **Predecessor list.** The department page's "Other Physics (25 credits)" list is probably an older form of the 26-credit "Professional Emphasis Additional Required Courses" block. It includes Wave Phenomena, Advanced Electromagnetism, Optics, Thermal Physics, Intermediate Lab II, Advanced Mechanics, Quantum Mechanics ×2 and Advanced Lab. The course numbers and the list itself must be re-verified.
@@ -116,7 +118,7 @@ The semester-by-semester course placement was **not** recovered.
 - [summary] About 14–16 credits per semester across four years. University Studies breadth and depth courses and advisor-directed electives fill the remaining slots. "Year 1 Fall is listed at 16 credits and Spring at 15" — [Acalog degree map](https://catalog.usu.edu/preview_program.php?catoid=39&poid=40015).
 - [summary] "Total Credits: 123" on the current listing — [new-format program page](https://catalog.usu.edu/programs/PHYX-PHYX_PROF_BS-MAJOR). The search tool also said the map can be downloaded as a PDF; that is unverified.
 - [summary] A USU physics degree plan places PHYS 2710 in a sequence alongside "PHYS 3550: Intermediate Classical Mechanics". The search tool did not say which program's plan this was. Candidates in the results: [Physics BS catoid=39](https://catalog.usu.edu/preview_program.php?catoid=39&poid=39042&returnto=30112), [Applied Emphasis catoid=38](https://catalog.usu.edu/preview_program.php?catoid=38&poid=37070&returnto=29298).
-- [summary] For contrast, the Applied Emphasis sequence places PHYS 2500 (2 cr) in the second year, alongside MATH 2280 — [Physics: Applied Emphasis – BS, catoid=38](https://catalog.usu.edu/preview_program.php?catoid=38&poid=37070&returnto=29298).
+- [summary] For contrast, the Applied Emphasis sequence places PHYS 2500 (2 cr) in the second year, alongside MATH 2280 — [Physics: Applied Emphasis – BS, catoid=38](https://catalog.usu.edu/preview_program.php?catoid=38&poid=37070&returnto=29298). The parallel researcher also reports that this Applied plan pairs MATH 1220 with PHYS 2210 in the first year, with MATH 2210 and MATH 2270 in the following term [cross-ref, summary]. This is a sibling program and an older edition, not the Professional map.
 
 ### Inferences
 - [INF] PHYS 3750 sits in Year 3 fall (stated). Because MATH 2250, or 2270 and 2280, must come before it, the math sequence probably runs MATH 1220 → 2210 → 2250 (or 2270/2280) through Year 2. This is inferred from the prerequisite note, not from the map grid.
@@ -245,7 +247,9 @@ Same source caveat as PHYS 2710: [Physics BS catoid=39](https://catalog.usu.edu/
 - The department page lists 2 credits in the common core — [core.html](https://www.physics.usu.edu/core.html).
 
 **Course learning outcomes**
-- None were found in the catalog snippets.
+- None were found in my catalog snippets.
+- [listing; cross-ref] The new-format catalog publishes per-course "course learning objectives" sub-pages. The example the parallel researcher surfaced is [catalog.usu.edu/courses/PHYS2225/course-learning-objectives-L3FLu](https://catalog.usu.edu/courses/PHYS2225/course-learning-objectives-L3FLu). Its content was not retrieved. Official learning objectives for every PHYS course probably exist at `catalog.usu.edu/courses/PHYS####/course-learning-objectives-…`; that pattern is [INF] and unverified.
+- [listing; cross-ref] An "Applied & Professional Emphasis" assessment page may hold program-level learning outcomes: [usu.edu/physics/assessments/applied-professional-emphasis](https://www.usu.edu/physics/assessments/applied-professional-emphasis/index). Not retrieved.
 - The department has assessment pages that may hold program-level outcomes: [artsci.usu.edu/physics/assessments](https://artsci.usu.edu/physics/assessments/index) and [physics.usu.edu/teaching/assessment.html](https://www.physics.usu.edu/teaching/assessment.html) [listing]. Their content was not retrieved.
 
 ### Inferences
@@ -289,6 +293,7 @@ What actually distinguishes them was not found. The 2210 entry says "lecture and
 - [summary] PHYS 2500, Introduction to Computer Methods in Physics, 2 credits, sits in the Applied Emphasis Year-2 sequence — [catoid=38 Applied Emphasis](https://catalog.usu.edu/preview_program.php?catoid=38&poid=37070&returnto=29298).
 - [listing] USU publishes a "Math/Science Elective" list page whose content was not retrieved — [catoid=35 Math/Science Elective](https://catalog.usu.edu/content.php?catoid=35&navoid=26518).
 - [summary] The department's older "Other Physics" list (Optics, Thermal Physics, Advanced Mechanics, Quantum Mechanics ×2, Advanced Electromagnetism, Wave Phenomena, Intermediate Lab II, Advanced Lab) was presented as required, not elective — [physics.usu.edu/core.html](https://www.physics.usu.edu/core.html).
+- [excerpt; cross-ref] The only physics-elective rule found anywhere belongs to the sibling plain Physics – BS: "Select 6 additional Physics credits at the 3500 level and above." — [Acalog catoid=40 Physics – BS](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40337). Whether the Professional Emphasis has a similar rule is unknown.
 
 ### Inferences
 - [INF] PHYS 3750's catalog emphasis on "application of mathematical techniques to the wave equation, Schrodinger equation, and Maxwell equations" makes it the de facto mathematical-methods course in the core.
@@ -319,7 +324,7 @@ Only PHYS 3750 and PHYS 2500 yielded instructor-level materials. The textbook as
   - The repository's contents could not be read; this session's GitHub access is limited to its configured repository.
 
 ### Inferences
-- [INF] The catalog title of PHYS 3750, "Foundations of Wave Phenomena", matches the title of Charles Torre's open textbook on USU DigitalCommons. That is a strong hint the book was written for, and is used in, this course. It was not confirmed from a syllabus here.
+- [INF] The catalog title of PHYS 3750, "Foundations of Wave Phenomena", matches the title of Charles Torre's open textbook on USU DigitalCommons. The book was a lead supplied in the assignment and is also in background knowledge; it was not retrieved here. The matching title is a strong hint that the book was written for, and is used in, this course, but it was not confirmed from a syllabus.
 
 ### Gaps
 - Textbooks for every other PHYS course in the program.
@@ -346,7 +351,7 @@ The Applied Emphasis includes PHYS 2500 computer methods. Physics Teaching adds 
   - in the legacy catalog: [Physical Science Composite Teaching (Physics) – BS](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40621&returnto=30826), [Physics – Minor](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40333), [Physics Teaching – Minor](https://catalog.usu.edu/preview_program.php?catoid=39&poid=39039)
   - USU's degree page "Physics – BS, BA": [usu.edu/degrees-majors/physics_bs_ba](https://www.usu.edu/degrees-majors/physics_bs_ba)
 - [excerpt] Professional Emphasis purpose (research careers and graduate study in physics, astronomy, materials science and applied mathematics) — [catoid=40](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40466&returnto=30826). Its extra blocks are "Professional Emphasis Math Requirements (13 credits)" and "Professional Emphasis Additional Required Courses (26 credits)", plus 4 credits of PHYS 4900 (same source).
-- [excerpt] The plain Physics – BS shares the "Major Requirements (28 credits)" heading — [catoid=40 Physics – BS](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40337).
+- [excerpt] The plain Physics – BS shares the "Major Requirements (28 credits)" heading — [catoid=40 Physics – BS](https://catalog.usu.edu/preview_program.php?catoid=40&poid=40337). Instead of the Professional blocks, it has (per the parallel researcher's snippet) "Select 6 additional Physics credits at the 3500 level and above." [cross-ref, excerpt]. Its full block list was not seen.
 - [summary] Applied Emphasis: PHYS 2500 Introduction to Computer Methods in Physics (2 cr) in Year 2, alongside MATH 2280 — [catoid=38 Applied Emphasis](https://catalog.usu.edu/preview_program.php?catoid=38&poid=37070&returnto=29298).
 - [excerpt] Physics Teaching: "physics teaching majors take classes in thermal physics, intermediate modern physics, wave phenomena, electromagnetism, and quantum mechanics, as well as teaching courses" — [PHXT_BS program](https://catalog.usu.edu/programs/PHXT-PHXT_BS-MAJOR).
 - [summary] The older department page puts the B.S. in Physics at 83 credits and the B.S. with Professional Emphasis at 97 — [physics.usu.edu/core.html](https://www.physics.usu.edu/core.html).
