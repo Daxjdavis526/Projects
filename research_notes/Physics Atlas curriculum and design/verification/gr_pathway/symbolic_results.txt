@@ -1,0 +1,53 @@
+Polar Gamma^r_thth: -r
+Polar Gamma^th_rth: 1/r
+Polar Ricci scalar (flat => 0): 0
+Polar divergence of V^r=r: 2
+Polar nabla_mu V^nu for constant e_x (all zero): [[0, 0], [0, 0]]
+Sphere Gamma^th_phph: -sin(2*theta)/2
+Sphere Gamma^ph_thph: 1/tan(theta)
+Sphere R_{th ph th ph} minus a^2 sin^2(theta) (should be 0): 0
+Sphere Ricci scalar: 2/a**2
+Sphere Einstein tensor (2D => 0): Matrix([[0, 0], [0, 0]])
+3-sphere Ricci scalar: 6/a**2
+Schw Gamma^r_tt: M*(-2*M + r)/r**3
+Schw Gamma^t_tr: M/(r*(-2*M + r))
+Schw Gamma^r_rr: -M/(r*(-2*M + r))
+Schw Gamma^r_thth: 2*M - r
+Schw Ricci tensor (vacuum => 0): Matrix([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+Schw Kretschmann: 48*M**2/r**6
+Schw R^r_{trt} (coordinate): -2*M*(-2*M + r)/r**4
+Schw R^rhat_{that rhat that} = R^r_trt / f  (orthonormal): -2*M/r**3
+Schw R^thhat_{that thhat that} (orthonormal): M/r**3
+FLRW G_tt: 3*(k + Derivative(A(t), t)**2)/A(t)**2
+FLRW G^r_r: (-k - 2*A(t)*Derivative(A(t), (t, 2)) - Derivative(A(t), t)**2)/A(t)**2
+FLRW Ricci scalar: 6*(k + A(t)*Derivative(A(t), (t, 2)) + Derivative(A(t), t)**2)/A(t)**2
+FLRW rho from 00 eq: (-Lambda*A(t)**2 + 3*k + 3*Derivative(A(t), t)**2)/(8*pi*A(t)**2)
+FLRW check acceleration eq (should be 0): 0
+FLRW continuity identity (should be 0): 0
+MT rho: Derivative(b(r), r)/(8*pi*r**2)
+MT p_r: -b(r)/(8*pi*r**3)
+MT p_t: (-r*Derivative(b(r), r) + b(r))/(16*pi*r**3)
+MT rho + p_r: (r*Derivative(b(r), r) - b(r))/(8*pi*r**3)
+Ellis rho: -r0**2/(8*pi*r**4)
+Ellis p_r: -r0**2/(8*pi*r**4)
+Ellis rho+p_r: -r0**2/(4*pi*r**4)
+Ellis integrated energy one side (G=c=1): -pi*r0/4
+Painleve-Gullstrand Ricci (vacuum => 0): Matrix([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+IEF outgoing null slope dr/dv: (-M + r/2)/r
+Brill-Lindquist flat Laplacian of psi (=0 away from punctures): 0
+Weak field Gamma^x_tt to O(eps): epsilon*Derivative(Phi(x, y, z), x)
+Laplacian of 4M/r (=0 off source): 0
+Linearised h_00, h_xx from hbar_00=4M/r: (2*M/sqrt(x**2 + y**2 + z**2), 2*M/sqrt(x**2 + y**2 + z**2))
+Circular orbit radii (massive): [L**2/(2*M) - L*sqrt(L**2 - 12*M**2)/(2*M), L**2/(2*M) + L*sqrt(L**2 - 12*M**2)/(2*M)]
+L at which circular orbits merge (ISCO): [2*sqrt(3)*M]
+ISCO radius for L=2sqrt3 M: [6*M, 6*M]
+Photon sphere radius: [3*M]
+E at ISCO: 2*sqrt(2)/3
+L at ISCO: 2*sqrt(3)*M
+Marginally bound circular orbit (E=1) radius: [4*M]
+check dV=0 for circular L: 0
+check E^2/2 = V for circular orbit: 0
+dtau/dt circular: sqrt(-3*M + r)/sqrt(r)
+Critical impact parameter b_c: 3*sqrt(3)*M
+Kerr horizons: [M - sqrt(M**2 - a**2), M + sqrt(M**2 - a**2)]
+Kerr ergosurface (g_tt=0): [M - sqrt(M**2 - a**2*cos(theta)**2), M + sqrt(M**2 - a**2*cos(theta)**2)]

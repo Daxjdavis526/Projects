@@ -1,0 +1,251 @@
+
+=== Polar coordinates (r, theta) on the flat plane ===
+    g = [[1, 0], [0, r**2]]
+    g^-1 = [[1, 0], [0, r**(-2)]]
+    sqrt|det g| = Abs(r)
+    Gamma^r_{thth} = -r; Gamma^th_{rth} = 1/r
+  Riemann (upper first index, c<d):
+    all zero
+  Riemann (all lower, a<b, c<d):
+    all zero
+    Ricci = [[0, 0], [0, 0]]
+    Ricci scalar R = 0
+
+=== Spherical coordinates (r, theta, phi) in flat R^3 ===
+    g = [[1, 0, 0], [0, r**2, 0], [0, 0, r**2*sin(theta)**2]]
+    g^-1 = [[1, 0, 0], [0, r**(-2), 0], [0, 0, 1/(r**2*sin(theta)**2)]]
+    sqrt|det g| = r**2*Abs(sin(theta))
+    Gamma^r_{thth} = -r; Gamma^r_{phph} = -r*sin(theta)**2; Gamma^th_{rth} = 1/r; Gamma^th_{phph} = -sin(2*theta)/2; Gamma^ph_{rph} = 1/r; Gamma^ph_{thph} = 1/tan(theta)
+  Riemann (upper first index, c<d):
+    all zero
+    Ricci = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    Ricci scalar R = 0
+
+=== 2-sphere of radius a ===
+    g = [[a**2, 0], [0, a**2*sin(theta)**2]]
+    g^-1 = [[a**(-2), 0], [0, 1/(a**2*sin(theta)**2)]]
+    sqrt|det g| = a**2*Abs(sin(theta))
+    Gamma^th_{phph} = -sin(2*theta)/2; Gamma^ph_{thph} = 1/tan(theta)
+  Riemann (upper first index, c<d):
+    R^th_{phthph} = sin(2*theta)/(2*tan(theta)) - cos(2*theta); R^ph_{ththph} = -1
+  Riemann (all lower, a<b, c<d):
+    R_{thphthph} = a**2*(sin(2*theta)/(2*tan(theta)) - cos(2*theta))
+    Ricci = [[1, 0], [0, sin(2*theta)/(2*tan(theta)) - cos(2*theta)]]
+    Ricci scalar R = 2/a**2
+    Gaussian curvature K = R_{thph th ph}/det g = a**(-2)
+
+=== Torus (u = around z-axis, v = around tube) ===
+    g = [[(R_big + r_small*cos(v))**2, 0], [0, r_small**2]]
+    g^-1 = [[(R_big + r_small*cos(v))**(-2), 0], [0, r_small**(-2)]]
+    sqrt|det g| = r_small*Abs(R_big + r_small*cos(v))
+    Gamma^u_{uv} = -r_small*sin(v)/(R_big + r_small*cos(v)); Gamma^v_{uu} = (R_big + r_small*cos(v))*sin(v)/r_small
+  Riemann (upper first index, c<d):
+    R^u_{vuv} = r_small*cos(v)/(R_big + r_small*cos(v)); R^v_{uuv} = -(R_big + r_small*cos(v))*cos(v)/r_small
+  Riemann (all lower, a<b, c<d):
+    R_{uvuv} = r_small*(R_big + r_small*cos(v))*cos(v)
+    Ricci = [[(R_big + r_small*cos(v))*cos(v)/r_small, 0], [0, r_small*cos(v)/(R_big + r_small*cos(v))]]
+    Ricci scalar R = 2*cos(v)/(r_small*(R_big + r_small*cos(v)))
+    K = R/2 = cos(v)/(r_small*(R_big + r_small*cos(v)))
+    Total curvature int K dA (R>r, sqrt g = r(R + r cos v)) = 0
+    Sphere: int K dA = (1/a^2) * 4 pi a^2 = 4*pi
+
+=== Cylinder radius a, coords (phi, z) ===
+    g = [[a**2, 0], [0, 1]]
+    g^-1 = [[a**(-2), 0], [0, 1]]
+    sqrt|det g| = Abs(a)
+    all zero
+  Riemann (upper first index, c<d):
+    all zero
+  Riemann (all lower, a<b, c<d):
+    all zero
+    Ricci = [[0, 0], [0, 0]]
+    Ricci scalar R = 0
+
+=== Hyperbolic upper half-plane ds^2=(dx^2+dy^2)/y^2 ===
+    g = [[y**(-2), 0], [0, y**(-2)]]
+    g^-1 = [[y**2, 0], [0, y**2]]
+    sqrt|det g| = y**(-2)
+    Gamma^x_{xy} = -1/y; Gamma^y_{xx} = 1/y; Gamma^y_{yy} = -1/y
+  Riemann (upper first index, c<d):
+    R^x_{yxy} = -1/y**2; R^y_{xxy} = y**(-2)
+  Riemann (all lower, a<b, c<d):
+    R_{xyxy} = -1/y**4
+    Ricci = [[-1/y**2, 0], [0, -1/y**2]]
+    Ricci scalar R = -2
+
+=== Rindler ds^2 = -rho^2 deta^2 + drho^2 (flat) ===
+    g = [[-rho**2, 0], [0, 1]]
+    g^-1 = [[-1/rho**2, 0], [0, 1]]
+    sqrt|det g| = Abs(rho)
+    Gamma^eta_{etarho} = 1/rho; Gamma^rho_{etaeta} = rho
+  Riemann (upper first index, c<d):
+    all zero
+  Riemann (all lower, a<b, c<d):
+    all zero
+    Ricci = [[0, 0], [0, 0]]
+    Ricci scalar R = 0
+
+=== 1+1 FLRW ds^2 = -dt^2 + A(t)^2 dx^2 ===
+    g = [[-1, 0], [0, A(t)**2]]
+    g^-1 = [[-1, 0], [0, A(t)**(-2)]]
+    sqrt|det g| = sqrt(Abs(A(t)**2))
+    Gamma^t_{xx} = A(t)*Derivative(A(t), t); Gamma^x_{tx} = Derivative(A(t), t)/A(t)
+  Riemann (upper first index, c<d):
+    R^t_{xtx} = A(t)*Derivative(A(t), (t, 2)); R^x_{ttx} = Derivative(A(t), (t, 2))/A(t)
+  Riemann (all lower, a<b, c<d):
+    R_{txtx} = -A(t)*Derivative(A(t), (t, 2))
+    Ricci = [[-Derivative(A(t), (t, 2))/A(t), 0], [0, A(t)*Derivative(A(t), (t, 2))]]
+    Ricci scalar R = 2*Derivative(A(t), (t, 2))/A(t)
+
+=== 2D de Sitter ds^2 = -dt^2 + exp(2Ht) dx^2 ===
+    g = [[-1, 0], [0, exp(2*H*t)]]
+    g^-1 = [[-1, 0], [0, exp(-2*H*t)]]
+    sqrt|det g| = exp(H*t)
+    Gamma^t_{xx} = H*exp(2*H*t); Gamma^x_{tx} = H
+  Riemann (upper first index, c<d):
+    R^t_{xtx} = H**2*exp(2*H*t); R^x_{ttx} = H**2
+    Ricci = [[-H**2, 0], [0, H**2*exp(2*H*t)]]
+    Ricci scalar R = 2*H**2
+
+=== 3-sphere radius a (chi, theta, phi) ===
+    g = [[a**2, 0, 0], [0, a**2*sin(chi)**2, 0], [0, 0, a**2*sin(chi)**2*sin(theta)**2]]
+    g^-1 = [[a**(-2), 0, 0], [0, 1/(a**2*sin(chi)**2), 0], [0, 0, 1/(a**2*sin(chi)**2*sin(theta)**2)]]
+    sqrt|det g| = a**2*sin(chi)**2*Abs(a*sin(theta))
+    Gamma^chi_{thth} = -sin(2*chi)/2; Gamma^chi_{phph} = -sin(chi)*sin(theta)**2*cos(chi); Gamma^th_{chith} = 1/tan(chi); Gamma^th_{phph} = -sin(2*theta)/2; Gamma^ph_{chiph} = 1/tan(chi); Gamma^ph_{thph} = 1/tan(theta)
+  Riemann (upper first index, c<d):
+    R^chi_{thchith} = sin(2*chi)/(2*tan(chi)) - cos(2*chi); R^chi_{phchiph} = sin(chi)**2*sin(theta)**2; R^th_{chichith} = -1; R^th_{phthph} = sin(chi)**2*sin(theta)**2; R^ph_{chichiph} = -1; R^ph_{ththph} = sin(2*chi)/(2*tan(chi)) - 1
+    Ricci = [[2, 0, 0], [0, 2*sin(chi)**2, 0], [0, 0, 2*sin(chi)**2*sin(theta)**2]]
+    Ricci scalar R = 6/a**2
+    Ricci - (2/a^2) g = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+=== Signature flip test (g -> -g) on 1+1 FLRW ===
+    Gammas identical: True
+    R^a_bcd identical: True
+    R_ab identical: True
+    R scalar (-+): 2*Derivative(A(t), (t, 2))/A(t)   R scalar (+-): -2*Derivative(A(t), (t, 2))/A(t)
+
+=== Static spherical 4D metric: contracted Bianchi identity ===
+    nabla_mu G^{mu nu} = [0, 0, 0, 0]
+    G_tt = (2*r*Derivative(beta(r), r) + exp(2*beta(r)) - 1)*exp(2*alpha(r) - 2*beta(r))/r**2
+    G_rr = (2*r*Derivative(alpha(r), r) - exp(2*beta(r)) + 1)/r**2
+
+=== Schwarzschild (G=c=1) ===
+    Ricci = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    Kretschmann R_abcd R^abcd = 48*M**2/r**6
+    Gamma^t_{tr} = M/(r*(-2*M + r)); Gamma^r_{tt} = M*(-2*M + r)/r**3; Gamma^r_{rr} = M/(r*(2*M - r)); Gamma^r_{thth} = 2*M - r; Gamma^r_{phph} = (2*M - r)*sin(theta)**2; Gamma^th_{rth} = 1/r; Gamma^th_{phph} = -sin(2*theta)/2; Gamma^ph_{rph} = 1/r; Gamma^ph_{thph} = 1/tan(theta)
+
+=== Extrinsic geometry of embedded surfaces ===
+  Sphere radius a, X=(a sin th cos ph, a sin th sin ph, a cos th):
+    I: E=a**2, F=0, G=a**2*sin(theta)**2
+    II (normal = X_p x X_q / |..|): L=-a*Abs(sin(theta))/sin(theta), M=0, N=-a*sin(theta)**3/Abs(sin(theta))
+    K=a**(-2), H=-sin(theta)/(a*Abs(sin(theta)))
+  Cylinder radius a, X=(a cos ph, a sin ph, z):
+    I: E=a**2, F=0, G=1
+    II (normal = X_p x X_q / |..|): L=-a**2/Abs(a), M=0, N=0
+    K=0, H=-1/(2*Abs(a))
+  Torus X=((R+r cos v)cos u, (R+r cos v) sin u, r sin v):
+    I: E=(R_big + r_small*cos(v))**2, F=0, G=r_small**2
+    II (normal = X_p x X_q / |..|): L=-(R_big + r_small*cos(v))**2*cos(v)/Abs(R_big + r_small*cos(v)), M=0, N=-r_small*(R_big + r_small*cos(v))/Abs(R_big + r_small*cos(v))
+    K=cos(v)/(r_small*(R_big + r_small*cos(v))), H=(-R_big/2 - r_small*cos(v))/(r_small*Abs(R_big + r_small*cos(v)))
+  Saddle z = x y:
+    I: E=y**2 + 1, F=x*y, G=x**2 + 1
+    II (normal = X_p x X_q / |..|): L=0, M=1/sqrt(x**2 + y**2 + 1), N=0
+    K=-1/(x**2 + y**2 + 1)**2, H=-x*y/(x**2 + y**2 + 1)**(3/2)
+  Paraboloid z = (x^2+y^2)/2:
+    I: E=x**2 + 1, F=x*y, G=y**2 + 1
+    II (normal = X_p x X_q / |..|): L=1/sqrt(x**2 + y**2 + 1), M=0, N=1/sqrt(x**2 + y**2 + 1)
+    K=(x**2 + y**2 + 1)**(-2), H=(x**2 + y**2 + 2)/(2*(x**2 + y**2 + 1)**(3/2))
+  Catenoid X=(c cosh(v/c) cos u, c cosh(v/c) sin u, v):
+    I: E=c**2*cosh(v/c)**2, F=0, G=cosh(v/c)**2
+    II (normal = X_p x X_q / |..|): L=-c, M=0, N=1/c
+    K=-1/(c**2*cosh(v/c)**4), H=0
+  Helicoid X=(c sinh(v/c) cos u, c sinh(v/c) sin u, c u):
+    I: E=c**2*cosh(v/c)**2, F=0, G=cosh(v/c)**2
+    II (normal = X_p x X_q / |..|): L=0, M=1, N=0
+    K=-1/(c**2*cosh(v/c)**4), H=0
+
+=== Frenet-Serret ===
+  Helix (a cos t, a sin t, b t), a>0: kappa = a/(a**2 + b**2), tau = b/(a**2 + b**2)
+  Twisted cubic (t, t^2, t^3) at t=0: kappa = 2, tau = 3
+  Circle radius 3 in plane: kappa = 1/3, tau = 0
+
+=== Coordinate transformations: Cartesian <-> polar ===
+    dx^i/dx'^mu = [[cos(theta), -r*sin(theta)], [sin(theta), r*cos(theta)]]
+    dx'^mu/dx^i = [[cos(theta), sin(theta)], [-sin(theta)/r, cos(theta)/r]]
+    g'_{mu nu} = J^T J = [[1, 0], [0, r**2]]
+    V = d/dx -> (V^r, V^th) = [[cos(theta)], [-sin(theta)/r]]
+    omega = dx -> (w_r, w_th) = [[cos(theta), -r*sin(theta)]]
+    contraction w_mu V^mu (polar) = 1
+    V_mu = g_{mu nu} V^nu = [[cos(theta)], [-r*sin(theta)]] ; |V|^2 = 1
+    nabla_mu V^nu for V = d/dx in polar (rows nu, cols mu) = [[0, 0], [0, 0]]
+    naive partials d_mu V^nu = [[0, -sin(theta)], [sin(theta)/r**2, -cos(theta)/r]]
+    div(r d_r) = (1/sqrt g) d_mu(sqrt g V^mu) = 2
+    Laplacian polar = Piecewise((zoo*Derivative(f(0, theta), (theta, 2)) + Subs(Derivative(f(r, theta), (r, 2)), r, 0), Eq(r, 0)), (Derivative(f(r, theta), (r, 2)) + Derivative(f(r, theta), r)/r + Derivative(f(r, theta), (theta, 2))/r**2, True))
+    T = dx (x) dx in polar T'_{mu nu} = [[cos(theta)**2, -r*sin(2*theta)/2], [-r*sin(2*theta)/2, r**2*sin(theta)**2]]
+    spherical metric J^T J = [[1, 0, 0], [0, r**2, 0], [0, 0, r**2*sin(theta)**2]] ; det J = r**2*sin(theta)
+
+=== Lie derivatives and Killing vectors ===
+    L_X g (flat plane, X = -y d_x + x d_y) = [[0, 0], [0, 0]]
+    [X, d_x] for X = -y d_x + x d_y = [0, -1]
+    L_X g for dilation X = x d_x + y d_y = [[2, 0], [0, 2]]
+    S^2 Killing check L_xi g for xi = d_phi: [[0, 0], [0, 0]]
+    S^2 Killing check L_xi g for xi = -sin ph d_th - cot th cos ph d_ph: [[0, 0], [0, 0]]
+    S^2 Killing check L_xi g for xi = cos ph d_th - cot th sin ph d_ph: [[0, 0], [0, 0]]
+    [xi2, xi3] = [0, -1]  (compare xi1 = [0, 1] )
+    [xi3, xi1] = [sin(phi), cos(phi)*cot(theta)]  (compare xi2 = [-sin(phi), -cos(phi)*cot(theta)] )
+    [xi1, xi2] = [-cos(phi), sin(phi)*cot(theta)]  (compare xi3 = [cos(phi), -sin(phi)*cot(theta)] )
+    Minkowski 1+1 boost xi = x d_t + t d_x: L_xi eta = [[0, 0], [0, 0]]
+    Not Killing: xi = t d_t + x d_x (dilation): L_xi eta = [[-2, 0], [0, 2]]
+    Killing conserved quantity on S^2: sin^2(th) dph/ds is constant along geodesics (Clairaut)
+
+=== Geodesic checks ===
+    S^2 equator th=pi/2, ph=s/a: [0, 0]
+    S^2 latitude th=th0, ph=s/(a sin th0): [-1/(a**2*tan(theta_0)), 0]
+    S^2 meridian th=s/a, ph=const: [0, 0]
+    H^2 semicircle x=tanh s, y=sech s: [0, 0]
+    H^2 vertical line x=0, y=e^s: [0, 0]
+    Cylinder helix ph = s/(a sqrt2), z = s/sqrt2: [0, 0]
+    Jacobi eq xi'' + K xi on S^2 (K=1/a^2), xi = a sin(s/a): 0
+    Jacobi eq on H^2 (K=-1), xi = sinh s: 0
+
+=== Parallel transport and holonomy on the unit sphere (numeric, embedded R^3) ===
+    latitude th0=30 deg: rotation of transported vector = 48.2309 deg; cap area/a^2 = 2pi(1-cos th0) = 48.2309 deg; (ang - cap) mod 360 = 360.0000
+    latitude th0=45 deg: rotation of transported vector = 105.4416 deg; cap area/a^2 = 2pi(1-cos th0) = 105.4416 deg; (ang - cap) mod 360 = 360.0000
+    latitude th0=60 deg: rotation of transported vector = 180.0000 deg; cap area/a^2 = 2pi(1-cos th0) = 180.0000 deg; (ang - cap) mod 360 = 360.0000
+    latitude th0=90 deg: rotation of transported vector = -0.0000 deg; cap area/a^2 = 2pi(1-cos th0) = 360.0000 deg; (ang - cap) mod 360 = 0.0000
+    geodesic triangle [(0, 0, 1), (1, 0, 0), (0, 1, 0)]: holonomy = 90.0000 deg; area/a^2 = 90.0000 deg
+    geodesic triangle [(0, 0, 1), (0.955, 0, 0.296), (0, 0.878, 0.479)]: holonomy = 47.2519 deg; area/a^2 = 47.2519 deg
+
+=== Lorentz / rotation groups ===
+    L^T eta L - eta = [[0, 0], [0, 0]]
+    L(w1)L(w2) - L(w1+w2) = [[0, 0], [0, 0]]
+    tanh(atanh v1 + atanh v2) = (v1 + v2)/(v1*v2 + 1)
+    [J1,J2] == J3: True
+    [J1,K2] == K3: True
+    [K1,K2] == -J3: True
+    generators satisfy X^T eta + eta X = 0: True
+    exp(theta J3) = [[1, 0, 0, 0], [0, cos(vartheta), -sin(vartheta), 0], [0, sin(vartheta), cos(vartheta), 0], [0, 0, 0, 1]]
+    exp(w K1) = [[cosh(w1), sinh(w1), 0, 0], [sinh(w1), cosh(w1), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    SU(2): exp(-i 2pi sigma_z/2) = [[-1, 0], [0, -1]]
+    dim so(1,3) = 6, Poincare = 6 + 4 = 10; max Killing vectors n(n+1)/2 for n=2,3,4: [3, 6, 10]
+
+=== Riemann tensor independent components (linear algebra count) ===
+    n=2: independent components = 1; formula n^2(n^2-1)/12 = 1
+    n=3: independent components = 6; formula n^2(n^2-1)/12 = 6
+    n=4: independent components = 20; formula n^2(n^2-1)/12 = 20
+
+=== Differential forms ===
+    d(-y dx + x dy) coefficient of dx^dy: 2
+    d(dtheta) coefficient: 0
+    loop integral of (x dy - y dx)/(x^2+y^2) around unit circle: 2*pi
+    Stokes: int_disk 2 dA = 2*pi ; loop of (-y dx + x dy) = 2*pi
+    dx^dy in polar = det(J) dr^dth with det J = r
+    (alpha ^ beta) components dy^dz, dz^dx, dx^dy: a2*b3 - a3*b2 , -a1*b3 + a3*b1 , a1*b2 - a2*b1
+    curl grad F = [0, 0, 0]
+    div curl = 0
+
+=== Units ===
+    GM_sun/c^2 = 1476.6250 m ; GM_sun/c^3 = 4.9255 microseconds
+    Planck length = 1.6163e-35 m ; Planck time = 5.3912e-44 s ; Planck mass = 2.1764e-08 kg
+    Earth GM/c^2 = 4.435 mm
+    1 m of length <-> 3.3356e-09 s ; 1 kg <-> G/c^2 = 7.4262e-28 m

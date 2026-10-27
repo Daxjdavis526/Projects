@@ -1,0 +1,289 @@
+S01: Earth surface g (GM/R^2, R=6371 km) m/s^2 = 9.82025
+S01: Earth escape speed km/s = 11.1861
+S01: Michell dark-star radius for the Sun 2GM/c^2 (km) = 2.95325
+S01: compactness GM/(Rc^2) Earth = 6.96127e-10
+S01: compactness GM/(Rc^2) Sun = 2.1225e-06
+S01: compactness GM/(Rc^2) white dwarf 1 Msun, R=7000 km = 0.000210946
+S01: compactness GM/(Rc^2) neutron star 1.4 Msun, R=12 km = 0.172273
+S01: Lunar tidal acceleration at Earth's surface 2GM_moon R/d^3 (m/s^2) = 1.10031e-06
+S01: Mercury residual from rounded Clemence budget 5600-5025-532 (arcsec/cy) = 43
+S02: muon gamma at 0.995c = 10.0125
+S02: muon dilated lifetime (us) = 21.9973
+S02: mean decay length with dilation (km) = 6.56166
+S02: naive decay length without dilation (m) = 655.345
+S02: 0.6c (+) 0.6c relativistic addition (c) = 0.882353
+S02: Lorentz transform of (t=5 s, x=3 light-s) with v=0.6c: t' (s) = 4
+S02: x' (light-s) = 0
+S02: Doppler ratio approaching at 0.6c sqrt((1+b)/(1-b)) = 2
+S02: Twin: 0.8c to 4 ly and back, Earth years = 10
+S02: Twin: traveller proper years = 6
+S03: interval dt=3 s, dx=4 light-s: s^2 (light-s^2), spacelike if >0 = 7
+S03: proper time for dt=5 yr, dx=3 ly (yr) = 4
+S03: rapidity of 0.8c = 1.09861
+S03: 0.8c (+) 0.8c via rapidity addition (c) = 0.97561
+S04: LHC proton gamma at 6.5 TeV = 6927.63
+S04:   1-beta at 6.5 TeV = 1.04184e-08
+S04: LHC proton gamma at 6.8 TeV = 7247.36
+S04:   1-beta at 6.8 TeV = 9.5194e-09
+S04: invariant mass, two 1 GeV photons head-on (GeV) = 2
+S04: invariant mass, two 1 GeV photons at 90 deg (GeV) = 1.41421
+S04: pi+ -> mu+ nu at rest: muon kinetic energy (MeV) = 4.11987
+S04:   muon momentum (MeV/c) = 29.7921
+S05: light drop across 3 m cabin at 1 g (m) = 4.91179e-16
+S05: gh/c^2 for h=22.5 m = 2.4559e-15
+S05: gh/c^2 for h=0.33 m = 3.60198e-17
+S05: gh/c^2 for h=0.001 m = 1.09151e-19
+S05: gh/c^2 for h=330.0 m = 3.60198e-14
+S05: 330 m tower clock gain per day (ns) = 3.11211
+S05: Pound-Rebka two-way (up minus down) fractional difference 2gh/c^2, h=22.5 m = 4.91179e-15
+S06: two walkers 1 km apart at equator, separation at 60N (km) = 0.5
+S06: thrown ball extra proper time v0^3/(3 g c^2), v0=10 m/s (s) = 3.78067e-16
+S06:   numerical integral check (s) = 3.78067e-16
+S06: Earth vertical tidal gradient 2GM/R^3 (s^-2) = 3.0828e-06
+S06: head-to-foot tidal difference for 2 m (m/s^2) = 6.16559e-06
+S06: sphere triangle (pole + two equator pts 90 deg apart) angle excess (deg) = 90
+S07: 1 g rocket, proper time 1.0 yr: Earth-frame time (yr) = 1.18745
+S07:   distance (ly) = 0.563869
+S07:   final speed (c) = 0.774968
+S07: 1 g rocket, proper time 10.0 yr: Earth-frame time (yr) = 14782.6
+S07:   distance (ly) = 14781.6
+S07:   final speed (c) = 1
+S07: c/g in years (rocket 'natural' time) = 0.968384
+S07: e_x at (1,1) in polar components V^r = 0.707107
+S07:   V^theta = -0.5
+S08: circle of surface radius 100.0 km on Earth: shortfall 2pi r - C (m) = 25.7993
+S08: circle of surface radius 1000.0 km on Earth: shortfall 2pi r - C (m) = 25767.9
+S08: Schwarzschild proper radial distance r_s -> 2 r_s (units r_s) = 2.29559
+S08: Schwarzschild proper radial distance r_s -> 3 r_s (units r_s) = 3.59571
+S08: Schwarzschild proper radial distance r_s -> 10 r_s (units r_s) = 11.3053
+S08: Sun surface to 1 AU: extra proper distance beyond coordinate difference (km) = 7.93064
+S09: GPS gravitational term (us/day) = 45.7884
+S09: GPS velocity term (us/day) = -7.21312
+S09: GPS net (us/day) = 38.5753
+S09: GPS factory frequency (MHz) = 10.22999999543
+S09: light distance in net daily offset (km) = 11.5646
+S09: ISS speed (km/s) = 7.6726
+S09: ISS gravitational (us/day) = 3.55312
+S09: ISS velocity (us/day) = -28.2961
+S09: ISS net (us/day) = -24.743
+S09: ISS 182.6-day mission accumulated (ms) = -4.51808
+S09: crossover altitude r=1.5 R_E (km) (ignoring Earth rotation) = 3185.5
+S09: circular-geodesic dtau/dt at ISCO sqrt(1-3M/r) r=6M = 0.707107
+S13: holonomy around latitude 60.0 circle 2pi(1-cos theta0) (deg) = 48.2309
+S13:   = 360 - 360 sin(lat) check (deg) = 48.2309
+S13: holonomy around latitude 45.0 circle 2pi(1-cos theta0) (deg) = 105.442
+S13:   = 360 - 360 sin(lat) check (deg) = 105.442
+S13: GP-B geodetic precession, circular 642 km orbit (mas/yr) = 6620.97
+S14: Riemann independent components n^2(n^2-1)/12 for n=2,3,4 = 1, 6, 20
+S14: tidal gradient 2GM/r^3 at horizon, 10 Msun (s^-2) = 1.03048e+08
+S14:   head-to-foot (2 m) at horizon (m/s^2) = 2.06097e+08
+S14:   Kretschmann 48G^2M^2/(c^4 r^6) at horizon (m^-4) = 1.57754e-17
+S14: tidal gradient 2GM/r^3 at horizon, Sgr A* 4.30e6 Msun (s^-2) = 0.000557319
+S14:   head-to-foot (2 m) at horizon (m/s^2) = 0.00111464
+S14:   Kretschmann 48G^2M^2/(c^4 r^6) at horizon (m^-4) = 4.61431e-40
+S14: tidal gradient 2GM/r^3 at horizon, M87* 6.5e9 Msun (s^-2) = 2.43901e-10
+S14:   head-to-foot (2 m) at horizon (m/s^2) = 4.87803e-10
+S14:   Kretschmann 48G^2M^2/(c^4 r^6) at horizon (m^-4) = 8.83745e-53
+S14: radius where 2 m head-foot tidal difference = 10 g, 10 Msun (km) = 3782.4
+S14:   in units of r_s = 128.076
+S15: Ricci scalar of Earth-radius 2-sphere 2/a^2 (m^-2) = 4.92737e-14
+S15: ball of test particles in water-density medium: Vddot/V = -4 pi G rho (s^-2) = -8.38717e-07
+S15:   timescale 1/sqrt(4 pi G rho) (s) = 1091.92
+S16: sunlight energy density at 1 AU, S/c (J/m^3) = 4.53981e-06
+S16: air: p/c^2 vs rho (ratio) = 9.39262e-13
+S18: kappa = 8 pi G/c^4 (N^-1) = 2.07665e-43
+S18: 1/kappa (N) = 4.81545e+42
+S18: curvature radius 1/sqrt(kappa rho c^2) for water density (m) = 2.31472e+11
+S18:   in AU = 1.54729
+S18: Lambda = 3 Omega_L H0^2/c^2 (m^-2), H0=67.4, OL=0.685 = 1.09091e-52
+S18: vacuum mass density rho_L (kg/m^3) = 5.84501e-27
+S18: vacuum energy density (J/m^3) = 5.25323e-10
+S19: h_00 = -2 Phi/c^2 at Earth's surface = 1.39225e-09
+S19: (v/c)^2 for Earth's orbital speed 29.78 km/s = 9.86752e-09
+S20: r_s Sun (m) = 2953.25
+S20:   'mean density' M/(4/3 pi r_s^3) Sun (kg/m^3) = 1.84296e+19
+S20: r_s Earth (m) = 0.00887006
+S20:   'mean density' M/(4/3 pi r_s^3) Earth (kg/m^3) = 2.04298e+30
+S20: r_s Sgr A* 4.30e6 (m) = 1.2699e+10
+S20:   r_s Sgr A* 4.30e6 (AU) = 0.0848874
+S20:   'mean density' M/(4/3 pi r_s^3) Sgr A* 4.30e6 (kg/m^3) = 996735
+S20: r_s M87* 6.5e9 (m) = 1.91961e+13
+S20:   r_s M87* 6.5e9 (AU) = 128.318
+S20:   'mean density' M/(4/3 pi r_s^3) M87* 6.5e9 (kg/m^3) = 0.436204
+S20: r_s GW150914 remnant 62 (m) = 183102
+S20:   'mean density' M/(4/3 pi r_s^3) GW150914 remnant 62 (kg/m^3) = 4.79439e+15
+S21: GM_sun/c^3 (s) = 4.92549e-06
+S21: ISCO radius 1 Msun (km) = 8.85975
+S21:   orbital frequency at ISCO (Hz) = 2198.59
+S21:   GW frequency at ISCO 2 f_orb (Hz) = 4397.17
+S21: ISCO radius 10 Msun (km) = 88.5975
+S21:   orbital frequency at ISCO (Hz) = 219.859
+S21:   GW frequency at ISCO 2 f_orb (Hz) = 439.717
+S21: ISCO radius 62 Msun (km) = 549.305
+S21:   orbital frequency at ISCO (Hz) = 35.4611
+S21:   GW frequency at ISCO 2 f_orb (Hz) = 70.9222
+S21: efficiency 1-sqrt(8/9) = 0.057191
+S21: L_isco = 2 sqrt(3) GM/c (units GM/c) = 3.4641
+S21: orbital speed at ISCO measured by static observer (c): v = sqrt(M/(r-2M)) at r=6M = 0.5
+S22: max proper time horizon->singularity pi GM/c^3, 10 Msun (s) = 0.000154739
+S22:   free fall from rest at infinity: proper time r_s->0 = (4/3)GM/c^3 (s) = 6.56732e-05
+S22: max proper time horizon->singularity pi GM/c^3, Sgr A* (s) = 66.5377
+S22:   free fall from rest at infinity: proper time r_s->0 = (4/3)GM/c^3 (s) = 28.2395
+S22: max proper time horizon->singularity pi GM/c^3, M87* (s) = 100580
+S22:   free fall from rest at infinity: proper time r_s->0 = (4/3)GM/c^3 (s) = 42687.6
+S22: Hawking temperature 1.0 Msun (K) = 6.17026e-08
+S22: Hawking temperature 4300000.0 Msun (K) = 1.43494e-14
+S22: GW150914 initial horizon areas (non-spinning approx) 36+29 Msun (km^2) = 234215
+S22: 62 Msun non-spinning area (km^2) [upper bound for spinning remnant] = 421302
+S22: 62 Msun, chi=0.67 Kerr area (km^2) = 367030
+S22: GW250114 initial areas 33.6+32.2 Msun (km^2) = 237372
+S23: Sun surface GM/(Rc^2) = 2.1225e-06
+S23:   as velocity cz (m/s) = 636.31
+S23: neutron star 1.4 Msun R=12 km: r_s/R = 0.344546
+S23:   1+z = 1/sqrt(1-r_s/R) = 1.23518
+S23: static emitter at r=3 r_s: z = 0.224745
+S23: static clock at r=1.5 r_s rate factor = 0.57735
+S23: Earth-surface clock vs infinity GM/(Rc^2) = 6.96127e-10
+S24: solar limb deflection 4GM/(c^2 R) (arcsec) = 1.75119
+S24: Newtonian/corpuscular half (arcsec) = 0.875595
+S24: deflection at 90 deg elongation (b = 1 AU) (mas) = 8.14385
+S24: Einstein radius, 0.5 Msun lens at 4 kpc, source 8 kpc (mas) = 0.713436
+S24:   physical Einstein radius at lens (AU) = 2.85374
+S24: Shapiro round-trip delay Earth-Mars superior conjunction, ray grazing Sun (us) = 247.244
+S24: Schwarzschild shadow angular diameter Sgr A* 4.30e6 Msun, 8.275 kpc (uas) = 53.3037
+S24: Schwarzschild shadow angular diameter M87* 6.5e9 Msun, 16.8 Mpc (uas) = 39.6881
+S24: shadow diameter / horizon diameter = sqrt(27)/2 = 2.59808
+S24: exact deflection b=1000 M (rad) vs 4M/b + 15 pi M^2/(4 b^2) = 4.011823604e-03 vs 4.011780972e-03
+S24: exact deflection b=10000 M (rad) vs 4M/b + 15 pi M^2/(4 b^2) = 4.001148457e-04 vs 4.001178097e-04
+S25: Mercury GR precession per century (arcsec) = 42.9808
+S25: Venus GR precession per century (arcsec) = 8.62459
+S25: Earth GR precession per century (arcsec) = 3.83871
+S25: S2 semi-major axis from 120 AU pericentre, e=0.88 (AU) = 1000
+S25: S2 Schwarzschild precession per orbit (arcmin) = 12.1913
+S25: Hulse-Taylor periastron advance (deg/yr) = 4.22513
+S25: Binet-equation numeric perihelion shift, M=1, p=1000M, e=0.5 (rad) vs 6 pi M/p = 1.899811e-02 vs 1.884956e-02
+S26: chi=0.0: r+ , r- (GM/c^2) = 2.0000, 0.0000
+S26:   ISCO prograde, retrograde (GM/c^2) = 6.0000, 6.0000
+S26:   efficiency prograde 1-E_isco = 0.057191
+S26:   efficiency retrograde = 0.057191
+S26:   irreducible mass fraction / extractable fraction = 1.0000 / 0.0000
+S26: chi=0.5: r+ , r- (GM/c^2) = 1.8660, 0.1340
+S26:   ISCO prograde, retrograde (GM/c^2) = 4.2330, 7.5546
+S26:   efficiency prograde 1-E_isco = 0.082118
+S26:   efficiency retrograde = 0.0451422
+S26:   irreducible mass fraction / extractable fraction = 0.9659 / 0.0341
+S26: chi=0.67: r+ , r- (GM/c^2) = 1.7424, 0.2576
+S26:   ISCO prograde, retrograde (GM/c^2) = 3.5281, 8.0557
+S26:   efficiency prograde 1-E_isco = 0.099422
+S26:   efficiency retrograde = 0.0422722
+S26:   irreducible mass fraction / extractable fraction = 0.9334 / 0.0666
+S26: chi=0.9: r+ , r- (GM/c^2) = 1.4359, 0.5641
+S26:   ISCO prograde, retrograde (GM/c^2) = 2.3209, 8.7174
+S26:   efficiency prograde 1-E_isco = 0.155753
+S26:   efficiency retrograde = 0.0389983
+S26:   irreducible mass fraction / extractable fraction = 0.8473 / 0.1527
+S26: chi=0.998: r+ , r- (GM/c^2) = 1.0632, 0.9368
+S26:   ISCO prograde, retrograde (GM/c^2) = 1.2370, 8.9944
+S26:   efficiency prograde 1-E_isco = 0.320994
+S26:   efficiency retrograde = 0.0377736
+S26:   irreducible mass fraction / extractable fraction = 0.7291 / 0.2709
+S26: chi=0.999999: r+ , r- (GM/c^2) = 1.0014, 0.9986
+S26:   ISCO prograde, retrograde (GM/c^2) = 1.0161, 9.0000
+S26:   efficiency prograde 1-E_isco = 0.413576
+S26:   efficiency retrograde = 0.0377496
+S26:   irreducible mass fraction / extractable fraction = 0.7076 / 0.2924
+S26: maximal Kerr efficiency 1-1/sqrt(3) = 0.42265
+S26: Omega_H for 10 Msun chi=0.9 (rad/s) = 6362.71
+S26:   horizon rotation frequency Omega_H/2pi (Hz) = 1012.66
+S26: ergosphere equatorial radius (GM/c^2) any chi = 2
+S27: Delta L = h L for h=1e-21, L=4 km (m) = 4e-18
+S27: GW150914 source-frame chirp mass from 36+29 (Msun) = 28.0956
+S27:   detector-frame chirp mass (1+z) with z=0.09 = 30.6242
+S27: energy radiated 3 Msun c^2 (J) = 5.36128e+47
+S27: 410 Mpc in Gly = 1.33724
+S27: leading-order strain amplitude at f_GW=35.0 Hz, optimally oriented = 9.29853e-22
+S27: leading-order strain amplitude at f_GW=150.0 Hz, optimally oriented = 2.45337e-21
+S27: time to coalescence from f_GW=35 Hz for Mc_z (s) = 0.164674
+S27: Earth-Sun GW power (W) = 196.271
+S27: Hulse-Taylor semi-major axis (m) = 1.94903e+09
+S27: Peters-Mathews enhancement f(e) at e=0.617 = 11.8428
+S27: Hulse-Taylor GW power (W) = 7.75573e+24
+S27: Hulse-Taylor predicted dPb/dt (s/s) = -2.39928e-12
+S27:   i.e. per year (us) = -75.7155
+S27: Hulse-Taylor time to merger by Peters equations (Myr) = 300.976
+S28: dof count 10 - 4 (gauge) - 4 (residual) = = 2
+S28: proper change of x-arm for h+ (fraction of L) = h/2 per arm; differential = h = h/2 each, h total
+S30: Hubble time 1/H0 for 67.4 (Gyr) = 14.5073
+S30: Hubble time 1/H0 for 73.0 (Gyr) = 13.3944
+S30: Hubble radius c/H0 (Mpc) = 4447.96
+S30:   in Gly = 14.5073
+S30: recession velocity at 100 Mpc for H0=67.4 (km/s) = 6740
+S30: CMB temperature at z=1089.9 from T0=2.725 K (K) = 2972.7
+S31: critical density 3H0^2/(8 pi G) for 67.4 (kg/m^3) = 8.53286e-27
+S31:   protons per m^3 = 5.10148
+S31: Einstein-de Sitter age 2/(3H0) for 67.4 (Gyr) = 9.67154
+S31: flat LCDM age (Om=0.315, OL=0.685, H0=67.4, no radiation) (Gyr) = 13.7962
+S31: deceleration parameter q0 = Om/2 - OL = -0.5275
+S31: matter-Lambda equality z = (OL/Om)^(1/3)-1 = 0.295567
+S31: onset of acceleration z = (2 OL/Om)^(1/3)-1 = 0.632313
+S31: comoving distance to z=1 (Gpc) = 3.40126
+S31: lookback time to z=1 (Gyr) = 7.95061
+S31: flat LCDM age incl. radiation Omega_r=9.1e-5 (Gyr) = 13.7908
+S31: tension (73.04+-1.04) vs (67.4+-0.5) in sigma = 4.88756
+S31: tension (73.04+-1.04) vs (67.19+-0.38) in sigma = 5.28337
+S31: tension (73.18+-0.88) vs (67.4+-0.5) in sigma = 5.71075
+S31: tension (73.18+-0.88) vs (67.19+-0.38) in sigma = 6.24908
+S31: tension (73.5+-0.81) vs (67.4+-0.5) in sigma = 6.40828
+S31: tension (73.5+-0.81) vs (67.19+-0.38) in sigma = 7.05259
+S32: Schwarzschild l=2 n=0 QNM, 2M*omega = 0.747343 -0.177925i
+S32:   M*omega = 0.373672 -0.088962i
+S32: Schwarzschild ringdown for 62.0 Msun: f (Hz) = 194.746
+S32:   damping time (ms) = 3.43269
+S32: Schwarzschild ringdown for 10.0 Msun: f (Hz) = 1207.43
+S32:   damping time (ms) = 0.55366
+S32: Kerr l=m=2 fit M*omega at chi=0.67 (BCW 2006 fit, unverified) = 0.522679
+S32:   f for 62 Msun (Hz) = 272.404
+S32:   detector-frame f for z=0.09 (Hz) = 249.912
+S32: PG shift (river speed) at r = 4 r_s in c = 0.5
+S33: Casimir energy density, plates 1 um apart (J/m^3) = -0.000433375
+S33: Casimir attractive pressure pi^2 hbar c/(240 d^4) at 1 um (Pa) = 0.00130013
+S33: Casimir energy density at 10 nm (J/m^3) = -43337.5
+S34: cosmic string deficit angle for G mu/c^2=1e-07 (arcsec) = 0.5184
+S34: cosmic string deficit angle for G mu/c^2=1e-06 (arcsec) = 5.184
+S34: Reissner-Nordstrom horizons Q=0.6M: r+- = 1.800 M, 0.200 M
+S35: throat radial tension c^4/(8 pi G r0^2) for r0=1.0 m (Pa) = 4.81545e+42
+S35: Ellis wormhole integrated negative mass per side -(pi/4) r0 c^2/G, r0=1.0 m (kg) = -1.05761e+27
+S35:   in Jupiter masses (1.898e27 kg) = -0.557223
+S35:   in solar masses = -0.000531887
+S35: throat radial tension c^4/(8 pi G r0^2) for r0=1000.0 m (Pa) = 4.81545e+36
+S35: Ellis wormhole integrated negative mass per side -(pi/4) r0 c^2/G, r0=1000.0 m (kg) = -1.05761e+30
+S35:   in Jupiter masses (1.898e27 kg) = -557.223
+S35:   in solar masses = -0.531887
+S36: Alcubierre E/c^2 R=100.0 m sigma=1.0/m beta=1 exact (kg) = -3.74065e+29
+S36:   thin-wall approx -c^2 R^2 sigma/(36 G) (kg) = -3.74053e+29
+S36:   in solar masses = -0.188123
+S36: Alcubierre E/c^2 R=100.0 m sigma=10.0/m beta=1 exact (kg) = -3.74053e+30
+S36:   thin-wall approx -c^2 R^2 sigma/(36 G) (kg) = -3.74053e+30
+S36:   in solar masses = -1.88117
+S36: Planck length (m) = 1.61626e-35
+S36: thin-wall E/c^2 for R=100 m, wall ~100 l_P (sigma=2/Delta) (kg) = -4.62864e+62
+S37: Planck density c^5/(hbar G^2) (kg/m^3) = 5.15485e+96
+S37: ratio Planck density / rho_Lambda = 8.81924e+122
+S37:   log10 = 122.945
+S37: Hawking evaporation time 1 Msun (photons+gravitons only formula 5120 pi G^2 M^3/(hbar c^4)) (yr) = 2.09549e+67
+S37: Bekenstein-Hawking entropy 1 Msun S/k_B = A c^3/(4 G hbar) = 1.04889e+77S36 Alcubierre R=100.0 sigma=1.0 beta=1.0: E/c^2 exact = -3.7407e+29 kg; thin-wall -beta^2 c^2 R^2 sigma/(36G) = -3.7405e+29 kg; = -0.1881 Msun
+S36 Alcubierre R=100.0 sigma=10.0 beta=1.0: E/c^2 exact = -3.7405e+30 kg; thin-wall -beta^2 c^2 R^2 sigma/(36G) = -3.7405e+30 kg; = -1.881 Msun
+S36 Alcubierre R=100.0 sigma=10.0 beta=0.1: E/c^2 exact = -3.7405e+28 kg; thin-wall -beta^2 c^2 R^2 sigma/(36G) = -3.7405e+28 kg; = -0.01881 Msun
+S36 Alcubierre R=1.0 sigma=1.0 beta=1.0: E/c^2 exact = -7.6822e+25 kg; thin-wall -beta^2 c^2 R^2 sigma/(36G) = -3.7405e+25 kg; = -3.863e-05 Msun
+S36 Planck length 1.61625502392855e-35
+S36 thin-wall E/c^2, R=100 m, beta=1, wall Delta=100 l_P (sigma=2/Delta): -4.629e+62 kg
+S36 thin-wall E/c^2, R=100 m, beta=1, wall Delta=1000 l_P (sigma=2/Delta): -4.629e+61 kg
+S37 Planck density 5.154848506403409e+96 ratio 8.819235932539267e+122 log10 122.94543096102117
+S37 evaporation time 1 Msun (yr) 2.0954923150929828e+67
+S37 BH entropy 1 Msun S/k 1.0488914484892333e+77
+S37 Planck length 1.61625502392855e-35 Planck time 5.391246446661944e-44 Planck energy GeV 1.220890128209864e+19
+S25 Binet p=1000M e=0.5: numeric 1.899811e-02, 6piM/p 1.884956e-02, rel diff 7.881e-03
+S25 Binet p=10000M e=0.5: numeric 1.886429e-03, 6piM/p 1.884956e-03, rel diff 7.819e-04
+S25 Binet p=100000M e=0.5: numeric 1.885103e-04, 6piM/p 1.884956e-04, rel diff 7.813e-05
+S13 GP-B geodetic r=7027.4 km (mas/yr) 6603.876323899905
+S07 1g accel/decel to 4.37 ly: proper time (yr) 3.581651985829822 Earth time (yr) 6.002021086455458 peak speed (c) 0.9516793012757739
