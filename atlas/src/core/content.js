@@ -14,6 +14,10 @@ import { grade } from './check.js';
 import { mathIn, escapeDamage } from './markup.js';
 
 export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider'];
+export const LESSON_KINDS = ['lesson', 'concept', 'dissection'];
+
+/** A dissected equation marks its parts as \part{n}{…}; for plain rendering they are just groups. */
+export const stripParts = (src) => String(src).replace(/\\part\{\d+\}/g, '');
 
 /** Normalise a lesson definition. */
 export function lesson(def) {
@@ -27,6 +31,15 @@ export function lesson(def) {
   L.course ??= course;
   L.module ??= `${course}.${module}`;
   return L;
+}
+
+/**
+ * Normalise an authored boss battle: a story in rounds, each round a few
+ * unassisted problems. Every item names the lesson skill it measures
+ * (`skill: 'math1220.C2-4.5'`) so a boss result moves the right estimate.
+ */
+export function boss(def) {
+  return { pass: 0.7, intro: '', ...def, rounds: (def.rounds || []).map((r, k) => ({ title: `Round ${k + 1}`, story: '', items: [], ...r })) };
 }
 
 /** Helpers for writing items tersely; they only fill defaults. */
@@ -159,9 +172,25 @@ export function validateLesson(L, tex) {
   need(/^[a-z0-9-]+\.[A-Za-z0-9-]+\.[0-9a-z]+$/.test(L.id), `lesson id ${L.id} must look like course.MODULE.n`);
   need(L.title && L.title.length > 2, 'title missing');
   need(L.intro && L.intro.length > 40, 'intro missing or too short');
+  need(LESSON_KINDS.includes(L.kind), `unknown lesson kind ${L.kind}`);
   if (L.kind === 'lesson') {
     need(L.example && L.example.steps?.length >= 1, 'needs a worked example with steps');
     need(L.practice.length >= 4, `needs at least 4 practice items (has ${L.practice.length})`);
+    need(L.checkpoint.length >= 2, `needs at least 2 checkpoint items (has ${L.checkpoint.length})`);
+  }
+  if (L.kind === 'concept') {
+    need(L.practice.length >= 3, `a concept lesson needs at least 3 practice items (has ${L.practice.length})`);
+    need(L.checkpoint.length >= 2, `needs at least 2 checkpoint items (has ${L.checkpoint.length})`);
+  }
+  if (L.kind === 'dissection') {
+    need(L.equation, 'a dissection needs its equation');
+    need(L.parts?.length >= 3, 'a dissection needs at least 3 parts');
+    const marked = new Set([...String(L.equation || '').matchAll(/\\part\{(\d+)\}/g)].map((m) => +m[1]));
+    for (const [k, part] of (L.parts || []).entries()) {
+      need(marked.has(k + 1), `part ${k + 1} (${part.name}) is not marked in the equation with \\part{${k + 1}}{…}`);
+      need(part.name && part.text && part.text.length > 20, `part ${k + 1} needs a name and an explanation`);
+    }
+    need(L.practice.length >= 3, `a dissection needs at least 3 practice items (has ${L.practice.length})`);
     need(L.checkpoint.length >= 2, `needs at least 2 checkpoint items (has ${L.checkpoint.length})`);
   }
   const ids = new Set();
@@ -169,7 +198,9 @@ export function validateLesson(L, tex) {
     need(def.id && !ids.has(def.id), `duplicate or missing item id ${def.id}`);
     ids.add(def.id);
   }
-  const texts = [L.intro, L.why, L.example?.prompt, ...(L.example?.steps || []).map((s) => s.text), L.visual?.caption, L.visual?.explain, L.summary];
+  const texts = [L.intro, L.why, L.example?.prompt, L.example?.answer, ...(L.example?.steps || []).map((s) => s.text), L.visual?.lead,
+    L.visual?.caption, L.visual?.explain, L.summary, L.readAloud, ...(L.symbols || []).map((s) => s.text), ...(L.visual?.tasks || []),
+    ...(L.parts || []).flatMap((q) => [q.text, q.more])];
   for (const s of texts) {
     if (!s) continue;
     const dmg = escapeDamage(s);
@@ -177,6 +208,14 @@ export function validateLesson(L, tex) {
     if (tex) for (const m of mathIn(s)) {
       try { tex(m.tex, m.display); } catch (e) { p.push(`bad TeX “${m.tex}”: ${e.message}`); }
     }
+  }
+  // bare TeX fields (no $ delimiters)
+  const bare = [[L.equation && stripParts(L.equation), true], ...(L.symbols || []).map((s) => [s.tex, false]), ...(L.parts || []).map((q) => [q.tex, false])];
+  for (const [src, display] of bare) {
+    if (!src) continue;
+    const dmg = escapeDamage(src);
+    if (dmg) p.push(`TeX “${String(src).slice(0, 40)}…” ${dmg}`);
+    if (tex) { try { tex(src, display); } catch (e) { p.push(`bad TeX “${src}”: ${e.message}`); } }
   }
   return p;
 }

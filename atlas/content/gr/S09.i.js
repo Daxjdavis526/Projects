@@ -34,7 +34,7 @@ The minus sign changes everything. In space, a straight line is the *shortest* p
       { label: 'Earth’s clock', text: t`Distance there and back is 8 ly at 0.8 ly/yr: $\Delta t = 8/0.8 = 10$ years.` },
       { label: 'One leg for the traveller', text: t`Each leg lasts $5$ years of Earth time and covers 4 ly: $\Delta\tau = \sqrt{5^2 - 4^2} = 3$ years.` },
       { label: 'Total', text: t`The traveller ages $2 \times 3 = 6$ years; the stay-at-home twin ages 10.` },
-      { label: 'Why it is not symmetric', text: t`Only the stay-at-home twin's worldline is straight. The traveller's has a corner — she turned around — and bent worldlines always carry less proper time.` },
+      { label: 'Why it is not symmetric', text: t`Only the stay-at-home twin's worldline is straight. The traveller's has a corner — the turnaround — and bent worldlines always carry less proper time.` },
     ],
     answer: t`Home: 10 years. Traveller: 6 years.`,
   },
@@ -94,12 +94,12 @@ The minus sign changes everything. In space, a straight line is the *shortest* p
         const D = r.pick([3, 4.24, 6, 9]), v = r.pick([0.6, 0.8]);
         const g = Math.sqrt(1 - v * v);
         return {
-          prompt: t`An astronaut travels to a star ${D} light-years away at $${v}c$, turns around immediately, and returns at the same speed. How many years does her own clock record for the whole trip?`,
+          prompt: t`An astronaut travels to a star ${D} light-years away at $${v}c$, turns around immediately, and returns at the same speed. How many years does the astronaut's own clock record for the whole trip?`,
           answer: (2 * D / v) * g, units: 'yr', tol: { rel: 0.01 },
-          errors: [{ value: 2 * D / v, feedback: 'That is the Earth time. Her clock records less: multiply by √(1 − v²).' }],
+          errors: [{ value: 2 * D / v, feedback: 'That is the Earth time. The astronaut’s clock records less: multiply by √(1 − v²).' }],
           hints: ['First find the Earth-frame time for the round trip: distance ÷ speed.', t`Then multiply by $\sqrt{1 - v^2}$ — both legs have the same speed.`],
           teach: 'For a round trip at constant speed, the traveller’s proper time is the Earth time times √(1 − v²/c²).',
-          explain: t`Earth time: $2\times${D}/${v} = ${nice(2 * D / v)}$ yr. Her clock: $${nice(2 * D / v)}\times${nice(g)} = ${nice((2 * D / v) * g)}$ yr.`,
+          explain: t`Earth time: $2\times${D}/${v} = ${nice(2 * D / v)}$ yr. The astronaut's clock: $${nice(2 * D / v)}\times${nice(g)} = ${nice((2 * D / v) * g)}$ yr.`,
         };
       },
     }),
@@ -131,12 +131,12 @@ The minus sign changes everything. In space, a straight line is the *shortest* p
     mcq({
       id: 'cp-why', difficulty: 2,
       prompt: 'In the twin paradox, why is the travelling twin younger at the reunion — rather than the Earth twin, who also sees the traveller’s clock run slow?',
-      choices: ['Her worldline between the two meetings is not straight, and straight worldlines carry the most proper time', 'Moving clocks are physically damaged by speed', 'Light from her takes longer to reach Earth', 'She was far from Earth’s gravity'],
+      choices: ['The traveller’s worldline between the two meetings is not straight, and straight worldlines carry the most proper time', 'Moving clocks are physically damaged by speed', 'Light from the traveller takes longer to reach Earth', 'The traveller was far from Earth’s gravity'],
       answer: 0,
       why: { 1: 'Clocks are not damaged; time along different paths simply differs.', 2: 'Signal delays are corrected for in the calculation; they are not the cause.', 3: 'Gravity is not needed — the effect exists in flat spacetime.' },
       hints: ['What is different about the two worldlines?'],
       teach: 'The asymmetry is geometric: only the traveller’s worldline bends, and bent worldlines have less proper time.',
-      explain: 'Both twins see the other’s clock slow while moving apart uniformly, but only the traveller changes frames. Her bent worldline between the shared events is shorter in proper time.',
+      explain: 'Both twins see the other’s clock slow while moving apart uniformly, but only the traveller changes frames. The traveller’s bent worldline between the shared events is shorter in proper time.',
     }),
     num({
       id: 'cp-proxima', difficulty: 3, transfer: true,

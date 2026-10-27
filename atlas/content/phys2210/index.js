@@ -14,7 +14,7 @@ export default {
     mod('M2', 'Vectors', ['Vectors and components', 'Adding vectors', 'Unit vectors', 'The dot product', 'The cross product']),
     mod('M3', 'Motion in one dimension', ['Position, displacement and velocity', 'Acceleration', 'Reading motion graphs', 'Constant-acceleration equations', 'Free fall', 'Variable acceleration with calculus']),
     mod('M4', 'Motion in two and three dimensions', ['Position and velocity vectors', 'Projectile motion', 'Range, height and trajectory shape', 'Uniform circular motion', 'Relative motion']),
-    mod('M5', 'Newton’s laws', ['Forces and free-body diagrams', 'Newton’s first law and inertial frames', { title: 'Newton’s second law', minutes: 8, load: () => import('./M5.3.js') }, 'Newton’s third law', 'Weight, normal force and apparent weight', 'Tension, ropes and pulleys']),
+    mod('M5', 'Newton’s laws', ['Forces and free-body diagrams', 'Newton’s first law and inertial frames', { title: 'Newton’s second law', minutes: 8 }, 'Newton’s third law', 'Weight, normal force and apparent weight', 'Tension, ropes and pulleys']),
     mod('M6', 'Applying Newton’s laws', ['Friction', 'Inclined planes', 'Connected objects and the Atwood machine', 'Dynamics of circular motion', 'Drag and terminal velocity']),
     mod('M7', 'Work and kinetic energy', ['Work done by a constant force', 'Work done by a variable force', 'The work–energy theorem', 'Power']),
     mod('M8', 'Potential energy and conservation of energy', ['Gravitational and elastic potential energy', 'Conservative forces and potential-energy functions', 'Conservation of mechanical energy', 'Energy with friction', 'Energy diagrams and equilibrium']),

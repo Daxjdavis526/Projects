@@ -175,5 +175,18 @@ check('slider: in range', grade({ type: 'slider', answer: [40, 50] }, 45).correc
   check('perm is a permutation', makeRng(5).perm(6).slice().sort().join() === '0,1,2,3,4,5');
 }
 
+// declared subscripted names keep their subscripts in the preview
+check('r_s shows as r_{s}', toTeX(parse('r_s/r', { vars: ['r_s', 'r'] })) === '\\frac{r_{s}}{r}');
+check('k_B T shows as k_{B} T', toTeX(parse('k_B T', { vars: ['k_B', 'T'] })) === 'k_{B}\\,T');
+check('omega_0 shows as ω₀', toTeX(parse('ω_0 t', { vars: ['omega_0', 't'] })) === '\\omega_{0}\\,t');
+check('a subscripted name grades like any other', grade({ type: 'expression', answer: 'r_s/r', vars: { r_s: [1, 2], r: [3, 9] } }, 'rs/r').correct);
+
+// angles on the sky and reciprocal units
+check('43 arcsec in radians', Math.abs(parseQuantity('43 arcsec').si - 43 * Math.PI / 648000) < 1e-15);
+check('1 mas = 1e-3 arcsec', Math.abs(parseUnit('mas').factor * 1000 - parseUnit('arcsec').factor) < 1e-20);
+check('a reciprocal unit 1/N', describeDims(parseUnit('1/N').dims) === describeDims(parseUnit('N^-1').dims));
+check('a number with a reciprocal unit', parseQuantity('2.08e-43 1/N').si === 2.08e-43);
+check('arcsec graded against a degree answer', grade({ type: 'numeric', answer: 1.75 / 3600, units: 'deg', tol: { rel: 0.01 } }, '1.75 arcsec').correct);
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

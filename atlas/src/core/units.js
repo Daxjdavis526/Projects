@@ -28,6 +28,7 @@ export const UNITS = {
   au: [1.495978707e11, D(1)], AU: [1.495978707e11, D(1)], ly: [9.4607304725808e15, D(1)],
   pc: [3.0856775814913673e16, D(1)], Å: [1e-10, D(1)], angstrom: [1e-10, D(1)],
   rad: [1, ZERO], sr: [1, ZERO], deg: [Math.PI / 180, ZERO], '°': [Math.PI / 180, ZERO],
+  arcmin: [Math.PI / 10800, ZERO], arcsec: [Math.PI / 648000, ZERO], mas: [Math.PI / 648000000, ZERO],
   rev: [2 * Math.PI, ZERO], rpm: [2 * Math.PI / 60, D(0, 0, -1)],
   atm: [101325, D(-1, 1, -2)], bar: [1e5, D(-1, 1, -2)], torr: [101325 / 760, D(-1, 1, -2)],
   mmHg: [133.322387415, D(-1, 1, -2)], psi: [6894.757293168361, D(-1, 1, -2)],
@@ -42,7 +43,7 @@ export const UNITS = {
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
-const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'rev', 'rpm',
+const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l']);
 
@@ -78,7 +79,8 @@ const SUP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5
 export function parseUnit(src) {
   let s = String(src).trim()
     .replace(/[·⋅∙*]/g, ' ').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+/g, (m) => '^' + [...m].map((c) => SUP[c]).join(''))
-    .replace(/\s*\^\s*/g, '^').replace(/\s*\/\s*/g, '/').replace(/\(\s*/g, '(').replace(/\s*\)/g, ')');
+    .replace(/\s*\^\s*/g, '^').replace(/\s*\/\s*/g, '/').replace(/\(\s*/g, '(').replace(/\s*\)/g, ')')
+    .replace(/^1\//, '/');                         // "1/s" is "/s": a reciprocal unit
   if (!s) throw new UnitError('No unit');
   let i = 0;
   const peek = () => s[i];
@@ -173,8 +175,9 @@ export function parseQuantity(src) {
   } catch (e) { /* fall through to number + unit */ }
   for (let k = 1; k < text.length; k++) {
     const ch = text[k];
-    if (!/[A-Za-zμµΩÅ°%☉(]/.test(ch)) continue;
     const prev = text[k - 1];
+    const reciprocal = ch === '1' && text[k + 1] === '/' && prev === ' ';   // "2.1e-43 1/N"
+    if (!/[A-Za-zμµΩÅ°%☉(]/.test(ch) && !reciprocal) continue;
     if (ch === '(' && prev !== ' ') continue;
     const numPart = text.slice(0, k).trim();
     const unitPart = text.slice(k).trim();

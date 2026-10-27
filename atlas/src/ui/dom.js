@@ -67,6 +67,20 @@ export function tex(src, display = false) {
   texCache.set(key, out);
   return out;
 }
+/**
+ * An equation whose parts are marked \\part{n}{…} (a dissection): each part
+ * becomes an element with class eqp-n that the page can highlight.
+ */
+export function texParts(src, display = true) {
+  const K = globalThis.katex;
+  const marked = String(src).replace(/\\part\{(\d+)\}/g, '\\htmlClass{eqp eqp-$1}');
+  if (!K) return `<code>${escapeHTML(src)}</code>`;
+  try {
+    return K.renderToString(marked, { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore', trust: (c) => c.command === '\\htmlClass' });
+  } catch {
+    return `<code class="tex-error">${escapeHTML(src)}</code>`;
+  }
+}
 const escapeHTML = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Lesson markup → element (block). */

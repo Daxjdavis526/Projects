@@ -4,7 +4,7 @@
 // spaced-review rating. Completing a lesson is recorded separately from
 // mastery, which only the evidence moves.
 
-import { h, md, mdi, math, icon, statePill, difficultyDots, clear, toast } from '../dom.js';
+import { h, md, mdi, math, tex, texParts, icon, statePill, difficultyDots, clear, toast } from '../dom.js';
 import { app, log } from '../state.js';
 import { instantiate } from '../../core/content.js';
 import { prereqStatus, recommendNext, stateOf } from '../../core/plan.js';
@@ -13,8 +13,8 @@ import { mountQuestion } from '../player/question.js';
 import { mountViz } from '../../viz/registry.js';
 import { badge } from './course.js';
 
-const STEPS = ['intro', 'visual', 'example', 'practice', 'checkpoint', 'summary'];
-const STEP_LABEL = { intro: 'Introduction', visual: 'Explore', example: 'Worked example', practice: 'Practice', checkpoint: 'Checkpoint', summary: 'Summary' };
+const STEPS = ['intro', 'dissect', 'visual', 'example', 'practice', 'checkpoint', 'summary'];
+const STEP_LABEL = { intro: 'Introduction', dissect: 'Dissect', visual: 'Explore', example: 'Worked example', practice: 'Practice', checkpoint: 'Checkpoint', summary: 'Summary' };
 
 export async function render(main, { lesson: id }) {
   const entry = app.cat.lessons[id];
@@ -37,7 +37,7 @@ class Player {
     this.main = main; this.L = L; this.entry = entry;
     this.course = app.cat.byId[entry.course];
     this.module = app.cat.modules[entry.module];
-    this.steps = STEPS.filter((s) => (s === 'visual' ? !!L.visual : s === 'example' ? !!L.example : s === 'checkpoint' ? L.checkpoint.length > 0 : s === 'practice' ? L.practice.length > 0 : true));
+    this.steps = STEPS.filter((s) => (s === 'dissect' ? L.kind === 'dissection' && !!L.parts?.length : s === 'visual' ? !!L.visual : s === 'example' ? !!L.example : s === 'checkpoint' ? L.checkpoint.length > 0 : s === 'practice' ? L.practice.length > 0 : true));
     this.cleanups = [];
     this.stateBefore = stateOf(app.st, L.skills[0]);
     this.xpBefore = app.st.xp;
@@ -85,7 +85,7 @@ class Player {
         ...(L.badges || []).map(badge),
         stateOf(app.st, L.skills[0]) !== 'not-started' ? statePill(stateOf(app.st, L.skills[0])) : null),
       pre.length ? h('div.callout', 'This lesson builds on ', pre.map((p, i) => [i ? ', ' : '', h('a', { href: `#/lesson/${p.id}` }, p.title)]), '. You can explore it anyway.') : null,
-      L.equation ? h('div.eq-hero', { html: math(L.equation, true).innerHTML }) : null,
+      L.equation ? h('div.eq-hero', { html: texParts(L.equation, true) }) : null,
       md(L.intro),
       L.symbols?.length ? h('dl.symbols', L.symbols.flatMap((s) => [h('dt', { html: math(s.tex).innerHTML }), h('dd', mdi(s.text))])) : null,
       L.why ? h('div.why', h('span', { html: icon('target'), style: { color: 'var(--accent-2)', display: 'inline-flex' } }), mdi(L.why)) : null,
@@ -94,6 +94,45 @@ class Player {
     );
     const testOut = L.checkpoint.length ? h('button.btn.ghost', { type: 'button', title: 'Skip straight to the unassisted checkpoint', onclick: () => this.go('checkpoint') }, 'I know this — test me') : null;
     this.navButtons(this.steps[1] ? `Start` : null, { back: false, extra: testOut });
+  }
+
+  // ── dissection: the equation, one symbol at a time ─────────────────────
+  dissect() {
+    const L = this.L;
+    const parts = L.parts;
+    const eq = h('div.eq-hero.eq-dissect', { html: texParts(L.equation, true) });
+    const detail = h('div.part-detail', { 'aria-live': 'polite' });
+    let cur = 0;
+    const chips = parts.map((p, k) => h('button.part-chip', { type: 'button', 'aria-pressed': 'false', onclick: () => select(k) },
+      h('span.pn', String(k + 1)), h('span', { html: tex(p.tex) }), h('span.pname', p.name)));
+    const prevBtn = h('button.btn.small.ghost', { type: 'button', onclick: () => select(cur - 1), html: `${icon('left')}Previous part` });
+    const nextBtn = h('button.btn.small', { type: 'button', onclick: () => select(cur + 1) }, 'Next part', h('span', { html: icon('right'), style: { display: 'inline-flex' } }));
+    const select = (k) => {
+      cur = Math.max(0, Math.min(parts.length - 1, k));
+      eq.classList.add('focus');
+      eq.querySelectorAll('.eqp').forEach((el) => el.classList.toggle('lit', el.classList.contains(`eqp-${cur + 1}`)));
+      chips.forEach((c, i) => c.setAttribute('aria-pressed', String(i === cur)));
+      const p = parts[cur];
+      detail.replaceChildren(
+        h('div.row.small.faint', h('span', `Part ${cur + 1} of ${parts.length}`), p.badge ? badge(p.badge) : null, p.units ? h('span', 'units: ', mdi(p.units)) : null),
+        h('h3', h('span', { html: tex(p.tex) }), ' ', h('span', `— ${p.name}`)),
+        md(p.text, 'prose small'),
+        p.more ? h('details', h('summary', 'Go deeper'), md(p.more, 'prose small')) : null);
+      prevBtn.disabled = cur === 0;
+      nextBtn.disabled = cur === parts.length - 1;
+    };
+    // pointing at a term in the equation selects its part (the innermost one)
+    eq.addEventListener('click', (e) => {
+      const el = e.target.closest('.eqp');
+      const m = el && /eqp-(\d+)/.exec(el.className);
+      if (m) select(+m[1] - 1);
+    });
+    this.stage.append(h('div.kicker', h('span.eyebrow', 'Dissect the equation')), h('h2', L.title),
+      h('p.small.muted', 'Tap a symbol in the equation, or step through the parts in order.'),
+      eq, h('div.part-chips', chips), detail, h('div.row', { style: { marginTop: '.8rem' } }, prevBtn, nextBtn),
+      L.readAloud ? h('div.callout', { style: { marginTop: '1.2rem' } }, h('b', 'In words: '), mdi(L.readAloud)) : null);
+    select(0);
+    this.navButtons(this.steps.includes('visual') ? 'Explore' : 'Practice');
   }
 
   // ── 2. visual ───────────────────────────────────────────────────────────

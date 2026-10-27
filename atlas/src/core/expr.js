@@ -194,6 +194,9 @@ export const canon = (name) => String(name)
  */
 export function parse(src, opts = {}) {
   const vars = new Set((opts.vars || []).map(canon));
+  // a declared name with a subscript ("r_s", "k_B", "omega_0") keeps it for display
+  const labels = {};
+  for (const v of opts.vars || []) if (/_/.test(v)) labels[canon(v)] = v;
   const text = normalise(src);
   if (!text.trim()) throw new ParseError('Empty expression');
   const raw = tokenize(text);
@@ -258,7 +261,7 @@ export function parse(src, opts = {}) {
     if (!t) throw new ParseError('The expression ends too early', text.length);
     switch (t.k) {
       case 'num': return { t: 'num', v: t.v, text: t.text };
-      case 'var': return { t: 'var', name: t.name };
+      case 'var': return labels[t.name] ? { t: 'var', name: t.name, label: labels[t.name] } : { t: 'var', name: t.name };
       case 'const': return { t: 'const', name: t.name };
       case '(': { const e = parseAdditive(); expect(')'); return { t: 'group', a: e }; }
       case '|': {
@@ -433,7 +436,13 @@ export function countNodes(node, pred) {
 
 const PREC = { '+': 1, '-': 1, '*': 2, '/': 2, neg: 3, '^': 4, fn: 5, num: 6, var: 6, const: 6, group: 6 };
 
-export function symbolTeX(name) {
+export function symbolTeX(name, label) {
+  if (label) {
+    // "r_s" → r_{s}, "omega_0" → \omega_{0}, "k_{B}" → k_{B}
+    const [base, ...sub] = label.replace(/[{}\\]/g, '').split('_');
+    const b = canon(base);
+    return `${GREEK_SET.has(b) ? '\\' + b : b.length > 1 ? `\\mathrm{${b}}` : b}_{${sub.join('')}}`;
+  }
   const m = /^([A-Za-z]+?)(\d+)$/.exec(name);
   if (m && !FUNCS[name]) return `${symbolTeX(m[1])}_{${m[2]}}`;
   if (GREEK_SET.has(name)) return '\\' + name;
@@ -445,7 +454,7 @@ export function symbolTeX(name) {
 export function toTeX(node) {
   switch (node.t) {
     case 'num': return numTeX(node);
-    case 'var': return symbolTeX(node.name);
+    case 'var': return symbolTeX(node.name, node.label);
     case 'const': return CONSTS[node.name].tex;
     case 'group': return toTeX(node.a);
     case 'neg': return '-' + wrap(node.a, PREC.neg, true);

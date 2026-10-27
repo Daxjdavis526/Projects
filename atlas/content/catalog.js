@@ -1,6 +1,7 @@
 // Every course in the Atlas, in library order.
 
 import { buildCatalog } from '../src/core/catalog.js';
+import * as LOADS from './loads.js';
 import m0 from './m0/index.js';
 import math1210 from './math1210/index.js';
 import math1220 from './math1220/index.js';
@@ -40,4 +41,4 @@ export const COURSES = [
   gr,
 ];
 
-export const CATALOG = buildCatalog(COURSES);
+export const CATALOG = buildCatalog(COURSES, LOADS);

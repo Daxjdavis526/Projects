@@ -1,6 +1,7 @@
 // Shorthand for course index files.
-//   mod('C2-2', 'Techniques of integration', [ 'Integration by parts', { title: '…', minutes: 8, load: () => import('./C2-2.2.js') } ])
-// A lesson is "ready" once its entry has a load() for its module file.
+//   mod('C2-2', 'Techniques of integration', [ 'Integration by parts', { title: '…', minutes: 8 } ])
+// A lesson is "ready" once its file exists (content/<course>/C2-2.1.js) and
+// `node atlas/tools/register.mjs` has listed it in content/loads.js.
 
 export function mod(id, title, lessons, extra = {}) {
   return {

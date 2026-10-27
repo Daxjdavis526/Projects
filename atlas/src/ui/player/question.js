@@ -117,12 +117,13 @@ export function mountQuestion(el, item, o = {}) {
       parts.push(h('div.head', { html: `${icon('check')}${S.hints || S.tries > 1 ? 'Correct' : pick(['Correct', 'Exactly right', 'That’s it'])}` }));
       if (r.feedback) parts.push(h('div.small', r.feedback));
     } else {
-      parts.push(h('div.head', { html: `${icon('x')}${final ? 'Not this time' : 'Not quite'}` }));
+      // opening the solution is not a failure to scold: it gets a neutral heading
+      parts.push(h('div.head', { html: S.solution ? `${icon('info')}Here’s how it goes` : `${icon('x')}${final ? 'Not this time' : 'Not quite'}` }));
       const msg = r.feedback || (item.type === 'mcq' ? '' : 'That doesn’t match. Check each step against the hint.');
       if (msg) parts.push(mdi(msg, 'small'));
       if (!final && assisted) parts.push(h('div.small.faint', { style: { marginTop: '.3rem' } }, item.hints?.length > S.hints ? 'Try again, or take a hint.' : 'Try again, or open the solution.'));
     }
-    const box = h(`div.feedback.${ok ? 'good' : 'bad'}`, parts);
+    const box = h(`div.feedback.${ok ? 'good' : S.solution ? 'info' : 'bad'}`, parts);
     feedbackBox.replaceChildren(box);
     if (S.resolved) {
       if (item.teach) feedbackBox.append(h('div.teach', h('span', { html: icon('bulb') }), mdi(item.teach)));
@@ -141,7 +142,9 @@ export function mountQuestion(el, item, o = {}) {
     S.solution = true;
     resolve();
     ctl.reveal?.(item);
-    feedback(false, { feedback: o.context === 'checkpoint' ? 'Counted as not yet known — here is how it goes.' : '' }, true);
+    // keep what the last attempt was told (an option's “why”, a named slip)
+    const last = S.lastResult && !S.lastResult.correct ? S.lastResult.feedback || '' : '';
+    feedback(false, { feedback: o.context === 'checkpoint' && !last ? 'Counted as not yet known — here is how it goes.' : last }, true);
   }
 
   function resolve() {

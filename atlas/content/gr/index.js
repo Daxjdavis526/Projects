@@ -3,16 +3,11 @@
 // dissections. Step numbers never change; the two modes are different routes
 // through them (see ROUTES). Every step carries an honesty badge.
 
-// built lesson modules, by step and mode
-const LOADS = {
-  'S09.i': () => import('./S09.i.js'),
-};
-
 const S = (n, title, badges, i, d, extra = {}) => ({
   id: `S${String(n).padStart(2, '0')}`, step: n, title, badges, independent: true, ...extra,
   lessons: [
-    { n: 'i', title: i.title ?? i, mode: 'intuition', minutes: i.minutes ?? 7, prereqs: i.prereqs ?? [], concept: !!i.concept, badges, load: LOADS[`S${String(n).padStart(2, '0')}.i`] },
-    { n: 'd', title: d.title ?? d, mode: 'derivation', minutes: d.minutes ?? 12, difficulty: d.difficulty ?? 3, prereqs: d.prereqs ?? [], badges, load: LOADS[`S${String(n).padStart(2, '0')}.d`] },
+    { n: 'i', title: i.title ?? i, mode: 'intuition', minutes: i.minutes ?? 7, prereqs: i.prereqs ?? [], concept: !!i.concept, badges },
+    { n: 'd', title: d.title ?? d, mode: 'derivation', minutes: d.minutes ?? 12, difficulty: d.difficulty ?? 3, prereqs: d.prereqs ?? [], badges },
   ],
 });
 const I = (n) => `gr.S${String(n).padStart(2, '0')}.i`;

@@ -23,11 +23,15 @@ export const PROVENANCE = {
 /**
  * Build lookup tables from course definitions.
  * @param {object[]} courses course index objects
+ * @param {{LESSONS?: object, BOSSES?: object}} loads lesson id → loader and
+ *   course id → boss loader, as generated into content/loads.js
  */
-export function buildCatalog(courses) {
+export function buildCatalog(courses, loads = {}) {
+  const LESSONS = loads.LESSONS || {}, BOSSES = loads.BOSSES || {};
   const cat = { courses: [], byId: {}, modules: {}, lessons: {}, order: [] };
   for (const c of courses) {
     const course = { prereqs: [], modules: [], ...c };
+    course.bossLoad ??= BOSSES[course.id];
     cat.courses.push(course);
     cat.byId[course.id] = course;
     course.lessonIds = [];
@@ -38,11 +42,12 @@ export function buildCatalog(courses) {
       (m.lessons || []).forEach((l, li) => {
         const id = l.id || `${mid}.${l.n ?? li + 1}`;
         const prev = li > 0 && !m.independent ? mod.lessonIds[li - 1] : null;
+        const load = l.load || LESSONS[id];
         const lesson = {
           minutes: 6, difficulty: 2, ...l, id, course: course.id, module: mid, index: cat.order.length,
           // a lesson needs the lesson before it in its module, plus whatever it lists
           prereqs: [...(prev ? [prev] : []), ...(l.prereqs || [])],
-          ready: typeof l.load === 'function',
+          load, ready: typeof load === 'function',
         };
         cat.lessons[id] = lesson;
         mod.lessonIds.push(id);
