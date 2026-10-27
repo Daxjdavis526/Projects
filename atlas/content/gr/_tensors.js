@@ -32,19 +32,22 @@ export function polarGrid(R = 4, color = 'ink4') {
  * graph expression that switches the set on and off.
  */
 export function fieldArrows(kind, { R = 4, Ry = 3, scale = 0.6, k = 1, when, color = 'ink3' } = {}) {
-  const arrows = [];
-  for (let i = -R; i <= R; i++) for (let j = -Ry; j <= Ry; j++) {
+  const pts = [];
+  for (let i = -R; i <= R; i++) for (let j = -Ry; j <= Ry; j++) if (kind === 'uniform' || Math.hypot(i, j) > 0.5) pts.push([i, j]);
+  const vec = ([i, j]) => {
     const r = Math.hypot(i, j);
-    if (kind !== 'uniform' && r < 0.5) continue;
-    let vx, vy;
-    if (kind === 'uniform') { vx = 1; vy = 0; }
-    else if (kind === 'swirl') { vx = -j; vy = i; }
-    else if (kind === 'radial') { vx = i; vy = j; }
-    else { const m = r ** k; vx = (m * i) / r; vy = (m * j) / r; }
-    const L = Math.hypot(vx, vy), s = (kind === 'uniform' ? scale : (scale * 0.32)) * (kind === 'power' ? 1 / Math.max(1, L) : 1);
-    arrows.push({ from: [rnd(i - (s * vx) / 2, 5), rnd(j - (s * vy) / 2, 5)], to: [rnd(i + (s * vx) / 2, 5), rnd(j + (s * vy) / 2, 5)], color, ...(when ? { when } : {}) });
-  }
-  return arrows;
+    if (kind === 'uniform') return [1, 0];
+    if (kind === 'swirl') return [-j, i];
+    if (kind === 'radial') return [i, j];
+    return [(r ** k * i) / r, (r ** k * j) / r];
+  };
+  // uniform arrows have length `scale`; the others are drawn to scale with each other, the longest 0.85
+  const longest = Math.max(...pts.map((p) => Math.hypot(...vec(p))));
+  const s = kind === 'uniform' ? scale : 0.85 / longest;
+  return pts.map((p) => {
+    const [vx, vy] = vec(p), [i, j] = p;
+    return { from: [rnd(i - (s * vx) / 2, 5), rnd(j - (s * vy) / 2, 5)], to: [rnd(i + (s * vx) / 2, 5), rnd(j + (s * vy) / 2, 5)], color, ...(when ? { when } : {}) };
+  });
 }
 
 /** A still picture of a vector field on a polar grid, with optional marked points. */
