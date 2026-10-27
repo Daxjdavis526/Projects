@@ -81,6 +81,8 @@ function specOf(P, v, mode) {
 
 // ─── number formats ────────────────────────────────────────────────────────
 const trim = (x, n = 3) => { const r = +(+x).toPrecision(n); return Math.abs(r) < 1e-9 ? '0' : String(r); };
+// a mass on a cart, with a thousands separator from 10,000 kg up, as the prompts write it
+const kgLabel = (m) => { const s = trim(m); return `${Math.abs(+s) >= 1e4 ? (+s).toLocaleString('en-US') : s} kg`; };
 const fmt2 = (x) => (Math.abs(x) >= 100 ? String(Math.round(x)) : trim(x, Math.abs(x) >= 10 ? 3 : 2));
 const vtxt = (x) => `${fmt2(x)} m/s`;
 const texv = (x, unit) => `${trim(x, 3)}\\,\\mathrm{${unit}}`;
@@ -183,7 +185,7 @@ export function mount(F, P0) {
     const ya = y - 7 - 34 - 26, step = clash(cxs, vels.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
     for (let i = 0; i < 2; i++) {
       const cw = w[i] * k, ch = Math.max(20, Math.min(34, cw * 0.42));
-      cart(c, cxs[i], y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i], i && namesClash(cxs) ? 13 : 0);
+      cart(c, cxs[i], y, cw, ch, COL[i], kgLabel(v(i ? 'm2' : 'm1')), P.names[i], i && namesClash(cxs) ? 13 : 0);
       velArrow(c, cxs[i], ya - i * step, vels[i] * kv, c[COL[i]], lab(i), vels[i]);
     }
     if (P.cm) cmMark(c, X(cm0 - shift), y + 2);
@@ -208,7 +210,7 @@ export function mount(F, P0) {
       const step = clash(pos.map(X), rv.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
       for (let i = 0; i < 2; i++) {
         const cx = X(pos[i]), cw = w[i] * k, ch = Math.max(18, Math.min(30, cw * 0.4));
-        cart(c, cx, y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i], i && namesClash(pos.map(X)) ? 13 : 0);
+        cart(c, cx, y, cw, ch, COL[i], kgLabel(v(i ? 'm2' : 'm1')), P.names[i], i && namesClash(pos.map(X)) ? 13 : 0);
         const vel = rv[i];
         if (stuck) {
           if (i === 1) {
@@ -510,6 +512,7 @@ export function validate(P0) {
   if (![1, 2].includes(P.dim)) p.push('dim must be 1 or 2');
   if (!['collide', 'explode'].includes(P.mode)) p.push(`unknown mode “${P.mode}”`);
   if (P.dim === 2 && P.mode === 'explode') p.push('explode is a 1D mode');
+  if (P.dim === 1 && P.stick) p.push('stick is for 2D; in 1D a collision in which the bodies stick together is e: 0');
   if (!['play', 'snapshots'].includes(P.view)) p.push(`unknown view “${P.view}”`);
   if (!['both', 'before'].includes(P.show)) p.push(`show must be 'both' or 'before'`);
   for (const k of ['m1', 'm2']) if (!(P[k] > 0)) p.push(`${k} must be positive`);

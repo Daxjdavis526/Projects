@@ -27,6 +27,8 @@
 //       results: null,              // the fit numbers in the readout (default: on in bench, off in static views)
 //       table: null,                // the data table (default: on in bench, off in static views)
 //       latest: true,               // ring the newest point
+//       stats: true,                // repeat: draw the mean, ±1 SD band and ±1 SEM bar (false: the readings only)
+//       inflate: 1,                 // multiply the stated error bars (and fit weights) — e.g. 5 shows overestimated errors
 //       aspect: null,               // static plot: canvas aspect ('wide' default)
 //       labels: true,               // apparatus: dimension labels and the instrument display
 //   } }
@@ -40,7 +42,7 @@ export const defaults = {
   exp: 'freefall', view: 'bench', repeat: false, at: null, params: {}, seed: 1, prefill: 'series',
   data: null, settings: null, n: 10, axes: null, axesChoice: true, sys: false, sysKind: null, toggle: true,
   fit: true, origin: false, originToggle: false, expected: false, residuals: false, results: null, table: null,
-  latest: true, aspect: null, labels: true, alt: null,
+  latest: true, aspect: null, labels: true, alt: null, stats: true, inflate: 1,
 };
 
 const VIEWS = ['bench', 'plot', 'apparatus'];
@@ -144,7 +146,7 @@ export function mount(F, P0) {
   const compact = F.compact;
   let app = null, plotC = null, resC = null;
   if (bench || P.view === 'apparatus') app = F.canvas({ aspect: 'wide', label: P.alt || `The apparatus: ${B.EXPERIMENTS[state.id].title}` });
-  if (bench || P.view === 'plot') plotC = F.canvas({ aspect: P.aspect || (bench ? '' : 'wide'), label: P.alt || 'The data with error bars and a least-squares line' });
+  if (bench || P.view === 'plot') plotC = F.canvas({ aspect: P.aspect || (bench && !isRepeat(state.id) ? '' : 'wide'), label: P.alt || (isRepeat(state.id) ? 'Every reading as a dot, stacked by value' : 'The data with error bars and a least-squares line') });
   if (P.residuals && (bench || P.view === 'plot') && !isRepeat(state.id)) resC = F.canvas({ aspect: '', height: compact ? '96px' : '118px', label: 'Residuals: each point minus the fitted line' });
   const appPlot = app && new Plot(app.canvas, { x: [0, 20], y: [0, 10], equal: true, grid: false, axes: false, pad: { l: 4, r: 4, t: 4, b: 4 } });
   const dataPlot = plotC && new Plot(plotC.canvas, { x: [0, 1], y: [0, 1], pad: { l: 58, r: 14, t: 12, b: 36 } });
@@ -209,8 +211,8 @@ export function mount(F, P0) {
     const rep = isRepeat(state.id);
     const axesKey = (bench ? F.params.axes : null) || P.axes || E.defaultAxes;
     const origin = bench && P.originToggle ? !!F.params.origin : !!P.origin;
-    const an = !rep && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: false }) : null;
-    const anO = !rep && origin && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: true }) : null;
+    const an = !rep && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: false, inflate: P.inflate }) : null;
+    const anO = !rep && origin && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: true, inflate: P.inflate }) : null;
     const rs = rep ? repeatOf(E, PP, rows) : null;
     // the instrument shows the newest reading taken at the knob’s current setting (none yet: a dash)
     const knob = E.setting ? (rep ? P.at : bench ? F.params.set : P.at ?? E.setting.value) : null;
@@ -350,7 +352,8 @@ export function mount(F, P0) {
     pl.setView([lo, hi], [0, top]);
     pl.o.axesAt = 'edge';
     pl.clear();
-    if (vals.length >= 2 && Number.isFinite(rs.sd)) pl.area(() => top, rs.mean - rs.sd, rs.mean + rs.sd, { color: 'accent', alpha: 0.1 });
+    const showStats = P.stats !== false;
+    if (showStats && vals.length >= 2 && Number.isFinite(rs.sd)) pl.area(() => top, rs.mean - rs.sd, rs.mean + rs.sd, { color: 'accent', alpha: 0.1 });
     // the dots, stacked in their bins
     const counted = new Map();
     vals.forEach((v, i) => {
@@ -359,7 +362,7 @@ export function mount(F, P0) {
       pl.point(b * bw, k - 0.45, { color: i === vals.length - 1 && bench && state.latest >= 0 ? 'gold' : 'accent', r: compact ? 3.6 : 4.2 });
     });
     if (Number.isFinite(rs.accepted)) pl.line(rs.accepted, 0, rs.accepted, top, { color: 'good', width: 1.6, dash: [6, 5] });
-    if (vals.length) {
+    if (vals.length && showStats) {
       pl.line(rs.mean, 0, rs.mean, top - 0.4, { color: 'gold', width: 2 });
       if (vals.length >= 2 && Number.isFinite(rs.sem)) {
         const y = top - 0.75, g = pl.ctx;
@@ -368,11 +371,11 @@ export function mount(F, P0) {
         g.moveTo(pl.X(rs.mean - rs.sem), pl.Y(y) - 5); g.lineTo(pl.X(rs.mean - rs.sem), pl.Y(y) + 5);
         g.moveTo(pl.X(rs.mean + rs.sem), pl.Y(y) - 5); g.lineTo(pl.X(rs.mean + rs.sem), pl.Y(y) + 5); g.stroke(); g.restore();
       }
-    } else pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
+    } else if (!vals.length) pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
     legend(pl, [
-      vals.length ? ['line', 'gold', vals.length >= 2 ? 'mean, with ±1 SEM bar' : 'mean'] : null,
+      vals.length && showStats ? ['line', 'gold', vals.length >= 2 ? 'mean, with ±1 SEM bar' : 'mean'] : null,
       Number.isFinite(rs.accepted) ? ['dash', 'good', `${R.acceptedLabel || 'accepted'} ${keepTxt(rs.accepted, 4)} ${R.unit}`] : null,
-      vals.length >= 2 ? ['band', 'accent', '±1 SD of the readings'] : null,
+      vals.length >= 2 && showStats ? ['band', 'accent', '±1 SD of the readings'] : null,
     ]);
   }
 
@@ -882,5 +885,6 @@ export function validate(P0) {
   if (P.settings && (!Array.isArray(P.settings) || P.settings.some((v) => !Number.isFinite(v)))) p.push('settings must be a list of numbers');
   if (P.view === 'bench' && P.data) p.push('a bench starts from its own readings: give data only to a static view');
   if (P.residuals && rep) p.push('residuals belong to a fitted line, not repeated readings');
+  if (!(P.inflate > 0)) p.push('inflate must be a positive factor');
   return p;
 }

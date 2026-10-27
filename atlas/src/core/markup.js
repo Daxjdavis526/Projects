@@ -114,8 +114,12 @@ export function escapeDamage(text, { prose = true } = {}) {
   }
   // a TeX command in prose prints literally: it belongs inside $…$
   if (prose) for (const g of segments(withoutCode(s))) {
-    const cmd = g.t === 'text' && /\\([A-Za-z]{2,})/.exec(g.v);
+    if (g.t !== 'text') continue;
+    const cmd = /\\([A-Za-z]{2,})/.exec(g.v);
     if (cmd) return `“\\${cmd[1]}” sits outside $…$, so it would print literally — put it inside math`;
+    // a subscript in prose (I_cm, v_0) prints its underscore: it belongs in math (link targets excepted)
+    const sub = /(?<![\w\\/.-])([A-Za-z]_(?:\{[^}]*\}|[A-Za-z0-9]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
+    if (sub) return `“${sub[1]}” is a subscript outside $…$ and would print its underscore — write $${sub[1]}$`;
   }
   return null;
 }

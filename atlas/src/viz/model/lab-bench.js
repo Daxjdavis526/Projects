@@ -623,7 +623,7 @@ export function rereadRows(id, rows, { sys = null, params = {} } = {}) {
  * fit of each (or a fit through the origin with `origin`), and the results
  * the slopes stand for, with Type B terms folded in.
  */
-export function analyse(id, rows, { axes, sys = null, params = {}, origin = false } = {}) {
+export function analyse(id, rows, { axes, sys = null, params = {}, origin = false, inflate = 1 } = {}) {
   const { E, P } = experiment(id, params);
   const A = E.axes?.[axes || E.defaultAxes];
   if (!A) return null;
@@ -633,7 +633,7 @@ export function analyse(id, rows, { axes, sys = null, params = {}, origin = fals
       const R = r.R;
       return {
         x: A.x.of(r.s, R, P, sys), y: Y.of(r.s, R, P, sys),
-        sx: A.x.sigma ? A.x.sigma(r.s, R, P, S(r)) : 0, sy: Y.sigma(r.s, R, P, S(r)),
+        sx: A.x.sigma ? inflate * A.x.sigma(r.s, R, P, S(r)) : 0, sy: inflate * Y.sigma(r.s, R, P, S(r)),
         s: r.s,
       };
     }).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));

@@ -28,6 +28,8 @@ export default [
   { id: 'flow', title: 'Continuity and Bernoulli', track: 'physics', blurb: 'Liquid speeds up through a narrowing pipe while its pressure drops; a Pitot-static probe turns ½ρv² into airspeed.', lesson: 'phys2210.M14.5' },
   { id: 'kepler', title: 'Kepler orbits, from the ISS to S2', track: 'physics', blurb: 'Real orbits to scale, from the ISS to the star S2, with equal-area sweeps — or fire Newton’s cannon until it orbits or escapes.', spec: { type: 'mech-kepler', params: {} } },
   { id: 'gas', title: 'Molecules in a box', track: 'physics', blurb: 'Pressure from impacts, and a single speed relaxing into the Maxwell–Boltzmann curve.', lesson: 'phys2210.M17.3' },
+  { id: 'collide', title: 'Collisions', track: 'physics', blurb: 'Carts and pucks collide or spring apart: momentum always balances, kinetic energy only when the collision is elastic.', lesson: 'phys2210.M9.3' },
+  { id: 'rotor', title: 'Torque and moment of inertia', track: 'physics', blurb: 'Spin a wheel, rod or dumbbell: torque, lever arms, moment of inertia, the parallel-axis theorem and τ = Iα.', lesson: 'phys2210.M10.4' },
   { id: 'projectile', title: 'Projectile motion', track: 'physics', blurb: 'Launch speed, angle, height, gravity — with or without air drag.', spec: { type: 'projectile', params: {} } },
   { id: 'cart', title: 'Newton’s second law on a cart', track: 'physics', blurb: 'Force, mass and friction set the slope of the velocity graph.', spec: { type: 'force-cart', params: {} } },
   { id: 'spring', title: 'Damped, driven oscillator', track: 'physics', blurb: 'Energy bars, damping regimes and resonance.', spec: { type: 'oscillator', params: { kind: 'spring', b: 0.3 } } },

@@ -50,9 +50,9 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
     title: 'Three paths, one change in internal energy',
     lead: t`Helium goes from state A (300 kPa, 1 L, 300 K) to state B (100 kPa, 4 L, 400 K). Pick a path. The readouts give the heat $Q$ into the gas, the work $W$ it does and $\Delta E_\text{int}$, path by path and leg by leg. Red legs take heat in; blue legs give it out.`,
     tasks: [
-      'Switch between the three paths: W and Q change every time, yet ΔE_int stays at +150 J.',
+      t`Switch between the three paths: $W$ and $Q$ change every time, yet $\Delta E_\text{int}$ stays at +150 J.`,
       'A → C → B takes in 2250 J along A → C and gives out 1200 J along C → B: heat flows both ways on one path, and only the net 1050 J enters the first law.',
-      'Watch W: it is still just the area under each path, as in M18.1 — 900 J, 300 J and 600 J.',
+      t`Watch $W$: it is still just the area under each path, as in M18.1 — 900 J, 300 J and 600 J.`,
     ],
     params: { mode: 'paths', gas: 'He', n: N0, ...ROUTES, controls: ['path'], readouts: ['Q', 'W', 'dU', 'legs'], vrange: [0, 5], prange: [0, 400], isotherms: [300, 400] },
     caption: 'Helium as an ideal gas, every path quasi-static. Shaded: the work done by the gas, the area under the chosen path. Dashed: the isotherms of A (300 K) and B (400 K). The legs are coloured by the sign of the heat; a straight leg can take heat in on part of its length and give some out on the rest — the colour shows the net.',

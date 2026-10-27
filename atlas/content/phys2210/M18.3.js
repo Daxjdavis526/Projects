@@ -46,9 +46,9 @@ A sealed propellant tank warming in the sun is isochoric; a regulated ullage is 
     title: 'Hold one variable fixed',
     lead: t`Air starts at state 1: 100 kPa, 2 L, 300 K. Pick a process, then drag its end point (or use the slider). Red legs take heat in, blue legs give it out. Watch how $Q$ splits between $W$ and $\Delta E_\text{int}$.`,
     tasks: [
-      'Isochoric up to 450 K: no area under a vertical line, so W = 0 and all of Q goes into ΔE_int.',
-      'Switch to Isobaric: it starts at the same 450 K. ΔE_int is unchanged, but now W > 0 and Q is 7/5 as large — the ratio C_P/C_V for air.',
-      'Isothermal: ΔE_int stays 0 however far you drag, and Q = W. Drag to the left of state 1: both turn negative — heat flows out as the gas is compressed.',
+      t`Isochoric up to 450 K: no area under a vertical line, so $W = 0$ and all of $Q$ goes into $\Delta E_\text{int}$.`,
+      t`Switch to Isobaric: it starts at the same 450 K. $\Delta E_\text{int}$ is unchanged, but now $W > 0$ and $Q$ is 7/5 as large — the ratio $C_P/C_V$ for air.`,
+      t`Isothermal: $\Delta E_\text{int}$ stays 0 however far you drag, and $Q = W$. Drag to the left of state 1: both turn negative — heat flows out as the gas is compressed.`,
     ],
     params: {
       mode: 'process', gas: 'air', gases: ['air', 'He'], n: N0, start: { P: 100, V: 2 }, process: 'isochoric', processes: ['isochoric', 'isobaric', 'isothermal'], end: { T: 450 },
@@ -66,10 +66,10 @@ A sealed propellant tank warming in the sun is isochoric; a regulated ullage is 
       { label: 'The internal energy', text: t`Either way the gas ends at ${EX.T2} K, so $\Delta E_\text{int} = nC_V\Delta T = (${EX.n})(\tfrac32\times8.314)(${EX.T2 - EX.T1}) = ${fmt(EX.QV, 4)}$ J for both.` },
       { label: '(a) Rigid tank', text: t`No change of volume, no work: $Q = \Delta E_\text{int} = ${fmt(EX.QV, 4)}$ J.` },
       { label: '(b) Constant pressure', text: t`Now the gas expands and pushes the piston: $W = P\Delta V = nR\Delta T = (${EX.n})(8.314)(${EX.T2 - EX.T1}) = ${fmt(EX.W, 4)}$ J, using $PV = nRT$ at both ends. So $Q = \Delta E_\text{int} + W = ${fmt(EX.QV + EX.W, 4)}$ J.` },
-      { label: 'Why $C_P = C_V + R$', text: t`Per mole and per kelvin, the constant-pressure heat is $C_V + R$: $C_V$ to warm the gas, plus $R$ for the work of pushing the piston out. For helium $C_P = \tfrac52R = 20.8$ J/(mol K), and indeed $nC_P\Delta T = ${fmt(EX.QP, 4)}$ J.` },
+      { label: 'Where the extra comes from', text: t`Per mole and per kelvin, the constant-pressure heat is $C_V + R$: $C_V$ to warm the gas, plus $R$ for the work of pushing the piston out. For helium $C_P = \tfrac52R = 20.8$ J/(mol K), and indeed $nC_P\Delta T = ${fmt(EX.QP, 4)}$ J.` },
       { label: 'Sense check', text: t`The ratio $Q_P/Q_V = ${fmt(EX.QP / EX.QV, 3)} = 5/3$ is helium's $\gamma = C_P/C_V$, the number that will run the next lesson. Two-fifths of the constant-pressure heat leaves as work.` },
     ],
-    answer: t`(a) ${fmt(EX.QV, 3)} J; (b) ${fmt(EX.QP, 3)} J. The extra ${fmt(EX.W, 3)} J is the work the gas does pushing the piston back.`,
+    answer: t`(a) ${fmt(EX.QV, 4)} J; (b) ${fmt(EX.QP, 4)} J. The extra ${fmt(EX.W, 4)} J is the work the gas does pushing the piston back.`,
   },
   practice: [
     match({
@@ -95,7 +95,7 @@ A sealed propellant tank warming in the sun is isochoric; a regulated ullage is 
           hints: ['A rigid container: what is W?', t`$Q = \Delta E_\text{int} = nC_V\Delta T$.`],
           teach: 'At constant volume no work is done, so all the heat goes into internal energy: Q = nC_VΔT.',
           explain: t`$W = 0$, so $Q = nC_V\Delta T = (${n})(\tfrac52\times8.314)(${dT}) = ${fmt(Q, 4)}$ J. The pressure rises in proportion to $T$, from ${lab((n * R * T1) / V)} kPa to ${lab((n * R * (T1 + dT)) / V)} kPa.`,
-          visual: pvPic({ gas: 'N2', n, heat: true, states: { A: { P: (n * R * T1) / V, V }, B: { P: (n * R * (T1 + dT)) / V, V } }, paths: one('A', ['isochoric', 'B']), vrange: [0, 16], prange: [0, Math.ceil((n * R * (T1 + dT)) / V / 100) * 100 + 200], caption: 'Heating at constant volume: a vertical path, with no area under it.' }),
+          visual: pvPic({ gas: 'N2', n, heat: true, isotherms: [T1, T1 + dT], isoLabels: true, states: { A: { P: (n * R * T1) / V, V }, B: { P: (n * R * (T1 + dT)) / V, V } }, paths: one('A', ['isochoric', 'B']), vrange: [0, 20], prange: [0, Math.ceil((n * R * (T1 + dT)) / V / 100) * 100 + 300], caption: 'Heating at constant volume: a short vertical path between the two isotherms, with no area under it.' }),
         };
       },
     }),
@@ -209,7 +209,7 @@ What is wrong?`,
           hints: ['Rigid tank: no work.'],
           teach: 'A sealed rigid tank is an isochoric process: all the heat raises the internal energy.',
           explain: t`$Q = nC_V\Delta T = (${n})(\tfrac32\times8.314)(${dT}) = ${fmt(Q / 1000, 3)}$ kJ. The pressure climbs in proportion to the absolute temperature — by about ${fmt((dT / 290) * 100, 2)} % from 290 K — which is why pressurant bottles have relief valves and why pad crews watch bottle temperatures. (At hundreds of bar real helium is about 10 % less compressible than an ideal gas, but its $C_V$ stays very close to $\tfrac32R$.)`,
-          visual: pvPic({ gas: 'He', n: 1, heat: true, states: { A: { P: 200, V: 1 }, B: { P: 200 * (1 + dT / 290), V: 1 } }, paths: one('A', ['isochoric', 'B']), vrange: [0, 2], prange: [0, 260], caption: 'The bottle’s gas is heated at constant volume (sketch: pressure in bar-like units, not to the bottle’s scale).' }),
+          visual: pvPic({ gas: 'He', n, punit: 'MPa', heat: true, isotherms: [290, 290 + dT], isoLabels: true, states: { A: { P: 20, T: 290 }, B: { P: (20 * (290 + dT)) / 290, T: 290 + dT } }, paths: one('A', ['isochoric', 'B']), prange: [0, 26], caption: 'Heating at constant volume, if the bottle starts at 20 MPa. The volume is the ideal-gas estimate; at that pressure real helium needs about 10 % more room.' }),
         };
       },
     }),

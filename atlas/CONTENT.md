@@ -103,7 +103,9 @@ Formatting helpers that return TeX (`tex(x)`, `frac(x)`, `polyTeX`, a
 `×10ⁿ` number) must land inside `$…$` (`t\`about $${tex(x)}$ m\``); labels that
 a simulation draws on its canvas are plain text, so give them plain numbers.
 Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
-as typed — put every symbol, subscript and thin space inside math.
+as typed — put every symbol, subscript and thin space inside math, and the
+whole phrase around it ("the ratio $E_n / E_{2n}$", not "the ratio E_n/E_2n").
+The test flags TeX commands and subscripts it finds in prose.
 Show the lesson's main equation once: either as `equation` (the large
 display above the intro) or as a `$$…$$` line inside `intro`, not both.
 

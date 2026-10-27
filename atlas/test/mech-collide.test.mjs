@@ -110,6 +110,7 @@ for (const spec of [{ m1: 2, m2: 1, u1: [3, 0], b: 0.5, e: 1 }, { m1: 1.4, m2: 2
 // ─── the simulation's parameter check ──────────────────────────────────────
 check('validate: defaults are fine', validate({}).length === 0, validate({}).join('; '));
 check('validate: the usual sliders are fine', validate({ sliders: true }).length === 0 && validate({ dim: 2, sliders: true }).length === 0);
+check('validate: stick is 2D-only (1D uses e: 0)', validate({ stick: true }).length === 1 && validate({ dim: 2, stick: true }).length === 0);
 check('validate: an after that breaks momentum is caught', validate({ m1: 2, m2: 1, u1: 3, u2: 0, after: [1, 3] }).length === 1);
 check('validate: an after with extra energy is caught', validate({ m1: 1, m2: 1, u1: 2, u2: 0, after: [-1, 3] }).length === 1);
 check('validate: a consistent after passes', validate({ m1: 2, m2: 1, u1: 3, u2: 0, after: [1, 4] }).length === 0);
