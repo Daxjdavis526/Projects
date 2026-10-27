@@ -2313,7 +2313,7 @@ I computed the derived values in Python from the exact inputs. They are exact to
 | ħc | 197.326 980 4 MeV fm | exact (derived) |
 
 #### B. Constants derived from the verified CODATA 2022 values
-I computed these. They agree with the CODATA 2022 tabulations where those were seen (λ_C, μ_B, r_e, μ₀), but should still be checked digit by digit against NIST before publication.
+I computed these. They match the CODATA 2022 values for λ_C, μ_B, r_e and μ₀ as I recall them, but those tabulations were not seen in this session, so check every value digit by digit against NIST before publication.
 
 | Quantity | Value |
 |---|---|
