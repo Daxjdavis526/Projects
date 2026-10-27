@@ -181,7 +181,9 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       const calc = calculusProblem(item);
       if (calc) p.push(calc);
       if (p.length) { firstProblem = `variant ${v}: ${p.join('; ')}`; break; }
-      if (item.visual || item.diagram) hasVisual = true;
+      // a picture; or, for programming, the code itself: an exercise's editor and output,
+      // or a listing to read in the prompt
+      if (item.visual || item.diagram || item.type === 'code' || /(\\?`){3}/.test(item.prompt)) hasVisual = true;
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
     }
     if (hasVisual) withVisual++;

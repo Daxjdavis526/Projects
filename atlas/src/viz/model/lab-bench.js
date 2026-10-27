@@ -581,6 +581,62 @@ export const EXPERIMENTS = {
     systematics: { leak: { label: 'No lagging: the bare block leaks heat to the room', short: 'heat leak', explain: 'Without its insulating jacket the block loses heat about twelve times faster.' } },
     defaultSys: 'leak',
   },
+
+  // ─── PHYS 2225 (the lab strand of PHYS 2220) ─────────────────────────────
+
+  // 2225 L.1 — field mapping on conductive paper: two bars (a uniform field) …
+  fieldmap: {
+    title: 'Mapping the field between two bars on conductive paper', method: 'Bars: uniform field',
+    apparatus: 'fieldmap',
+    note: 'Two silver-paint bars 10.0 cm apart span the paper’s full width, so the field between them is uniform. The probe is placed on the printed grid to ±0.5 mm, the paper’s resistance varies a little from place to place (±0.02 V), and the meter reads to 0.01 V.',
+    defaults: { V0: 10.0, d: 0.100, D: 0.100, a: 0.002, sx: 0.0005, sp: 0.02, loss: 0.03 },
+    setting: { key: 'x', sym: 'x', label: 'Probe position $x$', unit: 'cm', min: 0.5, max: 9.5, step: 0.5, value: 4.0, series: [1.0, 2.5, 4.0, 5.5, 7.0, 8.5], explain: 'Distance from the inner edge of the + bar, read off the grid printed on the paper.' },
+    nz: 2,
+    read: (x, P, sys, z) => [barsV((x / 100) + P.sx * z[0], P, sys === 'contact') + P.sp * z[1]],
+    series: [{ key: 'V', sym: 'V', label: 'potential', unit: 'V', res: 0.01, sigma: (x, P) => Math.hypot(P.sp, (P.V0 / P.d) * P.sx, resolutionU(0.01)) }],
+    axes: {
+      Vx: {
+        label: 'V against x', slopeUnit: 'V/m', expectLabel: 'V₀ − (V₀/d)x: perfect contacts',
+        x: { sym: 'x', unit: 'm', of: (x) => x / 100 },
+        ys: [{ sym: 'V', unit: 'V', of: (x, R) => R[0], sigma: (x, R, P) => Math.hypot(P.sp, (P.V0 / P.d) * P.sx, resolutionU(0.01)) }],
+        expect: (P) => ({ a: P.V0, b: -P.V0 / P.d }),
+        results: [{ sym: 'E', name: 'field strength', unit: 'V/m', of: (f) => -f.b, sigma: (f) => f.sb, accepted: (P) => P.V0 / P.d, acceptedLabel: 'V₀/d' }],
+        intercept: { sym: 'V(0)', name: 'potential at the + bar', unit: 'V' },
+      },
+    },
+    defaultAxes: 'Vx',
+    systematics: { contact: { label: 'Contact resistance: 3% of the supply voltage is lost where each electrode’s paint meets the paper', short: 'contact resistance', explain: 'The silver paint does not bond perfectly to the paper, so 0.30 V of the 10.0 V is dropped across each contact before the current reaches the paper.' } },
+    defaultSys: 'contact',
+  },
+
+  // … and two small dots (a field that is strongest next to the electrodes)
+  'fieldmap-dots': {
+    title: 'Mapping the field between two dots on conductive paper', method: 'Dots: non-uniform field',
+    apparatus: 'fieldmap',
+    note: 'Two silver dots 4 mm across, 10.0 cm apart centre to centre, on paper treated as much larger than their separation. The paper is two-dimensional, so each dot acts like a long line charge seen end on: the potential goes as ln r, not 1/r. Probe to ±0.5 mm; the paper varies by ±0.02 V; the meter reads to 0.01 V.',
+    defaults: { V0: 10.0, d: 0.100, D: 0.100, a: 0.002, sx: 0.0005, sp: 0.02, loss: 0.03 },
+    setting: { key: 'x', sym: 'x', label: 'Probe position $x$', unit: 'cm', min: 0.5, max: 9.5, step: 0.5, value: 3.0, series: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], explain: 'Distance from the centre of the + dot, along the line joining the two dots.' },
+    nz: 2,
+    read: (x, P, sys, z) => [dotsV((x / 100) + P.sx * z[0], P, sys === 'contact') + P.sp * z[1]],
+    series: [{ key: 'V', sym: 'V', label: 'potential', unit: 'V', res: 0.01, sigma: (x, P) => Math.hypot(P.sp, dotsE(x / 100, P) * P.sx, resolutionU(0.01)) }],
+    axes: {
+      log: {
+        label: 'V against ln(r₂/r₁)', slopeUnit: 'V', expectLabel: 'perfect contacts',
+        x: { sym: 'ln(r₂/r₁)', unit: '', of: (x, R, P) => dotsU(x / 100, P) },
+        ys: [{ sym: 'V', unit: 'V', of: (x, R) => R[0], sigma: (x, R, P) => Math.hypot(P.sp, dotsE(x / 100, P) * P.sx, resolutionU(0.01)) }],
+        expect: (P) => ({ a: P.V0 / 2, b: dotsGeom(P).K }),
+        results: [{ sym: 'K', name: 'potential per unit of ln(r₂/r₁)', unit: 'V', of: (f) => f.b, sigma: (f) => f.sb, accepted: (P) => dotsGeom(P).K, acceptedLabel: 'from V₀ and the dots’ size' }],
+        intercept: { sym: 'V(mid)', name: 'potential halfway between the dots', unit: 'V' },
+      },
+      raw: {
+        label: 'V against x', slopeUnit: 'V/m', x: { sym: 'x', unit: 'm', of: (x) => x / 100 },
+        ys: [{ sym: 'V', unit: 'V', of: (x, R) => R[0], sigma: (x, R, P) => Math.hypot(P.sp, dotsE(x / 100, P) * P.sx, resolutionU(0.01)) }], curved: true,
+      },
+    },
+    defaultAxes: 'log',
+    systematics: { contact: { label: 'Contact resistance: 3% of the supply voltage is lost where each electrode’s paint meets the paper', short: 'contact resistance', explain: 'The silver paint does not bond perfectly to the paper, so 0.30 V of the 10.0 V is dropped across each contact before the current reaches the paper.' } },
+    defaultSys: 'contact',
+  },
 };
 
 export function inertiaRotary(P) {
@@ -667,4 +723,42 @@ export function repeatStats(id, rows, { params = {} } = {}) {
   const st = stats(vals);
   const acc = E.repeat.accepted(P, rows[0]?.s);
   return { ...st, vals, accepted: acc, z: Number.isFinite(acc) && st.sem > 0 ? Math.abs(st.mean - acc) / st.sem : NaN, P };
+}
+
+// ─── PHYS 2225 helpers (the lab strand of PHYS 2220) ──────────────────────
+
+// L.1 — conductive paper. A contact loss f (a fraction of V₀ at each
+// electrode) leaves the paper itself between V₀(1 − f) and V₀f.
+
+/** The potential at x (m from the + bar) between two full-width bars d apart. */
+export function barsV(x, P, contact = false) {
+  const f = contact ? P.loss : 0;
+  return P.V0 * (1 - f) - (P.V0 * (1 - 2 * f) * x) / P.d;
+}
+
+/**
+ * Two round dots of radius a, centres D apart, on an unbounded sheet: the
+ * potential of two line charges at the Apollonius points ±c from the midpoint
+ * (c² = (D/2)² − a²), which makes each dot's rim an exact equipotential.
+ * V = V₀/2 + K ln(r₂/r₁), r₁ and r₂ measured from those points (0.04 mm from
+ * the dots' centres for 4 mm dots 10 cm apart).
+ */
+export function dotsGeom(P, contact = false) {
+  const f = contact ? P.loss : 0;
+  const c = Math.sqrt((P.D / 2) ** 2 - P.a ** 2);
+  const k1 = (P.D / 2 + c) / P.a;
+  return { c, k1, f1: P.D / 2 - c, f2: P.D / 2 + c, K: ((P.V0 / 2) * (1 - 2 * f)) / Math.log(k1) };
+}
+/** ln(r₂/r₁) at x (m from the + dot's centre) on the line through the dots. */
+export function dotsU(x, P) {
+  const g = dotsGeom(P);
+  return Math.log((g.f2 - x) / (x - g.f1));
+}
+export function dotsV(x, P, contact = false) {
+  return P.V0 / 2 + dotsGeom(P, contact).K * dotsU(x, P);
+}
+/** The field strength (V/m) at x on the line through the dots. */
+export function dotsE(x, P, contact = false) {
+  const g = dotsGeom(P, contact);
+  return g.K * (1 / (x - g.f1) + 1 / (g.f2 - x));
 }

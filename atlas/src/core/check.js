@@ -192,6 +192,8 @@ function sigfigNote(numberText, want) {
  *   answer   key expression (string)
  *   vars     { x: [lo, hi], ... } sampling domain per variable (default [-2, 2])
  *   mode     'exact' | 'constant' (antiderivatives: equal up to + C) | 'equation' (lhs = rhs, up to a factor)
+ *   wrt      'constant' mode: the variable integrated over (default: the first in vars) —
+ *            the constant may depend on every other variable
  *   errors   [{ answer, feedback }] known wrong forms
  *   forbid   function names the learner may not use (e.g. ['abs'])
  */
@@ -209,18 +211,18 @@ export function gradeExpression(item, input) {
   }
   const key = parseSide(item.answer, names, item.mode);
   const preview = student.tex;
-  const cmp = compareExpr(student, key, domains, item.mode || 'exact', item.seed ?? 12345);
+  const cmp = compareExpr(student, key, domains, item.mode || 'exact', item.seed ?? 12345, item.wrt);
   if (cmp.verdict === 'equal') return ok('', { preview });
   if (cmp.verdict === 'undefined') return no('Your expression is undefined at points where the answer is defined — check for a division by zero or a square root of a negative.', { preview });
   for (const e of item.errors || []) {
     const err = parseSide(e.answer, names, item.mode);
-    if (compareExpr(student, err, domains, item.mode || 'exact', 7).verdict === 'equal') return no(e.feedback, { preview, known: true });
+    if (compareExpr(student, err, domains, item.mode || 'exact', 7, item.wrt).verdict === 'equal') return no(e.feedback, { preview, known: true });
   }
   // generic slips
   if (/\blog\b/.test(text)) {
     try {
       const alt = parseSide(text.replace(/\blog\b/g, 'ln'), names, item.mode);
-      if (compareExpr(alt, key, domains, item.mode || 'exact', 9).verdict === 'equal') {
+      if (compareExpr(alt, key, domains, item.mode || 'exact', 9, item.wrt).verdict === 'equal') {
         return no('In the Atlas, log means log base 10. Use ln for the natural logarithm.', { preview });
       }
     } catch { /* ignore */ }
@@ -268,9 +270,10 @@ function usesFunction(node, name) {
  * verdict: 'equal' | 'different' | 'undefined'; also reports a constant ratio or
  * difference when one exists, so the grader can name the slip.
  */
-export function compareExpr(s, k, domains, mode = 'exact', seed = 1) {
+export function compareExpr(s, k, domains, mode = 'exact', seed = 1, wrt = null) {
   const rng = makeRng(seed);
   const names = Object.keys(domains);
+  if (mode === 'constant' && names.length > 1) return upToConstant(s, k, domains, rng, names.includes(wrt) ? wrt : names[0]);
   const pts = [];
   for (let tries = 0; pts.length < 10 && tries < 200; tries++) {
     const env = {};
@@ -297,6 +300,34 @@ export function compareExpr(s, k, domains, mode = 'exact', seed = 1) {
   const d0 = pts[0].sv - pts[0].kv;
   const constDiff = pts.length > 1 && pts.every((p) => Math.abs(p.sv - p.kv - d0) <= 1e-7 * Math.max(scale, 1));
   return { verdict: 'different', ratio: ratioOf(pts), diff: constDiff ? d0 : null };
+}
+
+// Antiderivatives: equal up to a constant of integration, which may depend on every
+// variable except the one integrated over. The points come in groups that share the
+// other variables and differ only in that one.
+function upToConstant(s, k, domains, rng, wrt) {
+  const others = Object.keys(domains).filter((n) => n !== wrt);
+  const all = [];
+  let groups = 0;
+  for (let g = 0; g < 4; g++) {
+    const base = {};
+    for (const n of others) { const [lo, hi] = domains[n]; base[n] = lo + (hi - lo) * rng.next(); }
+    const pts = [];
+    for (let tries = 0; pts.length < 5 && tries < 80; tries++) {
+      const [lo, hi] = domains[wrt];
+      const env = { ...base, [wrt]: lo + (hi - lo) * rng.next() };
+      const kv = k.f(env);
+      if (Number.isFinite(kv)) pts.push({ env, kv, sv: s.f(env) });
+    }
+    if (pts.some((p) => !Number.isFinite(p.sv))) return { verdict: 'undefined', ratio: null, diff: null };
+    if (pts.length < 2) continue;
+    groups++;
+    all.push(...pts);
+    const scale = Math.max(1e-12, ...pts.map((p) => Math.abs(p.kv)));
+    const d0 = pts[0].sv - pts[0].kv;
+    if (!pts.every((p) => Math.abs(p.sv - p.kv - d0) <= 1e-7 * Math.max(scale, Math.abs(p.sv), 1))) return { verdict: 'different', ratio: ratioOf(all), diff: null };
+  }
+  return groups ? { verdict: 'equal', ratio: null, diff: null } : { verdict: 'different', ratio: null, diff: null };
 }
 
 // A constant ratio s/k across all points, or null. Points where k ≈ 0 must have s ≈ 0.

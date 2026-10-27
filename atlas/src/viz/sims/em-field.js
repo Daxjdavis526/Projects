@@ -35,7 +35,7 @@
 //                   fieldLine: false, drag: true, path },   // path: true shows the whole path in a static picture
 //       profile: false,                     // a graph of V along the horizontal line through the probe
 //       edit: false,                        // buttons to add and remove charges
-//       presets: [{ id, label, charges: […], … }], preset: 'id',   // a choice of arrangements (each may also set probe, gauss, …)
+//       presets: [{ id, label, charges: […], … }], preset: 'id',   // a choice of arrangements (each may also set probe, gauss, dV, levels, …)
 //       toggles: ['arrows', 'fieldLines', 'equip'],                 // checkboxes for the layers
 //       readouts: ['E', 'V'],               // any of E Ex Ey Edir V F flux Qenc Qeps Esurf Eexact Vc speed K deflect time dVdx
 //       labels: true,                       // label charges with their values
@@ -112,7 +112,7 @@ export function mount(F, P0) {
 
   // the scene's movable state, in display units; a preset replaces parts of it
   const st = {};
-  const load = (src) => { for (const k of SCENE_KEYS) st[k] = clone(src[k] ?? null); };
+  const load = (src) => { for (const k of SCENE_KEYS) st[k] = clone(src[k] ?? null); st.dV = src.dV ?? null; st.levels = src.levels ?? null; };
   const presetOf = (id) => (P.presets || []).find((p) => p.id === id);
   load(P.presets?.length ? { ...P, ...presetOf(F.params._preset) } : P);
   for (const k of ['charges', 'rods', 'lines', 'sheets', 'balls']) st[k] = st[k] || [];
@@ -275,9 +275,9 @@ export function mount(F, P0) {
       const grid = memo('grid', sig + nx, () => M.potentialGrid(S, box, nx, ny));
       const vals = Array.from(grid.v).filter(Number.isFinite).sort((a, b) => a - b);
       const lo = vals[Math.floor(vals.length * 0.015)], hi = vals[Math.floor(vals.length * 0.985)];
-      let levels = P.levels;
+      let levels = st.levels;
       if (!levels) {
-        const step = P.dV ?? M.niceStep(grid, compact ? 8 : 10);
+        const step = st.dV ?? M.niceStep(grid, compact ? 8 : 10);
         levels = [];
         for (let k = Math.ceil(lo / step); k * step <= hi && levels.length < 80; k++) levels.push(k * step);
       }
@@ -307,6 +307,12 @@ export function mount(F, P0) {
         for (const [x0, y0, x1, y1] of segs) { g.moveTo(plot.X(x0 / L), plot.Y(y0 / L)); g.lineTo(plot.X(x1 / L), plot.Y(y1 / L)); }
         g.stroke(); g.restore();
         if (P.equipLabels === false) continue;
+        // with many levels at a regular step, label every other one
+        if (!st.levels && levels.length > 9 && Math.round(lev0 / step0) % 2 !== 0) continue;
+        // no label on a small ring (close around a charge, where the labels would pile up)
+        let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+        for (const [x0, y0, x1, y1] of segs) { bx0 = Math.min(bx0, x0, x1); bx1 = Math.max(bx1, x0, x1); by0 = Math.min(by0, y0, y1); by1 = Math.max(by1, y0, y1); }
+        if (Math.max(bx1 - bx0, by1 - by0) / L * pxPer < (compact ? 40 : 52)) continue;
         // a label at the highest free point of the contour inside the frame
         const text = volts(lev0), w = widthOf(text);
         const ax0 = plot.vx0 <= 0 && plot.vx1 >= 0 && P.axes !== false ? plot.X(0) : -1e9, ay0 = plot.vy0 <= 0 && plot.vy1 >= 0 && P.axes !== false ? plot.Y(0) : -1e9;
@@ -754,7 +760,9 @@ export function validate(P0) {
   if (P.shapes && !P.gauss) out.push('shapes needs a gauss surface');
   if (P.test !== null && P.test !== undefined) expr(P.test, 'test charge');
   if (P.arrows !== true && P.arrows !== false && P.arrows !== 'linear') out.push('arrows is true, false or “linear”');
-  if (P.levels && !(Array.isArray(P.levels) && P.levels.every(Number.isFinite))) out.push('levels must be a list of numbers (volts)');
-  if (P.dV !== null && P.dV !== undefined && !(P.dV > 0)) out.push('dV must be positive');
+  for (const Q of [P, ...(P.presets || [])]) {
+    if (Q.levels && !(Array.isArray(Q.levels) && Q.levels.every(Number.isFinite))) out.push('levels must be a list of numbers (volts)');
+    if (Q.dV !== null && Q.dV !== undefined && !(Q.dV > 0)) out.push('dV must be positive');
+  }
   return out;
 }

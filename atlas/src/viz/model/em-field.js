@@ -1131,7 +1131,11 @@ export function potentialGrid(S, box, nx, ny) {
  */
 export function contour(grid, level) {
   const { v, nx, ny, box } = grid, segs = [];
-  if (grid.scale === undefined) { let m = 0; for (const u of v) if (Number.isFinite(u)) m = Math.max(m, Math.abs(u)); grid.scale = m; }
+  if (grid.scale === undefined) {
+    // a typical size of V on the grid (not its largest, which a point charge sends towards infinity)
+    const a = Array.from(v).filter(Number.isFinite).map(Math.abs).sort((p, q) => p - q);
+    grid.scale = a.length ? a[Math.floor(0.9 * (a.length - 1))] : 0;
+  }
   const tol = 1e-9 * Math.max(grid.scale, Math.abs(level));
   const below = (u) => u < -tol;
   const X = (i) => box.x0 + ((box.x1 - box.x0) * i) / nx, Y = (j) => box.y0 + ((box.y1 - box.y0) * j) / ny;

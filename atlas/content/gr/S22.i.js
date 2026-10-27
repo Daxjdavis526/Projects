@@ -20,7 +20,7 @@ const SGR = 4.30e6, M87 = 6.5e9;
 const log = Math.log10;
 
 // light cones in ingoing Eddington–Finkelstein coordinates (G = c = 1, r and t* in units of M)
-const TOP = 8.2;                                   // trim rays to the visible window (the plotter does not clip)
+const TOP = 8.2;                                   // rays stop at the top of the window
 const solve = (f, lo, hi) => { for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if ((f(lo) - TOP) * (f(m) - TOP) <= 0) hi = m; else lo = m; } return (lo + hi) / 2; };
 const OUT = [2.15, 2.5, 3, 4, 6].map((x0) => {        // outgoing rays through (x0, 0), outside: rise to the right
   const c = -x0 - 4 * Math.log(x0 - 2), f = (x) => x + 4 * Math.log(x - 2) + c;

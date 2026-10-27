@@ -13,6 +13,8 @@ export function themeColors() {
     bg: v('--bg-2', '#0a0f1c'), panel: v('--panel', '#0e1526'),
     accent: v('--accent', '#5c9dff'), accent2: v('--accent-2', '#8cbaff'), good: v('--good', '#38d39f'),
     warn: v('--warn', '#f3b74f'), bad: v('--bad', '#ff6b7d'), violet: v('--violet', '#b38cff'), gold: v('--gold', '#f2c14e'), teal: v('--teal', '#33c4b4'),
+    // the same in both themes: a black hole is black on any page
+    void: '#03050a',
   };
 }
 

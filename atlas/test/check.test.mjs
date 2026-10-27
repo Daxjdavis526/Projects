@@ -138,6 +138,13 @@ check('expr: log(x²) ≠ 2 log x on a domain with negatives? both forms agree f
 check('expr: log vs ln slip named', /log base 10/.test(grade({ type: 'expression', answer: 'ln(x)', vars: { x: [0.5, 3] } }, 'log(x)').feedback));
 check('expr: antiderivative up to a constant', grade({ type: 'expression', answer: 'x sin(x) + cos(x)', vars: ['x'], mode: 'constant' }, 'x sin x + cos x + 7').correct);
 check('expr: antiderivative wrong', !grade({ type: 'expression', answer: 'x sin(x) + cos(x)', vars: ['x'], mode: 'constant' }, 'x sin x - cos x').correct);
+// the constant of integration may depend on every variable but the one integrated over
+const tortoise = { type: 'expression', answer: 'r + 2M ln(r - 2M)', vars: { r: [3, 9], M: [0.5, 1.4] }, mode: 'constant' };
+check('expr: a constant that depends on a parameter (M) is still a constant', grade(tortoise, 'r + 2M ln((r - 2M)/M)').correct);
+check('expr: …but not one that depends on the variable integrated over', !grade(tortoise, 'r + 2M ln(r - 2M) + r/M').correct);
+check('expr: …and a wrong coefficient is still caught', !grade(tortoise, 'r + M ln(r - 2M)').correct);
+check('expr: wrt names the variable of integration', grade({ type: 'expression', answer: 'x t^2/2', vars: { x: [1, 3], t: [0, 2] }, mode: 'constant', wrt: 't' }, 'x t^2/2 + x^3').correct
+  && !grade({ type: 'expression', answer: 'x t^2/2', vars: { x: [1, 3], t: [0, 2] }, mode: 'constant', wrt: 't' }, 'x t^2/2 + t').correct);
 check('expr: exact mode rejects + C', grade({ type: 'expression', answer: 'x^2', vars: ['x'] }, 'x^2 + 1').feedback.includes('constant'));
 check('expr: equation mode accepts a rescaled equation', grade({ type: 'expression', answer: 'y = 2x + 1', vars: ['x', 'y'], mode: 'equation' }, '2y - 4x = 2').correct);
 check('expr: equation mode rejects a different line', !grade({ type: 'expression', answer: 'y = 2x + 1', vars: ['x', 'y'], mode: 'equation' }, 'y = 2x - 1').correct);

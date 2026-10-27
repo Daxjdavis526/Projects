@@ -8,6 +8,29 @@ const G = 6.674e-11, C = 2.998e8;
 
 const EFE = t`R_{\mu\nu} - \tfrac12 R\,g_{\mu\nu} + \Lambda g_{\mu\nu} = \frac{8\pi G}{c^4}\,T_{\mu\nu}`;
 
+// pictures
+const SUB = '₀₁₂₃';
+const GRID = [];
+for (let m = 0; m < 4; m++) for (let n = 0; n < 4; n++) GRID.push({ x: n, y: -m, r: 5, color: m === n ? 'gold' : 'accent', label: `X${SUB[m]}${SUB[n]}`, labelDx: 7, labelDy: -13 });
+const ARRAY = {
+  type: 'graph', params: { x: [-0.7, 3.7], y: [-3.7, 0.7], aspect: 'square', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, points: GRID,
+    curves: [{ fn: '-x', domain: [-0.45, 3.45], dash: [5, 5], color: 'ink3', width: 1.2 }] },
+  caption: t`The sixteen entries of a $4\times4$ array: row $\mu$, column $\nu$, each running over $0, 1, 2, 3$. Symmetry, $X_{\mu\nu} = X_{\nu\mu}$, is a reflection across the dashed diagonal.`,
+};
+// the length on which matter of density ρ curves spacetime: L = 1/√(κρc²), κ = 8πG/c⁴
+const L_COEF = C / Math.sqrt(8 * Math.PI * G);
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+const sci = (x) => { const e = Math.floor(Math.log10(x)), m = Math.round(x / 10 ** e); return m === 10 ? `10${[...String(e + 1)].map((d) => SUP[d]).join('')}` : `${m} × 10${[...String(e)].map((d) => SUP[d]).join('')}`; };
+const DENSITIES = [['air', 1.2, 0, -14], ['water', 1000, 0, -14], ['the Sun’s core', 1.5e5, 0, -14], ['a white dwarf', 1e9, 0, -14], ['a neutron star', 4e17, -10, 16]];
+const length = (L) => (L < 1e6 ? `${Math.round(L / 1000)} km` : `${sci(L)} m`);
+const STIFFNESS = {
+  type: 'graph', params: { x: [-1, 19.5], y: [2.5, 14], xlabel: 'log₁₀ density (kg/m³)', ylabel: 'log₁₀ L (m)', axesAt: 'edge',
+    curves: [{ fn: `${Math.log10(L_COEF).toFixed(4)} - x/2`, color: 'ink3', width: 1.4 }],
+    points: DENSITIES.map(([name, rho, dx, dy]) => ({ x: Math.log10(rho), y: Math.log10(L_COEF / Math.sqrt(rho)), color: 'accent', label: `${name}: ${length(L_COEF / Math.sqrt(rho))}`, labelDx: dx || 9, labelDy: dy, labelAlign: dx < 0 ? 'right' : 'left' })) },
+  caption: t`The length $L = 1/\sqrt{\kappa\,\rho c^2}$, with $\kappa = 8\pi G/c^4$, on which matter of density $\rho$ curves spacetime — an order of magnitude, not an exact radius. For water it is about 1.5 AU; only in a neutron star does it shrink to the size of the star itself.`,
+};
+const FALLING_BALL = (caption) => ({ type: 'gr-dustball', params: { mode: 'tides', body: 'bh', rSlider: false, play: false, t: 0.6, readout: false, views: 'side' }, caption });
+
 export default lesson({
   id: 'gr.EQ.1',
   kind: 'dissection',
@@ -60,6 +83,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     mcq({
       id: 'which-matter', difficulty: 1,
       prompt: t`$$${EFE}$$ Which term describes the matter and energy present?`,
+      visual: { type: 'gr-dustball', params: { mode: 'matter', rho: 1000, rhoSlider: false, play: false, t: 0.6, readout: false, views: 'side' }, caption: t`A ball of dust released at rest inside water-density matter shrinks the same way in every direction. Something in the equation must say how much matter is there.` },
       choices: [t`$T_{\mu\nu}$`, t`$R_{\mu\nu}$`, t`$g_{\mu\nu}$`, t`$\Lambda g_{\mu\nu}$`],
       answer: 0,
       why: { 1: 'The Ricci tensor is geometry: second derivatives of the metric.', 2: 'The metric is the geometry itself — the unknown you solve for.', 3: 'This is the cosmological-constant term: a property of empty spacetime, not of the matter in it.' },
@@ -70,6 +94,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     mcq({
       id: 'count-equations', difficulty: 2,
       prompt: t`Each side of the field equations is a symmetric $4\times4$ array ($X_{\mu\nu} = X_{\nu\mu}$). How many independent component equations does that make?`,
+      visual: ARRAY,
       choices: ['10', '16', '4', '6'],
       answer: 0,
       why: { 1: 'A general 4 × 4 array has 16 entries, but symmetry makes the 6 below the diagonal copies of the 6 above it.', 2: 'That counts only the diagonal.', 3: 'That counts only the off-diagonal pairs — add the 4 diagonal entries.' },
@@ -81,6 +106,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     num({
       id: 'coupling', difficulty: 2,
       prompt: t`Using $G = 6.674\times10^{-11}\ \text{m}^3\,\text{kg}^{-1}\,\text{s}^{-2}$ and $c = 2.998\times10^{8}\ \text{m/s}$, compute the coupling $\dfrac{8\pi G}{c^4}$ in $\text{N}^{-1}$.`,
+      visual: STIFFNESS,
       answer: (8 * Math.PI * G) / C ** 4, units: 'N^-1', tol: { rel: 0.01 },
       errors: [{ value: (8 * Math.PI * G) / C ** 2, feedback: t`You divided by $c^2$; the coupling has $c^4$ downstairs.` }, { value: (8 * G) / C ** 4, feedback: t`You dropped the $\pi$.` }],
       hints: [t`$c^4 = (2.998\times10^8)^4 \approx 8.08\times10^{33}$.`, t`$8\pi G \approx 1.68\times10^{-9}$; divide.`],
@@ -105,6 +131,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     mcq({
       id: 'vacuum', difficulty: 3,
       prompt: t`In empty space with $\Lambda = 0$, $T_{\mu\nu} = 0$. What do the field equations reduce to?`,
+      visual: FALLING_BALL(t`A ball of dust falling freely in empty space near a black hole of ten solar masses. Shape drawn to scale; the hole is off to the left.`),
       choices: [t`$R_{\mu\nu} = 0$`, t`$g_{\mu\nu} = 0$`, t`Spacetime must be flat: $R^{\rho}{}_{\sigma\mu\nu} = 0$`, t`$R = 0$, with $R_{\mu\nu}$ free`],
       answer: 0,
       why: { 1: 'A vanishing metric would mean no distances or times at all — not a spacetime.', 2: 'Ricci-flat is weaker than flat: the Riemann tensor (tidal curvature) can survive. Outside the Sun, spacetime is curved but empty.', 3: t`Taking the trace of $R_{\mu\nu} - \tfrac12 R g_{\mu\nu} = 0$ gives $R - 2R = 0$, so $R = 0$ — and then $R_{\mu\nu} = 0$ follows.` },
@@ -127,6 +154,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     mcq({
       id: 'cp-flat', difficulty: 3, transfer: true,
       prompt: t`A probe far from any star measures tidal stretching from a nearby black hole, in a region where $T_{\mu\nu} = 0$ and we take $\Lambda = 0$. Which statement is right?`,
+      visual: FALLING_BALL(t`The probe's test masses, released around it, as they fall towards the black hole (off to the left). Shape drawn to scale.`),
       choices: [
         t`$R_{\mu\nu} = 0$ there, but the Riemann tensor is not zero — tides are curvature`,
         t`The tides prove $T_{\mu\nu} \neq 0$ at the probe`,
@@ -142,6 +170,7 @@ So pressure gravitates too, not only mass. In a star that is a small correction;
     num({
       id: 'cp-lambda', difficulty: 3,
       prompt: t`The vacuum energy density equivalent to $\Lambda$ is $u_\Lambda = \dfrac{\Lambda c^4}{8\pi G}$. With $\Lambda = 1.1\times10^{-52}\ \text{m}^{-2}$, $G = 6.674\times10^{-11}$ and $c = 2.998\times10^8$ (SI), find $u_\Lambda$ in $\text{J/m}^3$.`,
+      visual: { type: 'gr-friedmann', params: { sliders: false, readout: false }, caption: t`The size of our universe against time in billions of years (the Planck 2018 fit): the measured $\Lambda$ is what makes the expansion speed up today.` },
       answer: (1.1e-52 * C ** 4) / (8 * Math.PI * G), units: 'J/m^3', tol: { rel: 0.02 },
       hints: [t`It is $\Lambda$ divided by the coupling constant you met earlier, $2.08\times10^{-43}\ \text{N}^{-1}$.`, t`$1.1\times10^{-52} / 2.08\times10^{-43}$.`],
       teach: 'Dividing a curvature by the coupling 8πG/c⁴ turns it into an energy density.',

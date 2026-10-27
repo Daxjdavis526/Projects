@@ -17,8 +17,8 @@
 //       probe: { x, y, label } | null,           // drag it; reads B (probeArrow: false hides the B arrow drawn on it)
 //       loop: { shape: 'circle', x, y, r, move: true, resize: true } | null,   // an Amperian loop
 //       shapes: ['circle', 'square', 'lumpy'],   // offer a choice of its shape
-//       forces: false, forceOn: 0,               // force-per-length arrows on the wires; which wire the readout follows
-//       readouts: ['B'],                         // any of B Bx By circ muI Ienc F mu0nI mu0NI
+//       forces: false, forceOn: 0,               // force-per-length arrows on the wires; which wire the readout follows ('all': each)
+//       readouts: ['B'],                         // any of B Bx By circ muI Ienc F d mu0nI mu0NI (d: wires 1–2 apart)
 //       labels: true, static: false,             // label wires with their currents; a still picture (no dragging)
 //       sliders, choices, constants,             // as in graph: keys usable in I, x, y, R, N, …
 //       presets: [{ id, label, wires, loops, … }], preset } }   // a choice of arrangements
@@ -39,7 +39,7 @@ export const defaults = {
 
 const UNIT = { m: 1, cm: 0.01, mm: 0.001 };
 const UNIT_TEXT = { m: 'm', cm: 'cm', mm: 'mm' };
-const READOUTS = ['B', 'Bx', 'By', 'circ', 'muI', 'Ienc', 'F', 'mu0nI', 'mu0NI'];
+const READOUTS = ['B', 'Bx', 'By', 'circ', 'muI', 'Ienc', 'F', 'd', 'mu0nI', 'mu0NI'];
 const SHAPES = { circle: 'Circle', square: 'Square', lumpy: 'Lumpy loop' };
 const SCENE_KEYS = ['wires', 'loops', 'solenoid', 'toroid', 'uniform', 'probe', 'loop'];
 const keysOf = (P) => [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
@@ -97,10 +97,11 @@ export function mount(F, P0) {
   // ─── handles ─────────────────────────────────────────────────────────────
   const handles = [];
   if (live) {
-    st.wires.forEach((w, k) => {
-      if (!w.drag) return;
-      handles.push(plot.handle(() => [num(w.x, env()), num(w.y, env())], (x, y) => { w.x = +x.toFixed(3); w.y = +y.toFixed(3); }, { r: 11, label: w.label || `wire ${k + 1}` }));
-    });
+    // a handle for every wire index that is draggable in any arrangement; it acts on whichever wire is there now
+    const nDrag = Math.max(0, ...[P, ...(P.presets || [])].map((S) => (S.wires || []).reduce((m, w, k) => (w.drag ? k + 1 : m), 0)));
+    for (let k = 0; k < nDrag; k++) {
+      handles.push(plot.handle(() => { const w = st.wires[k]; return w?.drag ? [num(w.x, env()), num(w.y, env())] : [NaN, NaN]; }, (x, y) => { const w = st.wires[k]; if (w?.drag) { w.x = +x.toFixed(3); w.y = +y.toFixed(3); } }, { r: 11, label: `wire ${k + 1}` }));
+    }
     if (st.probe && st.probe.drag !== false) handles.push(plot.handle(() => [st.probe.x, st.probe.y], (x, y) => { st.probe.x = x; st.probe.y = y; }, { r: 9, label: 'probe' }));
     if (st.loop && st.loop.move !== false) handles.push(plot.handle(() => [st.loop.x, st.loop.y], (x, y) => { st.loop.x = x; st.loop.y = y; }, { r: 9, label: 'Amperian loop centre' }));
     if (st.loop && st.loop.resize !== false) handles.push(plot.handle(() => [st.loop.x + st.loop.r, st.loop.y], (x) => { st.loop.r = Math.max(0.05 * (plot.vx1 - plot.vx0), x - st.loop.x); }, { r: 8, label: 'Amperian loop size' }));
@@ -253,8 +254,12 @@ export function mount(F, P0) {
         const len = Math.min(0.12 * (v.x1 - v.x0), 0.42 * gap) * Math.sqrt(m / Fmax);
         plot.arrow(w.x / L + (f[0] / m) * 0.02 * (v.x1 - v.x0), w.y / L + (f[1] / m) * 0.02 * (v.x1 - v.x0), w.x / L + (f[0] / m) * len, w.y / L + (f[1] / m) * len, { color: 'violet', width: 2.6, head: 10, label: k === 0 ? 'F' : '', ldx: 6, ldy: -8 });
       });
-      if (want.includes('F')) { const k = P.forceOn ?? 0, f = Fs[k], lb = S.wires[k]?.label; if (f) rows.push([`force per metre on ${lb ? (lb.length <= 2 ? `wire ${lb}` : lb) : 'the wire'}`, `${texNum(Math.hypot(...f))}\\ \\mathrm{N/m}`]); }
+      if (want.includes('F')) {
+        const on = P.forceOn === 'all' ? st.wires.map((_, k) => k) : [P.forceOn ?? 0];
+        for (const k of on) { const f = Fs[k], lb = S.wires[k]?.label; if (f) rows.push([`force per metre on ${lb ? (lb.length <= 2 ? `wire ${lb}` : lb) : 'the wire'}`, `${texNum(Math.hypot(...f))}\\ \\mathrm{N/m}`]); }
+      }
     }
+    if (want.includes('d') && S.wires.length > 1) rows.push(['separation $d$', `${+(Math.hypot(S.wires[1].x - S.wires[0].x, S.wires[1].y - S.wires[0].y) / L).toPrecision(3)}\\ \\mathrm{${ut}}`]);
 
     // the probe
     if (st.probe) {

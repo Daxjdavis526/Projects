@@ -306,6 +306,10 @@ const tangent = (S, lines) => {
   const zero = M.contour(pg, 0), top = M.contour(pg, Vp), mid = M.contour(pg, Vp / 2);
   check('plates: no contour of noise where V is constant at the level', zero.length === 0 && top.every(([x0, , x1]) => Math.abs(x0 + 0.04) < 0.007 && Math.abs(x1 + 0.04) < 0.007), `${zero.length} segments at 0 V; ${top.length} at the + plate`);
   check('plates: the halfway equipotential is the midplane', mid.length > 10 && mid.every(([x0, , x1]) => Math.abs(x0) < 1e-6 && Math.abs(x1) < 1e-6));
+  // a charge on (or a hair from) a grid node makes V there enormous; the other contours must survive it
+  const S3 = M.scene({ charges: [{ x: -0.025, y: 0, q: 3e-9 }, { x: 0.03, y: 0, q: -1e-9 }] });
+  const g3 = M.potentialGrid(S3, { x0: -0.1, x1: 0.1, y0: -0.0625, y1: 0.0625 }, 160, 100);
+  check('a charge on a grid node does not wipe out the other equipotentials', [-200, 0, 200, 1000].every((l) => M.contour(g3, l).length > 40));
 }
 
 // ─── a charged particle ───────────────────────────────────────────────────

@@ -113,6 +113,8 @@ export function escapeDamage(text, { prose = true } = {}) {
     if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
+    // '\rho' in an ordinary string is a carriage return + "ho", which a later rewrite may turn into a newline
+    if (/\n(ho|ight|angle|floor|ceil|ightarrow|m)(?![A-Za-z])/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” has a line break where \\rho, \\right or \\rangle was probably meant; use String.raw`;
   }
   // an odd number of unescaped $ leaves one open: everything after it reads as math
   if (prose && (withoutCode(s).replace(/\\\$/g, '').match(/\$/g) || []).length % 2) return 'has an odd number of $ signs — one opens math that never closes (a stray $ after an interpolation?)';

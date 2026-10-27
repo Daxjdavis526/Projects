@@ -145,7 +145,7 @@ taking $V = 0$ infinitely far away. It is positive near a positive charge and ne
         const [q1, q2, q3] = r.pick([[2, 2, 2], [3, 3, -2], [4, -1, -1]]), a = r.pick([3, 5]);
         const S = q1 * q2 + q1 * q3 + q2 * q3, U = (K * S * 1e-18) / (a / 100);
         return {
-          prompt: t`How much work does it take to assemble charges of $${q1}$, $${q2}$ and $${q3}$ nC, brought in from far apart, at the corners of an equilateral triangle of side ${a} cm?`,
+          prompt: t`How much work does it take to assemble charges of $${q1 > 0 ? '+' : ''}${q1}$, $${q2 > 0 ? '+' : ''}${q2}$ and $${q3 > 0 ? '+' : ''}${q3}$ nC, brought in from far apart, at the corners of an equilateral triangle of side ${a} cm?`,
           answer: U, units: 'J', tol: { rel: 0.01 },
           errors: [
             { value: 2 * U, feedback: 'Each pair counts once: three charges make three pairs, not six.' },
@@ -172,7 +172,7 @@ taking $V = 0$ infinitely far away. It is positive near a positive charge and ne
           hints: [t`Outside, the sphere's potential is that of a point charge at its centre: $kQ/r$. At the surface, $kQ/R$.`, 'Inside, E = 0: moving inward changes V by nothing.'],
           teach: 'A charged conductor is at one potential throughout: for a sphere, kQ/R at the surface and everywhere inside.',
           explain: t`At the surface $V = kQ/R = \dfrac{(8.988\times10^{9})(${Q}\times10^{-9})}{${R / 100}} = ${tn(V)}$ V. Inside, $E = 0$, so $\Delta V = -\int\vec E\cdot d\vec s = 0$: the centre is at the same $${tn(V)}$ V.`,
-          visual: field({ unit: 'cm', x: [-2.2 * R, 2.2 * R], y: [-1.375 * R, 1.375 * R], conductor: { x: 0, y: 0, R, Q }, probe: { x: 0.001, y: 0, label: 'centre' }, probeArrow: false, fieldLines: false, equip: true, equipLabels: false }, 'The charged sphere, its equipotentials outside (violet) and its centre.'),
+          visual: field({ unit: 'cm', x: [-2.2 * R, 2.2 * R], y: [-1.375 * R, 1.375 * R], conductor: { x: 0, y: 0, R, a: r6(0.9 * R), Q }, probe: { x: 0.001, y: 0, label: 'centre' }, probeArrow: false, fieldLines: false, equip: true, equipLabels: false }, 'The charged hollow sphere in cross-section, its equipotentials outside (violet) and its centre.'),
         };
       },
     }),
@@ -242,12 +242,12 @@ taking $V = 0$ infinitely far away. It is positive near a positive charge and ne
           curves: [{ param: ['1 + 2.05*t', '0'], t: [0, 1], color: 'ink2', width: 1.6 }],
           points: [{ x: 0, y: 0, r: 0.01, label: 'R = 20 cm', color: 'ink', labelDx: -28, labelDy: 4 }, { x: 3.3, y: 0.3, r: 0.01, label: 'R = 1.0 cm', color: 'ink', labelDx: -26, labelDy: -6 }, { x: 2.1, y: 0, r: 0.01, label: 'wire', color: 'ink2', labelDx: -10, labelDy: -8 }],
         },
-        caption: 'The two spheres joined by a wire (not to scale: in fact they are far apart).',
+        caption: 'The two spheres joined by a wire. Not to scale: the small sphere is drawn larger than it is, and the two are really far apart.',
       },
     }),
     mcq({
       id: 'cp-zero-V', difficulty: 2,
-      prompt: 'On the line midway between the two charges of a dipole, V = 0. What is true at the point P on that line?',
+      prompt: t`On the line midway between the two charges of a dipole, $V = 0$. What is true at the point P on that line?`,
       choices: [
         'Carrying a test charge in from far away to P takes no net work',
         'The field at P is zero',
@@ -263,7 +263,7 @@ taking $V = 0$ infinitely far away. It is positive near a positive charge and ne
       hints: ['V = 0 tells you about energy. What tells you about force?'],
       teach: 'V = 0 at a point says nothing about the field there: the field is how fast V changes, not V itself.',
       explain: 'With V = 0 at P and far away, bringing a test charge from far away to P takes no net work. But the field at P is how V changes from point to point, and V rises toward the + charge and falls toward the − charge: the field at P points from + toward −, and a charge there is pushed. (Just as E = 0 between two like charges does not make V zero there.)',
-      visual: field({ unit: 'cm', x: [-10, 10], y: [-5, 5], charges: [{ x: -3, y: 0, q: 2 }, { x: 3, y: 0, q: -2 }], probe: { x: 0, y: 2.5, label: 'P' }, probeArrow: false, fieldLines: false, equip: true }, 'A dipole, its equipotentials (violet, labelled in volts) and the point P on the 0 V line.'),
+      visual: field({ unit: 'cm', x: [-10, 10], y: [-5, 5], charges: [{ x: -3, y: 0, q: 2 }, { x: 3, y: 0, q: -2 }], probe: { x: 0, y: 3.4, label: 'P' }, probeArrow: false, fieldLines: false, equip: true, levels: [-1200, -600, -300, 0, 300, 600, 1200] }, 'A dipole, its equipotentials (violet, labelled in volts) and the point P on the 0 V line.'),
     }),
     num({
       id: 'cp-vdg', difficulty: 2, transfer: true,

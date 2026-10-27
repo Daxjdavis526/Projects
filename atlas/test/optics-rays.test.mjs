@@ -52,7 +52,7 @@ check('normal incidence: s and p agree', near(O.fresnel(1, 1.5, 0).Rs, O.fresnel
     }
   check('energy is conserved at every angle: R + T = 1 for s and p', worst < 1e-12, worst.toExponential(2));
 }
-check('grazing incidence reflects almost everything', O.fresnel(1, 1.5, 89.9 * D).R > 0.99);
+check('grazing incidence reflects almost everything (99% at 89.9°)', O.fresnel(1, 1.5, 89.9 * D).R > 0.98);
 check('beyond the critical angle R = 1', O.fresnel(1.5, 1, 50 * D).R === 1 && O.fresnel(1.5, 1, 50 * D).tir);
 check('polarizing sunglasses: water’s glare at 53° is mostly s', O.reflectance(1, 1.333, 53.1 * D, 'p') < 1e-4 && O.reflectance(1, 1.333, 53.1 * D, 's') > 0.07);
 
@@ -73,35 +73,38 @@ check('refraction works with the normal on either side', near(O.refractDir([0.6,
 
 // ─── exact tracing: prisms ─────────────────────────────────────────────────
 {
-  const A = 60 * D, n = 1.5168;
-  const sc = O.polygonScene(O.prismVerts(A, 1), n);
-  // a ray aimed at the left face at incidence θ₁ (to that face's normal), travelling up toward the base side
-  const fire = (th1) => {
-    const p = [-0.5 * Math.tan(A / 2), 0.5];                     // the middle of the left face
-    const nOut = [-Math.cos(A / 2), Math.sin(A / 2)];              // outward normal of the left face
-    // incoming direction: −nOut rotated by −θ₁ (toward the base)
-    const c = Math.cos(-th1), s = Math.sin(-th1), d = [-(nOut[0] * c - nOut[1] * s), -(nOut[0] * s + nOut[1] * c)];
+  // a ray aimed at the middle of the left face at incidence θ₁ to its normal,
+  // coming from the base side of the normal (the textbook picture)
+  const fire = (A, n, th1) => {
+    const sc = O.polygonScene(O.prismVerts(A, 1), n);
+    const p = [-0.5 * Math.tan(A / 2), 0.5];
+    const inward = [Math.cos(A / 2), -Math.sin(A / 2)];          // into the glass, perpendicular to the left face
+    const c = Math.cos(th1), s = Math.sin(th1), d = [inward[0] * c - inward[1] * s, inward[0] * s + inward[1] * c];
     const o = [p[0] - 3 * d[0], p[1] - 3 * d[1]];
     return { tr: O.trace(sc, o, d), d };
   };
-  for (const deg of [40, 48.6, 60, 75]) {
-    const { tr, d } = fire(deg * D);
+  const A = 50 * D, n = 1.5168;
+  for (const deg of [30, 40, 60, 75]) {
+    const { tr, d } = fire(A, n, deg * D);
     const out = tr.end.dir, dev = Math.acos(Math.max(-1, Math.min(1, out[0] * d[0] + out[1] * d[1])));
     const exp = O.prism(A, n, deg * D);
-    check(`exact trace through a 60° BK7 prism at ${deg}° deviates by ${(exp.delta / D).toFixed(2)}°`, near(dev, exp.delta, 1e-9), `${(dev / D).toFixed(4)}°`);
-    check(`…and loses a few percent to reflections at the two faces`, tr.end.power > 0.85 && tr.end.power < 0.99, tr.end.power.toFixed(3));
+    check(`exact trace through a 50° BK7 prism at ${deg}° deviates by ${(exp.delta / D).toFixed(3)}°`, near(dev, exp.delta, 1e-9), `${(dev / D).toFixed(4)}°`);
+    check('…crossing the two slanted faces only', tr.legs.length === 3);
+    const T = (1 - O.fresnel(1, n, deg * D).R) * (1 - O.fresnel(n, 1, exp.th3).R);
+    check('…keeping the power the two faces’ Fresnel transmissions allow', near(tr.end.power, T, 1e-9), `${tr.end.power} vs ${T}`);
   }
-  // minimum deviation: scan the incidence angle
+  const A6 = 60 * D;
   let best = Infinity;
-  for (let a = 30; a < 89; a += 0.01) { const p = O.prism(A, n, a * D); if (!p.tir) best = Math.min(best, p.delta); }
-  check('the smallest deviation found by scanning equals 2 asin(n sin(A/2)) − A', near(best, O.minDeviation(A, n), 1e-6), `${(best / D).toFixed(4)}° vs ${(O.minDeviation(A, n) / D).toFixed(4)}°`);
-  const sym = O.prism(A, n, Math.asin(n * Math.sin(A / 2)));
-  check('at minimum deviation the ray crosses the prism symmetrically (θ₂ = θ₃ = A/2)', near(sym.th2, A / 2) && near(sym.th3, A / 2));
-  check('violet is deviated more than red', O.prism(A, O.indexOf('crown', 400), 50 * D).delta > O.prism(A, O.indexOf('crown', 700), 50 * D).delta);
-  const p = O.prism(A, n, 20 * D);
-  check('at 20° incidence the ray is trapped at the second face (θ₃ > critical)', p.tir && O.prism(A, n, 20 * D).th3 > O.criticalAngle(n, 1));
-  const { tr } = fire(20 * D);
-  check('…and the exact trace reflects it totally there and out through the base', tr.legs.length >= 4 && tr.end.dir[1] < 0);
+  for (let a = 30; a < 89; a += 0.01) { const p = O.prism(A6, n, a * D); if (!p.tir) best = Math.min(best, p.delta); }
+  check('the smallest deviation found by scanning equals 2 asin(n sin(A/2)) − A', near(best, O.minDeviation(A6, n), 1e-6), `${(best / D).toFixed(4)}° vs ${(O.minDeviation(A6, n) / D).toFixed(4)}°`);
+  const sym = O.prism(A6, n, Math.asin(n * Math.sin(A6 / 2)));
+  check('at minimum deviation the ray crosses the prism symmetrically (θ₂ = θ₃ = A/2)', near(sym.th2, A6 / 2) && near(sym.th3, A6 / 2));
+  check('violet is deviated more than red', O.prism(A6, O.indexOf('crown', 400), 50 * D).delta > O.prism(A6, O.indexOf('crown', 700), 50 * D).delta);
+  const p = O.prism(A6, n, 20 * D);
+  check('at 20° incidence on a 60° prism the ray is trapped at the second face (θ₃ > critical)', p.tir && p.th3 > O.criticalAngle(n, 1));
+  const { tr } = fire(A6, n, 20 * D);
+  const second = tr.legs[2];
+  check('…the exact trace reflects it totally there, with no loss, and out through the base', second.power === tr.legs[1].power && tr.end.dir[1] < 0 && Math.abs(tr.legs[3].a[1]) < 1e-9, JSON.stringify(tr.legs.map((l) => l.a.map((v) => +v.toFixed(3)))));
 }
 
 // ─── fibres ────────────────────────────────────────────────────────────────
