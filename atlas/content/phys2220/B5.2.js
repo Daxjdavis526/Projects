@@ -3,7 +3,7 @@
 // add as phasors: V₀ = I₀Z with Z = √(R² + (X_L − X_C)²) and
 // tan φ = (X_L − X_C)/R. Element voltages can exceed the source's.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { tn, sf, r6, apart, acPic, phasorPic, COL, DEG } from './_maxwell.js';
+import { tn, sf, r6, apart, acPic, phasorPic, impedanceTriangle, COL, DEG } from './_maxwell.js';
 
 const t = String.raw;
 const TAU = 2 * Math.PI;
@@ -14,24 +14,6 @@ function rlc({ V0, f, R, L, C }) {
   return { w, XL, XC, X, Z, phi, I, VR: I * R, VL: I * XL, VC: I * XC };
 }
 const EX = rlc({ V0: 10, f: 120, R: 40, L: 0.1, C: 50e-6 });
-
-/** the impedance triangle: R along x, the net reactance up (inductive) or down (capacitive), Z the hypotenuse */
-function impedanceTriangle({ R, X, labels = { R: 'R', X: 'X_L − X_C', Z: 'Z' }, showZ = true, caption }) {
-  const s = 1 / Math.max(R, Math.abs(X), 1e-9);
-  const r = R * s, x = X * s;
-  return {
-    type: 'graph',
-    params: {
-      x: [-0.35, 1.45], y: [Math.min(-0.25, x - 0.2), Math.max(0.25, x + 0.2)], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
-      arrows: [
-        { from: [0, 0], to: [r6(r), 0], color: COL.R, label: labels.R, labelDx: -10, labelDy: x >= 0 ? 14 : -12, labelAlign: 'center' },
-        { from: [r6(r), 0], to: [r6(r), r6(x)], color: x >= 0 ? COL.L : COL.C, label: labels.X, labelDx: 8, labelDy: 0, labelAlign: 'left' },
-        ...(showZ ? [{ from: [0, 0], to: [r6(r), r6(x)], color: COL.v, label: labels.Z, labelDx: -16, labelDy: x >= 0 ? -10 : 10 }] : []),
-      ],
-    },
-    caption: caption ?? 'The impedance triangle: R along the current’s direction, the net reactance at right angles, and Z their phasor sum.',
-  };
-}
 
 export default lesson({
   id: 'phys2220.B5.2',
@@ -55,16 +37,16 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
     title: 'Three voltages, one current',
     lead: t`The element voltages $v_R$, $v_L$, $v_C$ drawn head to tail as phasors: their sum is the source voltage $v$ (gold). The current $i$ (blue) is in step with $v_R$. Graphs on the right show all five against time.`,
     tasks: [
-      'Follow the chain of arrows: v_R, then v_L, then v_C — it ends exactly at the tip of v.',
-      'Compare lengths: v_L is longer than v itself. The coil and the capacitor partly cancel each other.',
-      'Lower f until the source voltage lines up with the current: there X_L = X_C and φ = 0.',
+      t`Follow the chain of arrows: $v_R$, then $v_L$, then $v_C$ — it ends exactly at the tip of $v$.`,
+      t`Compare lengths: $v_L$ is longer than $v$ itself. The coil and the capacitor partly cancel each other.`,
+      t`Lower $f$ until the source voltage lines up with the current: there $X_L = X_C$ and $\phi = 0$.`,
       'Raise R: the phase angle shrinks and the current falls.',
     ],
     params: { mode: 'ac', elements: 'RLC', V0: 10, f: 120, R: 40, L: 0.1, C: 50e-6 },
   },
   example: {
     prompt: t`A source of amplitude 10.0 V at 120 Hz drives $R = 40.0\ \Omega$, $L = 0.100$ H and $C = 50.0\ \mu$F in series. Find the reactances, the impedance, the current amplitude, the phase angle, and the voltage amplitude across each element.`,
-    visual: impedanceTriangle({ R: EX.R ?? 40, X: EX.X, caption: 'The impedance triangle for this circuit, to scale: R = 40.0 Ω along the current, the net reactance 48.9 Ω upward (the coil wins at 120 Hz), and Z.' }),
+    visual: impedanceTriangle({ R: 40, X: EX.X, caption: 'The impedance triangle for this circuit, to scale: R = 40.0 Ω along the current, the net reactance 48.9 Ω upward (the coil wins at 120 Hz), and Z.' }),
     steps: [
       { label: 'Reactances', text: t`$\omega = 2\pi(120) = ${tn(EX.w)}$ rad/s: $X_L = \omega L = ${tn(EX.XL)}\ \Omega$ and $X_C = 1/\omega C = ${tn(EX.XC)}\ \Omega$.` },
       { label: 'Impedance', text: t`$Z = \sqrt{40.0^2 + (${tn(EX.XL)} - ${tn(EX.XC)})^2} = \sqrt{40.0^2 + ${tn(EX.X)}^2} = ${tn(EX.Z)}\ \Omega$.` },
@@ -83,10 +65,10 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
         const Z = Math.hypot(R, XL - XC);
         return {
           prompt: t`In a series RLC circuit at some frequency, $R = ${R}\ \Omega$, $X_L = ${XL}\ \Omega$ and $X_C = ${XC}\ \Omega$. What is the impedance?`,
-          visual: impedanceTriangle({ R, X: XL - XC, labels: { R: `R = ${R} Ω`, X: `X_L − X_C = ${XL - XC} Ω`.replace('X_L − X_C', 'net reactance'), Z: 'Z = ?' }, caption: 'The impedance triangle, to scale: R along the current, the net reactance at right angles.' }),
+          visual: impedanceTriangle({ R, X: XL - XC, labels: { R: `R = ${R} Ω`, X: `net reactance ${XL - XC} Ω`, Z: 'Z = ?' }, caption: 'The impedance triangle, to scale: R along the current, the net reactance at right angles.' }),
           answer: Z, units: 'Ω', tol: { rel: 0.005 },
           errors: apart([
-            { value: R + XL + XC, feedback: 'Impedances do not add as numbers: R and the reactances are at right angles, and X_L and X_C oppose each other.' },
+            { value: R + XL + XC, feedback: t`Impedances do not add as numbers: $R$ and the reactances are at right angles, and $X_L$ and $X_C$ oppose each other.` },
             { value: Math.sqrt(R * R + XL * XL + XC * XC), feedback: t`$X_L$ and $X_C$ point opposite ways: subtract them first, $Z = \sqrt{R^2 + (X_L - X_C)^2}$.` },
             { value: R + Math.abs(XL - XC), feedback: t`R and the net reactance are at right angles: combine them with Pythagoras.` },
           ], Z),
@@ -121,7 +103,7 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
           prompt: t`A source of amplitude ${V0} V at ${f} Hz drives $R = ${R}\ \Omega$, $L = ${LmH}$ mH and $C = ${CuF}\ \mu$F in series. What is the current amplitude?`,
           visual: acPic({ mode: 'ac', elements: 'RLC', V0, f, R, L: LmH * 1e-3, C: CuF * 1e-6, phase: 70, strip: true, phasors: ['R', 'L', 'C'], traces: ['i'] }, 'The circuit, its element voltages as phasors drawn head to tail, and the current against time (to its own scale).'),
           answer: c.I, units: 'A', tol: { rel: 0.01 },
-          errors: apart([{ value: V0 / (R + c.XL + c.XC), feedback: 'Add R and the reactances as phasors, not as numbers: Z = √(R² + (X_L − X_C)²).' }, { value: V0 / R, feedback: t`That ignores the reactances: only at resonance is $Z = R$.` }], c.I),
+          errors: apart([{ value: V0 / (R + c.XL + c.XC), feedback: t`Add $R$ and the reactances as phasors, not as numbers: $Z = \sqrt{R^2 + (X_L - X_C)^2}$.` }, { value: V0 / R, feedback: t`That ignores the reactances: only at resonance is $Z = R$.` }], c.I),
           hints: [t`Find $X_L = \omega L$ and $X_C = 1/\omega C$, then $Z$, then $I_0 = V_0/Z$.`, t`$X_L = ${tn(c.XL)}\ \Omega$ and $X_C = ${tn(c.XC)}\ \Omega$.`],
           teach: t`In a series AC circuit, $I_0 = V_0/Z$ with $Z = \sqrt{R^2 + (X_L - X_C)^2}$.`,
           explain: t`$X_L = ${tn(c.XL)}\ \Omega$, $X_C = ${tn(c.XC)}\ \Omega$, $Z = \sqrt{${R}^2 + (${tn(c.X)})^2} = ${tn(c.Z)}\ \Omega$, so $I_0 = ${V0}/${tn(c.Z)} = ${tn(c.I)}$ A.`,
@@ -131,7 +113,7 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
     mcq({
       id: 'voltages-dont-add', difficulty: 2,
       prompt: t`In a series RLC circuit, an AC voltmeter shows these amplitudes: $V_R = 30$ V across the resistor, $V_L = 80$ V across the coil and $V_C = 40$ V across the capacitor. What is the amplitude of the source voltage?`,
-      visual: phasorPic({ items: [{ len: 0.45, deg: 0, color: COL.R, label: 'V_R = 30 V'.replace('V_R', 'resistor') }, { len: 1.2, deg: 90, color: COL.L, label: 'coil 80 V', ldx: 6, ldy: -6 }, { len: 0.6, deg: -90, color: COL.C, label: 'capacitor 40 V', ldx: 6, ldy: 12 }], R: 1.25, circle: false, caption: 'The three element voltages as phasors, to scale, at an instant when the current points to the right. The source voltage is not drawn.' }),
+      visual: phasorPic({ items: [{ len: 0.45, deg: 0, color: COL.R, label: 'resistor 30 V', ldy: 14 }, { len: 1.2, deg: 90, color: COL.L, label: 'coil 80 V', ldx: 6, ldy: -6 }, { len: 0.6, deg: -90, color: COL.C, label: 'capacitor 40 V', ldx: 6, ldy: 12 }], R: 1.25, circle: false, caption: 'The three element voltages as phasors, to scale, at an instant when the current points to the right. The source voltage is not drawn.' }),
       choices: ['50 V', '150 V', '70 V', '10 V'],
       answer: 0,
       why: {
@@ -140,21 +122,21 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
         3: t`That subtracts $V_R$ too. Only $v_L$ and $v_C$ point in opposite directions.`,
       },
       hints: [t`$v_L$ and $v_C$ point opposite ways; $v_R$ is at right angles to both.`, t`$V_0 = \sqrt{V_R^2 + (V_L - V_C)^2}$.`],
-      teach: 'Element voltages in an AC series circuit add as phasors: the source amplitude is √(V_R² + (V_L − V_C)²), less than their plain sum.',
+      teach: t`Element voltages in an AC series circuit add as phasors: the source amplitude is $\sqrt{V_R^2 + (V_L - V_C)^2}$, less than their plain sum.`,
       explain: t`$V_0 = \sqrt{30^2 + (80 - 40)^2} = \sqrt{900 + 1600} = 50$ V. The coil alone has more voltage across it than the whole source — possible because the capacitor’s voltage is opposite to it at every instant.`,
     }),
     mcq({
       id: 'leads-or-lags', difficulty: 2,
       prompt: t`A series RLC circuit is driven below its resonant frequency, where $X_C > X_L$. The element phasors are drawn head to tail. How is the current timed relative to the source voltage?`,
-      visual: acPic({ mode: 'ac', elements: 'RLC', V0: 10, f: 50, R: 40, L: 0.1, C: 50e-6, phase: 60, phasors: ['i', 'R', 'L', 'C'], traces: [] }, 'The element voltages v_R, v_L, v_C drawn head to tail, and the current phasor (blue). The source voltage is the arrow from the centre to the end of the chain — not drawn.'),
+      visual: acPic({ mode: 'ac', elements: 'RLC', V0: 10, f: 50, R: 40, L: 0.1, C: 50e-6, phase: 60, phasors: ['R', 'L', 'C'], traces: [] }, t`The element voltages $v_R$, $v_L$, $v_C$ drawn head to tail; $v_R$ points along the current. The source voltage is the arrow from the centre to the end of the chain — not drawn.`),
       choices: ['The current leads the source voltage', 'The current lags the source voltage', 'They are in phase', 'The current leads by exactly 90°'],
       answer: 0,
       why: {
         1: 'That happens above resonance, where the coil wins.',
-        2: 'Only at resonance, where X_L = X_C.',
+        2: t`Only at resonance, where $X_L = X_C$.`,
         3: t`With a resistor in the loop the angle is between 0 and 90°: $\tan\phi = (X_L - X_C)/R$ is finite.`,
       },
-      hints: ['The chain ends below the current’s direction: the net reactive voltage points along v_C.', t`$\tan\phi = (X_L - X_C)/R < 0$: what does a negative $\phi$ mean?`],
+      hints: [t`The current points along $v_R$. The chain ends on the $v_C$ side of it: the net reactive voltage points along $v_C$, a quarter turn behind the current.`, t`$\tan\phi = (X_L - X_C)/R < 0$: what does a negative $\phi$ mean?`],
       teach: 'Below resonance a series RLC circuit is capacitive: the current leads the source voltage.',
       explain: t`At 50 Hz, $X_L = 31.4\ \Omega$ and $X_C = 63.7\ \Omega$, so $\tan\phi = (31.4 - 63.7)/40$ and $\phi = -38.9^\circ$: the source voltage is behind the current, i.e. the current leads.`,
     }),
@@ -167,7 +149,7 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
           prompt: t`A source of amplitude ${V0} V at ${f} Hz drives $R = ${R}\ \Omega$, $L = ${L}$ H and $C = ${CuF}\ \mu$F in series. What is the amplitude of the voltage across the coil?`,
           visual: acPic({ mode: 'ac', elements: 'RLC', V0, f, R, L, C: CuF * 1e-6, phase: 20, strip: true, phasors: ['v', 'i'], traces: ['v', 'i'] }, 'The circuit, the source voltage v and the current i; the element voltages are not drawn.'),
           answer: c.VL, units: 'V', tol: { rel: 0.01 },
-          errors: apart([{ value: V0, feedback: 'The coil’s voltage is not capped at the source’s: it is I₀X_L, and here the capacitor cancels much of it.' }, { value: V0 * c.XL / (R + c.XL + c.XC), feedback: 'Share the voltage with the impedance Z = √(R² + (X_L − X_C)²), not with the plain sum of R and the reactances.' }], c.VL),
+          errors: apart([{ value: V0, feedback: t`The coil’s voltage is not capped at the source’s: it is $I_0X_L$, and here the capacitor cancels much of it.` }, { value: V0 * c.XL / (R + c.XL + c.XC), feedback: t`Share the voltage with the impedance $Z = \sqrt{R^2 + (X_L - X_C)^2}$, not with the plain sum of $R$ and the reactances.` }], c.VL),
           hints: [t`Find $I_0 = V_0/Z$, then $V_L = I_0X_L$.`, t`$X_L = ${tn(c.XL)}\ \Omega$, $X_C = ${tn(c.XC)}\ \Omega$, $Z = ${tn(c.Z)}\ \Omega$.`],
           teach: 'Each element’s voltage amplitude is I₀ times its own resistance or reactance — and near resonance the coil’s and capacitor’s can far exceed the source’s.',
           explain: t`$Z = ${tn(c.Z)}\ \Omega$, $I_0 = ${V0}/${tn(c.Z)} = ${tn(c.I)}$ A, so $V_L = I_0X_L = ${tn(c.VL)}$ V${c.VL > V0 ? ` — ${tn(c.VL / V0, 2)} times the source’s amplitude` : ''}.`,
@@ -235,11 +217,11 @@ $Z$ is the **impedance**, the AC circuit’s overall ratio of voltage to current
       answer: 0,
       why: {
         1: 'That holds for amplitudes in a DC loop. In AC the element voltages peak at different times and can partly cancel.',
-        2: 'All three amplitudes are positive; it is the phases that let v_L and v_C cancel.',
+        2: t`All three amplitudes are positive; it is the phases that let $v_L$ and $v_C$ cancel.`,
         3: 'No energy is created: the large voltages belong to energy sloshing between the coil and the capacitor, not drawn from the source.',
       },
       hints: [t`Do $v_L$ and $v_C$ peak at the same time, or in opposition?`],
-      teach: 'Because v_L and v_C are in opposition, each can be many times the source voltage near resonance.',
+      teach: t`Because $v_L$ and $v_C$ are in opposition, each can be many times the source voltage near resonance.`,
       explain: t`$V_0 = \sqrt{V_R^2 + (V_L - V_C)^2}$ constrains only the difference $V_L - V_C$. Near resonance $V_L \approx V_C$ and both can be $Q$ times the source amplitude — 25 V from a 10 V source is easy.`,
     }),
     num({

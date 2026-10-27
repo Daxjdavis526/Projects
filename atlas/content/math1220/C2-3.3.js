@@ -94,7 +94,7 @@ While $P$ is small compared with $K$ the bracket is close to 1 and growth is exp
         return {
           prompt: t`Carbon-14 has a half-life of 5730 years. A piece of charcoal has ${Math.round(f * 100)}% of the carbon-14 found in living wood. Roughly how old is it?`,
           answer: age, units: 'yr', tol: { rel: 0.01 },
-          errors: [{ value: 5730 * (1 - f) * 2, feedback: 'Decay is not linear: equal times remove equal *fractions*, not equal amounts. Use N = N₀ e^{−kt}.' }],
+          errors: [{ value: 5730 * (1 - f) * 2, feedback: 'Decay is not linear: equal times remove equal *fractions*, not equal amounts. Use $N = N_0 e^{-kt}$.' }],
           hints: [t`$N = N_0e^{-kt}$ with $k = \dfrac{\ln 2}{5730}\ \text{yr}^{-1}$.`, t`Solve $e^{-kt} = ${f}$: $\;t = \dfrac{\ln(1/${f})}{k} = 5730\,\dfrac{\ln(1/${f})}{\ln 2}$.`],
           teach: 'Radiometric dating inverts exponential decay: the fraction left gives the number of half-lives elapsed.',
           explain: t`$t = 5730 \times \dfrac{\ln(1/${f})}{\ln 2} = 5730 \times ${fmt(Math.log(1 / f) / LN2, 3)} \approx ${Math.round(age)}$ years — ${fmt(Math.log(1 / f) / LN2, 3)} half-lives.`,

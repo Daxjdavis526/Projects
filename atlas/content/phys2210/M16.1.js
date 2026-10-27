@@ -173,7 +173,7 @@ A kelvin and a Celsius degree are the same size; the two scales differ only in w
         const dT = toK(Tc) - 77.36;
         return {
           prompt: t`A stainless steel propellant line is chilled from the test cell’s ${Tc} °C down to 77.36 K by flowing liquid nitrogen through it. By how many kelvin does its temperature fall?`,
-          answer: +dT.toFixed(2), units: 'K', tol: { rel: 0, abs: 0.2 },
+          answer: +dT.toFixed(2), units: 'K', difference: true, tol: { rel: 0, abs: 0.2 },
           errors: [
             { value: +(Tc - 77.36).toFixed(2), feedback: 'You subtracted a kelvin temperature from a Celsius one. Put both on the same scale first.' },
             { value: +(toK(Tc) + 77.36).toFixed(2), feedback: 'The fall is the difference between the two temperatures, not their sum.' },

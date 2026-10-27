@@ -152,7 +152,7 @@ A small ball of freely falling test particles, at rest relative to one another, 
         return {
           prompt: t`Matter makes a ball of test grains shrink, with $\ddot V/V = -4\pi G\rho$; the cosmological constant makes it grow, with $+\Lambda c^2$. Above what matter density does the ball shrink, if $\Lambda = ${sci(lam, 2)}\ \text{m}^{-2}$? Give it in kg/m³.`,
           answer: rho, units: 'kg/m^3', tol: { rel: 0.01 },
-          errors: [{ value: rho / 2, feedback: 'That is ρ_Λ = Λc²/(8πG), the vacuum energy as a density. The balance needs matter of twice that: Λc²/(4πG).' }],
+          errors: [{ value: rho / 2, feedback: 'That is $\\rho_\\Lambda = \\Lambda c^2/(8\\pi G)$, the vacuum energy as a density. The balance needs matter of twice that: $\\Lambda c^2/(4\\pi G)$.' }],
           hints: [t`Set $4\pi G\rho = \Lambda c^2$.`, t`$\rho = \Lambda c^2/(4\pi G) = ${sci(lam, 2)}\times8.988\times10^{16}/(4\pi\times6.674\times10^{-11})$.`],
           teach: 'Matter attracts and Λ repels: matter wins wherever its density exceeds Λc²/(4πG), about 10⁻²⁶ kg/m³.',
           explain: t`$\rho = \Lambda c^2/(4\pi G) = ${sci(rho)}\ \text{kg/m}^3$ — about ${Math.round(rho / M_H)} hydrogen atoms per cubic metre. Planets, stars and galaxies are far denser, so Λ is invisible inside them; the universe on average is now thinner, so Λ wins.`,

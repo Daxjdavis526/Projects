@@ -281,7 +281,7 @@ with $g = M/r^2$ the surface gravity. Restoring $c$: a fractional shift $gh/c^2$
           prompt: t`An astronaut falls from rest far away straight into a black hole ($G = c = 1$). Her four-velocity is $u^t = 1/(1 - 2M/r)$, $u^r = -\sqrt{2M/r}$. Starlight falls in radially behind her: $p_t = -E$ and $p^r = -E$, so $p_r = g_{rr}p^r = -E/(1 - 2M/r)$. At $r = ${k}M$, what does she measure for $\omega/E$ — the light's frequency compared with its value far away?`,
           answer: x, tol: { rel: 0.003 },
           errors: [
-            { value: 1 / Math.sqrt(1 - 2 / k), feedback: 'That is what a hovering observer measures. She is falling: include the u^r p_r term.' },
+            { value: 1 / Math.sqrt(1 - 2 / k), feedback: t`That is what a hovering observer measures. She is falling: include the $u^r p_r$ term.` },
             { value: 1 + Math.sqrt(2 / k), feedback: t`Upside down. Simplify $\dfrac{1 - \sqrt{2M/r}}{1 - 2M/r}$ using $1 - 2M/r = (1 - \sqrt{2M/r})(1 + \sqrt{2M/r})$.` },
             { value: (1 + Math.sqrt(2 / k)) / (1 - 2 / k), feedback: t`Check the sign of the $u^r p_r$ term: $u^r$ and $p_r$ are both negative, so $-u^r p_r$ is negative.` },
           ],

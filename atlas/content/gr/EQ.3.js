@@ -136,9 +136,9 @@ In polar coordinates, $ds^2 = dr^2 + r^2d\theta^2$, it is the only surviving ter
       answer: '-r', answerTeX: '-r', lhs: t`\Gamma^r{}_{\theta\theta}`,
       vars: { r: [0.5, 4] },
       errors: [
-        { answer: 'r', feedback: 'Check the sign: the only surviving term is the “minus” derivative, −∂_r g_θθ.' },
+        { answer: 'r', feedback: 'Check the sign: the only surviving term is the “minus” derivative, $-\\partial_r g_{\\theta\\theta}$.' },
         { answer: '-2r', feedback: 'You dropped the ½ in front.' },
-        { answer: '-r^2/2', feedback: 'Differentiate g_θθ = r² with respect to r before multiplying by ½.' },
+        { answer: '-r^2/2', feedback: 'Differentiate $g_{\\theta\\theta} = r^2$ with respect to $r$ before multiplying by ½.' },
       ],
       hints: [t`With $\lambda = r$ and a diagonal metric, only $\sigma = r$ survives: $g^{rr} = 1$.`, t`$\Gamma^r{}_{\theta\theta} = \tfrac12\,g^{rr}\left(\partial_\theta g_{\theta r} + \partial_\theta g_{\theta r} - \partial_r g_{\theta\theta}\right)$, and $g_{\theta r} = 0$.`],
       teach: t`In polar coordinates the minus term alone gives $\Gamma^r{}_{\theta\theta} = -r$: stepping around turns the grid arrow $\mathbf e_\theta$ toward the centre.`,
@@ -153,7 +153,7 @@ In polar coordinates, $ds^2 = dr^2 + r^2d\theta^2$, it is the only surviving ter
         return {
           prompt: t`On a sphere of radius $a$, $ds^2 = a^2\,d\theta^2 + a^2\sin^2\theta\,d\phi^2$ ($\theta$ measured from the north pole). The formula gives $\Gamma^\theta{}_{\phi\phi} = \tfrac12\,g^{\theta\theta}\left(-\partial_\theta g_{\phi\phi}\right)$. Evaluate it at $\theta = ${colat}^\circ$ (latitude ${90 - colat}°N).`,
           answer: val, tol: { rel: 0.01 },
-          errors: [{ value: -Math.sin(2 * colat * DEG), feedback: 'You dropped the ½: −½ × 2 sin θ cos θ = −sin θ cos θ.' }, { value: -0.5 * Math.sin(colat * DEG) ** 2, feedback: 'Differentiate g_φφ = a² sin²θ with respect to θ (giving 2a² sin θ cos θ) rather than using it as it stands.' }],
+          errors: [{ value: -Math.sin(2 * colat * DEG), feedback: 'You dropped the ½: −½ × 2 sin θ cos θ = −sin θ cos θ.' }, { value: -0.5 * Math.sin(colat * DEG) ** 2, feedback: 'Differentiate $g_{\\phi\\phi} = a^2 \\sin^2\\theta$ with respect to $\\theta$ (giving $2a^2 \\sin\\theta\\cos\\theta$) rather than using it as it stands.' }],
           hints: [t`$g^{\theta\theta} = 1/a^2$ and $\partial_\theta(a^2\sin^2\theta) = 2a^2\sin\theta\cos\theta$.`, t`So $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$ — the radius $a$ cancels.`],
           teach: t`On a sphere $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$, whatever the radius: it is why only the equator, where it vanishes, is a geodesic among the circles of latitude.`,
           explain: t`$\Gamma^\theta{}_{\phi\phi} = \tfrac12\cdot\dfrac{1}{a^2}\left(-2a^2\sin\theta\cos\theta\right) = -\sin ${colat}^\circ\cos ${colat}^\circ = ${fmt(val, 3)}$. It vanishes only at the equator and the poles.`,
@@ -189,7 +189,7 @@ In polar coordinates, $ds^2 = dr^2 + r^2d\theta^2$, it is the only surviving ter
         return {
           prompt: t`In $n$ dimensions, $\lambda$ takes $n$ values and the lower pair $(\mu, \nu)$ is symmetric. How many independent Christoffel symbols $\Gamma^\lambda{}_{\mu\nu}$ are there for $n = ${n}$? (In spacetime, $n = 4$ gives 40.)`,
           answer: N, tol: { rel: 0, abs: 0.5 },
-          errors: [{ value: n * n * n, feedback: 'That counts every (μ, ν) pair separately; Γ^λ_μν = Γ^λ_νμ, so mirror pairs are not independent.' }, { value: (n * n * (n - 1)) / 2, feedback: 'That leaves out the diagonal pairs μ = ν: a symmetric pair has n(n + 1)/2 independent values, not n(n − 1)/2.' }],
+          errors: [{ value: n * n * n, feedback: 'That counts every $(\\mu, \\nu)$ pair separately; $\\Gamma^\\lambda{}_{\\mu\\nu} = \\Gamma^\\lambda{}_{\\nu\\mu}$, so mirror pairs are not independent.' }, { value: (n * n * (n - 1)) / 2, feedback: 'That leaves out the diagonal pairs μ = ν: a symmetric pair has n(n + 1)/2 independent values, not n(n − 1)/2.' }],
           hints: [t`A symmetric $n\times n$ array has $n(n+1)/2$ independent entries.`, t`Multiply by the $n$ values of $\lambda$: $n \cdot n(n+1)/2$.`],
           teach: 'Symmetry in the lower pair leaves n²(n + 1)/2 independent Christoffel symbols: 6 on a surface, 40 in spacetime.',
           explain: t`$${n}\times\dfrac{${n}\times${n + 1}}{2} = ${N}$. For $n = 2$ (a surface) that is 6, for $n = 4$ (spacetime) 40.`,
@@ -227,7 +227,7 @@ In polar coordinates, $ds^2 = dr^2 + r^2d\theta^2$, it is the only surviving ter
         return {
           prompt: t`Far from any planet, spacetime is flat — but in coordinates turning with a ring-shaped space station at angular speed $\omega$, the metric has $g_{tt} = -(c^2 - \omega^2 r^2)$ and $g_{rr} = 1$, and the only surviving term for $\Gamma^r{}_{tt}$ is $-\tfrac12\,g^{rr}\,\partial_r g_{tt}$. The station's rim is at $R = ${R}$ m and it turns ${rpm} time${rpm > 1 ? 's' : ''} a minute. Find the size of $\Gamma^r{}_{tt}$ at the rim, in $\text{m/s}^2$.`,
           answer: g, units: 'm/s^2', tol: { rel: 0.01 },
-          errors: [{ value: w * R, feedback: 'That is ωR, the rim speed in m/s. Square ω: Γ^r_tt = −ω²r.' }, { value: 2 * w * w * R, feedback: 'You dropped the ½: ∂_r g_tt = 2ω²r, and half of it is ω²r.' }, { value: (rpm * rpm) * R, feedback: 'Convert to radians per second first: ω = 2π × (turns per minute)/60.' }],
+          errors: [{ value: w * R, feedback: 'That is $\\omega R$, the rim speed in m/s. Square $\\omega$: $\\Gamma^r{}_{tt} = -\\omega^2 r$.' }, { value: 2 * w * w * R, feedback: 'You dropped the ½: $\\partial_r g_{tt} = 2\\omega^2 r$, and half of it is $\\omega^2 r$.' }, { value: (rpm * rpm) * R, feedback: 'Convert to radians per second first: ω = 2π × (turns per minute)/60.' }],
           hints: [t`$\partial_r g_{tt} = \partial_r(-c^2 + \omega^2r^2) = 2\omega^2r$, so $\Gamma^r{}_{tt} = -\omega^2 r$.`, t`$\omega = 2\pi\times${rpm}/60 = ${fmt(w, 4)}$ rad/s; evaluate $\omega^2 R$.`],
           teach: t`In a rotating frame the Christoffel symbol $\Gamma^r{}_{tt} = -\omega^2 r$ is the artificial gravity: a connection with no curvature, as the equivalence principle says.`,
           explain: t`$\Gamma^r{}_{tt} = -\omega^2 R = -(${fmt(w, 4)})^2\times${R} = ${sci(-g)}\ \text{m/s}^2$. For someone at rest on the rim, the geodesic equation says a released object accelerates outward at $\omega^2 R = ${sci(g)}\ \text{m/s}^2$ — the artificial gravity. The Riemann tensor here is exactly zero: this "gravity" is pure coordinates, just like gravity measured in a lab fixed to the ground.`,

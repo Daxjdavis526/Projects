@@ -171,3 +171,28 @@ export function rlGraph({ E, R, L, on = true, span = 5, marks = [], tauLine = tr
     caption: caption ?? `The current after the switch ${on ? 'connects the battery' : 'cuts the battery out'}${tauLine ? '; the gold line marks one time constant' : ''}.`,
   };
 }
+
+/** the impedance triangle: R along x, the net reactance up (inductive) or down (capacitive), Z the hypotenuse; labels at the sides' middles */
+export function impedanceTriangle({ R, X, labels = { R: 'R', X: 'net reactance', Z: 'Z' }, showZ = true, caption }) {
+  const s = 1 / Math.max(R, Math.abs(X), 1e-9);
+  const r = R * s, x = X * s, up = x >= 0 ? 1 : -1, ph = Math.atan2(x, r), ra = Math.min(0.28, 0.45 * Math.hypot(r, x));
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.75, 1.75], y: [Math.min(-0.3, x - 0.22), Math.max(0.3, x + 0.22)], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+      curves: Math.abs(ph) > 0.05 ? [{ param: [`${ra}*cos(t)`, `${ra}*sin(t)`], t: [Math.min(0, r6(ph)), Math.max(0, r6(ph))], color: 'ink2', width: 1.5 }] : [],
+      arrows: [
+        { from: [0, 0], to: [r6(r), 0], color: COL.R },
+        { from: [r6(r), 0], to: [r6(r), r6(x)], color: x >= 0 ? COL.L : COL.C },
+        ...(showZ ? [{ from: [0, 0], to: [r6(r), r6(x)], color: COL.v }] : []),
+      ],
+      points: [
+        { x: r6(r / 2), y: 0, r: 0.01, color: COL.R, label: labels.R, labelDx: 0, labelDy: up * 14, labelAlign: 'center' },
+        { x: r6(r), y: r6(x / 2), r: 0.01, color: x >= 0 ? COL.L : COL.C, label: labels.X, labelDx: 9, labelDy: 0, labelAlign: 'left' },
+        ...(showZ ? [{ x: r6(r / 2), y: r6(x / 2), r: 0.01, color: COL.v, label: labels.Z, labelDx: -10, labelDy: -up * 10, labelAlign: 'right' }] : []),
+        ...(Math.abs(ph) > 0.05 ? [{ x: r6((ra + 0.07) * Math.cos(ph / 2)), y: r6((ra + 0.07) * Math.sin(ph / 2)), r: 0.01, color: 'ink2', label: 'φ', labelDx: 0, labelDy: 0, labelAlign: 'center' }] : []),
+      ],
+    },
+    caption: caption ?? 'The impedance triangle: R along the current’s direction, the net reactance at right angles, and Z their phasor sum.',
+  };
+}

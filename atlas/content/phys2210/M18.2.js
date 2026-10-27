@@ -209,7 +209,7 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
         const dT = (Won - Qout) / (n * 2.5 * R);
         return {
           prompt: t`In a diesel engine's compression stroke the piston does ${Won} J of work on the ${n} mol of air in the cylinder, while ${Qout} J of heat leaks out into the cylinder walls. By how much does the air's temperature rise? (Air: $E_\text{int} = \tfrac52 nRT$.)`,
-          answer: dT, units: 'K', tol: { rel: 0.01 },
+          answer: dT, units: 'K', difference: true, tol: { rel: 0.01 },
           errors: [{ value: Won / (n * 2.5 * R), feedback: t`Some energy leaks out as heat: $\Delta E_\text{int} = Q - W$ with $Q$ negative.` }, { value: (Won + Qout) / (n * 2.5 * R), feedback: 'The heat leaves the air, so it subtracts from the work done on it.' }, { value: (Won - Qout) / (n * 1.5 * R), feedback: t`Air is diatomic: $E_\text{int} = \tfrac52 nRT$, not $\tfrac32 nRT$.` }],
           hints: [t`$Q = -${Qout}$ J and $W = -${Won}$ J (work done on the air).`, t`$\Delta E_\text{int} = Q - W = ${Won - Qout}$ J, and $\Delta E_\text{int} = \tfrac52 nR\,\Delta T$.`],
           teach: 'Work done on a gas raises its internal energy, minus whatever leaks away as heat; for an ideal gas that sets the temperature rise.',

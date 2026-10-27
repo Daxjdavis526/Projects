@@ -234,7 +234,7 @@ A choice, not a law — but taking the divergence of the field equation shows it
         return {
           prompt: t`A ray of starlight grazing a body is bent by $\alpha = \dfrac{4GM}{c^2b}$ — exactly the value of $\bar h_{00} = 4GM/(c^2r)$ at the closest approach $b$. For a ray grazing ${name} ($GM = ${gmTeX}\ \text{m}^3/\text{s}^2$, $b = ${rTeX}$ m), what is $\alpha$ in milliarcseconds? (1 mas $= 4.848\times10^{-9}$ rad)`,
           answer: a / MAS, units: 'mas', tol: { rel: 0.01 },
-          errors: [{ value: a / 2 / MAS, feedback: 'That is half: the factor 4 includes space curving as much as time (h₀₀ = h_ii).' }, { value: a, feedback: 'That is in radians. Divide by 4.848 × 10⁻⁹ to get milliarcseconds.' }],
+          errors: [{ value: a / 2 / MAS, feedback: 'That is half: the factor 4 includes space curving as much as time ($h_{00} = h_{ii}$).' }, { value: a, feedback: 'That is in radians. Divide by 4.848 × 10⁻⁹ to get milliarcseconds.' }],
           hints: [t`$\alpha = 4GM/(c^2b)$ in radians.`, t`$\alpha = 4\times${gmTeX}/(8.988\times10^{16}\times${rTeX})$; then divide by $4.848\times10^{-9}$.`],
           teach: 'Light bending, 4GM/(c²b), is twice what the time part of the metric alone would give: the linear solution curves space as much as time.',
           explain: t`$\alpha = ${sci(a)}$ rad $= ${sci(a / MAS)}$ mas. ${name === 'the Sun' ? 'That is the famous 1.75 arcseconds of 1919.' : name === 'Jupiter' ? 'Radio astronomers have measured Jupiter’s deflection of a quasar’s light with very-long-baseline interferometry.' : 'Too small to measure for the Earth, but real.'} Half of it comes from $h_{00}$, half from $h_{ii}$.`,

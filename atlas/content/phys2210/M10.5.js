@@ -175,7 +175,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
           answer: tt, units: 's', tol: { rel: 0.01 },
           errors: [
             // two different slips give the same number (twice the answer), so one message names both
-            { value: (I * w) / (F * R), feedback: t`That is twice the answer. Both thrusters turn the satellite the same way, so the torque is $2FR$ — and a solid cylinder about its axis has $I = 	frac12 MR^2$, not $MR^2$.` },
+            { value: (I * w) / (F * R), feedback: t`That is twice the answer. Both thrusters turn the satellite the same way, so the torque is $2FR$ — and a solid cylinder about its axis has $I = \tfrac12 MR^2$, not $MR^2$.` },
             { value: (I * N) / tau, feedback: 'Convert rpm to rad/s first (× 2π/60).' },
           ],
           hints: [t`The thrusters form a couple: $\tau = 2FR$. A solid cylinder: $I = \tfrac12 MR^2$.`, t`$\alpha = \tau/I$, then $t = \omega/\alpha$ with $\omega$ in rad/s.`],

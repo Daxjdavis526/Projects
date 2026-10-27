@@ -263,10 +263,12 @@ export function mount(F, P0) {
         const len = 0.11 * (v.x1 - v.x0);
         plot.arrow(pr.x, pr.y, pr.x + (b[0] / m) * len, pr.y + (b[1] / m) * len, { color: 'teal', width: 2.8, head: 10, label: 'B', ldx: 6, ldy: -8 });
       }
-      g.save(); g.strokeStyle = c.gold; g.fillStyle = c.panel; g.lineWidth = 2;
-      g.beginPath(); g.arc(plot.X(pr.x), plot.Y(pr.y), 6.5, 0, 2 * Math.PI); g.fill(); g.stroke();
-      g.fillStyle = c.gold; g.beginPath(); g.arc(plot.X(pr.x), plot.Y(pr.y), 1.8, 0, 2 * Math.PI); g.fill(); g.restore();
-      if (pr.label) plot.text(pr.label, pr.x, pr.y, { dx: -10, dy: 12, color: 'gold', size: 12, weight: 700, align: 'right' });
+      // a filled point (a ring with a dot would read as a current out of the page); dashed ring if it can be dragged
+      g.save(); g.fillStyle = c.gold; g.strokeStyle = c.bg; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(plot.X(pr.x), plot.Y(pr.y), 5.5, 0, 2 * Math.PI); g.fill(); g.stroke();
+      if (live && pr.drag !== false) { g.strokeStyle = c.gold; g.setLineDash([2, 2]); g.beginPath(); g.arc(plot.X(pr.x), plot.Y(pr.y), 10, 0, 2 * Math.PI); g.stroke(); }
+      g.restore();
+      if (pr.label) plot.text(pr.label, pr.x, pr.y, { dx: -9, dy: -12, color: 'gold', size: 12, weight: 700, align: 'right' });
       if (want.includes('B')) rows.unshift([`$|\\vec B|$ at ${pr.label || 'the probe'}`, tesla(m)]);
       if (want.includes('Bx')) rows.push(['$B_x$', tesla(b[0])]);
       if (want.includes('By')) rows.push(['$B_y$', tesla(b[1])]);

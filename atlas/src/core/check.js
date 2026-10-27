@@ -125,8 +125,10 @@ export function gradeNumeric(item, input) {
     } else {
       value = q.si / expectedUnit.factor;
       // a temperature, not a difference: °C and K differ by an offset as well as a name
+      // (an item marked difference: true asks for a change, where they are the same number)
       const isC = (u) => /^\s*(°C|degC)\s*$/.test(u || ''), isK = (u) => /^\s*K\s*$/.test(u || '');
-      if (isC(q.unitText) && isK(item.units)) value += 273.15;
+      if (item.difference) { /* a change of 1 K is a change of 1 °C */ }
+      else if (isC(q.unitText) && isK(item.units)) value += 273.15;
       else if (isK(q.unitText) && isC(item.units)) value -= 273.15;
     }
   } else {

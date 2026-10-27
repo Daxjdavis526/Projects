@@ -321,7 +321,7 @@ In general relativity these are components of the **Riemann curvature tensor**, 
         return {
           prompt: t`At the horizon $r_s = 2GM/c^2$, the stretch on a body of length $L$ is $2GML/r_s^3$. How massive must a black hole be — in solar masses — for a 2 m astronaut to feel exactly ${n} g there? Use $G = 6.674\times10^{-11}$ SI, $c = 2.998\times10^{8}$ m/s and $M_\odot = 1.989\times10^{30}$ kg.`,
           answer: M / 1.989e30, units: 'Msun', tol: { rel: 0.01 },
-          errors: [{ value: (C ** 3 / G) * Math.sqrt(4 / (n * g0)) / 1.989e30, feedback: 'The horizon is at r_s = 2GM/c², not GM/c².' }],
+          errors: [{ value: (C ** 3 / G) * Math.sqrt(4 / (n * g0)) / 1.989e30, feedback: 'The horizon is at $r_s = 2GM/c^2$, not $GM/c^2$.' }],
           hints: [t`Substitute $r_s = 2GM/c^2$: $\dfrac{2GML}{(2GM/c^2)^3} = \dfrac{Lc^6}{4G^2M^2}$.`, t`Set $\dfrac{Lc^6}{4G^2M^2} = ${n}\times9.81$ and solve: $M = \dfrac{c^3}{2G}\sqrt{\dfrac{L}{${n}g}}$.`],
           teach: 'The stretch at a horizon falls as 1/M², so above a few thousand to tens of thousands of solar masses you cross the horizon before the tide becomes severe.',
           explain: t`$M = \dfrac{c^3}{2G}\sqrt{\dfrac{L}{${n}g}} = ${sci(C ** 3 / (2 * G), 3)}\ \text{kg/s}\times\sqrt{\dfrac{2}{${round(n * g0, 4)}}}\ \text{s} = ${sci(M, 3)}$ kg $= ${sci(M / 1.989e30, 3)}\ M_\odot$. Heavier holes have gentler horizons: you would cross into Sgr A* (4.3 million $M_\odot$) without noticing.`,

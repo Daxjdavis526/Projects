@@ -145,9 +145,12 @@ for (const c of COURSES) {
   }
 }
 
+check('gallery ids are unique', new Set(GALLERY.map((g) => g.id)).size === GALLERY.length, GALLERY.filter((g, i) => GALLERY.findIndex((x) => x.id === g.id) !== i).map((g) => g.id).join(', '));
 if (!only) for (const g of GALLERY) {
-  if (g.lesson) check(`gallery ${g.id}: lesson ${g.lesson} is built`, !!CATALOG.lessons[g.lesson]?.ready);
-  else await checkVisual(`gallery ${g.id}`, g.spec);
+  if (!g.lesson) { await checkVisual(`gallery ${g.id}`, g.spec); continue; }
+  const L0 = CATALOG.lessons[g.lesson];
+  check(`gallery ${g.id}: lesson ${g.lesson} is built`, !!L0?.ready);
+  if (L0?.ready) check(`gallery ${g.id}: lesson ${g.lesson} has an Explore visual`, !!(await L0.load()).default.visual);
 }
 
 let lessons = 0, items = 0, instances = 0, withVisual = 0;

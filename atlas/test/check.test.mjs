@@ -192,6 +192,10 @@ check('293.15 K typed for an answer of 20 °C', grade({ type: 'numeric', answer:
 check('−196 °C typed for an answer of 77.15 K', grade({ type: 'numeric', answer: 77.15, units: 'K', tol: { rel: 0.001 } }, '-196 °C').correct);
 check('a specific heat in J/(kg °C) equals one in J/(kg K)', grade({ type: 'numeric', answer: 4186, units: 'J/(kg K)', tol: { rel: 0.001 } }, '4186 J/(kg °C)').correct);
 check('a temperature change in °C needs no offset', grade({ type: 'numeric', answer: 15, units: 'K', tol: { rel: 0.001 } }, '15').correct);
+check('a temperature change typed in °C, for a change in K', grade({ type: 'numeric', answer: 15, units: 'K', difference: true, tol: { rel: 0.001 } }, '15 °C').correct);
+check('…but a change is not offset into an absolute temperature', !grade({ type: 'numeric', answer: 15, units: 'K', difference: true, tol: { rel: 0.001 } }, '288.15 °C').correct);
+check('a sound level carries its decibels', grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '85 dB').correct && grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '85').correct);
+check('a decibel is not a deci-anything', !grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '8.5 B').correct);
 
 // angles on the sky and reciprocal units
 check('43 arcsec in radians', Math.abs(parseQuantity('43 arcsec').si - 43 * Math.PI / 648000) < 1e-15);

@@ -252,7 +252,7 @@ export function mount(F, P0) {
 
   // ── drawing ──
   const prof = P.profile && !compact ? F.canvas({ height: '150px', label: 'The potential along the horizontal line through the probe' }) : null;
-  const pplot = prof ? new Plot(prof.canvas, { x: P.x, y: [0, 1], xlabel: `x (${ut})`, ylabel: 'V (V)', pad: { l: 58, r: 16, t: 10, b: 30 } }) : null;
+  const pplot = prof ? new Plot(prof.canvas, { x: P.x, y: [0, 1], xlabel: `x (${ut})`, ylabel: 'V (V)', axesAt: 'edge', pad: { l: 58, r: 16, t: 10, b: 30 } }) : null;
 
   const cache = {};
   let probeRef = 0;                // |E| where the probe started: sets the length of its arrow

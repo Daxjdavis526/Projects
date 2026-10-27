@@ -68,7 +68,7 @@ It is the slope of the velocity–time graph, measured in metres per second per 
         return {
           prompt: t`A cyclist on a straight road speeds up steadily from ${v1} m/s to ${nice(v2)} m/s in ${dt} s. What is her acceleration?`,
           answer: a, units: 'm/s^2', tol: { rel: 0.01 },
-          errors: [{ value: v2 / dt, feedback: 'You divided the final velocity by the time — that ignores the velocity she started with. Use the change in velocity, Δv = v_f − v_i.' }],
+          errors: [{ value: v2 / dt, feedback: 'You divided the final velocity by the time — that ignores the velocity she started with. Use the change in velocity, $\\Delta v = v_f - v_i$.' }],
           hints: [t`$a = \Delta v/\Delta t$, with $\Delta v = v_f - v_i$.`],
           teach: 'Acceleration is the change in velocity divided by the time it took: the slope of the v–t graph.',
           explain: t`$a = \dfrac{${nice(v2)} - ${v1}}{${dt}} = \dfrac{${nice(v2 - v1)}\ \text{m/s}}{${dt}\ \text{s}} = ${nice(a)}\ \text{m/s}^2$.`,
@@ -262,7 +262,7 @@ It is the slope of the velocity–time graph, measured in metres per second per 
         return {
           prompt: t`A spacecraft approaches a space station along a line, with the station at the origin and the craft on the $+x$ side. Its velocity is $${nice(v1)}$ m/s. After a ${dt} s thruster burn it is $${nice(v2)}$ m/s. What was its average acceleration (with its sign)?`,
           answer: a, units: 'm/s^2', tol: { rel: 0.01 },
-          errors: [{ value: (Math.abs(v2) - Math.abs(v1)) / dt, feedback: 'You subtracted speeds. Subtract velocities, keeping their signs: Δv = v_f − v_i.' }],
+          errors: [{ value: (Math.abs(v2) - Math.abs(v1)) / dt, feedback: 'You subtracted speeds. Subtract velocities, keeping their signs: $\\Delta v = v_f - v_i$.' }],
           hints: ['Keep the signs: both velocities are negative.', t`$\Delta v = ${nice(v2)} - ${par(v1)}$.`],
           teach: 'Acceleration comes from the change in velocity with signs kept; its sign is a direction.',
           explain: t`$a = \dfrac{${nice(v2)} - ${par(v1)}}{${dt}} = \dfrac{${nice(v2 - v1)}}{${dt}} = ${nice(a)}\ \text{m/s}^2$. Positive while the craft moves in $-x$: the burn is braking the approach.`,

@@ -131,7 +131,7 @@ export function validateItem(item, tex) {
   // strings: escape damage and TeX
   const strings = [...TEXT_FIELDS.map((f) => item[f]), ...(item.hints || []), ...(item.choices || []),
     ...(item.items || []), ...(item.left || []), ...(item.right || []), ...Object.values(item.why || {}),
-    ...(item.tests || []).map((x) => x.name)];
+    ...(item.tests || []).map((x) => x.name), ...(item.errors || []).map((e) => e.feedback), item.instruction];
   for (const s of strings) {
     if (s === undefined || s === null) continue;
     const dmg = escapeDamage(s);
@@ -139,6 +139,13 @@ export function validateItem(item, tex) {
     if (tex) for (const m of mathIn(s)) {
       try { tex(m.tex, m.display); } catch (e) { p.push(`bad TeX “${m.tex}”: ${e.message}`); }
     }
+  }
+  // bare TeX fields (no $ delimiters): the typeset answer and the left-hand side shown before the input
+  for (const src of [item.answerTeX, item.lhs]) {
+    if (!src) continue;
+    const dmg = escapeDamage(src, { prose: false }) || (bareCommand(src) && `contains “${bareCommand(src)}” without its backslash — write it with String.raw`);
+    if (dmg) p.push(`TeX “${String(src).slice(0, 40)}…” ${dmg}`);
+    if (tex) { try { tex(src, false); } catch (e) { p.push(`bad TeX “${src}”: ${e.message}`); } }
   }
   if (item.type === 'code') {
     // run by test/code.test.mjs in real Python: the reference passes, the starter does not

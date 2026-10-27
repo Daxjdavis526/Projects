@@ -29,6 +29,6 @@ export default {
     mod('M17', 'Kinetic theory of gases', ['The ideal gas law', 'Pressure from molecular collisions', 'Molecular speeds and the Maxwell–Boltzmann distribution', 'Heat capacities and equipartition']),
     mod('M18', 'The first law of thermodynamics', ['Work in thermodynamic processes', 'The first law', 'Isothermal, isobaric and isochoric processes', 'Adiabatic processes']),
     mod('M19', 'The second law of thermodynamics', ['Heat engines', 'Refrigerators and heat pumps', 'The Carnot cycle', 'Entropy', 'Real engine cycles: Otto and Brayton']),
-    mod('L', 'Lab strand (PHYS 2215)', ['Measurement and uncertainty at the bench', 'Graphing and linearizing data', 'Measuring g in free fall', 'Projectile range', 'Newton’s second law on a cart', 'Coefficients of friction', 'Energy conservation on a track', 'Momentum in collisions', 'Moment of inertia', 'The pendulum period', 'Springs and simple harmonic motion', 'Specific heat by calorimetry'], { prereqs: ['phys2210.M1'] }),
+    mod('L', 'Lab strand (PHYS 2215)', ['Measurement and uncertainty at the bench', 'Graphing and linearizing data', 'Measuring g in free fall', 'Projectile range', 'Newton’s second law on a cart', 'Coefficients of friction', 'Energy conservation on a track', 'Momentum in collisions', 'Moment of inertia', 'The pendulum period', 'Springs and simple harmonic motion', 'Specific heat by calorimetry'], { prereqs: ['phys2210.M1.3'] }),
   ],
 };

@@ -671,7 +671,10 @@ export function mount(F, P0) {
     const stripH = !(P.strip ?? !compact) ? 0 : narrow ? 66 : 54;
     const legendH = shownTr.length > 1 ? 18 : 0;
     let cx, cy, Rp, tr;
-    if (narrow) {
+    if (!shownTr.length) {
+      Rp = Math.min(W / 2 - 40, (H - stripH - 24) / 2);
+      cx = W / 2; cy = stripH + (H - stripH) / 2; tr = null;
+    } else if (narrow) {
       Rp = Math.min(W / 2 - 24, (H - stripH) * 0.24);
       cx = W / 2; cy = stripH + Rp + 12;
       const top = cy + Rp + 12 + legendH;
@@ -724,7 +727,12 @@ export function mount(F, P0) {
       const am = (a0 + a1) / 2;
       text('φ', cx + (r0 + 10) * Math.cos(am), cy - (r0 + 10) * Math.sin(am), { color: C.ink2, size: FS, weight: 700 });
     }
-    for (const [k, from, to] of order) arrow(from[0], from[1], to[0], to[1], COL[k], 2.4, 9);
+    // in a stack, v_C runs back along v_L: draw it a few pixels to one side so both stay visible
+    for (const [k, from, to] of order) {
+      let off = [0, 0];
+      if (stack && k === 'C' && shownPh.includes('L')) { const a = ang.C; off = [5 * Math.sin(a), 5 * Math.cos(a)]; }
+      arrow(from[0] + off[0], from[1] + off[1], to[0] + off[0], to[1] + off[1], COL[k], 2.4, 9);
+    }
     if (shownPh.includes('i')) { const [x, y] = tip(s.I0 * kI, ang.i); arrow(cx, cy, x, y, COL.i, 3, 10); }
     if (shownPh.includes('v')) { const [x, y] = tip(V0 * kV, ang.v); arrow(cx, cy, x, y, COL.v, 3, 10); }
     // labels: v and i beyond their tips; element phasors beside their middles, on the side away from the origin
@@ -744,7 +752,7 @@ export function mount(F, P0) {
     const tc = ((t % (2 * T)) + 2 * T) % (2 * T);
     const [tf, tu] = timeUnit(2 * T);
     const curves = shownTr.map((k) => ({ f: k === 'i' ? (x) => (value.i(x) / Iref) * (0.62 * Vref) : value[k], color: COL[k], width: k === 'v' || k === 'i' ? 2.6 : 1.8, dash: k === 'v' || k === 'i' ? [] : [6, 4] }));
-    const g = graph(tr, { x0: 0, x1: 2 * T, xfac: tf, xunit: `t (${tu})`, y0: -Vref, y1: Vref, yticks: [], padL: narrow ? 8 : 10, curves, cursor: tc, title: null });
+    const g = tr ? graph(tr, { x0: 0, x1: 2 * T, xfac: tf, xunit: `t (${tu})`, y0: -Vref, y1: Vref, yticks: [], padL: narrow ? 8 : 10, curves, cursor: tc, title: null }) : null;
     // a legend above the traces
     if (legendH) {
       let x = g.X0 + 2;
@@ -757,7 +765,7 @@ export function mount(F, P0) {
       if (shownTr.includes('i')) text('(current to its own scale)', g.X1, y, { align: 'right', color: C.ink3, size: FS - 2.5, weight: 500 });
     }
     // projection lines from the phasor tips to the cursor (wide layout: same height and scale)
-    if (!narrow) {
+    if (!narrow && g) {
       const xc = g.X(tc);
       for (const k of ['v', 'i']) {
         if (!shownPh.includes(k) || !shownTr.includes(k)) continue;

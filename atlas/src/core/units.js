@@ -46,12 +46,15 @@ export const UNITS = {
   mph: [0.44704, D(1, 0, -1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
   mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], lbf: [4.4482216152605, D(1, 1, -2)],
   percent: [0.01, ZERO], '%': [0.01, ZERO],
+  // a decibel is a level, not a size: "85 dB" is read as the number 85, so a sound
+  // level can carry its unit; levels never convert multiplicatively to anything else
+  dB: [1, ZERO],
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
 const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
-  'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l']);
+  'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB']);
 
 export const PREFIXES = {
   Q: 1e30, R: 1e27, Y: 1e24, Z: 1e21, E: 1e18, P: 1e15, T: 1e12, G: 1e9, M: 1e6, k: 1e3, h: 1e2, da: 1e1,

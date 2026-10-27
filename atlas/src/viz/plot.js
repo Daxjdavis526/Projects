@@ -280,7 +280,8 @@ export class Plot {
     g.save();
     g.beginPath(); g.ellipse(this.X(x), this.Y(y), rx, ry, 0, 0, Math.PI * 2);
     if (o.fill) { g.fillStyle = this.color(o.fill); g.globalAlpha = o.alpha ?? 1; g.fill(); g.globalAlpha = 1; }
-    if (o.stroke !== false) { this._stroke(o); g.stroke(); }
+    // the outline takes strokeAlpha if given, else the same alpha as the fill
+    if (o.stroke !== false) { this._stroke({ ...o, alpha: o.strokeAlpha ?? o.alpha }); g.stroke(); }
     g.restore();
     return this;
   }
@@ -310,9 +311,10 @@ export class Plot {
   /**
    * Make a draggable handle. get() → [x, y]; set(x, y) is called while dragging
    * (return a corrected position to constrain it). Keyboard: arrow keys move it.
+   * { hollow: true } draws only the ring, so the handle does not hide what it marks.
    */
   handle(get, set, o = {}) {
-    const H = { get, set, r: o.r || 9, label: o.label || 'point' };
+    const H = { get, set, r: o.r || 9, label: o.label || 'point', hollow: !!o.hollow };
     this.handles.push(H);
     if (!this._wired) this._wire();
     return H;
@@ -364,7 +366,9 @@ export class Plot {
       g.fillStyle = this.col.panel;
       g.strokeStyle = this.col.accent2;
       g.lineWidth = 2.5;
-      g.beginPath(); g.arc(this.X(x), this.Y(y), H.r - 2, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.beginPath(); g.arc(this.X(x), this.Y(y), H.r - 2, 0, Math.PI * 2);
+      if (!H.hollow) g.fill();
+      g.stroke();
       g.restore();
     }
   }

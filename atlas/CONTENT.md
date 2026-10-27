@@ -82,6 +82,7 @@ export default lesson({
   practice: [ … ],                 // 4–8 items
   checkpoint: [ … ],               // 2–4 items
   sources: [{ label: 'OpenStax University Physics Vol. 1, §6.1', url: 'https://openstax.org/…' }],
+  lab: true,                       // a lab lesson (virtual experiment): counts toward the Experimenter achievement
   // Road to Einstein lessons only:
   mode: 'intuition',               // or 'derivation' — must match the file (.i / .d)
   badges: ['est-obs'],             // the step's honesty badges, as in content/gr/index.js
@@ -97,7 +98,7 @@ not put `prereqs` in a lesson file — it would be ignored.
 Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
 `solution`, `choices`, `why`, `errors[].feedback`, coding `tests[].name`,
 `intro`, captions — except a worked-example step's short `label` (plain
-uppercase text: no TeX), and
+text shown in capitals, so no TeX and no symbol labels: `g` would read "G"), and
 the right-hand options of a matching problem (plain text in a drop-down) and
 labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it.
@@ -180,6 +181,9 @@ mcq({ id: 'which-method', difficulty: 2,
   hints: ['…'], teach: '…', explain: '…' })
 ```
 
+The player letters the choices A–D, so do not label points in the
+problem's picture A, B, C — use P, Q, R (or numbers) instead.
+
 Distractors must be **plausible wrong answers** — the result of a real slip
 (sign error, missing factor of 2, the classic misconception), never filler.
 Set `fixedOrder: true` only when the order is meaningful ("all of the above"
@@ -208,8 +212,9 @@ num({ id: 'f-over-m', difficulty: 1,
   `'kN'`, `'J/(kg K)'`, `'eV'`, `'ly'`, `'arcsec'`, `'mas'`, `'uas'`, `'N^-1'`, `'yr'`, `'Msun'`…;
   the full table is `UNITS` in `src/core/units.js`). Temperatures may be in
   `'K'` or `'°C'`: a learner may type either, and a bare temperature is
-  converted with the 273.15 offset (a temperature *change* in K or °C is the
-  same number).
+  converted with the 273.15 offset. A temperature *change* is the same number
+  in K and °C: mark such an item `difference: true` so no offset is applied.
+  A sound level takes `'dB'` (read as a plain number: "85 dB" is 85).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
   makes typing a unit compulsory. Omit `units` for pure numbers.
@@ -438,9 +443,14 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `mech-tank`, `mech-flow` | pressure in vessels of any shape, manometers, buoyancy; flow through a narrowing pipe, Bernoulli, a Pitot-static probe |
 | `therm-gas` | a 3D hard-sphere gas: pressure from wall impacts against nRT/V, a live speed histogram against Maxwell–Boltzmann, mixtures |
 | `therm-pv` | PV diagrams: processes with work as area, cycles (Carnot, Otto, Brayton) and refrigerators, energy flows, a T–S panel |
-| `mech-collide`, `mech-rotor` | 1D/2D collisions with momentum and energy charts; rigid bodies about an axis, torque, the parallel-axis theorem |
 | `em-circuit` | nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
 | `em-capacitor` | a parallel-plate capacitor with a sliding dielectric, battery connected or not: Q, V, C and stored energy |
+| `lab-bench` | fourteen virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
+| `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
+| `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |
+| `wave-doppler` | wavefronts from a moving source and a moving observer: crowding ahead, stretching behind, the Mach cone past Mach 1 |
+| `em-coulomb` | draggable point charges with every Coulomb force drawn to scale, action–reaction pairs, the net force (tip-to-tail and components) |
+| `em-induction` | a charged ball near a neutral conductor or insulator: induction, polarization, grounding, and spheres sharing charge on contact |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
@@ -486,7 +496,9 @@ and under reduced motion); `F.onDestroy(fn)`. Return
 Draw with `Plot` from `src/viz/plot.js` (2D, world coordinates, theme colours:
 `'accent' 'accent2' 'gold' 'good' 'warn' 'bad' 'violet' 'teal' 'ink' 'ink2'
 'ink3' 'ink4'`) or `View3D` from `src/viz/three-d.js`. Read those two files'
-method lists before writing. Put any real physics in a DOM-free module under
+method lists before writing. A draggable `plot.handle(get, set, { hollow: true })`
+draws only its ring, so it does not hide what it marks; `plot.circle(…, { fill,
+alpha, strokeAlpha })` gives the outline its own opacity. Put any real physics in a DOM-free module under
 `src/viz/model/` and test it headlessly — `src/viz/model/gravity.js` and
 `test/models.test.mjs` are the pattern. A sim must work in both themes, at
 phone width, with keyboard (sliders are native inputs), and must not animate

@@ -172,7 +172,7 @@ For particles released at rest at distance $r$ from a mass $M$, $u^0 = c$ and th
         return {
           prompt: t`On a unit sphere, $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$ and $\Gamma^\phi{}_{\theta\phi} = \cot\theta$, and the only surviving terms of $R^\theta{}_{\phi\theta\phi}$ are $$R^\theta{}_{\phi\theta\phi} = \partial_\theta\Gamma^\theta{}_{\phi\phi} - \Gamma^\theta{}_{\phi\phi}\,\Gamma^\phi{}_{\theta\phi}.$$ Evaluate it at $\theta = ${th}^\circ$.`,
           answer: s * s, tol: { rel: 0.01 },
-          errors: [{ value: dTerm, feedback: 'That is the derivative term alone. Subtract the product term, −Γ^θ_φφ Γ^φ_θφ = +cos²θ.' }, { value: gg, feedback: 'That is the product term alone. Add the derivative term, ∂_θ(−sin θ cos θ) = −cos 2θ.' }],
+          errors: [{ value: dTerm, feedback: 'That is the derivative term alone. Subtract the product term, $-\\Gamma^\\theta{}_{\\phi\\phi}\\Gamma^\\phi{}_{\\theta\\phi} = +\\cos^2\\theta$.' }, { value: gg, feedback: 'That is the product term alone. Add the derivative term, ∂_θ(−sin θ cos θ) = −cos 2θ.' }],
           hints: [t`$\partial_\theta(-\sin\theta\cos\theta) = -\cos 2\theta$.`, t`$-\Gamma^\theta{}_{\phi\phi}\Gamma^\phi{}_{\theta\phi} = -(-\sin\theta\cos\theta)\cot\theta = \cos^2\theta$. Add the two.`],
           teach: t`On a sphere both parts of the formula contribute: $-\cos 2\theta + \cos^2\theta = \sin^2\theta$, which is the sphere's constant curvature written in angles.`,
           explain: t`Derivative term: $-\cos(${2 * th}^\circ) = ${fmt(dTerm, 3)}$. Product term: $\cos^2 ${th}^\circ = ${fmt(gg, 3)}$. Sum: $${fmt(s * s, 3)} = \sin^2 ${th}^\circ$. Divided by $g_{\phi\phi} = \sin^2\theta$ it gives the Gaussian curvature $1$ at every point: a unit sphere is equally curved everywhere.`,
@@ -211,7 +211,7 @@ For particles released at rest at distance $r$ from a mass $M$, $u^0 = c$ and th
         return {
           prompt: t`A gravitational wave of strain amplitude $h = 1.0\times10^{-21}$ and frequency $f = ${f}$ Hz passes LIGO. Its curvature makes the two free-hanging mirrors at the ends of a $L = 4.0$ km arm accelerate relative to each other with amplitude $\tfrac12(2\pi f)^2 h L$ — the deviation equation with $c^2R^{\hat x}{}_{\hat 0\hat x\hat 0} = -\tfrac12\ddot h$. What is that relative acceleration, in m/s²?`,
           answer: acc, units: 'm/s^2', tol: { rel: 0.01 },
-          errors: [{ value: 2 * acc, feedback: 'Keep the ½: R^x̂_0̂x̂0̂ carries half the second derivative of the strain.' }, { value: acc / (2 * Math.PI) ** 2, feedback: 'Use the angular frequency ω = 2πf, not f itself.' }],
+          errors: [{ value: 2 * acc, feedback: 'Keep the ½: $R^{\\hat x}{}_{\\hat 0\\hat x\\hat 0}$ carries half the second derivative of the strain.' }, { value: acc / (2 * Math.PI) ** 2, feedback: 'Use the angular frequency ω = 2πf, not f itself.' }],
           hints: [t`$\omega = 2\pi f = ${fmt(w, 4)}$ rad/s.`, t`$\tfrac12\omega^2 hL = \tfrac12\times(${fmt(w, 4)})^2\times10^{-21}\times4000$.`],
           teach: 'LIGO measures curvature: the Riemann tensor of a passing wave sets the relative acceleration of its free mirrors.',
           explain: t`$\tfrac12\omega^2hL = ${sci(acc)}\ \text{m/s}^2$. The curvature behind it is only $\tfrac12\omega^2h/c^2 = ${sci((0.5 * w * w * h) / (C * C))}\ \text{m}^{-2}$, yet the mirrors' $${sci(h * L)}$ m swing in arm length is measured.`,
