@@ -26,13 +26,17 @@ export function bodyFBD(forces, { icon = 'none', show = 'fbd', name, caption, ..
 /** A mech-fbd scene: scene(name, { m: 10, F: 40, ... }, caption). */
 export const scene = (name, params, caption) => ({ type: 'mech-fbd', params: { scene: name, ...params }, ...(caption ? { caption } : {}) });
 
-/** Three significant figures, as text (a thin alias kept local so these lessons do not depend on another course helper). */
-export const s3 = (x) => {
+/** n significant figures as plain text: 0.0962, 69.3, 156, 11800. */
+export function sf(x, n = 3) {
   if (!Number.isFinite(x) || x === 0) return String(x);
   const p = Math.floor(Math.log10(Math.abs(x)));
-  const d = Math.max(0, 2 - p);
+  if (p >= n - 1) return String(Math.round(x / 10 ** (p - n + 1)) * 10 ** (p - n + 1));
+  const d = n - 1 - p;
   return (Math.round(x * 10 ** d) / 10 ** d).toFixed(d);
-};
+}
+export const s3 = (x) => sf(x, 3);
+/** The same for TeX, with a thin space between thousands from 10 000 up: 11\,800. */
+export const t3 = (x, n = 3) => { const s = sf(x, n); return Math.abs(x) >= 1e4 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, '\\,') : s; };
 
 /** Degrees ↔ radians. */
 export const D2R = Math.PI / 180;
