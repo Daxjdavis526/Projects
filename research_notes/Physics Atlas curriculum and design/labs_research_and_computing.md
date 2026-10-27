@@ -440,7 +440,7 @@ Seven mini-projects with public data are specified below, with [computed] refere
 - **R4 Modelling.** Choose the minimal model; dimensional analysis; identify parameters and nuisance parameters.
 - **R5 Simulation.** Turn the model into code; validate against analytic limits (convergence tests); separate simulation state from plotting.
 - **R6 Uncertainty and inference.** Statistical vs systematic; covariance; likelihoods; MCMC as an optional extension.
-- **R7 Reproducibility.** Pin library versions; record seeds; keep raw data immutable; script every figure; use version control. Case study: the 2016 GWOSC tutorial's `signal.tukey` call, and its bare-`except` fallback `signal.blackman`, both no longer exist in SciPy 1.18.1 [primary-verified], so the unpinned notebook now fails.
+- **R7 Reproducibility.** Pin library versions; record seeds; keep raw data immutable; script every figure; use version control. Case study: the 2016–17-era GWOSC event tutorial's `signal.tukey` call, and its bare-`except` fallback `signal.blackman`, both no longer exist in SciPy 1.18.1 [primary-verified], so the unpinned notebook now fails.
 - **R8 Presenting.** Abstract, figure, 5-minute talk, poster (mirrors PHYS 4900's written-plus-oral requirement and the 3870/3880 poster page).
 - **R9 Project proposal and retrospective.**
 

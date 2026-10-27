@@ -451,3 +451,115 @@ This is the single most important bridge course into GR. USU's catalog lists eve
 - Griffiths' own metric signature, and his preface's one-semester advice, were not verified this session. A search summary said "a one-semester course could reasonably stop after Chapter 7" but did not identify its source.
 - No item-level CURrENT results were retrieved (e.g., on Poynting vector or Faraday's law).
 
+## Key question 5 — E&M II (PHYS 4600): problem-solving techniques, problem archetypes, visualizations, depth and rigor, misconceptions
+
+### Takeaway
+The hard parts of E&M II are spatiotemporal reasoning:
+- linking integral-form Maxwell equations to a geometry;
+- tracking energy and momentum through fields;
+- reading reflection and transmission notation;
+- retarded time;
+- seeing E and B as one tensor.
+
+All of these are naturally visual: animated fields, light cones, live Lorentz boosts. They should anchor the course's interactive lessons.
+
+### Cited Findings
+- **Documented E&M II difficulties.** CURrENT data (CU Boulder) show trouble relating the vectors in integral-form Maxwell equations to specific geometries, trouble with the fields of an infinite solenoid, and trouble with reflection/transmission diagrams and notation. — [AAPT Summer 2014 program, CURrENT poster](https://aapt.org/Conferences/sm2014/Program/files/assets/basic-html/page83.html). CURrENT measures both procedural and conceptual understanding for Griffiths ch. 7–9. — [arXiv:1708.04451](https://arxiv.org/pdf/1708.04451)
+- **Visualization benchmarks (Falstad).** A 2-D Electrodynamics (TE) applet showing EM radiation, plus a TM version that adds induction. A Cavity Modes applet for a 3-D rectangular cavity. An Antenna applet that draws radiation patterns. — [Falstad applets](https://falstad.com/mathphysics.html)
+- **Visualization benchmarks (PhET).** A PhET simulation index lists "Radiating Charge" and "Radio Waves & Electromagnetic Fields". — [PhET index (Latvian translations mirror)](https://clixplatform.tiss.ac.in/phet/en/simulations/translated/lv.html). Their content was not described in the sources found. Some older PhET listings still require Java. — [ComPADRE PhET quantum listing](https://www.compadre.org/quantum/items/detail.cfm?ID=4210)
+- **Purcell & Morin ch. 5** includes "the field of a charge that starts or stops", the classic kinked-field-line picture of radiation. — [Prometeus contents record](https://www.prometeus.nsc.ru/acquisitions/16-03-29/cont33f.ssi)
+
+### Inferences
+**Technique ladder.**
+- Choose integral vs. differential Maxwell by symmetry.
+- Run the continuity-equation bookkeeping (charge → energy → momentum).
+- Use complex amplitudes plus boundary conditions at interfaces.
+- Pick a gauge, then solve wave equations.
+- Retarded-time geometry: draw the past light cone first.
+- Expand in small parameters (d ≪ λ ≪ r; v ≪ c), then restore relativistic factors.
+- Transform to the frame where the problem is easy (Lorentz boost), then transform back.
+
+**Representative archetypes per module.**
+- **M1 Induction and Maxwell**
+  - EMF(t) of a loop rotating in uniform B; current direction via Lenz.
+  - Induced E inside and outside a solenoid with I(t) (Ampère-like symmetry).
+  - Mutual inductance of a loop and a solenoid, and why M₁₂ = M₂₁ makes the hard direction easy.
+  - Displacement current in a charging capacitor, comparing flat and bulging Amperian surfaces.
+- **M2 Conservation laws**
+  - Poynting flux into a resistor equals I²R.
+  - Energy flow down a coaxial cable.
+  - Stress-tensor force between the northern and southern hemispheres of a charged sphere.
+  - Field angular momentum of a charged spinning shell inside a solenoid (the Feynman-disk family).
+- **M3 Waves**
+  - Radiation pressure on a solar sail (absorbing vs. reflecting).
+  - Fresnel R and T for air→glass (n = 1.5); Brewster angle ≈ 56.3°.
+  - Skin depth of copper at 60 Hz, 1 MHz and 10 GHz.
+  - TE₁₀ cutoff and group velocity for a given rectangular guide; building circular polarization from two linear ones.
+- **M4 Potentials**
+  - Show that a gauge transformation leaves E and B unchanged; find λ that reaches Lorenz gauge.
+  - Retarded potentials of a wire switched on at t = 0: A grows as the light sphere sweeps out.
+  - Liénard–Wiechert potentials of a uniformly moving charge, ending in the Heaviside "pancake" field.
+- **M5 Radiation**
+  - Pattern and power of an oscillating dipole; the ω⁴ "blue sky / red sunset" estimate.
+  - Larmor collapse time of a classical Bohr-orbit electron (~10⁻¹¹ s), which motivates QM.
+  - Radiation resistance of a short antenna.
+  - Relativistic beaming of a synchrotron electron.
+- **M6 Relativistic**
+  - Boost a capacitor's pure E-field and watch B appear.
+  - Use E·B and E² − c²B² to decide whether some frame has E = 0 or B = 0.
+  - Write F^{μν} and recover Gauss and Ampère–Maxwell from ∂_νF^{μν} = μ₀J^μ.
+  - Hyperbolic motion of a charge in uniform E (the Rindler on-ramp to GR).
+
+**Visualization specs (E&M II).** Format: drawn | parameters (units) | teaches | simplified.
+1. **Generator and Lenz lab.** A rotating loop in B with Φ(t), EMF(t) and the induced current and opposing torque. | B (T); ω (rad/s); area (cm²); R (Ω); self-inductance toggle. | Lenz's law = energy conservation; the phase relation between Φ and EMF. | Uniform field.
+2. **Changing-solenoid E-field.** B(t) inside a solenoid, with circulating E outside where B = 0. | dB/dt (T/s); radius (cm). | E ∝ 1/s outside; induction is about *changing* B, and E is set by ∇×E plus boundary conditions. Second Aharonov–Bohm hook. | Infinite ideal solenoid; quasistatic.
+3. **Displacement-current capacitor.** A charging capacitor with switchable Amperian surfaces. | I (A); plate radius (cm); gap (mm). | Ampère–Maxwell consistency; B between the plates. | Quasistatic; uniform E between plates.
+4. **Poynting flow viewer.** S arrows for a resistor, a coax and a charging capacitor, with a ∮S·da readout next to I²R or d(½CV²)/dt. | V (V); I (A); geometry. | Energy travels through the fields, entering a wire from outside. | Ideal conductors; DC or quasistatic.
+5. **3D plane-wave explorer.** E and B oscillating in phase, with polarization controls. | λ (nm to m); E₀ (V/m); E₀x, E₀y, relative phase δ (rad). | Transversality; B = E/c in phase; linear, circular and elliptical polarization; intensity and pressure. | Monochromatic, infinite plane wave.
+6. **Interface lab (Fresnel).** Incident, reflected and transmitted rays with amplitudes, plus R(θ) and T(θ) plots. | n₁, n₂ (1–4); θ_i (0–90°); s or p polarization. | Snell's law, Brewster's angle, total internal reflection, the evanescent tail, R + T = 1. | Lossless, non-magnetic, planar interface.
+7. **Skin-depth lab.** A wave decaying into a conductor, with B lagging. | σ (S/m); f (Hz); μ_r; presets for Cu, Al and seawater. | Complex k; δ ∝ 1/√(fσ); metals reflect. | Good-conductor approximation (toggle exact).
+8. **Dispersion oscillator.** Re ε(ω) and Im ε(ω), n(ω), and the absorption coefficient. | ω₀ (rad/s); damping γ (s⁻¹); oscillator strength; ◇ plasma frequency. | Anomalous dispersion; absorption peaks; v_g vs. v_p. | Single-resonance Lorentz model.
+9. **Waveguide mode painter.** Cross-section field patterns of TE_mn and TM_mn. | a, b (cm); m, n; f (GHz). | Cutoff, evanescence below cutoff, v_p·v_g = c². | Perfect conductor walls. Benchmark: Falstad cavity modes.
+10. **Gauge playground.** V and A morph under a chosen λ(x, t) while E and B stay frozen. | Preset λ; Coulomb or Lorenz toggle. | Gauge = redundancy; Lorenz gauge gives wave equations. Sets up the GR harmonic gauge (Key question 10). | 2D slice.
+11. **Retarded-time light cone.** A charge on a chosen worldline; for each field point, the backward light cone meets the worldline at the retarded position. Field lines kink when the charge stops. | v/c (0–0.99); a (m/s²); stop duration (ns). | Fields are retarded; the velocity field vs. the radiation kink moving out at c. A uniformly moving charge's field points from the *present* position. | Point charge in 2D. Benchmarks: PhET Radiating Charge; Purcell & Morin ch. 5.
+12. **Dipole radiation pattern.** The near field morphing into the sin²θ doughnut. | ω (rad/s); p₀ (C·m); r/λ. | Zones; no radiation along the axis; P ∝ ω⁴. | Ideal point dipole. Benchmark: Falstad Antenna.
+13. **Beaming lab.** The Liénard angular pattern vs. v/c, with acceleration parallel or perpendicular to v. | v/c (0–0.999); acceleration direction. | Relativistic headlight; γ⁴–γ⁶ enhancement. | Instantaneous pattern only.
+14. **Lorentz-boost field transformer.** Lab-frame charges and currents, a boost slider, live E and B arrows, and the live 4×4 F^{μν} matrix with the invariants displayed. | v/c (−0.99 to 0.99); boost direction. | E and B are one object; the invariants stay put. Direct preparation for tensors in GR. | Uniform fields.
+15. **Spacetime current diagram.** Worldlines of charges with J^μ arrows; continuity as "no worldline ends". | Charge density; drift velocity. | Four-vectors; ∂_μJ^μ = 0. | 1+1 D.
+
+**Depth and rigor target.** Full Griffiths 7–12 derivations, including:
+- Poynting's theorem; using the stress tensor;
+- Fresnel at oblique incidence; skin depth; TE_mn modes;
+- Lorenz-gauge wave equations; retarded potentials (heuristic derivation plus verification);
+- Liénard–Wiechert, with the 1 − 𝓇̂·v/c factor shown visually as "Doppler-like compression of the source";
+- dipole radiation with explicit approximations; Larmor; covariant Maxwell.
+
+Zangwill/Jackson-level material goes in optional panels: the retarded Green's function, multipole radiation fields, Kramers–Kronig, radiation reaction. If time is short, trim like Texas A&M does: parts of ch. 8 (angular momentum) and ch. 11 (radiation reaction).
+
+**Distractor bank (E&M II).**
+- PER-documented, cited above: wrong vector geometry in integral-form Maxwell equations; infinite-solenoid field errors; reflection/transmission notation errors.
+- Expert-anticipated, *not* PER-cited this session:
+  - "Displacement current is a flow of charge."
+  - "An induced EMF needs a wire or loop present."
+  - Applying the flux rule where it fails: sliding contacts, the Faraday disk.
+  - Lenz sign errors.
+  - "Energy flows inside the wire along with the electrons."
+  - "E and B in a vacuum plane wave are 90° out of phase."
+  - B₀ = E₀, i.e. dropping the 1/c.
+  - Radiation pressure: confusing absorbing and reflecting surfaces.
+  - "Skin depth grows with frequency."
+  - "v_g > c means a causality violation."
+  - "A hollow guide carries TEM."
+  - "A uniformly moving charge radiates."
+  - "Coulomb gauge violates causality"; "changing gauge changes the physics".
+  - Using the present position instead of the retarded position in Liénard–Wiechert.
+  - "A uniformly moving charge's field points from its retarded position" (it points from the present position).
+  - "Larmor depends on speed" (it depends on acceleration).
+  - "A dipole radiates most along its axis" (it radiates zero there).
+  - "E and B are frame-independent."
+  - Index-placement and sign errors in F^{μν}.
+
+### Gaps
+- No item-level PER statistics were retrieved for Poynting, gauge or radiation topics. Most E&M II distractors above are expert-anticipated, not PER-validated.
+- The contents and HTML5 status of PhET "Radiating Charge" were not verified.
+
