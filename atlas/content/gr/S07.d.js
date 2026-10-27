@@ -25,8 +25,8 @@ function polarGrid(rmax = 4) {
 // a unit arrow V (direction α) at P, with the polar basis vectors e_r and ½e_θ there
 const sceneArrows = [
   { from: ['px', 'py'], to: ['px + cos(al*pi/180)', 'py + sin(al*pi/180)'], color: 'gold', label: 'V' },
-  { from: ['px', 'py'], to: ['px + px/sqrt(px^2 + py^2)', 'py + py/sqrt(px^2 + py^2)'], color: 'accent', label: 'e_r' },
-  { from: ['px', 'py'], to: ['px - 0.5*py', 'py + 0.5*px'], color: 'violet', label: '½ e_θ' },
+  { from: ['px', 'py'], to: ['px + px/sqrt(px^2 + py^2)', 'py + py/sqrt(px^2 + py^2)'], color: 'accent', label: 'eᵣ' },
+  { from: ['px', 'py'], to: ['px - 0.5*py', 'py + 0.5*px'], color: 'violet', label: '½ eθ' },
 ];
 const polarScene = (px, py, al, caption, extra = {}) => ({
   type: 'graph',
@@ -78,6 +78,7 @@ export default lesson({
       curves: polarGrid(),
       drag: [{ key: 'p', x: 1.73, y: 1 }],
       arrows: sceneArrows,
+      points: [{ x: 'px', y: 'py', color: 'ink', r: 0.01, label: 'P', labelDx: -18, labelDy: 14 }],
       readouts: [
         { label: t`$r$`, expr: 'sqrt(px^2 + py^2)', digits: 3 },
         { label: t`$\theta$ (degrees)`, expr: 'atan2(py, px)*180/pi', digits: 3 },

@@ -156,7 +156,7 @@ These are the string’s **normal modes**: the **fundamental** $f_1$ and its **h
       hints: ['Which modes already have a node at the midpoint?', t`Mode $n$ has nodes at $x = mL/n$. Is $L/2$ among them?`],
       teach: 'Forcing a node at a point allows only the modes that already have a node there.',
       explain: t`$L/2$ is a node of mode $n$ when $L/2 = mL/n$ for some whole $m$, i.e. when $n$ is even. So the string sounds $2f_1, 4f_1, \ldots$ — an octave above its normal note. Guitarists call this playing a harmonic.`,
-      visual: standingPicture({ n: 2, L: 1, marks: [{ x: 0.5, y: 0, color: 'good', r: 7, label: 'finger', dy: 16 }], caption: 'Mode 2, which already has a node at the midpoint (green: the finger). Height exaggerated.' }),
+      visual: standingPicture({ n: 1, L: 1, marks: [{ x: 0.5, y: 0, color: 'good', r: 7, label: 'finger', dy: 16 }], caption: 'The string’s fundamental, and the finger (green) at the midpoint. Height exaggerated.' }),
     }),
     num({
       id: 'fret', difficulty: 2,

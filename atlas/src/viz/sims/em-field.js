@@ -50,10 +50,9 @@ import * as M from '../model/em-field.js';
 
 export const defaults = {
   unit: 'cm', qunit: 'nC', x: [-10, 10], y: [-6.25, 6.25], aspect: '',
-  charges: [{ x: -3, y: 0, q: 2 }, { x: 3, y: 0, q: -2 }],
-  rods: [], lines: [], sheets: [], balls: [], uniform: null, conductor: null, ref: null,
+  charges: [], rods: [], lines: [], sheets: [], balls: [], uniform: null, conductor: null, ref: null,
   arrows: true, fieldLines: true, equip: false, dV: null, levels: null, density: null,
-  probe: { x: 0, y: 3 }, test: null, gauss: null, shapes: null, normals: false, patch: null, particle: null,
+  probe: null, test: null, gauss: null, shapes: null, normals: false, patch: null, particle: null,
   profile: false, edit: false, presets: null, preset: null, toggles: null, readouts: ['E', 'V'], labels: false,
   static: false, axes: true, grid: true,
 };
@@ -107,11 +106,11 @@ export function mount(F, P0) {
   const keys = keysOf(P);
   const env = () => { const e = { ...(P.constants || {}) }; for (const k of keys) if (F.params[k] !== undefined) e[k] = +F.params[k]; return e; };
   const num = (v, E) => (v === undefined || v === null ? v : typeof v === 'number' ? v : fn(v, keys)(E));
-  const layer = (k) => (P.toggles?.includes(k) ? !!F.params[`_${k}`] : P[k]);
+  const layer = (k) => (P.toggles?.includes(k) ? (F.params[`_${k}`] ? P[k] || true : false) : P[k]);
 
   // the scene's movable state, in display units; a preset replaces parts of it
   const st = {};
-  const load = (src) => { for (const k of SCENE_KEYS) st[k] = clone(src[k] ?? (k in P0 ? P[k] : defaults[k])); };
+  const load = (src) => { for (const k of SCENE_KEYS) st[k] = clone(src[k] ?? null); };
   const presetOf = (id) => (P.presets || []).find((p) => p.id === id);
   load(P.presets?.length ? { ...P, ...presetOf(F.params._preset) } : P);
   for (const k of ['charges', 'rods', 'lines', 'sheets', 'balls']) st[k] = st[k] || [];
@@ -245,9 +244,13 @@ export function mount(F, P0) {
   const prof = P.profile && !compact ? F.canvas({ height: '150px', label: 'The potential along the horizontal line through the probe' }) : null;
   const pplot = prof ? new Plot(prof.canvas, { x: P.x, y: [0, 1], xlabel: `x (${ut})`, ylabel: 'V (V)', pad: { l: 58, r: 16, t: 10, b: 30 } }) : null;
 
+  const cache = {};
+  const memo = (name, sig, make) => { if (cache[name]?.sig !== sig) cache[name] = { sig, val: make() }; return cache[name].val; };
+
   function draw() {
     plot.clear();
     const E = env(), S = sceneSI(E), g = plot.ctx, c = plot.col;
+    const sig = JSON.stringify([st.charges, st.rods, st.lines, st.sheets, st.balls, st.uniform, st.conductor, st.ref, E, plot.vx0, plot.vx1, plot.vy0, plot.vy1, plot.w]);
     const v = view(), box = { x0: v.x0 * L, x1: v.x1 * L, y0: v.y0 * L, y1: v.y1 * L };
     const W = plot.R - plot.L, pxPer = W / (v.x1 - v.x0);                  // pixels per display unit
     const fs = compact ? 11 : 12.5;
@@ -258,7 +261,7 @@ export function mount(F, P0) {
     // equipotentials
     if (layer('equip')) {
       const nx = compact ? 110 : 160, ny = Math.round((nx * (v.y1 - v.y0)) / (v.x1 - v.x0));
-      const grid = M.potentialGrid(S, box, nx, ny);
+      const grid = memo('grid', sig + nx, () => M.potentialGrid(S, box, nx, ny));
       const vals = Array.from(grid.v).filter(Number.isFinite).sort((a, b) => a - b);
       const lo = vals[Math.floor(vals.length * 0.015)], hi = vals[Math.floor(vals.length * 0.985)];
       let levels = P.levels;
@@ -318,7 +321,7 @@ export function mount(F, P0) {
 
     // field lines
     if (layer('fieldLines')) {
-      const FL = M.fieldLines(S, box, { n: P.density ?? (compact ? 10 : 12) });
+      const FL = memo('lines', sig, () => M.fieldLines(S, box, { n: P.density ?? (compact ? 10 : 12) }));
       g.save(); g.strokeStyle = c.ink2; g.globalAlpha = 0.75; g.lineWidth = 1.4; g.lineJoin = 'round';
       g.beginPath();
       for (const l of FL) l.pts.forEach(([x, y], k) => (k ? g.lineTo(plot.X(x / L), plot.Y(y / L)) : g.moveTo(plot.X(x / L), plot.Y(y / L))));
@@ -355,15 +358,14 @@ export function mount(F, P0) {
       for (let k = 0; k <= nm; k++) {
         const t = -span / 2 + (span * k) / nm, x = s.x / L + t * s.ux, y = s.y / L + t * s.uy;
         if (x < v.x0 || x > v.x1 || y < v.y0 || y > v.y1) continue;
-        sign(x, y, s.sigma, 3.2, s.nx, s.ny);
+        sign(x, y, s.sigma, 3.2);
       }
-      if (s.w !== Infinity && P.labels !== false && st.sheets.length && P.sheetLabels !== false) { /* plates are labelled by their caption */ }
     }
     S.rods.forEach((r, i) => {
       const col = signCol(r.Q), pieces = S.pieces.filter((p) => p.rod === i);
       plot.line(r.x1 / L, r.y1 / L, r.x2 / L, r.y2 / L, { color: col, width: pieces.length ? 2 : 5, alpha: pieces.length ? 0.45 : 1 });
       if (pieces.length) for (const p of pieces) plot.point(p.x / L, p.y / L, { color: col, r: pieces.length > 30 ? 2.2 : 3.4 });
-      else { const nm = Math.max(2, Math.round((r.L / L) * pxPer / 18)); for (let k = 0; k < nm; k++) { const f = (k + 0.5) / nm; sign((r.x1 + f * (r.x2 - r.x1)) / L, (r.y1 + f * (r.y2 - r.y1)) / L, r.Q, 3, -r.uy, r.ux); } }
+      else { const nm = Math.max(2, Math.round((r.L / L) * pxPer / 18)); for (let k = 0; k < nm; k++) { const f = (k + 0.5) / nm; sign((r.x1 + f * (r.x2 - r.x1)) / L, (r.y1 + f * (r.y2 - r.y1)) / L, r.Q, 3); } }
     });
     for (const b of S.balls) {
       const col = signCol(b.Q);
@@ -411,8 +413,8 @@ export function mount(F, P0) {
       if (lab) plot.text(lab, q.x / L, q.y / L, { dx: r + 4, dy: -r - 2, color: col, size: fs, weight: 600 });
     });
     // the zero of potential, when it is not at infinity
-    if (S.unbounded && (P.readouts || []).includes('V') && st.ref && P.showRef !== false) {
-      const [rx, ry] = st.ref;
+    if (S.unbounded && (P.readouts || []).includes('V') && P.showRef !== false) {
+      const [rx, ry] = st.ref || [0, 0];
       if (rx >= v.x0 && rx <= v.x1 && ry >= v.y0 && ry <= v.y1) {
         plot.point(rx, ry, { color: 'ink3', r: 3 });
         plot.text('V = 0', rx, ry, { color: 'ink3', size: fs - 1.5, dx: 6, dy: 10 });
@@ -441,7 +443,8 @@ export function mount(F, P0) {
       const want = P.readouts || [];
       if (want.includes('flux') || want.includes('Qenc') || want.includes('Qeps')) {
         const onSurf = S.charges.some((q) => surf.outline.some(([x, y]) => Math.hypot(x - q.x, y - q.y) < 0.012 * (v.x1 - v.x0) * L));
-        const f = M.flux(S, surf, { tol: 1e-7, budget: 150000 }), Qe = M.enclosed(S, surf);
+        const gsig = sig + JSON.stringify([st.gauss, currentShape()]);
+        const { f, Qe } = memo('gauss', gsig, () => ({ f: M.flux(S, surf, { tol: 1e-7, budget: 150000 }), Qe: M.enclosed(S, surf) }));
         const approx = f.converged ? '' : '\\approx ';
         if (want.includes('flux')) rows.push(['flux $\\Phi_E = \\oint\\vec E\\cdot d\\vec A$', onSurf ? '\\text{undefined: a charge is on the surface}' : approx + qty(f.flux, 'N\\,m^2/C', 3)]);
         if (want.includes('Qenc')) rows.push(['charge inside $Q_\\text{enc}$', `${texNum(Qe / QF, 3)}\\ ${QUNIT_TEX[P.qunit]}`]);
@@ -467,7 +470,7 @@ export function mount(F, P0) {
       const pa = st.particle, kind = M.PARTICLES[pa.kind] || M.PARTICLES.electron;
       const q = pa.q !== undefined ? num(pa.q, E) * M.E_CHARGE : kind.q, m = pa.m !== undefined ? num(pa.m, E) : kind.m;
       const sp = num(pa.speed ?? 0, E), an = (num(pa.angle ?? 0, E) * Math.PI) / 180;
-      const tr = M.trajectory(S, { x: pa.x * L, y: pa.y * L, vx: sp * Math.cos(an), vy: sp * Math.sin(an), q, m }, { box, tmax: pa.tmax });
+      const tr = memo('path', sig + JSON.stringify([pa.x, pa.y, sp, an, q, m]), () => M.trajectory(S, { x: pa.x * L, y: pa.y * L, vx: sp * Math.cos(an), vy: sp * Math.sin(an), q, m }, { box, tmax: pa.tmax }));
       T.path = tr;
       T.dur = Math.max(1.5, Math.min(5, (tr.pts.length / 400) * 2.2));
       if (pa.fieldLine) {
@@ -475,11 +478,13 @@ export function mount(F, P0) {
         plot.path(fl.map(([x, y]) => [x / L, y / L]), { color: 'ink2', width: 1.6, dash: [6, 5] });
       }
       const pts = tr.pts.map(([x, y]) => [x / L, y / L]);
-      plot.path(pts, { color: 'gold', width: 2.2, alpha: 0.9 });
-      // where it is now
-      let k = pts.length - 1;
-      if (T.running || (T.tau > 0 && T.tau < 1)) { const tt = T.tau * tr.t[tr.t.length - 1]; k = Math.max(0, tr.t.findIndex((x) => x >= tt)); }
-      const [px, py] = pts[T.tau === 0 && !T.running ? 0 : k];
+      // where it is now: at the start until launched; the trail grows behind it (a static picture shows the whole path when path: true)
+      let k = 0;
+      if (!live || pa.path === true || T.tau >= 1) k = pts.length - 1;
+      else if (T.tau > 0) { const tt = T.tau * tr.t[tr.t.length - 1]; k = Math.max(0, tr.t.findIndex((x) => x >= tt)); }
+      if (!live && pa.path === false) k = 0;
+      if (k > 0) plot.path(pts.slice(0, k + 1), { color: 'gold', width: 2.2, alpha: 0.9 });
+      const [px, py] = pts[k];
       plot.point(px, py, { color: q > 0 ? 'bad' : 'accent', r: 5.5, ring: 'gold' });
       const want = P.readouts || [];
       const last = tr.v[tr.v.length - 1], vEnd = Math.hypot(last[0], last[1]);
@@ -514,16 +519,16 @@ export function mount(F, P0) {
       if (pr.label) plot.text(pr.label, pr.x, pr.y, { dx: -10, dy: 12, color: 'gold', size: fs, weight: 700, align: 'right' });
       const want = P.readouts || [];
       const Vlab = S.unbounded ? '$V$ (zero at the marked point)' : '$V$';
-      if (want.includes('E')) rows.unshift(['$|\\vec E|$ at the probe', qty(m, 'N/C')]);
+      const pieces = want.includes('Eexact') && S.rods.some((r) => !r.exact);
+      if (want.includes('E')) rows.unshift([pieces ? `sum of ${S.pieces.length} point charges, $|\\vec E|$` : '$|\\vec E|$ at the probe', qty(m, 'N/C', pieces ? 4 : 3)]);
       if (want.includes('Ex')) rows.push(['$E_x$', qty(e[0], 'N/C')]);
       if (want.includes('Ey')) rows.push(['$E_y$', qty(e[1], 'N/C')]);
       if (want.includes('Edir')) rows.push(['direction of $\\vec E$', `${Math.round((Math.atan2(e[1], e[0]) * 180) / Math.PI)}^\\circ`]);
       if (want.includes('V')) rows.push([Vlab, qty(V, 'V')]);
       if (want.includes('F')) { const tq2 = num(P.test, E) * QF; rows.push(['force on the test charge, $|\\vec F|$', qty(Math.abs(tq2) * m, 'N')]); }
-      if (want.includes('Eexact') && S.rods.some((r) => !r.exact)) {
+      if (pieces) {
         const Sx = sceneSI(E, { exact: true }), ex = M.field(Sx, pr.x * L, pr.y * L);
-        rows.push(['the integral (exact) $|\\vec E|$', qty(Math.hypot(ex[0], ex[1]), 'N/C', 4)]);
-        rows[0] = [`sum of ${S.pieces.length} pieces, $|\\vec E|$`, qty(m, 'N/C', 4)];
+        rows.push(['the integral, $|\\vec E|$', qty(Math.hypot(ex[0], ex[1]), 'N/C', 4)]);
       }
       if (want.includes('dVdx')) {
         const h = (v.x1 - v.x0) * 1e-4 * L, d = (M.potential(S, pr.x * L + h, pr.y * L) - M.potential(S, pr.x * L - h, pr.y * L)) / (2 * h);
@@ -539,10 +544,7 @@ export function mount(F, P0) {
   }
 
   // + and − glyphs
-  function sign(x, y, s, size, nx = 0, ny = 0) {
-    const X = plot.X(x) + nx * 0, Y = plot.Y(y) - ny * 0;
-    glyph(X, Y, s, size, plot.col[s > 0 ? 'bad' : 'accent'], true);
-  }
+  function sign(x, y, s, size) { glyph(plot.X(x), plot.Y(y), s, size, plot.col[s > 0 ? 'bad' : 'accent'], true); }
   function glyph(X, Y, s, size, color, halo = false) {
     const g = plot.ctx;
     g.save(); g.lineCap = 'round';

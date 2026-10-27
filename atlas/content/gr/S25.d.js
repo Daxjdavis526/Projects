@@ -162,7 +162,7 @@ Conventions: Carroll's, signature $(-,+,+,+)$, **with $G = c = 1$**, so $M$ mean
       'Mercury’s M/p is 2.7×10⁻⁸ — far below the slider’s smallest step. Its orbit would look perfectly closed here, yet the advance adds up to 43″ a century.',
     ],
     params: {
-      x: [-2.8, 2.8], y: [-2.1, 2.1], equal: true, xlabel: '', ylabel: '', axes: false,
+      x: [-2.7, 1.5], y: [-1.6, 1.6], equal: true, xlabel: '', ylabel: '', axes: false,
       sliders: [
         { key: 'g', label: 'Strength $M/p$', min: 0, max: 0.04, step: 0.0005, value: 0.02, explain: 'The size of the relativistic correction, GM/(c²p). Mercury: 2.7 × 10⁻⁸; a star at 100 M from a black hole: 0.01.' },
         { key: 'e', label: 'Eccentricity $e$', min: 0, max: 0.6, step: 0.01, value: 0.4, explain: 'How stretched the orbit is: 0 is a circle. A circle has no perihelion to advance.' },
@@ -190,7 +190,7 @@ $$E = \left(1 - \frac{2M}{r}\right)\frac{dt}{d\tau}, \qquad L = r^2\frac{d\phi}{
 the energy and angular momentum per unit mass.` },
       { label: 'The radial equation', text: t`Put them into $g_{\mu\nu}u^\mu u^\nu = -1$ (with $\theta = \pi/2$):
 $$-\frac{E^2}{1 - 2M/r} + \frac{1}{1 - 2M/r}\left(\frac{dr}{d\tau}\right)^2 + \frac{L^2}{r^2} = -1 \;\Rightarrow\; \left(\frac{dr}{d\tau}\right)^2 = E^2 - \left(1 - \frac{2M}{r}\right)\left(1 + \frac{L^2}{r^2}\right).$$` },
-      { label: 'Trade τ for φ', text: t`With $u = 1/r$: $\dfrac{dr}{d\tau} = \dfrac{dr}{d\phi}\dfrac{d\phi}{d\tau} = -\dfrac{1}{u^2}\dfrac{du}{d\phi}\cdot Lu^2 = -L\,u'$, primes now meaning $d/d\phi$. So
+      { label: 'Angle instead of time', text: t`With $u = 1/r$: $\dfrac{dr}{d\tau} = \dfrac{dr}{d\phi}\dfrac{d\phi}{d\tau} = -\dfrac{1}{u^2}\dfrac{du}{d\phi}\cdot Lu^2 = -L\,u'$, primes now meaning $d/d\phi$. So
 $$u'^2 = \frac{E^2}{L^2} - (1 - 2Mu)\left(\frac{1}{L^2} + u^2\right).$$` },
       { label: 'Differentiate', text: t`Take $d/d\phi$ of both sides and divide by $2u'$ (it is non-zero except at the turning points):
 $$u'' + u = \frac{M}{L^2} + 3Mu^2.$$
@@ -200,7 +200,7 @@ Newton's orbit equation is the same without $3Mu^2$. Its size relative to $M/L^2
       { label: 'Read off the advance', text: t`$u \approx \dfrac1p\left[1 + e\cos\phi + \dfrac{3M}{p}\,e\,\phi\sin\phi\right] \approx \dfrac1p\left[1 + e\cos\!\left(\left(1 - \dfrac{3M}{p}\right)\phi\right)\right]$, since $\cos(\phi - \delta\phi) \approx \cos\phi + \delta\phi\sin\phi$. Perihelion comes when $(1 - 3M/p)\phi = 2\pi$, at $\phi \approx 2\pi(1 + 3M/p)$:
 $$\Delta\phi = \frac{6\pi M}{p} \;\text{ per orbit} \;=\; \frac{6\pi GM}{c^2a(1 - e^2)}.$$` },
       { label: 'Mercury', text: t`$p = a(1 - e^2) = ${sci(MERC_P, 4)}$ m and $GM_\odot/c^2 = 1476.6$ m, so $\Delta\phi = ${sci(MERC_ORBIT, 4)}$ rad $= ${sci(MERC_ORBIT / ARCSEC, 4)}''$ per orbit. A century holds $36\,525/87.969 = ${sci(36525 / MERC.P, 4)}$ orbits: $${sci(MERC_CY, 4)}''$ per century. The measured anomaly is $43''$ per century.` },
-      { label: 'Check the approximation', text: t`Integrating the exact equation numerically (with $e = 0.2$) gives an advance larger than $6\pi M/p$ by $7.6\times10^{-3}$, $7.6\times10^{-4}$ and $7.6\times10^{-5}$ of itself at $p = 10^3$, $10^4$ and $10^5\,M$: the error shrinks in proportion to $M/p$, as a first-order result should. For Mercury it is a few parts in $10^{8}$.` },
+      { label: 'Check the approximation', text: t`Integrating the exact equation numerically (with $e = 0.2$) gives an advance larger than $6\pi M/p$ by $7.6\times10^{-3}$, $7.6\times10^{-4}$ and $7.6\times10^{-5}$ of itself at $p = 10^3$, $10^4$ and $10^5\,M$: the error shrinks in proportion to $M/p$, as a first-order result should. For Mercury it is about $${sci(7.6 * M_SUN / MERC_P, 1)}$ of the advance — far below anything measured.` },
     ],
     answer: t`$u'' + u = M/L^2 + 3Mu^2$ gives $\Delta\phi = 6\pi M/p = 6\pi GM/[c^2a(1 - e^2)]$ per orbit: $${sci(MERC_ORBIT / ARCSEC, 4)}''$ per orbit and $${sci(MERC_CY, 4)}''$ per century for Mercury.`,
   },

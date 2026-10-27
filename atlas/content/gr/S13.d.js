@@ -106,7 +106,7 @@ On a curved space, a vector carried around a closed loop comes back **rotated**.
   },
   example: {
     prompt: t`Carry a vector once around the circle of colatitude $\theta_0$ on a unit sphere ($\theta = \theta_0$, $\phi$ from $0$ to $2\pi$) without turning it. Solve the transport equations and find how much it has turned when it gets back.`,
-    visual: capPic(60, 0.3, t`The circle at colatitude 60° (latitude 30°N). Black: the vector at the start, pointing north; red: the same vector carried 30% of the way round. Drag the sliders to follow it.`),
+    visual: capPic(60, 0.3, t`The circle at colatitude 60° (latitude 30°N). The arrow at the starting point points north; red: the same vector carried 30% of the way round. Drag the sliders to follow it.`),
     steps: [
       { label: 'The path', text: t`Label the curve by $\lambda = \phi$: then $d\theta/d\lambda = 0$ and $d\phi/d\lambda = 1$. Only Christoffel symbols with a $\phi$ in the middle slot enter: $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$ and $\Gamma^\phi{}_{\phi\theta} = \cot\theta$ (step 11).` },
       { label: 'The equations', text: t`The two components, $dV^\theta/d\phi + \Gamma^\theta{}_{\phi\phi}V^\phi = 0$ and $dV^\phi/d\phi + \Gamma^\phi{}_{\phi\theta}V^\theta = 0$, become $$\frac{dV^\theta}{d\phi} = \sin\theta_0\cos\theta_0\,V^\phi, \qquad \frac{dV^\phi}{d\phi} = -\cot\theta_0\,V^\theta.$$` },
@@ -130,7 +130,7 @@ On a curved space, a vector carried around a closed loop comes back **rotated**.
           hints: [t`The angle from the local $\hat e_\theta$ is $\phi\cos\theta_0$.`, t`$${phi}^\circ\times\cos ${th}^\circ$.`],
           teach: 'Along a circle of colatitude θ₀ a parallel-transported vector turns against the local frame at the steady rate cos θ₀ per unit of longitude.',
           explain: t`$${phi}^\circ\times\cos ${th}^\circ = ${fmt(ang, 3)}^\circ$. The rate, $\cos\theta_0$ per degree, is the Foucault pendulum's: at latitude $\lambda$, $\cos\theta_0 = \sin\lambda$.`,
-          visual: capPic(th, phi / 360, t`The circle at colatitude ${th}°, the vector carried ${phi}° of longitude (red) from its start (black). The black arrow points north here; the turn is the same whichever way it starts.`),
+          visual: capPic(th, phi / 360, t`The circle at colatitude ${th}°, the vector carried ${phi}° of longitude (red) from where it started. At the start it pointed north; the turn is the same whichever way it starts.`),
         };
       },
     }),
@@ -253,7 +253,7 @@ On a curved space, a vector carried around a closed loop comes back **rotated**.
       hints: [t`$\Gamma^\phi{}_{\phi\theta} = \cot\theta$ (step 11).`],
       teach: 'Each component of the transport equation subtracts the Christoffel term that tracks how the basis turns along the path.',
       explain: t`$\dfrac{dV^\phi}{d\phi} = -\cot\theta\,V^\theta$. With $\dfrac{dV^\theta}{d\phi} = \sin\theta\cos\theta\,V^\phi$ it closes into simple harmonic motion at rate $\cos\theta$ — the turn that adds up to the cap's area.`,
-      visual: capPic(50, 0.35, 'The circle of colatitude 50°, with the vector carried part of the way round (red) from its start (black).'),
+      visual: capPic(50, 0.35, 'The circle of colatitude 50°, with the vector carried part of the way round (red) from where it started.'),
     }),
   ],
   sources: [

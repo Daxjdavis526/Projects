@@ -70,7 +70,7 @@ Its symmetries leave 20 independent numbers at each event of spacetime; it vanis
   },
   example: {
     prompt: t`Compute the Riemann tensor of a sphere of radius $a$ from its Christoffel symbols, $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$ and $\Gamma^\phi{}_{\theta\phi} = \Gamma^\phi{}_{\phi\theta} = \cot\theta$, and read off its curvature.`,
-    visual: surfacePic({ mode: 'loop', surface: 'sphere', v: 1.0, size: 0.4 }, 'A vector (black) carried around a coordinate rectangle on a sphere comes back turned (red), by the enclosed area divided by a².'),
+    visual: surfacePic({ mode: 'loop', surface: 'sphere', v: 1.0, size: 0.4 }, 'A vector (violet) carried around a coordinate rectangle on a sphere comes back turned (red), by the enclosed area divided by a².'),
     steps: [
       { label: 'Which components', text: t`On a surface every index is $\theta$ or $\phi$. Antisymmetry in the last pair leaves only $\mu\nu = \theta\phi$ (or $\phi\theta$, its negative), and with the first index lowered, antisymmetry in the first pair does the same: one independent component. Compute $R^\theta{}_{\phi\theta\phi}$ ($\rho = \theta$, $\sigma = \phi$, $\mu = \theta$, $\nu = \phi$).` },
       { label: 'Derivative terms', text: t`$\partial_\theta\Gamma^\theta{}_{\phi\phi} - \partial_\phi\Gamma^\theta{}_{\theta\phi} = \partial_\theta(-\sin\theta\cos\theta) - 0 = -\cos 2\theta$.` },
@@ -143,7 +143,7 @@ Its symmetries leave 20 independent numbers at each event of spacetime; it vanis
           hints: [t`$K\times\text{area} = \dfrac{\cos v}{r(R + r\cos v)}\times(R + r\cos v)\,r\,(0.08)^2 = \cos v\times0.0064$ rad.`, t`$\cos ${vd}^\circ = ${fmt(Math.cos(v), 3)}$; convert radians to degrees.`],
           teach: 'The turn around a small loop is the curvature times the enclosed area — positive on the outside of a torus, negative on the inside.',
           explain: t`$K\,dA = \cos v\,du\,dv$, so the turn is $${fmt(Math.cos(v), 3)}\times0.0064 = ${fmt(K * area, 3)}$ rad $= ${fmt(rot, 3)}^\circ$. Added over the whole torus, $\int K\,dA = 0$: the positive outside exactly cancels the negative inside (the Gauss–Bonnet theorem).`,
-          visual: surfacePic({ mode: 'loop', surface: 'torus', v: rnd(v === Math.PI ? 3.14 : v, 4), size: 0.3 }, t`A larger loop drawn at $v = ${vd}^\circ$ so it can be seen: black, the vector at the start; red, what comes back. Colour: Gaussian curvature (gold positive, blue negative).`),
+          visual: surfacePic({ mode: 'loop', surface: 'torus', v: rnd(v === Math.PI ? 3.14 : v, 4), size: 0.3 }, t`A larger loop drawn at $v = ${vd}^\circ$ so it can be seen: violet, the vector at the start; red, what comes back. Colour: Gaussian curvature (gold positive, blue negative).`),
         };
       },
     }),

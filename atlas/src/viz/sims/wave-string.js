@@ -269,6 +269,7 @@ export async function mount(F, P0) {
   function drawStanding() {
     const L = P.Ls, FT = F.params.FT, mu = P.mu, v = W.stringSpeed(FT, mu), f1 = W.harmonic(1, v, L);
     const ph = W.TAU * 0.8 * S.t;          // slow motion: about one cycle per 1.25 s whatever the frequency
+    plot.o.yfmt = () => '';                // heights are in display units only: no numbers
     if (P.show !== 'drive') {
       const n = F.params.n, A = 1;
       plot.o.ylabel = 'y';
@@ -294,7 +295,7 @@ export async function mount(F, P0) {
     const y = (x) => { const Y = W.drivenString(x, p); return Y.re * Math.cos(ph) - Y.im * Math.sin(ph); };
     plot.fn(y, { color: 'accent', width: 2.6 });
     beads(plot, L, y, { n: 40, r: 2.4 });
-    plot.rect(-0.012 * L, y(0) - 0.12, 0.024 * L, 0.24, { color: 'warn', alpha: 0.9 });
+    plot.rect(-0.01 * L, y(0) - 0.05, 0.02 * L, 0.1, { color: 'warn', alpha: 0.9 });
     const g = W.drivenGain({ ...p, a: 1 });
     plot.text(`shaken end (orange) moves 1 unit; the string swings up to ${trim(g, 2)} units (slowed down)`, plot.L + 6, 12, { screen: true, color: 'ink2', size: 12, weight: 600 });
     // the resonance curve

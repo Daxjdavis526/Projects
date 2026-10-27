@@ -287,12 +287,14 @@ export function mount(F, P0) {
     return f < 0.5 ? mix(C.accent, C.violet, f * 2) : mix(C.violet, C.bad, (f - 0.5) * 2);
   };
 
-  function layout() {
-    const Wd = canvas.clientWidth || 600;
-    const narrow = Wd < 520;
-    const want = tall ? (narrow ? '3 / 4' : '16 / 11') : narrow ? '4 / 3' : '';
-    if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; return false; }
-    return true;
+  // the canvas takes the height the schematic needs at the full width (plus the graph)
+  let sized = { w: 0, tries: 0 };
+  function fitHeight(Wd, Ht, want) {
+    if (sized.w !== Wd) sized = { w: Wd, tries: 0 };
+    if (Math.abs(want - Ht) <= 6 || sized.tries > 3) return true;
+    sized.tries++;
+    box.style.aspectRatio = `${Wd} / ${Math.round(want)}`;
+    return false;
   }
 
   let FS = 12.5, LW = 2.6;
@@ -320,7 +322,7 @@ export function mount(F, P0) {
     }
     if (W && e.id === 'R1' && show.names) { const w = wireNow(); l1.push(`${M.MATERIALS[w.material].label}, L = ${trimNum(w.L, 3)} m`, `d = ${trimNum(w.d * 1e3, 3)} mm`); }
     if (e.kind === 'A') l2.push(P.hide.includes(e.id) ? '?' : eng(Math.abs(st.I[e.id]), 'A'));
-    else if (e.kind !== 'S') {
+    else if (e.kind !== 'S' && !(A.w < 520 && !compact)) {
       if (show.I) l2.push(P.hide.includes(`I:${e.id}`) ? 'I = ?' : `I = ${eng(Math.abs(st.I[e.id]), 'A')}`);
       if (show.drop && e.kind !== 'B') l2.push(P.hide.includes(`dV:${e.id}`) ? 'ΔV = ?' : `ΔV = ${eng(Math.abs(st.drop[e.id]), 'V')}`);
       if (show.P && e.kind !== 'C') l2.push(P.hide.includes(`P:${e.id}`) ? 'P = ?' : `P = ${eng(Math.abs(e.kind === 'B' ? vals[e.id] * st.I[e.id] : st.P[e.id]), 'W')}`);
@@ -336,7 +338,6 @@ export function mount(F, P0) {
   const TAGS = { tl: [-8, -12, 'right'], tr: [8, -12, 'left'], bl: [-8, 13, 'right'], br: [8, 13, 'left'], tc: [0, -16, 'center'], r: [10, 0, 'left'] };
 
   function draw() {
-    if (!layout()) { requestAnimationFrame(draw); return; }
     C = themeColors();
     A.resize(); A.refreshTheme(); G.resize(); G.refreshTheme();
     const Wd = A.w, Ht = A.h;
@@ -358,8 +359,8 @@ export function mount(F, P0) {
     // ── layout: the nodes' box, with margins measured from the text that goes outside it ──
     const xs = pre.nodes.map((n) => n[0]), ys = pre.nodes.map((n) => n[1]);
     const x0w = Math.min(...xs), x1w = Math.max(...xs), y0w = Math.min(...ys), y1w = Math.max(...ys);
-    const graphH = tall ? Math.round(Ht * (narrow ? 0.4 : 0.38)) : 0;
-    const need = { l: 14, r: 14, t: potOn ? 26 : 14, b: 12 };
+    const graphH = tall ? (narrow ? 200 : 230) : 0;
+    const need = { l: 14, r: 14, t: 14, b: 12 };
     const measure = (s, w = 650) => { ctx.save(); ctx.font = `${w} ${fs}px Inter, system-ui, sans-serif`; const m = ctx.measureText(s).width; ctx.restore(); return m; };
     // a first guess at the scale, then the margins the labels need at that scale
     let u = Math.min((Wd - 180) / (x1w - x0w || 1), (Ht - graphH - 90) / (y1w - y0w || 1));
@@ -376,18 +377,22 @@ export function mount(F, P0) {
         if (!all.length) continue;
         if (side === 'l') need.l = Math.max(need.l, hw + 9 + wmax - (cx - x0w) * u);
         if (side === 'r') need.r = Math.max(need.r, hw + 9 + wmax - (x1w - cx) * u);
-        if (side === 't') need.t = Math.max(need.t, hw + 6 + all.length * lh - (y1w - cy) * u + (potOn ? 16 : 0));
+        if (side === 't') need.t = Math.max(need.t, hw + 6 + all.length * lh - (y1w - cy) * u);
         if (side === 'b') need.b = Math.max(need.b, hw + 6 + all.length * lh - (cy - y0w) * u);
       }
       if (show.V) for (const tg of pre.tags) {
         const [x, y] = pre.nodes[tg.n], o = TAGS[tg.at] || TAGS.tr, w = measure('00.0 V', 700) + 4;
-        if (o[1] < 0) need.t = Math.max(need.t, -o[1] + 9 - (y1w - y) * u + (potOn ? 16 : 0));
+        if (o[1] < 0) need.t = Math.max(need.t, -o[1] + 9 - (y1w - y) * u);
         if (o[1] > 0) need.b = Math.max(need.b, o[1] + 9 - (y - y0w) * u);
         if (o[2] === 'right') need.l = Math.max(need.l, w - o[0] - (x - x0w) * u);
         if (o[2] === 'left') need.r = Math.max(need.r, w + o[0] - (x1w - x) * u);
       }
-      u = Math.min((Wd - need.l - need.r) / (x1w - x0w || 1), (Ht - graphH - need.t - need.b) / (y1w - y0w || 1));
+      u = (Wd - need.l - need.r) / (x1w - x0w || 1);
     }
+    if (potOn) need.t += 30;          // a strip of its own for the potential legend
+    // the schematic at full width sets the canvas height (within reason)
+    const want = Math.max(Wd * 0.36, Math.min(Wd * (tall ? 1.6 : 0.9), (y1w - y0w) * u + need.t + need.b + graphH));
+    if (!fitHeight(Wd, Ht, want)) { requestAnimationFrame(draw); return; }
     A.o.pad = { l: need.l, r: need.r, t: need.t, b: need.b + graphH };
     A.setView([x0w, x1w], [y0w, y1w]);
     u = A.X(1) - A.X(0);
@@ -489,7 +494,7 @@ export function mount(F, P0) {
     if (flowOn) {
       ctx.save();
       ctx.fillStyle = C.ink;
-      const rad = carriers() === 'electrons' ? 2.2 : 2.6;
+      const spacing = Math.max(11, Math.min(SP, 0.3 * u)), rad = Math.max(1.7, Math.min(carriers() === 'electrons' ? 2.2 : 2.6, 0.045 * u));
       for (const e of pre.elements) {
         const g = geo[e.id];
         if (!g || (e.kind === 'S' && !swNow()[e.id] && !e.spdt)) continue;
@@ -502,7 +507,7 @@ export function mount(F, P0) {
         for (const [p0, p1] of paths) {
           const L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
           if (L < 4) continue;
-          const n = Math.max(1, Math.round(L / SP)), sp = L / n;
+          const n = Math.max(1, Math.round(L / spacing)), sp = L / n;
           const ph = (((S.phase[e.id] || 0) % sp) + sp) % sp;
           for (let k = 0; k < n; k++) {
             const s = ph + k * sp;
@@ -783,6 +788,17 @@ export function mount(F, P0) {
         const w = wireNow(), Ar = (Math.PI * w.d * w.d) / 4, I = Math.abs(st.I.R1), mat = M.MATERIALS[w.material];
         rows.push(['$R = \\rho L/A$', texEng(vals.R1, 'Ω')], ['current density $J = I/A$', `${trimNum(I / Ar / 1e6, 3)}\\,\\mathrm{A/mm^2}`], ['field in the wire $E = V/L$', `${trimNum(Math.abs(st.drop.R1) / w.L, 3)}\\,\\mathrm{V/m}`]);
         if (mat.n) rows.push(['drift speed $v_d$', `${trimNum(M.driftSpeed(I, mat.n, Ar) * 1e3, 3)}\\,\\mathrm{mm/s}`]);
+      }
+    }
+    // on a narrow screen the per-element readings live here rather than on the picture
+    if (A.w < 520 && !compact && !hasCaps && P.circuit !== 'twoloop' && (show.I || show.P || show.drop)) {
+      for (const e of pre.elements) {
+        if (!['R', 'L', 'G'].includes(e.kind)) continue;
+        const parts = [];
+        if (show.I && !P.hide.includes(`I:${e.id}`)) parts.push(texEng(Math.abs(st.I[e.id]), 'A'));
+        if (show.drop && !P.hide.includes(`dV:${e.id}`)) parts.push(texEng(Math.abs(st.drop[e.id]), 'V'));
+        if (show.P && !P.hide.includes(`P:${e.id}`)) parts.push(texEng(Math.abs(st.P[e.id]), 'W'));
+        if (parts.length) rows.push([`$${texKey(e.id)}$`, parts.join(',\\ ')]);
       }
     }
     F.readout(rows);
