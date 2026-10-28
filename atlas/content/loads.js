@@ -523,6 +523,7 @@ export const LESSONS = {
   'phys3710.R0.1': () => import('./phys3710/R0.1.js'),
   'phys3710.R0.2': () => import('./phys3710/R0.2.js'),
   'phys3710.R0.3': () => import('./phys3710/R0.3.js'),
+  'phys3710.R1.1': () => import('./phys3710/R1.1.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
   'prog.P1.1': () => import('./prog/P1.1.js'),
   'prog.P1.2': () => import('./prog/P1.2.js'),

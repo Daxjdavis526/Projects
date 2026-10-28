@@ -30,7 +30,7 @@ The method is always the same: **relate, then differentiate, then substitute**. 
   visual: {
     type: 'graph',
     title: 'Radar range to a passing aircraft',
-    lead: t`A radar on the ground (left of centre) tracks an aircraft flying level at altitude $H$ and speed $v$. Run the clock with the time slider. The readouts show the ground distance $x$, the range $r$, and the rate at which the range is changing.`,
+    lead: t`A radar at the origin tracks an aircraft flying level at altitude $H$ and speed $v$. Run the clock with the time slider. The readouts show the ground distance $x$, the range $r$, and the rate at which the range is changing.`,
     tasks: [
       t`Far away, the range shrinks at nearly the full flight speed: $dr/dt \approx -v$.`,
       t`At the moment the aircraft passes overhead ($x = 0$), $dr/dt = 0$ — although the aircraft has not slowed at all.`,
@@ -59,7 +59,7 @@ The method is always the same: **relate, then differentiate, then substitute**. 
         { label: t`$x$`, expr: X, unit: t`\text{km}`, digits: 3 },
         { label: t`$r$`, expr: `sqrt(${X}^2 + H^2)`, unit: t`\text{km}`, digits: 3 },
         { label: t`$dx/dt$`, expr: '-v', unit: t`\text{m/s}`, digits: 3 },
-        { label: t`$dr/dt = \frac{x}{r}\frac{dx}{dt}$`, expr: `-v*${X}/sqrt(${X}^2 + H^2)`, unit: t`\text{m/s}`, digits: 3 },
+        { label: t`range rate $dr/dt$`, expr: `-v*${X}/sqrt(${X}^2 + H^2)`, unit: t`\text{m/s}`, digits: 3 },
       ],
     },
     caption: t`Flat Earth, straight level flight, and a radar at ground level. Both axes share one scale. Real radars measure range rate directly from the Doppler shift of the echo.`,
@@ -102,7 +102,7 @@ The method is always the same: **relate, then differentiate, then substitute**. 
             params: {
               x: [-12, s + 25], y: [-4, 45], aspect: 'wide', equal: true, xlabel: 'm', ylabel: '',
               curves: [{ fn: lineAt0(s, h), color: 'gold', dash: true, width: 1.6, domain: [0, s] }, { param: ['0', `${h}*t`], t: [0, 1], color: 'ink3', dash: true, width: 1.2 }],
-              points: [{ x: 0, y: h, color: 'accent', r: 6, label: 'lander' }, { x: N(s), y: 0, color: 'violet', r: 5, label: 'shadow', labelDy: 16 }],
+              points: [{ x: 0, y: h, color: 'accent', r: 6, label: 'lander' }, { x: N(s), y: 0, color: 'violet', r: 5, label: 'shadow', labelDx: 8, labelDy: -14 }],
               arrows: [{ from: [0, h], to: [0, h - 10], color: 'accent', label: 'descending' }],
             },
             caption: t`A sunbeam (dashed gold) grazes the lander and lands at the shadow. Shown at $h = ${h}$ m; flat ground and parallel sunlight assumed. Apollo landings were timed for a low Sun, roughly $5$–$15^\circ$ up, so that craters cast long shadows.`,

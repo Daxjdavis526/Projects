@@ -53,7 +53,7 @@ const candidates = {
   P: [[0, 0], [0.4, 1], [0.6, 2], [1.4, 3], [1.6, 4], [1.2, 5]],
   Q: [[2.6, 0], [3, 1.2], [4.6, 2], [4.9, 3], [5.1, 5]],
   R: [[7, 0], [7.4, 1.5], [7.6, 3.2], [7.2, 2.4], [7.3, 5]],
-  S: [[-1.2, 5], [-1.8, 3.6], [-1.6, 2], [-2.4, 0.6], [-2.2, 0]],
+  S: [[-2.2, 0], [-2.4, 1], [-1, 1.6], [-1.4, 3], [-1.2, 5]],
 };
 
 export default lesson({
@@ -110,11 +110,11 @@ Anything with mass moves slower than light, so **its worldline stays inside the 
       why: {
         1: 'Between t = 1.2 and t = 2, Q climbs only 0.8 while moving 1.6 across: slope below 45°, faster than light.',
         2: 'R turns back in time between t = 3.2 and t = 2.4: no physical object’s clock runs backward.',
-        3: 'S is fine in shape, but read it from the bottom: between t = 0 and t = 0.6 it moves 0.2 across, then between 0.6 and 2 it moves 0.8 in 1.4 — all slower than light. Look again: S is drawn steeper than 45° everywhere except from t = 0.6 to 2? Check each segment’s slope.',
+        3: 'Between t = 1 and t = 1.6, S moves 1.4 light-years in 0.6 years: faster than light.',
       },
       hints: ['A massive body moves slower than light at every moment: every piece of its worldline must be steeper than the 45° light lines.', 'Check each straight piece: time climbed must exceed distance moved.'],
       teach: 'A worldline of anything with mass is timelike everywhere: steeper than 45° at every event, and always climbing in time.',
-      explain: 'P climbs more than it moves on every piece — it speeds up, slows and turns, but never reaches light speed. Q has a faster-than-light stretch, R runs backward in time, and S has a stretch flatter than 45°.',
+      explain: 'P climbs more than it moves on every piece — it speeds up, slows and turns, but never reaches light speed. Q and S each have a stretch flatter than 45° (faster than light), and R runs backward in time.',
     }),
     num({
       id: 'when-speed', difficulty: 2,
