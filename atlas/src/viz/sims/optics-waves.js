@@ -27,7 +27,7 @@
 //       //            light 'laser' | 'white', phasors true, envelope true, marks null | 'bright' | 'dark' | 'single',
 //       //            probe null (axis units); hide: spacing (no fringe-spacing readout), probe
 //       // film:      t 300 (nm), nFilm 1.33, nTop 1, nSub 1 (1: a free film in air), angle 0 (°), design null (nm: mark a
-//       //            design wavelength), strip true (Newton's scale); hide: colour, spectrum
+//       //            design wavelength), strip true (Newton's scale); hide: colour, spectrum, flips
 //       // michelson: dL 0 (nm, the mirror's displacement), lambda 633 (nm), d0 400 (µm, the arms' starting difference,
 //       //            which sets how fine the rings are), maxL 2000 (nm, the slider's range), play true
 //       // airy:      preset 'hubble' | 'jwst' | 'eye' | 'eht' | 'custom', D (m), lambda (m), sep (rad: the stars' separation),
@@ -178,7 +178,8 @@ export async function mount(F, P0) {
   const box = canvas.parentElement;
   function setNarrow() {
     const narrow = (box.clientWidth || 600) < 520;
-    const want = narrow && (mode === 'film' || mode === 'michelson' || mode === 'airy') ? '4 / 5' : '';
+    const sectionOnly = mode === 'film' && P.hide?.includes('spectrum') && P.hide?.includes('colour') && P.strip === false;
+    const want = sectionOnly ? '4 / 3' : narrow && (mode === 'film' || mode === 'michelson' || mode === 'airy') ? '4 / 5' : '';
     if (box.style.aspectRatio !== want) box.style.aspectRatio = want;
     return narrow;
   }
@@ -333,8 +334,10 @@ export async function mount(F, P0) {
     const n0 = p.nTop, n1 = p.nFilm, n2 = p.nSub, t = p.t, th0 = rad(p.angle);
     const lt = lightTheme(A.col);
     const narrow = W0 < 520;
-    const leftW = narrow ? W0 : Math.round(W0 * 0.42);
-    const crossH = narrow ? Math.round(H0 * 0.38) : H0 - 8;
+    const showSpec = !hide.has('spectrum'), showSwatch = !hide.has('colour'), showStrip = P.strip !== false;
+    const sectionOnly = !showSpec && !showSwatch && !showStrip;
+    const leftW = narrow || sectionOnly ? W0 : Math.round(W0 * 0.42);
+    const crossH = sectionOnly ? H0 - 8 : narrow ? Math.round(H0 * 0.38) : H0 - 8;
     // cross-section, drawn with the rays at 25° so the two reflections separate
     frame(A, { l: 8, r: W0 - leftW + 8, t: 8, b: H0 - crossH + 8 });
     A.setView([0, 1], [0, 1]);
@@ -360,38 +363,44 @@ export async function mount(F, P0) {
       A.text(`n = ${n0.toFixed(2)}`, 0.03, 0.96, { color: 'ink2', size: 11 });
       A.text(`film n = ${n1.toFixed(2)}, t = ${Math.round(t)} nm`, 0.03, (yTop + yBot) / 2, { color: 'ink', size: 11.5, weight: 600 });
       A.text(`n = ${n2.toFixed(2)}`, 0.03, 0.04, { color: 'ink2', size: 11 });
-      A.text(`1: top face, ${flip1 ? 'flips by ½ cycle' : 'no flip'}`, 0.03, 0.31, { color: 'accent2', size: 11 });
-      A.text(`2: bottom face, ${flip2 ? 'flips by ½ cycle' : 'no flip'}`, 0.03, 0.23, { color: 'violet', size: 11 });
+      if (!hide.has('flips')) {
+        A.text(`1: top face, ${flip1 ? 'flips by ½ cycle' : 'no flip'}`, 0.03, 0.31, { color: 'accent2', size: 11 });
+        A.text(`2: bottom face, ${flip2 ? 'flips by ½ cycle' : 'no flip'}`, 0.03, 0.23, { color: 'violet', size: 11 });
+      }
       A.text('ray 2 goes about 2nt farther', 0.03, 0.15, { color: 'ink3', size: 11 });
     }
     // spectrum and colour
+    const flipsText = () => { const flips = W.phaseFlips(n0, n1, n2); return hide.has('flips') ? [] : [['phase flips', flips === 1 ? '\\text{one: bright when } 2nt = (m + \\tfrac12)\\lambda' : `\\text{${flips === 0 ? 'none' : 'two'}: bright when } 2nt = m\\lambda`]]; };
+    if (sectionOnly) { if (P.readout !== false) F.readout(flipsText()); return; }
     const lams = []; for (let l = 380; l <= 750; l += 2) lams.push(l);
     const R = (l) => W.filmReflectance({ n0, n1, n2, t, lambda: l, theta0: th0 });
     const bare = W.bareReflectance(n0, n2);
     const Rmax = Math.max(...lams.map(R)), top = Math.max(0.02, Rmax, bare) * 1.18;
     const gx = narrow ? 46 : leftW + 46, gw = W0 - gx - 14;
-    const specB = narrow ? crossH + 26 : 22, specH = narrow ? Math.round(H0 * 0.27) : Math.round(H0 * 0.52);
-    frame(B, { l: gx, r: 14, t: specB, b: H0 - specB - specH });
-    B.o.xlabel = 'wavelength (nm)'; B.o.ylabel = ''; B.o.yfmt = (v) => `${trim(v * 100, 2)}%`; B.o.xticks = 5;
-    B.setView([380, 750], [0, top]);
-    if (!hide.has('spectrum')) {
+    const specB = narrow ? crossH + 26 : 22;
+    const specH = !showSpec ? 0 : narrow ? Math.round(H0 * 0.27) : showSwatch || showStrip ? Math.round(H0 * 0.52) : H0 - specB - 40;
+    if (showSpec) {
+      frame(B, { l: gx, r: 14, t: specB, b: H0 - specB - specH });
+      B.o.xlabel = 'wavelength (nm)'; B.o.ylabel = ''; B.o.yfmt = (v) => `${trim(v * 100, 2)}%`; B.o.xticks = 5;
+      B.setView([380, 750], [0, top]);
       for (const l of lams) { const r0 = R(l); B.line(l, 0, l, r0, { color: lineColor(A.col, l, 0.55), width: Math.max(1.2, (B.R - B.L) / lams.length + 0.6) }); }
       B.grid(); B.axes();
       B.fn(R, { color: 'ink', width: 2, domain: [380, 750] });
       if (n2 !== n0) { B.line(380, bare, 750, bare, { color: 'ink3', width: 1.2, dash: [5, 4] }); B.text('no film', 745, bare, { color: 'ink3', size: 10.5, align: 'right', dy: -8 }); }
       if (P.design) { B.line(P.design, 0, P.design, top, { color: 'gold', width: 1.2, dash: [3, 3] }); B.text(`${P.design} nm`, P.design, top * 0.94, { color: 'gold', size: 10.5, dx: 4 }); }
       B.text('reflected fraction R', B.L + 2, B.T - 10, { screen: true, color: 'ink2', size: 11, weight: 600 });
-    } else { B.grid(); B.axes(); B.text('spectrum hidden', (B.L + B.R) / 2, (B.T + B.B) / 2, { screen: true, color: 'ink3', align: 'center' }); }
-    // the colour, and Newton's scale against thickness
-    const sy = specB + specH + 48, sh = Math.max(14, Math.round((H0 - sy - 8) / 2 - 4));
+    }
+    // the colour, and Newton's scale against thickness (filling the panel when the spectrum is hidden)
+    const sy = showSpec ? specB + specH + 48 : narrow ? crossH + 36 : Math.round(H0 * 0.3);
+    const sh = showSpec ? Math.max(14, Math.round((H0 - sy - 8) / 2 - 4)) : Math.max(14, Math.min(60, Math.round((H0 - sy - 30) / 2)));
     const sw = Math.max(40, Math.round(Math.min(sh * 1.6, narrow ? 60 : 90)));
-    if (!hide.has('colour')) {
+    if (showSwatch) {
       const c = W.filmColor({ n0, n1, n2, t, theta0: th0 });
       ctx.save(); ctx.fillStyle = css(c); ctx.fillRect(gx, sy, sw, sh * 2 + 8); ctx.strokeStyle = A.col.line3; ctx.strokeRect(gx + 0.5, sy + 0.5, sw - 1, sh * 2 + 7); ctx.restore();
       B.text('colour seen', gx, sy - 8, { screen: true, color: 'ink2', size: 11, weight: 600 });
     }
-    if (P.strip !== false) {
-      const x0 = gx + sw + 14, w = W0 - x0 - 14, n = Math.max(2, Math.round(w));
+    if (showStrip) {
+      const x0 = showSwatch ? gx + sw + 14 : gx, w = W0 - x0 - 14, n = Math.max(2, Math.round(w));
       const key = `${n0}|${n1}|${n2}|${p.angle}|${n}`;
       if (drawFilm.key !== key) {
         drawFilm.key = key;
@@ -407,9 +416,8 @@ export async function mount(F, P0) {
       B.text(narrow ? 'colour vs thickness, 0 → 1500 nm' : 'colour against thickness, 0 → 1500 nm', x0, sy - 8, { screen: true, color: 'ink2', size: 11, weight: 600 });
     }
     if (P.readout !== false) {
-      const flips = W.phaseFlips(n0, n1, n2);
-      const rows = [['phase flips', flips === 1 ? '\\text{one: bright when } 2nt = (m + \\tfrac12)\\lambda' : `\\text{${flips === 0 ? 'none' : 'two'}: bright when } 2nt = m\\lambda`]];
-      if (!hide.has('spectrum')) rows.push(['R at 550 nm', `${trim(100 * R(550), 2)}\\%`]);
+      const rows = flipsText();
+      if (showSpec) rows.push(['R at 550 nm', `${trim(100 * R(550), 2)}\\%`]);
       if (n2 !== n0) rows.push(['without the film', `${trim(100 * bare, 2)}\\%`]);
       F.readout(rows);
     }

@@ -1079,6 +1079,131 @@ const APPARATUS = {
       if (sys === 'tilt') sysTag(pl, 0.8, 9.55, `search coil tilted ${P.tilt}°`, { size: 10.5 });
     }
   },
+
+  // a ray table with an acrylic half-cylinder (Snell), or an optical bench with a lens and a screen
+  optics(pl, E, P, st, o) {
+    const sys = st.sys, off = sys === 'reference';
+    if (E === B.EXPERIMENTS.snell) {
+      const C = [6.6, 4.6], Rp = 4.0, Rb = 2.5, th1 = st.setting ?? E.setting.value;
+      const d = off ? P.rot : 0;
+      const th2 = Number.isFinite(st.row?.R?.[0]) ? st.row.R[0] : Math.asin(Math.sin((th1 - d) * D2R) / P.n) / D2R + d;
+      // the protractor, its 0° line horizontal
+      pl.circle(C[0], C[1], Rp, { color: 'ink3', width: 1.2 });
+      for (let a = 0; a < 360; a += 10) { const c = Math.cos(a * D2R), s = Math.sin(a * D2R), l = a % 90 ? 0.22 : 0.45; pl.line(C[0] + Rp * c, C[1] + Rp * s, C[0] + (Rp - l) * c, C[1] + (Rp - l) * s, { color: 'ink3', width: 1 }); }
+      pl.line(C[0] - Rp, C[1], C[0] + Rp, C[1], { color: 'ink3', width: 1, dash: [4, 4] });
+      // the block (turned d° when the zero is off) and its own normal
+      const rot = (x, y) => [C[0] + x * Math.cos(d * D2R) - y * Math.sin(d * D2R), C[1] + x * Math.sin(d * D2R) + y * Math.cos(d * D2R)];
+      pl.path(Array.from({ length: 61 }, (_, i) => { const a = -Math.PI / 2 + (Math.PI * i) / 60; return rot(Rb * Math.cos(a), Rb * Math.sin(a)); }).concat([rot(0, Rb)]), { color: 'teal', width: 1.4, fill: 'teal', fillAlpha: 0.18, close: true });
+      if (off) { const [nx, ny] = rot(Rp, 0), [mx, my] = rot(-Rp, 0); pl.line(mx, my, nx, ny, { color: 'warn', width: 1.2, dash: [3, 3] }); }
+      // the beam: in from the upper left at θ₁, out along a radius at θ₂ below the 0° line
+      const a1 = th1 * D2R, a2 = th2 * D2R, Lin = Rp + 0.5;
+      pl.line(C[0] - Lin * Math.cos(a1), C[1] + Lin * Math.sin(a1), C[0], C[1], { color: 'bad', width: 2.4 });
+      pl.line(C[0], C[1], C[0] + Rp * Math.cos(a2), C[1] - Rp * Math.sin(a2), { color: 'bad', width: 2.4 });
+      const lx = C[0] - (Lin + 0.4) * Math.cos(a1), ly = C[1] + (Lin + 0.4) * Math.sin(a1);
+      pl.circle(lx, ly, 0.32, { fill: 'ink3', color: 'ink2', width: 1 });
+      pl.curve((u) => C[0] - 1.5 * Math.cos(u), (u) => C[1] + 1.5 * Math.sin(u), 0, a1, { color: 'gold', width: 1.4 });
+      pl.curve((u) => C[0] + 1.9 * Math.cos(u), (u) => C[1] - 1.9 * Math.sin(u), 0, a2, { color: 'gold', width: 1.4 });
+      if (st.labels) {
+        pl.text('θ₁', C[0] - 1.95 * Math.cos(a1 / 2), C[1] + 1.95 * Math.sin(a1 / 2), { color: 'gold', size: 12, weight: 700, align: 'center' });
+        pl.text('θ₂', C[0] + 2.35 * Math.cos(a2 / 2), C[1] - 2.35 * Math.sin(a2 / 2), { color: 'gold', size: 12, weight: 700, align: 'center' });
+        pl.text('acrylic', C[0] + 1.3, C[1] + 1.9, { color: 'teal', size: 11, weight: 600 });
+        pl.text('laser, 633 nm', lx - 0.5, ly, { color: 'ink3', size: 10.5, align: 'right' });
+        const r = st.row?.R?.[0];
+        display(pl, 14.6, 7.4, [`θ₁ = ${th1}°`, `θ₂ = ${Number.isFinite(r) ? r.toFixed(1) : '—'}°`], { compact: o.compact, title: 'protractor' });
+        if (off) sysTag(pl, 12.2, 3.0, `block turned ${P.rot}° on the table`, { size: 10.5 });
+      }
+      return;
+    }
+    // the bench: object at the left, lens, screen; distances to scale
+    const s = st.setting ?? E.setting.value, dmark = off ? P.hold : 0;
+    const so = s + dmark, siTrue = 1 / (1 / P.f - 1 / so);
+    const r = st.row?.R?.[0], si = Number.isFinite(r) ? r : siTrue + dmark;   // what the scale says
+    const k = 17.6 / 100, yA = 5.2, xO = 1.0, xL = xO + k * so, xS = xL + k * siTrue;
+    pl.line(0.5, 2.2, 19.6, 2.2, { color: 'ink3', width: 3 });
+    for (let c = 0; c <= 100; c += 5) pl.line(xO + k * c, 2.2, xO + k * c, c % 10 ? 1.95 : 1.75, { color: 'ink3', width: 1 });
+    pl.line(0.5, yA, 19.6, yA, { color: 'ink4', width: 1, dash: [5, 4] });
+    const hO = 1.5, hI = Math.max(-4.2, Math.min(4.2, (-hO * siTrue) / so));
+    pl.arrow(xO, yA, xO, yA + hO, { color: 'good', width: 2.4, head: 8 });
+    pl.circle(xO - 0.35, yA + 0.4, 0.22, { fill: 'gold', alpha: 0.7, stroke: false });
+    // the lens and its holder
+    pl.curve((u) => xL + 0.22 * Math.cos(u), (u) => yA + 2.6 * Math.sin(u), 0, 2 * Math.PI, { color: 'accent', width: 2 });
+    pl.line(xL, yA - 2.6, xL, 2.2, { color: 'ink3', width: 2 });
+    const xM = xL - k * dmark;                                              // the holder's index mark
+    pl.path([[xM - 0.18, 2.2], [xM, 2.55], [xM + 0.18, 2.2]], { color: off ? 'warn' : 'ink2', width: 1.6 });
+    // two principal rays from the arrow's tip
+    const F2 = xL + k * P.f;
+    pl.path([[xO, yA + hO], [xL, yA + hO], [xS, yA + hI]], { color: 'bad', width: 1.3, alpha: 0.85 });
+    pl.line(xO, yA + hO, xS, yA + hI, { color: 'bad', width: 1.3, alpha: 0.85 });
+    pl.circle(F2, yA, 0.08, { fill: 'accent', stroke: false });
+    // the screen and the image on it
+    if (xS < 19.8) {
+      pl.rect(xS, yA - 4.4, 0.2, 8.6, { fill: 'ink3', alpha: 0.35, stroke: 'ink2', width: 1 });
+      pl.arrow(xS - 0.12, yA, xS - 0.12, yA + hI, { color: 'good', width: 2.4, head: 8 });
+      pl.line(xS + 0.1, yA - 4.4, xS + 0.1, 2.2, { color: 'ink3', width: 2 });
+    }
+    if (st.labels) {
+      const mx = off ? xM : xL, col = off ? 'warn' : 'gold';
+      dim(pl, xO, 1.0, mx, 1.0, `s = ${s} cm`, { color: col, dy: -0.45, dx: -1.0 });
+      if (xS < 19.8) dim(pl, mx, 1.0, xS, 1.0, `s′ = ${Number.isFinite(r) ? r.toFixed(1) : '?'} cm`, { color: col, dy: -0.45, dx: -1.2 });
+      pl.text('F′', F2, yA - 0.45, { color: 'accent', size: 11, weight: 600, align: 'center' });
+      pl.text(`f = ${fx(P.f, 1)} cm`, xL, yA + 2.95, { color: 'accent', size: 11, align: 'center' });
+      display(pl, 0.6, 8.7, [`s = ${s} cm`, `s′ = ${Number.isFinite(r) ? r.toFixed(1) : '—'} cm`], { compact: o.compact, title: 'bench scale' });
+      if (off) sysTag(pl, 19.6, 9.55, `distances read from the holder’s mark, ${P.hold.toFixed(1)} cm before the lens`, { size: 10.5, align: 'right' });
+    }
+  },
+
+  // a laser through slits (side view, below) and the pattern on the screen (face on, above)
+  diffraction(pl, E, P, st, o) {
+    const sys = st.sys, slip = sys === 'slip', grat = E === B.EXPERIMENTS.grating;
+    const m = st.setting ?? E.setting.value, r = st.row?.R?.[0];
+    // side view
+    block(pl, 0.5, 1.9, 1.8, 0.8, 'ink3', 0.8);
+    pl.line(2.3, 2.3, 5.0, 2.3, { color: 'bad', width: 2.2 });
+    pl.rect(5.0, 1.0, 0.18, 2.6, { fill: 'ink2', alpha: 0.9, stroke: 'ink2', width: 1 });
+    pl.line(12.4, 0.7, 12.4, 3.9, { color: 'ink2', width: 3 });
+    const spread = grat ? [-1.45, -0.7, 0, 0.7, 1.45] : [-1.2, -0.6, 0, 0.6, 1.2];
+    for (const dy of spread) pl.line(5.2, 2.3, 12.35, 2.3 + dy, { color: 'bad', width: 1, alpha: dy ? 0.45 : 0.8 });
+    // the pattern on the screen, face on: a dark strip with the light drawn on it
+    const sx0 = 2.6, sx1 = 19.4, cy = 7.1, hh = 0.95, mid = (sx0 + sx1) / 2;
+    pl.rect(sx0, cy - hh, sx1 - sx0, 2 * hh, { fill: 'void', alpha: 0.92, stroke: 'ink3', width: 1 });
+    let ym;                                                           // the measured fringe or spot, in strip units from the centre
+    if (!grat) {
+      const k = 8 / 50;                                              // strip units per mm: ±50 mm shown
+      for (let u = -8; u <= 8; u += 0.035) {
+        const I = B.slitPattern(P, (u / k) * 1e-3);
+        if (I > 0.004) pl.line(mid + u, cy - hh + 0.05, mid + u, cy + hh - 0.05, { color: 'bad', width: 1.6, alpha: Math.min(1, 1.6 * Math.sqrt(I)) });
+      }
+      const yTrue = Number.isFinite(r) ? r : 1e3 * P.L * Math.tan(Math.asin((m * P.lam) / P.d));
+      ym = k * yTrue;
+      for (let j = -50; j <= 50; j += 10) pl.line(mid + k * j, cy - hh, mid + k * j, cy - hh - 0.3, { color: 'gold', width: 1 });
+      if (st.labels) for (const j of [-40, -20, 0, 20, 40]) pl.text(`${j}`, mid + k * j, cy - hh - 0.6, { color: 'ink3', size: 10, align: 'center' });
+    } else {
+      const k = 8 / 400;                                             // ±400 mm shown
+      for (let j = -4; j <= 4; j++) {
+        const yj = 1e3 * P.Lg * Math.tan(Math.asin((Math.abs(j) * P.lam * P.lines) / 1e-3)) * Math.sign(j);
+        pl.circle(mid + k * yj, cy, 0.2, { fill: 'bad', alpha: j ? 0.8 : 1, stroke: false });
+      }
+      ym = k * (Number.isFinite(r) ? r / 2 : 1e3 * P.Lg * Math.tan(Math.asin((m * P.lam * P.lines) / 1e-3)));
+      for (let j = -400; j <= 400; j += 100) pl.line(mid + k * j, cy - hh, mid + k * j, cy - hh - 0.3, { color: 'gold', width: 1 });
+      if (st.labels) for (const j of [-400, -200, 0, 200, 400]) pl.text(`${j}`, mid + k * j, cy - hh - 0.6, { color: 'ink3', size: 10, align: 'center' });
+    }
+    // the measurement: centre to fringe m (double slit), or spot −m to spot +m (grating)
+    if (Math.abs(ym) < 8.2) {
+      if (grat) dim(pl, mid - ym, cy + hh + 0.45, mid + ym, cy + hh + 0.45, '', { color: 'gold' });
+      else dim(pl, mid, cy + hh + 0.45, mid + ym, cy + hh + 0.45, '', { color: 'gold' });
+    }
+    if (st.labels) {
+      pl.text(grat ? 'grating' : 'double slit', 5.1, 4.15, { color: 'ink2', size: 10.5, align: 'center' });
+      pl.text('screen', 12.4, 4.25, { color: 'ink2', size: 10.5, align: 'center' });
+      pl.text('HeNe 632.8 nm', 1.4, 1.45, { color: 'ink3', size: 10, align: 'center' });
+      dim(pl, 5.1, 0.45, 12.4, 0.45, `L = ${fx(grat ? P.Lg : P.L, 3)} m`, { color: 'ink3', dy: -0.0, dx: 1.2 });
+      pl.text(grat ? 'spots on the screen (mm)' : 'fringes on the screen (mm)', sx0, cy + hh + 1.25, { color: 'ink3', size: 10.5 });
+      const label = grat ? `2y = ${Number.isFinite(r) ? r.toFixed(0) : '—'} mm` : `y = ${Number.isFinite(r) ? r.toFixed(1) : '—'} mm`;
+      display(pl, 14.0, 3.0, [`m = ${slip && !grat ? `${B.slitCounted(P, m)} (really ${m})` : m}`, label], { compact: o.compact, title: grat ? `order ±${m}` : `bright fringe ${m}` });
+      if (slip && !grat && m > 5) sysTag(pl, 14.0, 4.6, 'counted past the missing 5th order', { size: 10.5 });
+      if (slip && grat) sysTag(pl, 14.0, 4.6, 'sin θ taken as y/L', { size: 10.5 });
+    }
+  },
 };
 
 /** A zigzag (a wound resistor wire) between two world points, `n` half-turns of half-width w. */

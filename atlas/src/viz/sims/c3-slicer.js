@@ -162,7 +162,7 @@ export function mount(F, P) {
     if (t !== null) {
       at = M.stripAt(pieces, t);
       if (at) {
-        const w = (b - a) / 60, p = at.piece, u0 = Math.max(p.from, t - w / 2), u1 = Math.min(p.to, t + w / 2);
+        const w = (b - a) / 45, p = at.piece, u0 = Math.max(p.from, t - w / 2), u1 = Math.min(p.to, t + w / 2);
         plot.path(band(p, u0, u1, 12), { close: true, fill: 'gold', fillAlpha: 0.75, color: 'gold', width: 1 });
         const P0 = pt(t, at.lo), P1 = pt(t, at.hi);
         if (Math.hypot(P1[0] - P0[0], P1[1] - P0[1]) > 1e-9) plot.arrow(P0[0], P0[1], P1[0], P1[1], { color: 'gold', width: 1.6, head: 8 });
@@ -180,11 +180,11 @@ export function mount(F, P) {
     }
 
     if (P.readout === false) { F.readout([]); return; }
-    const inner = vertical ? 'y' : 'x', outerName = vertical ? 'x' : 'y';
+    const inner = vertical ? 'y' : 'x';
     const total = M.iterated(pieces, g, 120);
     const rows = [];
     if (at) {
-      rows.push([`inner limits at ${outerName} = ${num(t)}`, `${tx(at.lo)} \\le ${inner} \\le ${tx(at.hi)}`]);
+      rows.push(['inner limits', `${tx(at.lo)} \\le ${inner} \\le ${tx(at.hi)}`]);
       rows.push([fx ? `inner integral $\\int f\\,d${inner}$` : 'strip length', tx(M.simpson((s) => g(t, s), at.lo, at.hi, 120))]);
       rows.push([fx ? 'swept so far' : 'area swept so far', tx(M.sweptIntegral(pieces, t, g, 80))]);
     }

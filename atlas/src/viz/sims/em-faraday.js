@@ -23,25 +23,32 @@
 //       // magnet: m (A m²), ml (m, its length), a (m, coil radius), N, Lc (m, coil length), R (Ω, circuit),
 //       //         motion: 'inout' | 'const' | 'drop', z0 (m, start), zs (m, where 'inout' stops), T1, T2 (s), v (m/s, 'const'),
 //       //         pole: 'N' | 'S' (the end that meets the coil first), poles: false (label the coil's own N and S), meter: true
-//       // ramp:   B0 (T), dir, Rf (m, the field's radius), r (m, the ring), ring: true, R (Ω, the ring),
+//       // ramp:   B0 (T), dir, Rf (m, the field's radius), r (m, the ring), ring: true, R (Ω, the ring), path: true (with no ring, draw the circle of radius r),
 //       //         profile: 'trapezoid' | 'sine', tr (s, each ramp), f (Hz, sine)
 //       // rails:  B, dir, L (m, rail spacing), len (m, rail length), R (Ω), mass (kg), x0 (m),
 //       //         motion: 'push' | 'coast' | 'pull', v (m/s: push or launch speed), Fa (N, the pull)
 //       // transformer: Np, Ns, Vp (V rms), f (Hz), RL (Ω), source: 'ac' | 'dc', tau (s, DC switch-on)
-//       sliders: ['B', 'v', 't', …],                 // built-in sliders for the mode (see sliderSpec), or objects overriding them
+//       sliders: ['B', 'v', 't', …],                 // built-in sliders — slide: B v w h R t · magnet: v T1 N m R t ·
+//                                                    // ramp: B0 tr f r R t · rails: B v L R mass Fa t · transformer: Np Ns Vp f RL t
+//                                                    // (or objects { key, … } overriding a built-in's label, range or value)
 //       dirChoice, motionChoice, poleChoice, ringToggle, sourceChoice,   // offer those choices
+//       motions: ['inout', 'const'],                 // with motionChoice, which motions to offer (default: all)
 //       graphs: ['flux', 'emf'],                     // slide: flux emf I F · magnet: flux emf I · ramp: B emf E ·
 //                                                    // rails: v x emf I F · transformer: vp vs flux is ip — [] for none
 //       readouts: [...],                             // slide: flux emf I F P emax · magnet: flux emf I v · ramp: B dB E emf I ·
 //                                                    // rails: flux emf I F P v vt tau · transformer: Vs Is Ip P ratio phi
 //       arrows: [...],                               // slide: v I F · magnet: v I · ramp: E I · rails: v I F Fapp · transformer: flux
-//       play: true, t: null,                         // animate; or a still at time t (s)
+//       play: true, t: null,                         // animate; or a still at time t (s) — play: false with no t picks
+//                                                    // a telling moment (loop half in, magnet's biggest emf, mid-ramp…)
 //       playSeconds: 6, unit: 'cm', labels: true } }
 //
 // The animation runs in real time when a run lasts 1.5–12 s; otherwise it is
 // slowed or sped up to last about playSeconds, and the caption says so — the
-// graphs and readouts always use the true times. A picture must not show its
-// answer: leave the asked-for quantity out of readouts and graphs.
+// graphs and readouts always use the true times. In a problem's (compact)
+// picture the graphs appear only if `graphs` is given. Graphs take the flux
+// as positive (the loop's normal along the field), so the emf is negative
+// while the flux grows. A picture must not show its answer: leave the
+// asked-for quantity out of readouts and graphs.
 
 import { Plot } from '../plot.js';
 import * as M from '../model/em-faraday.js';
@@ -218,7 +225,7 @@ export async function mount(F, P0) {
     if (S.t > T) S.t = T;
     const st = stateAt(q, S.t);
     plot.refreshTheme?.();
-    SCENES[mode](plot, q, st, S.t, T, { U, ut, labels: P.labels, arrows: P.arrows || [], vertical: mode === 'magnet' && q.motion === 'drop', compact });
+    SCENES[mode](plot, q, st, S.t, T, { U, ut, labels: P.labels, arrows: P.arrows || [], vertical: mode === 'magnet' && q.motion === 'drop', compact, rMax: specs.r ? specs.r.max * specs.r.si : 0 });
     gkeys.forEach((k, i) => drawGraph(gplots[i], mode, k, q, T, S.t));
     F.readout(readoutRows(mode, P.readouts || [], q, st, T));
   }
@@ -451,21 +458,28 @@ const SCENES = {
 
   ramp(plot, q, s, t, T, o) {
     const U = o.U, R = q.Rf * U, r = q.r * U, sign = sgnB(q);
-    plot.setView([-2.65 * R, 2.65 * R], [-1.4 * R, 1.4 * R]);
+    // the view holds the field region and the largest circle the ring can have
+    const H = Math.max(1.4 * R, 1.2 * Math.max(r, (o.rMax || 0) * U)), W = Math.max(2.65 * R, 2 * H);
+    plot.setView([-W, W], [-H, H]);
     plot.clear();
     const B0 = q.B0, rel = B0 > 0 ? Math.abs(s.B) / B0 : 0;
     plot.circle(0, 0, R, { fill: 'teal', alpha: 0.05 + 0.13 * rel, stroke: false });
     plot.circle(0, 0, R, { color: 'teal', width: 1.4, dash: [5, 4] });
     if (rel > 0.01) fieldMarks(plot, -R, R, -R, R, R / 4.2, Math.sign(s.B) || sign, 0.15 + 0.6 * rel, (x, y) => Math.hypot(x, y) > 0.93 * R);
     if (o.labels) plot.text(rel < 0.005 ? 'B = 0 now' : `B ${s.B < 0 ? 'into' : 'out of'} the page`, -0.72 * R, 1.08 * R, { color: 'teal', size: 11.5, align: 'right' });
-    // the induced electric field, on rings inside and outside
-    const dBmax = maxAbs((tt) => M.rampField(q, tt).dB, T) || 1, Emax = (q.Rf / 2) * dBmax;
+    // the induced electric field, on circles inside and outside — kept off the ring so it stays visible
+    const dBmax = maxAbs((tt) => M.rampField(q, tt).dB, T) || 1, Emax = (q.Rf / 2) * dBmax, showPath = q.ring || q.path !== false;
     if (o.arrows.includes('E') && Math.abs(s.dB) > 1e-12) {
-      for (const [rr, n] of [[0.38, 6], [0.72, 10], [1.3, 14], [1.85, 18], [2.4, 22]]) {
-        const rad = rr * R, E = M.inducedE(rad / U, q.Rf, s.dB), len = 0.5 * R * Math.abs(E) / Emax, d = Math.sign(E);
+      const u = Math.max(R, H / 1.4), step = 0.56 * u, radii = [0.38 * R, 0.72 * R];   // u: the arrows' spacing scale
+      for (let rad = R + 0.3 * u; rad < Math.hypot(W, H); rad += step) radii.push(rad);
+      for (let rad of radii) {
+        if (showPath && Math.abs(rad - r) < 0.14 * u) rad = rad < r ? r - 0.16 * u : r + 0.16 * u;
+        if (rad <= 0.15 * R) continue;
+        const E = M.inducedE(rad / U, q.Rf, s.dB), len = 0.235 * u * Math.abs(E) / Emax, d = Math.sign(E);
+        const n = Math.max(6, Math.round((M.TAU * rad) / (rad < R ? 0.62 * R : 0.62 * u)));
         for (let k = 0; k < n; k++) {
-          const th = (M.TAU * (k + (rr > 1 ? 0.5 : 0))) / n, cx = rad * Math.cos(th), cy = rad * Math.sin(th);
-          if (Math.abs(cy) > 1.32 * R || Math.abs(cx) > 2.58 * R) continue;
+          const th = (M.TAU * (k + (rad > R ? 0.5 : 0))) / n, cx = rad * Math.cos(th), cy = rad * Math.sin(th);
+          if (Math.abs(cy) > 0.94 * H || Math.abs(cx) > 0.97 * W) continue;
           const tx = -Math.sin(th) * d, ty = Math.cos(th) * d;
           plot.arrow(cx - (tx * len) / 2, cy - (ty * len) / 2, cx + (tx * len) / 2, cy + (ty * len) / 2, { color: 'gold', width: 1.8, head: 7 });
         }
@@ -473,8 +487,8 @@ const SCENES = {
     }
     // the ring (or just a path)
     if (q.ring) plot.circle(0, 0, r, { color: 'ink2', width: 3.2 });
-    else plot.circle(0, 0, r, { color: 'ink3', width: 1.4, dash: [3, 4] });
-    if (o.labels) plot.text(q.ring ? 'ring' : 'no ring: just a path', r * Math.cos(-0.62), r * Math.sin(-0.62), { dx: 8, dy: 10, color: q.ring ? 'ink2' : 'ink3', size: 11.5 });
+    else if (showPath) plot.circle(0, 0, r, { color: 'ink3', width: 1.4, dash: [3, 4] });
+    if (o.labels && showPath) plot.text(q.ring ? 'ring' : 'no ring: just a path', r * Math.cos(-0.62), r * Math.sin(-0.62), { dx: 8, dy: 10, color: q.ring ? 'ink2' : 'ink3', size: 11.5 });
     if (q.ring && o.arrows.includes('I') && Math.abs(s.I) > 1e-12) {
       const d = Math.sign(s.I), len = 0.5 * r;     // anticlockwise: leftward along the top
       plot.arrow(d * len / 2, r, -d * len / 2, r, { color: 'accent', width: 2.6, head: 10, label: 'I', ldx: -14, ldy: -9 });
@@ -569,6 +583,7 @@ export function validate(P) {
     if (!(Q.a > 0 && Q.N > 0 && Q.m > 0 && Q.ml > 0)) p.push('em-faraday magnet: a, N, m and ml must be positive');
   }
   if (mode === 'rails' && !['push', 'coast', 'pull'].includes(Q.motion)) p.push('em-faraday rails: motion is push, coast or pull');
+  for (const m of Q.motions || []) if (!(MOTIONS[mode] || []).some(([k]) => k === m)) p.push(`em-faraday ${mode}: unknown motion “${m}” in motions`);
   if (mode === 'rails' && !(Q.x0 >= 0 && Q.x0 < Q.len)) p.push('em-faraday rails: x0 must lie on the rails');
   if (mode === 'ramp' && !['trapezoid', 'sine'].includes(Q.profile)) p.push('em-faraday ramp: profile is trapezoid or sine');
   if (mode === 'transformer' && !['ac', 'dc'].includes(Q.source)) p.push('em-faraday transformer: source is ac or dc');

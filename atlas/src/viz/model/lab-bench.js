@@ -832,6 +832,135 @@ export const EXPERIMENTS = {
     },
     defaultSys: 'nominal',
   },
+
+  // 2225 L.6 — refraction into an acrylic half-cylinder …
+  snell: {
+    title: 'A laser beam refracted into an acrylic half-cylinder', method: 'Snell’s law (acrylic block)',
+    apparatus: 'optics',
+    note: 'A red laser (633 nm) enters the flat face of a half-cylinder of acrylic at its centre, so the refracted beam leaves the curved face along a radius, undeviated. Angles are read on the ray table’s protractor, marked every 0.5°, to ±0.25°. Acrylic (PMMA) at 633 nm: n = 1.489.',
+    defaults: { n: 1.489, sth: 0.25, rot: 4.0, f: 15.0, ss: 0.1, hold: 1.0 },
+    setting: { key: 'th1', sym: 'θ₁', label: 'Angle of incidence $\\theta_1$', unit: '°', min: 5, max: 85, step: 5, value: 40, series: [10, 20, 30, 40, 50, 60, 70, 80], explain: 'Set by aiming the laser at a protractor mark, measured from the normal to the flat face.' },
+    nz: 1,
+    read: (th1, P, sys, z) => {
+      const d = sys === 'reference' ? P.rot : 0;                         // the block turned d° on the table
+      const th2 = Math.asin(Math.sin((th1 - d) * D2R) / P.n) / D2R + d;
+      return [th2 + P.sth * z[0]];
+    },
+    series: [{ key: 'th2', sym: 'θ₂', label: 'angle of refraction', unit: '°', res: 0.5, sigma: (th1, P) => Math.hypot(P.sth, resolutionU(0.5)) }],
+    axes: {
+      sin: {
+        label: 'sin θ₂ against sin θ₁', slopeUnit: '', expectLabel: 'sin θ₂ = sin θ₁ / n',
+        x: { sym: 'sin θ₁', unit: '', of: (th1) => Math.sin(th1 * D2R) },
+        ys: [{ sym: 'sin θ₂', unit: '', of: (th1, R) => Math.sin(R[0] * D2R), sigma: (th1, R, P) => Math.cos(R[0] * D2R) * Math.hypot(P.sth, resolutionU(0.5)) * D2R }],
+        expect: (P) => ({ a: 0, b: 1 / P.n }),
+        results: [{ sym: 'n', name: 'refractive index of acrylic', unit: '', of: (f) => 1 / f.b, sigma: (f) => f.sb / f.b ** 2, accepted: (P) => P.n, acceptedLabel: 'PMMA at 633 nm' }],
+        intercept: { sym: 'sin θ₂ at 0', name: 'intercept', unit: '' },
+      },
+      raw: {
+        label: 'θ₂ against θ₁', slopeUnit: '', x: { sym: 'θ₁', unit: '°', of: (th1) => th1 },
+        ys: [{ sym: 'θ₂', unit: '°', of: (th1, R) => R[0], sigma: (th1, R, P) => Math.hypot(P.sth, resolutionU(0.5)) }], curved: true,
+      },
+    },
+    defaultAxes: 'sin',
+    systematics: { reference: { label: 'A misplaced zero: the block sits turned 4° on the protractor (Snell), or distances are read from the holder’s mark 1.0 cm from the lens (lens)', short: 'misplaced zero', explain: 'The scale you read is not zeroed where the physics happens: the protractor’s 0° is not the block’s normal, or the lens holder’s index mark is not at the lens.' } },
+    defaultSys: 'reference',
+  },
+
+  // … and images formed by a thin converging lens
+  lens: {
+    title: 'Images formed by a thin converging lens', method: 'Thin lens (optical bench)',
+    apparatus: 'optics',
+    note: 'A thin converging lens, f = 15.0 cm by the maker’s specification. The lit object is set to ±1 mm on the bench’s scale; the screen is moved until the image looks sharpest, which can be judged only to about ±(2 mm + 1.2%), since the image stays acceptably sharp over a range.',
+    defaults: { n: 1.489, sth: 0.25, rot: 4.0, f: 15.0, ss: 0.1, hold: 1.0 },
+    setting: { key: 's', sym: 's', label: 'Object distance $s$', unit: 'cm', min: 20, max: 70, step: 1, value: 30, series: [20, 25, 30, 35, 40, 50, 60], explain: 'From the object to the lens, as read on the bench’s scale.' },
+    nz: 2,
+    read: (s, P, sys, z) => {
+      const d = sys === 'reference' ? P.hold : 0;                        // the holder's mark sits d on the object side of the lens
+      const so = s + d + P.ss * z[0], si = 1 / (1 / P.f - 1 / so);
+      return [si + d + (0.2 + 0.012 * si) * z[1]];
+    },
+    series: [{ key: 'si', sym: 's′', label: 'image distance', unit: 'cm', res: 0.1, sigma: (s, P) => { const si = 1 / (1 / P.f - 1 / s); return Math.hypot(0.2 + 0.012 * si, (P.ss * si * si) / (s * s), resolutionU(0.1)); } }],
+    axes: {
+      inv: {
+        label: '1/s′ against 1/s', slopeUnit: '', expectLabel: '1/s + 1/s′ = 1/f',
+        x: { sym: '1/s', unit: 'm⁻¹', of: (s) => 100 / s, sigma: (s, R, P) => (100 * P.ss) / (s * s) },
+        ys: [{ sym: '1/s′', unit: 'm⁻¹', of: (s, R) => 100 / R[0], sigma: (s, R) => (100 * Math.hypot(0.2 + 0.012 * R[0], resolutionU(0.1))) / (R[0] * R[0]) }],
+        expect: (P) => ({ a: 100 / P.f, b: -1 }),
+        results: [
+          { sym: 'f', name: 'focal length', unit: 'cm', of: (f) => 100 / f.a, sigma: (f) => (100 * f.sa) / f.a ** 2, accepted: (P) => P.f, acceptedLabel: 'maker’s f' },
+          { sym: 'slope', name: 'slope (lens law: −1)', unit: '', of: (f) => f.b, sigma: (f) => f.sb, accepted: () => -1, acceptedLabel: 'thin lens' },
+        ],
+        intercept: { sym: '1/f', name: 'power of the lens', unit: 'm⁻¹' },
+      },
+      raw: {
+        label: 's′ against s', slopeUnit: '', x: { sym: 's', unit: 'cm', of: (s) => s },
+        ys: [{ sym: 's′', unit: 'cm', of: (s, R) => R[0], sigma: (s, R) => Math.hypot(0.2 + 0.012 * R[0], resolutionU(0.1)) }], curved: true,
+      },
+    },
+    defaultAxes: 'inv',
+    systematics: { reference: { label: 'A misplaced zero: the block sits turned 4° on the protractor (Snell), or distances are read from the holder’s mark 1.0 cm from the lens (lens)', short: 'misplaced zero', explain: 'The scale you read is not zeroed where the physics happens: the protractor’s 0° is not the block’s normal, or the lens holder’s index mark is not at the lens.' } },
+    defaultSys: 'reference',
+  },
+
+  // 2225 L.7 — a HeNe laser through a double slit …
+  doubleslit: {
+    title: 'Interference fringes from a double slit', method: 'Double slit',
+    apparatus: 'diffraction',
+    note: 'A HeNe laser (632.8 nm) lights two slits 0.040 mm wide; the screen is 1.500 m away (±2 mm). Each bright fringe’s centre is read off a ruler on the screen to ±0.3 mm (marks every 0.5 mm). The slits are labelled 0.200 mm apart, so every fifth order falls on a zero of the single-slit pattern and is missing.',
+    defaults: { lam: 632.8e-9, d: 0.200e-3, a: 0.040e-3, L: 1.500, sL: 0.002, sy: 0.3, lines: 300, Lg: 0.300, sY: 1.0 },
+    setting: { key: 'm', sym: 'm', label: 'Bright fringe $m$', unit: 'order', min: 1, max: 12, step: 1, value: 3, series: [1, 2, 3, 4, 6, 7, 8, 9], explain: 'Counted out from the central bright fringe (m = 0). The 5th order is missing.' },
+    nz: 1,
+    read: (m, P, sys, z) => [1e3 * P.L * Math.tan(Math.asin((m * P.lam) / P.d)) + P.sy * z[0]],
+    series: [{ key: 'y', sym: 'y', label: 'fringe position', unit: 'mm', res: 0.5, sigma: (m, P) => Math.hypot(P.sy, resolutionU(0.5)) }],
+    axes: {
+      ym: {
+        label: 'y against m', slopeUnit: 'mm', expectLabel: 'y = mλL/d',
+        x: { sym: 'm', unit: '', of: (m, R, P, sys) => (sys === 'slip' ? slitCounted(P, m) : m) },
+        ys: [{ sym: 'y', unit: 'mm', of: (m, R) => R[0], sigma: (m, R, P) => Math.hypot(P.sy, resolutionU(0.5)) }],
+        expect: (P) => ({ a: 0, b: (1e3 * P.L * P.lam) / P.d }),
+        results: [{
+          sym: 'd', name: 'slit separation', unit: 'mm', of: (f, P) => (1e6 * P.lam * P.L) / f.b, sigma: (f, P) => ((1e6 * P.lam * P.L) / f.b) * (f.sb / f.b), accepted: (P) => 1e3 * P.d, acceptedLabel: 'label on the slide',
+          typeB: (P) => [{ label: 'screen distance', rel: P.sL / P.L }],
+        }],
+        intercept: { sym: 'y₀', name: 'intercept', unit: 'mm' },
+      },
+    },
+    defaultAxes: 'ym',
+    systematics: { slip: { label: 'A slip in the analysis: the fringes beyond the missing 5th order counted one too low (double slit), or sin θ taken as y/L (grating)', short: 'analysis slip', explain: 'Counting visible fringes skips the dark 5th order without noticing it; and y/L is tan θ, which equals sin θ only for small angles.' } },
+    defaultSys: 'slip',
+  },
+
+  // … and through a diffraction grating
+  grating: {
+    title: 'A diffraction grating’s bright orders', method: 'Grating (300 lines/mm)',
+    apparatus: 'diffraction',
+    note: 'The same laser through a grating of 300 lines per mm (spacing certified to ±0.3%), 0.300 m (±1 mm) from a flat screen. The distance between the two spots of each order, 2y, is read to ±1 mm. sin θ = y/√(y² + L²) — at these angles y/L is not sin θ.',
+    defaults: { lam: 632.8e-9, d: 0.200e-3, a: 0.040e-3, L: 1.500, sL: 0.002, sy: 0.3, lines: 300, Lg: 0.300, sY: 1.0 },
+    setting: { key: 'm', sym: 'm', label: 'Order $m$', unit: 'order', min: 1, max: 4, step: 1, value: 2, series: [1, 2, 3, 4], explain: 'Measure the distance between the spots of order +m and −m.' },
+    nz: 1,
+    read: (m, P, sys, z) => [2e3 * P.Lg * Math.tan(Math.asin((m * P.lam * P.lines) / 1e-3)) + P.sY * z[0]],
+    series: [{ key: 'Y', sym: '2y', label: 'spot separation', unit: 'mm', res: 1, sigma: (m, P) => Math.hypot(P.sY, resolutionU(1)) }],
+    axes: {
+      sin: {
+        label: 'sin θ against m', slopeUnit: '', expectLabel: 'sin θ = mλ/d',
+        x: { sym: 'm', unit: '', of: (m) => m },
+        ys: [{ sym: 'sin θ', unit: '', of: (m, R, P, sys) => gratingSin(P, R[0], sys === 'slip'), sigma: (m, R, P, sys) => gratingSinSigma(P, R[0], sys === 'slip') }],
+        expect: (P) => ({ a: 0, b: (P.lam * P.lines) / 1e-3 }),
+        results: [{
+          sym: 'λ', name: 'wavelength', unit: 'nm', of: (f, P) => (1e9 * f.b * 1e-3) / P.lines, sigma: (f, P) => (1e9 * f.sb * 1e-3) / P.lines, accepted: (P) => 1e9 * P.lam, acceptedLabel: 'HeNe',
+          typeB: () => [{ label: 'grating spacing', rel: 0.003 }, { label: 'screen distance', rel: 0.002 }],
+        }],
+        intercept: { sym: 'sin θ₀', name: 'intercept', unit: '' },
+      },
+      raw: {
+        label: '2y against m', slopeUnit: 'mm', x: { sym: 'm', unit: '', of: (m) => m },
+        ys: [{ sym: '2y', unit: 'mm', of: (m, R) => R[0], sigma: (m, R, P) => Math.hypot(P.sY, resolutionU(1)) }], curved: true,
+      },
+    },
+    defaultAxes: 'sin',
+    systematics: { slip: { label: 'A slip in the analysis: the fringes beyond the missing 5th order counted one too low (double slit), or sin θ taken as y/L (grating)', short: 'analysis slip', explain: 'Counting visible fringes skips the dark 5th order without noticing it; and y/L is tan θ, which equals sin θ only for small angles.' } },
+    defaultSys: 'slip',
+  },
 };
 
 export function inertiaRotary(P) {
@@ -988,4 +1117,25 @@ export const solL = (P) => MU0 * P.n * P.n * Math.PI * P.Rs * P.Rs * P.len;
 export function solI0(P, f) {
   const Z = (ff) => Math.hypot(P.Rc, 2 * Math.PI * ff * solL(P));
   return (P.I100 * Z(100)) / Z(f);
+}
+
+// L.7 — the order a student who counts only visible fringes gives to true
+// order m, when every (d/a)-th order is missing
+export function slitCounted(P, m) {
+  const k = Math.round(P.d / P.a);
+  return m - Math.floor(m / k);
+}
+/** Double-slit intensity at screen position y (m), normalised to 1 at the centre: cos²(πd sin θ/λ)·sinc²(πa sin θ/λ). */
+export function slitPattern(P, y) {
+  const s = y / Math.hypot(y, P.L), be = (Math.PI * P.a * s) / P.lam, al = (Math.PI * P.d * s) / P.lam;
+  return Math.cos(al) ** 2 * (Math.abs(be) < 1e-9 ? 1 : (Math.sin(be) / be) ** 2);
+}
+/** sin θ from a grating's spot separation Y (mm) at screen distance Lg (m); `small`: the slip y/L. */
+export function gratingSin(P, Y, small = false) {
+  const y = Y / 2, L = 1e3 * P.Lg;
+  return small ? y / L : y / Math.hypot(y, L);
+}
+export function gratingSinSigma(P, Y, small = false) {
+  const y = Y / 2, L = 1e3 * P.Lg, sy = Math.hypot(P.sY, resolutionU(1)) / 2;
+  return small ? sy / L : (L * L * sy) / (y * y + L * L) ** 1.5;
 }

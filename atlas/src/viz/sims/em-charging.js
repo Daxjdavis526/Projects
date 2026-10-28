@@ -12,7 +12,7 @@
 //
 // Physics in model/em-charges.js (tested headlessly).
 //
-//   { type: 'em-induction', params: {
+//   { type: 'em-charging', params: {
 //       scene: 'ball',                      // ball | share
 //       // ball:  material 'conductor' | 'insulator', Q (nC, ±) 30, d (cm, centre to centre) 14, a (cm) 5,
 //       //        kappa 3 (insulator), ground: false, present: true, qNet (nC) 0 (a starting net charge)

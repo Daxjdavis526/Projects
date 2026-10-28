@@ -23,7 +23,7 @@ And charge is **conserved**: the total charge of an isolated system never change
   ],
   why: 'Charge conservation is among the most exactly tested laws in physics: it becomes Kirchhoff’s junction rule in circuits, and every particle reaction ever seen obeys it.',
   visual: {
-    type: 'em-induction',
+    type: 'em-charging',
     title: 'Charge moves; the total stays',
     lead: t`Three identical metal spheres on insulating stands. Touch any two together: charge flows between them until they share it equally. Watch the total — and the number of electrons each has gained or lost.`,
     tasks: [

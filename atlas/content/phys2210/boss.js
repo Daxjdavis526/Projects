@@ -480,10 +480,10 @@ export default boss({
             return {
               prompt: t`The ${m} kg capsule meets the top of the atmosphere, 120 km up, at ${v.toFixed(1)} km/s; its parachute opens ${hc} km up at ${vc} m/s. A student writes: “In between, the capsule loses $\tfrac12m(v_1^2 - v_2^2) = ${tn(dK / 1e9)}$ GJ of kinetic energy. Heating and vaporizing heat-shield material takes about 30 MJ/kg, so that energy would vaporize ${Math.round(shield)} kg of shield — about the capsule's whole mass. Without braking rockets it cannot survive.” What is wrong?`,
               choices: [
-                'The energy is about right, but nearly all of it heats the air — the shock wave in front of the blunt shield — and is carried away in the wake; only of order one per cent reaches the shield',
-                'She left out the gravitational potential energy, which is larger than the kinetic energy',
-                'At these speeds kinetic energy must be computed relativistically, which makes it far smaller',
-                t`The atmosphere turns with Earth, so relative to the air the capsule is much slower than ${v.toFixed(1)} km/s`,
+                'The energy is about right, but nearly all of it heats the air in the shock wave ahead of the shield and is carried away; only about a per cent reaches the capsule',
+                'She left out the gravitational potential energy, which is larger than the kinetic energy and makes the heating far worse than she says',
+                'At these speeds the kinetic energy must be computed relativistically, and the relativistic value is far smaller than ½mv²',
+                t`The atmosphere turns with Earth, so relative to the air the capsule moves much slower than ${v.toFixed(1)} km/s and carries far less energy`,
               ],
               answer: 0,
               why: {

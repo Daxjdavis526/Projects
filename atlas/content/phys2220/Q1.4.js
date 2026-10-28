@@ -174,7 +174,8 @@ This is Heisenberg’s uncertainty principle (1927). **It is not about clumsy in
         params: {
           x: [-0.5, 10.5], y: [-1.2, 1.4], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
           curves: [seg(0, 0, 10, 0, 'ink4', 1, true), seg(4.4, -0.55, 5.6, -0.55, 'ink2', 1.6), seg(4.4, 0.55, 5.6, 0.55, 'ink2', 1.6), seg(4.4, -0.55, 4.4, 0.55, 'ink2', 1.6), seg(5.6, -0.55, 5.6, 0.55, 'ink2', 1.6)],
-          points: [{ x: 1, y: 0, r: 5, color: 'gold' }, { x: 9.2, y: 0, r: 5, color: 'gold' }, label(5, 0.55, 'the apparatus', 'ink2', 0, -14, 'center'), label(5.1, -0.1, 'spacing = ?', 'gold', 0, 30, 'center')],
+          points: [{ x: 1, y: 0, r: 5, color: 'gold' }, { x: 9.2, y: 0, r: 5, color: 'gold' }, label(5, 0.55, 'the apparatus', 'ink2', 0, -14, 'center'), label(5.1, -0.9, 'spacing = ?', 'gold', 0, 14, 'center')],
+          arrows: [{ from: [5.1, -0.9], to: [1.1, -0.9], color: 'gold' }, { from: [5.1, -0.9], to: [9.1, -0.9], color: 'gold' }],
         },
         caption: 'Two successive photons in a feeble beam, and the apparatus between them. Not to scale.',
       },

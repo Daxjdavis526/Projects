@@ -24,7 +24,7 @@ $$q = -\frac{a}{d}\,Q$$`,
   ],
   why: 'Induction and polarization explain why dust clings to screens, suits and solar panels, how photocopiers and electrostatic dust filters work, and why fuel hoses and spacecraft are carefully grounded before anything flammable flows.',
   visual: {
-    type: 'em-induction',
+    type: 'em-charging',
     title: 'Neutral, yet attracted',
     lead: t`A small charged ball on an insulating handle beside a neutral sphere. Switch between a metal and a plastic sphere, flip the ball’s sign, and move it closer. Then charge the metal sphere by induction: ground it, unground it, then take the ball away.`,
     tasks: [

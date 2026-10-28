@@ -1,6 +1,6 @@
 // Picture builders and constants for the PHYS 2220 charge lessons (module E1:
 // charge, conductors and insulators, Coulomb's law, superposition). They
-// return ordinary visual specs for the em-coulomb and em-induction
+// return ordinary visual specs for the em-coulomb and em-charging
 // simulations, or plain graphs, so the content test validates them like any
 // other visual. Not a lesson: the leading underscore keeps it out of the registry.
 //
@@ -20,10 +20,10 @@ export const r6 = (v) => +(+v).toPrecision(6);
 /** A value with floating-point noise near zero removed. */
 export const clean = (x) => (Math.abs(x) < 1e-12 ? 0 : x);
 
-/** Identical metal spheres on stands with charges q (nC), from the em-induction share scene. */
-export const spheres = (q, caption, extra = {}) => ({ type: 'em-induction', params: { scene: 'share', q, controls: false, readout: false, ...extra }, ...(caption ? { caption } : {}) });
-/** A charged ball near a neutral sphere (em-induction ball scene), static. */
-export const ballNear = (params, caption) => ({ type: 'em-induction', params: { scene: 'ball', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
+/** Identical metal spheres on stands with charges q (nC), from the em-charging share scene. */
+export const spheres = (q, caption, extra = {}) => ({ type: 'em-charging', params: { scene: 'share', q, controls: false, readout: false, ...extra }, ...(caption ? { caption } : {}) });
+/** A charged ball near a neutral sphere (em-charging ball scene), static. */
+export const ballNear = (params, caption) => ({ type: 'em-charging', params: { scene: 'ball', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 /** Two charges on a line with their forces (em-coulomb pair mode), static. */
 export const pairPic = (params, caption) => ({ type: 'em-coulomb', params: { mode: 'pair', static: true, readout: false, ...params }, ...(caption ? { caption } : {}) });
 /** Point charges in a plane with the forces on one of them (em-coulomb free mode), static. */

@@ -1,4 +1,4 @@
-// The DOM-free electrostatics behind sims/em-coulomb.js and sims/em-induction.js:
+// The DOM-free electrostatics behind sims/em-coulomb.js and sims/em-charging.js:
 // Coulomb forces between point charges and their superposition; a conducting
 // sphere near a point charge, solved exactly by image charges (its surface
 // charge, its net charge when grounded, the force on it); a small insulating

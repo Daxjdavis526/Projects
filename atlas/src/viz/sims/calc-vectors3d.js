@@ -232,7 +232,7 @@ export function scenePoints(P, R, keys, E) {
 
 function numTeX(v, digits = 3) {
   if (!Number.isFinite(v)) return '\\text{—}';
-  if (Math.abs(v) < 1e-9) return '0';
+  if (Math.abs(v) < 1e-12) return '0';     // rounding noise, not a value
   const a = Math.abs(v);
   if (a >= 1e5 || a < 1e-3) return v.toExponential(digits - 1).replace(/e([+-]\d+)/, (m, e) => `\\times10^{${+e}}`);
   return String(+v.toPrecision(digits));

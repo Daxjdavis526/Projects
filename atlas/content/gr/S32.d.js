@@ -34,14 +34,14 @@ const admPic = {
     ],
     arrows: [
       { from: [PX, yLo(PX)], to: [PX, yHi(PX)], color: 'gold' },
-      { from: [PX, yHi(PX)], to: [QX, yHi(QX)], color: 'violet' },
+      { from: [PX, round(yHi(PX) + 0.14, 4)], to: [QX, round(yHi(QX) + 0.14, 4)], color: 'violet' },
       { from: [PX, yLo(PX)], to: [QX, yHi(QX)], color: 'ink3' },
     ],
     points: [
       { x: PX, y: yLo(PX), color: 'ink', r: 4.5, label: 'P', labelDx: -16, labelDy: 10 },
       { x: QX, y: yHi(QX), color: 'ink', r: 4.5, label: 'Q: same xⁱ as P', labelDx: 10, labelDy: -12 },
       { x: PX - 0.12, y: 1.05, r: 0.01, color: 'gold', label: 'along the normal n: proper time α dt', labelAlign: 'right', labelDx: 0, labelDy: 0 },
-      { x: 0, y: round((yHi(PX) + yHi(QX)) / 2, 4), r: 0.01, color: 'violet', label: 'shift: βⁱ dt', labelDx: -10, labelDy: -22 },
+      { x: 0, y: round((yHi(PX) + yHi(QX)) / 2 + 0.14, 4), r: 0.01, color: 'violet', label: 'shift: βⁱ dt', labelDx: -10, labelDy: -20 },
       { x: 0.35, y: 0.95, r: 0.01, color: 'ink3', label: 't direction = αc n + β', labelAlign: 'left', labelDx: 0, labelDy: 0 },
     ],
   },
@@ -50,10 +50,14 @@ const admPic = {
 
 // Brill–Lindquist data for two punctures, total mass 1 (G = c = 1): height ψ⁻², a common starting lapse
 const PSI = '1 + q/(2*sqrt((x + d*(1 - q))^2 + y^2)) + (1 - q)/(2*sqrt((x - d*q)^2 + y^2))';
+const blDomain = (d, q) => {
+  const half = Math.max(2.5, round(d * Math.max(q, 1 - q) + 1.2, 3));
+  return [[-half, half], [-round(0.75 * half, 3), round(0.75 * half, 3)]];
+};
 const blSurface = ({ d = 2.5, q = 0.5, sliders = false, caption } = {}) => ({
   type: 'surface3d',
   params: {
-    z: `1/(${PSI})^2`, domain: [[-4, 4], [-3, 3]], n: 72, zscale: 1.6, axisLen: 3.4, axisLabels: ['x', 'y', 'ψ⁻²'],
+    z: `1/(${PSI})^2`, domain: sliders ? [[-4, 4], [-3, 3]] : blDomain(d, q), n: 72, zscale: 1.6, axisLen: 3.4, axisLabels: ['x', 'y', 'ψ⁻²'],
     ...(sliders ? {
       sliders: [
         { key: 'd', label: 'Separation $d$ (units of $M$)', min: 0.3, max: 4, step: 0.05, value: d, explain: 'Coordinate distance between the punctures, in units of the total mass $M = m_1 + m_2$ (geometric units, $G = c = 1$, so a mass is a length $GM/c^2$).' },
@@ -73,7 +77,7 @@ const blSurface = ({ d = 2.5, q = 0.5, sliders = false, caption } = {}) => ({
 const flrwSlicesPic = {
   type: 'graph',
   params: {
-    x: [-3.4, 3.4], y: [0, 2.2], xlabel: 'distance between galaxies (schematic)', ylabel: 'cosmic time t', grid: false,
+    x: [-3.4, 3.4], y: [0, 2.2], xlabel: 'distance between galaxies (schematic)', ylabel: 'cosmic time t', grid: false, axesAt: 'edge',
     curves: [
       ...[0.5, 1, 1.5, 2].map((y, k) => ({ fn: String(y), color: 'accent', width: 1.8, ...(k === 0 ? { label: 'slices of constant t', labelAt: 3.3, labelAlign: 'right', labelDx: 0, labelDy: -10 } : {}) })),
       ...[-2, -1, 0, 1, 2].map((x0) => ({ param: [`${x0}*t^(2/3)`, 't'], t: [0.001, 2.15], color: 'gold', width: 2 })),
@@ -103,7 +107,7 @@ const throatPic = {
 const lapsePic = {
   type: 'graph',
   params: {
-    x: [0, 1.05], y: [-0.05, 1.15], xlabel: 'volume element √γ (starting value 1)', ylabel: 'lapse α',
+    x: [0, 1], y: [-0.05, 1.15], xlabel: 'volume element √γ (starting value 1)', ylabel: 'lapse α',
     curves: [
       { fn: '1', color: 'ink3', width: 2, label: 'geodesic slicing', labelAt: 0.05, labelDy: -12 },
       { fn: 'x', color: 'accent', width: 2.2, label: 'harmonic', labelAt: 0.3, labelDx: 8, labelDy: 6 },
@@ -130,16 +134,22 @@ const growthPic = {
 const kPic = {
   type: 'graph',
   params: {
-    x: [0.25, 4], y: [-1.6, 4.5], xlabel: 'r / rₛ', ylabel: 'curvature × rₛ',
+    x: [0.4, 4], y: [-1.3, 3.3], xlabel: 'r / rₛ', ylabel: 'curvature × rₛ', axesAt: 'edge',
     curves: [
-      { fn: '1.5*x^(-1.5)', color: 'gold', width: 2.6, label: 'K (the trace)', labelAt: 0.62, labelDx: 10, labelDy: -4 },
-      { fn: 'x^(-1.5)', color: 'accent', width: 2.2, label: 'tangential components', labelAt: 1.25, labelDx: 10, labelDy: -6 },
-      { fn: '-0.5*x^(-1.5)', color: 'bad', width: 2.2, label: 'radial component', labelAt: 1.25, labelDx: 10, labelDy: 14 },
+      { fn: '1.5*x^(-1.5)', color: 'gold', width: 2.6 },
+      { fn: 'x^(-1.5)', color: 'accent', width: 2.2 },
+      { fn: '-0.5*x^(-1.5)', color: 'bad', width: 2.2 },
     ],
     vlines: [{ x: 1, color: 'ink3', label: 'horizon' }],
-    hlines: [{ y: 0, color: 'violet', label: 'K² − KᵢⱼKⁱʲ = 0 everywhere' }],
+    hlines: [{ y: 0, color: 'violet' }],
+    points: [
+      { x: 3.9, y: 2.95, r: 0.01, color: 'gold', label: 'K, the trace', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+      { x: 3.9, y: 2.6, r: 0.01, color: 'accent', label: 'tangential components', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+      { x: 3.9, y: 2.25, r: 0.01, color: 'bad', label: 'radial component', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+      { x: 3.9, y: 1.9, r: 0.01, color: 'violet', label: 'dashed: K² − KᵢⱼKⁱʲ = 0', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+    ],
   },
-  caption: t`Extrinsic curvature of the Painlevé–Gullstrand slices of a Schwarzschild black hole, in units of $1/r_s$: $K^r{}_r = -\tfrac12\sqrt{r_s/r^3}$, $K^\theta{}_\theta = K^\phi{}_\phi = \sqrt{r_s/r^3}$ and their sum $K$. Everything is smooth through the horizon, and the slice itself is flat.`,
+  caption: t`Extrinsic curvature of the Painlevé–Gullstrand slices of a Schwarzschild black hole, in units of $1/r_s$: $K^r{}_r = -\tfrac12\sqrt{r_s/r^3}$, $K^\theta{}_\theta = K^\phi{}_\phi = \sqrt{r_s/r^3}$ and their sum $K$. The combination $K^2 - K_{ij}K^{ij}$ is zero everywhere (dashed). Everything is smooth through the horizon, and the slice itself is flat.`,
 };
 
 // the metric in 3+1 form
@@ -169,7 +179,7 @@ const gpsPic = (rk, name) => ({
     curves: [{ fn: `${KE}/x`, domain: [4.5, 32], color: 'accent', width: 2.4 }],
     points: [
       { x: round(R_EARTH / 1e6, 5), y: round(KE / (R_EARTH / 1e6), 4), color: 'good', r: 5, label: 'clock on the ground', labelDx: 10, labelDy: -4 },
-      { x: round(rk / 1000, 5), y: round(KE / (rk / 1000), 4), color: 'gold', r: 5, label: `clock at rest at ${name} radius`, labelDx: -8, labelDy: -16, labelAlign: 'right' },
+      { x: round(rk / 1000, 5), y: round(KE / (rk / 1000), 4), color: 'gold', r: 5, label: `clock at rest at ${name} radius`, labelDx: -8, labelDy: 20, labelAlign: 'right' },
     ],
   },
   caption: t`The lapse of Earth's static slicing, $\alpha = \sqrt{1 - 2GM/(rc^2)} \approx 1 - GM/(rc^2)$: proper time per unit coordinate time for a clock at rest. Its tiny shortfall below 1 is drawn multiplied by $10^9$; Earth's rotation is ignored.`,
@@ -418,7 +428,7 @@ Written that way, the evolution is only weakly hyperbolic, and black-hole codes 
     num({
       id: 'cp-binding', difficulty: 3,
       gen(r) {
-        const [m1, d] = r.pick([[0.5, 10], [0.6, 8], [0.75, 6]]);
+        const [m1, d] = r.pick([[0.5, 4], [0.6, 3], [0.75, 5]]);
         const m2 = round(1 - m1, 4);
         const ans = -(m1 * m2) / d;
         return {
@@ -431,7 +441,7 @@ Written that way, the evolution is only weakly hyperbolic, and black-hole codes 
           hints: [t`$M_1 + M_2 = m_1 + m_2 + \dfrac{m_1m_2}{2d} + \dfrac{m_2m_1}{2d}$.`, t`So $M - (M_1 + M_2) = -m_1m_2/d$.`],
           teach: t`Exact initial data for two black holes already contain the Newtonian binding energy: with $G = c = 1$, the whole weighs $m_1m_2/d$ less than its parts.`,
           explain: t`$M - (M_1 + M_2) = -m_1m_2/d = ${round(ans, 4)}$ — exactly $-Gm_1m_2/(c^2d)$, the Newtonian binding energy, although nothing Newtonian went in: it came out of the Hamiltonian constraint. (For close holes, $M_1$ and $M_2$ are only approximately each hole's own mass, and $d$ is a coordinate separation.)`,
-          visual: blSurface({ d, q: m1, caption: t`These Brill–Lindquist data: the height is $\psi^{-2}$ on the plane through both punctures, masses ${m1}$ and ${m2}$ of the total, $G = c = 1$. Drag to rotate.` }),
+          visual: blSurface({ d, q: m1, caption: t`These Brill–Lindquist data: the height is $\psi^{-2}$ on the plane through both punctures, masses $${m1}$ and $${m2}$ of the total, $G = c = 1$. Drag to rotate.` }),
         };
       },
     }),

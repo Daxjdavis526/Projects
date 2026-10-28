@@ -427,7 +427,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `calc-polar` | polar and parametric curves, swept areas as thin wedges (½∫r²dθ), tangents, arc length, conics with focus and directrix, Kepler's equation with equal-time sectors |
 | `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
-| `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders |
+| `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
 | `mech-frames` | Newton's first law seen from the ground and from an accelerating train car |
@@ -455,8 +455,12 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |
 | `wave-doppler` | wavefronts from a moving source and a moving observer: crowding ahead, stretching behind, the Mach cone past Mach 1 |
 | `em-coulomb` | draggable point charges with every Coulomb force drawn to scale, action–reaction pairs, the net force (tip-to-tail and components) |
-| `em-induction` | a charged ball near a neutral conductor or insulator: induction, polarization, grounding, and spheres sharing charge on contact |
+| `em-charging` | a charged ball near a neutral conductor or insulator: induction, polarization, grounding, and spheres sharing charge on contact |
 | `em-field` | point charges, rods, line charges, sheets, charged balls and shells, a uniform field, a conducting sphere: field vectors and lines, labelled equipotentials, a probe for E and V, 3D Gaussian surfaces with their flux, charged particles launched through the field |
+| `em-lorentz` | a charged particle circling, spiralling or drifting (E×B) in fields; a mass spectrometer and a velocity selector |
+| `em-bfield` | field lines of wires, loops, solenoids and toroids; a draggable Amperian loop; forces between parallel currents |
+| `em-faraday` | electromagnetic induction: a loop crossing a field, a magnet and a coil, a ramping field with its induced E, a bar on rails, a transformer — flux, emf and Lenz's law |
+| `em-generator` | a 3D coil turning between magnet poles, as a generator (slip rings or commutator) or a motor |
 | `em-ac` | a coil answering back, RL growth and decay, LC oscillation with its energy sloshing, phasors beside their waves, the series RLC circuit, resonance curves |
 | `em-wave`, `em-gap`, `em-spectrum` | a 3D plane light wave (E ⟂ B ⟂ travel); Ampère's loop round a charging capacitor with two surfaces (displacement current); the electromagnetic spectrum on one log scale |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
@@ -464,6 +468,12 @@ Simulations written for particular courses — reuse them anywhere they fit
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an
 `explain` — one line saying what the parameter means physically.
+
+A worked example's visual is drawn compact: a simulation's secondary panels
+(graphs beside the picture) may be hidden there, so put a picture that needs
+them in the Explore step or a problem. Symbols such as ⊗ and ⊙ (into and out
+of the page) belong in math — `$\otimes$`, `$\odot$` — where KaTeX draws
+them; as plain text they fall back to another font.
 
 A visual's `caption` replaces the simulation's default caption.
 **Captions must say what is simplified or not to scale.** "Arrows show

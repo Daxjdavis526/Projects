@@ -312,6 +312,33 @@ for (const [P, why] of bad) check(`validate rejects ${why}`, validate(P).length 
   check('coil-axis: the background is the intercept against u', near(ab.series[0].fit.a, 0.04, 1e-9));
   for (const Q of [{ exp: ['coil', 'coil-axis'] }, { exp: 'coil-axis', axes: 'raw', view: 'plot', fit: false }, { exp: 'coil', view: 'apparatus', at: 1.5, params: { N: 100, R: 0.15 } }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
 }
+{
+  // L.5 — induction in a search coil
+  const P = B.EXPERIMENTS.induction.defaults, M = B.MU0 * 1000 * 100 * Math.PI * 0.01 ** 2;
+  check('induction: M = μ₀nN₂A = 39.48 µH; the solenoid’s L = μ₀n²πR²ℓ = 1.78 mH', near(B.mutualM(P), M, 1e-12) && Math.abs(1e3 * B.solL(P) - 1.7765) < 1e-4);
+  check('induction: the current is 500 mA at 100 Hz and falls as R/√(R² + (2πfL)²)', near(B.solI0(P, 100), 0.5, 1e-12) && near(B.solI0(P, 1000) / B.solI0(P, 100), Math.hypot(20, 2 * Math.PI * 100 * B.solL(P)) / Math.hypot(20, 2 * Math.PI * 1000 * B.solL(P)), 1e-12));
+  const r = exact('induction'), nm = exact('induction', { sys: 'nominal' }), tl = exact('induction', { sys: 'tilt' });
+  check('induction: ℰ₀ against ωI₀ (measured current) is straight with slope M', near(r.results[0].value, 1e6 * M, 1e-9) && Math.abs(r.series[0].fit.a) < 1e-9);
+  check('induction: assuming 500 mA throughout bends the line and drags M low', nm.results[0].value < 0.92 * 1e6 * M && nm.series[0].fit.chi2 > 50, `${nm.results[0].value} ${nm.series[0].fit.chi2}`);
+  check('induction: a coil tilted 25° gives M cos 25°, still a straight line', near(tl.results[0].value, 1e6 * M * Math.cos(25 * D2R), 1e-9) && tl.series[0].fit.chi2 < 1e-9);
+  const row = B.makeData('induction', { noiseless: true, settings: [500] }).rows[0];
+  check('induction: the peak EMF is MωI₀ (in mV, with I₀ in mA)', near(row.R[0], M * 2 * Math.PI * 500 * row.R[1], 1e-12));
+  for (const Q of [{ exp: 'induction', axes: 'ef', view: 'plot', fit: false }, { exp: 'induction', view: 'apparatus', sys: true, sysKind: 'tilt', at: 550 }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
+{
+  // L.6 — Snell’s law and the thin lens
+  const r = exact('snell'), z = exact('snell', { sys: 'reference' });
+  check('snell: sin θ₂ against sin θ₁ is a line through the origin with slope 1/n (n = 1.489)', near(r.results[0].value, 1.489, 1e-9) && Math.abs(r.series[0].fit.a) < 1e-12);
+  const row = B.makeData('snell', { noiseless: true, sys: 'reference', settings: [40] }).rows[0];
+  check('snell: a block turned 4° obeys Snell’s law about its own normal: sin(θ₁ − 4°) = n sin(θ₂ − 4°)', near(Math.sin(36 * D2R), 1.489 * Math.sin((row.R[0] - 4) * D2R), 1e-12));
+  check('snell: read from the wrong zero, the line gains an intercept and n comes out low', z.series[0].fit.a > 0.01 && z.results[0].value < 1.46, `${z.series[0].fit.a} ${z.results[0].value}`);
+  const l = exact('lens'), h = exact('lens', { sys: 'reference' });
+  check('lens: 1/s′ against 1/s has intercept 1/f (f = 15.0 cm) and slope exactly −1', near(l.results[0].value, 15, 1e-9) && near(l.results[1].value, -1, 1e-9));
+  check('lens: distances from a mark 1.0 cm before the lens keep the line nearly straight but tilt it (slope −0.875) and lengthen f', h.results[1].value > -0.9 && h.results[1].value < -0.85 && h.results[0].value > 15.9 && h.series[0].fit.chi2 < 0.01, `${h.results[1].value} ${h.results[0].value}`);
+  const lr = B.makeData('lens', { noiseless: true, sys: 'reference', settings: [30] }).rows[0];
+  check('lens: corrected by the mark’s offset, the readings satisfy 1/(s + 1) + 1/(s′ − 1) = 1/f', near(1 / 31 + 1 / (lr.R[0] - 1), 1 / 15, 1e-12));
+  for (const Q of [{ exp: ['snell', 'lens'] }, { exp: 'snell', axes: 'raw', view: 'plot', fit: false }, { exp: 'lens', view: 'apparatus', sys: true, at: 30, params: { hold: 1.5 } }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

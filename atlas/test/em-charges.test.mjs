@@ -1,4 +1,4 @@
-// The DOM-free electrostatics behind sims/em-coulomb.js and sims/em-induction.js:
+// The DOM-free electrostatics behind sims/em-coulomb.js and sims/em-charging.js:
 // Coulomb forces and their superposition, the image-charge solution for a
 // conducting sphere near a point charge (checked against direct numerical
 // integration of its surface charge), the dipole approximation for an
@@ -7,7 +7,7 @@
 
 import * as C from '../src/viz/model/em-charges.js';
 import { validate as validateCoulomb } from '../src/viz/sims/em-coulomb.js';
-import { validate as validateInduction } from '../src/viz/sims/em-induction.js';
+import { validate as validateInduction } from '../src/viz/sims/em-charging.js';
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {
@@ -91,8 +91,8 @@ check('−25 nC is about −1.56 × 10¹¹ e', near(C.elementary(-25e-9), -1.560
 // ─── the simulations' parameter checks ─────────────────────────────────────
 check('em-coulomb validate accepts its defaults', validateCoulomb({}).length === 0, validateCoulomb({}).join('; '));
 check('em-coulomb validate rejects charges on top of each other', validateCoulomb({ charges: [{ x: 0, y: 0, q: 1 }, { x: 0, y: 0, q: 2 }] }).length > 0);
-check('em-induction validate accepts its defaults', validateInduction({}).length === 0, validateInduction({}).join('; '));
-check('em-induction validate rejects an unknown scene', validateInduction({ scene: 'nope' }).length > 0);
+check('em-charging validate accepts its defaults', validateInduction({}).length === 0, validateInduction({}).join('; '));
+check('em-charging validate rejects an unknown scene', validateInduction({ scene: 'nope' }).length > 0);
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
