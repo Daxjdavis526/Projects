@@ -92,9 +92,9 @@ export function mount(F, P) {
     };
     const sym = (key) => SYM[key];
     const dimText = (key) => {
-      const v = hidden.has(key) ? '?' : String(d[key]);
+      if (hidden.has(key)) return 'dim ?';
       const expr = key === 'null' ? 'n − r' : key === 'left' ? 'm − r' : 'r';
-      return compact ? `dim ${v}` : `dim ${expr} = ${v}`;
+      return compact ? `dim ${d[key]}` : `dim ${expr} = ${d[key]}`;
     };
     for (const [key, B] of Object.entries(blocks)) {
       const col = COLOR[key];
@@ -164,7 +164,7 @@ export function mount(F, P) {
       if (blocks.row.dim && blocks.col.dim) {
         const y = oy + 0.84 * Math.min(blocks.row.s, blocks.col.s);
         plot.arrow(OL[0] - 0.25 * blocks.row.s, y, OR[0] + 0.25 * blocks.col.s, y, { color: 'gold', width: 2.2 });
-        plot.text(compact ? 'A' : 'A: row space onto column space', 10, y, { color: 'gold', weight: 700, size: compact ? 11 : 12, align: 'center', dy: -11 });
+        plot.text(compact ? 'A' : P.names ? 'A: C(Aᵀ) onto C(A)' : 'A: row space onto column space', 10, y, { color: 'gold', weight: 700, size: compact ? 11 : 12, align: 'center', dy: -11 });
       }
       // A sends the null space to 0: along the seam between the squares, from the null space to the right-hand origin
       if (blocks.null.dim) {

@@ -155,7 +155,7 @@ $X = 0$ always works. A **nonzero** solution exists only for special values of $
       hints: ['Check each candidate against the conditions: a sine vanishes at 0, a cosine has zero slope at 0.', 'For the mixed problem, the slope must vanish at L: an odd number of quarter waves.'],
       teach: 'The boundary conditions choose the eigenfunctions: zero value means a sine-like end, zero slope a cosine-like end.',
       explain: t`Fixed–fixed: whole half-waves, $\sin(n\pi x/L)$. Free–free: $\cos(n\pi x/L)$, including the constant. Fixed–free: odd quarter-waves, $\sin\big((2n - 1)\pi x/2L\big)$. Periodic: whole waves around the ring, sines and cosines both — every eigenvalue but zero has two eigenfunctions. sinh never satisfies two such conditions.`,
-      visual: modes(['sin(pi*x/2)'], 1, t`An example, the first fixed–free eigenfunction on $[0, 1]$: zero at the fixed end, level at the free one — a quarter wave.`, { y: [-0.2, 1.2] }),
+      visual: modes(['sin(pi*x)', 'cos(pi*x)', 'sin(pi*x/2)'], 1, t`Three shapes on $[0, 1]$: $\sin\pi x$ (blue), $\cos\pi x$ (violet) and $\sin(\pi x/2)$ (teal). Check each one’s value and slope at the two ends.`, { y: [-1.3, 1.3] }),
     }),
     num({
       id: 'fixed-free', difficulty: 3,

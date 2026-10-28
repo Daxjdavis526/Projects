@@ -465,6 +465,7 @@ export const LESSONS = {
   'phys2710.MP7.3': () => import('./phys2710/MP7.3.js'),
   'phys2710.MP7.4': () => import('./phys2710/MP7.4.js'),
   'phys2710.MP7.5': () => import('./phys2710/MP7.5.js'),
+  'phys2710.MP8.1': () => import('./phys2710/MP8.1.js'),
   'phys2710.MP9.1': () => import('./phys2710/MP9.1.js'),
   'phys2710.MP9.2': () => import('./phys2710/MP9.2.js'),
   'phys2710.MP9.3': () => import('./phys2710/MP9.3.js'),

@@ -145,7 +145,7 @@ Requiring $\psi$ to be single-valued and finite makes $m$ an integer, $l \ge |m|
           errors: g > 1 ? [{ value: 1, feedback: 'Different orderings of the same three numbers are different states: (1, 1, 2) has its double hump along z, (2, 1, 1) along x.' }] : [],
           hints: [t`Find the whole numbers $n_x, n_y, n_z \ge 1$ with $n_x^2 + n_y^2 + n_z^2 = ${s}$.`, t`Then count the distinct orders: three different numbers give 6, two equal give 3.`],
           teach: 'A cube’s symmetry makes levels degenerate: the same energy from different orderings of (nx, ny, nz).',
-          explain: t`$${s} = ${triples(s).map((q) => q.join('² + ') + '²').filter((v, i, arr) => arr.findIndex((w) => w.split(' + ').sort().join() === v.split(' + ').sort().join()) === i)[0]}$, which can be arranged in ${g} ways — ${g}-fold degeneracy. Stretch one side of the box and the symmetry breaks, splitting the level.`,
+          explain: t`$${s} = ${triples(s)[0].map((v) => `${v}^2`).join(' + ')}$, and the three numbers can be arranged in ${g} distinct orders — a ${g}-fold degeneracy. Stretch one side of the box and the symmetry breaks, splitting the level.`,
           visual: cubeLadder(s),
         };
       },
@@ -293,7 +293,7 @@ Requiring $\psi$ to be single-valued and finite makes $m$ an integer, $l \ge |m|
           errors: [{ value: (RH * C) / (n * n) / 1e6, feedback: 'Subtract the two terms: the photon carries the difference between the levels.' }],
           hints: [t`$\dfrac{1}{${n}^2} - \dfrac{1}{${n + 1}^2} = ${tex(1 / (n * n) - 1 / ((n + 1) * (n + 1)), 5)}$.`, t`For large $n$ this is about $2/n^3$: the levels crowd together.`],
           teach: 'High-n transitions in interstellar hydrogen fall in the radio — and E depending only on n makes them easy to predict.',
-          explain: t`$\nu = ${tex(RH * C, 5)}\times${tex(1 / (n * n) - 1 / ((n + 1) * (n + 1)), 5)} = ${fmt(nu / 1e6, 5)}$ MHz${n === 109 ? ', exactly where H109α is observed (5008.9 MHz)' : ''}. An atom in level ${n} has a mean radius of about $1.5n^2a_0 \approx ${fmt(1.5 * n * n * A0 * 1e6, 2)}$ μm — larger than a bacterium; it survives only in the near-vacuum of nebulae. The lines’ Doppler shifts map how the gas moves.`,
+          explain: t`$\nu = ${tex(RH * C, 5)}\times${tex(1 / (n * n) - 1 / ((n + 1) * (n + 1)), 5)} = ${fmt(nu / 1e6, 5)}$ MHz${n === 109 ? ', exactly where H109α is observed (5008.9 MHz)' : ''}. An atom in level ${n} is of order $n^2a_0 \approx ${fmt(n * n * A0 * 1e6, 2)}$ μm across — the size of a bacterium; it survives only in the near-vacuum of nebulae. The lines’ Doppler shifts map how the gas moves.`,
           visual: {
             type: 'graph',
             params: {
