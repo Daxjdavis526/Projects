@@ -112,6 +112,7 @@ export const LESSONS = {
   'm0.M0-6.1': () => import('./m0/M0-6.1.js'),
   'm0.M0-6.2': () => import('./m0/M0-6.2.js'),
   'm0.M0-6.3': () => import('./m0/M0-6.3.js'),
+  'm0.M0-6.4': () => import('./m0/M0-6.4.js'),
   'math1210.C1-1.1': () => import('./math1210/C1-1.1.js'),
   'math1210.C1-1.2': () => import('./math1210/C1-1.2.js'),
   'math1210.C1-2.1': () => import('./math1210/C1-2.1.js'),

@@ -84,9 +84,9 @@ of a root $r$ — a bound you know **before** you start, for any continuous $f$,
       { label: 'Why the bound holds', text: t`Each step keeps a half on which $f$ changes sign, so a root stays inside, and the width halves: after $n$ steps it is $2/2^n$. The root lies in the bracket and the midpoint is in its centre, so $\lvert m_n - r\rvert \le \tfrac12 \cdot 2/2^n = 2^{-n}$.` },
       { label: 'Count the steps', text: t`$2^{-n} \le 10^{-10}$ needs $n \ge 10\log_2 10 = 33.2$: **34 steps**, decided before evaluating anything.` },
       { label: 'Run it', text: t`The midpoints are $5, 4.5, 4.75, 4.875, 4.9375, \ldots$; the 34th is within $10^{-10}$ of $r = ${ROOT.toFixed(12)}$. Carried on to the limit of float64, ${FLOAT_END.zero ? t`after ${FLOAT_END.n} halvings it lands on a midpoint where the computed $f$ is exactly 0 — as close as float64 can say.` : t`after ${FLOAT_END.n} halvings the bracket is two adjacent floats.`}` },
-      { label: 'Wien’s constant', text: t`$b = \dfrac{hc}{k_Bx} = \dfrac{${tex(HC_K, 6)}\ \text{m K}}{${ROOT.toFixed(6)}} = ${tex(WIEN_B, 6)}\ \text{m K}$, the CODATA value. The Sun's photosphere, at about 5770 K, peaks near $${(WIEN_B / 5770 * 1e9).toFixed(0)}$ nm.` },
+      { label: 'Wien’s constant', text: t`$b = \dfrac{hc}{k_Bx} = \dfrac{${tex(HC_K, 6)}\ \text{m K}}{${ROOT.toFixed(6)}} = ${(WIEN_B * 1e3).toFixed(6)}\times10^{-3}\ \text{m K}$, the CODATA value. The Sun's photosphere, at about 5770 K, peaks near $${(WIEN_B / 5770 * 1e9).toFixed(0)}$ nm.` },
     ],
-    answer: t`34 steps; $x = ${ROOT.toFixed(10)}$ and $b = ${tex(WIEN_B, 6)}$ m K.`,
+    answer: t`34 steps; $x = ${ROOT.toFixed(10)}$ and $b = ${(WIEN_B * 1e3).toFixed(6)}\times10^{-3}$ m K.`,
   },
   practice: [
     num({
@@ -145,7 +145,7 @@ of a root $r$ — a bound you know **before** you start, for any continuous $f$,
         const ans = m - k + 52;
         const lo = 2 ** k, w = 2 ** m;
         return {
-          prompt: t`Bisection runs in float64 on the bracket $[2^{${k}},\ 2^{${k}} + 2^{${m}}]$. The floats there are $2^{${k}-52}$ apart. How many halvings can it make before the two ends of the bracket are **adjacent floats**, so that no new midpoint exists?`,
+          prompt: t`Bisection runs in float64 on the bracket $[2^{${k}},\ 2^{${k}} + 2^{${m}}]$. The floats there are $2^{${k - 52}}$ apart. How many halvings can it make before the two ends of the bracket are **adjacent floats**, so that no new midpoint exists?`,
           visual: {
             type: 'graph',
             params: { x: [-0.5, 8.5], y: [-0.7, 0.9], aspect: 'wide', axesAt: 'edge', xlabel: '', ylabel: '', yticks: 0, xticks: 0, grid: false,
@@ -155,7 +155,7 @@ of a root $r$ — a bound you know **before** you start, for any continuous $f$,
           },
           answer: ans, tol: { rel: 0, abs: 0.5 },
           errors: [{ value: 52, feedback: 'That would be right for a bracket as wide as the whole binade. Count the gaps in this one: its width divided by the spacing.' }],
-          hints: [t`The bracket holds $2^{${m}}/2^{${k}-52}$ gaps.`, t`Each halving halves the number of gaps; stop at one: $\log_2$ of the number of gaps.`],
+          hints: [t`The bracket holds $2^{${m}}/2^{${k - 52}}$ gaps.`, t`Each halving halves the number of gaps; stop at one: $\log_2$ of the number of gaps.`],
           teach: 'In floating point bisection ends after about log₂(width/spacing) steps — at most 52 inside one binade — when the ends are neighbouring floats; asking for a tighter tolerance than that loops forever.',
           explain: t`The bracket is $2^{${m}}/2^{${k - 52}} = 2^{${ans}}$ gaps wide, so $${ans}$ halvings leave one gap. A loop that waits for \`b - a < 1e-20\` near $${lo > 1000 ? tex(lo, 3) : lo}$ never ends: test instead whether the midpoint equals an end, or use a tolerance relative to the size of $x$.`,
         };

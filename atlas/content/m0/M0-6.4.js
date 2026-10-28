@@ -201,7 +201,7 @@ Every $\tau$ the quantity falls to $1/e \approx 37\%$; every half-life $t_{1/2} 
           hints: [t`$RC = ${R} \times 10^{3}\ \Omega \times ${C} \times 10^{-6}\ \text{F} = ${nice(sig(tau, 3))}$ s.`, t`$V = 28\,e^{-${tt}/${nice(sig(tau, 3))}}$.`],
           teach: t`The product $RC$ of resistance and capacitance is a time, in seconds: the circuit’s time constant.`,
           explain: t`$\tau = RC = ${nice(sig(tau, 3))}$ s, so $V = 28\,e^{-${tt}/${nice(sig(tau, 3))}} = ${nice(sig(ans, 3))}$ V.`,
-          visual: { type: 'em-circuit', params: { layout: 'rc' }, caption: t`The discharge circuit: the capacitor drains through the resistor. Ideal components.` },
+          visual: { type: 'em-circuit', params: { circuit: 'rc', opts: { net: 'single' }, values: { E: 28, R: R * 1e3, C: C * 1e-6 }, switches: { mode: 'discharge' }, graph: false, readout: false }, caption: t`The discharge circuit: the capacitor drains through the resistor. Ideal components.` },
         };
       },
     }),
