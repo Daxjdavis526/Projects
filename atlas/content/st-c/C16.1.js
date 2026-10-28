@@ -44,7 +44,7 @@ On a surface there is only one plane, so nothing is lost: $R_{ab} = K\,g_{ab}$ a
       t`At large $r$ the dashed formula fails: it is only the first correction. On the sphere the exact curve keeps falling until the ball covers everything.`,
     ],
     params: {
-      x: [0, 2.6], y: [0, 2], aspect: 'wide', axesAt: 'edge', xlabel: 'geodesic radius r', ylabel: 'V / V(flat)', yticks: 4,
+      x: [0, 2.6], y: [0.3, 1.7], aspect: 'wide', axesAt: 'edge', xlabel: 'geodesic radius r', ylabel: 'V / V(flat)', yticks: 4,
       sliders: [{ key: 'R', label: 'Ricci scalar $R$', min: -3, max: 3, step: 0.1, value: 1, explain: 'The scalar curvature, the same everywhere (a sphere for R > 0, hyperbolic space for R < 0), in units where r is measured in the same length unit.' }],
       choices: [{ key: 'n', label: 'Dimension', options: [[2, 'surface (area)'], [3, '3D space (volume)']], value: 2, explain: 'A geodesic disc on a surface, or a geodesic ball in three dimensions.' }],
       curves: [
@@ -184,7 +184,7 @@ On a surface there is only one plane, so nothing is lost: $R_{ab} = K\,g_{ab}$ a
         const K = (c * c) / (c * c + rim * rim) ** 2, key = K * rim * rim;
         return {
           prompt: t`A radio dish is the paraboloid $z = \rho^2/4f$ with focal length $f = ${f}$ m. In polar coordinates on its surface, $ds^2 = \big(1 + \rho^2/4f^2\big)d\rho^2 + \rho^2d\varphi^2$, and its Gaussian curvature is $K = \dfrac{4f^2}{(4f^2 + \rho^2)^2}$. Find the Ricci component $R_{\varphi\varphi}$ at $\rho = ${nice(rim, 3)}$ m.`,
-          visual: { type: 'surface3d', params: { surface: ['u*cos(v)', 'u*sin(v)', 'u^2/4'], domain: [[0, (rim / f) * 1.1], [0, 2 * Math.PI]], pitch: 0.5, scale: 2.4, axes: false, curves: [{ param: [`${rim / f}*cos(t)`, `${rim / f}*sin(t)`, `${(rim / f) ** 2 / 4}`], t: [0, 2 * Math.PI], color: 'gold', width: 3 }] }, caption: t`The dish in units of its focal length, with the circle $\rho = ${nice(rim, 3)}$ m in gold.` },
+          visual: { type: 'surface3d', params: { surface: ['u*cos(v)', 'u*sin(v)', 'u^2/4'], domain: [[0, (rim / f) * 1.1], [0, 2 * Math.PI]], pitch: 0.3, dist: 3.2, axes: false, curves: [{ param: [`${rim / f}*cos(t)`, `${rim / f}*sin(t)`, `${(rim / f) ** 2 / 4}`], t: [0, 2 * Math.PI], color: 'gold', width: 3 }] }, caption: t`The dish in units of its focal length, with the circle $\rho = ${nice(rim, 3)}$ m in gold.` },
           answer: key, tol: { rel: 0.005 },
           errors: [
             { value: K, feedback: t`That is $K$. In 2D, $R_{\varphi\varphi} = K g_{\varphi\varphi}$ with $g_{\varphi\varphi} = \rho^2$.` },

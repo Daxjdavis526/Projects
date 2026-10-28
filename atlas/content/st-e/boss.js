@@ -133,7 +133,7 @@ export default boss({
           gen(r) {
             const C = pulseCase(r);
             return {
-              prompt: t`A battery heater is driven by a pulse train: $${C.H}$ V for a fraction $D = ${C.D}$ of each period, 0 V for the rest. The heater’s slow thermal response passes mainly the **fundamental**. What is the amplitude of the fundamental (the $n = 1$ harmonic) in the Fourier series of the drive, in volts? (Take $t = 0$ at the middle of a pulse.)`,
+              prompt: t`A battery heater is driven by a pulse train: $${C.H}\ \text{V}$ for a fraction $D = ${C.D}$ of each period, $0\ \text{V}$ for the rest. The heater’s slow thermal response passes mainly the **fundamental**. What is the amplitude of the fundamental (the $n = 1$ harmonic) in the Fourier series of the drive, in volts? (Take $t = 0$ at the middle of a pulse.)`,
               answer: C.key, units: 'V', tol: { rel: 0.005 },
               errors: apart([
                 { value: (2 * C.H) / PI, feedback: t`$2H/\pi$ is the fundamental of a square wave ($D = \tfrac12$). For duty fraction $D$ the coefficient carries $\sin(\pi D)$.` },

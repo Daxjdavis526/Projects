@@ -24,7 +24,7 @@ const twins = (beta, T = 10, caption) => {
   return gpic({
     x: [-6, 6], y: [-0.5, 10.8], equal: true, axesAt: 'edge', xlabel: 'x (light-years)', ylabel: 't (years)',
     curves: [seg([0, 0], [0, T], 'accent', 2.6), seg([0, 0], [xt, T / 2], 'gold', 2.6), seg([xt, T / 2], [0, T], 'gold', 2.6), seg([0, 0], [5.4, 5.4], 'ink4', 1, true), seg([0, 0], [-5.4, 5.4], 'ink4', 1, true), seg([0, T], [5, T - 5], 'ink4', 1, true), seg([0, T], [-5, T - 5], 'ink4', 1, true)],
-    points: [{ x: 0, y: 0, color: 'ink', r: 4, label: 'depart', labelDx: 8, labelDy: 10 }, { x: 0, y: T, color: 'ink', r: 4, label: 'reunion', labelDx: 8, labelDy: -10 }, lab(-0.3, T * 0.3, 'home', 'accent', -6, 0), lab(xt + 0.3, T / 2, 'traveller', 'gold', 6, 0)],
+    points: [{ x: 0, y: 0, color: 'ink', r: 4, label: 'depart', labelDx: 8, labelDy: 10 }, { x: 0, y: T, color: 'ink', r: 4, label: 'reunion', labelDx: 8, labelDy: -10 }, { x: 0, y: T * 0.3, r: 0, color: 'accent', label: 'home', labelDx: -8, labelDy: 0, labelAlign: 'right' }, lab(xt + 0.3, T / 2, 'traveller', 'gold', 6, 0)],
   }, caption, 'A straight vertical worldline and a bent one meeting it at both ends, inside dashed light cones');
 };
 
