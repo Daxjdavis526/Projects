@@ -157,7 +157,7 @@ export function mount(F, P0) {
       rows.push(['at $t$', q('time', `${num(S.pk.t, 3)}\\ \\text{s}`)]);
     }
     rows.push(['optimal SNR $\\rho_{\\text{opt}}$', q('opt', num(S.opt))]);
-    if (S.ci) rows.push([`${Math.round(P.level * 100)}\\% interval`, q('ci', `${num(S.ci.lo, 1)}\\text{–}${num(S.ci.hi, 1)}\\ M_\\odot`)]);
+    if (S.ci && panels.includes('post')) rows.push([`${Math.round(P.level * 100)}% credible interval`, q('ci', `${num(S.ci.lo, 1)}\\text{–}${num(S.ci.hi, 1)}\\ M_\\odot`)]);
     F.readout(rows);
   }
 

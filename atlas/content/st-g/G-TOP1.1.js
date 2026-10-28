@@ -117,7 +117,7 @@ In $\mathbb R^n$ the open sets are the ones in which every point has a small bal
           prompt: t`$f(x) = \dfrac{1}{1 + x^2}$ is continuous on $\mathbb R$. The preimage of the open interval $V = (${a}, 2)$ is an open interval. How long is it?`,
           visual: band('1/(1 + x^2)', [-3.5, 3.5], [-0.15, 1.3], a, 2, t`The curve $y = 1/(1 + x^2)$ and the band $${a} < y < 2$ (gold). The preimage is the set of $x$ whose point on the curve lies in the band.`),
           answer: ans, tol: { rel: 0.005 },
-          errors: [{ value: half, feedback: 'That is half of it: the preimage is symmetric, from −√(1/a − 1) to +√(1/a − 1).' }, { value: 2 * (1 / a - 1), feedback: 'Take the square root: x² < 1/a − 1.' }],
+          errors: [{ value: half, feedback: 'That is half of it: the preimage is symmetric, from −√(1/a − 1) to +√(1/a − 1).' }, { value: 2 * (1 / a - 1), feedback: 'Take the square root: x² < 1/a − 1.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`Solve $\dfrac{1}{1 + x^2} > ${a}$ (the upper end, $2$, is never reached).`, t`$1 + x^2 < \tfrac{1}{${a}}$, so $|x| < \sqrt{1/${a} - 1}$.`],
           teach: 'For a continuous f, the preimage of an open set is open — here the open interval of x whose values land inside the band.',
           explain: t`$|x| < \sqrt{${nice(1 / a)} - 1} = ${nice(half, 4)}$, an open interval of length $${nice(ans, 4)}$. Its endpoints map to $y = ${a}$ exactly, the excluded edge of $V$, so they are excluded too.`,
