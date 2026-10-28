@@ -12,6 +12,7 @@
 //   { type: 'de-tracedet', params: {
 //       tau: -1, Delta: 2,               // the starting point (input 'drag')
 //       drag: true, snap: 0.05,          // the point can be dragged (snapped to a grid, and onto the parabola when close)
+//       marker: true,                    // with drag: false, marker: false hides the point (a map of fixed points only)
 //       matrix: null,                    // or [[a, b], [c, d]] in slider keys: the point follows the matrix
 //       sliders, constants,              // for matrix (as in graph)
 //       map: { tau: [-4, 4], Delta: [-2.5, 5] },   // the map's window
@@ -121,7 +122,7 @@ export function mount(F, P0) {
       if (p.label) { const t1 = ev(p.t[1], E); pm.text(p.label, ft({ ...E, t: t1 }), fd({ ...E, t: t1 }), { color: p.color || 'violet', dx: 6, dy: -10, weight: 650 }); }
     }
     for (const p of P.points || []) pm.point(ev(p.tau, E), ev(p.Delta, E), { color: p.color || 'violet', r: 4.5, label: p.label, ldx: p.labelDx, ldy: p.labelDy });
-    if (!(P.drag && !P.matrix) || P.panels === 'portrait') {
+    if (P.marker === false) { /* fixed marks only */ } else if (!(P.drag && !P.matrix) || P.panels === 'portrait') {
       pm.point(pt.tau, pt.Delta, { color: eqColor(type), r: 6, ring: 'ink' });
     } else {
       pm.point(pt.tau, pt.Delta, { color: eqColor(type), r: 5 });

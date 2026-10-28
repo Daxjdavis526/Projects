@@ -101,7 +101,7 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
           ['y', '-x - x^2 - 0.5*y', [-1, 0], [[0, 1], [1, -0.5]]],
           ['y', '-x - x^2 - 0.5*y', [0, 0], [[0, 1], [-1, -0.5]]],
           ['x*(2 - x) - x*y', 'y*(x - 1)', [1, 1], [[-1, -1], [1, 0]]],
-          ['y - x', 'x^2 - 2*y + 1', [1, 1], [[-1, 1], [2, -2]]],
+          ['y - x', 'x^2 - 3*y + 2', [1, 1], [[-1, 1], [2, -3]]],
         ]);
         const tr = J[0][0] + J[1][1], det = J[0][0] * J[1][1] - J[0][1] * J[1][0], disc = tr * tr - 4 * det;
         const kind = det < 0 ? 0 : disc < 0 ? (tr < 0 ? 1 : 3) : (tr < 0 ? 2 : 3);
@@ -113,7 +113,7 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
           choices, answer: kind, why,
           hints: ['Compute the Jacobian and evaluate it at the equilibrium.', t`$J = ${M(J)}$, with $\tau = ${n(tr)}$ and $\Delta = ${n(det)}$.`],
           teach: 'Classify an equilibrium by the trace and determinant of its Jacobian; for hyperbolic equilibria the nonlinear system has the same type nearby.',
-          explain: t`$J = ${M(J)}$: $\tau = ${n(tr)}$, $\Delta = ${n(det)}$, $\tau^2 - 4\Delta = ${n(disc)}$. ${kind === 0 ? 'Δ < 0: a saddle.' : kind === 1 ? 'Δ > 0, τ < 0 and τ² < 4Δ: a stable spiral.' : kind === 2 ? 'Δ > 0, τ < 0 and τ² > 4Δ: a stable node.' : 'Δ > 0 and τ > 0: unstable.'} No eigenvalue has zero real part, so the nonlinear system agrees near $(${eq[0]}, ${eq[1]})$.`.replace('τ² < 4Δ', 'τ² < 4Δ'),
+          explain: t`$J = ${M(J)}$: $\tau = ${n(tr)}$, $\Delta = ${n(det)}$, $\tau^2 - 4\Delta = ${n(disc)}$. ${kind === 0 ? 'Δ < 0: a saddle.' : kind === 1 ? 'Δ > 0, τ < 0 and τ² < 4Δ: a stable spiral.' : kind === 2 ? 'Δ > 0, τ < 0 and τ² > 4Δ: a stable node.' : 'Δ > 0 and τ > 0: unstable.'} No eigenvalue has zero real part, so the nonlinear system agrees near $(${eq[0]}, ${eq[1]})$.`,
           visual: plane(fx, fy, { x: [eq[0] - 2, eq[0] + 2], y: [eq[1] - 1.5, eq[1] + 1.5], nullclines: true, field: false, seeds: [], points: [{ x: eq[0], y: eq[1], label: 'equilibrium', color: 'gold' }], caption: 'The nullclines near the equilibrium (gold): they cross there. The type is for you to compute.' }),
         };
       },
@@ -148,7 +148,7 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
           answer: th, tol: { rel: 0.005 },
           errors: [{ value: Math.log(2) / d, feedback: t`The decay rate is the real part of the eigenvalues, $\alpha = \tau/2 = -${d}/2$, not $\tau$ itself.` }],
           hints: [t`$J(1, 0) = ${M([[0, 1], [-2, -d]])}$.`, t`The eigenvalues are $\alpha \pm i\beta$ with $\alpha = \tau/2 = ${n(al)}$; the amplitude goes like $e^{\alpha t}$, so it halves when $e^{\alpha t} = \tfrac12$.`],
-          teach: 'Near a stable spiral the amplitude decays like e^{αt} with α = τ/2 from the Jacobian.'.replace('e^{αt}', 'an exponential'),
+          teach: t`Near a stable spiral the amplitude decays like $e^{\alpha t}$, with $\alpha = \tau/2$ from the Jacobian.`,
           explain: t`$\alpha = ${n(al)}$, so $t = \ln2/${n(-al)} = ${fmt(th, 3)}$ time units. Because $(1, 0)$ is hyperbolic, the real strip’s small oscillations decay at this rate.`,
           visual: plane('y', `x - x^3 - ${d}*y`, { x: [0.2, 1.8], y: [-0.6, 0.6], seeds: [{ x: 1.4, y: 0, dir: 'forward', color: 'accent2', T: 60 }], caption: 'Near (1, 0): a small ringing, traced forward, spirals into the buckled state.' }),
         };
@@ -157,7 +157,7 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
     multi({
       id: 'hyperbolic', difficulty: 2,
       prompt: t`Four equilibria of different systems have Jacobians with these eigenvalues. At which ones does the linearization **reliably** predict the local portrait? Select all.`,
-      choices: [t`$\lambda = -1,\ 2$`, t`$\lambda = \pm 2i$`, t`$\lambda = -0.5 \pm i$`, t`$\lambda = 0,\ -3$`, t`$\lambda = 0.1 \pm 3i$`],
+      choices: [t`$\lambda = -1,\ 2$`, t`$\lambda = \pm 2i$`, t`$\lambda = -0.5 \pm i$`, t`$\lambda = 0,\ -3$`, t`$\lambda = 0.1 \pm 2i$`],
       answer: [0, 2, 4],
       why: {
         1: 'Purely imaginary eigenvalues (a linear centre) are not hyperbolic: the nonlinear terms decide whether trajectories close, spiral in or spiral out.',
@@ -165,8 +165,8 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
       },
       hints: ['Hartman–Grobman needs every eigenvalue to have a nonzero real part.', 'Check the real part of each listed eigenvalue.'],
       teach: 'An equilibrium is hyperbolic when no eigenvalue of its Jacobian has zero real part; only then does the linearization reliably fix the local picture.',
-      explain: t`$-1, 2$ (saddle), $-0.5 \pm i$ (stable spiral) and $0.1 \pm 3i$ (unstable spiral, however slowly) are hyperbolic. $\pm2i$ and $0, -3$ have an eigenvalue with zero real part, so the nonlinear terms decide.`,
-      visual: { type: 'de-tracedet', params: { drag: false, labels: false, readout: false, panels: 'map', tau: -1, Delta: 2, points: [{ tau: 1, Delta: -2, label: '1' }, { tau: 0, Delta: 4, label: '2' }, { tau: -1, Delta: 1.25, label: '3' }, { tau: 0, Delta: 0, label: '4' }, { tau: 0.2, Delta: 4.5, label: '5' }], map: { tau: [-4, 4], Delta: [-2.5, 5] } }, caption: 'The five equilibria as points (τ, Δ) on the trace–determinant map, numbered in the order listed. The large dot is just the map’s marker.' },
+      explain: t`$-1, 2$ (saddle), $-0.5 \pm i$ (stable spiral) and $0.1 \pm 2i$ (unstable spiral, however slowly) are hyperbolic. $\pm2i$ and $0, -3$ have an eigenvalue with zero real part, so the nonlinear terms decide.`,
+      visual: { type: 'de-tracedet', params: { drag: false, marker: false, labels: false, readout: false, panels: 'map', points: [{ tau: 1, Delta: -2, label: '1' }, { tau: 0, Delta: 4, label: '2' }, { tau: -1, Delta: 1.25, label: '3' }, { tau: -3, Delta: 0, label: '4' }, { tau: 0.2, Delta: 4.01, label: '5' }], map: { tau: [-4, 4], Delta: [-2.5, 5] } }, caption: 'The five equilibria as points (τ, Δ) on the trace–determinant map, numbered in the order listed. Gold line: τ = 0, Δ > 0; grey line: Δ = 0; grey curve: τ² = 4Δ.' },
     }),
   ],
   checkpoint: [
@@ -225,7 +225,7 @@ If no eigenvalue of the **Jacobian** $J$ has zero real part (the equilibrium is 
           hints: [t`At $\theta = 0$ the Jacobian is $${M([[0, 1], ['\\Omega^2 - g/R', '-b']])}$.`, t`It is a saddle when $\Delta = -(\Omega^2 - g/R) < 0$, that is $\Omega^2 > g/R$.`],
           teach: 'An equilibrium loses stability when a parameter pushes the Jacobian’s determinant through zero — here the spin rate turns the bottom of the hoop into a saddle.',
           explain: t`$\Omega_c = \sqrt{g/R} = ${fmt(w, 3)}$ rad/s $= ${fmt(rpm, 3)}$ rpm. Faster than that, the bottom becomes a saddle and two new stable equilibria appear at $\cos\theta = g/(R\Omega^2)$ — the bead rides up the side. (A pitchfork bifurcation; centrifuge governors on steam engines worked this way.)`,
-          visual: plane('y', `sin(x)*(1.5*${r6(g / R)}*cos(x) - ${r6(g / R)}) - 0.3*y`, { x: [-2.2, 2.2], y: [-3, 3], equal: false, nullclines: false, equilibria: true, seeds: [[0.05, 0], [-0.05, 0]], T: 30, caption: 'The bead’s phase plane for a spin rate above the critical one (Ω² = 1.5 g/R): the bottom, θ = 0, has become a saddle between two new stable states.' }),
+          visual: plane('y', 'sin(x)*(1.5*cos(x) - 1) - 0.3*y', { x: [-2.2, 2.2], y: [-1.2, 1.2], equal: false, nullclines: false, equilibria: true, seeds: [[0.02, 0], [-0.02, 0]], T: 60, xlabel: 'θ', ylabel: 'θ′', caption: 'The bead’s phase plane for a spin rate above the critical one (Ω² = 1.5 g/R), with time in units of √(R/g) and some friction: the bottom, θ = 0, has become a saddle between two new stable states.' }),
         };
       },
     }),
