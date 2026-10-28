@@ -233,5 +233,14 @@ check('arcsec graded against a degree answer', grade({ type: 'numeric', answer: 
   check('a number already grouped is left alone', groupDigits('26\\,560 + 6{,}371') === '26\\,560 + 6{,}371');
 }
 
+// TeX spelled in Unicode, for drop-down options
+{
+  const { texToPlain } = await import('../src/core/markup.js');
+  check('texToPlain: a substitution keeps its function', texToPlain('trigonometric substitution $x = 2\\tan\\theta$') === 'trigonometric substitution x = 2 tan θ');
+  check('texToPlain: powers, fractions and roots', texToPlain('$\\dfrac{1}{2}mv^2$') === '1/2 mv²' && texToPlain('$\\sqrt{\\dfrac{GM}{r}}$') === '√(GM/r)');
+  check('texToPlain: vectors and hats', texToPlain('$\\vec F = q\\vec v\\times\\vec B$') === 'F\u20d7 = qv\u20d7×B\u20d7' && texToPlain('$\\hat{\\theta}$') === 'θ\u0302');
+  check('texToPlain: subscripts', texToPlain('$\\omega_0$ and $T_{\\text{cold}}$') === 'ω₀ and T_cold');
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

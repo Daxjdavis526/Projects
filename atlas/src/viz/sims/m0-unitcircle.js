@@ -31,6 +31,8 @@
 //       readout: true,
 //       hide: [],                  // readouts printed “?”: theta sin cos tan arc ref principal other
 //       labels: true,              // numbers on the canvas (P's coordinates, the inverse's angles)
+//       rlabel: null,              // the label on the radius (default '1', or 'r = …'); '' hides it
+//       aspect: null,              // circle mode: the canvas shape ('wide' or ''); default '' in Explore, 'wide' in a problem
 //   } }
 //
 // get('theta') is the angle in radians (a slider item reads it); get('v') the value.
@@ -41,7 +43,7 @@ const PI = Math.PI, TAU = 2 * PI;
 export const defaults = {
   mode: 'circle', theta: 0.9, range: [0, TAU], units: 'both', snap: 1, r: 1, rslider: false,
   legs: true, arc: true, radianTicks: false, signs: false, ref: false, tan: false,
-  fn: 'sin', inv: 'asin', v: 0.5, invChoice: true, controls: true, readout: true, hide: [], labels: true,
+  fn: 'sin', inv: 'asin', v: 0.5, invChoice: true, controls: true, readout: true, hide: [], labels: true, rlabel: null, aspect: null,
 };
 const MODES = ['circle', 'unroll', 'inverse'];
 const INV = { asin: 'arcsin', acos: 'arccos', atan: 'arctan' };
@@ -106,7 +108,7 @@ const num3 = (x) => (Math.abs(x) < 5e-4 ? '0' : String(+x.toFixed(3)));
 export function mount(F, P) {
   const mode = P.mode;
   const wide = mode !== 'circle';
-  const { canvas } = F.canvas({ aspect: wide ? 'wide' : '', label: mode === 'unroll' ? 'A point going round the unit circle beside the graph of its height against the angle' : mode === 'inverse' ? 'The angles on the unit circle that share one sine, cosine or tangent, and the principal branch' : 'The unit circle with a point at angle θ and its cosine and sine as projections on the axes' });
+  const { canvas } = F.canvas({ aspect: wide ? 'wide' : (P.aspect ?? (F.compact ? 'wide' : '')), label: mode === 'unroll' ? 'A point going round the unit circle beside the graph of its height against the angle' : mode === 'inverse' ? 'The angles on the unit circle that share one sine, cosine or tangent, and the principal branch' : 'The unit circle with a point at angle θ and its cosine and sine as projections on the axes' });
   const hidden = new Set(P.hide || []);
   const snapRad = (P.snap * PI) / 180;
   const [lo, hi] = P.range;
@@ -209,9 +211,12 @@ export function mount(F, P) {
     }
     left.text('θ', 0.4 * r * Math.cos(th / 2), 0.4 * r * Math.sin(th / 2), { align: 'center', color: 'gold', size: 13, weight: 700 });
     left.point(x, y, { color: 'ink', r: 5 });
-    const coords = P.labels && !hidden.has('sin') && !hidden.has('cos') ? `P (${num3(c * r).replace('-', '−')}, ${num3(s * r).replace('-', '−')})` : 'P';
-    left.text(coords, x, y, { align: c >= 0 ? 'left' : 'right', dx: c >= 0 ? 10 : -10, dy: s >= 0 ? -12 : 12, color: 'ink', size: 12.5, weight: 650 });
-    left.text(r === 1 ? '1' : `r = ${+r.toFixed(2)}`, x / 2, y / 2, { align: 'center', dx: -9 * s, dy: -9 * c, color: 'ink3', size: 11 });
+    const coords = P.labels && !P.radianTicks && !hidden.has('sin') && !hidden.has('cos') ? `P (${num3(c * r).replace('-', '−')}, ${num3(s * r).replace('-', '−')})` : 'P';
+    // with radian ticks round the rim, P's label goes inside the circle, clear of the tick numbers
+    const inside = P.radianTicks ? -1 : 1;
+    left.text(coords, x, y, { align: (c >= 0) === (inside > 0) ? 'left' : 'right', dx: inside * (c >= 0 ? 10 : -10), dy: inside * (s >= 0 ? -12 : 12), color: 'ink', size: 12.5, weight: 650 });
+    const rl = P.rlabel ?? (r === 1 ? '1' : `r = ${+r.toFixed(2)}`);
+    if (rl) left.text(rl, x / 2, y / 2, { align: 'center', dx: -9 * s, dy: -9 * c, color: 'ink3', size: 11 });
     left.drawHandles();
   }
 
@@ -320,7 +325,7 @@ export function mount(F, P) {
   }
   F.draw(draw);
   F.caption(mode === 'unroll'
-    ? 'Both panels share one vertical scale, so the height of P is carried straight across. The θ axis is to scale in radians: one unit of θ is one unit of arc on the unit circle.'
+    ? 'Both panels share one vertical scale, so the height of P is carried straight across. The θ axis is squeezed to fit: on a true scale one radian of θ would be as long as the circle’s radius.'
     : mode === 'inverse'
       ? 'Bold green: the restricted range each inverse function answers from. Hollow points are other angles with the same sine, cosine or tangent, which the inverse function does not return.'
       : 'Angles are measured anticlockwise from the positive x-axis. The legs of the triangle are the shadows of P on the two axes: cos θ across, sin θ up.');

@@ -99,7 +99,9 @@ Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
 `solution`, `choices`, `why`, `errors[].feedback`, coding `tests[].name`,
 `intro`, captions — except a worked-example step's short `label` (plain
 text shown in capitals, so no TeX and no symbol labels: `g` would read "G"), and
-the right-hand options of a matching problem (plain text in a drop-down) and
+the right-hand options of a matching problem (shown in a drop-down, which
+cannot typeset: simple math is spelled in Unicode — `$x^2$` as x², `$\sqrt{x}$`
+as √x, `$\vec F$` as F⃗ — and the test fails an option it cannot spell) and
 labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it. Markup has no
 tables; for a small one, use display math with `\begin{array}{c|c} … \hline … \end{array}`
@@ -163,6 +165,9 @@ not TeX: use Unicode (`θ̂`, `ẍ`, `v⃗`, `rₛ`, `x²`) — combining hats, 
 arrows are drawn over their letter.
 
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**
+A template literal *inside* a `` t`…` `` (`` t`${k ? `\times` : ''}` ``) is an
+ordinary one again and eats its backslashes: tag it too (`` t`\times` ``). The
+content test catches this in lessons; in a sim file only a screenshot will.
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
 test catches this ("escape damage"), but it is easier not to make the mistake.
 Inside `` t`…` `` you can still interpolate: `` t`$\frac{${a}}{${b}}$` ``.
@@ -584,6 +589,10 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `wv-chain` | N masses on springs (fixed, free or ring ends): start in a mode, pluck a mass or launch a pulse, motion as an exact sum of modes, beside the dispersion curve ω = 2√(k/m)|sin(qa/2)| with ω = vq and the cutoff | `N`, `bc`, `k`, `start`, `n`, `pluck`, `x0`, `width`, `view`, `panels`, `ghost`, `line`, `spectrum`, `labels`, `controls`, `maxN`, `play`, `time`, `readouts`, `hide` — see the file header |
 | `em3-relax` | Laplace's equation in a box solved by relaxation (Jacobi, Gauss–Seidel, SOR), walls at set voltages and an optional electrode, a second guess converging alongside, a log convergence panel and a probe against the exact series | `n`, `aspect`, `walls`, `top`, `electrode`, `init`, `method`, `sweeps`, `compare`, `exact`, `probe`, `levels`, `labels`, `history`, `controls`, `play`, `readout`, `hide` |
 | `em3-images` | a draggable charge beside a grounded plane or a grounded or neutral sphere: the image charge, equal-flux field lines, induced-charge shading, a σ panel, force and induced-charge readouts | `geometry`, `q`, `pos`, `R`, `ground`, `x`, `image`, `lines`, `equip`, `shade`, `force`, `panel`, `drag`, `controls`, `readout`, `hide` |
+| `cm2-vary` | a true path, a family of varied paths, and the functional (length, bead travel time or action) against the variation — flat at the true path | `preset`, `n`, `alpha`, `T`, `sliders`, `modes`, `panels`, `ghosts`, `marks`, `readouts`, `labels` |
+| `cm2-race` | beads racing downhill on a line, a circular arc, a cycloid, a steep curve and a drop; a tautochrone mode | `mode`, `x1`, `curves`, `p`, `sliders`, `a`, `times`, `play`, `at`, `slow`, `labels` |
+| `cm2-noether` | a puck over potential contours beside its conserved quantities in time, with a slider that breaks a rotation, translation or time symmetry | `kind`, `kinds`, `eps`, `sliders`, `show`, `panels`, `play`, `labels`, `readout` |
+| `num-float` | the bits of a float64 or float32 coloured by field: flip a bit, step to the neighbouring floats, read the exact stored decimal and the gap; presets such as 0.1 and 2⁵³ + 1 mark the true value | see the file header |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
 | `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
 | `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |

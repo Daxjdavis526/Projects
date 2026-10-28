@@ -11,7 +11,7 @@
 
 import { makeRng, hashString } from './rng.js';
 import { grade } from './check.js';
-import { mathIn, escapeDamage, bareCommand } from './markup.js';
+import { mathIn, escapeDamage, bareCommand, texToPlain } from './markup.js';
 import { unitTeX } from './units.js';
 
 export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider', 'code'];
@@ -180,6 +180,10 @@ export function validateItem(item, tex) {
     if (item.type === 'match' || item.type === 'label') {
       need(item.left?.length >= 2, 'matching needs 2+ items on the left');
       need(item.right?.length >= item.left?.length, `matching needs at least as many options on the right (${item.right?.length}) as items on the left (${item.left?.length}) — list a repeated answer once per left item that uses it`);
+      if (item.type === 'match') for (const r of item.right || []) {
+        const plain = texToPlain(r);
+        need(!/[\\{}$]/.test(plain), `a matching option is shown in a drop-down as plain text, and “${String(r).slice(0, 40)}” comes out as “${plain.slice(0, 40)}” — keep its math simple (Unicode, or TeX the drop-down can spell: x², √x, θ, ∫, fractions)`);
+      }
       need(item.answer?.length === item.left?.length, 'matching answer must map every left item');
     }
     const r = grade(item, keyResponse(item));

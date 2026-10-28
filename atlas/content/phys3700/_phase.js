@@ -126,9 +126,10 @@ export const STEAM = {
   hf: 191.81, hg: 2583.9, sf: 0.6492, sg: 8.1488,   // saturated liquid and vapour at 10 kPa
   sf10: 3.3606, sg10: 5.6160,                       // saturated liquid and vapour at 10 MPa
 };
-// Steam T–s dome: s(kJ/(kg K)) = Σ cᵢ uⁱ with u = (1 − T/647.096 K)^(1/3) (error ≤ 0.04 kJ/(kg K)).
-const DOME_F = [4.327168, 0.5977873, -19.04048, 77.7923, -177.2252, 191.8126, -84.327];
-const DOME_G = [4.788267, -8.940348, 100.8257, -416.5795, 886.4371, -934.6092, 391.0566];
+// Steam T–s dome: s(kJ/(kg K)) = Σ cᵢ uⁱ with u = (1 − T/647.096 K)^(1/3), both branches through the
+// critical point (s = 4.407); error ≤ 0.006 (liquid) and 0.021 (vapour) kJ/(kg K).
+const DOME_F = [4.407, -1.773618, 4.92776, -38.61218, 128.1528, -251.3587, 250.3851, -102.6604];
+const DOME_G = [4.407, 2.771475, -19.83198, 177.2899, -687.1213, 1366.559, -1357.49, 538.9193];
 // At 10 MPa: compressed liquid s(t) from 46 °C to 311 °C, and superheated vapour s(t) from 311 °C to 500 °C (t in °C).
 const LIQ10 = [-0.01264349, 0.01578408, -3.687103e-05, 1.32515e-07, -3.442934e-10, 4.345003e-13];
 const SUP10 = [-18.61399, 0.2109838, -0.0006957324, 1.046243e-06, -5.940595e-10];
@@ -138,8 +139,8 @@ const poly = (c, v) => c.map((a, i) => `(${a})*(${v})^${i}`).join(' + ');
 export function rankinePic({ caption, labels = true, ask = null, x = [-0.3, 9.4], y = [0, 620], alt } = {}) {
   const S = STEAM, u = '(1 - (t + 273.15)/647.096)^(1/3)';
   const curves = [
-    { param: [poly(DOME_F, u), 't'], t: [0.01, 373.9], color: 'ink3', width: 1.6 },
-    { param: [poly(DOME_G, u), 't'], t: [0.01, 373.9], color: 'ink3', width: 1.6 },
+    { param: [poly(DOME_F, u), 't'], t: [0.01, 373.946], color: 'ink3', width: 1.6 },
+    { param: [poly(DOME_G, u), 't'], t: [0.01, 373.946], color: 'ink3', width: 1.6 },
     // 2 → 3: heating at 10 MPa (liquid, boiling, superheat)
     { param: [poly(LIQ10, 't'), 't'], t: [46.14, S.Tsat], color: 'warn', width: 2.6 },
     { param: ['t', String(S.Tsat)], t: [S.sf10, S.sg10], color: 'warn', width: 2.6 },
@@ -153,14 +154,14 @@ export function rankinePic({ caption, labels = true, ask = null, x = [-0.3, 9.4]
     { x: S.s3, y: S.Tin, r: 4.5, color: 'ink', label: labels ? '3' : '', labelDx: 8 },
     { x: S.s3, y: S.Tc, r: 4.5, color: 'ink', label: labels ? '4' : '', labelDx: 8, labelDy: 14 },
     { x: 2.0, y: 330, r: 0.01, color: 'warn', label: 'boiler (10 MPa)', labelDx: -60, labelDy: -6 },
-    { x: 7.0, y: S.Tc, r: 0.01, color: 'accent', label: 'condenser (10 kPa)', labelDx: -40, labelDy: 16 },
+    { x: 3.2, y: S.Tc, r: 0.01, color: 'accent', label: 'condenser (10 kPa)', labelDx: -40, labelDy: -10 },
     { x: S.s3, y: 270, r: 0.01, color: 'gold', label: 'turbine', labelDx: 8 },
   ];
   if (ask) pts.push(...ask);
   return {
     type: 'graph',
     params: { x, y, aspect: 'wide', xlabel: 'entropy s (kJ/(kg·K))', ylabel: 'temperature (°C)', axesAt: 'edge', alt: alt || 'The Rankine cycle on a temperature–entropy diagram of water', curves, points: pts, },
-    caption: caption ?? 'The ideal Rankine cycle on water’s T–s diagram (IAPWS-95 states; the dome and the heating line are fits good to a few hundredths of a kJ/(kg·K)). The pump’s temperature rise is too small to see: states 1 and 2 overlap.',
+    caption: caption ?? 'The ideal Rankine cycle on water’s T–s diagram (IAPWS-95 states; the dome and the heating line are fits good to about 0.02 kJ/(kg·K)). The pump’s temperature rise is too small to see: states 1 and 2 overlap.',
   };
 }
 

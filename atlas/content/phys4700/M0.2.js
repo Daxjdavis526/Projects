@@ -50,8 +50,8 @@ const nvLevels = {
   params: {
     x: [0, 10], y: [-0.6, 4.4], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [seg(1.5, 0, 4.5, 0, 'accent', 3), seg(5.5, 3.3, 8.5, 3.3, 'accent', 3), seg(5.5, 2.5, 8.5, 2.5, 'accent', 3), seg(5.5, 2.9, 8.5, 2.9, 'ink3', 1.4, [4, 4])],
-    arrows: [{ from: [4.2, 0.05], to: [5.8, 3.25], color: 'gold', width: 2.2 }, { from: [3.6, 0.05], to: [5.8, 2.45], color: 'violet', width: 2.2 }],
-    points: [label(1.5, 0, 'mₛ = 0', 'ink2', -6, 0, 'right'), label(8.5, 3.3, 'mₛ = +1: D + γB', 'ink2', 8, 0), label(8.5, 2.5, 'mₛ = −1: D − γB', 'ink2', 8, 0), label(8.5, 2.9, 'D (no field)', 'ink3', 8, 0), label(5.0, 3.0, 'f₊', 'gold', -8, -6, 'right'), label(4.6, 1.6, 'f₋', 'violet', 8, 6)],
+    arrows: [{ from: [3.0, 0.05], to: [6.2, 3.25], color: 'gold', width: 2.2 }, { from: [4.2, 0.05], to: [6.8, 2.45], color: 'violet', width: 2.2 }],
+    points: [label(1.5, 0, 'mₛ = 0', 'ink2', -6, 0, 'right'), label(8.5, 3.3, 'mₛ = +1: D + γB', 'ink2', 8, 0), label(8.5, 2.5, 'mₛ = −1: D − γB', 'ink2', 8, 0), label(8.5, 2.9, 'D (no field)', 'ink3', 8, 0), label(4.45, 1.55, 'f₊', 'gold', -8, 0, 'right'), label(5.6, 1.35, 'f₋', 'violet', 8, 0)],
   },
   caption: 'The NV centre’s spin-1 levels in a field along its axis (frequencies E/h). Not to scale: the splitting 2γB is far smaller than D in a weak field.',
 };
@@ -86,7 +86,7 @@ The eigenvalues $a$ are real — the possible results of a measurement. Eigenvec
       range: 1.4, yaw: 0.6, pitch: 0.3,
       sliders: [
         { key: 'th', label: 'Polar angle $\\theta$ of $\\hat b$', min: 0, max: 180, step: 5, value: 50, unit: '^\\circ', explain: 'The direction of b from the z-axis; θ = 0 makes H diagonal.' },
-        { key: 'ph', label: 'Azimuth $\\phi$ of $\\hat b$', min: 0, max: 355, step: 5, value: 30, unit: '^\\circ', explain: 'Turning b about z changes the phase of the off-diagonal entry.' },
+        { key: 'ph', label: 'Azimuth $\\phi$ of $\\hat b$', min: 0, max: 355, step: 5, value: 100, unit: '^\\circ', explain: 'Turning b about z changes the phase of the off-diagonal entry.' },
         { key: 'b', label: 'Length $|\\vec b|$', min: 0, max: 2, step: 0.1, value: 1, explain: 'Half the gap between the two eigenvalues.' },
         { key: 'a0', label: 'Offset $a_0$', min: -2, max: 2, step: 0.1, value: 0.5, explain: 'Adds the same amount to both eigenvalues; it moves no eigenvector.' },
       ],
@@ -327,7 +327,11 @@ print(np.round(vals, 6))`,
         const df = r.pick([0.8, 1.4, 2.8, 5.6, 11.2, 22.4]);
         const B = df / 1e3 / (2 * GHZ_T) * 1e6;        // μT
         return {
-          prompt: t`A nitrogen-vacancy centre in diamond is a spin-1 defect used as a quantum magnetometer, and is being developed for space magnetometry. With a field $B$ along its axis, its spin Hamiltonian (in frequency units, $\hat H/h$) is $\begin{pmatrix} D + \gamma B & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & D - \gamma B \end{pmatrix}$, with $D = ${D_NV}$ GHz and $\gamma = ${fmt(GHZ_T, 4)}$ GHz/T (the free electron’s value; the NV’s differs by under 0.1%). Microwaves drive transitions from the middle level to the other two, and the two resonances are found ${df} MHz apart. What is $B$, in μT?`,
+          prompt: t`A nitrogen-vacancy centre in diamond is a spin-1 defect used as a quantum magnetometer, and is being developed for space magnetometry. With a field $B$ along its axis, its spin Hamiltonian, in frequency units, is
+
+$$\hat H/h = \begin{pmatrix} D + \gamma B & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & D - \gamma B \end{pmatrix},$$
+
+with $D = ${D_NV}$ GHz and $\gamma = ${fmt(GHZ_T, 4)}$ GHz/T (the free electron’s value; the NV’s differs by under 0.1%). Microwaves drive transitions from the middle level to the other two, and the two resonances are found ${df} MHz apart. What is $B$, in μT?`,
           visual: nvLevels,
           answer: B, units: 'μT', tol: { rel: 0.01 },
           errors: [{ value: 2 * B, feedback: t`The two resonances are at $D \pm \gamma B$, so they are $2\gamma B$ apart, not $\gamma B$.` }],

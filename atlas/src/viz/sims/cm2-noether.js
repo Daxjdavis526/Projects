@@ -1,6 +1,6 @@
 // Noether's theorem side by side: a symmetry and the quantity it conserves.
-// Left, a 1 kg puck moving in a plane over the contour lines of its potential
-// energy; right, the candidate conserved quantities against time, each as a
+// Top, a 1 kg puck moving in a plane over the contour lines of its potential
+// energy; below, the candidate conserved quantities against time, each as a
 // fraction of its starting value (a flat line at 1 is a conserved quantity).
 //   rotation     U = ½(x² + (1 + ε)y²): circles when ε = 0 — angular momentum L
 //   translation  U = ½y² + ε(x + 3): a straight valley, tilted by ε — momentum pₓ
@@ -83,7 +83,7 @@ export function mount(F, P0) {
     if (kind === 'translation') {
       // U = ½y² + ε(x + 3) = c: horizontal lines when ε = 0, nested parabolas opening left otherwise
       for (const c of [0.05, 0.3, 0.8, 1.5]) {
-        if (eps < 1e-6) { const y = Math.sqrt(2 * c); pp.line(-4, y, 4, y, { color: 'ink4', width: 1.2 }); pp.line(-4, -y, 4, -y, { color: 'ink4', width: 1.2 }); }
+        if (eps < 1e-6) { const y = Math.sqrt(2 * c); pp.line(pp.vx0, y, pp.vx1, y, { color: 'ink4', width: 1.2 }); pp.line(pp.vx0, -y, pp.vx1, -y, { color: 'ink4', width: 1.2 }); }
       }
       if (eps >= 1e-6) for (let j = 0; j < 9; j++) { const c = 0.3 * j; pp.curve((y) => (c - 0.5 * y * y) / eps - 3, (y) => y, -2, 2, { color: 'ink4', width: 1.2 }); }
     }

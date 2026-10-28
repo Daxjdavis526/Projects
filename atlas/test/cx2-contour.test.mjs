@@ -93,6 +93,9 @@ check('a bad contour kind is caught', validate({ ...defaults, contour: { kind: '
 check('a draggable contour must be numbers', validate({ ...defaults, drag: true, sliders: [{ key: 'r', label: 'r', min: 0, max: 2, value: 1, explain: 'radius' }], contour: { kind: 'circle', c: [0, 0], r: 'r' } }).length > 0);
 check('… which is fine when not dragged', validate({ ...defaults, drag: false, sliders: [{ key: 'r', label: 'r', min: 0.1, max: 2, value: 1, explain: 'radius' }], contour: { kind: 'circle', c: [0, 0], r: 'r' } }).length === 0);
 check('TeX in a mark label is caught', validate({ ...defaults, marks: [{ x: 0, y: 0, label: 'z_0' }] }).length > 0);
+check('a path contour validates', validate({ ...defaults, contour: { kind: 'path', parts: [{ kind: 'segment', from: [-2, 0], to: [2, 0] }, { kind: 'arc', c: [0, 0], r: 2, from: 0, to: 3.14159 }] } }).length === 0);
+check('a bad piece of a path is caught', validate({ ...defaults, contour: { kind: 'path', parts: [{ kind: 'segment', from: [-2, 0] }] } }).length > 0);
+check('reserved slider keys are caught', validate({ ...defaults, sliders: [{ key: 'n', label: 'n', min: 0, max: 2, value: 1, explain: 'x' }] }).length > 0);
 check('fns validate', validate({ ...defaults, fns: [{ f: 'z^2', label: '$z^2$' }, { f: 'conj(z)', label: 'z̄' }] }).length === 0);
 
 console.log(`${pass} passed, ${fail} failed`);

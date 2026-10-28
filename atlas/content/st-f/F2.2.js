@@ -338,7 +338,7 @@ for n in [5, 10, 15, 20]:
       prompt: t`The diffraction pattern of a circular aperture needs the Bessel functions $J_n(1)$. A code builds them from $J_0(1)$ and $J_1(1)$ with the exact identity $J_{n+1}(x) = \frac{2n}{x}J_n(x) - J_{n-1}(x)$. It matches tables to 15 digits at $n = 2$, but by $n = 10$ it returns $-6.9\times10^{-9}$ for the true $2.6\times10^{-10}$. What is going on, and what is the fix?`,
       visual: {
         type: 'graph',
-        params: { x: [-0.3, 12.3], y: [-26, 0.5], ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'n', ylabel: '|Jₙ(1)|',
+        params: { x: [-0.3, 12.3], y: [-13.5, 0.5], ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'n', ylabel: '|Jₙ(1)|',
           points: JN1.map((v, n) => ({ x: n, y: n12(lg(v)), r: 4.5, color: 'accent' })) },
         caption: 'The true Jₙ(1) for n = 0 … 12 (logarithmic axis), falling like (1/2)ⁿ/n!. The recurrence must produce these tiny numbers as differences of much larger ones.',
       },

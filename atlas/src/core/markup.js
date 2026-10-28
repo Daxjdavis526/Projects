@@ -191,3 +191,33 @@ export function groupDigits(src) {
     (m, text, num) => text || num.replace(/\B(?=(\d{3})+(?!\d))/g, '\\,'));
 }
 
+// TeX → plain Unicode, for places that cannot typeset (a drop-down <option>)
+const GREEK = { alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'φ', varphi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω',
+  Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω' };
+const SYMBOL = { cdot: '·', times: '×', div: '÷', pm: '±', mp: '∓', to: '→', rightarrow: '→', Rightarrow: '⇒', leftarrow: '←', infty: '∞', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠', approx: '≈', sim: '∼', equiv: '≡', propto: '∝',
+  partial: '∂', nabla: '∇', int: '∫', oint: '∮', sum: 'Σ', prod: 'Π', circ: '∘', degree: '°', hbar: 'ħ', ell: 'ℓ', ldots: '…', cdots: '⋯', dots: '…', perp: '⊥', parallel: '∥', in: '∈', langle: '⟨', rangle: '⟩', quad: ' ', qquad: '  ' };
+const FUNCS = ['sin', 'cos', 'tan', 'sec', 'csc', 'cot', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'ln', 'log', 'exp', 'det', 'lim', 'max', 'min'];
+const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '-': '⁻', '+': '⁺', n: 'ⁿ', i: 'ⁱ' };
+const SUB = { 0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉', '-': '₋', '+': '₊' };
+const script = (str, table, mark) => ([...str].every((c) => table[c]) ? [...str].map((c) => table[c]).join('') : `${mark}${/^[\w.]+$/.test(str) ? str : `(${str})`}`);
+/** A string of markup with $…$ math, as plain Unicode text (no TeX left when it can help it). */
+export function texToPlain(s) {
+  return String(s).replace(/\$\$?([^$]+)\$\$?/g, (m, x) => mathToPlain(x)).replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+}
+function mathToPlain(x) {
+  let t = x;
+  for (let k = 0; k < 4; k++) {   // innermost first, a few levels deep
+    t = t.replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (m, a, b) => `${/^\w+$/.test(a) ? a : `(${a})`}/${/^\w+$/.test(b) ? b : `(${b})`} `)
+      .replace(/\\sqrt\{([^{}]*)\}/g, (m, a) => (/^\w+$/.test(a) ? `√${a}` : `√(${a})`))
+      .replace(/\\(?:text|mathrm|mathbf|mathit|operatorname|boldsymbol|left|right|big|Big)\s*\{([^{}]*)\}/g, '$1')
+      .replace(/\^\{([^{}]*)\}/g, (m, a) => script(a, SUP, '^')).replace(/_\{([^{}]*)\}/g, (m, a) => script(a, SUB, '_'));
+  }
+  t = t.replace(/\^([0-9n+-])/g, (m, a) => SUP[a]).replace(/_([0-9])/g, (m, a) => SUB[a])
+    .replace(/\\([A-Za-z]+)(?![A-Za-z])/g, (m, name) => GREEK[name] ?? SYMBOL[name] ?? (FUNCS.includes(name) ? ` ${name} ` : m))
+    .replace(/\\[,;:! ]/g, ' ').replace(/\\left|\\right/g, '').replace(/[{}]/g, '');
+  // accents on a single letter: \vec F → F⃗, \hat x → x̂, \dot x → ẋ
+  t = t.replace(/\\(vec|hat|dot|ddot|bar|tilde)\s*\{?([A-Za-zα-ωΑ-Ω])\}?/g, (m, acc, c) => `${c}${{ vec: '\u20d7', hat: '\u0302', dot: '\u0307', ddot: '\u0308', bar: '\u0304', tilde: '\u0303' }[acc]}`);
+  return t.replace(/\s+/g, ' ').replace(/\s+([)\],.;:])/g, '$1').replace(/([(\[])\s+/g, '$1')
+    .replace(/\s+([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺ⁿⁱ])/g, '$1').replace(new RegExp(`\\b(${FUNCS.join('|')})([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺ⁿⁱ]*) \\(`, 'g'), '$1$2(').trim();
+}
+

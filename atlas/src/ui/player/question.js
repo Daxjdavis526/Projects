@@ -1,3 +1,4 @@
+import { texToPlain } from '../../core/markup.js';
 // One question, start to finish: prompt, optional visual, the answer control
 // for its type, a hint ladder, grading with named slips, the one-line
 // micro-teaching, the explanation, an expanded solution after an attempt,
@@ -374,7 +375,7 @@ function matchControl(item, box, changed) {
   };
 }
 
-function plainText(s) { return String(s).replace(/\$([^$]+)\$/g, '$1').replace(/\\[a-z]+/gi, '').replace(/[{}]/g, ''); }
+const plainText = (s) => texToPlain(s);   // an <option> cannot typeset: Unicode instead of TeX
 
 function sliderControl(item, box, changed) {
   // the slider lives in the item's visual; this control reads it

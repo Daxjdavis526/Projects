@@ -11,11 +11,9 @@ const t = String.raw;
 const MHE = 4.002602e-3, MN2 = 28.0134e-3;     // kg/mol
 
 // a free expansion and two reversible routes between the same states of 1 mol of argon
-const ARG = { A: { T: 300, V: 10 }, B: { T: 300, V: 20 } };
-ARG.PA = (R * 300) / 10e-3 / 1000; ARG.PB = ARG.PA / 2;     // kPa
 const routes = {
   gas: 'Ar', n: 1, vrange: [0, 24], prange: [0, 300],
-  states: { A: { P: r4(ARG.PA), V: 10 }, B: { P: r4(ARG.PB), V: 20 }, C: { P: r4(ARG.PA), V: 20, label: 'C' } },
+  states: { A: { T: 300, V: 10 }, B: { T: 300, V: 20 }, C: { T: 600, V: 20, label: 'C' } },
   paths: [
     { from: 'A', legs: [['free', 'B']], label: 'free expansion (irreversible)' },
     { from: 'A', legs: [['isothermal', 'B']], label: 'reversible isotherm' },
@@ -66,7 +64,7 @@ It relates **state functions only**, so it holds for any change between two near
       { label: 'Use the identity', text: t`With $N$ fixed, $dS = \dfrac{dU}{T} + \dfrac{P}{T}dV$. For an ideal gas $dU = C_V\,dT$ and $P/T = nR/V$, so $dS = C_V\dfrac{dT}{T} + nR\dfrac{dV}{V}$ — between *any* two nearby equilibrium states.` },
       { label: 'Integrate', text: t`$\Delta S = C_V\ln\dfrac{T_2}{T_1} + nR\ln\dfrac{V_2}{V_1}$, with $C_V = \tfrac32 R$ for argon.` },
       { label: 'Numbers', text: t`$\Delta S = \tfrac32(8.314)\ln(${fmt(EX.T2 / EX.T1, 3)}) + 8.314\ln(${fmt(EX.V2 / EX.V1, 3)}) = ${fmt(EX.sT, 4)} + ${fmt(EX.sV, 4)} = ${fmt(EX.dS, 4)}$ J/K.` },
-      { label: 'Why it is allowed', text: t`The real process passed through non-equilibrium states, but $S$ is a state function: any reversible route between the same ends — heat at constant volume, then expand isothermally — gives the same $\Delta S$. The heat the messy process actually absorbed is a different, smaller number.` },
+      { label: 'Why it is allowed', text: t`The real process passed through non-equilibrium states, but $S$ is a state function: any reversible route between the same ends — heat at constant volume, then expand isothermally — gives the same $\Delta S$. The heat the messy process actually absorbed does not follow this rule: for an irreversible change, $\int đQ/T$ falls short of $\Delta S$.` },
       { label: 'Sense check', text: t`Both factors grew, so both terms are positive. Each doubling of $V$ adds $R\ln 2 = 5.76$ J/K; each doubling of $T$ adds $\tfrac32 R\ln 2 = 8.64$ J/K.` },
     ],
     answer: t`$\Delta S = C_V\ln(T_2/T_1) + nR\ln(V_2/V_1) = ${fmt(EX.dS, 4)}$ J/K, whatever the process.`,
@@ -169,7 +167,7 @@ It relates **state functions only**, so it holds for any change between two near
       hints: [t`Is a sudden compression quasistatic?`, t`At the same final volume, a higher $S$ means a higher $T$ — check with $\Delta S = C_V\ln(T_2/T_1) + nR\ln(V_2/V_1)$.`],
       teach: 'Q = 0 means ΔS = 0 only for a reversible process; irreversible adiabatic processes create entropy.',
       explain: t`The piston does more work than the slow minimum (it overshoots and sloshes the gas), and that extra energy ends as internal energy. At the same final volume the gas is hotter, so by $\Delta S = C_V\ln(T_2/T_1) + nR\ln(V_2/V_1)$ its entropy is higher than at the start. The identity still holds between the end states; $đQ = T\,dS$ does not hold along the way.`,
-      visual: { type: 'therm-pv', params: { mode: 'paths', gas: 'air', n: 1, states: { A: { T: 300, V: 20 }, B: { V: 10, T: r4(300 * 2 ** 0.4) }, C: { V: 10, T: 460 } }, paths: [{ from: 'A', legs: [['adiabatic', 'B']], label: 'slow (reversible) adiabat' }, { from: 'A', legs: [['line', 'C']], label: 'sudden (end points only)' }], show: 'all', readouts: [], isotherms: false, shade: false }, caption: 'A slow adiabatic compression of 1 mol of air to half its volume, and a sudden one that ends hotter (its straight line only joins the end points: the gas passes through no equilibrium states). The sudden end state is illustrative.' },
+      visual: { type: 'therm-pv', params: { mode: 'paths', gas: 'air', n: 1, states: { A: { T: 300, V: 20 }, B: { V: 10, T: r4(300 * 2 ** 0.4) }, C: { V: 10, T: 460 } }, paths: [{ from: 'A', legs: [['adiabatic', 'B']], label: 'slow (reversible) adiabat' }, { from: 'A', legs: [['line', 'C']], label: 'sudden (end points only)', color: 'warn' }], show: 'all', readouts: [], isotherms: false, shade: false, heat: false }, caption: 'A slow adiabatic compression of 1 mol of air to half its volume, and a sudden one that ends hotter (its straight line only joins the end points: the gas passes through no equilibrium states). The sudden end state is illustrative.' },
     }),
   ],
   checkpoint: [

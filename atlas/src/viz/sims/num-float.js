@@ -75,7 +75,7 @@ function offsetInGaps(x, pq, fmt) {
 export function mount(F, P) {
   const presets = P.presets || PRESETS;
   const fmt0 = P.format;
-  const { canvas } = F.canvas({ aspect: 'wide', label: 'The bits of a floating-point number, coloured by field, with its neighbouring floats on a number line' });
+  const { canvas } = F.canvas({ aspect: P.microscope === false ? 'wide' : '', label: 'The bits of a floating-point number, coloured by field, with its neighbouring floats on a number line' });
   const plot = new Plot(canvas, { x: [0, 1], y: [0, 1], grid: false, axes: false, pad: { l: 0, r: 0, t: 0, b: 0 } });
   const S = { value: M.toFormat(P.value, fmt0), exact: P.exact || null };
   if (P.preset) { const pr = presets.find((p) => p[0] === P.preset); if (pr) { S.value = M.toFormat(pr[2], fmt0); S.exact = pr[3]; } }
@@ -188,7 +188,7 @@ export function mount(F, P) {
       const gapTxt = `gap ${txtNum(gUp)}`;
       plot.text(gapTxt, X(0.5), yL - 22, { screen: true, align: 'center', color: 'ink2', size: 11.5 });
       if (gDown !== gUp) plot.text(`gap ${txtNum(gDown)}`, X(-0.5), yL - 22, { screen: true, align: 'center', color: 'gold', size: 11.5 });
-      plot.text('neighbouring floats: nothing in between exists', (L + R) / 2, H - 10, { screen: true, align: 'center', color: 'ink3', size: 11 });
+      if (W > 520) plot.text('neighbouring floats: nothing in between exists', (L + R) / 2, H - 10, { screen: true, align: 'center', color: 'ink3', size: 11 });
       // the real number the value stands for
       const off = S.exact ? offsetInGaps(x, S.exact, fmt) : null;
       if (off !== null && Math.abs(off) > 1e-12 && Math.abs(off) < 2.4) {
@@ -208,8 +208,8 @@ export function mount(F, P) {
     else if (ex.exp10 >= -4 && ex.exp10 < 16) {
       const sg = ex.sig, k = ex.exp10;
       const body = k < 0 ? `0.${'0'.repeat(-k - 1)}${sg}` : sg.length > k + 1 ? `${sg.slice(0, k + 1)}.${sg.slice(k + 1)}` : sg + '0'.repeat(k + 1 - sg.length);
-      exTeX = `${ex.neg ? '-' : ''}${body}${ex.cut ? '\ldots' : ''}`;
-    } else exTeX = `${ex.neg ? '-' : ''}${ex.sig[0]}${ex.sig.length > 1 ? '.' + ex.sig.slice(1) : ''}${ex.cut ? '\ldots' : ''}\times 10^{${ex.exp10}}`;
+      exTeX = `${ex.neg ? '-' : ''}${body}${ex.cut ? '\\ldots' : ''}`;
+    } else exTeX = `${ex.neg ? '-' : ''}${ex.sig[0]}${ex.sig.length > 1 ? '.' + ex.sig.slice(1) : ''}${ex.cut ? '\\ldots' : ''}\\times 10^{${ex.exp10}}`;
     const fracShown = d.fracBits.slice(0, 12) + (d.fracBits.length > 12 ? '\\ldots' : '');
     const rows = [
       ['value', texNum(x, 17)],

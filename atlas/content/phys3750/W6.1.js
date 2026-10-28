@@ -145,10 +145,10 @@ Each coefficient comes from **one integral**, because over a period $e^{in\omega
       id: 'complex-to-real', difficulty: 3,
       gen(r) {
         const a = r.intExcept(-3, 3, [0]), b = r.intExcept(-3, 3, [0]), n = r.int(2, 4), w0 = r.pick([5, 10, 50]);
-        const W = n * w0;
+        const W = n * w0, bi = `${Math.abs(b) === 1 ? '' : Math.abs(b)}i`;
         return {
-          prompt: t`A real signal with $\omega_0 = ${w0}$ rad/s has $c_{${n}} = ${a} ${b < 0 ? '-' : '+'} ${Math.abs(b)}i$ (and so $c_{-${n}} = c_{${n}}^*$). Write the real term $c_{${n}}e^{-i${n}\omega_0t} + c_{-${n}}e^{i${n}\omega_0t}$ as a function of $t$.`,
-          visual: phasorPic(a, b, t`The complex amplitude $c_{${n}}$ in the complex plane, with its real and imaginary parts.`, { name: `c${'₀₁₂₃₄'[n]}`, parts: [`${a}`, `${b}i`] }),
+          prompt: t`A real signal with $\omega_0 = ${w0}$ rad/s has $c_{${n}} = ${a} ${b < 0 ? '-' : '+'} ${bi}$ (and so $c_{-${n}} = c_{${n}}^*$). Write the real term $c_{${n}}e^{-i${n}\omega_0t} + c_{-${n}}e^{i${n}\omega_0t}$ as a function of $t$.`,
+          visual: phasorPic(a, b, t`The complex amplitude $c_{${n}}$ in the complex plane, with its real and imaginary parts.`, { name: `c${'₀₁₂₃₄'[n]}`, parts: [`${a}`, `${b < 0 ? '−' : ''}${bi}`] }),
           answer: `${2 * a}*cos(${W}*t) + (${2 * b})*sin(${W}*t)`,
           answerTeX: t`${2 * a}\cos(${W}t) ${b < 0 ? '-' : '+'} ${Math.abs(2 * b)}\sin(${W}t)`,
           vars: { t: [0, 1] },
@@ -158,7 +158,7 @@ Each coefficient comes from **one integral**, because over a period $e^{in\omega
           ],
           hints: [t`$c\,e^{-i\theta} + c^*e^{i\theta} = 2\operatorname{Re}\big(c\,e^{-i\theta}\big)$ with $\theta = ${n}\omega_0t = ${W}t$.`, t`$\operatorname{Re}\big[(a + ib)(\cos\theta - i\sin\theta)\big] = a\cos\theta + b\sin\theta$.`],
           teach: t`Real signal: $c_ne^{-in\omega_0t} + c_{-n}e^{in\omega_0t} = 2\operatorname{Re}(c_n)\cos n\omega_0t + 2\operatorname{Im}(c_n)\sin n\omega_0t$.`,
-          explain: t`$2\operatorname{Re}\big[(${a} ${b < 0 ? '-' : '+'} ${Math.abs(b)}i)e^{-i${W}t}\big] = ${2 * a}\cos(${W}t) ${b < 0 ? '-' : '+'} ${Math.abs(2 * b)}\sin(${W}t)$. The size $|c_{${n}}| = ${tn(Math.hypot(a, b))}$ gives the amplitude $${tn(2 * Math.hypot(a, b))}$; the angle of the arrow gives the phase.`,
+          explain: t`$2\operatorname{Re}\big[(${a} ${b < 0 ? '-' : '+'} ${bi})e^{-i${W}t}\big] = ${2 * a}\cos(${W}t) ${b < 0 ? '-' : '+'} ${Math.abs(2 * b)}\sin(${W}t)$. The size $|c_{${n}}| = ${tn(Math.hypot(a, b))}$ gives the amplitude $${tn(2 * Math.hypot(a, b))}$; the angle of the arrow gives the phase.`,
         };
       },
     }),

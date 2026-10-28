@@ -17,9 +17,10 @@
 //       f: '1/z',                 // the integrand: a complex expression of z (+ − * / ^, i, pi, e, exp log sqrt sin cos tan cot sinh cosh tanh conj re im abs arg; slider keys are real numbers)
 //       fns: null,                // or [{ f, label, marks, value, valueLabel }]: a control to switch integrands (label is markup; marks replace the default marks; value: a complex expression of the slider keys shown in the readout as valueLabel)
 //       sliders: [], constants: {}, choices: [],
-//       contour: { kind: 'circle', c: [0, 0], r: 1 },   // or arc { c, r, from, to }, segment { from, to }, poly { pts, closed }, rect { x, y }, param { param: [x(t), y(t)], t: [a, b] }; numbers or expressions of slider keys; null: no contour
+//       contour: { kind: 'circle', c: [0, 0], r: 1 },   // or arc { c, r, from, to }, segment { from, to }, poly { pts, closed }, rect { x, y }, param { param: [x(t), y(t)], t: [a, b] }, path { parts: [contour, …] } (joined in order); numbers or expressions of slider keys; null: no contour
 //       ccw: true,                // circle and rect: anticlockwise
 //       drag: false,              // true: circle: centre and rim handles; segment, poly: every vertex; rect: two corners
+//       dragRadius: true,         // false: a dragged circle keeps its radius (centre handle only)
 //       snap: 0,                  // round dragged positions to this step
 //       marks: [],                // [{ x, y, label, kind: 'pole' | 'zero' | 'point', color }] — × for a pole, ○ for a zero
 //       x: [-2, 2], y: [-2, 2],   // the z window (equal axes)
@@ -36,6 +37,8 @@
 //       ticks: true, sumTicks: null,   // numbers on the axes (sumTicks for the sum panel; default ticks)
 //       readout: true,            // or false, or a list: 'I' 'I2' 'sum' 'wind' 'L' 'M' 'ML', or { label, value } (a complex expression of the slider keys)
 //       zname: 'z-plane', wname: null,  // panel titles (plain text)
+//       fLabel: null,             // markup for the label of the fns control (default “Integrand f(z)”)
+//       iLabel: null,             // markup replacing the label of the readout's integral row (e.g. '$a_n$')
 //   } }
 //
 // get('point') returns the circle's centre or the first vertex as { x, y } (for point
@@ -48,10 +51,10 @@ import { phaseColor } from '../model/cx-map.js';
 
 export const defaults = {
   f: '1/z', fns: null, sliders: [], constants: {}, choices: [],
-  contour: { kind: 'circle', c: [0, 0], r: 1 }, ccw: true, drag: false, snap: 0, marks: [],
+  contour: { kind: 'circle', c: [0, 0], r: 1 }, ccw: true, drag: false, dragRadius: true, snap: 0, marks: [],
   x: [-2, 2], y: [-2, 2], view: 'plain', showChoice: false, panel: 'sum', wx: null, wy: null,
   n: 24, nSlider: false, arrowsOn: 'fdz', walk: false, play: false, scaleBy: 'one',
-  rings: [], circles: [], ticks: true, sumTicks: null, readout: true, zname: 'z-plane', wname: null,
+  rings: [], circles: [], ticks: true, sumTicks: null, readout: true, zname: 'z-plane', wname: null, iLabel: null, fLabel: null,
 };
 
 const keysOf = (P) => [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
@@ -85,7 +88,7 @@ export function mount(F, P) {
 
   for (const s of P.sliders || []) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
-  if (P.fns?.length) F.choice({ key: 'fi', label: 'Integrand $f(z)$', options: P.fns.map((o, k) => [k, o.label]), value: 0 });
+  if (P.fns?.length) F.choice({ key: 'fi', label: P.fLabel || 'Integrand $f(z)$', options: P.fns.map((o, k) => [k, o.label]), value: 0 });
   else F.params.fi = 0;
   if (P.showChoice) F.choice({ key: 'view', label: 'Show', options: [['plain', 'plain plane'], ['colour', 'colour by value of f']], value: P.view });
   else F.params.view = P.view;
@@ -119,6 +122,7 @@ export function mount(F, P) {
         const fx = fn(S.param[0], ['t', ...keys]), fy = fn(S.param[1], ['t', ...keys]);
         return { kind: 'param', z: (t) => [fx({ ...E, t }), fy({ ...E, t })], t: [ev(S.t[0], E), ev(S.t[1], E)] };
       }
+      case 'path': return { kind: 'path', parts: S.parts.map((q) => evalSpec(q, E)) };
       default: return null;
     }
   };
@@ -129,7 +133,7 @@ export function mount(F, P) {
   if (P.drag && S) {
     if (S.kind === 'circle') {
       zp.handle(() => S.c, (x, y) => { S.c = [clampX(x), clampY(y)]; }, { hollow: true, label: 'centre' });
-      zp.handle(() => [S.c[0] + S.r, S.c[1]], (x) => { S.r = Math.max(0.05, snap(x - S.c[0])); }, { label: 'radius' });
+      if (P.dragRadius !== false) zp.handle(() => [S.c[0] + S.r, S.c[1]], (x) => { S.r = Math.max(0.05, snap(x - S.c[0])); }, { label: 'radius' });
     } else if (S.kind === 'segment') {
       zp.handle(() => S.from, (x, y) => { S.from = [clampX(x), clampY(y)]; }, { hollow: true });
       zp.handle(() => S.to, (x, y) => { S.to = [clampX(x), clampY(y)]; }, { hollow: true });
@@ -222,7 +226,9 @@ export function mount(F, P) {
       ring(c, r0, r1, color, colour ? 0.28 : 0.16);
       zp.circle(c[0], c[1], r1, { color, width: 1.6, dash: [5, 4] });
       if (r0 > 0) zp.circle(c[0], c[1], r0, { color, width: 1.6, dash: [5, 4] });
-      if (R.label) zp.text(R.label, c[0] + (r0 + r1) / 2 * Math.cos(0.9), c[1] + (r0 + r1) / 2 * Math.sin(0.9), { color, weight: 650, align: 'center' });
+      // the label sits inside the shaded ring, within the window even when the ring runs far outside it
+      const rl = Math.min((r0 + r1) / 2, r0 + 0.22 * (zp.vy1 - zp.vy0));
+      if (R.label) zp.text(R.label, c[0] + rl * Math.cos(0.9), c[1] + rl * Math.sin(0.9), { color, weight: 650, align: 'center' });
     }
     for (const Ci of P.circles || []) {
       const c = cv(Ci.c || [0, 0], E), r = ev(Ci.r, E), color = Ci.color || 'ink3';
@@ -328,7 +334,7 @@ export function mount(F, P) {
       const pre = P.scaleBy === 'twopii' ? `\\tfrac{1}{2\\pi i}${sym}` : sym;
       if (broken) { if (P.readout !== false) rows.push([`$${sym} f\\,dz$`, '\\text{not defined: a singularity on the contour}']); }
       else {
-        if (want('I')) rows.push([`$${pre} f\\,dz$`, cTeX(Iv)]);
+        if (want('I')) rows.push([P.iLabel || `$${pre} f\\,dz$`, cTeX(Iv)]);
         if (want('I2') && P.scaleBy !== 'twopii') rows.push([`$\\tfrac{1}{2\\pi i}${sym} f\\,dz$`, cTeX(C.div(C.integrate(f, spec), TWOPI_I))]);
         if (want('sum')) rows.push([`sum of ${N} arrows`, cTeX(sum)]);
       }
@@ -378,6 +384,7 @@ export function validate(P) {
     if (!Array.isArray(P.fns) || !P.fns.length) problems.push('cx2-contour fns must be a list of { f, label }');
     else P.fns.forEach((o, k) => { cexpr(o.f, `fns[${k}].f`); if (!o.label) problems.push(`cx2-contour fns[${k}] needs a label`); (o.marks || []).forEach((m, j) => { check(m.x, `fns[${k}].marks[${j}].x`); check(m.y, `fns[${k}].marks[${j}].y`); }); if (o.value != null) cexpr(o.value, `fns[${k}].value`); });
   } else cexpr(P.f, 'f');
+  for (const k of keys) if (['n', 'walk', 'fi', 'view', 'z', 'i', 'x', 'y', 'e', 'pi'].includes(k)) problems.push(`cx2-contour: the key “${k}” is reserved; name the slider, choice or constant something else`);
   for (const s of P.sliders || []) {
     if (!(s.min < s.max) || s.value < s.min || s.value > s.max) problems.push(`cx2-contour slider ${s.key}: value must lie in [min, max]`);
     if (!s.label) problems.push(`cx2-contour slider ${s.key} needs a label`);
@@ -385,15 +392,16 @@ export function validate(P) {
   }
   const S = P.contour;
   if (S != null) {
-    const kinds = ['circle', 'arc', 'segment', 'poly', 'rect', 'param'];
+    const kinds = ['circle', 'arc', 'segment', 'poly', 'rect', 'param', 'path'];
     if (!kinds.includes(S.kind)) problems.push(`cx2-contour contour.kind must be one of ${kinds.join(', ')}`);
     if (S.kind === 'circle' || S.kind === 'arc') { pair(S.c, 'contour.c'); check(S.r, 'contour.r'); }
     if (S.kind === 'arc') { check(S.from, 'contour.from'); check(S.to, 'contour.to'); }
     if (S.kind === 'segment') { pair(S.from, 'contour.from'); pair(S.to, 'contour.to'); }
     if (S.kind === 'poly') { if (!Array.isArray(S.pts) || S.pts.length < 2) problems.push('cx2-contour contour.pts needs 2+ points'); else S.pts.forEach((p, k) => pair(p, `contour.pts[${k}]`)); }
     if (S.kind === 'rect') { pair(S.x, 'contour.x'); pair(S.y, 'contour.y'); }
+    if (S.kind === 'path') { if (!Array.isArray(S.parts) || !S.parts.length) problems.push('cx2-contour contour.parts must list the pieces'); else S.parts.forEach((q, k) => { for (const pr of validate({ ...P, drag: false, contour: q, fns: null, f: P.fns?.[0]?.f ?? P.f })) problems.push(pr.replace('contour.', `contour.parts[${k}].`)); }); }
     if (S.kind === 'param') { if (!Array.isArray(S.param) || S.param.length !== 2) problems.push('cx2-contour contour.param must be [x(t), y(t)]'); else S.param.forEach((s, i) => check(s, `contour.param[${i}]`, ['t', ...keys])); pair(S.t, 'contour.t'); }
-    if (P.drag && ['arc', 'param'].includes(S.kind)) problems.push('cx2-contour drag works on circle, segment, poly and rect contours only');
+    if (P.drag && ['arc', 'param', 'path'].includes(S.kind)) problems.push('cx2-contour drag works on circle, segment, poly and rect contours only');
     if (P.drag) {
       const leaves = [S.c, S.r, S.from, S.to, S.pts, S.x, S.y].flat(3).filter((v) => v !== undefined);
       if (leaves.some((v) => typeof v !== 'number')) problems.push('cx2-contour a draggable contour takes numbers, not expressions');
