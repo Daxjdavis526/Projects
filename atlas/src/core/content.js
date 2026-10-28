@@ -178,7 +178,8 @@ export function validateItem(item, tex) {
     }
     if (item.type === 'order') need(item.items?.length >= 3, 'ordering needs 3+ steps');
     if (item.type === 'match' || item.type === 'label') {
-      need(item.left?.length >= 2 && item.right?.length >= item.left.length, 'matching needs 2+ pairs');
+      need(item.left?.length >= 2, 'matching needs 2+ items on the left');
+      need(item.right?.length >= item.left?.length, `matching needs at least as many options on the right (${item.right?.length}) as items on the left (${item.left?.length}) — list a repeated answer once per left item that uses it`);
       need(item.answer?.length === item.left?.length, 'matching answer must map every left item');
     }
     const r = grade(item, keyResponse(item));

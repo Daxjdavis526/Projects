@@ -28,7 +28,7 @@ So $\log_2 8 = 3$ because $2^3 = 8$, and $\log_{10} 0.001 = -3$ because $10^{-3}
     title: 'Exponential and logarithm as mirror images',
     lead: t`Blue: $y = b^x$. Gold: $y = \log_b x$. The point $P = (c, b^c)$ on the exponential reflects to $Q = (b^c, c)$ on the logarithm. Slide the base $b$ and the exponent $c$.`,
     tasks: [
-      t`Set $b = 2$, $c = 3$: $P = (3, 8)$ and $Q = (8, 3)$, so $\log_2 8 = 3$.`,
+      t`With $b = 2$ and $c = 2$: $P = (2, 4)$ and $Q = (4, 2)$, so $\log_2 4 = 2$. Push $c$ to $3$ and $Q$ moves to $(8, 3)$: $\log_2 8 = 3$.`,
       t`Make $c$ negative: $b^c$ is a number between $0$ and $1$, and its logarithm is negative. The gold curve never reaches $x = 0$.`,
       t`Every gold curve passes through $(1, 0)$: $\log_b 1 = 0$ for every base, because $b^0 = 1$.`,
     ],
@@ -36,7 +36,7 @@ So $\log_2 8 = 3$ because $2^3 = 8$, and $\log_{10} 0.001 = -3$ because $10^{-3}
       x: [-4, 10], y: [-4, 6], equal: true, aspect: 'wide',
       sliders: [
         { key: 'b', label: t`Base $b$`, min: 1.3, max: 10, step: 0.1, value: 2, explain: t`The base of the exponential and the logarithm.` },
-        { key: 'c', label: t`Exponent $c$`, min: -2, max: 3, step: 0.1, value: 3, explain: t`$P$ sits at height $b^c$; its mirror $Q$ says $\log_b(b^c) = c$.` },
+        { key: 'c', label: t`Exponent $c$`, min: -2, max: 3, step: 0.1, value: 2, explain: t`$P$ sits at height $b^c$; its mirror $Q$ says $\log_b(b^c) = c$.` },
       ],
       curves: [
         { fn: 'x', color: 'ink3', dash: true },
@@ -75,7 +75,7 @@ So $\log_2 8 = 3$ because $2^3 = 8$, and $\log_{10} 0.001 = -3$ because $10^{-3}
           hints: [t`Write $${powTeX(b, k)}$ as a power of $${b}$.`],
           teach: t`$\log_b x$ is the exponent that turns $b$ into $x$.`,
           explain: t`$${powTeX(b, k)} = ${b}^{${k}}$, so $\log_{${b}} ${powTeX(b, k)} = ${k}$.`,
-          visual: { type: 'graph', params: { x: [-4, 7], y: k > 0 ? [-0.1 * X, 1.3 * X] : [-0.15, 1.5], aspect: 'wide', yticks: 0, curves: [{ fn: `${b}^x`, color: 'accent', label: `y = ${b}ˣ`, labelAt: k > 0 ? Math.log(0.7 * X) / Math.log(b) : 0.3, labelDx: -50, labelDy: -6 }], hlines: [{ y: N(X), color: 'gold' }] }, caption: t`$y = ${b}^x$ and the height $${powTeX(b, k)}$ (gold), vertical scale hidden. The logarithm is where they meet.` },
+          visual: { type: 'graph', params: { x: [-4, 7], y: k > 0 ? [-0.1 * X, 1.3 * X] : [-0.15, 1.5], aspect: 'wide', xticks: 0, yticks: 0, curves: [{ fn: `${b}^x`, color: 'accent', label: `y = ${b}ˣ`, labelAt: k > 0 ? Math.log(0.7 * X) / Math.log(b) : 0.3, labelDx: -50, labelDy: -6 }], hlines: [{ y: N(X), color: 'gold' }] }, caption: t`$y = ${b}^x$ and the height $${powTeX(b, k)}$ (gold), scales hidden. The logarithm is the $x$ where they meet.` },
         };
       },
     }),

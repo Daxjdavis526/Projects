@@ -53,7 +53,7 @@ export default lesson({
         { fn: BUMP, color: 'gold', width: 2, dash: true, label: 'η(x)', labelAt: 'c', labelDx: 6, labelDy: -12 },
       ],
       integral: { fn: `(${RESFN})*(${BUMP})`, from: 0, to: 1 },
-      readouts: [{ label: 'dL/dα = ∫ g η dx', expr: 'integral', digits: 3, unit: 'm' }],
+      readouts: [{ label: 'dL/dα = ∫ g η dx', expr: 'integral', digits: 3, unit: '\\mathrm{m}' }],
     },
     caption: t`The length functional, $f = \sqrt{1 + y'^2}$, for which $g = -y''/(1 + y'^2)^{3/2}$, minus the curvature. The bump is $\eta = 4x(1 - x)e^{-(x - c)^2/w^2}$. Heights of $g$ and $\eta$ are on different scales.`,
   },

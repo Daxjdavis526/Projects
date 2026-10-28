@@ -52,7 +52,8 @@ export function legendreTeX(l, v = 'x') {
   for (let k = ints.length - 1; k >= 0; k--) {
     const a = ints[k];
     if (!a) continue;
-    const mag = Math.abs(a), pw = k === 0 ? '' : k === 1 ? v : `${v}^{${k}}`;
+    const fnPow = /^\\(cos|sin)\b/.test(v);             // \cos\theta squared is \cos^{2}\theta, not \cos\theta^{2}
+    const mag = Math.abs(a), pw = k === 0 ? '' : k === 1 ? v : fnPow ? v.replace(/^(\\[a-z]+)/, `$1^{${k}}`) : `${v}^{${k}}`;
     const body = k === 0 ? String(mag) : mag === 1 ? pw : `${mag}${pw}`;
     s += s ? ` ${a < 0 ? '-' : '+'} ${body}` : `${a < 0 ? '-' : ''}${body}`;
   }

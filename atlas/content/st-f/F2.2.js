@@ -22,6 +22,9 @@ let FACT20 = 1; for (let k = 2; k <= 20; k++) FACT20 *= k;
 const hilbertCond = (n) => { const { w } = eigSym(Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => 1 / (i + j + 1)))); return w[n - 1] / w[0]; };
 const HCOND = Object.fromEntries([4, 6, 8, 10].map((n) => [n, hilbertCond(n)]));
 
+// Jₙ(1) from its power series Σ (−1)ᵏ (1/2)^(2k+n) / (k! (k+n)!)
+const JN1 = Array.from({ length: 13 }, (_, n) => { let s = 0, term = 0.5 ** n; for (let k = 1; k <= n; k++) term /= k; for (let k = 0; k < 30; k++) { s += term; term *= -0.25 / ((k + 1) * (k + 1 + n)); } return s; });
+
 // condition numbers for the Explore: [key, label, f(x) for the curve, κ(x)]
 const KAPPA = [
   [1, 'ln x', 'abs(1/ln(x))'],
@@ -93,8 +96,8 @@ A **backward-stable** algorithm returns the exact answer to an input perturbed b
       prompt: 'Which of these is a statement about the **conditioning of a problem**, rather than the stability of an algorithm?',
       visual: {
         type: 'graph',
-        params: { x: [0.4, 1.6], y: [-0.012, 0.03], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'p(x)',
-          curves: [{ fn: '(x - 1)^2', color: 'accent', width: 2, label: '(x − 1)²', labelAt: 1.45, labelDx: 6, labelDy: 0 }, { fn: '(x - 1)^2 - 0.0025', color: 'warn', width: 2, dash: true, label: 'constant changed by 0.0025', labelAt: 0.48, labelDx: 0, labelDy: 18 }] },
+        params: { x: [0.86, 1.14], y: [-0.004, 0.02], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'p(x)',
+          curves: [{ fn: '(x - 1)^2', color: 'accent', width: 2, label: '(x − 1)²', labelAt: 1.11, labelDx: 8, labelDy: 0 }, { fn: '(x - 1)^2 - 0.0025', color: 'warn', width: 2, dash: true, label: 'constant lowered by 0.0025', labelAt: 0.895, labelDx: 10, labelDy: 6 }] },
         caption: 'A double root, and the same polynomial with its constant term lowered by 0.0025: the roots move by 0.05, twenty times more than the change. (Exaggerated sizes for visibility.)',
       },
       choices: [
@@ -211,7 +214,7 @@ A **backward-stable** algorithm returns the exact answer to an input perturbed b
       visual: {
         type: 'graph',
         params: { x: [-1, 3], y: [-1, 3], aspect: 'wide', axesAt: 'edge', xlabel: 'x₁', ylabel: 'x₂', equal: true,
-          curves: [{ fn: '2 - x', color: 'accent', width: 2, label: 'equation 1', labelAt: -0.6, labelDx: 4, labelDy: -12 }, { fn: '(2.02 - 1.01*x)/1.0', color: 'warn', width: 2, dash: true, label: 'equation 2', labelAt: 2.4, labelDx: 4, labelDy: 14 }],
+          curves: [{ fn: '2 - x', color: 'accent', width: 2, label: 'equation 1', labelAt: -0.6, labelDx: 4, labelDy: -12 }, { fn: '2.2 - 1.1*x', color: 'warn', width: 2, dash: true, label: 'equation 2', labelAt: 2.6, labelDx: 6, labelDy: 14 }],
           points: [{ x: 2, y: 0, r: 4.5, color: 'gold', label: 'solution', labelDx: 8, labelDy: -12 }] },
         caption: 'A 2 × 2 system as two lines: nearly parallel, so their crossing slides far along them when either line moves slightly. Any point near both lines has a small residual.',
       },
@@ -305,12 +308,14 @@ for n in [5, 10, 15, 20]:
       prompt: t`A GPS receiver sees four satellites, all bunched in one small patch of sky. It solves for position with a numerically excellent least-squares method, yet its fix wanders by tens of metres while range errors are only a few metres. What is the right diagnosis?`,
       visual: {
         type: 'graph',
-        params: { x: [-3.2, 3.2], y: [-1.6, 1.6], aspect: 'wide', axesAt: 'edge', xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
+        params: { x: [-3.2, 3.2], y: [-1.7, 1.7], aspect: 'wide', axesAt: 'edge', xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
           curves: [
-            { param: ['-6 + 6.6*cos(t)', '0.3 + 6.6*sin(t)'], t: [-0.35, 0.35], color: 'accent', width: 2 }, { param: ['-6 + 6.8*cos(t)', '0.3 + 6.8*sin(t)'], t: [-0.35, 0.35], color: 'accent', width: 1.2, dash: true },
-            { param: ['-6.3 + 6.6*cos(t)', '-0.6 + 6.6*sin(t)'], t: [-0.3, 0.4], color: 'warn', width: 2 }, { param: ['-6.3 + 6.8*cos(t)', '-0.6 + 6.8*sin(t)'], t: [-0.3, 0.4], color: 'warn', width: 1.2, dash: true },
-          ] },
-        caption: 'Schematic, in two dimensions: two range circles from satellites in nearly the same direction cross at a shallow angle. Shift either by its uncertainty (dashed) and the crossing slides a long way.',
+            { param: ['-8 + 8.0225*cos(t)', '0.6 + 8.0225*sin(t)'], t: [-0.3, 0.16], color: 'accent', width: 2 },
+            { param: ['-8 + 8.1725*cos(t)', '0.6 + 8.1725*sin(t)'], t: [-0.3, 0.16], color: 'accent', width: 1.4, dash: true },
+            { param: ['-8 + 8.0225*cos(t)', '-0.6 + 8.0225*sin(t)'], t: [-0.16, 0.3], color: 'warn', width: 2 },
+          ],
+          points: [{ x: 0, y: 0, r: 5, color: 'gold', label: 'true position', labelDx: 10, labelDy: -10 }, { x: 0.012, y: -1.0125, r: 5, color: 'bad', label: 'fix with one range 0.15 long', labelDx: 10, labelDy: 4 }] },
+        caption: 'Schematic, in two dimensions and arbitrary units: two range circles from satellites about 9° apart in the sky cross at a shallow angle. Lengthen one range by 0.15 (dashed) and the crossing slides 1.0 sideways — an error magnified about seven times.',
       },
       choices: [
         'Poor geometry makes the position problem ill-conditioned (a large dilution of precision): no algorithm can fix it, only better-spread satellites',
@@ -334,8 +339,8 @@ for n in [5, 10, 15, 20]:
       visual: {
         type: 'graph',
         params: { x: [-0.3, 12.3], y: [-26, 0.5], ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'n', ylabel: '|Jₙ(1)|',
-          curves: [{ fn: 'log10(besselj(round(x), 1))', color: 'accent', width: 2, domain: [0, 12] }] },
-        caption: 'The true |Jₙ(1)| (a staircase through the integers n), falling like (1/2)ⁿ/n!. The recurrence must produce these tiny numbers as differences of much larger ones.',
+          points: JN1.map((v, n) => ({ x: n, y: n12(lg(v)), r: 4.5, color: 'accent' })) },
+        caption: 'The true Jₙ(1) for n = 0 … 12 (logarithmic axis), falling like (1/2)ⁿ/n!. The recurrence must produce these tiny numbers as differences of much larger ones.',
       },
       choices: [
         'The recurrence run upward is unstable for these values (it amplifies errors like the growing second solution Yₙ); run it downward from large n, as Miller’s algorithm does',
