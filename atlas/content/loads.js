@@ -740,6 +740,7 @@ export const LESSONS = {
   'phys4600.M1.2': () => import('./phys4600/M1.2.js'),
   'phys4600.M1.3': () => import('./phys4600/M1.3.js'),
   'phys4600.M1.4': () => import('./phys4600/M1.4.js'),
+  'phys4600.M1.5': () => import('./phys4600/M1.5.js'),
   'phys4700.M0.1': () => import('./phys4700/M0.1.js'),
   'phys4700.M0.2': () => import('./phys4700/M0.2.js'),
   'phys4700.M1.1': () => import('./phys4700/M1.1.js'),
