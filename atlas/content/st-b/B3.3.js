@@ -30,7 +30,7 @@ and $u(x_0, t_0)$ does not notice. In the $x$–$t$ plane this interval is the b
     title: 'The probe and its cone',
     lead: t`Drag the gold probe to any event $(x, t)$. For the wave equation, the gold triangle is its domain of dependence: only the initial data on its base matter. Switch to the heat equation and the dependence covers the whole line.`,
     tasks: [
-      'Put the probe where the shading is dark: its cone misses the initial bump entirely, so u there is exactly zero.',
+      'Put the probe in an unshaded region: its cone misses the initial pulse entirely, so u there is exactly zero.',
       'Raise the probe: its cone widens at slope 1/c — later events depend on more of the initial line.',
       'Switch to heat: there is no cone. The probe’s value depends on the initial data everywhere, however far away.',
     ],

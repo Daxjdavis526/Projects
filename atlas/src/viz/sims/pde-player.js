@@ -243,7 +243,8 @@ export function mount(F, P0) {
       if (probe) rows.push([`$u(${f3(probe.x)},\\,${f3(probe.t)})$`, q('u', f3(u(o, probe.x, probe.t)))], ['foot of its characteristic', q('foot', `x = ${f3(M.foot(o, probe.x, probe.t))}`)]);
     } else if (o.mode === 'wave') {
       const e = M.waveEnergy(o, t);
-      rows.push(['kinetic', q('energy', f3(e.K))], ['potential', q('energy', f3(e.V))], ['total energy', q('energy', f3(e.E))]);
+      if (Number.isFinite(e.E)) rows.push(['kinetic', q('energy', f3(e.K))], ['potential', q('energy', f3(e.V))], ['total energy', q('energy', f3(e.E))]);
+      else rows.push(['energy', '\\infty\\text{ (the profile has jumps)}']);
       if (probe) rows.push([`$u(${f3(probe.x)},\\,${f3(probe.t)})$`, q('u', f3(u(o, probe.x, probe.t)))], ['depends on data in', q('foot', `[${f3(probe.x - o.c * probe.t)},\\ ${f3(probe.x + o.c * probe.t)}]`)]);
     } else {
       let mx = -Infinity;
