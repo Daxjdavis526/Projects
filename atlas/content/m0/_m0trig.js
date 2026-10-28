@@ -146,6 +146,7 @@ export function triFig({ v, vLabels = [], sides = [], right = null, angleAt = nu
  * sit just inside the bottom of the frame.
  */
 export function trigGraph({ curves, lo = 0, hi = 2 * PI, y = [-1.4, 1.4], step = PI / 2, xlabel = 'x', ylabel = 'y', caption, extra = {}, deg = false, aspect = 'wide' }) {
+  lo = +lo; hi = +hi;
   const ticks = [];
   for (let k = Math.ceil(lo / step - 1e-9); k * step <= hi + 1e-9; k++) {
     const x = k * step;

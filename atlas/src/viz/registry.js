@@ -70,13 +70,20 @@ function makeFrame(el, spec, opts) {
       params[key] = value;
       const show = h('b');
       const input = h('input', { type: 'range', min: logScale ? Math.log10(min) : min, max: logScale ? Math.log10(max) : max, step: logScale ? (Math.log10(max) - Math.log10(min)) / 200 : step, value: logScale ? Math.log10(value) : value, 'aria-label': label });
-      const fmtv = fmt || ((v) => (Math.abs(v) >= 1e4 || (Math.abs(v) < 1e-2 && v !== 0) ? v.toExponential(2) : String(+v.toFixed(Math.max(0, -Math.floor(Math.log10(step || 1)))))));
+      // decimals to the step's precision; ×10ⁿ (as TeX, never 4.00e-3) only for very large values or a very fine step
+      const dec = Math.max(0, -Math.floor(Math.log10(step || 1)));
+      const fmtv = fmt || ((v) => {
+        if (!v) return '0';
+        if (Math.abs(v) < 1e6 && dec <= 4 && Math.abs(v) >= 10 ** -dec) return String(+v.toFixed(dec));
+        const [m, e] = v.toExponential(2).split('e');
+        return `${m}\\times10^{${+e}}`;
+      });
       const paint = () => {
         const v = params[key];
         show.innerHTML = tex(`${fmtv(v)}${unit ? '\\;' + unit : ''}`);
         const lo = +input.min, hi = +input.max, cur = logScale ? Math.log10(v) : v;
         input.style.setProperty('--p', `${((cur - lo) / (hi - lo)) * 100}%`);
-        input.setAttribute('aria-valuetext', `${fmtv(v)} ${unit.replace(/\\[a-z]+|[{}\\]/gi, '')}`);
+        input.setAttribute('aria-valuetext', `${fmtv(v).replace(/\\times10\^\{(-?\d+)\}/, '×10^$1')} ${unit.replace(/\\[a-z]+|[{}\\]/gi, '')}`);
       };
       input.addEventListener('input', () => { params[key] = logScale ? 10 ** +input.value : +input.value; paint(); changed(key); });
       const node = h('div.ctl', h('label', h('span', { html: renderLabel(label) }), show), input, explain ? h('small', mdi(explain)) : null);

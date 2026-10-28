@@ -38,7 +38,7 @@ export default lesson({
   minutes: 15, difficulty: 3,
   intro: t`In three dimensions the wave equation reads $\partial_t^2u = v^2\nabla^2u$, with $\nabla^2 = \partial_x^2 + \partial_y^2 + \partial_z^2$. Its simplest solutions are **plane waves**:
 
-$$u(\vec r, t) = \tilde A\,e^{i(\vec k\cdot\vec r - \omega t)}, \qquad \omega = v\,|\vec k|$$
+$$\begin{gathered}u(\vec r, t) = \tilde A\,e^{i(\vec k\cdot\vec r - \omega t)}, \\ \omega = v\,|\vec k|\end{gathered}$$
 
 Each $\partial_x$ brings down $ik_x$, so $\nabla^2 \to -|\vec k|^2$ and $\partial_t^2 \to -\omega^2$: the equation holds exactly when $\omega = v|\vec k|$. The **wave vector** $\vec k$ points the way the wave travels; the crests are planes $\vec k\cdot\vec r = $ const, perpendicular to $\vec k$ and $\lambda = 2\pi/|\vec k|$ apart. Like sines in one dimension, plane waves are a complete set: any 3D wave is a superposition of them.`,
   symbols: [

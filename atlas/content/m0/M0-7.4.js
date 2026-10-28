@@ -35,7 +35,7 @@ Landmarks worth knowing: $\sin x = 0$ at $x = 0, \pi, 2\pi, \ldots$; it peaks at
   },
   example: {
     prompt: t`Solve $\sin x = -\tfrac12$ for $0 \le x < 2\pi$.`,
-    visual: trigGraph({ curves: [SIN], extra: { hlines: [{ y: -0.5, color: 'gold', label: 'y = −1/2' }], points: [{ x: N(7 * PI / 6), y: -0.5, color: 'gold', r: 5, label: '7π/6', labelAlign: 'center', labelDx: 0, labelDy: 16 }, { x: N(11 * PI / 6), y: -0.5, color: 'gold', r: 5, label: '11π/6', labelAlign: 'center', labelDx: 0, labelDy: 16 }] }, caption: t`One period of $\sin x$ and the level $-\tfrac12$: two crossings, both where the sine is negative.` }),
+    visual: trigGraph({ curves: [SIN], extra: { hlines: [{ y: -0.5, color: 'gold' }], points: [{ x: N(7 * PI / 6), y: -0.5, color: 'gold', r: 5, label: '7π/6', labelAlign: 'center', labelDx: -22, labelDy: 13 }, { x: N(11 * PI / 6), y: -0.5, color: 'gold', r: 5, label: '11π/6', labelAlign: 'center', labelDx: 26, labelDy: 13 }] }, caption: t`One period of $\sin x$ and the level $-\tfrac12$: two crossings, both where the sine is negative.` }),
     steps: [
       { label: 'Reference angle', text: t`Ignore the sign: $\sin\alpha = \tfrac12$ at the acute angle $\alpha = \tfrac{\pi}{6}$.` },
       { label: 'Where is sine negative', text: t`Below the axis: $\pi < x < 2\pi$, the third and fourth quadrants. The graph dips below zero only there.` },

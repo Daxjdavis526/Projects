@@ -302,6 +302,6 @@ The experiment gives 0. Where is the mistake?`,
   sources: [
     { label: 'McIntyre, Quantum Mechanics: A Paradigms Approach, ch. 2', url: 'https://www.cambridge.org/9781009310611' },
     { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics, 3rd ed., §3.4 and §4.4.1', url: 'https://www.cambridge.org/9781316995433' },
-    { label: 'Williams et al., “Pathfinder experiments with atom interferometry in the Cold Atom Lab onboard the International Space Station”, Nat. Commun. 15, 6414 (2024)', url: 'https://doi.org/10.1038/s41467-024-50585-6' },
+    { label: 'Williams et al., “Pathfinder experiments with atom interferometry in the Cold Atom Lab onboard the International Space Station”, Nat. Commun. 15, 6414 (2024)', url: 'https://coldatomlab.jpl.nasa.gov/' },
   ],
 });

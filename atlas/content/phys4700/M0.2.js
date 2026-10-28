@@ -86,7 +86,7 @@ The eigenvalues $a$ are real — the possible results of a measurement. Eigenvec
       range: 1.4, yaw: 0.6, pitch: 0.3,
       sliders: [
         { key: 'th', label: 'Polar angle $\\theta$ of $\\hat b$', min: 0, max: 180, step: 5, value: 50, unit: '^\\circ', explain: 'The direction of b from the z-axis; θ = 0 makes H diagonal.' },
-        { key: 'ph', label: 'Azimuth $\\phi$ of $\\hat b$', min: 0, max: 355, step: 5, value: 100, unit: '^\\circ', explain: 'Turning b about z changes the phase of the off-diagonal entry.' },
+        { key: 'ph', label: 'Azimuth $\\phi$ of $\\hat b$', min: 0, max: 355, step: 5, value: 130, unit: '^\\circ', explain: 'Turning b about z changes the phase of the off-diagonal entry.' },
         { key: 'b', label: 'Length $|\\vec b|$', min: 0, max: 2, step: 0.1, value: 1, explain: 'Half the gap between the two eigenvalues.' },
         { key: 'a0', label: 'Offset $a_0$', min: -2, max: 2, step: 0.1, value: 0.5, explain: 'Adds the same amount to both eigenvalues; it moves no eigenvector.' },
       ],

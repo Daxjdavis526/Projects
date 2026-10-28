@@ -202,21 +202,22 @@ export function mount(F, P) {
       left.text('(+, −)', q, -q, { align: 'center', color: 'ink2', size: 12 });
     }
     left.line(0, 0, x, y, { color: 'ink2', width: 2 });
+    // leg labels, unless the circle is drawn small (the unrolled view on a phone)
+    const roomy = (left.X(1) - left.X(0)) > 70;
     if (P.legs) {
       left.line(0, 0, x, 0, { color: 'accent', width: 4 });
       left.line(x, 0, x, y, { color: 'warn', width: 4 });
-      const small = Math.abs(c) < 0.18 || Math.abs(s) < 0.12;
-      if (!small || Math.abs(c) >= 0.18) left.text('cos θ', x / 2, 0, { align: 'center', dy: s >= 0 ? 13 : -13, color: 'accent', size: 12, weight: 650 });
-      if (!small || Math.abs(s) >= 0.12) left.text('sin θ', x, y / 2, { align: c >= 0 ? 'left' : 'right', dx: c >= 0 ? 7 : -7, color: 'warn', size: 12, weight: 650 });
+      if (roomy && Math.abs(c) >= 0.18) left.text('cos θ', x / 2, 0, { align: 'center', dy: s >= 0 ? 13 : -13, color: 'accent', size: 12, weight: 650 });
+      if (roomy && Math.abs(s) >= 0.12) left.text('sin θ', x, y / 2, { align: c >= 0 ? 'left' : 'right', dx: c >= 0 ? 7 : -7, color: 'warn', size: 12, weight: 650 });
     }
     left.text('θ', 0.4 * r * Math.cos(th / 2), 0.4 * r * Math.sin(th / 2), { align: 'center', color: 'gold', size: 13, weight: 700 });
     left.point(x, y, { color: 'ink', r: 5 });
-    const coords = P.labels && !P.radianTicks && !hidden.has('sin') && !hidden.has('cos') ? `P (${num3(c * r).replace('-', '−')}, ${num3(s * r).replace('-', '−')})` : 'P';
+    const coords = P.labels && roomy && mode === 'circle' && !P.radianTicks && !hidden.has('sin') && !hidden.has('cos') ? `P (${num3(c * r).replace('-', '−')}, ${num3(s * r).replace('-', '−')})` : 'P';
     // with radian ticks round the rim, P's label goes inside the circle, clear of the tick numbers
     const inside = P.radianTicks ? -1 : 1;
     left.text(coords, x, y, { align: (c >= 0) === (inside > 0) ? 'left' : 'right', dx: inside * (c >= 0 ? 10 : -10), dy: inside * (s >= 0 ? -12 : 12), color: 'ink', size: 12.5, weight: 650 });
     const rl = P.rlabel ?? (r === 1 ? '1' : `r = ${+r.toFixed(2)}`);
-    if (rl) left.text(rl, x / 2, y / 2, { align: 'center', dx: -9 * s, dy: -9 * c, color: 'ink3', size: 11 });
+    if (rl && roomy) left.text(rl, x / 2, y / 2, { align: 'center', dx: -9 * s, dy: -9 * c, color: 'ink3', size: 11 });
     left.drawHandles();
   }
 

@@ -38,9 +38,9 @@ Weak solutions are not unique, though. The physical one obeys the **entropy cond
     title: 'Riemann problems',
     lead: t`A single jump from $u_L$ to $u_R$ at $x = 0$ — a **Riemann problem**. Set the two values and watch what the jump becomes; then add an upwind computation.`,
     tasks: [
-      'With uL = 1, uR = 0: one shock, moving at ½ m/s exactly — at x = 1 when t = 2. The readout compares its speed with (uL + uR)/2.',
-      'Swap them (uL = 0, uR = 1): no shock. The jump opens into a fan of characteristics (teal), u = x/t inside it.',
-      'Back at (1, 0), choose the non-conservative scheme: its shock stays stuck at x = 0. The conservative scheme’s dots follow the true shock.',
+      t`With $u_L = 1$, $u_R = 0$: one shock, moving at exactly $\tfrac12$ m/s — at $x = 1$ when $t = 2$. The readout compares its speed with $\tfrac12(u_L + u_R)$.`,
+      t`Swap them ($u_L = 0$, $u_R = 1$): no shock. The jump opens into a fan of characteristics (teal), with $u = x/t$ inside it.`,
+      t`Back at $(1, 0)$, choose the non-conservative scheme: its shock stays stuck at $x = 0$. The conservative scheme’s dots follow the true shock.`,
     ],
     params: { profile: 'step', uL: 1, uR: 0, t: 1, tmax: 4, x: [-3, 4], fold: false, controls: ['uL', 'uR', 't', 'scheme'], readout: true },
     caption: t`Exact weak (entropy) solution of $u_t + (\tfrac12u^2)_x = 0$ for a jump at $x = 0$. Upwind dots: 400 cells, Courant number 0.5. A real shock has a small thickness set by viscosity; here it is a mathematical jump.`,
@@ -65,7 +65,7 @@ Weak solutions are not unique, though. The physical one obeys the **entropy cond
         const s = (uL + uR) / 2;
         return {
           prompt: t`A Burgers shock has $u_L = ${uL}$ m/s behind it and $u_R = ${uR}$ m/s ahead. How fast does it move?`,
-          visual: burg({ profile: 'step', uL: Math.min(2, uL), uR, t: 1, tmax: 3, x: [-3, 5], fold: false, tstar: false }, 'A jump from the left value to the right one, and the shock it makes (drawn with the left value capped at 2).'),
+          visual: burg({ profile: 'step', uL: Math.min(2, uL), uR, t: 0, tmax: 3, x: [-3, 5], fold: false, tstar: false, shock: false }, 'The initial jump (left value capped at 2 in the drawing) and its characteristics, which overlap where they cross: the shock runs somewhere through that wedge.'),
           answer: s, units: 'm/s', tol: { rel: 0.005, abs: 0.005 },
           errors: [{ value: uL - uR, feedback: t`That is the jump $[u]$; the speed is $[f]/[u] = (u_L^2 - u_R^2)/\big(2(u_L - u_R)\big)$.` }, { value: (uL * uL - uR * uR) / 2, feedback: t`That is the flux jump $[f]$; divide by the jump $[u]$ too.` }].filter((e) => Math.abs(e.value - s) > 0.01),
           hints: [t`$s = \dfrac{f(u_L) - f(u_R)}{u_L - u_R}$ with $f = \tfrac12u^2$, which simplifies to $\tfrac12(u_L + u_R)$.`],
@@ -81,7 +81,7 @@ Weak solutions are not unique, though. The physical one obeys the **entropy cond
         const xs = w + (A * tt) / 2;
         return {
           prompt: t`A square pulse, $u_0 = ${A}$ m/s for $|x| < ${w}$ m and 0 elsewhere, obeys Burgers’ equation. Its front becomes a shock at once (a fan opens at its back). Where is the shock at $t = ${tt}$ s, in metres?`,
-          visual: burg({ profile: 'box', A, w: 1, t: 0, tmax: 4, x: [-3, 6], fold: false, tstar: false }, 'The square pulse at t = 0 (drawn with half-width 1) and its characteristics: the front edge breaks at once, the back edge fans out.'),
+          visual: burg({ profile: 'box', A, w: 1, t: 0, tmax: 4, x: [-3, 6], fold: false, tstar: false, shock: false }, 'The square pulse at t = 0 (drawn with half-width 1) and its characteristics, which cross at once at the front edge. Where the shock runs is for you to find.'),
           answer: xs, units: 'm', tol: { rel: 0.005 },
           errors: [{ value: w + A * tt, feedback: t`The shock moves at $\tfrac12(u_L + u_R) = ${A / 2}$ m/s, not at $${A}$.` }, { value: (A * tt) / 2, feedback: t`It starts at the front edge, $x = ${w}$, not at 0.` }],
           hints: [t`Behind the shock $u_L = ${A}$, ahead $u_R = 0$, so $s = ${A / 2}$ m/s.`, t`$x_s = ${w} + s\,t$ — valid until the fan from the back catches up, at $t = 4w/A = ${r3((4 * w) / A)}$ s.`],

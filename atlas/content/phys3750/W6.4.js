@@ -62,8 +62,10 @@ Add two waves $k_0 \pm \delta k$: the sum is $2\cos(\delta k\,x - \delta\omega\,
     prompt: t`The Crab pulsar’s radio pulses cross about 2 kpc of interstellar plasma. Its **dispersion measure** — the electrons along the way, $\mathrm{DM} = \int n_e\,dl$ — is about ${EX.DM} pc cm⁻³. How much later does a pulse arrive at ${tn(EX.f2 / 1e6)} MHz than at ${tn(EX.f1 / 1e9)} GHz?`,
     steps: [
       { label: 'Plasma dispersion', text: t`Free electrons give light the relation $\omega^2 = \omega_p^2 + c^2k^2$, with plasma frequency $\omega_p^2 = n_ee^2/\varepsilon_0m_e$. For the interstellar $n_e \approx 0.03\ \text{cm}^{-3}$, $f_p = \omega_p/2\pi \approx ${tn(EX.fp / 1e3, 2)}$ kHz — far below radio.` },
-      { label: 'Group velocity', text: t`$2\omega\,d\omega = 2c^2k\,dk$, so $v_g = c^2k/\omega = c\sqrt{1 - \omega_p^2/\omega^2} \approx c\Big(1 - \dfrac{\omega_p^2}{2\omega^2}\Big)$: lower frequencies travel slower. (And $v_p = \omega/k > c$, with $v_pv_g = c^2$.)` },
-      { label: 'Delay', text: t`Travel time $\int dl/v_g \approx L/c + \dfrac{e^2}{2\varepsilon_0m_ec\,\omega^2}\int n_e\,dl$. With $\omega = 2\pi f$, the extra delay is $\Delta t = \dfrac{e^2}{8\pi^2\varepsilon_0m_ec}\,\dfrac{\mathrm{DM}}{f^2} = ${tn(EX.kms, 4)}\ \text{ms} \times \dfrac{\mathrm{DM}/(\text{pc cm}^{-3})}{(f/\text{GHz})^2}$.` },
+      { label: 'Group velocity', text: t`$2\omega\,d\omega = 2c^2k\,dk$, so $v_g = c^2k/\omega$ $= c\sqrt{1 - \omega_p^2/\omega^2}$ $\approx c\Big(1 - \dfrac{\omega_p^2}{2\omega^2}\Big)$: lower frequencies travel slower. (And $v_p = \omega/k > c$, with $v_pv_g = c^2$.)` },
+      { label: 'Delay', text: t`Travel time $\int dl/v_g$ $\approx L/c + \dfrac{e^2}{2\varepsilon_0m_ec\,\omega^2}\int n_e\,dl$. With $\omega = 2\pi f$, the extra delay is
+
+$$\begin{gathered}\Delta t = \frac{e^2}{8\pi^2\varepsilon_0m_ec}\,\frac{\mathrm{DM}}{f^2} \\ = ${tn(EX.kms, 4)}\ \text{ms} \times \frac{\mathrm{DM}/(\text{pc cm}^{-3})}{(f/\text{GHz})^2}\end{gathered}$$` },
       { label: 'The Crab', text: t`At ${tn(EX.f1 / 1e9)} GHz: $${tn(EX.t1, 3)}$ s; at ${tn(EX.f2 / 1e6)} MHz: $${tn(EX.t2, 3)}$ s. The difference is $${tn(EX.dt, 3)}$ s.` },
       { label: 'Sense check', text: t`That is about ${Math.round(EX.turns)} turns of the 33.7 ms pulsar: without correcting for dispersion (“dedispersion”) a wide-band receiver would smear the pulses into a continuous hiss. The $1/f^2$ sweep is how pulses and fast radio bursts are recognised as astronomical.` },
     ],

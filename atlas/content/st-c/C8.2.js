@@ -70,7 +70,7 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
   },
   example: {
     prompt: t`Show that the two stereographic charts of the sphere are smoothly compatible: compute the Jacobian matrix of $T(X, Y) = (X, Y)/(X^2 + Y^2)$ and its determinant, and evaluate both at $(X, Y) = (2, 1)$.`,
-    visual: { type: 'graph', params: { x: [-3.2, 3.2], y: [-2, 2], equal: true, aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'X', ylabel: 'Y', curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, TAU], color: 'teal', width: 1.6 }, { param: ['2 + 0.4*t', '1'], t: [0, 1], color: 'gold', width: 2 }, { param: ['2', '1 + 0.4*t'], t: [0, 1], color: 'gold', width: 2 }, { param: ['0.4 - 0.048*t', '0.2 - 0.064*t'], t: [0, 1], color: 'violet', width: 2 }, { param: ['0.4 - 0.064*t', '0.2 + 0.048*t'], t: [0, 1], color: 'violet', width: 2 }], points: [{ x: 2, y: 1, color: 'gold', label: '(2, 1)' }, { x: 0.4, y: 0.2, color: 'violet', label: 'T(2, 1)', labelDx: 10, labelDy: 14 }, { x: 0, y: 0, r: 4, hollow: true, color: 'ink2' }] }, caption: t`Two small steps $0.4$ along $X$ and $Y$ at $(2, 1)$ (gold) and their images under $T$ (violet, from the Jacobian): shrunk by $1/5$, and with the turn from one to the other reversed — the determinant is negative.` },
+    visual: { type: 'graph', params: { x: [-3.2, 3.2], y: [-2, 2], equal: true, aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'X', ylabel: 'Y', curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, TAU], color: 'teal', width: 1.6 }, { param: ['2 + 0.4*t', '1'], t: [0, 1], color: 'gold', width: 2 }, { param: ['2', '1 + 0.4*t'], t: [0, 1], color: 'gold', width: 2 }, { param: ['0.4 - 0.24*t', '0.2 - 0.32*t'], t: [0, 1], color: 'violet', width: 2 }, { param: ['0.4 - 0.32*t', '0.2 + 0.24*t'], t: [0, 1], color: 'violet', width: 2 }], points: [{ x: 2, y: 1, color: 'gold', label: '(2, 1)' }, { x: 0.4, y: 0.2, color: 'violet', label: 'T(2, 1)', labelDx: 10, labelDy: 14 }, { x: 0, y: 0, r: 4, hollow: true, color: 'ink2' }] }, caption: t`Two small steps $0.4$ along $X$ and $Y$ at $(2, 1)$ (gold) and their images under $T$ (violet, from the Jacobian, drawn 5 times longer than they are): shrunk by $1/5$, and with the turn from one to the other reversed — the determinant is negative.` },
     steps: [
       { label: 'Write it out', text: t`With $\rho^2 = X^2 + Y^2$: $T = (X/\rho^2,\ Y/\rho^2)$, defined on $\mathbb R^2\setminus\{0\}$ — exactly the overlap.` },
       { label: 'Differentiate', text: t`$\partial_X(X/\rho^2) = (Y^2 - X^2)/\rho^4$, $\partial_Y(X/\rho^2) = -2XY/\rho^4$, and symmetrically for the second component: $J = \dfrac{1}{\rho^4}\begin{pmatrix} Y^2 - X^2 & -2XY \\ -2XY & X^2 - Y^2\end{pmatrix}$.` },
@@ -179,7 +179,7 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
         t`$\varphi_\alpha\circ\varphi_\beta^{-1}$ is a transition map, smooth because the atlas is smooth.`,
         t`A composition of smooth maps is smooth (chain rule, applied over and over), so $f\circ\varphi_\beta^{-1}$ is smooth near $\varphi_\beta(p)$.`,
       ],
-      hints: ['Insert the identity φ_α⁻¹ ∘ φ_α in the middle.', 'Then name what each of the two factors is.'],
+      hints: [t`Insert the identity $\varphi_\alpha^{-1}\circ\varphi_\alpha$ in the middle.`, 'Then name what each of the two factors is.'],
       teach: 'Smoothness of a function does not depend on the chart, because changing chart composes with a smooth transition map.',
       explain: t`Without smooth transitions this fails — with the charts $x$ and $x^3$ on $\mathbb R$, the function $f(x) = x$ is smooth in the first and equals $y^{1/3}$, not smooth, in the second.`,
     }),
@@ -212,7 +212,7 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
         const psi = rr / Math.cos(pitch * DEG);
         return {
           prompt: t`The orientations of a spacecraft form a smooth 3-manifold, the rotation group. Yaw–pitch–roll Euler angles $(\psi, \theta, \phi)$ are a chart on part of it. With roll $\phi = 0$, a steady body yaw rate $r$ (about the craft’s own $z$-axis, other body rates zero) needs $\dot\psi = r/\cos\theta$. At pitch $\theta = ${pitch}^\circ$, what yaw-angle rate $\dot\psi$ does a body rate $r = ${rr}^\circ$/s require, in degrees per second?`,
-          visual: { type: 'graph', params: { x: [0, 90], y: [0, 40], aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'pitch θ (°)', ylabel: 'ψ̇ per unit r', curves: [{ fn: '1/cos(x*pi/180)', domain: [0, 88.6], color: 'accent', width: 2.4 }], vlines: [{ x: 90, color: 'bad', label: 'gimbal lock' }] }, caption: t`$1/\cos\theta$: how much the yaw angle must spin per unit of real body rotation. The chart breaks at $\theta = 90^\circ$; the spacecraft does not.` },
+          visual: { type: 'graph', params: { x: [0, 108], y: [0, 40], aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'pitch θ (°)', ylabel: 'ψ̇ per unit r', curves: [{ fn: '1/cos(x*pi/180)', domain: [0, 88.6], color: 'accent', width: 2.4 }], vlines: [{ x: 90, color: 'bad', label: 'gimbal lock' }] }, caption: t`$1/\cos\theta$: how much the yaw angle must spin per unit of real body rotation. The chart breaks at $\theta = 90^\circ$; the spacecraft does not.` },
           answer: psi, units: 'deg/s', tol: { rel: 0.003 },
           errors: [{ value: rr * Math.cos(pitch * DEG), feedback: t`Divide by $\cos\theta$: near $90^\circ$ the yaw angle must spin *faster* than the craft does.` }, { value: rr / Math.sin(pitch * DEG), feedback: t`The factor is $1/\cos\theta$, which blows up at $90^\circ$ pitch, not $1/\sin\theta$.` }].filter((e) => Math.abs(e.value - psi) > 0.005 * psi),
           hints: [t`$\dot\psi = r/\cos\theta$.`, t`$\cos ${pitch}^\circ = ${nice(Math.cos(pitch * DEG), 4)}$.`],
@@ -224,14 +224,14 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
     num({
       id: 'cp-latlong-jac', difficulty: 3,
       gen(r) {
-        const thd = r.pick([30, 60, 90, 120, 45]);
+        const thd = r.pick([45, 60, 90, 120, 150]);
         const th = thd * DEG, d = -0.5 / Math.sin(th / 2) ** 2 / Math.tan(th / 2);
         return {
           prompt: t`Colatitude–longitude $(\theta, \varphi)$ and the north stereographic chart $(X, Y)$ overlap on most of the sphere, where $X = \cot(\theta/2)\cos\varphi$ and $Y = \cot(\theta/2)\sin\varphi$. The Jacobian determinant of this transition is $\det\dfrac{\partial(X, Y)}{\partial(\theta, \varphi)} = -\tfrac12\csc^2(\theta/2)\cot(\theta/2)$. Evaluate it at $\theta = ${thd}^\circ$.`,
-          visual: { type: 'graph', params: { x: [0, 180], y: [-12, 1], aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'θ (°)', ylabel: 'det', curves: [{ fn: '-0.5/(sin(x*pi/360)^2*tan(x*pi/360))', domain: [14, 179], color: 'accent', width: 2.4 }], hlines: [{ y: 0, color: 'ink3' }], vlines: [{ x: thd, color: 'gold' }] }, caption: t`The determinant against colatitude: never zero for $0 < \theta < 180^\circ$, so the two charts are compatible there.` },
+          visual: { type: 'graph', params: { x: [0, 180], y: [-12, 1], aspect: 'wide', xticks: 7, yticks: 5, xlabel: 'θ (°)', ylabel: 'det', curves: [{ fn: '-0.5/(sin(x*pi/360)^2*tan(x*pi/360))', domain: [40, 179], color: 'accent', width: 2.4 }], hlines: [{ y: 0, color: 'ink3' }], vlines: [{ x: thd, color: 'gold' }] }, caption: t`The determinant against colatitude: never zero for $0 < \theta < 180^\circ$, so the two charts are compatible there.` },
           answer: d, tol: { rel: 0.003 },
           errors: [{ value: -d, feedback: 'Keep the minus sign: increasing θ moves the point toward the chart’s centre.' }, { value: -0.5 / Math.sin(th) ** 2 / Math.tan(th), feedback: t`Use half the angle: $\theta/2 = ${nice(thd / 2)}^\circ$.` }].filter((e) => Math.abs(e.value - d) > 0.005 * Math.abs(d)),
-          hints: [t`$\theta/2 = ${nice(thd / 2)}^\circ$: $\csc^2 = 1/\sin^2$ and $\cot = 1/\tan$.`],
+          hints: [t`$\theta/2 = ${nice(thd / 2)}^\circ$: $\csc^2 = 1/\sin^2$ and $\cot = 1/\tan$.`, t`$\sin(${nice(thd / 2)}^\circ) = ${nice(Math.sin(th / 2), 4)}$ and $\tan(${nice(thd / 2)}^\circ) = ${nice(Math.tan(th / 2), 4)}$.`],
           teach: 'Two charts are compatible where the transition and its inverse are smooth; a nonzero Jacobian determinant guarantees a smooth inverse nearby.',
           explain: t`$-\tfrac12 \times ${nice(1 / Math.sin(th / 2) ** 2, 4)} \times ${nice(1 / Math.tan(th / 2), 4)} = ${nice(d, 4)}$. The determinant is finite and nonzero on $0 < \theta < \pi$, so by the inverse function theorem the inverse transition is smooth too. At $\theta = \pi$ (the south pole) it vanishes — a failure of the $(\theta, \varphi)$ chart, which has no business there.`,
         };

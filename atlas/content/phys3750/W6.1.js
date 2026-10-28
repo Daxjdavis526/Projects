@@ -29,7 +29,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`A signal that repeats every $T$ seconds can only contain frequencies that also repeat every $T$: the fundamental $\omega_0 = 2\pi/T$ and its whole multiples, the **harmonics**. So it is a sum of them, written in this course’s convention $e^{-i\omega t}$:
 
-$$f(t) = \sum_{n=-\infty}^{\infty} c_n\,e^{-in\omega_0t}, \qquad c_n = \frac1T\int_0^T f(t)\,e^{in\omega_0t}\,dt$$
+$$\begin{gathered}f(t) = \sum_{n=-\infty}^{\infty} c_n\,e^{-in\omega_0t}, \\ c_n = \frac1T\int_0^T f(t)\,e^{in\omega_0t}\,dt\end{gathered}$$
 
 Each coefficient comes from **one integral**, because over a period $e^{in\omega_0t}e^{-im\omega_0t}$ averages to zero unless $n = m$ — the harmonics are orthogonal, just like the mode vectors of the chain in [superposition and initial conditions](#/lesson/phys3750.W5.3). The same series drives oscillators in [periodic forcing](#/lesson/phys3550.M2.4) and solves boundary-value problems in [Fourier series solutions](#/lesson/st-b.B8.1); here it is a **spectrum**, the list of what a signal is made of.`,
   symbols: [

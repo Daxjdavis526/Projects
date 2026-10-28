@@ -87,11 +87,14 @@ export function orbit(P, { turns = 3, steps = 1440, rfar = null, rin = null } = 
   const acc = (u) => -lw.F(1 / u) / (L2 * u * u) - u;    // u″ = −F/(ℓ²u²) − u
   const h = (2 * Math.PI) / steps;
   const out = { ...tp, pts: [], r: [], phi: [], t: [], apsidal: null, advance: null };
-  if (tp.rc === null && tp.fate === 'plunge' && tp.rp === null && tp.ra === null) return out;
-  const start = tp.rp ?? tp.ra;
-  const far = rfar ?? (tp.ra ? 50 * tp.ra : 60 * tp.rp);
-  const near = rin ?? (P.force === 'gr' ? 2 * P.delta : 1e-3 * (tp.rc || start));
-  let u = 1 / start, w = 0, phi = 0, t = 0;
+  const V = ueff(lw, L);
+  // no turning point at all (over the barrier from far away): come in from a distance
+  const inbound = tp.rp === null && tp.ra === null;
+  const scale = tp.rc || L * L;
+  const start = tp.rp ?? tp.ra ?? Math.min(rfar ?? 20 * scale, 20 * scale);
+  const far = rfar ?? (tp.ra ? 50 * tp.ra : 60 * start);
+  const near = rin ?? (P.force === 'gr' ? 2 * P.delta : 1e-3 * scale);
+  let u = 1 / start, w = inbound ? Math.sqrt(Math.max(0, 2 * (tp.E - V(start)))) / L : 0, phi = 0, t = 0;
   const maxN = tp.fate === 'bound' || tp.fate === 'circle' ? Math.round(turns * steps) : 40 * steps;
   const R = [1 / u], PH = [0], T = [0];
   let prevW = 0;
@@ -102,7 +105,7 @@ export function orbit(P, { turns = 3, steps = 1440, rfar = null, rin = null } = 
     const k4u = w + h * k3w, k4w = acc(u + h * k3u);
     const u1 = u + (h / 6) * (k1u + 2 * k2u + 2 * k3u + k4u);
     const w1 = w + (h / 6) * (k1w + 2 * k2w + 2 * k3w + k4w);
-    if (!(u1 > 0) || 1 / u1 > far) break;
+    if (!(u1 > 0) || (!inbound && 1 / u1 > far)) break;
     t += 0.5 * h * (1 / (u * u) + 1 / (u1 * u1)) / L;
     phi += h; u = u1;
     // the first apoapsis: u′ crosses zero going up (from the periapsis start)

@@ -110,7 +110,7 @@ $$\sin^2\theta + \cos^2\theta = 1$$
           hints: [t`Rewrite with $\sin^2 x + \cos^2 x = 1$ (or $1 + \tan^2 x = \sec^2 x$).`, k === 1 ? t`Factor $1 - \cos^2 x$ as a difference of squares.` : t`Replace the bracket by a single squared function, then cancel.`],
           teach: t`Pythagorean identities turn $1 - \cos^2$, $1 - \sin^2$ and $\sec^2 - 1$ into single squares.`,
           explain: k === 0 ? t`$\dfrac{1 - \cos^2 x}{\sin x} = \dfrac{\sin^2 x}{\sin x} = \sin x$ (where $\sin x \neq 0$).` : k === 1 ? t`$\dfrac{\sin^2 x}{1 - \cos x} = \dfrac{(1 - \cos x)(1 + \cos x)}{1 - \cos x} = 1 + \cos x$ (where $\cos x \neq 1$).` : t`$(\sec^2 x - 1)\cos^2 x = \tan^2 x \cos^2 x = \dfrac{\sin^2 x}{\cos^2 x}\cos^2 x = \sin^2 x$.`,
-          visual: trigGraph({ curves: [{ fn: C.plot, color: 'accent', samples: 600 }], lo: 0.05, hi: N(2 * PI - 0.05), y: [-1.4, 2.4], caption: t`The expression as given, plotted: its graph is a familiar curve (gaps where it is not defined are not drawn).` }),
+          visual: trigGraph({ curves: [{ fn: C.plot, color: 'accent', samples: 600 }], lo: 0.05, hi: 2 * PI - 0.05, y: [-1.4, 2.4], caption: t`The expression as given, plotted: its graph is a familiar curve (gaps where it is not defined are not drawn).` }),
         };
       },
     }),
@@ -130,7 +130,7 @@ $$\sin^2\theta + \cos^2\theta = 1$$
           hints: [t`Write each factor with sines and cosines: $\tan = \sin/\cos$, $\sec = 1/\cos$, $\cot = \cos/\sin$.`],
           teach: t`When in doubt, rewrite everything in sines and cosines.`,
           explain: [t`$\tan x\cos x = \dfrac{\sin x}{\cos x}\cos x = \sin x$.`, t`$\sin x\sec x = \dfrac{\sin x}{\cos x} = \tan x$.`, t`$\cot x\sec x = \dfrac{\cos x}{\sin x}\cdot\dfrac{1}{\cos x} = \dfrac{1}{\sin x} = \csc x$.`][k],
-          visual: trigGraph({ curves: [{ fn: C.plot, color: 'accent', samples: 800 }], lo: 0.05, hi: N(2 * PI - 0.05), y: [-3.5, 3.5], caption: t`The product as given, plotted; recognise the curve. Vertical jumps at the gaps are not drawn.` }),
+          visual: trigGraph({ curves: [{ fn: C.plot, color: 'accent', samples: 800 }], lo: 0.05, hi: 2 * PI - 0.05, y: [-3.5, 3.5], caption: t`The product as given, plotted; recognise the curve. Vertical jumps at the gaps are not drawn.` }),
         };
       },
     }),

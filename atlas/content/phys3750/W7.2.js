@@ -29,7 +29,7 @@ export default lesson({
   minutes: 14, difficulty: 3,
   intro: t`A small source — a loudspeaker, a star, a supernova — sends waves out equally in all directions. For a wave that depends only on the distance $r$, the Laplacian simplifies to $\nabla^2u = \frac1r\partial_r^2(ru)$, so the product $ru$ obeys the **one-dimensional** wave equation, and $ru = f(r - vt)$. For a steady tone:
 
-$$u(r, t) = \frac{\tilde A}{r}\,e^{i(kr - \omega t)}, \qquad I = \frac{P}{4\pi r^2}$$
+$$\begin{gathered}u(r, t) = \frac{\tilde A}{r}\,e^{i(kr - \omega t)}, \\ I = \frac{P}{4\pi r^2}\end{gathered}$$
 
 The wavefronts are spheres, and the amplitude falls as $1/r$ — exactly what is needed for the power $P$ flowing out through every sphere, intensity $\times\ 4\pi r^2$, to be the same. That is the **inverse-square law**: not a separate fact, but energy conservation for a spherical wave. Far from the source, a small patch of a sphere is nearly flat: the spherical wave looks like the [plane waves](#/lesson/phys3750.W7.1) of the last lesson.`,
   symbols: [

@@ -190,7 +190,7 @@ export function mount(F, P0) {
     plot.rect(0.1, -0.24, 0.85, 0.48, { color: 'warn', alpha: 0.2, width: 1.5 });
     const src = F.params.src;
     const srcName = src === 'oven' ? 'oven' : src === 'state' ? 'ψ' : `|${src[1] === '-' ? MINUS : '+'}${src[0]}⟩`;
-    plot.text(srcName, 0.525, 0, { align: 'center', size: fs, color: 'warn', weight: 600 });
+    plot.text(srcName, 0.525, narrow ? 0.4 : 0, { align: 'center', size: fs, color: 'warn', weight: 600 });   // above the box on a phone
     plot.line(0.95, 0, G.cx[0] - G.bw / 2, 0, { color: 'gold', width: bw(1), alpha: 0.75 });
     // analysers
     A.forEach((a, i) => {
@@ -204,15 +204,15 @@ export function mount(F, P0) {
           plot.line(x0, y, xb, yb, { color: 'gold', width: bw(b.p), alpha: 0.75 });
           plot.rect(xb - 0.03, yb - 0.11, 0.1, 0.22, { color: 'ink3', alpha: 0.9, width: 1 });
           const lab = P.counts !== false ? `${counts.blocked[i]}` : '';
-          if (lab) plot.text(lab, xb + 0.02, yb, { align: 'center', dy: b.sign === '-' ? 18 : -18, size: fs, color: 'ink2' });
+          if (lab) plot.text(lab, xb + 0.02, yb, { align: 'center', dy: b.sign === '-' ? 23 : -23, size: fs, color: 'ink2' });
         } else {
           const yc = b.sign === '-' ? -0.62 : 0.62;
           plot.line(x0, y, G.end, yc, { color: 'gold', width: bw(b.p), alpha: 0.75 });
           plot.rect(G.end, yc - 0.17, 0.85, 0.34, { color: 'good', alpha: 0.18, width: 1.5 });
           const c = b.sign === '-' ? counts.minus : counts.plus;
-          plot.text(P.counts !== false ? `${signTxt(b.sign)} ${c}` : signTxt(b.sign), G.end + 0.425, yc, { align: 'center', size: fsBig, weight: 600, color: 'good' });
+          plot.text(P.counts !== false ? `${signTxt(b.sign)} ${c}` : signTxt(b.sign), G.end + 0.425, yc, { align: 'center', size: narrow ? fs : fsBig, weight: 600, color: 'good' });
         }
-        if (showP && b.p > 1e-9) {
+        if (showP && b.p > 1e-9 && !narrow) {     // on a phone the histogram carries the numbers
           // at the middle of the beam, on its outer side
           const [ex, ey] = b.fate === 'next' ? [G.cx[i + 1] - G.bw / 2, 0] : b.fate === 'blocked' ? [x0 + 0.42, b.sign === '-' ? -0.46 : 0.46] : [G.end, b.sign === '-' ? -0.62 : 0.62];
           if (b.fate === 'blocked') plot.text(pct(b.p), ex + 0.1, ey, { dx: 4, size: fs - 1.5, color: 'ink3' });

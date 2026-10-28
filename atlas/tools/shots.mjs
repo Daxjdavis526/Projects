@@ -1,7 +1,7 @@
 // Screenshots of the Atlas for visual checks — pages, lesson steps and every
 // simulation in the gallery — in dark and light themes. Several rendering
 // bugs in this repository were only ever visible in a screenshot.
-//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<id>|boss:<course>|all] [dark|light] [width]
+//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<gallery id>|boss:<course>|all] [dark|light] [width]
 //   (width, default 1280: e.g. 390 to walk a lesson, boss or sim at phone width)
 // It serves the repository itself on a free local port (so several runs can
 // go at once) and prints any page errors; exit status 1 if there were some.

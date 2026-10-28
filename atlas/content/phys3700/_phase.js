@@ -275,16 +275,20 @@ export function phasePic(key, { T, P, marks = true, regions = true, points = [],
     ...curves,
   ];
   const pts = [];
+  const inX = (x) => x >= T[0] && x <= T[1], inY = (y) => y >= P[0] && y <= P[1];
   if (marks) {
-    pts.push({ x: s.Tt, y: r4(lt), r: 5, color: 'gold', label: marks === true || marks.triple ? (marks.triple || 'triple point') : '', labelDx: 8, labelDy: 14 });
-    pts.push({ x: s.Tc, y: r4(lc), r: 5, color: 'warn', label: marks === true || marks.critical ? (marks.critical || 'critical point') : '', labelDx: -40, labelDy: -12 });
+    if (inX(s.Tt) && inY(lt)) pts.push({ x: s.Tt, y: r4(lt), r: 5, color: 'gold', label: marks === true || marks.triple ? (marks.triple || 'triple point') : '', labelDx: 8, labelDy: 14 });
+    if (inX(s.Tc) && inY(lc)) pts.push({ x: s.Tc, y: r4(lc), r: 5, color: 'warn', label: marks === true || marks.critical ? (marks.critical || 'critical point') : '', labelDx: -40, labelDy: -12 });
   }
   if (regions) {
-    const span = T[1] - T[0];
+    const span = T[1] - T[0], pspan = P[1] - P[0];
     const lab = (x, y, text) => ({ x: r4(x), y: r4(y), r: 0.01, color: 'ink2', label: text, labelDx: -3.2 * text.length, labelDy: 0 });
-    pts.push(lab(T[0] + 0.07 * span + (key === 'water' ? 0 : 0), P[0] + 0.78 * (P[1] - P[0]), 'solid'));
-    pts.push(lab(Math.min(s.Tc - 0.05 * span, (s.Tt + s.Tc) / 2), Math.min(P[1] - 0.12 * (P[1] - P[0]), lc + 0.35), 'liquid'));
-    pts.push(lab(T[0] + 0.62 * span, P[0] + 0.18 * (P[1] - P[0]), 'gas'));
+    const boundary = (x) => Math.log10(x < s.Tt ? subP(key, x) : vapP(key, Math.min(x, s.Tc)));
+    if (s.Tt > T[0] + 0.08 * span) pts.push(lab((T[0] + Math.min(s.Tt, T[1])) / 2, P[0] + 0.85 * pspan, 'solid'));
+    const xL = s.Tt + 0.35 * (Math.min(s.Tc, T[1]) - Math.max(s.Tt, T[0]));
+    if (inX(xL)) pts.push(lab(xL, Math.min(P[1] - 0.08 * pspan, boundary(xL) + 0.12 * pspan), 'liquid'));
+    const xG = T[0] + 0.7 * span;
+    pts.push(lab(xG, Math.max(P[0] + 0.06 * pspan, Math.min(P[0] + 0.25 * pspan, boundary(xG) - 0.12 * pspan)), 'gas'));
   }
   return {
     type: 'graph',

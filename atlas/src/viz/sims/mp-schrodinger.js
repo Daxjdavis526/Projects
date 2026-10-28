@@ -401,7 +401,20 @@ export function mount(F, P0) {
       if (showProb) {
         pW.area((x) => S.scatterPsi(sol, x).abs2, x0, x1, { color: 'accent', alpha: 0.18, samples: 700 });
         pW.path(xs.map((x, i) => [x, pr[i]]), { color: 'accent', width: 2.2 });
-        if (!hide.has('T') && sol.T > 0) pW.text(`transmitted: |ψ|² = T = ${f3(sol.T)}`, x1 - 0.02 * (x1 - x0), Math.min(yr[1] * 0.92, Math.max(sol.T, 0.08 * yr[1]) + 0.07 * (yr[1] - yr[0])), { color: 'accent', size: fs - 1, align: 'right' });
+        if (!hide.has('T') && sol.T > 0) {
+          // |ψ|² on the right is |t|²; the transmission T = (k_R/k_L)|t|² equals it only when
+          // the potential is the same on both sides (a barrier, not a step)
+          const t2 = sol.A[sol.A.length - 1].re ** 2 + sol.A[sol.A.length - 1].im ** 2;
+          const same = Math.abs(sol.k[sol.k.length - 1].re - sol.k[0].re) < 1e-9 * Math.abs(sol.k[0].re);
+          const lines = same ? [`transmitted: |ψ|² = T = ${f3(sol.T)}`] : [`transmitted: |ψ|² = |t|² = ${f3(t2)}`, `T = (k₂/k₁)|t|² = ${f3(sol.T)}`];
+          const span = yr[1] - yr[0], gap = 0.075 * span * lines.length;
+          // above the line when there is room, otherwise below it
+          const above = Math.max(t2, 0.08 * yr[1]) + 0.07 * span <= yr[1] - gap + 0.07 * span;
+          lines.forEach((txt, i) => {
+            const y = above ? Math.max(t2, 0.08 * yr[1]) + 0.07 * span + (lines.length - 1 - i) * 0.075 * span : t2 - 0.08 * span - i * 0.075 * span;
+            pW.text(txt, x1 - 0.02 * (x1 - x0), y, { color: 'accent', size: fs - 1, align: 'right' });
+          });
+        }
         pW.text('incident + reflected', x0 + 0.02 * (x1 - x0), yr[1] - 0.07 * (yr[1] - yr[0]), { color: 'ink2', size: fs - 1 });
       }
     }

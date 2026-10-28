@@ -30,7 +30,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`Stretch the period of a signal: the harmonics $n\omega_0$ crowd together, $\omega_0 = 2\pi/T \to 0$, and in the limit a **single** pulse has a continuous spectrum. Writing $\tilde f(\omega) = \lim Tc_n$ at $\omega = n\omega_0$, the series becomes a pair of integrals:
 
-$$f(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}\tilde f(\omega)\,e^{-i\omega t}\,d\omega, \qquad \tilde f(\omega) = \int_{-\infty}^{\infty}f(t)\,e^{i\omega t}\,dt$$
+$$\begin{gathered}f(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}\tilde f(\omega)\,e^{-i\omega t}\,d\omega, \\ \tilde f(\omega) = \int_{-\infty}^{\infty}f(t)\,e^{i\omega t}\,dt\end{gathered}$$
 
 $\tilde f(\omega)$ is the **complex amplitude per unit angular frequency**: how much of $e^{-i\omega t}$ the pulse contains, and with what phase. Short in time means wide in frequency; a delay is a phase that grows with $\omega$; and a derivative is just multiplication by $-i\omega$. The same transform in space, with $x$ and $k$, solves PDEs in [Fourier transform solutions](#/lesson/st-b.B8.2); here it is the language of signals.`,
   symbols: [
