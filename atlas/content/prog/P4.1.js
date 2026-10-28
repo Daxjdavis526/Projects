@@ -114,8 +114,8 @@ ax.scatter(t_obs, flux, s=14, label="photometry")
       { label: 'Model on a fine grid', text: t`The model is a function, so evaluate it on many more points than there are readings. Its edges are vertical, and 2001 points put them within 0.004 h of the right place; on the 60 reading times they would be slanted lines in the wrong place.
 
 \`\`\`python
-t = np.linspace(-4, 4, 2001)                  # h
-depth, half = 0.0101, 1.5                     # fraction blocked; half the duration, h
+t = np.linspace(-4, 4, 2001)        # h
+depth, half = 0.0101, 1.5           # fraction blocked; half-duration (h)
 model = np.where(np.abs(t) < half, 1 - depth, 1.0)
 ax.plot(t, model, color="C1", label="model")
 \`\`\`` },

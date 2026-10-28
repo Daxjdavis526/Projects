@@ -38,7 +38,7 @@ const standing = {
       { fn: boxProbFn(1), color: 'accent', width: 2.6, label: '|Ψ|², the same at every moment', labelAt: 0.24, labelDx: -8, labelDy: -14, labelAlign: 'right' },
     ],
   },
-  caption: 'A stationary state: the real part of Ψ = ψ(x)e^{−iEt/ħ} swings up and down in place (violet, four moments), while its probability density (blue) stays fixed. Scales are arbitrary.',
+  caption: t`A stationary state: the real part of $\Psi = \psi(x)e^{-iEt/\hbar}$ swings up and down in place (violet, four moments), while its probability density (blue) stays fixed. Scales are arbitrary.`,
 };
 
 /** ψ = A sin(πx/L) and |ψ|² = A² sin²(πx/L): the two areas a student might confuse. */
@@ -109,7 +109,7 @@ The second condition — **normalisation** — says the particle is certainly so
     lead: t`A particle in a box 1 nm wide. Top: its energy levels. Bottom: the chosen state’s $\psi$ (violet) and $|\psi|^2$ (blue). The gold window’s area is the probability of finding the particle between $a$ and $b$ — read it below the picture.`,
     tasks: [
       'Stretch the window over the whole box: P = 1.000 for every state. That is normalisation.',
-      'Window on the middle third: P = 0.609 for n = 1, but only 0.196 for n = 2, whose ψ has a node at the centre.',
+      'Window on the middle third: P is about 0.61 for n = 1, but only about 0.20 for n = 2, whose ψ has a node at the centre.',
       'Raise n to 8: the humps crowd together and the middle third’s share heads for 1/3 — the classical answer for a ball bouncing between the walls.',
     ],
     params: { mode: 'bound', well: 'infinite', L: 1, n: 1, show: 'both', window: [0.333, 0.667], controls: ['n', 'show', 'window'] },
@@ -218,12 +218,12 @@ The second condition — **normalisation** — says the particle is certainly so
         const n = r.pick([1, 2]), [a, b] = r.pick([[0, 0.1], [0.4, 0.6], [0.2, 0.3], [0.45, 0.55]]), N = 20000;
         const P = S.boxProb(n, a, b, 1), count = N * P;
         return {
-          prompt: t`An electron in a box 1.0 nm wide is in the state $\psi(x) = \sqrt{2/L}\,\sin(${n === 1 ? '' : n}\pi x/L)$. The same state is prepared ${fmt(N, 5).replace(/(\d)(\d{3})$/, '$1 $2')} times and each time the electron’s position is measured. About how many measurements find it between $x = ${a}$ nm and $x = ${b}$ nm?`,
+          prompt: t`An electron in a box 1.0 nm wide is in the state $\psi(x) = \sqrt{2/L}\,\sin(${n === 1 ? '' : n}\pi x/L)$. The same state is prepared 20 000 times and each time the electron’s position is measured. About how many measurements find it between $x = ${a}$ nm and $x = ${b}$ nm?`,
           answer: count, tol: { rel: 0.02 },
           errors: [{ value: N * (b - a), feedback: t`That assumes the electron is equally likely to be anywhere — the classical answer. Weight each place by $|\psi|^2$.` }],
           hints: [t`Expected count $= N\times P$, with $P = \displaystyle\int_{${a}}^{${b}} \frac2L\sin^2\frac{${n === 1 ? '' : n}\pi x}{L}\,dx$.`, t`$\int \frac2L\sin^2\frac{n\pi x}{L}dx = \frac xL - \frac{1}{2n\pi}\sin\frac{2n\pi x}{L}$.`],
           teach: 'Born’s rule predicts frequencies: N repeated measurements put about N·P in each region.',
-          explain: t`$P = ${fmt(P, 3)}$, so about $${fmt(count, 3)}$ of the ${fmt(N, 5).replace(/(\d)(\d{3})$/, '$1 $2')} measurements land there (give or take $\sqrt{${Math.round(count)}} \approx ${Math.round(Math.sqrt(count))}$ from run to run).${n === 2 && a === 0.45 ? ' Very few: the state has a node at the centre.' : ''}`,
+          explain: t`$P = ${fmt(P, 3)}$, so about $${fmt(count, 3)}$ of the 20 000 measurements land there (give or take $\sqrt{${Math.round(count)}} \approx ${Math.round(Math.sqrt(count))}$ from run to run).${n === 2 && a === 0.45 ? ' Very few: the state has a node at the centre.' : ''}`,
           visual: well({ well: 'infinite', L: 1, n, show: 'prob', window: [a, b], hide: ['prob', 'energy'] }, t`The electron’s energy levels (top) and the chosen state’s $|\psi|^2$ (bottom), with the region asked about shaded gold.`),
         };
       },

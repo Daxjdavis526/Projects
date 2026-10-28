@@ -52,17 +52,17 @@ const picture = (params, caption) => ({ type: 'graph', params: { equal: true, ax
 function tankPic(R, c) {
   const R2 = r4(R * R), w = Math.sqrt(R * R - c * c), s = -32 * DEG;
   return picture({
-    x: [r4(-2.75 * R), r4(2.75 * R)], y: [r4(-1.3 * R), r4(1.3 * R)],
+    x: [r4(-1.75 * R), r4(1.75 * R)], y: [r4(-1.25 * R), r4(1.3 * R)], aspect: '',
     shade: [
       { fn: `min(${c}, sqrt(max(0, ${R2} - x^2)))`, lower: `-sqrt(max(0, ${R2} - x^2))`, from: -R, to: R, color: 'accent', alpha: 0.38 },
       { fn: `sqrt(max(0, ${R2} - x^2))`, lower: `${c}`, from: r4(-w), to: r4(w), color: 'ink3', alpha: 0.1 },
     ],
-    curves: [arc(0, 0, R, 0, 2 * PI, 'ink2', 2.4), seg([-w, c], [w, c], 'accent', 2.2), seg([0, -1.22 * R], [0, 1.22 * R], 'ink3', 1.1, true)],
-    arrows: [{ from: [0, 0], to: [r4(R * Math.cos(s)), r4(R * Math.sin(s))], color: 'ink2', width: 1.6, label: `R = ${nice(R)} m`, labelDx: 8, labelDy: 10 }],
-    points: [dot(0, 0, 'ink2', 3), tag(w, c, `liquid surface, z = ${nice(c)} m`, 'accent', 10, -4), tag(0.06 * R, (c + R) / 2, 'ullage (gas)', 'ink2', 2, 5),
-      tag(-0.5 * R, -0.5 * R, 'liquid oxygen', 'ink', -6, 4), tag(0, 1.22 * R, 'z, up', 'ink3', 6, 8)],
+    curves: [arc(0, 0, R, 0, 2 * PI, 'ink2', 2.4), seg([-w, c], [w, c], 'accent', 2.2), seg([0, -1.2 * R], [0, 1.2 * R], 'ink3', 1.1, true)],
+    arrows: [{ from: [0, 0], to: [r4(R * Math.cos(s)), r4(R * Math.sin(s))], color: 'ink2', width: 1.6, label: 'R', labelDx: 6, labelDy: 10 }],
+    points: [dot(0, 0, 'ink2', 3), tag(w, c, `z = ${nice(c)} m`, 'accent', 8, -2), tag(0.05 * R, (c + R) / 2, 'gas', 'ink2', 2, 5),
+      tag(-0.12 * R, -0.62 * R, 'liquid oxygen', 'ink', -42, 4), tag(0, 1.2 * R, 'z', 'ink3', 6, 6)],
     alt: 'A circle cut by a horizontal line, the region below the line shaded as liquid',
-  }, 'A cut through the tank’s centre. The liquid oxygen (shaded) fills the sphere below the horizontal plane; the gas above it is the ullage.');
+  }, `A cut through the tank’s centre, radius R = ${nice(R)} m. The liquid oxygen (shaded) fills the sphere below the horizontal plane z = ${nice(c)} m; the gas above it is the ullage.`);
 }
 
 function torusPic(R, a) {
