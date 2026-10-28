@@ -51,7 +51,7 @@ In quantum mechanics $\|\psi\|^2$ is the total probability, so **whatever happen
   visual: {
     type: 'calc-vectors3d',
     title: 'Turn a spin, keep its length',
-    lead: t`A spin-½ state drawn on the Bloch sphere (gold). The unitary $U = e^{-i\alpha\,\sigma_n/2}$ turns it through the angle $\alpha$ about the violet axis — $z$ or $x$. The readouts give the probabilities of spin-up along $z$ and along $x$, the length of the state, and $\tfrac12\operatorname{tr}U$.`,
+    lead: t`A spin-½ state drawn on the Bloch sphere (gold). The unitary $U = e^{-i\alpha\,\sigma_n/2}$ turns it through the angle $\alpha$ about the violet axis — $z$ or $x$. The readouts give the probabilities of spin-up along $z$ and along $x$, the length of the Bloch arrow (1 exactly when $\|U\psi_0\| = 1$), and $\tfrac12\operatorname{tr}U$.`,
     tasks: [
       'Axis z: turn α. P(up along z) never changes — a z-turn only shifts the relative phase — while P(up along x) swings between its extremes.',
       'Axis x, start tilt 0°: at α = 180° spin-up has become spin-down. That is a π pulse, the NOT gate of a quantum computer.',
@@ -76,10 +76,10 @@ In quantum mechanics $\|\psi\|^2$ is the total probability, so **whatever happen
         { to: ['(1 - ax)*sin(th*pi/180)*cos(al*pi/180) + ax*sin(th*pi/180)', '(1 - ax)*sin(th*pi/180)*sin(al*pi/180) - ax*cos(th*pi/180)*sin(al*pi/180)', '(1 - ax)*cos(th*pi/180) + ax*cos(th*pi/180)*cos(al*pi/180)'], color: 'gold', label: 'U\\psi_0' },
       ],
       readouts: [
-        { label: t`$P(\uparrow_z)$`, expr: '(1 + (1 - ax)*cos(th*pi/180) + ax*cos(th*pi/180)*cos(al*pi/180))/2', digits: 3 },
-        { label: t`$P(+x)$`, expr: '(1 + (1 - ax)*sin(th*pi/180)*cos(al*pi/180) + ax*sin(th*pi/180))/2', digits: 3 },
-        { label: t`$\|U\psi_0\|$`, expr: '1', digits: 3 },
-        { label: t`$\tfrac12\operatorname{tr}U = \cos(\alpha/2)$`, expr: 'cos(al*pi/360)', digits: 3 },
+        { label: t`$P(\uparrow_z)$`, expr: 'round(1000*((1 + (1 - ax)*cos(th*pi/180) + ax*cos(th*pi/180)*cos(al*pi/180))/2))/1000', digits: 3 },
+        { label: t`$P(+x)$`, expr: 'round(1000*((1 + (1 - ax)*sin(th*pi/180)*cos(al*pi/180) + ax*sin(th*pi/180))/2))/1000', digits: 3 },
+        { label: 'length of the Bloch arrow', expr: 'round(1000*sqrt(((1 - ax)*sin(th*pi/180)*cos(al*pi/180) + ax*sin(th*pi/180))^2 + ((1 - ax)*sin(th*pi/180)*sin(al*pi/180) - ax*cos(th*pi/180)*sin(al*pi/180))^2 + ((1 - ax)*cos(th*pi/180) + ax*cos(th*pi/180)*cos(al*pi/180))^2))/1000', digits: 3 },
+        { label: t`$\tfrac12\operatorname{tr}U = \cos(\alpha/2)$`, expr: 'round(1000*(cos(al*pi/360)))/1000', digits: 3 },
       ],
     },
     caption: 'The Bloch sphere (three great circles): a picture of spin states, each point one state up to an overall phase. Grey: the starting state; gold: after the turn, with the circle it sweeps. Drag to rotate the view.',

@@ -66,7 +66,7 @@ Since $\bar z z = |z|^2$, every length is real and positive again. The price: $\
         { key: 'r1', label: t`$|z_1|$`, min: 0, max: 1, step: 0.05, value: 1, explain: t`The modulus of the first component.` },
         { key: 'p1', label: t`phase of $z_1$`, min: 0, max: 360, step: 5, value: 30, unit: t`^\circ`, explain: t`Its angle in the complex plane: $z_1 = |z_1|e^{i\varphi_1}$.` },
         { key: 'r2', label: t`$|z_2|$`, min: 0, max: 1, step: 0.05, value: 1, explain: t`The modulus of the second component.` },
-        { key: 'p2', label: t`phase of $z_2$`, min: 0, max: 360, step: 5, value: 60, unit: t`^\circ`, explain: t`Its angle: $z_2 = |z_2|e^{i\varphi_2}$.` },
+        { key: 'p2', label: t`phase of $z_2$`, min: 0, max: 360, step: 5, value: 75, unit: t`^\circ`, explain: t`Its angle: $z_2 = |z_2|e^{i\varphi_2}$.` },
       ],
       curves: [
         ...[0, 2.75].flatMap((c) => [{ param: [`${c} + t`, '0'], t: [-1.25, 1.25], color: 'ink4', width: 1 }, { param: [`${c}`, 't'], t: [-1.25, 1.25], color: 'ink4', width: 1 }, { param: [`${c} + cos(t)`, 'sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: [2, 4] }]),
@@ -88,8 +88,8 @@ Since $\bar z z = |z|^2$, every length is real and positive again. The price: $\
         { x: 4.6, y: 2.25, r: 0, label: 'products, tip to tail', color: 'ink2' },
       ],
       readouts: [
-        { label: t`$\operatorname{Re}(z_1^2 + z_2^2)$`, expr: 'r1^2*cos(2*p1*pi/180) + r2^2*cos(2*p2*pi/180)', digits: 3 },
-        { label: t`$\operatorname{Im}(z_1^2 + z_2^2)$`, expr: 'r1^2*sin(2*p1*pi/180) + r2^2*sin(2*p2*pi/180)', digits: 3 },
+        { label: t`$\operatorname{Re}(z_1^2 + z_2^2)$`, expr: 'round(1000*(r1^2*cos(2*p1*pi/180) + r2^2*cos(2*p2*pi/180)))/1000', digits: 3 },
+        { label: t`$\operatorname{Im}(z_1^2 + z_2^2)$`, expr: 'round(1000*(r1^2*sin(2*p1*pi/180) + r2^2*sin(2*p2*pi/180)))/1000', digits: 3 },
         { label: t`$\|\mathbf z\|^2 = |z_1|^2 + |z_2|^2$`, expr: 'r1^2 + r2^2', digits: 3 },
       ],
     },

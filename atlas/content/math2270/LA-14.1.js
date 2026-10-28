@@ -157,7 +157,7 @@ because $P^{-1}P = I$ says exactly that row $i$ of $P^{-1}$ times column $j$ of 
       hints: [t`Rank–nullity: $\dim\ker\varphi + \dim\operatorname{range}\varphi = 4$.`, t`The range of a nonzero functional is all of $\mathbb R$, which has dimension 1.`],
       teach: t`The kernel of a nonzero functional on an $n$-dimensional space is a hyperplane, of dimension $n - 1$.`,
       explain: t`$\varphi$ maps onto $\mathbb R$ (dimension 1), so its kernel has dimension $4 - 1 = 3$: a hyperplane. The level sets $\varphi = c$ are parallel copies of it — a covector on $\mathbb R^n$ is a stack of hyperplanes, as the 3D picture shows with planes.`,
-      visual: planesPic([[1, 0, 0], [0, 1, 0], [0, 0, 1]], [1, 1, 2], { levels: [0, 1, 2], name: t`\varphi`, basisNames: ['\\mathbf e_1', '\\mathbf e_2', '\\mathbf e_3'], caption: t`The analogue one dimension down: a functional on $\mathbb R^3$ and its level sets $\varphi = 0, 1, 2$ — parallel planes, the kernel among them. Drag to rotate.` }),
+      visual: planesPic([[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0.5, 0.5, 1], { levels: [0, 1, 2], name: t`\varphi`, basisNames: ['\\mathbf e_1', '\\mathbf e_2', '\\mathbf e_3'], caption: t`The analogue one dimension down: a functional on $\mathbb R^3$ and its level sets $\varphi = 0, 1, 2$ — parallel planes, the kernel among them. Drag to rotate.` }),
     }),
     num({
       id: 'expand', difficulty: 2,
@@ -166,6 +166,7 @@ because $P^{-1}P = I$ says exactly that row $i$ of $P^{-1}$ times column $j$ of 
         let w = [1, 1, 1];
         for (let k = 0; k < 100; k++) { w = [r.int(-3, 3), r.int(-3, 3), r.int(-3, 3)]; if (w.filter((x) => x !== 0).length >= 2) break; }
         const j = r.int(0, 2), comps = rowTimes(w, P), wrong = rowTimes(w, Pi);
+        const L = Math.max(1, Math.round(0.9 * Math.hypot(...w)));
         const errors = [];
         if (Math.abs(wrong[j] - comps[j]) > 1e-9) errors.push({ value: wrong[j], feedback: t`That is $\varphi P^{-1}$, the law for something else. The $j$-th component of $\varphi$ in the dual basis is $\varphi(\mathbf b_j)$: multiply by $P$.` });
         if (Math.abs(w[j] - comps[j]) > 1e-9 && !errors.some((e) => e.value === w[j])) errors.push({ value: w[j], feedback: t`That is $\varphi$’s coefficient in the standard dual basis. In the dual basis of $\mathcal B$ the component is $\varphi(\mathbf b_${j + 1})$.` });
@@ -175,7 +176,7 @@ because $P^{-1}P = I$ says exactly that row $i$ of $P^{-1}$ times column $j$ of 
           hints: [t`Apply both sides to $\mathbf b_${j + 1}$: every $\mathbf e^i(\mathbf b_${j + 1})$ is 0 except $\mathbf e^${j + 1}(\mathbf b_${j + 1}) = 1$.`, t`So $\varphi_${j + 1} = \varphi(\mathbf b_${j + 1}) = ${rowTeX(w)}${colTeX(P.map((row) => row[j]))}$.`],
           teach: t`A functional’s components in a dual basis are its values on the basis vectors: $\varphi_j = \varphi(\mathbf b_j)$, i.e. the row $\varphi P$.`,
           explain: t`$\varphi_${j + 1} = \varphi(\mathbf b_${j + 1}) = ${comps[j]}$. All three at once: $\varphi P = ${rowTeX(comps)}$. Components of vectors come from $P^{-1}$; components of covectors from $P$ — the two laws of the next lesson.`,
-          visual: planesPic(P, w, { levels: [0, 1], name: t`\varphi`, caption: t`The basis vectors and the planes $\varphi = 0$ and $\varphi = 1$. $\varphi(\mathbf b_j)$ counts how many unit steps of $\varphi$ the tip of $\mathbf b_j$ lies beyond the plane $\varphi = 0$. Drag to rotate.` }),
+          visual: planesPic(P, w, { levels: [0, L], name: t`\varphi`, caption: t`The basis vectors and the planes $\varphi = 0$ and $\varphi = ${L}$ of the stack. $\varphi(\mathbf b_j)$ counts how many unit steps of $\varphi$ the tip of $\mathbf b_j$ lies beyond the plane $\varphi = 0$. Drag to rotate.` }),
         };
       },
     }),

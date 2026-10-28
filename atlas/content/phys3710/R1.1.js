@@ -24,11 +24,11 @@ function horizonPicture({ s, top, signals = [], numbers = true, caption }) {
     x: [-0.12 * right, right], t: [-0.04 * top, top], numbers,
     lines: [
       { pts: [[0, 0], [0, top]], color: 'accent', width: 2.2, label: 'Earth', at: 0, dx: -8, dy: 0, align: 'right' },
-      { pts: [[-s, 0], [top - s, top]], color: 'bad', width: 1.6, dash: true, label: 'horizon', at: 0, dx: -10, dy: 12, align: 'right' },
+      { pts: [[-s, 0], [top - s, top]], color: 'bad', width: 1.6, dash: true },
       ...signals.map(([ts, te]) => ({ pts: [[0, ts], [te - ts, te]], color: 'warn', width: 1.6 })),
     ],
     events: signals.map(([ts], k) => [0, ts, k === 0 ? 'sent' : '', 'warn', -8, 0, 'right']).filter((e) => e[2]),
-    extra: { curves: [rocketCurve(phiMax, 'gold', s)], points: [label(s * (Math.cosh(phiMax * 0.8) - 1), s * Math.sinh(phiMax * 0.8), 'probe', 'gold', 10, 8)] },
+    extra: { curves: [rocketCurve(phiMax, 'gold', s)], points: [label(s * (Math.cosh(phiMax * 0.8) - 1), s * Math.sinh(phiMax * 0.8), 'probe', 'gold', 10, 8), label(0.8 * top - s, 0.8 * top, 'horizon', 'bad', -8, -4, 'right')] },
     caption: caption ?? t`Years up, light-years across, $c = 1$. Gold: a probe that accelerates for ever. Red dashed: the asymptote of its hyperbola, a 45° light line. Light sent from Earth on or above it never catches the probe.`,
   });
 }
@@ -43,7 +43,7 @@ function diamond({ T, d, unit, numbers = false, caption }) {
       { pts: [[d, -0.04 * T], [d, 1.06 * T]], color: 'ink3', width: 1.6, label: 'station', at: 0, dx: 8, dy: -30 },
     ],
     events: [[0, 0, 'command sent', 'accent2', -9, 10, 'right'], [0, T, 'reply needed', 'accent2', -9, -6, 'right']],
-    extra: { shade: [{ fn: `min(x, ${r6(T)} - x)`, lower: `max(-x, x - ${r6(T)})`, from: 0, to: r6(T / 2), color: 'gold', alpha: 0.18 }] },
+    extra: { shade: [{ fn: `${r6(T)} - x`, lower: 'x', from: 0, to: r6(T / 2), color: 'gold', alpha: 0.2 }] },
     caption: caption ?? t`The shaded diamond holds every event that the command can reach **and** that can still send an answer home in time: the overlap of one event’s future light cone and the other’s past light cone. Signal travel at exactly $c$; processing time is ignored.`,
   });
 }
@@ -100,10 +100,10 @@ Anything with mass moves slower than light, so **its worldline stays inside the 
       id: 'possible-worldline', difficulty: 1,
       prompt: 'Four curves are drawn on a spacetime diagram (c = 1, time up). Which could be the worldline of a spacecraft?',
       visual: st({
-        x: [-3, 8.5], t: [-0.3, 5.5], numbers: false, aspect: 'wide',
+        x: [-5, 8.5], t: [-0.3, 5.5], numbers: false, aspect: 'wide',
         lines: Object.entries(candidates).map(([name, pts]) => ({ pts, color: { P: 'gold', Q: 'violet', R: 'teal', S: 'accent' }[name], label: name, at: 0, dx: 10, dy: 4 })),
-        extra: { curves: [seg(-3, 4.5, -2, 5.5, 'warn', 1.2, true), seg(-1, 4.5, -2, 5.5, 'warn', 1.2, true)] },
-        caption: t`Four candidate worldlines, time up and space across with $c = 1$. The short dashed pair at the top left shows the 45° slope of light.`,
+        extra: { curves: [seg(-4.2, 3.5, -5, 4.3, 'warn', 1.4, true), seg(-4.2, 3.5, -3.4, 4.3, 'warn', 1.4, true)], points: [label(-4.2, 3.3, 'light', 'warn', 0, 10, 'center')] },
+        caption: t`Four candidate worldlines, time up and space across with $c = 1$. The small dashed V at the left shows the 45° slope of light.`,
       }),
       choices: ['P', 'Q', 'R', 'S'],
       answer: 0,
