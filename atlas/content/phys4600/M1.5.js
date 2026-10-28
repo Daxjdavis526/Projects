@@ -44,11 +44,11 @@ function refrPic(th1, q, caption, { show2 = true } = {}) {
 /** A flat gas void inside epoxy insulation between two electrodes, the field normal to it. */
 const voidPic = (caption) => ({
   type: 'graph',
-  params: bare([-3, 3], [-1.5, 1.5], {
+  params: bare([-3, 3], [-1.55, 1.55], {
     shade: [{ fn: '1.1', lower: '-1.1', from: -2.6, to: 2.6, color: 'gold', alpha: 0.2 }, { fn: '0.1', lower: '-0.1', from: -0.7, to: 0.7, color: 'bg', alpha: 1 }, { fn: '1.3', lower: '1.1', from: -2.6, to: 2.6, color: 'ink3', alpha: 0.85 }, { fn: '-1.1', lower: '-1.3', from: -2.6, to: 2.6, color: 'ink3', alpha: 0.85 }],
     curves: [{ fn: '0.1', domain: [-0.7, 0.7], color: 'ink2', width: 1.2 }, { fn: '-0.1', domain: [-0.7, 0.7], color: 'ink2', width: 1.2 }],
     arrows: [-2, -1.2, 1.2, 2].map((x) => ({ from: [x, 0.85], to: [x, -0.85], color: 'warn', width: 2 })),
-    points: [tag(0.75, 0.1, 'gas void', 'ink', { labelDx: 8, labelDy: -2 }), tag(-2.5, -0.7, 'epoxy', 'gold'), tag(-2.95, 1.2, 'electrode', 'ink2', { labelDy: 0 })],
+    points: [tag(0.75, 0.1, 'gas void', 'ink', { labelDx: 8, labelDy: -2 }), tag(-2.5, -0.7, 'epoxy', 'gold'), tag(-2.6, 1.42, 'electrode', 'ink2', { labelDx: 0, labelDy: 0 })],
   }),
   caption,
 });
@@ -183,7 +183,7 @@ export default lesson({
           visual: { type: 'graph', params: bare([-3, 3], [-1.4, 1.4], {
             shade: [{ fn: '-0.4', lower: '-1.4', from: -3, to: 3, color: 'ink3', alpha: 0.7 }],
             arrows: [{ from: [-2.4, -0.05], to: [-0.6, -0.05], color: 'accent', width: 2.4, label: 'B (tangential)', labelDx: 6, labelDy: -12 }, { from: [-2.4, 0.5], to: [-0.6, 0.5], color: 'accent', width: 1.6 }],
-            points: [tag(1.2, -0.9, 'conductor: B = 0', 'ink'), tag(1.2, 0.6, 'cavity', 'ink2'), tag(0.7, -0.4, 'K along the surface', 'warn', { labelDy: 12 })],
+            points: [tag(1.2, -0.9, 'conductor: B = 0', 'ink'), tag(1.2, 0.6, 'cavity', 'ink2'), tag(0.6, -0.22, 'K along the surface', 'warn', { labelDy: 0 })],
           }), caption: t`A cavity wall in cross-section: tangential $\vec B$ just outside the metal, none inside. The surface current flows across the page. Schematic.` },
           answer: K, units: 'A/m', tol: { rel: 0.01 },
           errors: [{ value: (B * 1e-3) / (2 * MU0), feedback: t`The whole jump in $B_\parallel$ — from ${B} mT to zero — is $\mu_0K$. There is no factor of 2 here.` }],

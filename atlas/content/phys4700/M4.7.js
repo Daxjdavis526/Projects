@@ -68,8 +68,8 @@ Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\lan
     lead: t`In ammonia the nitrogen atom can sit on either side of the plane of hydrogens: states $|L\rangle$ and $|R\rangle$. Tunnelling couples them, $\hat H = -A\big(|L\rangle\langle R| + |R\rangle\langle L|\big)$, and an electric field adds a bias between the sides. Start in $|L\rangle$: this is the probability of finding the nitrogen on the right.`,
     tasks: [
       'With no bias the nitrogen tunnels completely across and back, at ν₀ = 2A/h = 23.87 GHz — the molecule’s inversion frequency.',
-      'Add a bias: the transfer becomes incomplete, ν₀²/(ν₀² + ν_b²) at most, and faster. Energy eigenstates no longer straddle both wells evenly.',
-      'Halve ν₀: the flip takes twice as long. Nothing about the oscillation is put in by hand — it is e^{−iĤt/ħ} acting on |L⟩.',
+      t`Add a bias: the transfer becomes incomplete, $\nu_0^2/(\nu_0^2 + \nu_b^2)$ at most, and faster. Energy eigenstates no longer straddle both wells evenly.`,
+      t`Halve $\nu_0$: the flip takes twice as long. Nothing about the oscillation is put in by hand — it is $e^{-i\hat Ht/\hbar}$ acting on $|L\rangle$.`,
     ],
     params: {
       x: [0, 100], y: [0, 1.1], aspect: 'wide', xlabel: 't (ps)', ylabel: 'P(nitrogen on the right)', xticks: 5, yticks: 2, axesAt: 'edge',
@@ -142,7 +142,7 @@ Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\lan
           visual: phasePic(x0, q0, 'The starting point in the phase plane and the circle the averages follow. Not marked: where it is at the time asked.'),
           answer: ans, units: 'nm', tol: { rel: 0.005, abs: 0.002 },
           errors: [{ value: x0 * Math.cos(wt * Math.PI / 180) - q0 * Math.sin(wt * Math.PI / 180), feedback: t`$\hat x_H$ gains $+(\hat p/m\omega)\sin\omega t$: a positive momentum carries $x$ forward.` }, { value: x0 * Math.cos(wt * Math.PI / 180), feedback: t`Include the momentum term $(\langle p\rangle_0/m\omega)\sin\omega t$.` }].filter((e) => Math.abs(e.value - ans) > 0.02),
-          hints: [t`The state is fixed, so $\langle x\rangle(t) = \langle x\rangle_0\cos\omega t + \tfrac{\langle p\rangle_0}{m\omega}\sin\omega t$.`, t`$\cos ${wt}^\circ = ${fmt(Math.cos(wt * Math.PI / 180), 4)}$, $\sin ${wt}^\circ = ${fmt(Math.sin(wt * Math.PI / 180), 4)}$.`],
+          hints: [t`The state is fixed, so $\langle x\rangle(t) = \langle x\rangle_0\cos\omega t + \tfrac{\langle p\rangle_0}{m\omega}\sin\omega t$.`, t`$\cos ${wt}^\circ = ${fmt(Math.abs(Math.cos(wt * Math.PI / 180)) < 1e-9 ? 0 : Math.cos(wt * Math.PI / 180), 4)}$, $\sin ${wt}^\circ = ${fmt(Math.sin(wt * Math.PI / 180), 4)}$.`],
           teach: 'In the Heisenberg picture the oscillator’s operators rotate in phase space, and so do their averages — exactly as a classical oscillator moves.',
           explain: t`$\langle x\rangle = ${x0}\cos ${wt}^\circ + ${q0}\sin ${wt}^\circ = ${fmt(ans, 4)}$ nm, whatever the shape of the wave packet: for a quadratic potential Ehrenfest’s theorem is exact.`,
         };
@@ -199,7 +199,7 @@ Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\lan
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: nu / Math.sqrt(nu * nu + nb * nb), feedback: t`That is an amplitude; the probability is its square, $\nu_0^2/(\nu_0^2 + \nu_b^2)$.` }, { value: 1, feedback: 'With a bias the transfer is incomplete: the energy eigenstates no longer split |L⟩ evenly.' }].filter((e) => Math.abs(e.value - ans) > 0.01),
           hints: [t`Write $\hat H = \tfrac{h}{2}(-\nu_0\hat\sigma_x + \nu_b\hat\sigma_z)$: a spin in a “field” pointing at an angle $\theta$ from $-x$ toward $z$, with $\tan\theta = \nu_b/\nu_0$.`, t`$P_R(t) = \dfrac{\nu_0^2}{\nu_0^2 + \nu_b^2}\sin^2\!\big(\pi\sqrt{\nu_0^2 + \nu_b^2}\,t\big)$.`],
-          teach: 'A bias between two coupled states caps the transfer at ν₀²/(ν₀² + ν_b²) and speeds the oscillation to √(ν₀² + ν_b²).',
+          teach: t`A bias between two coupled states caps the transfer at $\nu_0^2/(\nu_0^2 + \nu_b^2)$ and speeds the oscillation to $\sqrt{\nu_0^2 + \nu_b^2}$.`,
           explain: t`$P_{\max} = ${nu}^2/(${nu}^2 + ${nb}^2) = ${fmt(ans, 4)}$, reached every $1/\sqrt{\nu_0^2 + \nu_b^2} = ${fmt(1000 / Math.sqrt(nu * nu + nb * nb), 3)}$ ps. The same formula (Rabi’s) governs a spin driven off resonance and an atom driven by a detuned laser.`,
         };
       },
@@ -301,6 +301,5 @@ print(abs(evolve(H2, L, 0.01)[1])**2)`,
   sources: [
     { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics, 3rd ed., §3.5.3 and Problem 3.40', url: 'https://www.cambridge.org/9781316995433' },
     { label: 'Feynman Lectures on Physics, Vol. III, ch. 8–9: the ammonia molecule', url: 'https://www.feynmanlectures.caltech.edu/III_09.html' },
-    { label: 'NIST: the first atomic clock (ammonia, 1949)', url: 'https://www.nist.gov/time-distribution/radio-station-wwv/atomic-clocks' },
   ],
 });
