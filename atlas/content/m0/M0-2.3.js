@@ -62,7 +62,7 @@ Divide by $v_e$, then undo the logarithm with its inverse, the exponential. Once
       { label: 'Undo the 2π', text: t`$\dfrac{T}{2\pi} = \sqrt{\dfrac{L}{g}}$.` },
       { label: 'Undo the root', text: t`Square both sides: $\dfrac{T^2}{4\pi^2} = \dfrac{L}{g}$.` },
       { label: 'Free g', text: t`Take reciprocals of both sides and multiply by $L$: $g = \dfrac{4\pi^2 L}{T^2}$.` },
-      { label: 'Evaluate', text: t`$g = \dfrac{39.48 \times 1.000}{2.006^2} = \dfrac{39.48}{4.024} = 9.81\ \text{m/s}^2$. Units: $\text{m}/\text{s}^2$ ✓. And $g$ falls as $T$ grows — a slower swing means weaker gravity, as on the Moon.` },
+      { label: 'Evaluate', text: t`$g = \dfrac{39.48 \times 1.000}{2.006^2}$ $= \dfrac{39.48}{4.024}$ $= 9.81\ \text{m/s}^2$. Units: $\text{m}/\text{s}^2$ ✓. And $g$ falls as $T$ grows — a slower swing means weaker gravity, as on the Moon.` },
     ],
     answer: t`$g = \dfrac{4\pi^2 L}{T^2} = 9.81\ \text{m/s}^2$.`,
   },
@@ -149,7 +149,7 @@ Divide by $v_e$, then undo the logarithm with its inverse, the exponential. Once
       },
       hints: [t`Subtract $mgh$ first, leaving $\tfrac12 m v^2$ alone.`, t`Then multiply by $2/m$, and take the square root of everything.`],
       teach: t`Isolate the term containing the unknown, then undo its coefficient, then its power — each step applied to the whole side.`,
-      explain: t`$\tfrac12 m v^2 = E - mgh \Rightarrow v^2 = \dfrac{2(E - mgh)}{m} \Rightarrow v = \sqrt{\dfrac{2(E - mgh)}{m}}$, equivalently $\sqrt{2E/m - 2gh}$.`,
+      explain: t`$\tfrac12 m v^2 = E - mgh$ $\Rightarrow v^2 = \dfrac{2(E - mgh)}{m}$ $\Rightarrow v = \sqrt{\dfrac{2(E - mgh)}{m}}$, equivalently $\sqrt{2E/m - 2gh}$.`,
     }),
   ],
   checkpoint: [

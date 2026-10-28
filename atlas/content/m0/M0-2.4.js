@@ -102,7 +102,7 @@ The picture explains it: $x^2 + bx$ is a square with two strips of width $b/2$ a
           errors,
           hints: [t`$\left(x ${sgn(b / 2)}\right)^2 = x^2 ${sgn(b, 'x')} + ${b * b / 4}$.`, t`So $q$ is whatever is left: $${c} - ${b * b / 4}$.`],
           teach: t`Completing the square adds the corner $(b/2)^2$ and subtracts it again, so $q = c - (b/2)^2$.`,
-          explain: t`$x^2 ${sgn(b, 'x')} ${sgn(c)} = \left(x ${sgn(b / 2)}\right)^2 - ${b * b / 4} ${sgn(c)} = \left(x ${sgn(b / 2)}\right)^2 ${sgn(q)}$.`,
+          explain: t`$x^2 ${sgn(b, 'x')} ${sgn(c)}$ $= \left(x ${sgn(b / 2)}\right)^2 - ${b * b / 4} ${sgn(c)}$ $= \left(x ${sgn(b / 2)}\right)^2 ${sgn(q)}$.`,
           visual: cornerFig(b, t`$x^2 + ${Math.abs(b)}x$ as a square and two strips; the dashed corner completes it.${b < 0 ? ' Drawn for $+' + Math.abs(b) + 'x$; the sign only changes the sign inside the bracket.' : ''}`),
         };
       },
@@ -138,7 +138,7 @@ The picture explains it: $x^2 + bx$ is a square with two strips of width $b/2$ a
       },
       hints: [t`Factor $2$ out of the $x$ terms: $2(x^2 + 4x) + 3$.`, t`$x^2 + 4x = (x + 2)^2 - 4$, and that $-4$ is multiplied by $2$.`],
       teach: t`With a leading coefficient, factor it out of the $x$ terms first, and remember it multiplies the corner you subtract.`,
-      explain: t`$2(x^2 + 4x) + 3 = 2\big[(x + 2)^2 - 4\big] + 3 = 2(x + 2)^2 - 8 + 3 = 2(x + 2)^2 - 5$. Vertex $(-2, -5)$.`,
+      explain: t`$2(x^2 + 4x) + 3$ $= 2\big[(x + 2)^2 - 4\big] + 3$ $= 2(x + 2)^2 - 8 + 3$ $= 2(x + 2)^2 - 5$. Vertex $(-2, -5)$.`,
     }),
     num({
       id: 'cts-root', difficulty: 2,

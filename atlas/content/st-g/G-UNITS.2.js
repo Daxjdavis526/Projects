@@ -39,7 +39,7 @@ function map({ mark = null, sliders = null, readouts = null, density = null, vli
     { fn: `x + ${r6(L2G)}`, color: 'bad', width: 1.8, label: 'horizon: R = 2GM/c²', labelAt: 18, labelDx: 10, labelDy: 14 },
     { fn: `${r6(LHC)} - x`, color: 'violet', width: 1.8, label: 'quantum: ħ/Mc', labelAt: -14, labelDx: 10, labelDy: 0 },
   ];
-  if (density) curves.push({ fn: `(x + ${r6(Math.log10(3 / (4 * Math.PI * density.rho)))})/3`, color: 'gold', dash: true, width: 1.6, label: density.label, labelAt: density.at ?? 10, labelDx: -4, labelDy: -10, labelAlign: 'right' });
+  if (density) curves.push({ fn: `(x + ${r6(Math.log10(3 / (4 * Math.PI * density.rho)))})/3`, color: 'gold', dash: true, width: 1.6, label: density.label, labelAt: density.at ?? 2, labelDx: 8, labelDy: -10 });
   return {
     type: 'graph',
     params: {
@@ -157,7 +157,7 @@ $$\ell_P = \sqrt{\frac{\hbar G}{c^3}} = 1.616\times10^{-35}\ \text{m}, \qquad m_
         const R = Math.sqrt(3 * C * C / (8 * Math.PI * G * rho)), ans = R / AU;
         return {
           prompt: t`With $G = c = 1$ a density is an inverse area. A uniform ball of density $\rho$ and radius $R$ has mass $\tfrac43\pi R^3\rho$, and it lies inside its own horizon when $R \le 2M$. Restore $G$ and $c$ and find the radius at which a ball of ${what} would be a black hole, in astronomical units (1 AU $= 1.496\times10^{11}$ m).`,
-          visual: map({ density: { rho, label: `constant density ${rho} kg/m³`, at: 32 }, caption: t`Balls of one density (gold dashed) grow as $R \propto M^{1/3}$, more slowly than the horizon line. Where they cross, the ball is a black hole. Ignores pressure, and that real matter this massive would collapse long before.` }),
+          visual: map({ density: { rho, label: `constant density ${rho} kg/m³` }, caption: t`Balls of one density (gold dashed) grow as $R \propto M^{1/3}$, more slowly than the horizon line. Where they cross, the ball is a black hole. Ignores pressure, and that real matter this massive would collapse long before.` }),
           answer: ans, units: 'AU', tol: { rel: 0.005 },
           errors: [{ value: ans * Math.sqrt(2), feedback: t`Use $R = 2GM/c^2$ with $M = \tfrac43\pi R^3\rho$: $R^2 = 3c^2/(8\pi G\rho)$.` }],
           hints: [t`In geometric units $R = 2\cdot\tfrac43\pi R^3\rho$, so $R^2 = 3/(8\pi\rho)$.`, t`Restore: $\rho \to G\rho/c^2$, so $R = \sqrt{3c^2/(8\pi G\rho)}$.`],

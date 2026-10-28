@@ -57,7 +57,7 @@ Multiply two such numbers by multiplying the mantissas and **adding** the expone
     prompt: t`How long does sunlight take to reach Earth? The distance is $1.496 \times 10^{11}$ m and light travels at $2.998 \times 10^{8}$ m/s.`,
     visual: logLadder({ items: [{ v: C, label: 'light-second' }, { v: 1.496e11, label: 'Earth–Sun' }], x: [6.5, 13], xlabel: 'distance (m)', alternate: false, caption: t`The Sun is between two and three powers of ten farther away than light travels in one second.` }),
     steps: [
-      { label: 'Set up', text: t`$t = \dfrac{d}{c} = \dfrac{1.496 \times 10^{11}\ \text{m}}{2.998 \times 10^{8}\ \text{m/s}}$.` },
+      { label: 'Set up', text: t`$t = \dfrac{d}{c}$ $= \dfrac{1.496 \times 10^{11}\ \text{m}}{2.998 \times 10^{8}\ \text{m/s}}$.` },
       { label: 'Split the parts', text: t`Mantissas divide: $1.496 / 2.998 = 0.4990$. Exponents subtract: $10^{11}/10^{8} = 10^{3}$.` },
       { label: 'Normalise', text: t`$0.4990 \times 10^{3}$ has a mantissa below 1, so move the point: $4.990 \times 10^{2}$ s.` },
       { label: 'Convert', text: t`$499.0\ \text{s} / 60 = 8.32$ minutes.` },

@@ -133,7 +133,7 @@ The cure is simple and non-negotiable: **substitute every candidate back into th
       },
       hints: [t`Expand $(\sqrt{2x + 1} + 1)^2$ properly.`, t`Move the $+1$ across first so the root is alone.`],
       teach: t`Isolate the radical before squaring, so the square of the root side is just what is under the root.`,
-      explain: t`$\sqrt{2x + 1} = x - 1 \Rightarrow 2x + 1 = x^2 - 2x + 1 \Rightarrow x(x - 4) = 0$. Check: $x = 4$ gives $3 + 1 = 4$ ✓; $x = 0$ gives $1 + 1 = 2 \ne 0$ ✗. Answer: $x = 4$.`,
+      explain: t`$\sqrt{2x + 1} = x - 1$ $\Rightarrow 2x + 1 = x^2 - 2x + 1$ $\Rightarrow x(x - 4) = 0$. Check: $x = 4$ gives $3 + 1 = 4$ ✓; $x = 0$ gives $1 + 1 = 2 \ne 0$ ✗. Answer: $x = 4$.`,
     }),
     num({
       id: 'rational-solve', difficulty: 2,

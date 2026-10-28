@@ -21,6 +21,7 @@
 //       edgeLabels: true,                // the box edges' lengths as labels (dr, r dθ, r sin θ dφ …); false hides them
 //       readouts: ['x', 'y', 'z'],       // any of x y z rho r theta phi (angles in degrees); [] for none
 //       labels: true, pointLabel: 'P',   // TeX labels at the point and on the unit vectors
+//       radius: 'rho',                   // the cylindrical radius's name: 'rho' (ρ, as in calculus books) or 's' (Griffiths)
 //       range: 3, yaw, pitch, dist } }
 //
 // The geometry lives in model/c3-coords.js, tested in test/c3-coords.test.mjs.
@@ -69,11 +70,12 @@ export function mount(F, P) {
   const cart = (sys) => (sys === 'cylindrical' ? M.cylToCart(state.cr, state.cp * DEG, state.cz) : M.sphToCart(state.sr, state.st * DEG, state.sp * DEG));
   toOther(P.system);
 
+  const RHO = P.radius === 's' ? 's' : '\\rho', RHO_TEXT = P.radius === 's' ? 's' : 'ρ';
   const ctrls = {};
-  if (P.choose) F.choice({ key: 'sys', label: 'Coordinates', options: [['cylindrical', 'Cylindrical (ρ, φ, z)'], ['spherical', 'Spherical (r, θ, φ)']], value: P.system, explain: 'The same point, described two ways.' });
+  if (P.choose) F.choice({ key: 'sys', label: 'Coordinates', options: [['cylindrical', `Cylindrical (${RHO_TEXT}, φ, z)`], ['spherical', 'Spherical (r, θ, φ)']], value: P.system, explain: 'The same point, described two ways.' });
   if (P.sliders) {
     const add = (sys, spec) => { if (P.choose || sys === P.system) ctrls[spec.key] = { sys, c: F.slider({ ...spec, value: +(+state[spec.key]).toFixed(2) }) }; };
-    add('cylindrical', { key: 'cr', label: '$\\rho$ (distance from the $z$-axis)', min: 0, max: R, step: 0.05, explain: 'How far from the $z$-axis: the radius of the cylinder.' });
+    add('cylindrical', { key: 'cr', label: `$${RHO}$ (distance from the $z$-axis)`, min: 0, max: R, step: 0.05, explain: 'How far from the $z$-axis: the radius of the cylinder.' });
     add('cylindrical', { key: 'cp', label: '$\\phi$ (azimuth)', min: 0, max: 360, step: 1, unit: '^\\circ', explain: 'The angle around the $z$-axis, from $+x$ toward $+y$.' });
     add('cylindrical', { key: 'cz', label: '$z$ (height)', min: -R * 0.85, max: R * 0.85, step: 0.05, explain: 'Height above the $xy$-plane, as in Cartesian coordinates.' });
     add('spherical', { key: 'sr', label: '$r$ (distance from the origin)', min: 0, max: R, step: 0.05, explain: 'How far from the origin: the radius of the sphere.' });
@@ -162,7 +164,7 @@ export function mount(F, P) {
       const d = sph ? [0.45 * R / 3, 20 * DEG, 26 * DEG] : [0.45 * R / 3, 24 * DEG, 0.45 * R / 3];
       const edges = M.element(sys, q, d);
       for (const e of edges) view.line(e.pts, { color: 'gold', width: 1.8, bias: 0.06 });
-      const names = sph ? ['dr', 'r\\,d\\theta', 'r\\sin\\theta\\,d\\phi'] : ['d\\rho', '\\rho\\,d\\phi', 'dz'];
+      const names = sph ? ['dr', 'r\\,d\\theta', 'r\\sin\\theta\\,d\\phi'] : [`d${RHO}`, `${RHO}\\,d\\phi`, 'dz'];
       // label the three edges through the base corner, pushed away from the box's middle on screen
       const all = edges.flatMap((e) => e.pts), mid = [0, 1, 2].map((k) => all.reduce((s, q2) => s + q2[k], 0) / all.length);
       const [mx, my] = view.project(mid), placed = [];
@@ -181,7 +183,7 @@ export function mount(F, P) {
     if (P.labels !== false && P.pointLabel) marks.push([p, P.pointLabel, 'gold', [12, -12]]);
     if (P.basis !== false) {
       const B = sph ? M.sphBasis(thS, phS) : M.cylBasis(phiC);
-      const names = sph ? ['\\hat r', '\\hat\\theta', '\\hat\\phi'] : ['\\hat\\rho', '\\hat\\phi', '\\hat z'];
+      const names = sph ? ['\\hat r', '\\hat\\theta', '\\hat\\phi'] : [`\\hat ${RHO}`, '\\hat\\phi', '\\hat z'];
       const cols = sph ? ['accent', 'good', 'warn'] : ['accent', 'warn', 'violet'];
       const L = 0.32 * R;
       B.forEach((u, k) => {
@@ -207,7 +209,7 @@ export function mount(F, P) {
     const rows = [];
     const [cr] = M.cartToCyl(...p), [sr, st] = M.cartToSph(...p);
     const num = (v) => (Math.abs(v) < 5e-4 ? '0' : String(+v.toFixed(2)));
-    const VALS = { x: ['$x$', num(p[0])], y: ['$y$', num(p[1])], z: ['$z$', num(p[2])], rho: ['$\\rho$', num(cr)], r: ['$r$', num(sr)],
+    const VALS = { x: ['$x$', num(p[0])], y: ['$y$', num(p[1])], z: ['$z$', num(p[2])], rho: [`$${RHO}$`, num(cr)], r: ['$r$', num(sr)],
       theta: ['$\\theta$', `${num(sph ? state.st : st / DEG)}^\\circ`], phi: ['$\\phi$', `${num(sph ? state.sp : state.cp)}^\\circ`] };
     for (const k of P.readouts || []) rows.push(VALS[k]);
     if (rows.length) F.readout(rows);
@@ -221,6 +223,7 @@ export function validate(P) {
   const problems = [];
   if (!SYSTEMS.includes(P.system)) problems.push(`c3-coords: system must be ${SYSTEMS.join(' or ')}`);
   if (!(P.range > 0)) problems.push('c3-coords: range must be positive');
+  if (P.radius !== undefined && P.radius !== 'rho' && P.radius !== 's') problems.push("c3-coords: radius is 'rho' or 's'");
   if (P.point) {
     if (!(Array.isArray(P.point) && P.point.length === 3 && P.point.every(Number.isFinite))) problems.push('c3-coords: point must be three numbers');
     else if (P.system === 'spherical' && (P.point[0] < 0 || P.point[0] > P.range || P.point[1] < 0 || P.point[1] > 180 || P.point[2] < 0 || P.point[2] > 360)) problems.push('c3-coords: spherical point must have 0 ≤ r ≤ range, 0 ≤ θ ≤ 180, 0 ≤ φ ≤ 360 (degrees)');

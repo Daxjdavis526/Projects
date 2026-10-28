@@ -67,3 +67,6 @@ export const cxmap = (params, caption, more = {}) => ({ type: 'cx-map', params: 
 
 /** Unit-modulus number at an angle in degrees. */
 export const cis = (d, r = 1) => M.polar(r, d * DEG);
+
+/** Keep only the error entries whose value is clearly apart from the answer (and from its negative). */
+export const apart = (ans, errors, rel = 0.02) => errors.filter((e) => Math.abs(Math.abs(e.value) - Math.abs(ans)) > rel * Math.max(1e-9, Math.abs(ans)) + 1e-9);

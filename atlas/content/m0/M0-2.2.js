@@ -54,7 +54,7 @@ Sums are combined over a common denominator. Physics produces these constantly: 
       caption: t`With $m_1 = 1$: the reduced mass is always below both masses and approaches $m_1$ as $m_2$ grows. The dashed line is what the slip $(a^{-1} + b^{-1})^{-1} = a + b$ would give.` },
     steps: [
       { label: 'Rewrite', text: t`$m^{-1} = \dfrac1m$, so $\mu = \dfrac{1}{\dfrac1{m_1} + \dfrac1{m_2}}$.` },
-      { label: 'Common denominator', text: t`$\dfrac1{m_1} + \dfrac1{m_2} = \dfrac{m_2}{m_1m_2} + \dfrac{m_1}{m_1m_2} = \dfrac{m_1 + m_2}{m_1 m_2}$.` },
+      { label: 'Common denominator', text: t`$\dfrac1{m_1} + \dfrac1{m_2}$ $= \dfrac{m_2}{m_1m_2} + \dfrac{m_1}{m_1m_2}$ $= \dfrac{m_1 + m_2}{m_1 m_2}$.` },
       { label: 'Invert', text: t`One over a fraction flips it: $\mu = \dfrac{m_1 m_2}{m_1 + m_2}$.` },
       { label: 'Sense check', text: t`If $m_2 \gg m_1$ (a satellite and Earth), $\mu \approx \dfrac{m_1 m_2}{m_2} = m_1$: the light body does all the moving. If $m_1 = m_2 = m$, $\mu = m/2$. Units: kg·kg/kg = kg ✓.` },
     ],
@@ -90,7 +90,7 @@ Sums are combined over a common denominator. Physics produces these constantly: 
           errors: [{ answer: `${a + b}/(2x + ${c})`, feedback: t`Adding tops and adding bottoms is not how fractions add: $\tfrac12 + \tfrac12$ is not $\tfrac24$.` }, { answer: `${a + b}/(x(x + ${c}))`, feedback: t`Each numerator must be multiplied by the factor its denominator was missing: $${a}(x + ${c})$ and $${b}x$.` }],
           hints: [t`The common denominator is $x(x + ${c})$.`, t`$\dfrac{${a}}{x} = \dfrac{${a}(x + ${c})}{x(x + ${c})}$ and $\dfrac{${b}}{x + ${c}} = \dfrac{${b}x}{x(x + ${c})}$.`],
           teach: t`To add fractions, rewrite each over the common denominator, scaling its numerator by the same factor.`,
-          explain: t`$\dfrac{${a}(x + ${c}) + ${b}x}{x(x + ${c})} = \dfrac{${a + b}x + ${a * c}}{x(x + ${c})}$.`,
+          explain: t`$\dfrac{${a}(x + ${c}) + ${b}x}{x(x + ${c})}$ $= \dfrac{${a + b}x + ${a * c}}{x(x + ${c})}$.`,
           visual: { type: 'graph', params: { x: [0, 5], y: [0, 6], aspect: 'wide', curves: [{ fn: `${a}/x`, color: 'accent', dash: true, domain: [0.05, 5], label: `${a}/x`, labelAt: 4.2, labelDy: -12 }, { fn: `${b}/(x + ${c})`, color: 'gold', dash: true, domain: [0, 5], label: `${b}/(x + ${c})`, labelAt: 3.2, labelDy: 14 }, { fn: `${a}/x + ${b}/(x + ${c})`, color: 'violet', domain: [0.05, 5], label: 'sum', labelAt: 1.2, labelDx: 8 }] },
             caption: t`The two fractions (dashed) and their sum, for $x > 0$. Your single fraction must trace the violet curve.` },
         };

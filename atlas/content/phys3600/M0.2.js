@@ -183,7 +183,7 @@ You proved them in [Calculus III](#/lesson/math2210.C3-5.10). This lesson is abo
       ],
       visual: {
         type: 'graph',
-        params: { x: [0, 3], y: [-2.5, 1.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'radius R of the bounding sphere', ylabel: 'size', curves: [{ fn: '-x', color: 'accent', label: 'f ~ 1/R', labelAt: 2.3, labelDy: 20 }, { fn: '-2*x', color: 'teal', label: 'A ~ 1/R²', labelAt: 0.6, labelDy: 22 }, { fn: '1.1 - x', color: 'gold', dash: true, label: 'surface term ~ 4πR²·f·A ~ 1/R', labelAt: 1.3, labelDy: -16 }] },
+        params: { x: [0, 3], y: [-2.5, 1.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'radius R of the bounding sphere', ylabel: 'size', curves: [{ fn: '-x', color: 'accent', label: 'f ~ 1/R', labelAt: 1.6, labelDx: 16, labelDy: -6 }, { fn: '-2*x', color: 'teal', label: 'A ~ 1/R²', labelAt: 0.5, labelDx: 16, labelDy: -6 }, { fn: '1.1 - x', color: 'gold', dash: true, label: 'surface term ~ 4πR²·f·A ~ 1/R', labelAt: 1.3, labelDy: -16 }] },
         caption: t`Log–log sketch for a point charge’s $f = V \sim 1/R$ and $\vec A = \vec E \sim 1/R^2$: the surface term $\oint f\vec A\cdot d\vec a \sim 4\pi R^2\cdot R^{-3}$ dies away as $1/R$. Slopes exact, heights illustrative.`,
       },
       hints: ['Start from a product rule — which derivative of a product contains ∇·A?', 'The divergence theorem turns the integral of a divergence into a surface integral; the last step is the limit.'],
@@ -246,7 +246,7 @@ You proved them in [Calculus III](#/lesson/math2210.C3-5.10). This lesson is abo
       prompt: t`For a localized charge distribution, the energy calculation uses $\int_{\text{all space}} V\,\nabla^2 V\,d\tau = -\int_{\text{all space}}|\nabla V|^2\,d\tau$. Why may the surface term be dropped?`,
       visual: {
         type: 'graph',
-        params: { x: [0, 3], y: [-3.5, 3.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'radius R of the bounding sphere (m)', ylabel: 'size', curves: [{ fn: '-x', color: 'accent', label: 'V ~ 1/R', labelAt: 2.2, labelDy: -16 }, { fn: '-2*x', color: 'teal', label: '|∇V| ~ 1/R²', labelAt: 0.9, labelDy: 22 }, { fn: '1.1 + 2*x', domain: [0, 1.15], color: 'violet', label: 'area 4πR²', labelAt: 0.75, labelDy: 20 }] },
+        params: { x: [0, 3], y: [-3.5, 3.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'radius R of the bounding sphere (m)', ylabel: 'size', curves: [{ fn: '-x', color: 'accent', label: 'V ~ 1/R', labelAt: 2.2, labelDy: -16 }, { fn: '-2*x', color: 'teal', label: '|∇V| ~ 1/R²', labelAt: 0.8, labelDx: 16, labelDy: -6 }, { fn: '1.1 + 2*x', domain: [0, 1.15], color: 'violet', label: 'area 4πR²', labelAt: 0.6, labelDx: 16, labelDy: 10 }] },
         caption: 'Far from any localized charge: how V, its gradient and the area of a large sphere scale with its radius R. Slopes exact; heights illustrative.',
       },
       choices: [

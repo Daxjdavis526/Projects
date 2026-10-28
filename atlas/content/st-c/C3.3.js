@@ -224,9 +224,9 @@ Near a point $p$, a sphere bends away from its tangent plane in every direction 
         const al = Math.asin(rho / R), om = 2 * Math.PI * (1 - Math.cos(al));
         return {
           prompt: t`A capsule’s heat shield is a spherical cap: part of a sphere of radius $${R}$ m, with a circular rim of radius $${rho}$ m. Its outward normals point into a cone of directions. What solid angle do they cover — the area of the shield’s Gauss image on the unit sphere — in steradians?`,
-          visual: one(0, { domain: [[0, 1], [0.62, 1]], curves: [{ param: G[0].X('t', 0.62), t: [0, 1], color: 'gold', width: 2.4 }], pitch: -0.1, dist: 7 }, 'A spherical cap seen from the side (the shield faces down, toward the flow). Not to scale.'),
+          visual: one(0, { domain: [[0, 1], [r6(1 - al / Math.PI), 1]], curves: [{ param: G[0].X('t', r6(1 - al / Math.PI)), t: [0, 1], color: 'gold', width: 2.4 }, ...[0, 0.33, 0.67].map((u) => ({ param: G[0].X(u, r6(1 - al / Math.PI)).map((q, i) => `${q} + 0.9*t*(${G[0].n(u, r6(1 - al / Math.PI))[i]})`), t: [0, 1], color: 'bad', width: 2.6 }))], pitch: 0.15, dist: 7, target: [0, 0, -1.2] }, 'The shield’s true shape, scaled down, facing the flow below it, with its rim (gold) and the normals at three rim points (red).'),
           answer: om, units: 'sr', tol: { rel: 0.01 },
-          errors: [{ value: 2 * Math.PI * R * R * (1 - Math.cos(al)), feedback: t`That is the shield’s area in $\text{m}^2$. The Gauss image lives on the *unit* sphere: divide by $R^2$.` }, { value: Math.PI * al * al, feedback: t`A small flat disc of angular radius $\alpha$ would cover about $\pi\alpha^2$; the exact cap area is $2\pi(1 - \cos\alpha)$.` }],
+          errors: [{ value: 2 * Math.PI * R * R * (1 - Math.cos(al)), feedback: t`That is the shield’s area in $\text{m}^2$. The Gauss image lives on the *unit* sphere: divide by $R^2$.` }, { value: Math.PI * al * al, feedback: t`A small flat disc of angular radius $\alpha$ would cover about $\pi\alpha^2$; the exact cap area is $2\pi(1 - \cos\alpha)$.` }].filter((e) => Math.abs(e.value - om) > 0.03 * om),
           hints: [t`On a sphere $\mathbf n$ is the radial direction, so the normals fill a cone of half-angle $\alpha$ with $\sin\alpha = ${rho}/${R}$.`, t`A cap of half-angle $\alpha$ on the unit sphere has area $2\pi(1 - \cos\alpha)$.`],
           teach: 'The Gauss image of a spherical cap is the same cap, shrunk onto the unit sphere: area divided by R².',
           explain: t`$\alpha = \arcsin(${rho}/${R}) = ${nice((al * 180) / Math.PI, 3)}^\circ$, so the normals cover $2\pi(1 - \cos\alpha) = ${nice(om, 3)}$ sr. The shield’s own area is $${nice(2 * Math.PI * R * R * (1 - Math.cos(al)), 3)}\ \text{m}^2$; their ratio is $1/R^2 = ${nice(1 / (R * R), 3)}\ \text{m}^{-2}$ — the Gaussian curvature of the sphere, as module C5 will define it. A flatter shield (larger $R$) turns its normals less.`,
@@ -244,7 +244,7 @@ Near a point $p$, a sphere bends away from its tangent plane in every direction 
         2: t`The saddle’s normal changes along its lines, as $(-y, -c, 1)$ shows.`,
         3: t`On the cylinder $\mathbf n = (\cos\varphi, \sin\varphi, 0)$ does not depend on $z$: constant along each vertical line.`,
       },
-      hints: [t`Cylinder: $\mathbf n = (\cos\varphi, \sin\varphi, 0)$. Saddle $z = xy$: $\mathbf n \propto (-z_x, -z_y, 1) = (-y, -x, 1)$.`],
+      hints: [t`Write the unit normal of each surface and restrict it to one of its straight lines.`, t`Cylinder: $\mathbf n = (\cos\varphi, \sin\varphi, 0)$. Saddle $z = xy$: $\mathbf n \propto (-z_x, -z_y, 1) = (-y, -x, 1)$.`],
       teach: 'Along the rulings of a cylinder the tangent plane stays fixed — the mark of a surface that unrolls flat; a saddle’s tangent plane twists along its lines.',
       explain: 'Surfaces whose tangent plane is constant along each ruling are the developable ones (cylinders, cones, tangent developables): they unroll onto a plane. The saddle is ruled but not developable, and module C6 will show why it cannot be: its Gaussian curvature is negative.',
     }),
