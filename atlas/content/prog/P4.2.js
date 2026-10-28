@@ -63,7 +63,7 @@ so on a log $y$ axis (\`ax.set_yscale("log")\`) the data fall on a line whose sl
     lead: t`Press **Run**. The top row shows the same muon-decay counts on linear and log axes, with Poisson error bars. The bottom row shows the same two numbers as bars, once with a truncated axis and once from zero. Which panels tell the truth at a glance?`,
     tasks: [
       'On the linear panel, find the error bars of the late bins: they are there, but too small to see. On the log panel they grow as the counts fall.',
-      'Change `ax[1, 0].set_ylim(300, 340)` to `(0, 400)`: the 11% difference stops looking like a factor of 8.',
+      'Change `ax[1, 0].set_ylim(300, 340)` to `(0, 400)`: the 11% difference stops looking like a factor of 9.',
       'Change the first x label to `"decay time $\\tau$ (μs)"`, without the `r`: the label reads “au”, because `\\t` became a tab.',
     ],
     params: {

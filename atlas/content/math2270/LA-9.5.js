@@ -2,10 +2,9 @@
 // dominant eigenvalue; Markov chains and their steady states (Markov's own
 // vowels and consonants); and a pointer to normal modes.
 import { lesson, mcq, num, code } from '../../src/core/content.js';
-import { nice } from '../../src/core/format.js';
-import { matTeX, map2d } from './_la.js';
+import { nice, tex } from '../../src/core/format.js';
+import { matTeX, det2, map2d } from './_la.js';
 import { withEigen, decTeX, trace } from './_eig.js';
-import { det2 } from './_la.js';
 
 const t = String.raw;
 
@@ -118,7 +117,7 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
           answer: lams[0], tol: { rel: 0, abs: 0.01 },
           errors: [{ value: trace(A), feedback: 'That is the trace, the sum of the eigenvalues. Only the largest one matters in the long run.' }, { value: lams[1], feedback: 'That is the smaller eigenvalue; its mode is soon swamped.' }].filter((e) => e.value !== lams[0] && e.value !== -lams[0]),
           hints: [t`Find the eigenvalues: $\lambda^2 - ${trace(A) < 0 ? `(${trace(A)})` : trace(A)}\lambda + ${det2(A) < 0 ? `(${det2(A)})` : det2(A)} = 0$.`, t`In $\mathbf x_k = c_1\lambda_1^k\mathbf v_1 + c_2\lambda_2^k\mathbf v_2$, the term with the larger $|\lambda|$ dominates.`],
-          teach: 'In the long run x_k grows by the dominant eigenvalue each step and lines up with its eigenvector.',
+          teach: t`In the long run $\mathbf x_k$ grows by the dominant eigenvalue each step and lines up with its eigenvector.`,
           explain: t`The eigenvalues are $${lams[0]}$ and $${lams[1]}$. Since $|${lams[0]}| > |${lams[1]}|$, $\mathbf x_k \approx c_1(${lams[0]})^k\mathbf v_1$: growth by a factor $${lams[0]}$ per step (as long as $c_1 \ne 0$).`,
           visual: map2d(A, { eigen: true, view: 2.6, caption: 'A with its eigenvector lines and eigenvalues: repeated application pulls every vector toward the line with the larger stretch.' }),
         };
@@ -169,7 +168,7 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
           errors: [{ value: 1 - a * b, feedback: t`Use the trace: $\lambda_1 + \lambda_2 = \operatorname{tr}P$, with $\lambda_1 = 1$.` }].filter((e) => Math.abs(e.value - l2) > 0.005),
           hints: [t`One eigenvalue is 1. The two add up to $\operatorname{tr}P = ${nice(2 - a - b)}$.`],
           teach: 'For a 2-state chain the second eigenvalue is tr P − 1; its size sets how fast the chain forgets its start.',
-          explain: t`$\lambda_2 = \operatorname{tr}P - 1 = ${nice(2 - a - b)} - 1 = ${nice(l2)}$. ${l2 < 0 ? 'Negative: the deviation flips sign each step while it shrinks.' : 'Positive: the deviation shrinks steadily.'} After 10 steps it has shrunk by $|\lambda_2|^{10} = ${nice(Math.abs(l2) ** 10, 3)}$.`,
+          explain: t`$\lambda_2 = \operatorname{tr}P - 1 = ${nice(2 - a - b)} - 1 = ${nice(l2)}$. ${l2 < 0 ? 'Negative: the deviation flips sign each step while it shrinks.' : 'Positive: the deviation shrinks steadily.'} After 10 steps it has shrunk by $|\lambda_2|^{10} = ${tex(Math.abs(l2) ** 10)}$.`,
           visual: chainPic(a, b),
         };
       },
@@ -204,7 +203,7 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
         return {
           prompt: t`A seabird population is counted each year as juveniles $J$ and adults $A$. Each adult raises $${f}$ juveniles a year, a fraction $${s}$ of juveniles survive to become adults, and a fraction $${a}$ of adults survive: $\begin{bmatrix} J \\ A \end{bmatrix}_{k+1} = ${decTeX([[0, f], [s, a]])}\begin{bmatrix} J \\ A \end{bmatrix}_k$. What is the long-run growth factor per year? Give 3 significant figures.`,
           answer: lam, tol: { rel: 0.003 },
-          errors: [{ value: f * s + a, feedback: 'Adding the rates is not an eigenvalue. Solve the characteristic equation λ² − aλ − fs = 0.' }, { value: (a - Math.sqrt(a * a + 4 * f * s)) / 2, feedback: 'That is the negative root. The dominant eigenvalue is the larger one.' }],
+          errors: [{ value: f * s + a, feedback: 'Adding the rates is not an eigenvalue. Solve the characteristic equation λ² − aλ − fs = 0.' }, { value: (a - Math.sqrt(a * a + 4 * f * s)) / 2, feedback: 'That is the negative root. The dominant eigenvalue is the larger one.' }].filter((e) => Math.abs(e.value - lam) > 0.01 * lam),
           hints: [t`$\det\begin{bmatrix} -\lambda & ${f} \\ ${s} & ${a} - \lambda \end{bmatrix} = \lambda^2 - ${a}\lambda - ${nice(f * s)} = 0$.`, t`$\lambda = \tfrac12\big(${a} + \sqrt{${nice(a * a)} + ${nice(4 * f * s)}}\big)$.`],
           teach: 'A population model’s long-run growth rate is the dominant eigenvalue of its matrix.',
           explain: t`$\lambda_1 = \tfrac12\big(${a} + \sqrt{${nice(a * a + 4 * f * s)}}\big) = ${nice(lam, 4)}$: the population ${lam > 1 ? `grows about ${Math.round((lam - 1) * 100)}% a year` : `shrinks about ${Math.round((1 - lam) * 100)}% a year`} once the age structure settles along the eigenvector. Ecologists call such stage-structured matrices Leslie or Lefkovitch matrices; the numbers here are illustrative.`,

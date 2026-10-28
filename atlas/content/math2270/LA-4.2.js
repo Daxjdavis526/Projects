@@ -57,7 +57,7 @@ The reason is superposition. Any $\mathbf x$ is $x_1\mathbf e_1 + \dots + x_n\ma
       { label: 'Plan', text: t`$T$ is linear, so its matrix has columns $T(\mathbf e_1)$ and $T(\mathbf e_2)$. Find where the reflection sends each.` },
       { label: 'The rule', text: t`Reflecting in a line at angle $\varphi$ sends a unit arrow at angle $\alpha$ to the unit arrow at angle $2\varphi - \alpha$: it lands as far past the mirror as it started before it. Here $\varphi = 30^\circ$.` },
       { label: 'Column 1', text: t`$\mathbf e_1$ is at $0^\circ$, so it goes to $60^\circ$: $T(\mathbf e_1) = (\cos60^\circ, \sin60^\circ) = (\tfrac12, \tfrac{\sqrt3}{2})$.` },
-      { label: 'Column 2', text: t`$\mathbf e_2$ is at $90^\circ$, so it goes to $60^\circ - 90^\circ = -30^\circ$: $T(\mathbf e_2) = (\cos(-30^\circ), \sin(-30^\circ)) = (\tfrac{\sqrt3}{2}, -\tfrac12)$.` },
+      { label: 'Column 2', text: t`$\mathbf e_2$ is at $90^\circ$, so it goes to $60^\circ - 90^\circ = -30^\circ$: $T(\mathbf e_2) = (\cos(-30^\circ), \sin(-30^\circ))$, which is $(\tfrac{\sqrt3}{2}, -\tfrac12)$.` },
       { label: 'Assemble', text: t`$$A = \begin{bmatrix} \frac12 & \frac{\sqrt3}{2} \\[6pt] \frac{\sqrt3}{2} & -\frac12 \end{bmatrix}$$` },
       { label: 'Check', text: t`Points on the mirror line must stay put: $A(\tfrac{\sqrt3}{2}, \tfrac12) = (\tfrac{\sqrt3}{4} + \tfrac{\sqrt3}{4},\ \tfrac34 - \tfrac14) = (\tfrac{\sqrt3}{2}, \tfrac12)$ ✓. In general the reflection in the line at angle $\varphi$ is $\begin{bmatrix} \cos2\varphi & \sin2\varphi \\ \sin2\varphi & -\cos2\varphi \end{bmatrix}$.` },
     ],

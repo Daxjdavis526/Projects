@@ -90,7 +90,7 @@ A subspace has many bases, but every one of them has the same number of vectors 
     caption: 'The violet square is a patch of the plane x + y + z = 0 (it goes on for ever). Gold: the combination of the vectors in use; red: the target w. Drag the picture to rotate.',
   },
   example: {
-    prompt: t`Find a basis and the dimension of $W = \{\mathbf x \text{ in } \mathbb R^4 : x_1 + 2x_2 - x_3 + x_4 = 0 \text{ and } x_2 + x_4 = 0\}$, then the coordinates of $\mathbf w = (3, -2, 1, 2)$ in that basis.`,
+    prompt: t`Find a basis and the dimension of $$W = \{\mathbf x \text{ in } \mathbb R^4 : x_1 + 2x_2 - x_3 + x_4 = 0 \text{ and } x_2 + x_4 = 0\},$$ then the coordinates of $\mathbf w = (3, -2, 1, 2)$ in that basis.`,
     visual: stems([['s₁', [1, 0, 1, 0], 'accent'], ['s₂', [1, -1, 0, 1], 'warn'], ['w', [3, -2, 1, 2], 'gold']], { caption: 'The two basis vectors and w as stem plots. Components 3 and 4 of w read off its coordinates directly.' }),
     steps: [
       { label: 'Recognise W', text: t`$W$ is the null space of $B = ${matTeX([[1, 2, -1, 1], [0, 1, 0, 1]])}$, so it is a subspace, and its special solutions will be a basis.` },
