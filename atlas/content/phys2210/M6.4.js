@@ -148,7 +148,7 @@ $$\sum F_\text{in} = \frac{m v^2}{r}$$
           ],
           hints: ['The centre of the circle is straight below the car: the net force must point down.', t`$mg - N = mv^2/R$.`],
           teach: 'Over a crest, N = m(g − v²/R): you feel lighter, and at v = √(gR) the road stops pushing.',
-          explain: t`$N = m\left(g - \dfrac{v^2}{R}\right) = ${m}\left(9.8 - \dfrac{${v}^2}{${R}}\right) = ${t3(N)}$ N, below the weight of ${t3(m * G)} N.`,
+          explain: t`$N = m\left(g - \dfrac{v^2}{R}\right) = ${m}\left(9.8 - \dfrac{${v}^2}{${R}}\right) = ${t3(N)}$ N, below the weight of $${t3(m * G)}$ N.`,
         };
       },
     }),

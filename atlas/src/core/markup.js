@@ -143,6 +143,7 @@ export function escapeDamage(text, { prose = true } = {}) {
     const after = /\)([_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
     if (after) return `“)${after[1]}” is a subscript or power outside $…$ and would print literally — put the whole expression in math`;
     if (/\{,\}/.test(g.v)) return 'a “{,}” sits outside $…$ and would print literally — a TeX thousands separator belongs in math';
+    if (/\\[,;:!]/.test(g.v)) return `a TeX space “${/\\[,;:!]/.exec(g.v)[0]}” sits outside $…$ and would print literally — a number formatted for math was spliced into prose; format it as plain text (a space or a comma)`;
   }
   return null;
 }

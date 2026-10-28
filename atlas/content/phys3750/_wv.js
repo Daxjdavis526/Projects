@@ -39,7 +39,7 @@ export function phasorPic(a, b, caption, o = {}) {
   return {
     type: 'graph',
     params: {
-      x: [-R, R], y: [-R, R], equal: true, aspect: 'wide', xlabel: 'Re', ylabel: 'Im', xticks: o.ticks ?? 5, yticks: o.ticks ?? 5,
+      x: [-R, R], y: [-R, R], equal: true, aspect: 'wide', xlabel: 'Re', ylabel: 'Im', xticks: o.ticks ?? 0, yticks: o.ticks ?? 0,
       curves: [...curves, ...(o.curves || [])],
       arrows: [{ from: [0, 0], to: [a, b], color: 'accent', width: 2.5, label: o.name ?? 'Ã', labelDx: 6, labelDy: -6 }, ...(o.extra || [])],
       points: [...points, ...(o.points || [])],

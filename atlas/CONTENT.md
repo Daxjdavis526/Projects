@@ -152,6 +152,13 @@ undefined, Infinity and null anywhere inside math, `\text{undefined}`
 included: a slope that does not exist is "has no value" or "is not defined"
 in prose, or $\pm\infty$ when it diverges.
 
+A link to another lesson is `[the ratio test](#/lesson/math1220.C2-4.8)`; to a
+gallery simulation, `[the resonance explorer](#/explore/resonance)`.
+
+Canvas labels (graph labels, sim captions drawn on the canvas) are plain text,
+not TeX: use Unicode (`θ̂`, `ẍ`, `v⃗`, `rₛ`, `x²`) — combining hats, dots and
+arrows are drawn over their letter.
+
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
 test catches this ("escape damage"), but it is easier not to make the mistake.
@@ -564,6 +571,9 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `pde-player` | one initial profile evolved exactly by transport (with decay), variable-speed transport, the wave or the heat equation; the x–t plane with characteristics and a draggable probe showing its domain of dependence | `mode`, `modes`, `profile`, `A`, `w`, `x0`, `c`, `lambda`, `speed`, `init`, `D`, `t`, `tmax`, `x`, `xt`, `chars`, `sheet`, `probe`, `halves`, `flux`, `energy` — see the file header |
 | `pde-walk` | seeded random walkers over the histogram of their positions against the heat-equation Gaussian of spread √(2Dt) | `N`, `dx`, `dt`, `p` (≠ ½ drifts), `steps`, `nmax`, `xr`, `seed`, `curve`, `controls`, `play`, `readout` |
 | `dg-frenet` | the fundamental theorem of curves: a space curve built from κ(s) and τ(s) by integrating the Frenet–Serret equations, a point riding it with its frame | `kappa`, `tau` (expressions of `s` and slider keys), `length`, `sliders`, `choices`, `constants`, `ghost`, `at`, `show`, `readouts`, `play`, `speed`, `fixed`, `yaw`, `pitch` |
+| `cm-polar` | plane-polar kinematics: the rotating r̂ and θ̂ and the acceleration split into r̈, −rθ̇², rθ̈ and 2ṙθ̇, head to tail and as bars | `r`, `theta` (expressions of t), `T`, `at`, `presets`, `sliders`, `show`, `bars`, `values`, `scale`, `x`, `y`, `fixed`, `readouts`, `labels` |
+| `cm-resonance` | a driven damped oscillator: amplitude (or A² with its Lorentzian and 2β width) against drive frequency, the phase lag, and drive and response in time | `w0`, `beta`, `w`, `f0`, `wmax`, `panels`, `y`, `lorentz`, `width`, `sliders`, `ranges`, `marks`, `readouts`, `cycles` |
+| `cm-fourier` | a periodic force (pulse, square, sawtooth, triangle), its partial sums, its harmonics against an oscillator's gain curve, and the summed response | `wave`, `h`, `d`, `tau`, `w0`, `beta`, `N`, `panels`, `sliders`, `ranges`, `nmax`, `units`, `readouts`, `values`, `response` |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
 | `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
 | `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |

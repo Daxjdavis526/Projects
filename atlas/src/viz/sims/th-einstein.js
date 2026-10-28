@@ -30,6 +30,7 @@
 //       ranges: {},            // slider ranges { NA: [min, max], NB: […], q: […], N: […] }
 //       cells: 'auto',         // pair: draw the oscillators ('auto': when N_A + N_B ≤ 120)
 //       visits: true,          // the time-spent dots
+//       panels: 'both',        // pair: 'both', 'cells' (oscillators only) or 'bars' (multiplicities only)
 //       numbers: 'auto',       // Ω_A·Ω_B printed over each bar ('auto': when q ≤ 10 on a linear scale)
 //       play: null,            // start running (default: in an Explore step, not in a small picture)
 //       readouts: true,
@@ -41,7 +42,7 @@
 import { Plot, pow10Label } from '../plot.js';
 import * as M from '../model/th-einstein.js';
 
-export const defaults = { mode: 'pair', NA: 3, NB: 3, q: 6, N: 3, start: 'A', scale: 'linear', x: 'q', tie: null, qper: 1, ghosts: true, controls: null, ranges: {}, cells: 'auto', visits: true, numbers: 'auto', play: null, readouts: true, hide: [], stars: true, seed: 1, alt: null };
+export const defaults = { mode: 'pair', NA: 3, NB: 3, q: 6, N: 3, start: 'A', scale: 'linear', x: 'q', tie: null, qper: 1, ghosts: true, controls: null, ranges: {}, cells: 'auto', visits: true, numbers: 'auto', panels: 'both', play: null, readouts: true, hide: [], stars: true, seed: 1, alt: null };
 const CONTROLS = ['NA', 'NB', 'q', 'N', 'scale', 'play'];
 const HIDE = ['qA', 'omega', 'peak', 'prob', 'width', 'total'];
 const LN10 = Math.LN10;
@@ -89,20 +90,21 @@ function mountList(F, P) {
     const more = om > BigInt(list.length);
     const Havail = H - (more ? 22 : 0);
     // pick the largest cell size that fits every microstate
-    let s = 30, cols = 1, rows = 1, itemW = 0, itemH = 0;
+    let s = 46, cols = 1, rows = 1, itemW = 0, itemH = 0;
     for (; s >= 7; s -= 0.5) {
       itemW = N * s + 1.3 * s; itemH = s * (P.stars ? 2.15 : 1.45);
       cols = Math.max(1, Math.floor(W / itemW)); rows = Math.ceil(list.length / cols);
       if (rows * itemH <= Havail) break;
     }
     const x0 = plot.L + (W - Math.min(cols, list.length) * itemW + 1.3 * s) / 2;
+    const y0 = plot.T + Math.max(2, (Havail - rows * itemH) / 2);
     list.forEach((st, k) => {
       const c = k % cols, r = Math.floor(k / cols);
-      const X = x0 + c * itemW, Y = plot.T + r * itemH + 2;
+      const X = x0 + c * itemW, Y = y0 + r * itemH;
       st.forEach((nq, i) => cell(g, plot, X + i * s, Y, s * 0.92, nq, 'accent'));
       if (P.stars) {
         const str = st.map((nq) => '●'.repeat(nq)).join('|');
-        plot.text(str || '|', X + (N * s) / 2, Y + s * 1.45, { screen: true, align: 'center', size: Math.max(8, Math.min(13, (1.1 * N * s) / Math.max(4, str.length))), color: 'ink2', halo: false });
+        plot.text(str || '|', X + (N * s) / 2, Y + s * 1.45, { screen: true, align: 'center', size: Math.max(8, Math.min(0.5 * s, 18, (1.1 * N * s) / Math.max(4, str.length))), color: 'ink2', halo: false });
       }
     });
     if (more) plot.text(`… and ${(om - BigInt(list.length)).toString()} more microstates`, plot.L + W / 2, plot.B - 8, { screen: true, align: 'center', color: 'ink3', size: 12 });
@@ -162,10 +164,11 @@ function mountPair(F, P) {
   };
   const showCells = () => { const { NA, NB } = sizes(); return P.cells === true || (P.cells === 'auto' && NA + NB <= 120); };
 
-  const top = F.canvas({ aspect: 'wide', label: 'The oscillators of solids A and B and the quanta they hold' });
-  const pt = new Plot(top.canvas, { x: [0, 1], y: [0, 1], axes: false, grid: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
-  const bot = F.canvas({ aspect: 'wide', label: 'The multiplicity of each macrostate q_A' });
-  const pb = new Plot(bot.canvas, { x: [0, 1], y: [0, 1], xlabel: P.x === 'fraction' ? 'q_A / q' : 'q_A (quanta in A)', ylabel: '', axesAt: 'edge' });
+  const showTop = P.panels !== 'bars', showBot = P.panels !== 'cells';
+  const top = showTop ? F.canvas({ aspect: 'wide', label: 'The oscillators of solids A and B and the quanta they hold' }) : null;
+  const pt = showTop ? new Plot(top.canvas, { x: [0, 1], y: [0, 1], axes: false, grid: false, pad: { l: 8, r: 8, t: 8, b: 8 } }) : null;
+  const bot = showBot ? F.canvas({ aspect: 'wide', label: 'The multiplicity of each macrostate: quanta in solid A' }) : null;
+  const pb = showBot ? new Plot(bot.canvas, { x: [0, 1], y: [0, 1], xlabel: P.x === 'fraction' ? 'share of the quanta in A' : 'quanta in A', ylabel: '', axesAt: 'edge', pad: { l: 62, r: 16, t: 14, b: 34 } }) : null;
 
   let S, D, ghostD = [], trace = [], last = null;
   const rebuild = () => {
@@ -185,21 +188,22 @@ function mountPair(F, P) {
     const qa = hide.has('qA') ? '?' : String(S.qA), qb = hide.has('qA') ? '?' : String(q - S.qA);
     if (showCells()) {
       const gap = W * 0.06, wA = ((W - gap) * NA) / (NA + NB), wB = W - gap - wA;
-      const layout = (n, w) => { let best = null; for (let s = 40; s >= 6; s -= 0.5) { const cols = Math.max(1, Math.floor(w / (s * 1.12))), rows = Math.ceil(n / cols); if (rows * s * 1.12 <= H - 26) { best = { s, cols }; break; } } return best || { s: 6, cols: Math.max(1, Math.floor(w / 6.7)) }; };
+      const layout = (n, w) => { let best = null; for (let s = 46; s >= 6; s -= 0.5) { const cols = Math.max(1, Math.floor(w / (s * 1.12))), rows = Math.ceil(n / cols); if (rows * s * 1.12 <= H - 26) { best = { s, cols }; break; } } return best || { s: 6, cols: Math.max(1, Math.floor(w / 6.7)) }; };
       const la = layout(NA, wA), lb = layout(NB, wB), s = Math.min(la.s, lb.s);
       const colsA = Math.max(1, Math.min(NA, Math.floor(wA / (s * 1.12)))), colsB = Math.max(1, Math.min(NB, Math.floor(wB / (s * 1.12))));
+      const rowsMax = Math.max(Math.ceil(NA / colsA), Math.ceil(NB / colsB)), yTop = pt.T + 24 + Math.max(0, (H - 26 - rowsMax * s * 1.12) / 2);
       const draw1 = (x0, w, cols, n, off, color) => {
         const used = cols * s * 1.12, xs = x0 + (w - used) / 2;
         for (let i = 0; i < n; i++) {
           const c = i % cols, r = Math.floor(i / cols), k = off + i;
           const ol = last && (k === last[0] ? 'bad' : k === last[1] ? 'good' : null);
-          cell(g, pt, xs + c * s * 1.12, pt.T + 24 + r * s * 1.12, s, S.n[k], color, ol);
+          cell(g, pt, xs + c * s * 1.12, yTop + r * s * 1.12, s, S.n[k], color, ol);
         }
       };
       draw1(pt.L, wA, colsA, NA, 0, 'accent');
       draw1(pt.L + wA + gap, wB, colsB, NB, NA, 'warn');
-      pt.text(`A: ${NA} oscillator${NA === 1 ? '' : 's'}, q_A = ${qa}`, pt.L + wA / 2, pt.T + 9, { screen: true, align: 'center', color: 'accent', size: fs, weight: 650 });
-      pt.text(`B: ${NB} oscillator${NB === 1 ? '' : 's'}, q_B = ${qb}`, pt.L + wA + gap + wB / 2, pt.T + 9, { screen: true, align: 'center', color: 'warn', size: fs, weight: 650 });
+      pt.text(`A: ${NA} oscillator${NA === 1 ? '' : 's'}, ${qa} quant${qa === '1' ? 'um' : 'a'}`, pt.L + wA / 2, pt.T + 9, { screen: true, align: 'center', color: 'accent', size: fs, weight: 650 });
+      pt.text(`B: ${NB} oscillator${NB === 1 ? '' : 's'}, ${qb} quant${qb === '1' ? 'um' : 'a'}`, pt.L + wA + gap + wB / 2, pt.T + 9, { screen: true, align: 'center', color: 'warn', size: fs, weight: 650 });
       g.save(); g.strokeStyle = pt.color('ink3'); g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pt.L + wA + gap / 2, pt.T + 20); g.lineTo(pt.L + wA + gap / 2, pt.B); g.stroke(); g.restore();
     } else {
       // too many to draw: A's share of the energy over time, with the expected band
@@ -216,7 +220,7 @@ function mountPair(F, P) {
       if (n) g.stroke();
       g.restore();
       for (const f of [0, 0.5, 1]) pt.text(String(f), x0 - 6, Y(f), { screen: true, align: 'right', color: 'ink3', size: 11, halo: false });
-      pt.text(`share of the energy in A, q_A/q   (N_A = ${NA}, N_B = ${NB}, q = ${q})`, x0, pt.T + 9, { screen: true, color: 'ink2', size: fs });
+      pt.text(`share of the energy in A   (${NA} and ${NB} oscillators, ${q} quanta)`, x0, pt.T + 9, { screen: true, color: 'ink2', size: fs });
       pt.text('gold band: mean ± one standard deviation', x1, y0 + 11, { screen: true, align: 'right', color: 'gold', size: fs - 1.5, halo: false });
     }
   }
@@ -232,7 +236,7 @@ function mountPair(F, P) {
     const ymin = log ? Math.min(0, (D.lnW[0] / LN10) * 0) : 0;
     const pad = frac ? 0.02 : 0.6;
     pb.o.yfmt = log ? pow10Label : undefined;
-    pb.o.ylabel = frac ? 'Ω / Ω(peak)' : log ? 'Ω_A·Ω_B (log scale)' : k ? `Ω_A·Ω_B  (×10^${k})`.replace(/\^(\d+)/, (m, d) => [...d].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]).join('')) : 'Ω_A·Ω_B';
+    pb.o.ylabel = frac ? 'Ω / Ω(peak)' : log ? 'Ω(A)·Ω(B), log scale' : k ? `Ω(A)·Ω(B)  (×10^${k})`.replace(/\^(\d+)/, (m, d) => [...d].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]).join('')) : 'Ω(A)·Ω(B)';
     pb.setView([frac ? 0 : -pad, frac ? 1 : q + pad], [ymin, ymax]);
     pb.clear();
     const g = pb.ctx;
@@ -294,7 +298,7 @@ function mountPair(F, P) {
     ].filter((r) => r && !(NA + NB > 0 && false)));
   }
 
-  function draw() { drawTop(); drawBottom(); readouts(); }
+  function draw() { if (showTop) drawTop(); if (showBot) drawBottom(); readouts(); }
 
   // the exchange: slow enough to follow single hops for small solids
   const reduced = () => document.documentElement.getAttribute('data-motion') === 'reduce' || !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -356,6 +360,7 @@ export function validate(P0) {
     if (!(['A', 'B', 'even'].includes(P.start) || whole(P.start, 0, P.q))) p.push('th-einstein: start is A, B, even, or a q_A from 0 to q');
     if (!['q', 'fraction'].includes(P.x)) p.push('th-einstein: x is q or fraction');
     if (!(P.qper > 0)) p.push('th-einstein: qper must be positive');
+    if (!['both', 'cells', 'bars'].includes(P.panels)) p.push('th-einstein: panels is both, cells or bars');
   }
   if (!['linear', 'log'].includes(P.scale)) p.push('th-einstein: scale is linear or log');
   if (Array.isArray(P.controls)) for (const c of P.controls) if (!CONTROLS.includes(c)) p.push(`th-einstein: unknown control “${c}”`);

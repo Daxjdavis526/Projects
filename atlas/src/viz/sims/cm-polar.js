@@ -64,7 +64,6 @@ export function mount(F, P0) {
   const presets = P.presets?.length ? P.presets : null;
   const { canvas, box } = F.canvas({ aspect: '', label: P.alt || 'A particle moving in the plane, with its polar unit vectors, velocity and acceleration' });
   const bars = P.bars ? F.canvas({ aspect: 'wide', label: 'The four terms of the polar acceleration, as bars' }) : null;
-  if (bars) bars.box.style.aspectRatio = '3 / 1';
   const keys = (P.sliders || []).map((s) => s.key);
   if (presets) F.choice({ key: 'preset', label: 'Motion', options: presets.map((q, i) => [i, q.label]), value: 0, explain: presets[0].explain || 'Each motion is a different r(t) and θ(t).' });
   for (const s of P.sliders || []) F.slider(s);
@@ -161,7 +160,8 @@ export function mount(F, P0) {
     const vals = TERMS.map(([key]) => k.terms[key]);
     const tot = [k.ar, k.at];
     const m = Math.max(1e-9, ...vals.map(Math.abs), ...tot.map(Math.abs));
-    bplot.setView([-1.05, 1.05], [0, 7]);
+    bars.box.style.aspectRatio = (bars.canvas.clientWidth || 600) >= 560 ? '3 / 1' : '2 / 1';
+    bplot.setView([-1.9, 1.6], [0, 7]);
     bplot.clear();
     const rows = [
       ...TERMS.slice(0, 2).map(([, name, color], i) => [name, color, vals[i]]), ['a_r', 'warn', tot[0]],
@@ -170,11 +170,11 @@ export function mount(F, P0) {
     bplot.line(0, 0.2, 0, 6.8, { color: 'ink3', width: 1 });
     rows.forEach(([name, color, v], i) => {
       const y = 6.3 - i - (i >= 3 ? 0.2 : 0), total = i === 2 || i === 5;
-      const w = (v / m) * 0.62;
+      const w = (v / m) * 0.5;
       bplot.rect(Math.min(0, w), y - 0.32, Math.abs(w), 0.64, { color, alpha: total ? 0.55 : 0.35, width: total ? 1.6 : 1 });
       const label = name === 'a_r' ? 'radial total' : name === 'a_θ' ? 'transverse total' : name;
-      mark(bplot, label, -1.02, y, { color: total ? 'ink' : 'ink2', size: 12.5, weight: total ? 700 : 500 });
-      if (C.values !== false) bplot.text(`${plain(v)} m/s²`, w >= 0 ? w + 0.02 : w - 0.02, y, { color: 'ink2', size: 11.5, align: w >= 0 ? 'left' : 'right' });
+      mark(bplot, label, -1.87, y, { color: total ? 'ink' : 'ink2', size: 12.5, weight: total ? 700 : 500 });
+      if (C.values !== false) bplot.text(`${plain(v)} m/s²`, 1.58, y, { color: 'ink2', size: 11.5, align: 'right' });
     });
   }
 

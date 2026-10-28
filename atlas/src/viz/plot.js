@@ -4,6 +4,11 @@
 // draggable handles. Colours come from the page's CSS variables at draw time,
 // so every plot follows the dark and light themes.
 
+const COMBINING = /[\u0300-\u036f\u20d7]/;
+// the spacing glyphs sit at different heights in their boxes: nudge each down (+) or up (−), in ems
+const MARK_DROP = { '\u0302': 0.2, '\u030c': 0.2, '\u20d7': -0.1 };
+const SPACING_MARK = { '\u0302': 'ˆ', '\u0307': '˙', '\u0308': '¨', '\u0304': '¯', '\u0303': '˜', '\u0301': '´', '\u0300': '`', '\u030c': 'ˇ', '\u20d7': '→', '\u0306': '˘' };
+
 export function themeColors() {
   const cs = getComputedStyle(document.documentElement);
   const v = (n, f) => (cs.getPropertyValue(n).trim() || f);
@@ -305,10 +310,49 @@ export class Plot {
     g.font = `${o.weight || 500} ${o.size || 12.5}px ${o.font || 'Inter, system-ui, sans-serif'}`;
     g.textAlign = o.align || 'left'; g.textBaseline = o.baseline || 'middle';
     const px = (o.screen ? x : this.X(x)) + (o.dx || 0), py = (o.screen ? y : this.Y(y)) + (o.dy || 0);
-    if (o.halo !== false) { g.lineWidth = 3.5; g.strokeStyle = this.col.bg; g.globalAlpha = 0.85; g.strokeText(s, px, py); g.globalAlpha = 1; }
+    const halo = o.halo !== false;
+    if (COMBINING.test(s)) { this._marked(String(s), px, py, o.size || 12.5, halo); g.restore(); return this; }
+    if (halo) { g.lineWidth = 3.5; g.strokeStyle = this.col.bg; g.globalAlpha = 0.85; g.strokeText(s, px, py); g.globalAlpha = 1; }
     g.fillText(s, px, py);
     g.restore();
     return this;
+  }
+
+  // Canvas does not stack combining marks (θ̂ prints as "θ^"): draw the letters,
+  // then each mark's spacing form centred over its letter
+  _marked(s, px, py, size, halo) {
+    const g = this.ctx;
+    const clusters = [];
+    for (const ch of s) {
+      if (COMBINING.test(ch) && clusters.length) clusters[clusters.length - 1].marks.push(ch);
+      else clusters.push({ ch, marks: [] });
+    }
+    const plain = clusters.map((c) => c.ch).join('');
+    const w = g.measureText(plain).width;
+    let x = g.textAlign === 'center' ? px - w / 2 : g.textAlign === 'right' || g.textAlign === 'end' ? px - w : px;
+    g.textAlign = 'left';
+    const draw = (t, tx, ty) => {
+      if (halo) { g.lineWidth = 3.5; g.strokeStyle = this.col.bg; g.globalAlpha = 0.85; g.strokeText(t, tx, ty); g.globalAlpha = 1; }
+      g.fillText(t, tx, ty);
+    };
+    draw(plain, x, py);
+    for (const c of clusters) {
+      const cw = g.measureText(c.ch).width;
+      // over a capital, digit or ascender the mark sits higher than over x-height letters
+      const tall = /[A-Z0-9bdfhklt\u0391-\u03a9βδζθλξ]/.test(c.ch);
+      let lift = (tall ? 0.62 : 0.46) * size;
+      for (const m of c.marks) {
+        const sp = SPACING_MARK[m] || '';
+        if (!sp) continue;
+        const font = g.font;
+        if (m === '\u20d7') g.font = font.replace(/[\d.]+px/, (q) => `${parseFloat(q) * 0.72}px`);   // a vector arrow, smaller
+        g.textAlign = 'center';
+        draw(sp, x + cw / 2, py - lift + (0.18 + (MARK_DROP[m] || 0)) * size);
+        g.textAlign = 'left'; g.font = font;
+        lift += 0.28 * size;
+      }
+      x += cw;
+    }
   }
 
   _stroke(o) {
