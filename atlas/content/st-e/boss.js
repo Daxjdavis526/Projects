@@ -155,7 +155,7 @@ export default boss({
           gen(r) {
             const C = gibbsCase(r);
             return {
-              prompt: t`A tank-pressure channel jumps from $${C.p1}$ kPa to $${C.p2}$ kPa, and the ground software rebuilds the record from its Fourier series truncated at a few hundred harmonics. What is the highest reading the rebuilt signal shows just after the step, in kPa?`,
+              prompt: t`A tank-pressure channel jumps from $${C.p1}\ \text{kPa}$ to $${C.p2}\ \text{kPa}$, and the ground software rebuilds the record from its Fourier series truncated at a few hundred harmonics. What is the highest reading the rebuilt signal shows just after the step, in kPa?`,
               answer: C.key, units: 'kPa', tol: { rel: 0.002 },
               errors: apart([
                 { value: C.p2, feedback: 'Adding harmonics never removes the overshoot near a jump; it only narrows it (Gibbs).' },
@@ -200,7 +200,7 @@ export default boss({
           gen(r) {
             const C = bandwidthCase(r);
             return {
-              prompt: t`The ranging laser emits Gaussian pulses of rms duration $\sigma_t = ${C.st}$ ns (the rms width of $|f(t)|^2$). What is the smallest possible rms bandwidth $\sigma_f$ of the pulse, in MHz? (Uncertainty principle of signals: $\sigma_t\sigma_\omega \ge \tfrac12$, with equality for Gaussians.)`,
+              prompt: t`The ranging laser emits Gaussian pulses of rms duration $\sigma_t = ${C.st}\ \text{ns}$ (the rms width of $|f(t)|^2$). What is the smallest possible rms bandwidth $\sigma_f$ of the pulse, in MHz? (Uncertainty principle of signals: $\sigma_t\sigma_\omega \ge \tfrac12$, with equality for Gaussians.)`,
               answer: C.key, units: 'MHz', tol: { rel: 0.005 },
               errors: apart([
                 { value: 1e3 / (2 * PI * C.st), feedback: t`$\sigma_\omega = 1/(2\sigma_t)$ is in rad/s; in hertz divide by $2\pi$: $\sigma_f = 1/(4\pi\sigma_t)$.` },
@@ -238,7 +238,7 @@ export default boss({
           gen(r) {
             const C = boomCase(r);
             return {
-              prompt: t`A solar-array boom of length $L = ${C.L}$ m is clamped at the hub and free at the tip. Its torsional twist $\theta(x)$ obeys $-\theta'' = (\omega/c)^2\theta$ with $\theta(0) = 0$, $\theta'(L) = 0$ and torsional wave speed $c = ${C.c}$ m/s. Using the Rayleigh quotient $\big(\frac\omega c\big)^2 \le \dfrac{\int_0^L\theta'^2dx}{\int_0^L\theta^2dx}$ with the trial $\theta = x(2L - x)$, give the upper bound on the fundamental frequency, in Hz.`,
+              prompt: t`A solar-array boom of length $L = ${C.L}\ \text{m}$ is clamped at the hub and free at the tip. Its torsional twist $\theta(x)$ obeys $-\theta'' = (\omega/c)^2\theta$ with $\theta(0) = 0$, $\theta'(L) = 0$ and torsional wave speed $c = ${C.c}\ \text{m/s}$. Using the Rayleigh quotient $\big(\frac\omega c\big)^2 \le \dfrac{\int_0^L\theta'^2dx}{\int_0^L\theta^2dx}$ with the trial $\theta = x(2L - x)$, give the upper bound on the fundamental frequency, in Hz.`,
               answer: C.key, units: 'Hz', tol: { rel: 0.003 },
               errors: apart([
                 { value: C.exact, feedback: t`That is the exact fundamental, $c/4L$; the trial gives a slightly higher **bound**.` },
@@ -263,7 +263,7 @@ export default boss({
           gen(r) {
             const C = modeCase(r);
             return {
-              prompt: t`The lidar’s beam runs in the Hermite–Gauss mode TEM$_{${C.n}0}$, whose field across the beam is $E(x) \propto H_{${C.n}}\big(\sqrt2\,x/w\big)\,e^{-x^2/w^2}$ with beam radius $w = ${C.w}$ mm. How far from the axis is its **outermost** dark line, in mm?`,
+              prompt: t`The lidar’s beam runs in the Hermite–Gauss mode TEM$_{${C.n}0}$, whose field across the beam is $E(x) \propto H_{${C.n}}\big(\sqrt2\,x/w\big)\,e^{-x^2/w^2}$ with beam radius $w = ${C.w}\ \text{mm}$. How far from the axis is its **outermost** dark line, in mm?`,
               answer: C.key, units: 'mm', tol: { rel: 0.005 },
               errors: apart([
                 { value: C.w * C.u, feedback: t`The argument is $\sqrt2x/w$: a zero at $u$ sits at $x = wu/\sqrt2$.` },
@@ -282,7 +282,7 @@ export default boss({
           gen(r) {
             const C = gateCase(r);
             return {
-              prompt: t`A lidar return pulse has intensity $\propto e^{-t^2/2\sigma^2}$ with $\sigma = ${C.sigma}$ ns. The receiver integrates only during a gate $-${C.tau} \le t \le ${C.tau}$ ns centred on the peak. What percentage of the pulse energy does it collect?`,
+              prompt: t`A lidar return pulse has intensity $\propto e^{-t^2/2\sigma^2}$ with $\sigma = ${C.sigma}\ \text{ns}$. The receiver integrates only during a gate $-${C.tau} \le t \le ${C.tau}\ \text{ns}$ centred on the peak. What percentage of the pulse energy does it collect?`,
               answer: C.key, units: '%', tol: { rel: 0.003 },
               errors: apart([
                 { value: 100 * C.erf(C.tau / C.sigma), feedback: t`Rescale with $u = t/(\sigma\sqrt2)$: the argument is $\tau/(\sigma\sqrt2)$.` },
@@ -325,7 +325,7 @@ export default boss({
           gen(r) {
             const C = lobesCase(r);
             return {
-              prompt: t`Model the contact binary as two equal point masses a distance $d = ${C.d}$ km apart. Kestrel is $r = ${C.R}$ km from the centre, at angle $\theta = ${C.th}^\circ$ from the line through the lobes. Using $\dfrac{1}{|\vec r - \vec r\,'|} = \sum_l\dfrac{r'^l}{r^{l+1}}P_l(\cos\gamma)$, by what percentage does the quadrupole term change the potential compared with a single point of the same total mass? (Include the sign.)`,
+              prompt: t`Model the contact binary as two equal point masses a distance $d = ${C.d}\ \text{km}$ apart. Kestrel is $r = ${C.R}\ \text{km}$ from the centre, at angle $\theta = ${C.th}^\circ$ from the line through the lobes. Using $\dfrac{1}{|\vec r - \vec r\,'|} = \sum_l\dfrac{r'^l}{r^{l+1}}P_l(\cos\gamma)$, by what percentage does the quadrupole term change the potential compared with a single point of the same total mass? (Include the sign.)`,
               answer: C.key, units: '%', tol: { rel: 0.005, abs: 1e-4 },
               errors: apart([
                 { value: -C.key, feedback: t`Sign: the bracket is $1 + (d/2r)^2P_2(\cos\theta) + \cdots$ — positive along the lobes’ axis, negative across it.` },
@@ -335,7 +335,7 @@ export default boss({
               hints: [t`For each lobe $r' = d/2$ and $\cos\gamma = \pm\cos\theta$; the odd $l$ cancel between the two.`, t`The bracket is $1 + \big(\tfrac{d}{2r}\big)^2P_2(\cos\theta)$, with $P_2(x) = \tfrac12(3x^2 - 1)$.`],
               teach: 'A multipole term is (size/distance)ˡ times Pₗ of the direction: the quadrupole of two lobes strengthens gravity along their axis and weakens it across.',
               explain: t`$\big(\tfrac{${C.d}}{2\times${C.R}}\big)^2\times${r4(SF.legendre(2, C.x))} = ${tex(C.key / 100, 3)}$, i.e. $${r4(C.key)}\%$. Small, but over many orbits such terms make orbits precess — real missions fit dozens of harmonics.`,
-              visual: gpic({ x: [-1.1 * C.R, 1.1 * C.R], y: [-0.6 * C.R, 0.6 * C.R], equal: true, xticks: 0, yticks: 0, xlabel: '', points: [{ x: -C.d / 2, y: 0, color: 'gold', r: 7 }, { x: C.d / 2, y: 0, color: 'gold', r: 7 }, { x: C.R * C.x, y: C.R * Math.sin((C.th * PI) / 180), color: 'accent', label: 'Kestrel', labelDx: 8 }], arrows: [{ from: [0, 0], to: [C.R * C.x, C.R * Math.sin((C.th * PI) / 180)], color: 'ink3', width: 1.3, dash: [5, 4] }] }, 'The two lobes (gold, size exaggerated) and the probe’s direction; not to scale.'),
+              visual: gpic({ x: [-1.1 * C.R, 1.1 * C.R], y: [-0.25 * C.R, 1.15 * C.R], equal: true, xticks: 0, yticks: 0, xlabel: '', points: [{ x: -C.d / 2, y: 0, color: 'gold', r: 7 }, { x: C.d / 2, y: 0, color: 'gold', r: 7 }, { x: C.R * C.x, y: C.R * Math.sin((C.th * PI) / 180), color: 'accent', label: 'Kestrel', labelDx: 8 }], arrows: [{ from: [0, 0], to: [C.R * C.x, C.R * Math.sin((C.th * PI) / 180)], color: 'ink3', width: 1.3, dash: [5, 4] }] }, 'The two lobes (gold, size exaggerated) and the probe’s direction; not to scale.'),
             };
           },
         }),
@@ -344,7 +344,7 @@ export default boss({
           gen(r) {
             const C = ringCase(r);
             return {
-              prompt: t`An annular radiator plate (inner radius $a = ${C.a}$ cm, outer $b = ${C.b}$ cm, thickness $h = ${C.h}$ mm, conductivity $k = ${C.k}$ W/(m K)) is held at the sink temperature along both edges. A heater ring of radius $s = ${C.s}$ cm dissipates $Q = ${C.Q}$ W. Steady conduction gives $-(r\,T')' = \dfrac{Q}{2\pi kh}\,\delta(r - s)$. With the Green’s function of $-(rT')'$ on $[a, b]$, $G(r, s) = \dfrac{\ln(r_</a)\,\ln(b/r_>)}{\ln(b/a)}$, what is the temperature rise at the heater ring, in K?`,
+              prompt: t`An annular radiator plate (inner radius $a = ${C.a}\ \text{cm}$, outer $b = ${C.b}\ \text{cm}$, thickness $h = ${C.h}\ \text{mm}$, conductivity $k = ${C.k}\ \text{W/(m K)}$) is held at the sink temperature along both edges. A heater ring of radius $s = ${C.s}\ \text{cm}$ dissipates $Q = ${C.Q}\ \text{W}$. Steady conduction gives $-(r\,T')' = \dfrac{Q}{2\pi kh}\,\delta(r - s)$. With the Green’s function of $-(rT')'$ on $[a, b]$, $G(r, s) = \dfrac{\ln(r_</a)\,\ln(b/r_>)}{\ln(b/a)}$, what is the temperature rise at the heater ring, in K?`,
               answer: C.key, units: 'K', tol: { rel: 0.005 },
               errors: apart([
                 { value: (C.Q / (C.k * C.h * 1e-3)) * C.G, feedback: t`The ring spreads $Q$ round a circumference: the source strength is $Q/(2\pi kh)$.` },
@@ -369,7 +369,7 @@ export default boss({
           gen(r) {
             const C = diaphragmCase(r);
             return {
-              prompt: t`A circular sensor diaphragm of radius $a = ${C.a}$ mm, under tension $T = ${C.T}$ N/m and pressure difference $p = ${C.p}$ Pa, takes the deflection $w(r)$ that makes $E[w] = \displaystyle\iint\Big(\frac T2|\nabla w|^2 - p\,w\Big)dA$ stationary, with $w = 0$ at the rim. Set $\delta E/\delta w = 0$, solve for the axisymmetric $w$, and give the deflection at the centre, in μm.`,
+              prompt: t`A circular sensor diaphragm of radius $a = ${C.a}\ \text{mm}$, under tension $T = ${C.T}\ \text{N/m}$ and pressure difference $p = ${C.p}\ \text{Pa}$, takes the deflection $w(r)$ that makes $E[w] = \displaystyle\iint\Big(\frac T2|\nabla w|^2 - p\,w\Big)dA$ stationary, with $w = 0$ at the rim. Set $\delta E/\delta w = 0$, solve for the axisymmetric $w$, and give the deflection at the centre, in μm.`,
               answer: C.key, units: 'um', tol: { rel: 0.005 },
               errors: apart([
                 { value: ((C.p * (C.a * 1e-3) ** 2) / (8 * C.T)) * 1e6, feedback: t`$pa^2/8T$ is the strip (one-dimensional) result. In 2D, $\nabla^2w = \frac1r(rw')'$ gives $w = \frac{p}{4T}(a^2 - r^2)$.` },
@@ -388,7 +388,7 @@ export default boss({
           gen(r) {
             const C = rampCase(r);
             return {
-              prompt: t`The descent engine’s thrust ramps as $\tanh(t/\tau)$ with $\tau = ${C.tau}$ s, and the software stores it on $-T \le t \le T$, $T = ${C.T}$ s, as a Chebyshev series in $x = t/T$. $\tanh(Tx/\tau)$ has poles at $x = \pm i\pi\tau/2T$. Assuming $|a_n| \sim \rho^{-n}$ with $\rho$ from the Bernstein ellipse through those poles, about how many terms bring the coefficients down by a factor $10^{10}$?`,
+              prompt: t`The descent engine’s thrust ramps as $\tanh(t/\tau)$ with $\tau = ${C.tau}\ \text{s}$, and the software stores it on $-T \le t \le T$, $T = ${C.T}\ \text{s}$, as a Chebyshev series in $x = t/T$. $\tanh(Tx/\tau)$ has poles at $x = \pm i\pi\tau/2T$. Assuming $|a_n| \sim \rho^{-n}$ with $\rho$ from the Bernstein ellipse through those poles, about how many terms bring the coefficients down by a factor $10^{10}$?`,
               answer: C.key, tol: { rel: 0, abs: 1.5 },
               errors: apart([
                 { value: Math.ceil(10 / lg(1 + C.beta)), feedback: t`$\rho = \beta + \sqrt{1 + \beta^2}$ for poles at $\pm i\beta$, not $1 + \beta$ (they agree only for small $\beta$).` },

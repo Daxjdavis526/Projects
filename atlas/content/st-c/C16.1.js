@@ -184,7 +184,7 @@ On a surface there is only one plane, so nothing is lost: $R_{ab} = K\,g_{ab}$ a
         const K = (c * c) / (c * c + rim * rim) ** 2, key = K * rim * rim;
         return {
           prompt: t`A radio dish is the paraboloid $z = \rho^2/4f$ with focal length $f = ${f}$ m. In polar coordinates on its surface, $ds^2 = \big(1 + \rho^2/4f^2\big)d\rho^2 + \rho^2d\varphi^2$, and its Gaussian curvature is $K = \dfrac{4f^2}{(4f^2 + \rho^2)^2}$. Find the Ricci component $R_{\varphi\varphi}$ at $\rho = ${nice(rim, 3)}$ m.`,
-          visual: { type: 'surface3d', params: { surface: ['u*cos(v)', 'u*sin(v)', 'u^2/4'], domain: [[0, (rim / f) * 1.1], [0, 2 * Math.PI]], pitch: 0.3, dist: 3.2, axes: false, curves: [{ param: [`${rim / f}*cos(t)`, `${rim / f}*sin(t)`, `${(rim / f) ** 2 / 4}`], t: [0, 2 * Math.PI], color: 'gold', width: 3 }] }, caption: t`The dish in units of its focal length, with the circle $\rho = ${nice(rim, 3)}$ m in gold.` },
+          visual: { type: 'surface3d', params: { surface: ['u*cos(v)', 'u*sin(v)', 'u^2/4'], domain: [[0, (rim / f) * 1.1], [0, 2 * Math.PI]], pitch: 0.35, dist: 2.6, scale: 1.4, axes: false, curves: [{ param: [`${rim / f}*cos(t)`, `${rim / f}*sin(t)`, `${(rim / f) ** 2 / 4}`], t: [0, 2 * Math.PI], color: 'gold', width: 3 }] }, caption: t`The dish in units of its focal length, with the circle $\rho = ${nice(rim, 3)}$ m in gold.` },
           answer: key, tol: { rel: 0.005 },
           errors: [
             { value: K, feedback: t`That is $K$. In 2D, $R_{\varphi\varphi} = K g_{\varphi\varphi}$ with $g_{\varphi\varphi} = \rho^2$.` },

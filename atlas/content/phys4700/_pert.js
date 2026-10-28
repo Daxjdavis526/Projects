@@ -109,3 +109,17 @@ export function exactPsiExpr(n, pieces) {
   }
   return { E, expr: parts.join(' + ') };
 }
+
+// ── hydrogen's fine structure (Griffiths & Schroeter §7.3), from CODATA 2022 constants ──
+import { QE as E_, HBAR as HB_, C as C_, H as H_, RINF as RINF_, MEC2 as MEC2_ } from '../phys2710/_constants.js';
+export const EPS0 = 8.8541878188e-12;                          // F/m, vacuum permittivity (CODATA 2022)
+export const ALPHA = (E_ * E_) / (4 * Math.PI * EPS0 * HB_ * C_);  // the fine-structure constant, 1/137.035 999 2…
+export const RYD_EV = (H_ * C_ * RINF_) / E_;                  // hcR∞ = ½α²mₑc² in eV: 13.605 693 1…
+export const MEC2_EV = MEC2_ * 1e6;                            // eV
+export const LAMB_2S_HZ = 1057.8e6;                            // Hz, the 2S½–2P½ Lamb shift (measured, ≈ 1057.8 MHz; QED)
+/** Eₙ²/2mc² = Ryα²/4n⁴ in eV (infinitely heavy nucleus): the unit of fine structure for level n (Z scales it by Z⁴). */
+export const fsUnit = (n, Z = 1) => (Z ** 4 * RYD_EV * ALPHA * ALPHA) / (4 * n ** 4);
+/** First-order fine-structure shift of level (n, j), eV: (Eₙ²/2mc²)(3 − 4n/(j + ½)). */
+export const fsShift = (n, j, Z = 1) => fsUnit(n, Z) * (3 - (4 * n) / (j + 0.5));
+/** The relativistic (p⁴) part alone for (n, l), eV. */
+export const relShift = (n, l, Z = 1) => -fsUnit(n, Z) * ((4 * n) / (l + 0.5) - 3);
