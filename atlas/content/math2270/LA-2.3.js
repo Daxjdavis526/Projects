@@ -19,6 +19,7 @@ $$\mathbf x = \mathbf x_p + t_1\mathbf v_1 + \dots + t_k\mathbf v_k$$
 
 one particular solution plus any combination of solutions of $A\mathbf x = \mathbf 0$: a point, a line, a plane, …`,
   symbols: [
+    { tex: t`\mathbf x`, text: t`any solution of $A\mathbf x = \mathbf b$; the formula lists them all` },
     { tex: t`\mathbf x_p`, text: t`a **particular** solution — the one found by setting every free variable to 0` },
     { tex: t`t_1, \dots, t_k`, text: 'the free variables, renamed as parameters: any real numbers at all' },
     { tex: t`\mathbf v_1, \dots, \mathbf v_k`, text: t`direction vectors, one per free variable; each solves $A\mathbf v = \mathbf 0$` },

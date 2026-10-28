@@ -82,8 +82,8 @@ function beamPic() {
       { param: [`${X} + 0.35*cos(t)`, `${H}*sin(t)`], t: [0, 6.2832], color: 'gold', width: 1.8 },
     ],
     arrows: [{ from: [0, -2.85], to: [X, -2.85], color: 'ink3', label: 'about 40 AU', labelDx: -150, labelDy: 14 }],
-    points: [tag(-0.85, 0.35, 'Lodestar', 'ink2', -26, -10), tag(0, 0.9, 'dish, D', 'ink2', -12, -12), tag(X, H, 'first dark ring', 'gold', -48, -12),
-      dot(X, 0.75, 'accent', 4), tag(X, 0.75, 'Earth', 'accent', 10, 4), tag(5.5, 1.6, 'θ = 1.22λ/D', 'gold', -30, -14)],
+    points: [tag(-0.85, -0.35, 'Lodestar', 'ink2', -26, 18), tag(0, 0.9, 'dish', 'ink2', -14, -10), tag(X, H, 'first dark ring', 'gold', -60, -12),
+      dot(X, 0.75, 'accent', 4), tag(X, 0.75, 'Earth', 'accent', 10, 4), tag(3.2, 0, 'θ = 1.22λ/D', 'gold', 0, 4)],
     alt: 'A dish antenna sending a cone-shaped beam toward a distant disc that contains Earth',
   }, 'Side view, far from scale: the real beam’s half-angle is under a degree, and Earth is a speck inside the disc. The disc is the beam’s central bright spot, out to its first dark ring.');
 }
@@ -105,8 +105,8 @@ function pyroPic(n, C1, Rh) {
     curves,
     points: [dot(1.3, top, 'ink', 4), dot(2.3, top, 'ink', 4), dot(x1, top, 'ink2', 4), dot(x1, 0, 'ink2', 4),
       tag(-0.6, 2.5, 'capacitor bank', 'ink2', -96, 0), tag(-0.6, 1.5, `${n} × ${C1} µF, 28 V`, 'ink2', -104, 16),
-      tag(1.8, top, 'fire', 'ink', -12, -14), tag(4.1, top, `harness ${Rh} Ω`, 'warn', -42, -16),
-      tag(x1, 2.0, 'igniter 1', 'warn', -66, 4), tag(x2, 2.0, 'igniter 2', 'warn', 12, 4), tag(x2, 1.2, '1.0 Ω each', 'ink3', 12, 18)],
+      tag(1.8, top, 'fire', 'ink', -12, 20), tag(4.1, top, `harness ${Rh} Ω`, 'warn', -42, -16),
+      tag(x1, 2.0, 'igniter 1', 'warn', -66, 4), tag(x2, 2.0, 'igniter 2', 'warn', 12, 4), tag((x1 + x2) / 2, 0, '1.0 Ω each', 'ink3', -30, 18)],
     alt: 'A capacitor bank discharging through a harness resistor into two igniters wired in parallel',
   }, 'The firing circuit as the fire switch closes, schematic: the bank (drawn as one capacitor), the harness, and the two igniters in parallel.');
 }
@@ -125,7 +125,7 @@ function recoilPic() {
       { from: [5.2, 1.3], to: [7.6, 1.3], color: 'warn', width: 3, label: 'net heat outward', labelDx: -100, labelDy: -12 },
       { from: [-1.0, 0], to: [-3.2, 0], color: 'good', width: 3, label: 'push', labelDx: -14, labelDy: -10 },
       { from: [-1.2, 2.3], to: [-5.2, 2.3], color: 'ink3', label: 'to the Sun and Earth', labelDx: 4, labelDy: -10 }],
-    points: [tag(2.9, -1.7, 'RTG', 'warn', -34, 14), tag(0.85, 0.45, 'body', 'ink2', -12, -8), tag(-0.6, 1.5, 'dish', 'ink2', -30, -6)],
+    points: [tag(2.9, -1.7, 'RTG', 'warn', -34, 14), tag(0.85, 0.45, 'body', 'ink2', -12, -8), tag(-0.65, -1.5, 'dish', 'ink2', -34, 14)],
     alt: 'The probe with its dish facing the Sun, its RTG radiating heat, slightly more of it away from the Sun',
   }, 'Not to scale; arrows show directions only. The RTG radiates its waste heat every way; some strikes the back of the dish and is reflected outward, so slightly more heat leaves away from the Sun than toward it.');
 }
@@ -138,7 +138,6 @@ function emfPic(eps, T) {
       x: [0, r4(2.25 * T)], y: [r4(-1.5 * eps), r4(1.8 * eps)], aspect: 'wide', axesAt: 'edge', xlabel: 't (s)', ylabel: 'emf (μV)',
       curves: [{ fn: `${r4(eps)}*sin(2*pi*x/${r4(T)})`, domain: [0, r4(2 * T)], color: 'accent', width: 2.2 }],
       hlines: [{ y: r4(eps), label: `peak ${eps} μV`, color: 'gold' }],
-      vlines: [{ x: r4(T), label: `one turn, ${T} s`, color: 'ink3' }],
       alt: 'A sine wave of emf at the probe’s spin frequency',
     },
     caption: 'The search coil’s emf near closest approach: a sine wave at the spin frequency. The probe’s motion through the field during one turn is neglected.',
@@ -147,15 +146,15 @@ function emfPic(eps, T) {
 
 function boomPic(r1, r2, B1, B2) {
   return picture({
-    x: [-3.4, r2 + 2.6], y: [-3.9, 3.1],
+    x: [-3.4, r2 + 2.6], y: [-4.6, 3.1],
     shade: [fill(-1, -0.75, 1, 0.75, 'ink2', 0.2)],
     curves: [...rect(-1, -0.75, 1, 0.75, 'ink2', 2), seg([1, 0], [r2 + 0.5, 0], 'ink2', 2.6),
       { polar: '1.5*sin(theta)^2', theta: [0, 6.2832], color: 'violet', width: 1.2, dash: true },
       { polar: '2.1*sin(theta)^2', theta: [0, 6.2832], color: 'violet', width: 1.2, dash: true }],
-    arrows: [{ from: [0, -2.5], to: [r1, -2.5], color: 'ink3', label: `${r1} m`, labelDx: -30, labelDy: 14 },
-      { from: [0, -3.4], to: [r2, -3.4], color: 'ink3', label: `${r2} m`, labelDx: -30, labelDy: 14 },
+    arrows: [{ from: [0, -2.9], to: [r1, -2.9], color: 'ink3', label: `${r1} m`, labelDx: -30, labelDy: -8 },
+      { from: [0, -4.1], to: [r2, -4.1], color: 'ink3', label: `${r2} m`, labelDx: -30, labelDy: -8 },
       { from: [r1 + 1, 1.9], to: [r2 - 1, 1.9], color: 'teal', label: 'interplanetary field', labelDx: -150, labelDy: -12 }],
-    points: [dot(r1, 0, 'gold', 6), dot(r2, 0, 'gold', 6), tag(r1, 0, `inner: ${B1} nT`, 'gold', -38, -16), tag(r2, 0, `outer: ${B2} nT`, 'gold', -44, -16),
+    points: [dot(r1, 0, 'gold', 6), dot(r2, 0, 'gold', 6), tag(r1, 0, `inner: ${B1} nT`, 'gold', -38, 22), tag(r2, 0, `outer: ${B2} nT`, 'gold', -44, -16),
       tag(-1, 0.75, 'body', 'ink2', -40, -6)],
     alt: 'The probe body with its own small dipole field, and a long boom carrying two magnetometers',
   }, 'The magnetometer boom, to scale along its length (the body drawn 2 m across). Dashed violet: field lines of the probe’s own small magnetic dipole, schematic. Both magnetometers measure the field’s component along the boom.');
@@ -191,25 +190,25 @@ function chargePic() {
     arrows: [-0.75, 0, 0.75].map((y) => ({ from: [-5.4, y], to: [-1.6, y], color: 'violet' })).concat([
       { from: [1.05, 0.75], to: [3.9, 2.2], color: 'accent', label: 'escapes', labelDx: 6, labelDy: 4 },
       { from: bez(0.86).map(r4), to: bez(1).map(r4), color: 'accent' }]),
-    points: [...plus, tag(-5.4, 1.15, 'Lyman-α, 121.6 nm', 'violet', 0, 0), tag(2.6, -1.55, 'pulled back', 'accent', 12, 12), tag(0, -R, 'Lodestar', 'ink2', -26, 20)],
+    points: [...plus, tag(-5.4, 1.6, 'Lyman-α photons', 'violet', 0, -2), tag(2.6, -1.55, 'pulled back', 'accent', 12, 12), tag(0, -R, 'Lodestar', 'ink2', -26, 20)],
     alt: 'Ultraviolet photons striking a positively charged sphere; one photoelectron escapes, another is pulled back',
   }, 'Schematic, not to scale. Ultraviolet photons free electrons from the probe’s skin; once the probe is positive, the slower photoelectrons are pulled back and only faster ones escape.');
 }
 
 function prismPic() {
-  const tilt = 12 * DEG, inside = 8 * DEG, y0 = 2.5, xin = -3.4;
+  const tilt = 12 * DEG, inside = 8 * DEG, y0 = 2.5, xin = -4.8;
   const hit = y0 / (1 + Math.tan(inside));          // where the tilted ray meets y = x
   const nx = 0.5657;                                  // 0.8 × cos 45°
   return picture({
-    x: [-3.9, 5.6], y: [-0.6, 4.9],
+    x: [-5.2, 5.6], y: [-0.6, 4.9],
     shade: [{ fn: '3', lower: 'x', from: 0, to: 3, color: 'accent', alpha: 0.16 }],
     curves: [...poly([[0, 0], [0, 3], [3, 3], [0, 0]], 'accent', 2),
       ...poly([[xin, 2], [2, 2], [2, 4.4]], 'gold', 2.2), seg([1.2, 4.4], [2.8, 4.4], 'ink2', 4),
       seg([xin, r4(y0 - xin * Math.tan(tilt))], [0, y0], 'warn', 2), seg([0, y0], [r4(hit), r4(hit)], 'warn', 2),
       seg([-2.3, y0], [0, y0], 'ink3', 1, true),
       seg([r4(hit - nx), r4(hit + nx)], [r4(hit + nx), r4(hit - nx)], 'ink3', 1.2, true)],
-    points: [tag(xin, 2, 'star on the axis', 'gold', 0, 16), tag(xin, y0 - xin * Math.tan(tilt), 'star off the axis', 'warn', 0, -10),
-      tag(1.5, 1.5, 'long face', 'accent', 12, 12), tag(2.8, 4.4, 'detector', 'ink2', 8, 4), tag(hit + nx, hit - nx, 'normal', 'ink3', 6, 10), tag(-1.75, 2.62, 'θ', 'warn', -3, 4)],
+    points: [tag(xin, 2, 'star on axis', 'gold', 0, 16), tag(xin, y0 - xin * Math.tan(tilt), 'tilted star', 'warn', 0, -10),
+      tag(1.0, 1.0, 'long face', 'accent', 12, 14), tag(2.8, 4.4, 'detector', 'ink2', 8, 4), tag(-1.75, 2.66, 'θ', 'warn', -3, -2)],
     alt: 'A right-angle prism folding a ray by reflection off its long face, with a second ray entering tilted',
   }, 'The fold prism in side view, with the tilt hugely exaggerated (about 12° drawn). Light along the axis meets the long face at 45°; light from a star tilted this way meets it closer to the normal (dashed).');
 }
@@ -224,10 +223,10 @@ function gratingPic(L) {
     arrows: [0.9, 0, -0.9].map((y) => ({ from: [-3.9, y], to: [-0.4, y], color: 'gold' })).concat([
       { from: [0, -2.75], to: [X, -2.75], color: 'ink3', label: `L = ${L} m`, labelDx: -96, labelDy: 14 },
       { from: [X + 0.7, 0], to: [X + 0.7, Y], color: 'ink3', label: 'x = ?', labelDx: 6, labelDy: 4 }]),
-    points: [dot(X, 0, 'gold', 5), dot(X, Y, 'gold', 5), dot(X, -Y, 'gold', 4), tag(-3.9, 1.35, 'X-rays', 'gold', 0, 0), tag(0, 1.6, 'grating', 'violet', -24, -8),
-      tag(X, 2.8, 'detector', 'ink2', -26, -8), tag(X, 0, 'zeroth order', 'gold', 10, 16), tag(X, Y, 'first order', 'gold', -86, -8)],
+    points: [dot(X, 0, 'gold', 5), dot(X, Y, 'gold', 5), dot(X, -Y, 'gold', 4), tag(-3.9, -0.9, 'X-rays', 'gold', 0, 20), tag(0, 1.6, 'grating', 'violet', -24, -8),
+      tag(X, 2.8, 'detector', 'ink2', -26, -8), tag(X, 0, 'm = 0', 'gold', 10, 18), tag(X, Y, 'm = 1', 'gold', -50, -8)],
     alt: 'X-rays passing through a transmission grating onto a detector, with the zeroth-order spot and first-order lines',
-  }, 'Not to scale: the real first-order angles are a fraction of a degree. The line also lands on the other side (dashed), equally far out.');
+  }, 'Not to scale: m = 0 is the undeviated spot and m = 1 the first order, whose real angle is a fraction of a degree. The line also lands on the other side (dashed), equally far out.');
 }
 
 function comptonPic() {
@@ -240,17 +239,16 @@ function comptonPic() {
   // the cone's rim, seen obliquely: an ellipse round the axis
   const Cc = [S[0] + Lc * Math.cos(half) * u[0], S[1] + Lc * Math.cos(half) * u[1]], p = [u[1], -u[0]], ra = Lc * Math.sin(half), rb = 0.3 * ra;
   const rim = { param: [0, 1].map((i) => `${r4(Cc[i])} + (${r4(ra * p[i])})*cos(t) + (${r4(rb * u[i])})*sin(t)`), t: [0, 6.2832], color: 'ink3', width: 1.2, dash: true };
-  const right = (x, y, label, color, dy) => ({ x: r4(x), y: r4(y), r: 0.01, color, label, labelDx: 0, labelDy: dy, labelAlign: 'right' });
   return picture({
-    x: [-7.4, 7.4], y: [-3.2, 5.2],
+    x: [-7.4, 7.4], y: [-3.4, 5.2],
     shade: [fill(-4.6, 1.1, 4.6, 2.3, 'accent', 0.2), fill(-4.6, -2.4, 4.6, -1.2, 'violet', 0.2)],
     curves: [...rect(-4.6, 1.1, 4.6, 2.3, 'accent', 1.4), ...rect(-4.6, -2.4, 4.6, -1.2, 'violet', 1.4), ...cone, rim],
     arrows: [{ from: A, to: S, color: 'gold', width: 2.2 },
       { from: S, to: H2, color: 'gold', width: 2.2 }, { from: S, to: [-0.15, 1.35], color: 'bad', width: 2 }],
-    points: [dot(S[0], S[1], 'bad', 5), dot(H2[0], H2[1], 'violet', 6), right(4.6, 2.3, 'layer 1: the electron stops (E₁)', 'accent', -8), right(4.6, -2.4, 'layer 2: the photon is absorbed (E₂)', 'violet', 18),
-      tag(A[0], A[1], 'gamma ray', 'gold', 8, 10), tag(0.3, 0, 'scattered photon', 'gold', 8, 4), tag(Cc[0] - ra * p[0], Cc[1] - ra * p[1], 'event cone', 'ink3', 8, 4)],
+    points: [dot(S[0], S[1], 'bad', 5), dot(H2[0], H2[1], 'violet', 6), { x: -4.8, y: 1.7, r: 0.01, color: 'accent', label: 'E₁', labelDx: 0, labelDy: 5, labelAlign: 'right' }, { x: -4.8, y: -1.8, r: 0.01, color: 'violet', label: 'E₂', labelDx: 0, labelDy: 5, labelAlign: 'right' },
+      tag(A[0], A[1], 'gamma ray', 'gold', -72, 4), tag(0.9, -0.6, 'scattered photon', 'gold', 10, 4), tag(Cc[0] + ra * p[0], Cc[1] + ra * p[1], 'event cone', 'ink3', 8, 4)],
     alt: 'A gamma ray scattering in a first detector layer and being absorbed in a second, with the cone of possible arrival directions',
-  }, 'Schematic, with the angle not to scale. From the two energies the camera knows the scattering angle but not the direction around the cone: the gamma ray came from somewhere on the dashed cone.');
+  }, 'Schematic, with the angle not to scale. The electron stops in the upper layer, depositing E₁; the scattered photon is absorbed in the lower layer, depositing E₂. From the two energies the camera knows the scattering angle but not the direction around the cone: the gamma ray came from somewhere on the dashed cone.');
 }
 
 // ── generator tables ─────────────────────────────────────────────────────────
@@ -360,9 +358,9 @@ export default boss({
                 ? t`The bus sits above string B's emf, so the healthy string drives current backward through the damaged one, which soaks up $V|I_B| = ${tn(V * -IB, 3)}$ W of string A's output instead of adding to it.`
                 : t`String B still helps, adding $VI_B = ${tn(V * IB, 3)}$ W of the $V^2/R = ${tn((V * V) / R, 3)}$ W reaching the electronics.`} Power systems put a diode in series with each string to block backward current; a lighter load (a larger $R$) raises $V$ and makes it more likely.`,
               visual: circuit('twoloop', {
-                values: { E1: eA, E2: eB, R1: rA, R2: rB, R3: R }, names: { E1: 'string A', E2: 'string B', R1: 'inside A', R2: 'inside B', R3: 'electronics' },
+                values: { E1: eA, E2: eB, R1: rA, R2: rB, R3: R }, names: { E1: 'A', E2: 'B', R1: 'rA', R2: 'rB', R3: 'load' },
                 flow: false, potential: false, readout: false,
-                caption: 'Each string drawn as a battery (its emf) in series with a resistor (its internal resistance); the probe’s electronics are the load in the middle. No current directions are shown: finding them is the problem.',
+                caption: 'Strings A and B, each drawn as a battery (its emf) in series with a resistor (its internal resistance, rA or rB); the probe’s electronics are the load in the middle. No current directions are shown: finding them is the problem.',
               }),
             };
           },
@@ -388,7 +386,7 @@ export default boss({
                 t`The current falls as $I(t) = I_0e^{-t/RC}$ with $I_0 = V_0/R$; each igniter carries half of it.`,
                 t`Solve $\tfrac12I_0e^{-t/RC} = I_\text{af}$: $t = RC\ln\dfrac{I_0}{2I_\text{af}}$.`,
               ],
-              teach: 'A capacitor discharge falls as e^(−t/RC); when loads share it in parallel, each one’s share of the current is what must stay above its threshold.',
+              teach: t`A capacitor discharge falls as $e^{-t/RC}$; when loads share it in parallel, each one’s share of the current is what must stay above its threshold.`,
               explain: t`In parallel the capacitors add to $C = ${tn(Cb * 1e3, 3)}$ mF, and the two igniters make $${tn(Rb / 2, 2)}\ \Omega$, in series with the harness: $R = ${tn(Rt, 2)}\ \Omega$ and $\tau = RC = ${tn(tau * 1e3, 3)}$ ms. At the start $I_0 = 28/${tn(Rt, 2)} = ${tn(I0, 3)}$ A, half through each igniter, so each carries $${tn(I0 / 2, 3)}\,e^{-t/\tau}$ A, which stays above ${Iaf.toFixed(1)} A until $$t = \tau\ln\frac{${tn(I0 / 2, 3)}}{${Iaf.toFixed(1)}} = ${tn(ms, 3)}\ \text{ms}.$$ The bank stores $\tfrac12CV_0^2 = ${tn(0.5 * Cb * V0 * V0, 3)}$ J; the igniters get $${Math.round((100 * Rb) / 2 / Rt)}\%$ of it and the harness the rest. Firing units are sized with a wide margin, because a pyrotechnic valve has only one chance to work.`,
               visual: pyroPic(n, C1, Rh),
             };

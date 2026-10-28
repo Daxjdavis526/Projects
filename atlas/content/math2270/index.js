@@ -9,7 +9,7 @@ export default {
   prereqs: ['math1210'],
   boss: { title: 'The Basis Change Challenge', blurb: 'Eigenvectors, projections and a quadratic form whose signature decides everything.' },
   modules: [
-    mod('LA-1', 'Vectors and linear combinations', ['Vectors, length and angle', 'Linear combinations and span']),
+    mod('LA-1', 'Vectors and linear combinations', ['Vectors, length and angle', 'Linear combinations and span'], { prereqs: ['math1220.C2-7.3'] }),
     mod('LA-2', 'Linear systems and elimination', ['Systems of equations as matrices', 'Gaussian elimination and row echelon form', 'Reduced row echelon form and solution sets', 'Applications: circuits, statics and balancing']),
     mod('LA-3', 'Matrix algebra', ['Matrix multiplication as composition', 'Inverse matrices', 'LU factorization', 'Transposes and symmetric matrices']),
     mod('LA-4', 'Linear transformations', ['Transformations of the plane', 'The matrix of a linear map', 'Kernel and range']),

@@ -44,7 +44,8 @@ export const UNITS = {
   G: [1e-4, D(0, 1, -2, -1)],   // gauss; only reached as a whole token ("G"), never as a prefix
   c: [299792458, D(1, 0, -1)],  // "c" as a speed unit: 0.6 c
   mph: [0.44704, D(1, 0, -1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
-  mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], lbf: [4.4482216152605, D(1, 1, -2)],
+  mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], t: [1000, D(0, 1)],   // tonne (kt, Mt)
+   lbf: [4.4482216152605, D(1, 1, -2)],
   percent: [0.01, ZERO], '%': [0.01, ZERO],
   // a decibel is a level, not a size: "85 dB" is read as the number 85, so a sound
   // level can carry its unit; levels never convert multiplicatively to anything else

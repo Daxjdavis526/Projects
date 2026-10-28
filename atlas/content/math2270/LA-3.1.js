@@ -31,6 +31,8 @@ Column $j$ of $AB$ is $A$ applied to column $j$ of $B$. Composition is *why* mat
     { tex: 'AB', text: t`the product, $m\times p$: the map “$B$ first, then $A$” (read right to left, like $f(g(x))$)` },
     { tex: t`(AB)_{ij}`, text: t`the entry in row $i$, column $j$: row $i$ of $A$ dotted with column $j$ of $B$` },
     { tex: t`\mathbf b_j`, text: t`column $j$ of $B$; column $j$ of $AB$ is $A\mathbf b_j$` },
+    { tex: t`\mathbf x`, text: t`any input vector, with $p$ components` },
+    { tex: 'n', text: t`the inner size: columns of $A$ = rows of $B$, the number of terms in each entry's sum` },
   ],
   why: 'Every chain of transformations — a spacecraft’s attitude rotations, changes between reference frames, the Lorentz boosts of special relativity — is a product of matrices, taken in the right order.',
   visual: {

@@ -76,7 +76,7 @@ By DE-3.3 the solution is the free motion — the **transient**, dying like $e^{
       { label: 'Spin-up', text: t`On the way to full speed the rotor passes ${Math.round(EX.rpm0)} rpm, where $\Omega = 1$. It must not linger there: run it up briskly so the response never has the $\sim Q/\pi$ cycles it needs to build up.` },
       { label: 'Sense check', text: t`Isolation needs $\Omega > \sqrt2$, whatever the damping; the further above, the better. That is why mounts are made **soft** — a low $f_0$ — and why a stiff mount would be worse than none.` },
     ],
-    answer: t`$f_0 \approx ${fmt(EX.f0, 3)}$ Hz; $A \approx ${fmt(EX.A * 1e6, 2)}\ \mu$m; about ${fmt(EX.Ft, 2)} N (${(100 * EX.T).toFixed(0)}%) reaches the structure; $Q = ${EX.Q}$, $\Delta f \approx ${fmt(EX.f0 / EX.Q, 2)}$ Hz.`,
+    answer: t`$f_0 \approx ${fmt(EX.f0, 3)}$ Hz; $A \approx ${fmt(EX.A * 1e6, 2)}\ \mu\text{m}$; about ${fmt(EX.Ft, 2)} N (${(100 * EX.T).toFixed(0)}%) reaches the structure; $Q = ${EX.Q}$, $\Delta f \approx ${fmt(EX.f0 / EX.Q, 2)}$ Hz.`,
   },
   practice: [
     num({
@@ -172,7 +172,18 @@ By DE-3.3 the solution is the free motion — the **transient**, dying like $e^{
           hints: [t`Set $e^{-\zeta\omega_0t} = 0.05$: $t = \dfrac{\ln 20}{\zeta\omega_0}$.`, t`$\zeta\omega_0 = \dfrac{\omega_0}{2Q} = \dfrac{2\pi\times${f0}}{${2 * Q}}$.`],
           teach: 'A resonance builds up on the same time scale it rings down on, 2Q/ω₀ per factor e — high-Q systems are slow to respond as well as slow to settle.',
           explain: t`$\zeta\omega_0 = \pi f_0/Q = ${fmt(w0 / (2 * Q), 3)}$ s⁻¹, so $t = \ln 20/${fmt(w0 / (2 * Q), 3)} = ${fmt(tt, 3)}$ s — about ${Math.round(tt * f0)} cycles. A frequency sweep through the resonance faster than this never sees the full peak.`,
-          visual: { type: 'c3-roots', params: { mode: 'forced', zeta: r6(1 / (2 * Q)), w0: 2, W: 1, T: r6(8 * Q / 2), sliders: false, readout: false, panels: 'motion', yname: 'x' }, caption: 'Driven at resonance from rest: the amplitude grows toward its final value (the dashed steady state) on a time scale set by Q. Shown for this Q; time axis not to this structure’s scale.' },
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 5], y: [-1.15, 1.15], xticks: 0, yticks: 0, aspect: 'wide', xlabel: 't', ylabel: 'x / A∞',
+              curves: [
+                { fn: '(1 - exp(-x))*sin(12*x)', color: 'accent', width: 1.4 },
+                { fn: '1 - exp(-x)', color: 'gold', width: 2.2, label: 'A∞ (1 − e^(−ζω₀t))', labelAt: 2.2, labelDx: 6, labelDy: -12 },
+              ],
+              hlines: [{ y: 0.95, label: '95%', color: 'ink3' }],
+            },
+            caption: 'The build-up at resonance from rest, sketched: the oscillation (blue) fills its growing envelope (gold). Real oscillations are far more numerous; no numbers on the axes.',
+          },
         };
       },
     }),
@@ -301,7 +312,7 @@ for zeta, W in [(0.1, 0.9), (0.05, 1.0), (0.2, 2.0)]:
           hints: [t`$\Delta\omega = 2\zeta\omega_0 = 2/\tau$, and $\Delta f = \Delta\omega/2\pi$.`],
           teach: 'Ring-down time and bandwidth determine each other: Δf = 1/(πτ).',
           explain: t`$\Delta f = \dfrac{1}{\pi\tau} = ${fmt(df, 3)}$ Hz, a quality factor $Q = f_0/\Delta f = ${fmt(Q, 3)}$.`,
-          visual: { type: 'c3-roots', params: { mode: 'forced', zeta: r6(1 / (2 * Q)), w0: 2, W: 1, T: 40, sliders: false, readout: false, panels: 'top', marks: false, yname: 'x' }, caption: 'The reflector’s resonance curve (blue) among curves for other damping (grey). The peak’s height is Q; its width is what is asked.' },
+          visual: { type: 'c3-roots', params: { mode: 'forced', zeta: r6(1 / (2 * Q)), w0: 2, W: 1, T: 40, sliders: false, readout: false, panels: 'top', marks: false, yname: 'x' }, caption: 'The reflector’s resonance curve (blue) among curves for other damping (grey). Its peak rises to Q — off the top of the chart when Q is large; its width is what is asked.' },
         };
       },
     }),

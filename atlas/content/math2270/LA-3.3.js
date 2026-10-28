@@ -22,6 +22,7 @@ export default lesson({
   equation: 'A = LU',
   intro: t`Elimination does the same work on $A$ whatever the right-hand side $\mathbf b$ is. The **LU factorization** records that work once. $U$ is the upper triangular echelon form that elimination produces; $L$ is lower triangular, with 1s on its diagonal and each multiplier $\ell_{ij}$ stored in exactly the position it cleared. Then $A\mathbf x = \mathbf b$ splits into two triangular solves — forward substitution for $L\mathbf y = \mathbf b$, back substitution for $U\mathbf x = \mathbf y$. Factoring an $n\times n$ matrix costs about $n^3/3$ multiplications; every new right-hand side after that costs only about $n^2$.`,
   symbols: [
+    { tex: 'A', text: t`the square matrix being factored ($n\times n$)` },
     { tex: 'U', text: t`upper triangular: the matrix elimination ends with; its diagonal holds the pivots` },
     { tex: 'L', text: t`lower triangular with 1s on the diagonal; below it, the multipliers` },
     { tex: t`\ell_{ij}`, text: t`the multiplier used in $R_i \leftarrow R_i - \ell_{ij}R_j$; it is stored in row $i$, column $j$ of $L$` },

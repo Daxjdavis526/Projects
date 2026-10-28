@@ -70,11 +70,11 @@ Its global error falls like $h^4$: halve the step and the error drops sixteen-fo
       { label: 'First slope', text: t`$k_1 = f(0, 1) = 0 + 1 = ${K1}$.` },
       { label: 'Midpoint slopes', text: t`$k_2 = f(0.1,\ 1 + 0.1 \times ${K1}) = f(0.1, 1.1) = ${r4(K2)}$, then $k_3 = f(0.1,\ 1 + 0.1 \times ${r4(K2)}) = f(0.1, 1.12) = ${r4(K3)}$.` },
       { label: 'End slope', text: t`$k_4 = f(0.2,\ 1 + 0.2 \times ${r4(K3)}) = f(0.2, 1.244) = ${r4(K4)}$.` },
-      { label: 'Combine', text: t`$y_1 = 1 + \dfrac{0.2}{6}\left(${K1} + 2(${r4(K2)}) + 2(${r4(K3)}) + ${r4(K4)}\right) = 1 + \dfrac{0.2}{6}(${r4(K1 + 2 * K2 + 2 * K3 + K4)}) = ${r4(Y1)}$.` },
-      { label: 'Compare', text: t`Exact: $2e^{0.2} - 1.2 = ${YX.toFixed(6)}$, so RK4 is off by $${(Y1 - YX).toExponential(1).replace('e-', '\\times10^{-').replace(/$/, '}')}$. One improved-Euler step gives $${nice(HEUN)}$ (off by $${fmt(Math.abs(HEUN - YX), 2)}$), and four Euler steps of 0.05 give $${EU4.toFixed(4)}$ (off by $${fmt(Math.abs(EU4 - YX), 2)}$).` },
+      { label: 'Combine', text: t`$y_1 = 1 + \dfrac{0.2}{6}\left(${K1} + 2(${r4(K2)}) + 2(${r4(K3)}) + ${r4(K4)}\right) = 1 + \dfrac{0.2}{6}(${r4(K1 + 2 * K2 + 2 * K3 + K4)}) = ${Y1.toFixed(4)}$.` },
+      { label: 'Compare', text: t`Exact: $2e^{0.2} - 1.2 = ${YX.toFixed(6)}$, so RK4 is off by $${tex2(Math.abs(Y1 - YX))}$. One improved-Euler step gives $${nice(HEUN)}$ (off by $${fmt(Math.abs(HEUN - YX), 2)}$), and four Euler steps of 0.05 give $${EU4.toFixed(4)}$ (off by $${fmt(Math.abs(EU4 - YX), 2)}$).` },
       { label: 'Sense check', text: t`For the same four evaluations of $f$, RK4 is about ${Math.round(Math.abs(EU4 - YX) / Math.abs(Y1 - YX) / 100) * 100} times more accurate than Euler. That gap widens as $h$ shrinks, because $h^4$ falls so much faster than $h$.` },
     ],
-    answer: t`$y_1 = ${r4(Y1)}$ against the exact ${YX.toFixed(6)}: an error of a few millionths, where improved Euler errs by about 0.003 and four Euler steps by about 0.012.`,
+    answer: t`$y_1 = ${Y1.toFixed(4)}$ against the exact $${YX.toFixed(6)}$: an error of a few millionths, where improved Euler errs by about 0.003 and four Euler steps by about 0.012.`,
   },
   practice: [
     num({
@@ -89,7 +89,7 @@ Its global error falls like $h^4$: halve the step and the error drops sixteen-fo
           errors: [{ value: yp, feedback: 'That is only the trial (Euler) step. Read the slope at its end and average the two slopes.' }, { value: y0 + h * k2, feedback: 'Use the average of the two slopes, not just the one at the end.' }].filter((e) => Math.abs(e.value - y1) > 1e-6),
           hints: [t`$k_1 = f(0, ${y0})$; the trial point is $y_0 + hk_1$ at $t = ${h}$.`, t`$k_2 = f(${h},\ ${nice(yp)})$; then $y_1 = y_0 + \tfrac h2(k_1 + k_2)$.`],
           teach: 'Improved Euler averages the slope at the start with the slope at the end of a trial Euler step.',
-          explain: t`$k_1 = ${nice(k1)}$, trial $y = ${nice(yp)}$, $k_2 = f(${h}, ${nice(yp)}) = ${nice(k2)}$, so $y_1 = ${y0} + ${h / 2}(${nice(k1)} + ${nice(k2)}) = ${nice(y1, 6)}$.`,
+          explain: t`$k_1 = ${nice(k1)}$, trial $y = ${nice(yp)}$, $k_2 = f(${h}, ${nice(yp)}) = ${nice(k2)}$, so $y_1 = ${y0} + ${h / 2}(${nice(k1)} ${pm(k2)}) = ${nice(y1, 6)}$.`,
           visual: { type: 'de-stepper', params: { f: `${a}*t*y + 1`, t0: 0, y0, T: h, hs: [h], methods: ['heun'], views: ['stage'], readout: false }, caption: 'The two slopes of the improved-Euler step, drawn where they are read. The numbers are yours to find.' },
         };
       },
@@ -107,7 +107,7 @@ Its global error falls like $h^4$: halve the step and the error drops sixteen-fo
           errors: [{ value: y0 + (h / 4) * (k1 + k2 + k3 + k4), feedback: t`The weights are $1, 2, 2, 1$ over 6, not equal quarters.` }, { value: y0 + h * k1, feedback: 'That is Euler’s step: RK4 needs all four slopes.' }].filter((e) => Math.abs(e.value - y1) > 1e-6),
           hints: [t`$k_1 = f(0, ${y0})$, $k_2 = f(${h / 2}, y_0 + ${h / 2}k_1)$, $k_3 = f(${h / 2}, y_0 + ${h / 2}k_2)$, $k_4 = f(${h}, y_0 + ${h}k_3)$.`, t`$k_1 = ${nice(k1)}$, $k_2 = ${nice(k2, 6)}$, $k_3 = ${nice(k3, 6)}$, $k_4 = ${nice(k4, 6)}$. Combine with weights 1, 2, 2, 1 over 6.`],
           teach: 'RK4 reads four slopes — start, midpoint twice, end — and weights them 1 : 2 : 2 : 1.',
-          explain: t`$y_1 = ${y0} + \dfrac{${h}}{6}\left(${nice(k1)} + 2(${nice(k2, 6)}) + 2(${nice(k3, 6)}) + ${nice(k4, 6)}\right) = ${nice(y1, 6)}$. The exact value is $${nice(c + c * h + (y0 - c) * Math.exp(h), 6)}$.`,
+          explain: t`$y_1 = ${y0} + \dfrac{${h}}{6}\left(${nice(k1)} + 2(${nice(k2, 6)}) + 2(${nice(k3, 6)}) ${pm(k4, 6)}\right) = ${nice(y1, 6)}$. The exact value is $${nice(c + c * h + (y0 - c) * Math.exp(h), 6)}$.`,
           visual: { type: 'de-stepper', params: { f: `y - ${c}*t`, exact: `${c}*t + ${c} + (${y0 - c})*exp(t)`, t0: 0, y0, T: h, hs: [h], methods: ['rk4'], views: ['stage'], readout: false }, caption: 'The four RK4 slopes, drawn where they are read; the dashed curve is the exact solution.' },
         };
       },
@@ -137,9 +137,9 @@ Its global error falls like $h^4$: halve the step and the error drops sixteen-fo
           answer: h4, tol: { rel: 0.01 },
           errors: [{ value: h1, feedback: t`That is the step Euler (error $\propto h$) would need. With error $\propto h^4$, take the fourth root of the error ratio.` }, { value: 0.1 * Math.sqrt(target / E0), feedback: t`Error $\propto h^2$ is improved Euler. RK4’s error goes like $h^4$.` }],
           hints: [t`$E \propto h^4$, so $\dfrac{h_\text{new}}{0.1} = \left(\dfrac{E_\text{new}}{E_\text{old}}\right)^{1/4}$.`, t`The error must fall by a factor $${nice(E0 / target)}$; take its fourth root.`],
-          teach: 'With error ∝ hᵖ, cutting the error by a factor F needs a step F^(1/p) times smaller — a small change for p = 4, a huge one for p = 1.',
+          teach: 'With error ∝ hᵖ, cutting the error by a factor F needs a step smaller by the p-th root of F — a small change for p = 4, a huge one for p = 1.',
           explain: t`$h = 0.1\times(${nice(E0 / target)})^{-1/4} = ${fmt(h4, 3)}$ — about ${Math.round(0.1 / h4)} times more steps. Euler would need $h = ${tex2(h1)}$: about ${Math.round(0.1 / h1).toLocaleString('en-US')} times more steps, which is why nobody integrates orbits with Euler.`,
-          visual: { type: 'graph', params: { x: [-4, -1], y: [-9, -2], xlog: true, ylog: true, axesAt: 'edge', xlabel: 'step size h', ylabel: '|error|', curves: [{ fn: `log10(${E0}) + 4*(x + 1)`, color: 'good', label: 'RK4, slope 4', labelAt: -1.5, labelDx: -86, labelDy: -6 }, { fn: `log10(${E0}) + (x + 1)`, color: 'warn', label: 'Euler, slope 1', labelAt: -2.5, labelDx: -40, labelDy: -12 }], hlines: [{ y: Math.log10(target), label: 'target', color: 'gold' }] }, caption: 'Two error lines through the same starting error, on logarithmic axes: the one with slope 4 reaches the target at a much larger h.' },
+          visual: { type: 'graph', params: { x: [-4, -1], y: [-9, -2], xlog: true, ylog: true, axesAt: 'edge', xlabel: 'step size h', ylabel: '|error|', curves: [{ fn: `log10(${E0}) + 4*(x + 1)`, color: 'good', label: 'RK4, slope 4', labelAt: -1.5, labelDx: -86, labelDy: -6 }, { fn: `log10(${E0}) + (x + 1)`, color: 'warn', label: 'Euler, slope 1', labelAt: -2.5, labelDx: -40, labelDy: -20 }], hlines: [{ y: Math.log10(target), label: 'target', color: 'gold' }] }, caption: 'Two error lines through the same starting error, on logarithmic axes: the one with slope 4 reaches the target at a much larger h.' },
         };
       },
     }),
@@ -167,7 +167,7 @@ Its global error falls like $h^4$: halve the step and the error drops sixteen-fo
       tests: [
         { name: 'y′ = y, h = 0.1, 10 steps matches the RK4 growth factor', code: 'abs(rk4(lambda t, y: y, 0, 1, 0.1, 10) - (1 + 0.1 + 0.1**2/2 + 0.1**3/6 + 0.1**4/24)**10) < 1e-12' },
         { name: 'exact for y′ = 4t³ (Simpson is exact for cubics): y(2) = 16', code: 'abs(rk4(lambda t, y: 4 * t**3, 0, 0, 0.5, 4) - 16) < 1e-12' },
-        { name: 'y′ = −2ty from y(0) = 1 reaches e^(−1) at t = 1 to within 10⁻⁶', code: 'abs(rk4(lambda t, y: -2 * t * y, 0, 1, 0.05, 20) - 0.36787944117144233) < 1e-6' },
+        { name: 'y′ = −2ty from y(0) = 1 reaches e⁻¹ at t = 1 to within 10⁻⁶', code: 'abs(rk4(lambda t, y: -2 * t * y, 0, 1, 0.05, 20) - 0.36787944117144233) < 1e-6' },
       ],
       hints: [t`$k_2 = f(t + h/2,\ y + (h/2)k_1)$ and $k_3 = f(t + h/2,\ y + (h/2)k_2)$; $k_4 = f(t + h,\ y + hk_3)$.`, '`y = y + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)` before moving t on.'],
       teach: 'RK4 is four slope evaluations and one weighted update per step.',
@@ -212,7 +212,7 @@ print(errors, p)`,
       ],
       hints: ['The same pattern as for Euler: `round(1 / h)` steps, compare with `math.e`.', '`errors = [abs(rk4(lambda t, y: y, 0, 1, h, round(1 / h)) - math.e) for h in hs]` and `p = math.log2(errors[-2] / errors[-1])`.'],
       teach: 'Halving h divides RK4’s error by about 2⁴ = 16: fourth order, measured.',
-      explain: t`The errors run from about $3.1\times10^{-5}$ down to $8.7\times10^{-9}$, each about 15–16 times smaller than the last, so $p \approx 3.98$. Halve $h$ much further and rounding error ($\sim 10^{-16}$ per step) starts to show.`,
+      explain: t`The errors run from about $3.1\times10^{-5}$ down to $8.7\times10^{-9}$, each 15 to 16 times smaller than the last, so $p \approx 3.97$. Halve $h$ much further and rounding error ($\sim 10^{-16}$ per step) starts to show.`,
     }),
     code({
       id: 'vs-scipy', difficulty: 3,
@@ -314,7 +314,7 @@ print(orbit_rk4(64), energy(orbit_rk4(64)) + 0.5)`,
       ],
       hints: ['Treat the state as a list and build each trial state with a list comprehension: `[a + h / 2 * b for a, b in zip(s, k1)]`.', 'The update is `s = [a + h / 6 * (p + 2*q + 2*r + w) for a, p, q, r, w in zip(s, k1, k2, k3, k4)]`.'],
       teach: 'RK4 works on a whole state vector at once — every component takes its stages together — and on an orbit it holds the energy thousands of times better than Euler.',
-      explain: t`With 64 steps RK4 returns to $(1, 0)$ to about $10^{-6}$ and the energy is off by roughly $10^{-6}$, against Euler’s 0.05 with ten times as many steps. Over thousands of orbits even RK4’s small drift adds up, which is why long orbit integrations use symplectic methods that conserve energy on average.`,
+      explain: t`With 64 steps RK4 returns to $(1, 0)$ to about $2\times10^{-5}$ and the energy is off by less than $10^{-6}$, against Euler’s 0.05 with ten times as many steps. Over thousands of orbits even RK4’s small drift adds up, which is why long orbit integrations use symplectic methods that conserve energy on average.`,
     }),
     num({
       id: 'cp-scale', difficulty: 2,
@@ -322,10 +322,10 @@ print(orbit_rk4(64), energy(orbit_rk4(64)) + 0.5)`,
         const E = r.pick([3.2e-5, 6.4e-4, 1.6e-3]), m = r.pick([[4, 'RK4', 2, 'quartered'], [2, 'improved Euler', 2, 'quartered'], [4, 'RK4', 1, 'halved']]);
         const factor = 2 ** (m[0] * m[2]), val = E / factor;
         return {
-          prompt: t`${m[1]} has an error of $${tex2(E)}$ at the end of a run with $h = 0.2$. Estimate its error when $h$ is ${m[3]} (to $${m[2] === 2 ? '0.05' : '0.1'}$).`,
+          prompt: t`${m[1][0].toUpperCase() + m[1].slice(1)} has an error of $${tex2(E)}$ at the end of a run with $h = 0.2$. Estimate its error when $h$ is ${m[3]} (to $${m[2] === 2 ? '0.05' : '0.1'}$).`,
           answer: val, tol: { rel: 0.02 },
           errors: [{ value: E / 2 ** m[2], feedback: 'That is first-order scaling. Use the method’s order as the power.' }, { value: E / 2 ** (m[0] * m[2] - m[0]), feedback: t`$h$ shrinks by a factor of $${2 ** m[2]}$ in all, so the error shrinks by $${2 ** m[2]}^{${m[0]}}$.` }].filter((e) => Math.abs(e.value - val) > 0.05 * val),
-          hints: [t`${m[1]} is order ${m[0]}: error $\propto h^{${m[0]}}$.`, t`$h$ shrinks by $${2 ** m[2]}$, so the error shrinks by $${2 ** m[2]}^{${m[0]}} = ${factor}$.`],
+          hints: [t`${m[1][0].toUpperCase() + m[1].slice(1)} is order ${m[0]}: error $\propto h^{${m[0]}}$.`, t`$h$ shrinks by $${2 ** m[2]}$, so the error shrinks by $${2 ** m[2]}^{${m[0]}} = ${factor}$.`],
           teach: 'Order p means the error scales as hᵖ: shrink h by a factor s and the error shrinks by sᵖ.',
           explain: t`$${tex2(E)}/${factor} = ${tex2(val)}$.`,
           visual: { type: 'graph', params: { x: [-1.5, -0.5], y: [Math.log10(val) - 1, Math.log10(E) + 0.6], xlog: true, ylog: true, axesAt: 'edge', xlabel: 'step size h', ylabel: '|error|', points: [{ x: Math.log10(0.2), y: Math.log10(E), color: 'gold', label: 'h = 0.2' }], curves: [{ fn: `log10(${E}) + ${m[0]}*(x - log10(0.2))`, color: 'ink3', dash: true, width: 1.4 }] }, caption: t`The measured error at $h = 0.2$ and a line of slope ${m[0]} through it, on logarithmic axes.` },
@@ -334,7 +334,7 @@ print(orbit_rk4(64), energy(orbit_rk4(64)) + 0.5)`,
     }),
     mcq({
       id: 'cp-adaptive', difficulty: 2,
-      prompt: t`SciPy’s \`solve_ivp\` (method \`'RK45'\`) chose the steps marked in the picture for $y' = y^2 - y^3$, $y(0) = 0.05$ — a flame that smoulders, then flares. How does it decide each step size?`,
+      prompt: t`An adaptive solver chose the steps marked in the picture for $y' = y^2 - y^3$, $y(0) = 0.05$ — a flame that smoulders, then flares. How does an adaptive solver, such as SciPy’s \`solve_ivp\` with its default method \`'RK45'\`, decide each step size?`,
       choices: [
         'Each step computes two estimates of different order from the same slopes; their difference estimates the error, and h shrinks or grows to keep it within the tolerance',
         'It compares each step with the exact solution and halves h when they disagree',
@@ -350,7 +350,7 @@ print(orbit_rk4(64), energy(orbit_rk4(64)) + 0.5)`,
       hints: ['Look at where the points crowd together: where is the solution changing fastest?', 'An embedded Runge–Kutta pair gets two answers per step almost for free.'],
       teach: 'Adaptive solvers estimate each step’s error from an embedded pair of methods and adjust h to meet rtol and atol.',
       explain: t`RK45 (Dormand–Prince) produces a 5th- and a 4th-order result from the same six slopes; their difference estimates the local error, and $h$ is rescaled so it stays below $\text{rtol}\,|y| + \text{atol}$. Steps are long while the flame smoulders and short during the flare, where the solution turns sharply.`,
-      visual: { type: 'graph', params: { x: [0, 42], y: [0, 1.15], xlabel: 't', ylabel: 'y', curves: [{ fn: '0', domain: [0, 0.01], color: 'accent' }], points: FLAME.map(([a, b]) => ({ x: a, y: b, color: 'gold', r: 2.6 })), arrows: [] }, caption: t`Steps chosen by an adaptive Bogacki–Shampine 3(2) pair at a relative tolerance of $10^{-4}$, computed for this picture; SciPy’s RK45 places its steps the same way. Each dot is the end of one step.` },
+      visual: { type: 'graph', params: { x: [0, 42], y: [0, 1.15], xlabel: 't', ylabel: 'y', points: FLAME.map(([a, b]) => ({ x: a, y: b, color: 'gold', r: 2.6 })) }, caption: t`Steps chosen by an adaptive Bogacki–Shampine 3(2) pair at a relative tolerance of $10^{-4}$, computed for this picture; SciPy’s RK45 uses a higher-order pair but chooses its steps by the same rule. Each dot is the end of one step.` },
     }),
   ],
   sources: [
@@ -359,6 +359,9 @@ print(orbit_rk4(64), energy(orbit_rk4(64)) + 0.5)`,
     { label: 'C. Moler, “Stiff differential equations” (the flame example), MATLAB News & Notes, 2003', url: 'https://www.mathworks.com/company/technical-articles/stiff-differential-equations.html' },
   ],
 });
+
+// “+ x” or “− |x|” for a term inside a sum
+function pm(x, d) { return x < 0 ? `- ${nice(-x, d)}` : `+ ${nice(x, d)}`; }
 
 // a number as TeX with ×10ⁿ for small and large values
 function tex2(x) {

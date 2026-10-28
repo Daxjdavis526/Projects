@@ -60,9 +60,11 @@ const matTeX = (A) => `\\begin{bmatrix} ${num(A[0][0])} & ${num(A[0][1])} \\\\ $
 const colTeX = (v) => `\\begin{bmatrix} ${num(v[0])} \\\\ ${num(v[1])} \\end{bmatrix}`;
 
 export function mount(F, P) {
-  const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'A linear map of the plane: the grid and a shape before and after' });
-  const W = P.view;
-  const plot = new Plot(canvas, { x: [-2 * W, 2 * W], y: [-W, W], equal: true, xlabel: '', ylabel: '', axes: true, grid: true });
+  // a phone gets a taller 16:10 canvas, so the picture is not squeezed into a thin strip
+  const narrow = (F.el.getBoundingClientRect().width || 800) < 560;
+  const { canvas } = F.canvas({ aspect: narrow ? '' : 'wide', label: P.alt || 'A linear map of the plane: the grid and a shape before and after' });
+  const W = P.view, across = narrow ? 1.6 : 2;
+  const plot = new Plot(canvas, { x: [-across * W, across * W], y: [-W, W], equal: true, xlabel: '', ylabel: '', axes: true, grid: true });
   for (const s of P.sliders || []) F.slider(s);
   const keys = keysOf(P);
   const env = () => { const e = { ...(P.constants || {}) }; for (const s of P.sliders || []) e[s.key] = +F.params[s.key]; return e; };

@@ -140,12 +140,18 @@ export function mount(F, P0) {
     framed(plot, local, { color: 'accent', width: 2, dash: [7, 5] });
     const seg = 0.22 * h;
     // trial lines: from the start of the step, along a slope, to the next stage point
+    // trial lines and slope segments stay inside the frame (a steep slope would cross the axes)
+    plot.ctx.save();
+    plot._clip();
     S.stages.forEach((s, i) => { if (i > 0) plot.line(tk, yk, s.t, s.y, { color: STAGE_COLOR[i], width: 1.2, dash: [3, 4] }); });
+    S.stages.forEach((s, i) => plot.line(s.t - seg, s.y - seg * s.k, s.t + seg, s.y + seg * s.k, { color: STAGE_COLOR[i], width: 3 }));
+    plot.ctx.restore();
     S.stages.forEach((s, i) => {
-      plot.line(s.t - seg, s.y - seg * s.k, s.t + seg, s.y + seg * s.k, { color: STAGE_COLOR[i], width: 3 });
       plot.point(s.t, s.y, { color: 'panel', r: 5, ring: STAGE_COLOR[i] });
       const label = S.stages.length > 1 ? `k${SUB[i]}` : 'slope k₁';
-      plot.text(label, s.t + seg, s.y + seg * s.k, { color: STAGE_COLOR[i], dx: 6, dy: 0, weight: 700 });
+      // at the segment's right end, or where it leaves the frame
+      const u = Math.max(0, Math.min(seg, s.k > 0 ? (plot.vy1 - s.y) / s.k : s.k < 0 ? (plot.vy0 - s.y) / s.k : seg));
+      plot.text(label, s.t + u, s.y + u * s.k, { color: STAGE_COLOR[i], dx: 6, dy: s.k > 0 && u < seg ? 10 : s.k < 0 && u < seg ? -10 : 0, weight: 700 });
     });
     plot.arrow(tk, yk, tk + h, S.y1, { color: 'gold', width: 2.6, head: 11 });
     plot.point(tk, yk, { color: 'ink', r: 4.5 });

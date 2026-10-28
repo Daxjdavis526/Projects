@@ -139,13 +139,14 @@ export function mount(F, P) {
   }
 
   // a label beside the segment p→q (at fraction f along it), on the side toward `ref` (inside) or away from it
-  function sideLabel(p, q, text, color, ref, inside, f = 0.5) {
+  function sideLabel(p, q, text, color, ref, inside, f = 0.5, gap = 15) {
     const mx = p[0] + (q[0] - p[0]) * f, my = p[1] + (q[1] - p[1]) * f;
     const sx = plot.X(q[0]) - plot.X(p[0]), sy = plot.Y(q[1]) - plot.Y(p[1]), L = Math.hypot(sx, sy) || 1;
     let nx = -sy / L, ny = sx / L;
     const toward = nx * (plot.X(ref[0]) - plot.X(mx)) + ny * (plot.Y(ref[1]) - plot.Y(my));
     if ((toward < 0) === inside) { nx = -nx; ny = -ny; }
-    plot.text(text, mx, my, { color, dx: nx * 15, dy: ny * 13, size: 12, weight: 650, align: 'center' });
+    const g = gap + Math.abs(nx) * text.length * 3.2;              // wide labels clear a steep arrow
+    plot.text(text, mx, my, { color, dx: nx * g, dy: ny * gap * 0.87, size: 12, weight: 650, align: 'center' });
   }
 
   // a label just beyond the tip of the arrow from the origin to e
@@ -191,11 +192,15 @@ export function mount(F, P) {
       plot.line(tail[0], tail[1], B[0], B[1], { color: 'violet', width: 2, dash: [6, 4] });
       plot.line(B[0], B[1], tip.x, tip.y, { color: 'accent', width: 1.6, dash: [6, 4], alpha: 0.85 });
       const mid = [(tail[0] + tip.x) / 2, (tail[1] + tip.y) / 2];
-      if (Math.hypot(a[0], a[1]) * pxPerUnit() > 40) sideLabel(tail, A, `${P.vname}${pr ? '′' : ''}¹${names[0]}`, 'accent', mid, true);
-      if (Math.hypot(b[0], b[1]) * pxPerUnit() > 40) sideLabel(tail, B, `${P.vname}${pr ? '′' : ''}²${names[1]}`, 'violet', mid, true);
+      // each piece is labelled outside the parallelogram, pushed further out when its label
+      // would land on the basis arrow's own label (which sits at 0.9 of the arrow)
+      const crowded = (piece, e) => Math.hypot(plot.X(tail[0] + 0.62 * piece[0]) - plot.X(0.9 * e[0]), plot.Y(tail[1] + 0.62 * piece[1]) - plot.Y(0.9 * e[1])) < 44;
+      const piece = (i) => `${P.vname}${pr ? '′' : ''}${'¹²'[i]}${names[i].length <= 3 ? names[i] : ''}`;   // V¹e₁, or just V¹ beside a long basis name
+      if (Math.hypot(a[0], a[1]) * pxPerUnit() > 40) sideLabel(tail, A, piece(0), 'accent', mid, false, 0.62, crowded(a, basis[0]) ? 32 : 15);
+      if (Math.hypot(b[0], b[1]) * pxPerUnit() > 40) sideLabel(tail, B, piece(1), 'violet', mid, false, 0.62, crowded(b, basis[1]) ? 32 : 15);
     }
     for (const a of P.arrows || []) plot.arrow(a.from[0], a.from[1], a.to[0], a.to[1], { color: a.color || 'ink2', width: 2.2, label: a.label });
-    basis.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 3 }); sideLabel([0, 0], e, names[i], i ? 'violet' : 'accent', [tip.x, tip.y], false, 0.8); });
+    basis.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 3 }); sideLabel([0, 0], e, names[i], i ? 'violet' : 'accent', [tip.x, tip.y], false, 0.9); });
     plot.arrow(tail[0], tail[1], tip.x, tip.y, { color: 'gold', width: 3.2, label: P.vname, ldx: 8, ldy: -10 });
     plot.point(0, 0, { color: 'ink2', r: 3 });
     g.restore();

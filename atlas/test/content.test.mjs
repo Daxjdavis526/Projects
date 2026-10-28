@@ -250,8 +250,8 @@ for (const c of CATALOG.courses) {
         if (v === 0) {
           check(`${c.id} boss round ${k + 1}/${def.id}`, true);
           check(`${c.id} boss ${def.id}: measures a real lesson skill`, !!CATALOG.lessons[def.skill], `skill “${def.skill}” — set skill to the id of the lesson this problem draws on`);
-          await checkVisual(`${c.id} boss ${def.id}`, item.visual);
         }
+        await checkVisual(`${c.id} boss ${def.id} variant ${v}`, item.visual);
       }
     }
   }

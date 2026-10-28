@@ -1,7 +1,8 @@
 // Screenshots of the Atlas for visual checks — pages, lesson steps and every
 // simulation in the gallery — in dark and light themes. Several rendering
 // bugs in this repository were only ever visible in a screenshot.
-//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<id>|boss:<course>|all] [dark|light]
+//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<id>|boss:<course>|all] [dark|light] [width]
+//   (width, default 1280: e.g. 390 to walk a lesson, boss or sim at phone width)
 // It serves the repository itself on a free local port (so several runs can
 // go at once) and prints any page errors; exit status 1 if there were some.
 // Playwright comes preinstalled in this environment; nothing is installed.
@@ -17,6 +18,7 @@ const { chromium } = require('playwright');
 const out = (process.argv[2] || 'shots').replace(/\/$/, '') + '/';
 const what = process.argv[3] || 'all';
 const themes = process.argv[4] ? [process.argv[4]] : ['dark', 'light'];
+const WIDTH = +(process.argv[5] || 1280);      // e.g. 390 for a phone-width walk of a lesson or boss
 mkdirSync(out, { recursive: true });
 
 // a static file server over the repository root
@@ -68,21 +70,21 @@ for (const theme of themes) {
   }
   if (what === 'all' || what === 'sims') {
     const { default: GALLERY } = await import('../content/gallery.js');
-    const page = await newPage(theme);
+    const page = await newPage(theme, WIDTH);
     for (const g of GALLERY) {
       await page.goto(BASE + '#/explore/' + g.id); await page.waitForTimeout(1200);
       await page.screenshot({ path: `${out}${theme}-sim-${g.id}.png`, fullPage: true });
     }
   }
   if (what.startsWith('sim:')) {
-    const page = await newPage(theme);
+    const page = await newPage(theme, WIDTH);
     await page.goto(BASE + '#/explore/' + what.slice(4)); await page.waitForTimeout(1200);
     await page.screenshot({ path: `${out}${theme}-sim-${what.slice(4)}.png`, fullPage: true });
   }
   if (what.startsWith('boss:')) {
     // an authored boss: the intro, then every problem before and after "I don't know"
     const course = what.slice(5);
-    const page = await newPage(theme);
+    const page = await newPage(theme, WIDTH);
     await page.goto(BASE + '#/boss/' + course); await page.waitForTimeout(1200);
     await page.screenshot({ path: `${out}${theme}-boss-${course}-00-intro.png`, fullPage: true });
     const begin = await page.$('button:has-text("Begin")');
@@ -107,7 +109,7 @@ for (const theme of themes) {
     // question with a hint and then its solution, then each checkpoint
     // question and its worked answer
     const id = what.slice(7);
-    const page = await newPage(theme);
+    const page = await newPage(theme, WIDTH);
     await page.goto(BASE + '#/lesson/' + id); await page.waitForTimeout(1000);
     let k = 0;
     const shot = async (tag) => page.screenshot({ path: `${out}${theme}-${id}-${String(k++).padStart(2, '0')}-${tag}.png`, fullPage: true });
@@ -144,7 +146,13 @@ for (const theme of themes) {
         if (input) await input.fill('1');
         for (const sel of await page.$$('.stage .match-row select')) await sel.selectOption({ index: 1 });
       }
-      for (const attempt of ['1', 'x = 1', 'x', 'y = x']) {
+      // throwaway answers that parse: a number, an equation, then the item's own variables
+      // (its keypad note reads "Use t, y. …")
+      const note = await page.$eval('.stage', (e) => (e.textContent.match(/Use ([^.]+)\./) || [])[1] || '').catch(() => '');
+      const vars = note.split(/,\s*/).map((v) => v.trim()).filter((v) => /^[A-Za-zα-ωθ]\w*$/.test(v));
+      const [v1 = 'x', v2 = 'y'] = vars;
+      const tries = ['1', `${v1} = 1`, v1, `${v2} = ${v1}`];
+      for (let k = 0; k < tries.length; k++) {
         const check = await page.$('.stage button.btn.primary:has-text("Check")');
         if (!check || !(await check.isEnabled())) break;
         await check.click(); await page.waitForTimeout(150);
@@ -155,7 +163,7 @@ for (const theme of themes) {
         if (!(await page.$('.stage .feedback.info .head:has-text("Not quite readable")'))) break;
         const input = await page.$('.stage .answer input');
         if (!input) break;
-        await input.fill(attempt === '1' ? 'x = 1' : attempt === 'x = 1' ? 'x' : 'y = x');
+        if (k + 1 < tries.length) await input.fill(tries[k + 1]);
       }
       const give = await page.$('.stage button:has-text("Show solution")');
       if (give) { await give.click(); await page.waitForTimeout(400); }

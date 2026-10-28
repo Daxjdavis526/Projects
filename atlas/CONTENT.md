@@ -294,6 +294,11 @@ The functions use the item's `vars` (the first one is the variable of
 differentiation or integration; set `wrt` to choose another). The player
 ignores these fields.
 
+A solution of a differential equation y′ = f(t, y) can be checked the same
+way: give `integrand` as f with the answer substituted for y (for y′ = −ky
+with answer `y0*e^(-k t)`, `integrand: '-k*y0*e^(-k t)'`), and the test checks
+that the answer's derivative is that right-hand side.
+
 ### Ordering — `order`
 
 `items` listed **in the correct order** (3+); the player shuffles them.
@@ -447,12 +452,14 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
 | `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
-| `c3-contour` | a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c |
+| `c3-contour` | (x and y share one scale: give a window with the canvas's aspect, 16:10 by default or 2:1 when wide) a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c |
 | `c3-coords` | cylindrical or spherical coordinates as three surfaces meeting at a point, turning unit vectors, the volume-element box (`edgeLabels: false` hides its edge lengths) |
 | `c3-curve` | a point riding a space curve: T, N, B frame, osculating circle, acceleration split into tangential and normal parts (gravity-turn preset) |
 | `c3-boxes`, `c3-slicer`, `c3-jacobian` | boxes under a surface summing to a double integral; a region sliced in strips both ways (the two orders' limits); a change of variables stretching each cell by its Jacobian |
 | `c3-lineint`, `c3-cells`, `c3-flux` | a bead riding a path through a vector field with F·dr adding up; a region cut into cells whose inner edges cancel (Green's theorem, the FTC); a 3D field through tiltable surfaces — the flux integrand, curl through butterfly nets, the divergence theorem |
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
+| `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
+| `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
 | `mech-frames` | Newton's first law seen from the ground and from an accelerating train car |
@@ -473,7 +480,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `mech-tank`, `mech-flow` | pressure in vessels of any shape, manometers, buoyancy; flow through a narrowing pipe, Bernoulli, a Pitot-static probe |
 | `therm-gas` | a 3D hard-sphere gas: pressure from wall impacts against nRT/V, a live speed histogram against Maxwell–Boltzmann, mixtures |
 | `therm-pv` | PV diagrams: processes with work as area, cycles (Carnot, Otto, Brayton) and refrigerators, energy flows, a T–S panel |
-| `em-circuit` | nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
+| `em-circuit` | (a compact picture — a worked example's — hides the currents unless `show: { I: true }`) nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
 | `em-capacitor` | a parallel-plate capacitor with a sliding dielectric, battery connected or not: Q, V, C and stored energy |
 | `lab-bench` | twenty-eight virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry; field mapping, Ohm's law and resistivity, RC decay, a coil's field, induction, refraction and lenses, slits and gratings, string resonance…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
 | `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
@@ -512,6 +519,9 @@ sim that calls `F.caption` again as it draws cannot overwrite it.
 **Captions must say what is simplified or not to scale.** "Arrows show
 direction only." "Drag is quadratic with a fixed coefficient; real drag
 varies with speed." That honesty is the house style.
+
+A coding exercise counts as having its picture (its editor and output), as
+does a problem whose prompt holds a code listing.
 
 **A problem's picture must not show its answer.** A readout of the very
 quantity asked for, or the point marked where the learner is asked to find
@@ -652,6 +662,7 @@ export default boss({
 });
 ```
 
+The test prints only a boss's failures, so a clean run shows no boss lines.
 Every item **must** name the lesson whose skill it measures (`skill`), so the
 result moves the right mastery estimate. Boss items follow all the item rules
 (hints are still required — they appear in later review, not in the battle);

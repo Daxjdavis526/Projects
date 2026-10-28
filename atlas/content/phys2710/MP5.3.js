@@ -28,7 +28,7 @@ const still = (params, caption) => ({ type: 'mp-franck-hertz', params: { play: f
 function hgLadder(arrows = [], caption) {
   const L = [[0, 'ground state'], [HG_LEVELS['3P0'], '4.67 eV'], [HG_LEVELS['3P1'], '4.89 eV'], [HG_LEVELS['3P2'], '5.46 eV'], [HG_LEVELS['1P1'], '6.70 eV'], [HG_LEVELS.ion, '10.44 eV: ionized']];
   const curves = L.map(([E]) => seg(0, E, 4.2, E, 'ink2', E === HG_LEVELS.ion ? 1.2 : 2, E === HG_LEVELS.ion));
-  const points = L.map(([E, txt], i) => label(4.2, E, txt, 'ink2', 8, i === 1 ? 7 : i === 2 ? -5 : 0));
+  const points = L.map(([E, txt], i) => label(4.2, E, txt, 'ink2', 8, [0, 8, -3, -9, 0, 0][i]));
   return {
     type: 'graph',
     params: frame([-2.2, 7.4], [-0.8, 11.3], {

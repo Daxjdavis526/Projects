@@ -34,7 +34,8 @@ const COLORS = ['accent', 'warn', 'good', 'violet', 'teal'];
 const fmt = (x, d = 3) => (Number.isFinite(x) ? String(+x.toPrecision(d)) : '\\text{—}');
 
 export function mount(F, P) {
-  const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'Vectors as stem plots, one stem per component, and the plane two of them span' });
+  const narrow = (F.el.getBoundingClientRect().width || 800) < 560;   // a phone: a taller canvas
+  const { canvas } = F.canvas({ aspect: narrow ? '' : 'wide', label: P.alt || 'Vectors as stem plots, one stem per component, and the plane two of them span' });
   const vecs = P.vectors.map((v, k) => ({ name: v.name || `v${k + 1}`, tex: v.tex || `\\mathbf{${v.name || 'v'}}`, color: v.color || COLORS[k % COLORS.length], drag: !!v.drag, raw: v.values.slice() }));
   const n = vecs[0].raw.length;
   const combo = P.combo ? { of: [0, 1], target: 2, c: [1, 1], range: [-3, 3], step: 0.1, ...P.combo } : null;
@@ -133,7 +134,7 @@ export function mount(F, P) {
       const R = planeR;
       right.setView([-0.55 * R, 1.25 * R], [-0.35 * R, 1.15 * R]);
       right.resize(); right.refreshTheme(); right.grid(); right.axes();
-      right.text(`the plane of ${vecs[0].name} and ${vecs[1].name}`, right.L + 4, right.T - 12, { screen: true, color: 'ink3', size: 11 });
+      right.text(narrow ? `plane of ${vecs[0].name}, ${vecs[1].name}` : `the plane of ${vecs[0].name} and ${vecs[1].name}`, right.L + 4, right.T - 12, { screen: true, color: 'ink3', size: 11 });
       if (pl) {
         const [vx, vy] = pl.v;
         right.line(vx, vy, vx, 0, { color: 'ink4', width: 1.2, dash: [4, 4] });

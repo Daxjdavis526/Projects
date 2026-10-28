@@ -25,6 +25,7 @@
 //       rowLabels: null,            // row names (plain text) instead of R₁, R₂, …
 //       view: null,                 // the picture's half-width (default 4, centred on the solution)
 //       readout: true,              // the solution set below the picture; false hides it
+//       notes: null,                // say on the picture what a row 0 = c means (default: with the readout)
 //   } }
 
 import { Plot } from '../plot.js';
@@ -35,7 +36,7 @@ import * as G from '../model/calc-vectors3d.js';
 
 export const defaults = {
   M: null, systems: null, aug: true, mode: 'ref', ops: null, step: 0, stepper: true, picture: 'auto',
-  solution: true, vars: null, colLabels: null, rowLabels: null, view: null, readout: true,
+  solution: true, vars: null, colLabels: null, rowLabels: null, view: null, readout: true, notes: null,
 };
 
 const ROW_COLORS = ['accent', 'warn', 'good', 'violet', 'teal', 'bad'];
@@ -69,7 +70,7 @@ export function mount(F, P) {
   const kind = () => (P.picture === 'none' || cur.rhs !== 1 ? 'none' : cur.nvar === 2 ? 'lines' : cur.nvar === 3 ? 'planes' : 'none');
   const pictureKind = kind();
   // one canvas for the whole life of the sim: lines or planes (every system offered has the same shape)
-  let plot = null, view = null, overlay = null;
+  let plot = null, view = null, overlay = null, noteBox = null;
   if (pictureKind === 'lines') {
     ({ canvas: plot } = F.canvas({ aspect: 'wide', label: P.alt || 'Each row of the system drawn as a line in the plane' }));
     plot = new Plot(plot, { x: [-4, 4], y: [-2, 2], equal: true, xlabel: vars(2)[0], ylabel: vars(2)[1] });
@@ -79,7 +80,8 @@ export function mount(F, P) {
     view = new View3D(c.canvas, { yaw: 0.6, pitch: 0.42, dist: 14, scale: 1.25 });
     view.onChange = () => draw();
     const hint = h('div', { style: { position: 'absolute', right: '10px', bottom: '6px', fontSize: '.72rem', color: 'var(--ink-3)' } }, 'drag to rotate');
-    overlay.append(hint);
+    noteBox = h('div', { style: { position: 'absolute', left: '10px', top: '8px', fontSize: '.8rem', fontWeight: 650, lineHeight: 1.5 } });
+    overlay.append(hint, noteBox);
   }
 
   // controls
@@ -188,6 +190,7 @@ export function mount(F, P) {
         plot.text(P.rowLabels ? P.rowLabels[i] : `R${sub(i + 1)}`, lx, ly, { color, weight: 700, dx: 6, dy: -10 });
       }
     });
+    zeroRowNotes(Mx).forEach(([text, color], k) => plot.text(text, plot.L + 8, plot.T + 12 + 18 * k, { screen: true, color, weight: 650 }));
     const s = solutionKind();
     if (P.solution && s?.kind === 'point') plot.point(s.p[0], s.p[1], { color: 'gold', r: 5.5 });
     if (P.solution && s?.kind === 'line') {
@@ -235,11 +238,19 @@ export function mount(F, P) {
       if (el.dataset.src !== src) { el.dataset.src = src; el.innerHTML = tex(src); }
     });
     for (let k = marks.length; k < pool.length; k++) pool[k].style.display = 'none';
+    const notes = zeroRowNotes(Mx);
+    noteBox.replaceChildren(...notes.map(([text, color]) => h('div', { style: { color: `var(${color === 'bad' ? '--bad' : '--ink-3'})` } }, text)));
   }
   // the point of the plane n·r = d nearest c
   function foot(n, d, c) { const t = (d - G.dot(n, c)) / G.dot(n, n); return G.add(c, G.scale(n, t)); }
 
   const stepData = () => cur.red.steps[step];
+  // rows whose coefficients are all zero draw nothing, so say what they mean
+  const zeroRowNotes = (Mx) => (P.notes ?? P.readout !== false) ? Mx.flatMap((row, i) => {
+    if (row.slice(0, cur.nvar).some((v) => !Q.qzero(v))) return [];
+    const name = P.rowLabels ? P.rowLabels[i] : `R${sub(i + 1)}`, c = row[cur.nvar];
+    return [Q.qzero(c) ? [`${name} reads 0 = 0: no condition at all`, 'ink3'] : [`${name} reads 0 = ${Q.qtext(c)}: no point satisfies it`, 'bad']];
+  }) : [];
 
   function statusTeX() {
     const s = solutionKind();

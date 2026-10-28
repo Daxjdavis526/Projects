@@ -280,7 +280,7 @@ export function mount(F, P0) {
   function drawField(f) {
     if (P.field === false) return;
     const n = P.grid || 17, g = plot.ctx;
-    const pxW = plot.R - plot.L, pxH = plot.B - plot.T, cell = Math.min(pxW, pxH) / n;
+    const pxW = plot.R - plot.L, pxH = plot.B - plot.T, cell = Math.max(pxW, pxH) / n;
     const nx = Math.max(2, Math.round(pxW / cell)), ny = Math.max(2, Math.round(pxH / cell));
     const len = cell * 0.62;
     g.save();
