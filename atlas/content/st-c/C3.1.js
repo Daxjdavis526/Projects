@@ -225,7 +225,7 @@ Then a small coordinate rectangle $du\,dv$ maps to a genuine little parallelogra
     mcq({
       id: 'cp-cuspidal', difficulty: 3,
       prompt: t`Where is the patch $\mathbf X(u, v) = (u,\ v^2,\ v^3)$ not regular?`,
-      visual: surf(['u', 'v^2', 'v^3'], [[-1.5, 1.5], [-1.2, 1.2]], { curves: [{ param: ['t', '0', '0'], t: [-1.5, 1.5], color: 'bad', width: 3 }], caption: 'The surface: each slice x = const is the same cusp, z² = y³. One line on it is marked in red.', pitch: 0.3, yaw: -1.2 }),
+      visual: surf(['u', 'v^2', 'v^3'], [[-1.5, 1.5], [-1.2, 1.2]], { caption: 'The surface. Every slice x = const is the same plane curve; turn the picture to look along the x-axis.', pitch: 0.3, yaw: 0.45, dist: 7 }),
       choices: [t`Along the whole line $v = 0$`, 'Nowhere', 'Only at the origin', t`Along the line $u = 0$`],
       answer: 0,
       why: {
