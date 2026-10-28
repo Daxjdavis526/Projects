@@ -1,7 +1,7 @@
 // Composition and inverse functions — machines in series, and running a machine backwards.
 import { lesson, mcq, num, expr, match } from '../../src/core/content.js';
 import { nice, sig } from '../../src/core/format.js';
-import { sgn } from './_m0kit.js';
+import { sgn, lab } from './_m0kit.js';
 
 const t = String.raw;
 const is = (k) => `step(0.5 - abs(fam - ${k}))`;
@@ -226,7 +226,7 @@ Order matters — $f(g(x))$ is usually not $g(f(x))$ — and $f^{-1}$ is **not**
           hints: [t`Inner function first: $C = \tfrac59(${F} - 32)$.`, t`Then add $273.15$.`],
           teach: t`A chain of unit conversions is a composition: apply the inner conversion first.`,
           explain: t`$C = \tfrac59(${F} - 32) = ${nice(sig(C, 4))}\ {}^\circ\text{C}$, then $K = ${nice(sig(C, 4))} + 273.15 = ${nice(sig(K, 3))}$ K.`,
-          visual: { type: 'graph', params: { x: [-480, 120], y: [-300, 60], aspect: 'wide', xlabel: '°F', ylabel: '°C', curves: [{ fn: '5/9*(x - 32)', color: 'accent', label: 'C(F)', labelAt: 40, labelDx: -40, labelDy: -12 }], vlines: [{ x: F, color: 'gold', label: `${F} °F` }], points: [{ x: 32, y: 0, color: 'ink3', r: 4, label: 'water freezes', labelDx: -90, labelDy: -12 }] }, caption: t`The inner conversion, Celsius against Fahrenheit, with the given temperature marked.` },
+          visual: { type: 'graph', params: { x: [-480, 120], y: [-300, 60], aspect: 'wide', xlabel: '°F', ylabel: '°C', curves: [{ fn: '5/9*(x - 32)', color: 'accent', label: 'C(F)', labelAt: -150, labelDx: 6, labelDy: 18 }], vlines: [{ x: F, color: 'gold', label: `${lab(F)} °F` }], points: [{ x: 32, y: 0, color: 'ink3', r: 4, label: 'water freezes', labelDx: -90, labelDy: -12 }] }, caption: t`The inner conversion, Celsius against Fahrenheit, with the given temperature marked.` },
         };
       },
     }),

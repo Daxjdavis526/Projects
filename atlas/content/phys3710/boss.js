@@ -68,7 +68,7 @@ export function fissionCase(r) {
 const ZV = '(x/(1.98 + 0.0155*x^(2/3)))';
 const SEMF_BA = `15.75 - 17.8*x^(-1/3) - 0.711*${ZV}*(${ZV} - 1)*x^(-4/3) - 23.7*(x - 2*${ZV})^2/x^2`;
 function bindingPic(C) {
-  const pts = [['U-235', C.bU, 'warn', 10, 14], ['Xe-140', C.bXe, 'accent', -8, -12, 'right'], ['Sr-94', C.bSr, 'accent', 8, -12]];
+  const pts = [['U-235', C.bU, 'warn', -10, 4, 'right'], ['Xe-140', C.bXe, 'accent', 8, 16], ['Sr-94', C.bSr, 'accent', 8, 16]];
   return {
     type: 'graph',
     params: {
@@ -125,7 +125,7 @@ function fuelPic(F) {
   return {
     type: 'graph',
     params: {
-      x: [-7.5, 12.5], y: [-3.4, 3.4], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
+      x: [-7.5, 12.5], y: [-2.8, 2.8], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
       shade: [{ fn: 'sqrt(max(0, 1.44 - x^2))', lower: '-sqrt(max(0, 1.44 - x^2))', from: -1.2, to: 1.2, color: 'warn', alpha: 0.35 }],
       curves: [{ fn: '1.4 + 0.18*(x - 1.6)', domain: [1.6, 11.5], color: 'ink3', width: 2.2 }, { fn: '-1.4 - 0.18*(x - 1.6)', domain: [1.6, 11.5], color: 'ink3', width: 2.2 }],
       arrows: [
@@ -135,7 +135,7 @@ function fuelPic(F) {
       points: [
         label(-6.2, 1.6, F.tagR[0], 'accent', -6, 0, 'right'), label(-6.2, -1.6, F.tagR[1], 'violet', -6, 0, 'right'),
         ...outs.map(({ y, s }) => label(10.7, y, s, 'gold', 8, 0, 'left')),
-        label(0, -1.4, 'burning plasma', 'warn', 0, 16, 'center'), label(6.5, 2.4, 'magnetic nozzle', 'ink3', 0, -6, 'center'),
+        label(0, -1.4, 'burning plasma', 'warn', 0, 16, 'center'), label(6.5, 2.4, 'magnetic nozzle', 'ink3', 0, -14, 'center'),
       ],
       alt: 'Two fuel nuclei meet in a hot plasma and the products stream out through a flared magnetic nozzle',
     },
@@ -204,7 +204,7 @@ function chamberPic(L) {
   ];
   const arrows = [{ from: [-6.4, 0], to: [-0.25, 0], color: 'violet', width: 2.4 }];
   const points = [
-    { x: 0, y: 0, r: 5, color: 'ink' }, label(-6.4, 0, 'p̄ from the trap', 'violet', 0, -12, 'left'), label(0, 0, 'hydrogen', 'ink2', 4, 16, 'center'),
+    { x: 0, y: 0, r: 5, color: 'ink' }, label(-6.4, 0, 'antiprotons from the trap', 'violet', 0, -12, 'left'), label(0, 0, 'hydrogen', 'ink2', -8, 18, 'right'),
     label(5.4, 2.3, 'magnetic nozzle', 'ink3', 0, -6, 'center'), label(11, 0.6, 'π⁺', 'warn', 8, 0, 'left'), label(10.6, -1.3, 'π⁻', 'accent', 8, 0, 'left'),
     label(-2.6, -2.6, 'γ (from a π⁰)', 'gold', -6, 0, 'right'), label(-1.8, 2.6, 'π⁺', 'warn', -8, 0, 'right'),
   ];
@@ -259,15 +259,15 @@ function laserPic(mode) {
   return {
     type: 'graph',
     params: {
-      x: [-1.6, 12.4], y: [-2.6, 2.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
+      x: [-1.6, 12.4], y: [-2.1, 2.1], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, equal: true,
       shade: [{ fn: 'sqrt(max(0, 0.81 - x^2))', lower: '-sqrt(max(0, 0.81 - x^2))', from: -0.9, to: 0.9, color: 'accent', alpha: 0.45 }],
-      curves: [{ fn: '0.42*sin(10*sqrt(x - 0.9))', domain: [1.2, 9.4], color: 'bad', width: 2 }, seg(9.9, -0.35, 10.9, 0, 'ink2', 2.4), seg(9.9, 0.35, 10.9, 0, 'ink2', 2.4), seg(9.9, -0.35, 9.9, 0.35, 'ink2', 2.4)],
+      curves: [{ fn: '0.42*sin(4.2*(x - 1.2))', domain: [1.2, 9.4], color: 'bad', width: 2 }, seg(9.9, -0.35, 10.9, 0, 'ink2', 2.4), seg(9.9, 0.35, 10.9, 0, 'ink2', 2.4), seg(9.9, -0.35, 9.9, 0.35, 'ink2', 2.4)],
       arrows: [{ from: [10.4, -1.2], to: [12.2, -1.2], color: 'gold', width: 2.4 }, up ? { from: [4.6, 1.3], to: [6.6, 1.3], color: 'bad', width: 1.8 } : { from: [6.6, 1.3], to: [4.6, 1.3], color: 'bad', width: 1.8 }],
       points: [label(0, -0.9, 'mission control', 'accent', 0, 16, 'center'), label(10.4, 0.35, 'Gannet', 'ink2', 0, -14, 'center'), label(11.3, -1.2, 'receding', 'gold', 0, 16, 'center'),
         label(5.6, 1.3, up ? 'uplink' : 'downlink', 'bad', 0, -12, 'center')],
       alt: 'Mission control on the left and the receding ship on the right, joined by a laser beam whose waves are drawn stretching out with distance',
     },
-    caption: 'The laser link, schematic: distances are light-years, not drawn to scale, and the stretching of the waves is only suggestive. Earth’s own motion around the Sun (about 10⁻⁴ c) is neglected.',
+    caption: 'The laser link, schematic: the distance is light-years, and the wave only marks the beam — its wavelength is not to scale, and is different in the two frames. Earth’s own motion around the Sun (about 10⁻⁴ c) is neglected.',
   };
 }
 
@@ -332,11 +332,11 @@ export function periodCase(r) {
 function periodPic(beta) {
   const x0 = 4.4, tick = [0, 1, 2, 3, 4], hits = tick.map((n) => { const th = (x0 + n) / (1 + beta); return [x0 - beta * th, th]; });
   return st({
-    x: [-1.2, 5.2], t: [-0.4, 5.4], numbers: false, aspect: 'square',
+    x: [-1.2, 5.2], t: [-0.4, 6.4], numbers: false, aspect: 'square',
     xlabel: 'x (not to scale)', ylabel: 't (orbits of the companion)',
     lines: [
-      { pts: [[0, -0.4], [0, 5.4]], color: 'warn', width: 2.6, label: 'companion', at: 0, dx: -8, dy: 50, align: 'right' },
-      { pts: [[x0, 0], [x0 - beta * 5.2, 5.2]], color: 'accent', width: 2.6, label: 'Gannet', at: 0, dx: 10, dy: 30 },
+      { pts: [[0, -0.4], [0, 6.4]], color: 'warn', width: 2.6, label: 'companion', at: 0, dx: -8, dy: 50, align: 'right' },
+      { pts: [[x0, 0], [x0 - beta * 6.3, 6.3]], color: 'accent', width: 2.6, label: 'Gannet', at: 0, dx: 10, dy: 30 },
     ],
     events: tick.map((n) => [0, n, '', 'warn']),
     extra: { curves: hits.map(([x, tt], n) => seg(0, n, x, tt, 'gold', 1.3, true)) },
@@ -385,7 +385,7 @@ export default boss({
             const Q1 = bXe + bSr - bU, Q2 = 235 * ((140 * bXe + 94 * bSr) / 234 - bU);
             const nPerYr = (P * 1e3 * YR) / (Q * MEV_J);
             return {
-              prompt: t`Gannet’s electricity comes from a small uranium-235 fission reactor, a scaled-up cousin of KRUSTY, the kilowatt-class reactor NASA ran on the ground in Nevada in 2018. A typical split is $$n + ${tn('U-235')} \to ${tn('Xe-140')} + ${tn('Sr-94')} + 2n.$$ Binding energies per nucleon $B/A$, from the 2020 Atomic Mass Evaluation: $${tn('U-235')}$ ${bU} MeV, $${tn('Xe-140')}$ ${bXe} MeV, $${tn('Sr-94')}$ ${bSr} MeV. The reactor makes ${P} kW of heat. Counting only the energy of this split, how many grams of uranium-235 does it fission in a year? ($1\ \text{MeV} = 1.602\times10^{-13}$ J, $1\ \text{yr} = 3.156\times10^{7}$ s, $N_A = 6.022\times10^{23}\ \text{mol}^{-1}$, uranium-235 is 235.04 g/mol.)`,
+              prompt: t`Gannet’s electricity comes from a small uranium-235 fission reactor, a scaled-up cousin of KRUSTY, the kilowatt-class reactor NASA ran on the ground in Nevada in 2018. A typical split is $$n + ${tn('U-235')} \to ${tn('Xe-140')} + ${tn('Sr-94')} + 2n.$$ Binding energies per nucleon $B/A$, from the 2020 Atomic Mass Evaluation: $${tn('U-235')}$ $${bU}\ \text{MeV}$, $${tn('Xe-140')}$ $${bXe}\ \text{MeV}$, $${tn('Sr-94')}$ $${bSr}\ \text{MeV}$. The reactor makes ${P} kW of heat. Counting only the energy of this split, how many grams of uranium-235 does it fission in a year? ($1\ \text{MeV} = 1.602\times10^{-13}$ J, $1\ \text{yr} = 3.156\times10^{7}$ s, $N_A = 6.022\times10^{23}\ \text{mol}^{-1}$, uranium-235 is 235.04 g/mol.)`,
               answer: grams, units: 'g', tol: { rel: 0.01 },
               errors: apart([
                 { value: perYear(Q1), feedback: t`$B/A$ is binding energy *per nucleon*. Each nucleus’s total binding energy is $A$ times it, so $Q = 140(B/A)_{\text{Xe}} + 94(B/A)_{\text{Sr}} - 235(B/A)_{\text{U}}$; the free neutrons have none.` },
@@ -397,7 +397,7 @@ export default boss({
                 t`Mass $=$ (fissions per year) $\times\ 235.04\ \text{g/mol} \div N_A$.`,
               ],
               teach: 'A fission releases the binding energy its fragments gain over the uranium: about 0.8 MeV for each of 235 nucleons.',
-              explain: t`The fragments are more tightly bound than the uranium, and the difference is released: $$Q = 140(${bXe}) + 94(${bSr}) - 235(${bU}) = ${tex(Q, 4)}\ \text{MeV} = ${tex(Q * MEV_J, 4)}\ \text{J}.$$ At ${P} kW the reactor needs $\dfrac{${P * 1000}\times3.156\times10^{7}}{${tex(Q * MEV_J, 4)}} = ${tex(nPerYr, 4)}$ fissions a year, which is $${tex(nPerYr, 4)}\times235.04/(6.022\times10^{23}) = ${tex(grams, 3)}$ g of uranium-235. Over a 3,000-year voyage that would be $${tex((grams * 3000) / 1000, 3)}$ kg, if anything could run that long. A whole fission gives about 200 MeV once the fragments’ later beta decays are counted (some of it carried off by antineutrinos), so a real reactor burns somewhat less than this. Compare chemistry: burning a carbon atom releases about 4 eV, some fifty million times less.`,
+              explain: t`The fragments are more tightly bound than the uranium, and the difference is released: $$Q = 140(${bXe}) + 94(${bSr}) - 235(${bU}) = ${tex(Q, 4)}\ \text{MeV} = ${tex(Q * MEV_J, 4)}\ \text{J}.$$ At ${P} kW the reactor needs $\dfrac{(${P}\times10^{3})(3.156\times10^{7})}{${tex(Q * MEV_J, 4)}} = ${tex(nPerYr, 4)}$ fissions a year, which is $${tex(nPerYr, 4)}\times235.04/(6.022\times10^{23}) = ${tex(grams, 3)}$ g of uranium-235. Over a 3,000-year voyage that would be $${tex((grams * 3000) / 1000, 3)}$ kg, if anything could run that long. A whole fission gives about 200 MeV once the fragments’ later beta decays are counted (some of it carried off by antineutrinos), so a real reactor burns somewhat less than this. Compare chemistry: burning a carbon atom releases about 4 eV, some fifty million times less.`,
               visual: bindingPic(C),
             };
           },
@@ -653,7 +653,7 @@ export default boss({
               teach: 'A moving observer’s “now” is a line tilted toward the light cone: t′ = γ(t − βx), so events farther along +x happen earlier for them.',
               explain: t`With $\gamma = ${tex(g, 4)}$, $t' = \gamma(t - ${beta}x)$ gives ${byG.map((e) => t`$t'_${e.name} = ${tex(g * wv(e), 3)}$`).join(', ')} years. So Gannet’s order is ${byG.map((e) => e.name).join(', ')}, while the Sun’s frame has ${byS.map((e) => e.name).join(', ')}. Only pairs separated by a spacelike interval can swap: Gannet’s lines of simultaneity tilt by the same angle as its time axis, toward the light cone, so events far along $+x$ slide earlier.`,
               visual: st({
-                x: [-4.5, 5.5], t: [-0.6, 5.6], aspect: 'square', boosted: { beta, ticks: 0, names: ['Gannet’s t′', 'Gannet’s x′'] }, cones: [[0, 0, 'future']],
+                x: [-4.4, 5.4], t: [-0.8, 5.4], aspect: 'square', boosted: { beta, ticks: 0, names: ['Gannet’s t′', 'Gannet’s x′'] }, cones: [[0, 0, 'future']],
                 events: ev.map((e) => [e.x, e.t, e.name, 'accent2', 9, -9]),
                 caption: t`The Sun’s frame ($c = 1$, years and light-years), its light cone from the origin dashed, and Gannet’s axes for $\beta = ${beta}$ in gold. Gannet’s lines of simultaneity are parallel to its gold $x'$ axis.`,
               }),

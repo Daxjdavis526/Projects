@@ -30,6 +30,7 @@
 //       ranges: {},            // slider ranges { NA: [min, max], NB: […], q: […], N: […] }
 //       cells: 'auto',         // pair: draw the oscillators ('auto': when N_A + N_B ≤ 120)
 //       visits: true,          // the time-spent dots
+//       xr: null,              // pair, x: 'q': the visible range of q_A, [min, max] (default 0 … q)
 //       panels: 'both',        // pair: 'both', 'cells' (oscillators only) or 'bars' (multiplicities only)
 //       numbers: 'auto',       // Ω_A·Ω_B printed over each bar ('auto': when q ≤ 10 on a linear scale)
 //       play: null,            // start running (default: in an Explore step, not in a small picture)
@@ -42,7 +43,7 @@
 import { Plot, pow10Label } from '../plot.js';
 import * as M from '../model/th-einstein.js';
 
-export const defaults = { mode: 'pair', NA: 3, NB: 3, q: 6, N: 3, start: 'A', scale: 'linear', x: 'q', tie: null, qper: 1, ghosts: true, controls: null, ranges: {}, cells: 'auto', visits: true, numbers: 'auto', panels: 'both', play: null, readouts: true, hide: [], stars: true, seed: 1, alt: null };
+export const defaults = { mode: 'pair', NA: 3, NB: 3, q: 6, N: 3, start: 'A', scale: 'linear', x: 'q', tie: null, qper: 1, ghosts: true, controls: null, ranges: {}, cells: 'auto', visits: true, numbers: 'auto', xr: null, panels: 'both', play: null, readouts: true, hide: [], stars: true, seed: 1, alt: null };
 const CONTROLS = ['NA', 'NB', 'q', 'N', 'scale', 'play'];
 const HIDE = ['qA', 'omega', 'peak', 'prob', 'width', 'total'];
 const LN10 = Math.LN10;
@@ -237,7 +238,8 @@ function mountPair(F, P) {
     const pad = frac ? 0.02 : 0.6;
     pb.o.yfmt = log ? pow10Label : undefined;
     pb.o.ylabel = frac ? 'Ω / Ω(peak)' : log ? 'Ω(A)·Ω(B), log scale' : k ? `Ω(A)·Ω(B)  (×10^${k})`.replace(/\^(\d+)/, (m, d) => [...d].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]).join('')) : 'Ω(A)·Ω(B)';
-    pb.setView([frac ? 0 : -pad, frac ? 1 : q + pad], [ymin, ymax]);
+    const xv = !frac && Array.isArray(P.xr) ? [P.xr[0], P.xr[1]] : [frac ? 0 : -pad, frac ? 1 : q + pad];
+    pb.setView(xv, [ymin, ymax]);
     pb.clear();
     const g = pb.ctx;
     for (const { d } of ghostD) {
@@ -245,16 +247,18 @@ function mountPair(F, P) {
       for (let a = 0; a <= qq; a += Math.max(1, Math.floor(qq / 600))) pts.push([a / qq, Math.exp(d.lnW[a] - d.lnPeak)]);
       pb.path(pts, { color: 'ink3', width: 1.2, alpha: 0.7 });
     }
-    const bars = !frac && q + 1 <= 160;
+    const bars = !frac && (Array.isArray(P.xr) ? P.xr[1] - P.xr[0] : q + 1) <= 160;
     if (bars) {
-      for (let a = 0; a <= q; a++) {
+      const a0 = Array.isArray(P.xr) ? Math.max(0, Math.ceil(P.xr[0])) : 0, a1 = Array.isArray(P.xr) ? Math.min(q, Math.floor(P.xr[1])) : q;
+      for (let a = a0; a <= a1; a++) {
         const y = yOf(D.lnW[a]);
         pb.rect(a - 0.4, ymin, 0.8, Math.max(0, y - ymin), { color: a === S.qA ? 'gold' : 'accent', alpha: a === S.qA ? 0.75 : 0.4, width: 1 });
       }
     } else {
-      const pts = [[xs(0), ymin]];
-      for (let a = 0; a <= q; a += Math.max(1, Math.floor(q / 800))) pts.push([xs(a), yOf(D.lnW[a])]);
-      pts.push([xs(q), yOf(D.lnW[q])], [xs(q), ymin]);
+      const lo = !frac && Array.isArray(P.xr) ? Math.max(0, Math.ceil(P.xr[0])) : 0, hi = !frac && Array.isArray(P.xr) ? Math.min(q, Math.floor(P.xr[1])) : q;
+      const pts = [[xs(lo), ymin]];
+      for (let a = lo; a <= hi; a += Math.max(1, Math.floor((hi - lo) / 800))) pts.push([xs(a), yOf(D.lnW[a])]);
+      pts.push([xs(hi), yOf(D.lnW[hi])], [xs(hi), ymin]);
       pb.path(pts, { color: 'accent', width: 2, fill: 'accent', fillAlpha: 0.22 });
       pb.line(xs(S.qA), ymin, xs(S.qA), yOf(D.lnW[S.qA]), { color: 'gold', width: 2.5 });
     }
@@ -360,6 +364,7 @@ export function validate(P0) {
     if (!(['A', 'B', 'even'].includes(P.start) || whole(P.start, 0, P.q))) p.push('th-einstein: start is A, B, even, or a q_A from 0 to q');
     if (!['q', 'fraction'].includes(P.x)) p.push('th-einstein: x is q or fraction');
     if (!(P.qper > 0)) p.push('th-einstein: qper must be positive');
+    if (P.xr !== null && !(Array.isArray(P.xr) && P.xr.length === 2 && P.xr[0] < P.xr[1])) p.push('th-einstein: xr is [min, max]');
     if (!['both', 'cells', 'bars'].includes(P.panels)) p.push('th-einstein: panels is both, cells or bars');
   }
   if (!['linear', 'log'].includes(P.scale)) p.push('th-einstein: scale is linear or log');

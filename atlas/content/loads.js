@@ -571,6 +571,7 @@ export const LESSONS = {
   'phys3600.M1.3': () => import('./phys3600/M1.3.js'),
   'phys3600.M2.1': () => import('./phys3600/M2.1.js'),
   'phys3600.M2.2': () => import('./phys3600/M2.2.js'),
+  'phys3600.M2.3': () => import('./phys3600/M2.3.js'),
   'phys3700.T0.1': () => import('./phys3700/T0.1.js'),
   'phys3700.T0.2': () => import('./phys3700/T0.2.js'),
   'phys3700.T0.3': () => import('./phys3700/T0.3.js'),

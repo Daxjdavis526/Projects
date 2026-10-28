@@ -151,7 +151,7 @@ Every microstate of the combined system is equally likely, so the energy drifts 
           hints: [t`Near the peak, $P \propto e^{-x^2/(2\sigma^2)}$ with $x = ${d}$ the deviation.`, t`$x/\sigma = ${d / 100}$.`],
           teach: 'A few standard deviations from the peak, a Gaussian has already collapsed.',
           explain: t`$e^{-(${d})^2/(2\times100^2)} = e^{-${fmt((d * d) / 20000, 3)}} = ${texNum(ratio, 3)}$ (the exact multiplicities agree to 0.1%). And this is only $${fmt((100 * d) / q, 2)}\%$ of $q$.`,
-          visual: einPic({ mode: 'pair', NA: 10000, NB: 10000, q: 20000, start: 10000 + d, panels: 'bars', hide: ['width', 'peak'] }, t`The multiplicity of each split for two solids of $10^{4}$ oscillators; the gold line marks $q_A = ${10000 + d}$.`),
+          visual: einPic({ mode: 'pair', NA: 10000, NB: 10000, q: 20000, start: 10000 + d, panels: 'bars', hide: ['width', 'peak'], xr: [9500, 10500] }, t`The multiplicity of each split for two solids of $10^{4}$ oscillators, near the peak only ($q_A$ from 9500 to 10 500); the gold line marks $q_A = ${10000 + d}$.`),
         };
       },
     }),
