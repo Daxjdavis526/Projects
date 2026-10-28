@@ -153,7 +153,7 @@ print(V[:, 0])      # axis of the smallest
 \`\`\`
 
 It prints moments of ${E_SAT.w.map((x) => x.toFixed(3)).join(', ')} kg m², and the smallest moment's axis $(${f3(minorAxis)})$ — almost the long $z$ axis, tilted slightly by the off-axis masses.` },
-      { label: 'Read the physics', text: t`A spin about the long axis (moment ${E_SAT.w[0].toFixed(2)}) is stable only for a perfectly rigid body. Flexing parts dissipate energy at fixed angular momentum $L$, and since $E = L^2/2I$ the spin drifts to the axis of largest $I$ — a tumble end over end. That is what happened to **Explorer 1** in 1958: spinning about its long axis, it was in a flat spin within hours, a motion traced to energy lost in its four whip antennas.` },
+      { label: 'Read the physics', text: t`A spin about the long axis (moment ${E_SAT.w[0].toFixed(2)}) is stable only for a perfectly rigid body. Flexing parts dissipate energy at fixed angular momentum $L$, and since $E = L^2/2I$ the spin drifts to the axis of largest $I$ — a tumble end over end. That is what happened to **Explorer 1** in 1958: launched spinning about its long axis, it soon went into a flat spin, traced to energy lost in the flexing of its four whip antennas.` },
       { label: 'Sense check', text: t`The trace of $I$ equals the sum of the moments (both ${E_SAT.w.reduce((a, b) => a + b, 0).toFixed(3)}), the moments obey $I_1 + I_2 \ge I_3$ as every real body's must, and \`V.T @ I @ V\` is diagonal to round-off.` },
     ],
     answer: t`Principal moments ${E_SAT.w.map((x) => x.toFixed(2)).join(', ')} kg m²; smallest about $(${f3(minorAxis)})$, nearly the long axis — an unstable spin axis for a body that dissipates energy.`,
@@ -221,8 +221,8 @@ print(I)`,
           prompt: t`A stiffness matrix from a finite-element model reports
 
 \`\`\`python
->>> np.linalg.cond(K)
-${(10 ** k * r.pick([1.2, 2.5, 4.1, 7.3])).toExponential(1).replace('e+', 'e+').replace(/e\+(\d)$/, 'e+0$1')}
+>>> print(f"{np.linalg.cond(K):.1e}")
+${(10 ** k * r.pick([1.2, 2.5, 4.1, 7.3])).toExponential(1).replace(/e\+(\d)$/, 'e+0$1')}
 \`\`\`
 
 Using 64-bit floats (about 16 significant digits), roughly how many significant digits of the computed displacements can you trust?`,
@@ -230,7 +230,7 @@ Using 64-bit floats (about 16 significant digits), roughly how many significant 
           errors: [{ value: k, feedback: t`$\log_{10}\kappa \approx ${k}$ is the number of digits *lost*, not kept.` }, { value: 16 + k, feedback: 'Conditioning never adds digits: the condition number amplifies errors.' }],
           hints: [t`Relative error in the answer $\lesssim \kappa \times 10^{-16}$.`, t`$\kappa \approx 10^{${k}}$ turns $10^{-16}$ into about $10^{${k - 16}}$.`],
           teach: 'With double precision you keep about 16 − log₁₀ κ significant digits — and fewer if the input data are less accurate than that.',
-          explain: t`The relative error can be as large as $10^{${k}}\times10^{-16} = 10^{${k - 16}}$, leaving about ${16 - k} trustworthy digits. If the inputs (say, measured stiffnesses) carry only 4 digits, the bound becomes $10^{${k}}\times10^{-4}$ — and ${k >= 4 ? 'nothing can be trusted at all' : `only about ${4 - k} digit${4 - k === 1 ? '' : 's'} survive`}.`,
+          explain: t`The relative error can be as large as $10^{${k}}\times10^{-16} = 10^{${k - 16}}$, leaving about ${16 - k} trustworthy digits. If the inputs (say, measured stiffnesses) carry only 4 digits, the bound becomes $10^{${k}}\times10^{-4}$ — and ${k >= 4 ? 'nothing can be trusted at all' : 'only about one digit survives'}.`,
         };
       },
     }),
@@ -297,7 +297,7 @@ w, V = np.linalg.eigh(J)       # w ascending
         2: 'That is a single number, one component of one eigenvector.',
         3: 'That scales the whole matrix; it is not a vector.',
       },
-      hints: ['NumPy’s documentation: “the column `v[:, i]` is the eigenvector corresponding to the eigenvalue `w[i]`”.'],
+      hints: ['NumPy’s documentation: “the column `v[:, i]` is the eigenvector corresponding to the eigenvalue `w[i]`”.', 'A column is selected with `[:, i]` (every row, column i); `V[i]` is row i.'],
       teach: 'Eigenvectors are the columns of `V`: pair `w[i]` with `V[:, i]`, and check with `J @ V[:, i] ≈ w[i] * V[:, i]`.',
       explain: t`\`V[:, 0]\` is the first column. A quick check that you have the right one: \`np.allclose(J @ V[:, 0], w[0] * V[:, 0])\` must be \`True\`. Rows and columns differ unless $V$ happens to be symmetric, so this slip often passes unnoticed on a nearly diagonal tensor.`,
     }),
@@ -335,14 +335,14 @@ print(w, major)`,
       ],
       hints: ['For each mass: `mk * (r @ r * np.eye(3) - np.outer(r, r))`; add them up with `sum(...)`.', '`w, V = np.linalg.eigh(J)`; the largest eigenvalue is last, so its axis is the column `V[:, -1]`.'],
       teach: 'An inertia tensor is a sum of outer products; its eigenvectors are the principal axes and the largest eigenvalue marks the stable spin axis for a dissipating body.',
-      explain: t`The moments are ${E_PANEL.w.map((x) => x.toFixed(2)).join(', ')} kg m², and the largest is about an axis close to $z$ — perpendicular to the plane of the panels and the tank's offset, as the long panel span suggests. The antenna and tank tilt it slightly. Spacecraft designers keep the intended spin axis the major axis for exactly the reason Explorer 1 taught.`,
+      explain: t`The moments are ${E_PANEL.w.map((x) => x.toFixed(2)).join(', ')} kg m², and the largest is about $(${f3(E_PANEL.V[2].map((x) => x * Math.sign(E_PANEL.V[2][1])))})$ — mostly the body $y$ axis, at right angles to the panel span, tilted by about ${(Math.acos(Math.abs(E_PANEL.V[2][1])) * 180 / Math.PI).toFixed(0)}° by the antenna and the off-centre tank. Designers make the intended spin axis the major axis for exactly the reason Explorer 1 taught; the sign of the vector you print does not matter.`,
     }),
     mcq({
       id: 'cp-cond', difficulty: 2,
       prompt: t`A fit to 12 polynomial terms builds a matrix that behaves like the 12 × 12 Hilbert matrix:
 
 \`\`\`python
->>> np.linalg.cond(H)
+>>> print(f"{np.linalg.cond(H):.1e}")
 1.8e+16
 \`\`\`
 
@@ -383,6 +383,6 @@ x = np.linalg.solve(A, np.array([1.0, 2.0, 0.5]))
   sources: [
     { label: 'numpy.linalg (solve, inv, eigh, cond)', url: 'https://numpy.org/doc/stable/reference/routines.linalg.html' },
     { label: 'Newman, Computational Physics, ch. 6: Solution of linear and nonlinear equations', url: 'http://www-personal.umich.edu/~mejn/cp/' },
-    { label: 'Efroimsky (2001), Relaxation of wobbling asteroids and comets (the major-axis rule; Explorer 1)', url: 'https://arxiv.org/abs/astro-ph/0007325' },
+    { label: 'Bracewell & Garriott (1958), Rotation of artificial Earth satellites, Nature 182, 760 (Explorer 1’s flat spin)', url: 'https://doi.org/10.1038/182760a0' },
   ],
 });

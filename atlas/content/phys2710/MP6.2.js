@@ -276,6 +276,6 @@ For a matter wave $E = \hbar\omega$ and $p = \hbar k$, so $v_\text{group} = dE/d
   sources: [
     { label: 'OpenStax University Physics Vol. 3, §7.1–7.2 (wave functions and the uncertainty principle)', url: 'https://openstax.org/books/university-physics-volume-3/pages/7-2-the-heisenberg-uncertainty-principle' },
     { label: 'Klobuchar (1987), Ionospheric time-delay algorithm for single-frequency GPS users, IEEE Trans. Aerosp. Electron. Syst. AES-23, 325', url: 'https://doi.org/10.1109/TAES.1987.310829' },
-    { label: 'Munk (1947), Tracking storms by forerunners of swell (group velocity of ocean waves), J. Meteorol. 4, 45', url: 'https://doi.org/10.1175/1520-0469(1947)004%3C0045:TSBFOS%3E2.0.CO;2' },
+    { label: 'NOAA Space Weather Prediction Center: the ionosphere and total electron content', url: 'https://www.swpc.noaa.gov/phenomena/ionosphere' },
   ],
 });

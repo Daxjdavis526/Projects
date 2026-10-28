@@ -54,6 +54,17 @@ export const M_H2 = 2.01410177784;
 export const M_H3 = 3.01604928132;
 export const M_HE4 = 4.00260325413;
 export const M_N = 1.00866491606;                 // the neutron (CODATA 2022)
+export const M_SI28 = 27.97692653442;
+export const M_SI29 = 28.97649466434;
+export const M_S32 = 31.9720711744;
+export const M_S33 = 32.9714589098;
+export const M_AU197 = 196.96656879;
+
+// ---- more particle data (PDG 2024 Review of Particle Physics; NIST) ----
+export const M_UQ = 2.16;                          // MeV, up-quark mass (MS-bar, 2 GeV)
+export const M_DQ = 4.70;                          // MeV, down-quark mass (MS-bar, 2 GeV)
+export const TAU_N = 878.4;                        // s, free-neutron mean life
+export const IE_H = 13.598434;                     // eV, ionization energy of the hydrogen atom (NIST ASD)
 
 // ---- astronomy ----
 export const T_SUN = 5772;                        // K, IAU 2015 nominal effective temperature
