@@ -128,6 +128,31 @@ for (const Mc of [20, 25, 40, 55]) {
   check('bankFor is sorted and spans 15–60', b.every((v, i) => i === 0 || v > b[i - 1]) && b[0] === 15 && b[b.length - 1] === 60);
 }
 
+// the time-marginalized posterior the simulation draws
+{
+  const ms = M.bankFor(30), R = M.record({ Mc: 30, amp: 1, seed: 2 }), parts = M.scanParts(R, ms);
+  let last = Infinity, ok = true;
+  for (const amp of [1, 2, 3]) {
+    const { rho, logL } = M.scanBoth(parts, amp);
+    check(`scanBoth ρ equals scanAt (amp ${amp})`, rho.every((v, i) => v === M.scanAt([parts[i]], amp)[0]));
+    check(`logL ≥ ρ²/2 (the sum includes the peak) (amp ${amp})`, logL.every((v, i) => v >= rho[i] ** 2 / 2 - 1e-9));
+    const post = M.posteriorLog(ms, logL), ci = M.credible(ms, post, 0.9);
+    let area = 0;
+    for (let i = 1; i < ms.length; i++) area += ((post[i] + post[i - 1]) / 2) * (ms[i] - ms[i - 1]);
+    check(`time-marginalized posterior has unit area (amp ${amp})`, Math.abs(area - 1) < 1e-9);
+    check(`its 90% interval holds 30 M☉ (amp ${amp})`, ci.lo < 30 && ci.hi > 30, `${ci.lo}–${ci.hi}`);
+    if (!(ci.hi - ci.lo < last)) ok = false;
+    last = ci.hi - ci.lo;
+  }
+  check('and narrows as the signal grows', ok);
+  let cover = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const Rs = M.record({ Mc: 30, amp: 1.5, seed }), { logL } = M.scanBoth(M.scanParts(Rs, ms), 1.5), ci = M.credible(ms, M.posteriorLog(ms, logL), 0.9);
+    if (ci.lo < 30 && ci.hi > 30) cover++;
+  }
+  check('90% intervals cover the truth in 15–20 of 20 noise draws', cover >= 15, `${cover}/20`);
+}
+
 // validate
 check('defaults validate', validate(defaults).length === 0, validate(defaults).join('; '));
 check('a posterior view validates', validate({ ...defaults, panels: ['scan', 'post'], amp: 2.5, controls: ['amp', 'noise'] }).length === 0);
