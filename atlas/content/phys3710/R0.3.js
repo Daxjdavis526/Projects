@@ -16,7 +16,7 @@ function circles({ mark = null, sliders = null, points = [], readouts = null, vl
   return {
     type: 'graph',
     params: {
-      x: [0, 3.3], y: [0, 26], aspect: 'wide', axesAt: 'edge', xlabel: 'radius ρ (in units of R or a)', ylabel: 'circumference C',
+      x: [0, 3.65], y: [0, 26], aspect: 'wide', axesAt: 'edge', xlabel: 'radius ρ (in units of R or a)', ylabel: 'circumference C',
       curves: [
         { fn: '2*pi*sinh(x)', domain: [0, 2.15], color: 'teal', width: 2.6, label: 'saddle: 2πa sinh(ρ/a)', labelAt: 1.95, labelDx: -10, labelDy: -6, labelAlign: 'right' },
         { fn: '2*pi*x', color: 'ink2', width: 2, dash: true, label: 'plane: 2πρ', labelAt: 2.9, labelDx: -6, labelDy: -12, labelAlign: 'right' },
@@ -33,7 +33,7 @@ function circles({ mark = null, sliders = null, points = [], readouts = null, vl
 /** A saddle surface z = (x² − y²)/2 drawn in polar form, so its rim is round. */
 const saddle = (caption) => ({
   type: 'surface3d',
-  params: { surface: ['u*cos(v)', 'u*sin(v)', '0.5*u^2*cos(2*v)'], domain: [[0, 1.5], [0, 2 * Math.PI]], n: 36, aspect: 'wide', dist: 7.5, pitch: 0.45 },
+  params: { surface: ['u*cos(v)', 'u*sin(v)', '0.5*u^2*cos(2*v)'], domain: [[0, 1.5], [0, 2 * Math.PI]], n: 36, aspect: 'wide', dist: 6.5, pitch: 0.75, yaw: 0.5, zscale: 0.7 },
   caption: caption ?? t`A saddle, $z = (x^2 - y^2)/2$: it curves up in one direction and down in the other. Its Gaussian curvature is $-1$ at the centre and weakens outward. No smooth surface in ordinary space has the same negative curvature everywhere (Hilbert’s theorem), so the exact “saddle geometry” of this lesson can only be drawn in pieces. Drag to turn it.`,
 });
 
