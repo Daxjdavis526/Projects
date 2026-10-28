@@ -37,7 +37,7 @@ It is **zero exactly when the three vectors lie in one plane**. The **vector tri
   visual: {
     type: 'calc-vectors3d',
     title: 'The box three vectors span',
-    lead: t`$\vec a$ (blue) and $\vec b$ (amber) lie in the floor, spanning a gold base of area $|\vec a\times\vec b| = 4$. Move $\vec c$ (green) with the sliders: the box it adds is the parallelepiped, and the dashed line is the height of $\vec c$ above the base. Drag to turn the picture.`,
+    lead: t`$\vec a$ (blue) and $\vec b$ (orange) lie in the floor, spanning a gold base of area $|\vec a\times\vec b| = 4$. Move $\vec c$ (green) with the sliders: the box it adds is the parallelepiped, and the dashed line is the height of $\vec c$ above the base. Drag to turn the picture.`,
     tasks: [
       t`Slide $c_x$ and $c_y$: the box leans, but the triple product stays $4c_z$ — only the height above the base counts, as with a stack of sliding cards.`,
       t`Bring $c_z$ to $0$: $\vec c$ lies in the plane of $\vec a$ and $\vec b$, the box flattens, and the triple product is $0$.`,

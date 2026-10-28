@@ -79,6 +79,8 @@ check('scale factors', JSON.stringify(M.cylScale(2)) === '[1,2,1]' && nearV(M.sp
   check('a cylindrical point beyond the range is caught', validate({ ...good, system: 'cylindrical', point: [5, 30, 0] }).length > 0);
   check('an unknown surface is caught', validate({ ...good, surfaces: ['rho'] }).length > 0);
   check('an unknown readout is caught', validate({ ...good, readouts: ['w'] }).length > 0);
+  check('hidden box-edge labels pass', validate({ ...good, element: true, edgeLabels: false }).length === 0);
+  check('a non-boolean edgeLabels is caught', validate({ ...good, edgeLabels: 'no' }).length > 0);
 }
 
 console.log(`${pass} passed, ${fail} failed`);

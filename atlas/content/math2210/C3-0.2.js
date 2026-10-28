@@ -180,7 +180,7 @@ Draw level curves for evenly spaced values of $c$ and you have a **contour map**
             .concat([1, 2, 3, 4].map((rr) => ({ param: [`5 + ${rr}*cos(t)`, `${rr}*sin(t)`], t: [0, 2 * Math.PI], color: 'warn' }))),
           points: [{ x: -5, y: 0, r: 3, color: 'accent' }, { x: 5, y: 0, r: 3, color: 'warn' }, { x: -5, y: 2.6, r: 0.01, color: 'accent', label: 'P', labelDx: -4, labelDy: 0 }, { x: 5, y: 4.6, r: 0.01, color: 'warn', label: 'Q', labelDx: -4, labelDy: 0 }],
         },
-        caption: 'Two contour maps, at z = 1, 2, 3, 4, to the same scale. P: blue. Q: amber.',
+        caption: 'Two contour maps, at z = 1, 2, 3, 4, to the same scale. P: blue. Q: orange.',
       },
     }),
     expr({

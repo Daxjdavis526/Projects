@@ -81,7 +81,7 @@ export function mount(F, P0) {
     const n = left(t);
     txt(hide.has('count') ? `${N0} nuclei at the start` : `${n} of ${N0} left`, G.x0 + G.size / 2, G.y0 + G.size + 14, { color: C.ink2 });
     // the graph: N against time in half-lives
-    const B = narrow ? { x0: W * 0.14, x1: W - 12, y0: H * 0.56, y1: H - 34 } : { x0: W * 0.47, x1: W - 14, y0: H * 0.08, y1: H - 40 };
+    const B = narrow ? { x0: W * 0.14, x1: W - 12, y0: H * 0.56, y1: H - 46 } : { x0: W * 0.47, x1: W - 14, y0: H * 0.08, y1: H - 40 };
     const X = (tt) => B.x0 + (tt / tmax) * (B.x1 - B.x0), Y = (nn) => B.y1 - (nn / (N0 * 1.06)) * (B.y1 - B.y0);
     line(B.x0, B.y1, B.x1, B.y1, C.ink3, 1.2); line(B.x0, B.y0, B.x0, B.y1, C.ink3, 1.2);
     for (let k = 1; k <= tmax; k++) {
@@ -92,7 +92,7 @@ export function mount(F, P0) {
     }
     txt('0', X(0), B.y1 + 10, { color: C.ink3, w: 500, size: fs - 1 });
     [[1, 'N₀'], [0.5, '½'], [0.25, '¼'], [0.125, '⅛']].forEach(([f, s]) => { line(B.x0, Y(N0 * f), B.x1, Y(N0 * f), C.ink4, 1, [2, 4]); txt(s, B.x0 - 8, Y(N0 * f), { color: C.ink3, align: 'right', size: fs - 0.5 }); });
-    txt('time (half-lives)', B.x1, B.y1 + (narrow ? 34 : 36) > H - 4 ? B.y0 - 6 : B.y1 + 36, { color: C.ink2, align: 'right', size: fs - 1, w: 500 });
+    txt('time (half-lives)', B.x1, Math.min(H - 6, B.y1 + 36), { color: C.ink2, align: 'right', size: fs - 1, w: 500 });
     if (F.params.curve) {
       ctx.save(); ctx.strokeStyle = C.warn; ctx.lineWidth = 2; ctx.beginPath();
       for (let k = 0; k <= 200; k++) { const tt = (k / 200) * tmax; const x = X(tt), y = Y(N0 * Math.pow(2, -tt)); if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y); }

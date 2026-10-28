@@ -130,7 +130,9 @@ export function mount(F, P0) {
 
     // ---- the atom in its upper level
     if (showPic) {
-      const cx = Ab.x0 + (Ab.x1 - Ab.x0) * 0.3, cy = (Ab.y0 + Ab.y1) / 2, R = Math.min((Ab.x1 - Ab.x0) * 0.28, (Ab.y1 - Ab.y0) * 0.46);
+      // on a narrow screen the atom sits at the top of its panel with a shorter note beneath it
+      const R = narrow ? Math.min((Ab.x1 - Ab.x0) * 0.42, (Ab.y1 - Ab.y0) * 0.3) : Math.min((Ab.x1 - Ab.x0) * 0.28, (Ab.y1 - Ab.y0) * 0.46);
+      const cx = narrow ? (Ab.x0 + Ab.x1) / 2 : Ab.x0 + (Ab.x1 - Ab.x0) * 0.3, cy = narrow ? Ab.y0 + R + 6 : (Ab.y0 + Ab.y1) / 2;
       const n = P.picN ?? S.ni, rpk = n * n, rmax = n * n + 4 * n + 4, sc = R / rmax;
       if (S.picture === 'orbit') {
         ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(cx, cy, rpk * sc, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
@@ -146,7 +148,10 @@ export function mount(F, P0) {
       const lines2 = S.picture === 'orbit'
         ? [`Bohr’s orbit for n = ${n}:`, `radius ${n * n} a₀ = ${nmR} nm`, 'right energies, but electrons', 'do not follow paths']
         : [`n = ${n}: most likely distance`, `${n * n} a₀ = ${nmR} nm, but it`, 'could be found anywhere', 'in the haze — no orbit'];
-      lines2.forEach((s, i) => txt(s, Math.min(tx, Ab.x1 - 4), cy - 22 + i * (fs + 4), { align: tx > Ab.x1 - 120 ? 'right' : 'left', color: i === 0 ? C.ink : C.ink2, w: i === 0 ? 650 : 500, size: fs - 0.5 }));
+      if (narrow) {
+        const short = S.picture === 'orbit' ? [`Bohr orbit, n = ${n}:`, `radius ${n * n} a₀ = ${nmR} nm`, 'not a real path'] : [`n = ${n}: most likely`, `at ${n * n} a₀ = ${nmR} nm;`, 'no orbit, only haze'];
+        short.forEach((s, i) => txt(s, cx, cy + R + 12 + i * (fs + 3), { color: i === 0 ? C.ink : C.ink2, w: i === 0 ? 650 : 500, size: fs - 1 }));
+      } else lines2.forEach((s, i) => txt(s, Math.min(tx, Ab.x1 - 4), cy - 22 + i * (fs + 4), { align: tx > Ab.x1 - 120 ? 'right' : 'left', color: i === 0 ? C.ink : C.ink2, w: i === 0 ? 650 : 500, size: fs - 0.5 }));
     }
   }
 

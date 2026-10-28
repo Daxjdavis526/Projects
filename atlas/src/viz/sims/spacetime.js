@@ -16,7 +16,8 @@ export function mount(F, P) {
   F.slider({ key: 'beta', label: 'Velocity of the moving frame $\\beta = v/c$', min: -0.95, max: 0.95, step: 0.01, value: P.beta, unit: '', explain: 'Its time axis is the worldline $x = \\beta t$; its space axis tilts by the same angle toward the light cone.' });
   F.toggle({ key: 'sim', label: 'Lines of simultaneity', value: P.simultaneity, explain: 'Events on a gold dashed line happen at the same $t\'$ for the moving observer.' });
   F.toggle({ key: 'hyp', label: 'Hyperbolae of constant interval', value: P.hyperbolae, explain: 'Every observer agrees on $t^2 - x^2$; a boost slides events along these curves.' });
-  const ev = P.events.map(([t, x], k) => ({ t, x, name: String.fromCharCode(65 + k) }));
+  // names: labels for the events (default A, B, …; a multiple-choice problem should use others, P, Q …)
+  const ev = P.events.map(([t, x], k) => ({ t, x, name: P.names?.[k] ?? String.fromCharCode(65 + k) }));
   for (const e of ev) plot.handle(() => [e.x, e.t], (x, t) => { e.x = x; e.t = t; });
   plot.onDrag = () => draw();
   F.onChange(() => draw());
@@ -61,4 +62,13 @@ export function mount(F, P) {
   F.draw(draw);
   F.caption('Units with $c = 1$: light travels at 45°. Gold dots mark one unit of the moving observer’s own time and distance — they sit on the hyperbolae, which is why moving rulers look short and moving clocks look slow.');
   return { get: (k) => F.params[k] };
+}
+
+/** Node-side check used by the content tests. */
+export function validate(P) {
+  const p = [];
+  if (!Array.isArray(P.events) || !P.events.every((e) => Array.isArray(e) && e.length === 2 && e.every(Number.isFinite))) p.push('spacetime: events must be [[t, x], …] with finite numbers');
+  if (P.names && (!Array.isArray(P.names) || P.names.length < (P.events || []).length)) p.push('spacetime: names needs one label per event');
+  if (!(Math.abs(P.beta) < 1)) p.push('spacetime: beta must lie between −1 and 1');
+  return p;
 }

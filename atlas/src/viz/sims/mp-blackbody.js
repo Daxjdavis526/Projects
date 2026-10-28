@@ -139,10 +139,11 @@ export function mount(F, P0) {
       const k5 = Math.log10(B.peakBLambda(1) * B.WIEN_B ** 5);
       if (P.peak !== false) {
         plot.fn((x) => k5 - 5 * x, { color: 'ink3', width: 1.2, dash: [5, 5] });
-        // label the locus a little past the middle of the stretch that is in view
+        // label the locus near where it enters from the top, on its empty upper-left side
+        // (every peak lies on the line itself, so labels along it would collide with them)
         const xa = Math.max(plot.vx0, (k5 - plot.vy1) / 5), xb = Math.min(plot.vx1, (k5 - plot.vy0) / 5);
-        const xl = xa + 0.55 * (xb - xa), yl = k5 - 5 * xl;
-        if (xb > xa) plot.text('peaks: λmax T = b', xl, yl, { color: 'ink3', dx: 10, dy: 2, size: fs - 1 });
+        const xl = xa + 0.08 * (xb - xa), yl = k5 - 5 * xl;
+        if (xb > xa) plot.text('peaks: λmax T = b', xl, yl, { color: 'ink3', dx: -8, dy: 0, align: 'right', size: fs - 1 });
       }
       for (const c of compare) {
         plot.fn(lg((l) => B.planckLambda(l, c.T)), { color: 'ink3', width: 1.6 });

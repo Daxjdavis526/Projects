@@ -106,7 +106,7 @@ export function mount(F, P0) {
     const xg = Wd * 0.07, xb = Wd * 0.3, xs = Wd * 0.58, sw = narrow ? 18 : 26, xh0 = xs + sw + 10, xh1 = Wd - 8;
     // the gun
     ctx.save(); ctx.fillStyle = C.ink3; ctx.fillRect(xg - 18, cy - 11, 30, 22); ctx.restore();
-    txt('electron gun', xg - 3, cy + 26, { color: C.ink2, size: fs - 0.5 });
+    txt('electron gun', Math.max(xg - 3, narrow ? 34 : 40), cy + 26, { color: C.ink2, size: fs - 0.5 });     // kept clear of the left edge
     txt(`${F.params.kV < 10 ? F.params.kV.toFixed(1) : F.params.kV.toFixed(0)} kV`, xg - 3, cy - 24, { color: C.ink2, size: fs - 0.5 });
     // the barrier: slits drawn far larger than scale, in the right proportions
     const dpx = Math.max(H * 0.07, Math.min(H * 0.34, H * 0.12 * Math.sqrt(S.d / 2e-6))), apx = Math.max(3, dpx * Math.min(0.9, S.a / S.d));

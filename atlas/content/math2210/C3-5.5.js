@@ -12,8 +12,10 @@ const PI = Math.PI;
 
 /** A paddle wheel drawn on a graph at (x, y): a circle and four spokes. */
 const paddle = (x, y, s = 0.32) => ({
-  curves: [{ param: [`${x} + ${s}*cos(t)`, `${y} + ${s}*sin(t)`], t: [0, 2 * PI], color: 'ink', width: 2 }],
-  arrows: [0, 1, 2, 3].map((k) => { const a = (k * PI) / 2 + 0.4; return { from: [x, y], to: [r6(x + s * Math.cos(a)), r6(y + s * Math.sin(a))], color: 'ink', width: 2 }; }),
+  curves: [
+    { param: [`${x} + ${s}*cos(t)`, `${y} + ${s}*sin(t)`], t: [0, 2 * PI], color: 'ink', width: 2 },
+    ...[0, 1].map((k) => { const a = (k * PI) / 2 + 0.4, c = r6(s * Math.cos(a)), d = r6(s * Math.sin(a)); return { param: [`${x} + ${c}*t`, `${y} + ${d}*t`], t: [-1, 1], color: 'ink', width: 2 }; }),
+  ],
 });
 /** Join graph parts (curves and arrows lists). */
 const join = (...parts) => ({ curves: parts.flatMap((p) => p.curves || []), arrows: parts.flatMap((p) => p.arrows || []) });
@@ -125,7 +127,7 @@ In the plane only the last component survives: $Q_x - P_y$, Green’s integrand.
       id: 'paddle', difficulty: 2,
       prompt: t`A river near its bank flows with velocity $\vec v = \langle y,\ 0\rangle$ (m/s, $y$ in m from the bank): every arrow points downstream. A small paddle wheel is held at the point $(0, 1)$. What does it do?`,
       visual: fieldPic('y', '0', { x: [-3.2, 3.2], y: [-0.05, 3.0], n: 15, aspect: '', ...join(paddle(0, 1)), caption: 'The flow (arrow lengths compressed: faster further from the bank, which is the x-axis) and the paddle wheel at (0, 1).' }),
-      choices: ['It spins clockwise: the water above it moves faster than the water below', 'It does not spin: every arrow points the same way', 'It spins anticlockwise', 'It spins only if it is moved off the line y = 1'],
+      choices: ['It spins clockwise: the water above it moves faster than the water below', 'It does not spin: every arrow points the same way', 'It spins anticlockwise', t`It spins only if it is moved off the line $y = 1$`],
       answer: 0,
       why: {
         1: t`Straight, parallel arrows can still have curl. What matters is how the speed changes **across** the flow: here $Q_x - P_y = 0 - 1 = -1$.`,

@@ -345,7 +345,7 @@ The total is roughly $-\beta^2c^2R^2\sigma/(36G)$ as a mass — about $-0.2$ sol
     { label: 'Lentz, “Breaking the warp barrier: hyper-fast solitons in Einstein–Maxwell-plasma theory”, Class. Quantum Grav. 38, 075015 (2021)', url: 'https://arxiv.org/abs/2006.07125' },
     { label: 'Fell & Heisenberg, “Positive energy warp drive from hidden geometric structures”, Class. Quantum Grav. 38, 155020 (2021)', url: 'https://arxiv.org/abs/2104.06488' },
     { label: 'Bobrick & Martire, “Introducing physical warp drives”, Class. Quantum Grav. 38, 105009 (2021)', url: 'https://arxiv.org/abs/2102.06824' },
-    { label: 'Fuchs et al., “Constant velocity physical warp drive solution”, Class. Quantum Grav. 41, 095013 (2024)', url: 'https://arxiv.org/abs/2405.02709' },
+    { label: 'Fuchs, Helmerich, Bobrick, Sellers, Melcher & Martire, “Constant velocity physical warp drive solution” (2024)', url: 'https://arxiv.org/abs/2405.02709' },
     { label: 'Barzegar, Buchert & Vigneron, “General formalism, classification, and demystification of the current warp-drive spacetimes” (2026)', url: 'https://arxiv.org/abs/2602.16495' },
   ],
 });

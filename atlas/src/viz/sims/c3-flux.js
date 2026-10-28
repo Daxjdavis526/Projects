@@ -25,7 +25,8 @@
 //       flip: false, flipToggle: null,      // n = r_u × r_v, or its opposite (a toggle, except in a question's picture)
 //       tint: true, arrows: true, arrowsOn: 'surface',   // tint by the integrand; field arrows on the surface or on a 'grid'
 //       normals: true, ghosts: false,
-//       patch: null,                        // { u: 'u0', v: 'v0', du: 0.3, dv: 0.3 } (numbers or slider keys)
+//       patch: null,                        // { u: 'u0', v: 'v0', du: 0.3, dv: 0.3 } (numbers or slider keys); with
+//                                           //   frac: true all four are fractions of the surface's own u and v ranges
 //       points: [{ at: [x, y, z], label, color }],
 //       readouts: ['flux', 'area', 'circ', 'volume', 'patch'],   // which numbers to show; [] or false hides them all
 //       n: 22, quad: 16,                    // the drawn grid; Gauss–Legendre panels per direction for the integrals
@@ -89,7 +90,7 @@ export function mount(F, P) {
     }
     if (!Number.isFinite(lo[0])) return { target: [0, 0, 0], dist: R * 3.6 };
     const target = lo.map((v, k) => (v + hi[k]) / 2), diag = Math.hypot(...hi.map((v, k) => v - lo[k]));
-    return { target, dist: Math.max(1.9 * diag, 2.2) };
+    return { target, dist: Math.max(1.15 * diag, 2.2) };
   })();
   const view = new View3D(canvas, { yaw: P.yaw ?? 0.6, pitch: P.pitch ?? 0.42, dist: P.dist ?? frame.dist, scale: P.scale ?? 1, target: P.target || frame.target });
   view.onChange = () => draw();
@@ -232,8 +233,13 @@ export function mount(F, P) {
     let patchRow = null;
     if (P.patch && C.pieces[0]) {
       const pc = C.pieces[0], E = C.E;
-      const u = num(P.patch.u, E, keys), v = num(P.patch.v, E, keys);
-      const du = num(P.patch.du ?? 0.3, E, keys), dv = num(P.patch.dv ?? 0.3, E, keys);
+      let u = num(P.patch.u, E, keys), v = num(P.patch.v, E, keys);
+      let du = num(P.patch.du ?? 0.3, E, keys), dv = num(P.patch.dv ?? 0.3, E, keys);
+      if (P.patch.frac) {          // fractions of the surface's own parameter ranges
+        const [u0, u1] = pc.u, [v0, v1] = pc.v;
+        du *= u1 - u0; dv *= v1 - v0;
+        u = u0 + (u1 - u0 - du) * u; v = v0 + (v1 - v0 - dv) * v;
+      }
       const p = pc.S(u, v), [ru, rv] = M.tangents(pc.S, u, v);
       const a = ru.map((x) => x * du), b = rv.map((x) => x * dv), nr = M.cross(a, b), L = Math.hypot(...nr);
       const add = (x, y) => [x[0] + y[0], x[1] + y[1], x[2] + y[2]];

@@ -40,9 +40,9 @@ Integrals are componentwise too, and the constant of integration is a constant *
   visual: {
     type: 'c3-curve',
     title: 'Secants become the tangent',
-    lead: t`The amber arrow is the difference quotient $\big(\vec r(t + h) - \vec r(t)\big)/h$: the dashed chord from the point at $t$ to the point at $t + h$, divided by $h$. The green arrow is $\vec r\,'(t)$, drawn from the gold point. Shrink $h$ and watch one become the other.`,
+    lead: t`The orange arrow is the difference quotient $\big(\vec r(t + h) - \vec r(t)\big)/h$: the dashed chord from the point at $t$ to the point at $t + h$, divided by $h$. The green arrow is $\vec r\,'(t)$, drawn from the gold point. Shrink $h$ and watch one become the other.`,
     tasks: [
-      t`Drag $h$ toward $0$. The amber secant vector swings round and lengthens until it lies on the green $\vec r\,'(t)$: the derivative is the limit of secant vectors, and it is tangent to the curve.`,
+      t`Drag $h$ toward $0$. The orange secant vector swings round and lengthens until it lies on the green $\vec r\,'(t)$: the derivative is the limit of secant vectors, and it is tangent to the curve.`,
       t`Make $h$ negative. The dashed chord now reaches back to an earlier point, yet the arrow still points forward — dividing by a negative $h$ reverses it — and it closes in on the same $\vec r\,'(t)$ from the other side.`,
       t`Switch on $\vec T$ and press **Play**. $\vec T$ always points along $\vec r\,'$ but keeps length 1, while the speed $|\vec r\,'| = \sqrt{4 + 0.35^2} \approx 2.03$ is the same all along this helix.`,
     ],
@@ -121,7 +121,7 @@ Integrals are componentwise too, and the constant of integration is a constant *
               lines: [{ point: scale(P, sc), dir: V, t: [-1.7 / Lv, 1.7 / Lv], color: 'warn' }],
               points: [{ at: scale(P, sc), color: 'gold' }],
             },
-            caption: 'Drag to rotate. The curve (blue) and its tangent line (amber) at the gold point, scaled down together to fit.',
+            caption: 'Drag to rotate. The curve (blue) and its tangent line (orange) at the gold point, scaled down together to fit.',
           },
         };
       },

@@ -22,6 +22,7 @@ import * as Nu from '../model/qm-nuclear.js';
 export const defaults = { nuclide: 'Fe-56', semf: true, reactions: false, labels: true, controls: null, readout: true, hide: [], zoom: null };
 const CONTROLS = ['nuclide', 'semf', 'reactions'];
 const LANDMARKS = ['H-2', 'He-4', 'Li-6', 'C-12', 'O-16', 'Fe-56', 'Ni-62', 'Kr-84', 'Sn-120', 'Ba-138', 'Pb-208', 'U-235', 'U-238'];
+const FEW = ['H-2', 'He-4', 'C-12', 'Fe-56', 'Sn-120', 'Pb-208', 'U-238'];
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
 /** 'Fe-56' → '⁵⁶Fe' for canvas labels, and → {}^{56}\text{Fe} in TeX. */
 const nice = (name) => { const [el, A] = name.split('-'); return A.replace(/\d/g, (d) => SUP[d]) + el; };
@@ -40,12 +41,17 @@ export function mount(F, P0) {
   if (wanted.includes('reactions')) F.toggle({ key: 'reactions', label: 'Fusion and fission', value: P.reactions, explain: 'Either way, energy is released when the products sit higher on the curve.' });
   else F.params.reactions = P.reactions;
 
-  const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'Binding energy per nucleon against mass number' });
+  const { canvas, box } = F.canvas({ aspect: 'wide', label: P.alt || 'Binding energy per nucleon against mass number' });
   const [x0, x1, y0, y1] = P.zoom || [0, 245, 0, 9.6];
   const plot = new Plot(canvas, { x: [x0, x1], y: [y0, y1], xlabel: 'mass number A (protons + neutrons)', ylabel: 'binding energy per nucleon (MeV)' });
   const sel = () => (P.nuclide === null ? null : Nu.byName[picks[Math.round(F.params.k)]]);
 
   function draw() {
+    // a phone gets a taller picture, shorter axis labels and fewer named nuclei
+    const narrow = (canvas.clientWidth || 600) < 520, want = narrow ? '4 / 3' : '';
+    if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; requestAnimationFrame(draw); return; }
+    plot.o.ylabel = narrow ? 'B/A (MeV)' : 'binding energy per nucleon (MeV)';
+    plot.o.xlabel = narrow ? 'mass number A' : 'mass number A (protons + neutrons)';
     plot.clear();
     if (F.params.semf) plot.fn((A) => (A >= 4 ? Nu.semfCurve(Math.round(A)) : NaN), { color: 'ink3', width: 1.6, dash: [6, 4], domain: [Math.max(4, x0), x1], samples: 240 });
     for (const n of Nu.NUCLIDES) {
@@ -59,13 +65,14 @@ export function mount(F, P0) {
     let gold = null;
     if (shown) {
       const v = Nu.bindingPerNucleon(n), text = hide.has('B') ? `${nice(n.name)}: ?` : `${nice(n.name)}: ${v.toFixed(3)} MeV`;
-      const [dx, dy, align] = n.A <= 30 ? [12, 18, 'left'] : n.A <= 180 ? [10, -16, 'left'] : [-12, 18, 'right'];
+      let [dx, dy, align] = n.A <= 30 ? [12, 18, 'left'] : n.A <= 180 ? [10, -16, 'left'] : [-12, 18, 'right'];
+      if (plot.Y(v) + dy + 10 > plot.B) dy = -16;      // never on top of the axis numbers
       const w = text.length * 7.4, x = plot.X(n.A) + dx, y = plot.Y(v) + dy;
       const px = plot.X(n.A), py = plot.Y(v);
       gold = { v, text, dx, dy, align, box: [align === 'left' ? x : x - w, align === 'left' ? x + w : x, y - 8, y + 8], dot: [px - 8, px + 8, py - 8, py + 8] };
     }
     const overlaps = (a, b) => a[0] < b[1] && b[0] < a[1] && a[2] < b[3] && b[2] < a[3];
-    if (P.labels) for (const name of LANDMARKS) {
+    if (P.labels) for (const name of narrow ? FEW : LANDMARKS) {
       const m = Nu.byName[name], v = Nu.bindingPerNucleon(m);
       if (m.A < x0 || m.A > x1 || v < y0 || v > y1 || (shown && m === n)) continue;
       const below = ['Ni-62', 'U-238', 'Kr-84', 'Ba-138', 'Li-6'].includes(name);

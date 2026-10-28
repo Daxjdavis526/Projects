@@ -210,7 +210,7 @@ As $t$ runs, the tip of $\vec r(t)$ traces a **space curve**: three ordinary fun
       hints: [t`A collision needs $\vec r_A(t) = \vec r_B(t)$ with the **same** $t$. Paths crossing needs only $\vec r_A(s) = \vec r_B(u)$.`, t`Try $s = 2$ and $u = 3$; then check whether any single $t$ works.`],
       teach: t`Paths intersect when $\vec r_A(s) = \vec r_B(u)$ for some $s$ and $u$; objects collide only if they are there at the same time, $s = u$.`,
       explain: t`$\vec r_A(2) = (2, 4, 4) = \vec r_B(3)$, so the paths cross there. For a collision, $t = t - 1$ in $x$ is already impossible: at no single moment do the drones coincide. Air-traffic deconfliction checks exactly this difference between crossing routes and conflicting ones.`,
-      visual: { type: 'calc-vectors3d', params: { range: 4, curves: [{ param: ['t', '2*t', 't^2'], t: [0, 2.6], color: 'accent', width: 2.4 }, { param: ['t - 1', '10 - 2*t', 't + 1'], t: [2.2, 5], color: 'warn', width: 2.4 }], points: [{ at: [2, 4, 4], color: 'gold' }] }, caption: 'Drag to rotate. Drone A’s path (blue) and drone B’s (amber); the gold point is where the paths cross.' },
+      visual: { type: 'calc-vectors3d', params: { range: 4, curves: [{ param: ['t', '2*t', 't^2'], t: [0, 2.6], color: 'accent', width: 2.4 }, { param: ['t - 1', '10 - 2*t', 't + 1'], t: [2.2, 5], color: 'warn', width: 2.4 }], points: [{ at: [2, 4, 4], color: 'gold' }] }, caption: 'Drag to rotate. Drone A’s path (blue) and drone B’s (orange); the gold point is where the paths cross.' },
     }),
   ],
   checkpoint: [
