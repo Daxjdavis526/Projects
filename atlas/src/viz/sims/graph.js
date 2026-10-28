@@ -179,8 +179,8 @@ export function validate(P) {
   if (P.tangent) { tryParse(P.tangent.fn, [], 'tangent'); if (P.tangent.secant) tryParse(P.tangent.secant); }
   for (const p of P.points || []) { tryParse(p.x, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'point'); tryParse(p.y, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
   for (const o of [...(P.shade || []), ...(P.vlines || []), ...(P.hlines || []), ...(P.arrows || [])]) if (o.when) tryParse(o.when, [], 'when');
-  for (const l of P.vlines || []) tryParse(l.x, [], 'vline');
-  for (const l of P.hlines || []) tryParse(l.y, [], 'hline');
+  for (const l of P.vlines || []) tryParse(l.x, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'vline');
+  for (const l of P.hlines || []) tryParse(l.y, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'hline');
   for (const a of P.arrows || []) [...a.from, ...a.to].forEach((v) => tryParse(v, [], 'arrow'));
   for (const c of P.curves || []) { if (c.when) tryParse(c.when, [], 'curve when'); (c.domain || []).forEach((v) => tryParse(v, [], 'curve domain')); if (c.labelAt !== undefined) tryParse(c.labelAt, [], 'curve labelAt'); }
   for (const r of P.readouts || []) {

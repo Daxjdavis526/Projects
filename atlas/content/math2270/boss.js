@@ -41,6 +41,8 @@ const ct = (v, f = nv) => `\\begin{bmatrix} ${v.map(f).join(' \\\\ ')} \\end{bma
 const tt = (v, f = nv) => `(${v.map(f).join(',\\ ')})`;
 /** A number as plain canvas text with a real minus sign. */
 const pl = (x) => String(nv(x)).replace('-', '−');
+/** A square in TeX, bracketed when negative: (−3)^2. */
+const sq = (v) => (v < 0 ? `(${nv(v)})^2` : `${nv(v)}^2`);
 
 /** Keep only the slips whose values are finite and clearly apart from the key (and a little apart from each other). */
 function apart(errors, key, rel = 0.03, mutual = 0.012) {
@@ -70,18 +72,18 @@ function busPic(thr, { caption, extraArrows = [], extraPoints = [] } = {}) {
   const [W, H] = BUS;
   const curves = [...poly([[-W, -H], [W, -H], [W, H], [-W, H], [-W, -H]], 'ink2', 2.2)];
   const arrows = [
-    { from: [-1.85, -0.9], to: [-1.45, -0.9], color: 'ink3', width: 1.6, label: 'x', labelDx: 4, labelDy: 4 },
-    { from: [-1.85, -0.9], to: [-1.85, -0.5], color: 'ink3', width: 1.6, label: 'y', labelDx: 4, labelDy: 0 },
+    { from: [-1.6, -0.88], to: [-1.3, -0.88], color: 'ink3', width: 1.6, label: 'x', labelDx: 4, labelDy: 4 },
+    { from: [-1.6, -0.88], to: [-1.6, -0.58], color: 'ink3', width: 1.6, label: 'y', labelDx: 4, labelDy: 0 },
     ...extraArrows,
   ];
-  const points = [dot2(0, 0, 'ink2', 4), tag(0, 0, 'CM', 'ink2', 6, 14), ...extraPoints];
+  const points = [dot2(0, 0, 'ink2', 4), ...extraPoints];
   thr.forEach((th, j) => {
     const [x, y] = th.p, [dx, dy] = th.d;
     curves.push(seg([x, y], [x - 0.28 * dx, y - 0.28 * dy], 'ink3', 5));            // the nozzle, pointing out
     arrows.push({ from: [x, y], to: [x + 0.42 * dx, y + 0.42 * dy], color: 'warn', width: 2.6 });
     points.push(dot2(x, y, 'gold', 5), tag(x - 0.3 * dx + 0.13 * dy, y - 0.3 * dy - 0.13 * dx, String(j + 1), 'gold', 0, 0, 'center'));
   });
-  return picture({ x: [-2, 2], y: [-1, 1], curves, arrows, points, alt: 'Top view of a rectangular satellite bus with thrusters at its edges' }, caption);
+  return picture({ x: [-1.75, 1.75], y: [-0.98, 0.98], curves, arrows, points, alt: 'Top view of a rectangular satellite bus with thrusters at its edges' }, caption);
 }
 
 // four-thruster layouts (positions on the 2 m × 1 m bus, push directions) whose
@@ -233,7 +235,7 @@ export function axesCase(r) {
     const Iyy = I0[1] + ms.reduce((s, [m, p]) => s + m * p[0] * p[0], 0);
     const Ixy = -ms.reduce((s, [m, p]) => s + m * p[0] * p[1], 0);
     const Izz = I0[2] + ms.reduce((s, [m, p]) => s + m * (p[0] * p[0] + p[1] * p[1]), 0);
-    if (Ixy === 0 || Math.abs(Ixx - Iyy) < 2) continue;
+    if (Ixy === 0 || Math.abs(Ixx - Iyy) < 2 || Math.abs(p1[0] * p2[1] - p1[1] * p2[0]) < 1e-9) continue;
     const th = 0.5 * Math.atan2(2 * Ixy, Ixx - Iyy) * DEG;
     if (Math.abs(th) < 4 || Math.abs(th) > 80 || Math.abs(Math.abs(th) - 45) < 3) continue;
     return { I0, m1, p1, m2, p2, Ixx, Iyy, Ixy, Izz, th };
@@ -396,7 +398,7 @@ export default boss({
               ],
               teach: t`The solutions of an underdetermined system are one particular solution plus the null space; a physical constraint such as $u_j \ge 0$ then picks the one to fly.`,
               explain: t`Elimination leaves one free variable, and the solution set is the line $\mathbf u = ${tt(u)} + s\,${tt(n)}$. The direction $\mathbf n$ spans the null space: fired together in that ratio, the four thrusters cancel — force, torque and all — and only waste propellant. Its entries are all positive, so the total thrust $${u.reduce((s, x) => s + x, 0)} + ${n.reduce((s, x) => s + x, 0)}s$ is least for the smallest $s$ that keeps every thrust $\ge 0$; thruster ${z + 1} reaches 0 first, at $s = 0$. So $\mathbf u = ${tt(u)}$ and $u_${k + 1} = ${u[k]}$ N. Check: $B\mathbf u = ${tt(w)}$ ✓. Real allocation software solves a small linear program like this every control cycle, with maximum thrusts and minimum pulse widths as further constraints.`,
-              visual: busPic(thr, { caption: 'Top view of Kittiwake’s bus (2 m × 1 m) with its centre of mass. Gold dots: the thrusters, numbered beside their nozzles (grey); orange arrows: the direction each one pushes the bus. Arrow lengths do not show thrust.' }),
+              visual: busPic(thr, { caption: 'Top view of Kittiwake’s bus (2 m × 1 m); the grey dot is its centre of mass. Gold dots: the thrusters, numbered beside their nozzles (grey); orange arrows: the direction each one pushes the bus. Arrow lengths do not show thrust.' }),
             };
           },
         }),
@@ -432,7 +434,7 @@ export default boss({
               ],
               teach: t`A wrench is reachable exactly when it lies in the column space, and the left null space is the test: $\mathbf y${T}\mathbf w$ must vanish for every $\mathbf y$ in $N(B${T})$.`,
               explain: t`$B$ has rank 2, and its left null space is spanned by $\mathbf y = ${yT}$: $\mathbf y${T}B = \mathbf 0${T}$. So the reachable wrenches form the plane $${y[0]}F_x ${y[1] < 0 ? '-' : '+'} ${Math.abs(y[1])}F_y + 10\tau = 0$. Divided by 10 it says $\tau - (Q_xF_y - Q_yF_x) = 0$ with $Q = ${tt(Q)}$ m: the torque about the point $Q$ is always zero, because all three thrust lines pass through $Q$. The wrench $${tt(out)}$ has $\mathbf y\cdot\mathbf w = ${nv(yw)} \ne 0$. ${OUT[outKind]} The flight layout’s fourth thruster is there to break exactly this concurrency.`,
-              visual: busPic(thr, { caption: 'The proposed three-thruster layout, top view: gold dots are the thrusters (numbered by their nozzles), orange arrows the direction each pushes the bus. Arrow lengths do not show thrust.' }),
+              visual: busPic(thr, { caption: 'The proposed three-thruster layout, top view: the grey dot is the centre of mass, gold dots are the thrusters (numbered by their nozzles), orange arrows the direction each pushes the bus. Arrow lengths do not show thrust.' }),
             };
           },
         }),
@@ -450,20 +452,21 @@ export default boss({
             const { A, t1, t2, p, q, c, u, i, alpha } = C;
             const ax = i ? 'y' : 'x';
             const naive = p[i] * u[0] + q[i] * u[1];
-            const sc = 2.6 / Math.max(...[...p, ...q, ...alpha].map(Math.abs));
-            const X0 = 5.6;
+            const cs = 2.4 / Math.max(...[...t1, ...t2, ...u].map(Math.abs));   // commands, shrunk to fit
+            const sc = 2.4 / Math.max(...[...p, ...q].map(Math.abs));            // responses, shrunk to fit
+            const X0 = 6.4;
             const lim = 2.9;
             const arrowsL = [
-              { from: [0, 0], to: t1, color: 'accent', width: 2.6, label: 't₁' },
-              { from: [0, 0], to: t2, color: 'warn', width: 2.6, label: 't₂' },
-              { from: [0, 0], to: u, color: 'gold', width: 2.8, label: 'u', dash: [6, 4] },
+              { from: [0, 0], to: t1.map((v) => cs * v), color: 'accent', width: 2.6, label: 't₁' },
+              { from: [0, 0], to: t2.map((v) => cs * v), color: 'warn', width: 2.6, label: 't₂' },
+              { from: [0, 0], to: u.map((v) => cs * v), color: 'gold', width: 2.8, label: 'u', dash: [6, 4] },
               { from: [X0, 0], to: [X0 + sc * p[0], sc * p[1]], color: 'accent', width: 2.6, label: 'α(t₁)' },
               { from: [X0, 0], to: [X0 + sc * q[0], sc * q[1]], color: 'warn', width: 2.6, label: 'α(t₂)' },
             ].map((a) => ({ ...a, from: a.from.map(r4), to: a.to.map(r4) }));
             const curves = [seg([-lim, 0], [lim, 0], 'ink4', 1), seg([0, -lim], [0, lim], 'ink4', 1), seg([X0 - lim, 0], [X0 + lim, 0], 'ink4', 1), seg([X0, -lim], [X0, lim], 'ink4', 1)];
             return {
               prompt: t`Kittiwake’s two in-plane reaction wheels sit a little off their nominal axes, so the matrix $A$ that turns commanded wheel torques $\mathbf u = (u_1, u_2)$ (in mN·m) into the bus’s angular acceleration $\boldsymbol\alpha = A\mathbf u$ (in µrad/s², about body $x$ and $y$) is not the design one. Two test commands during commissioning gave $$\mathbf t_1 = ${tupleTeX(t1)} \mapsto ${tupleTeX(p)},\qquad \mathbf t_2 = ${tupleTeX(t2)} \mapsto ${tupleTeX(q)}.$$ Predict $\alpha_${ax}$ for the command $\mathbf u = ${tupleTeX(u)}$.`,
-              answer: alpha[i], units: 'urad/s^2', tol: { rel: 0.002, abs: 0.05 },
+              answer: alpha[i], units: 'µrad/s^2', tol: { rel: 0.002, abs: 0.05 },
               errors: apart([
                 { value: naive, feedback: t`That treats the measured responses as the columns of $A$. They are the images of $\mathbf t_1$ and $\mathbf t_2$, not of $\mathbf e_1 = (1, 0)$ and $\mathbf e_2 = (0, 1)$: first write $\mathbf u$ as a combination of $\mathbf t_1$ and $\mathbf t_2$.` },
                 { value: alpha[1 - i], feedback: t`That is the other component, $\alpha_${i ? 'x' : 'y'}$.` },
@@ -475,10 +478,10 @@ export default boss({
               ],
               teach: t`A linear map is known once you know its action on a basis — any basis, not only the standard one: split the input in that basis and combine the outputs with the same weights.`,
               explain: t`Solving $c_1\mathbf t_1 + c_2\mathbf t_2 = \mathbf u$ gives $c_1 = ${c[0]}$, $c_2 = ${c[1]}$. By linearity $A\mathbf u = ${c[0]}\,${tupleTeX(p)} ${c[1] < 0 ? '-' : '+'} ${Math.abs(c[1])}\,${tupleTeX(q)} = ${tupleTeX(alpha)}$, so $\alpha_${ax} = ${alpha[i]}$ µrad/s². (The standard matrix is $A = [A\mathbf t_1\ A\mathbf t_2]\,[\mathbf t_1\ \mathbf t_2]^{-1} = ${mt(A)}$: the off-diagonal entries are the cross-coupling the mounting error causes.) Two tests in independent directions are the least that pins down a map of the plane; real calibrations use many and fit them by least squares.`,
-              visual: picture({ x: [-3.2, X0 + 3.2], y: [-3.1, 3.1], curves, arrows: arrowsL,
-                points: [tag(-3, 2.9, 'commands (mN·m)', 'ink2', 0, 4), tag(X0 - 2.9, 2.9, 'responses (scaled)', 'ink2', 0, 4)],
+              visual: picture({ x: [-3.2, X0 + 3.2], y: [-3.3, 3.6], curves, arrows: arrowsL,
+                points: [tag(-3.1, 3.45, 'commands', 'ink2', 0, 4), tag(X0 - 3.0, 3.45, 'responses', 'ink2', 0, 4)],
                 alt: 'Two test commands and the command to predict on the left; the two measured responses on the right' },
-              'Left: the test commands t₁, t₂ and the new command u (dashed). Right: the measured responses to t₁ and t₂, shrunk to fit. The response to u is not drawn — that is the question.'),
+              'Left: the test commands t₁, t₂ and the new command u (dashed). Right: the measured responses to t₁ and t₂. Each panel is shrunk to fit, on its own scale. The response to u is not drawn — that is the question.'),
             };
           },
         }),
@@ -511,7 +514,7 @@ export default boss({
               teach: t`The determinant’s sign is orientation: an orthogonal matrix with $\det = +1$ is a rotation, and one with $\det = -1$ includes a mirror, turning a right-handed frame into a left-handed one.`,
               explain: proper
                 ? t`The columns are orthonormal, so $M$ is orthogonal, and $\det(9M) = ${d9}$ gives $\det M = +1$: ${crossOK}, a proper rotation. Upload it. Flight software checks this sign before accepting a frame: a mirror-image attitude solution would look healthy star by star while every manoeuvre went the wrong way.`
-                : t`The columns are orthonormal, so $M$ is orthogonal — but $\det(9M) = ${d9}$ gives $\det M = -1$: ${crossOK}. The frame is left-handed, a mirror image of a rotation; most likely the sign of one axis (here the ${['first', 'second', 'third'][flip]}) was entered or wired backwards. Flipping that column restores $\det M = +1$. Flight software checks this sign before accepting a frame: a mirror-image attitude solution would look healthy star by star while every manoeuvre went the wrong way.`,
+                : t`The columns are orthonormal, so $M$ is orthogonal — but $\det(9M) = ${d9}$ gives $\det M = -1$: ${crossOK}. The frame is left-handed, a mirror image of a rotation; most likely one axis’s sign was entered or wired backwards. Negating any one column would restore $\det M = +1$, so the survey must say which axis is wrong. Flight software checks this sign before accepting a frame: a mirror-image attitude solution would look healthy star by star while every manoeuvre went the wrong way.`,
               visual: {
                 type: 'calc-vectors3d',
                 params: {
@@ -535,7 +538,7 @@ export default boss({
             const ax = i ? 'y' : 'x';
             const cols = colsOf(N);
             return {
-              prompt: t`Kittiwake’s star-tracker head A has the verified mounting matrix $$M = ${ninthTeX(N)},$$ whose columns are the head’s axes $\mathbf x_{\mathrm A}, \mathbf y_{\mathrm A}, \mathbf z_{\mathrm A}$ (the boresight) in body components. The onboard catalogue and the current attitude estimate say a guide star lies along the unit vector $$\mathbf s = ${ct(sB)}$$ in body components. Through the head’s lens of focal length $f = ${f}$ mm, a star with head components $(s_x', s_y', s_z')$ lands on the detector at $\big(f\,s_x'/s_z',\ f\,s_y'/s_z'\big)$. Where should the star appear: what is its $${ax}$ position on the detector, in mm?`,
+              prompt: t`Kittiwake’s star-tracker head A has the verified mounting matrix $$M = ${ninthTeX(N)},$$ whose columns are the head’s axes $\mathbf x_{\mathrm A}, \mathbf y_{\mathrm A}, \mathbf z_{\mathrm A}$ (the boresight) in body components. The onboard catalogue and the current attitude estimate say a guide star lies along the unit vector $$\mathbf s = ${ct(sB)}$$ in body components. Through the head’s lens of focal length $f = ${f}\ \text{mm}$, a star with head components $(s_x', s_y', s_z')$ lands on the detector at $\big(f\,s_x'/s_z',\ f\,s_y'/s_z'\big)$. Where should the star appear: what is its $${ax}$ position on the detector, in mm?`,
               answer: ans, units: 'mm', tol: { rel: 0.01, abs: 0.01 },
               errors: apart([
                 ...(Math.abs(wrong[2]) > 0.2 ? [{ value: (f * wrong[i]) / wrong[2], feedback: t`That multiplies by $M$. $M$ turns head components into body ones; to go from body to head, use $M^{-1}$, which for an orthogonal matrix is $M${T}$.` }] : []),
@@ -547,7 +550,7 @@ export default boss({
                 t`Compute $s_${ax}'$ and $s_z'$, then $f\,s_${ax}'/s_z'$.`,
               ],
               teach: t`Coordinates change against the basis: if the new axes are the columns of $M$, new components are $M^{-1}$ times old — and for an orthonormal frame $M^{-1}$ is simply $M${T}$.`,
-              explain: t`In head components $\mathbf s' = M${T}\mathbf s = ${ct(sT2, (v) => v.toFixed(4))}$: each entry is the dot product of $\mathbf s$ with one of the head’s axes, $(${cols[0].join(',\\ ')})/9$ and so on. The star is $${tn(Math.acos(Math.min(1, sT2[2])) * DEG, 3)}^\circ$ off the boresight, well inside a star tracker’s field of view, and it lands at $${ax} = ${f}\times${sT2[i].toFixed(4)}/${sT2[2].toFixed(4)} = ${tn(ans, 3)}$ mm. Matching predicted against measured positions star by star is how the tracker computes its attitude. (A pinhole camera model; real optics add distortion, calibrated on the ground.)`,
+              explain: t`In head components $\mathbf s' = M${T}\mathbf s = ${tt(sT2, (v) => v.toFixed(4))}$: each entry is the dot product of $\mathbf s$ with one of the head’s axes, $(${cols[0].join(',\\ ')})/9$ and so on. The star is $${tn(Math.acos(Math.min(1, sT2[2])) * DEG, 3)}^\circ$ off the boresight, well inside a star tracker’s field of view, and it lands at $${ax} = ${f}\times${sT2[i].toFixed(4)}/${sT2[2].toFixed(4)} = ${tn(ans, 3)}$ mm. Matching predicted against measured positions star by star is how the tracker computes its attitude. (A pinhole camera model; real optics add distortion, calibrated on the ground.)`,
               visual: {
                 type: 'calc-vectors3d',
                 params: {
@@ -600,11 +603,11 @@ export default boss({
                 x: [-2 * h, 2 * h], y: [-h, h],
                 curves: [...poly([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5], [-0.5, -0.5]], 'ink2', 2.2), seg([0, 0], p1, 'ink3', 1.6), seg([0, 0], p2, 'ink3', 1.6)],
                 arrows: [
-                  { from: [-2 * h + 0.3, -h + 0.3], to: [-2 * h + 1.1, -h + 0.3], color: 'ink3', width: 1.6, label: 'x', labelDx: 4, labelDy: 4 },
-                  { from: [-2 * h + 0.3, -h + 0.3], to: [-2 * h + 0.3, -h + 1.1], color: 'ink3', width: 1.6, label: 'y', labelDx: 4, labelDy: 0 },
+                  { from: [0, 0], to: [0.85, 0], color: 'ink3', width: 1.6, label: 'x', labelDx: 4, labelDy: 4 },
+                  { from: [0, 0], to: [0, 0.85], color: 'ink3', width: 1.6, label: 'y', labelDx: 4, labelDy: 0 },
                 ],
                 points: [dot2(0, 0, 'ink2', 4), dot2(p1[0], p1[1], 'gold', 7), dot2(p2[0], p2[1], 'violet', 7),
-                  tag(p1[0], p1[1], `magnetometer, ${m1} kg`, 'gold', p1[0] > 0 ? -70 : -40, -12), tag(p2[0], p2[1], `antenna, ${m2} kg`, 'violet', -30, p2[1] > 0 ? -12 : 22)],
+                  tag(p1[0], p1[1], `magnetometer, ${m1} kg`, 'gold', -55, p1[1] > 0 ? -14 : 24), tag(p2[0], p2[1], `antenna, ${m2} kg`, 'violet', -35, p2[1] > 0 ? -14 : 24)],
                 alt: 'Top view of the bus with a magnetometer on a boom and an antenna on another',
               }, `Top view of the mass model: the bus (its centre of mass at the centre), the magnetometer at (${pl(p1[0])}, ${pl(p1[1])}) m and the antenna at (${pl(p2[0])}, ${pl(p2[1])}) m, treated as point masses on massless booms. Positions to scale.`),
             };
@@ -627,7 +630,7 @@ export default boss({
             if (verdict !== 2) why[2] = t`${eig}, so $I_{zz} = ${e}$ is ${verdict === 0 ? 'the largest' : 'the smallest'} moment, not the intermediate one: the form is definite.`;
             why[3] = t`The products of inertia $I_{xz}$ and $I_{yz}$ are 0, so $z$ *is* a principal axis; $I_{xy} \ne 0$ only tilts the other two axes within the $x$–$y$ plane.`;
             return {
-              prompt: t`Kittiwake’s sister satellite, Petrel, will spin about its body $z$ axis in safe mode. Its inertia tensor is $$I = ${mt(I)}\ \text{kg m}^2.$$ For a torque-free rigid body spinning about a principal axis $z$, the quantity $|\mathbf L|^2 - 2E\,I_{zz}$ (angular momentum and kinetic energy, both conserved) depends only on the small cross-axis rates $\boldsymbol\omega_\perp = (\omega_x, \omega_y)$: $$|\mathbf L|^2 - 2E\,I_{zz} = \boldsymbol\omega_\perp${T}\,G\,\boldsymbol\omega_\perp,\qquad G = J\,(J - I_{zz}\,\mathbb 1),\quad J = \begin{bmatrix} ${a} & ${b} \\ ${b} & ${c} \end{bmatrix}.$$ If this quadratic form is definite, $\boldsymbol\omega_\perp$ stays as small as it starts and the spin is stable; if it is indefinite it can grow. Which is true of the spin about $z$?`,
+              prompt: t`Kittiwake’s sister satellite, Petrel, will spin about its body $z$ axis in safe mode. Its inertia tensor is $$I = ${mt(I)}\ \text{kg m}^2.$$ For a torque-free rigid body spinning about a principal axis $z$, the quantity $|\mathbf L|^2 - 2E\,I_{zz}$ (angular momentum and kinetic energy, both conserved) depends only on the small cross-axis rates $\boldsymbol\omega_\perp = (\omega_x, \omega_y)$: $$|\mathbf L|^2 - 2E\,I_{zz} = \boldsymbol\omega_\perp${T}\,G\,\boldsymbol\omega_\perp,$$ where $$G = J\,(J - I_{zz}\,\mathbb 1),\qquad J = \begin{bmatrix} ${a} & ${b} \\ ${b} & ${c} \end{bmatrix}.$$ If this quadratic form is definite, $\boldsymbol\omega_\perp$ stays as small as it starts and the spin is stable; if it is indefinite it can grow. Which is true of the spin about $z$?`,
               choices: [
                 t`Stable: $I_{zz}$ is the largest principal moment, and the form is definite`,
                 t`Stable: $I_{zz}$ is the smallest principal moment, and the form is definite`,
@@ -682,7 +685,7 @@ export default boss({
                 x: [lo, hi], y: [lo, hi], aspect: 'wide', axes: true, xticks: 6, yticks: 5, xlabel: 'T₁, head (°C)', ylabel: 'T₂, bracket (°C)', axesAt: 'edge',
                 curves: [
                   { fn: 'x', color: 'ink3', width: 1.4, dash: [5, 4], label: 'T₁ = T₂', labelAt: lo + 0.15 * (hi - lo) },
-                  { param: [`${T1} + t*${a}`, `${T2} - t*${b}`], t: [r4((lo - T1) / a), r4((hi - T1) / a)], color: 'violet', width: 1.4, dash: [2, 4] },
+                  { param: [`${T1} + t*${a}`, `${T2} - t*${b}`], t: [r4((1.4 * (pts[2][0] - T1)) / a), r4((-0.3 * (pts[2][0] - T1)) / a)], color: 'violet', width: 1.4, dash: [2, 4] },
                 ],
                 points: [...pts.map(([x, y], k) => ({ x: r4(x), y: r4(y), r: k ? 4 : 6, color: k ? 'accent' : 'gold' })), tag(T1, T2, 'start', 'gold', 8, 16)],
               }, 'The state (T₁, T₂) as a point: the start (gold) and the first two orbits (blue). Grey dashes: every equal-temperature state, the eigenvector line for λ = 1. The states move along the violet dotted line, the other eigenvector’s direction, toward it.'),
@@ -704,7 +707,7 @@ export default boss({
             const [s0h, vh] = fit.xhat;
             const sh2 = hs.reduce((s, h) => s + h * h, 0), sht2 = rows.reduce((s, row) => s + row[1] * row[1], 0);
             const shr = hs.reduce((s, h, i) => s + h * drho[i], 0), shtr = rows.reduce((s, row, i) => s + row[1] * drho[i], 0);
-            const tab = t`\begin{array}{c|${ts.map(() => 'r').join('')}} t_i\ (\text{min}) & ${ts.join(' & ')} \\ \hline h_i & ${hs.join(' & ')} \\ \delta\rho_i\ (\text{m}) & ${drho.join(' & ')} \end{array}`;
+            const tab = t`\begin{array}{r|r|r} t_i\ (\text{min}) & h_i & \delta\rho_i\ (\text{m}) \\ \hline ${ts.map((tm, i) => `${tm} & ${hs[i]} & ${drho[i]}`).join(' \\\\ ')} \end{array}`;
             const ylo = Math.min(...drho), yhi = Math.max(...drho), pad = 0.15 * (yhi - ylo || 50);
             return {
               prompt: t`On one pass the ground station measures Kittiwake’s range six times. Linearized about the predicted orbit, each **range residual** (measured minus predicted) is $$\delta\rho_i = h_i\,\delta s(t_i),\qquad \delta s(t) = \delta s_0 + \delta v\,t,$$ where $\delta s(t)$ is how far Kittiwake is ahead of its predicted position along its track, $t$ is the time from closest approach, and $h_i$ is the along-track component of the unit line-of-sight vector from the station (it comes from the pass geometry): $$${tab}$$ Fit $\delta s_0$ (m) and $\delta v$ (m/min) by least squares. Then predict the along-track error at the next pass, $t = ${P}$ min, in metres.`,
@@ -720,15 +723,15 @@ export default boss({
                 t`$\delta s_0 = \dfrac{\sum h_i\,\delta\rho_i}{\sum h_i^2}$ and $\delta v = \dfrac{\sum h_it_i\,\delta\rho_i}{\sum h_i^2t_i^2}$; then $\delta s_0 + ${P}\,\delta v$.`,
               ],
               teach: t`Least squares projects the data onto the column space of the design matrix; when the columns are orthogonal, the normal equations decouple and each unknown is one projection.`,
-              explain: t`The columns $\mathbf h$ and $(h_it_i)$ are orthogonal: $\sum h_i^2t_i = 0$ because the pass is symmetric about closest approach. So $$\delta s_0 = \frac{\sum h_i\delta\rho_i}{\sum h_i^2} = \frac{${tn(shr, 5)}}{${tn(sh2, 5)}} = ${tn(s0h, 4)}\ \text{m},\qquad \delta v = \frac{\sum h_it_i\delta\rho_i}{\sum h_i^2t_i^2} = \frac{${tn(shtr, 5)}}{${tn(sht2, 5)}} = ${tn(vh, 4)}\ \text{m/min}.$$ At the next pass, $\delta s(${P}) = ${tn(s0h, 4)} ${vh < 0 ? '-' : '+'} ${P}\times${tn(Math.abs(vh), 4)} = ${tn(ans, 4)}$ m. The along-track error grows by tens of metres a minute because a slightly wrong orbital period accumulates — which is why orbits are re-determined every pass. Notice that the station is blind to along-track error at closest approach ($h \approx 0$ there), and sees it best far from it. A linearized one-pass teaching model; real orbit determination fits six orbital elements, drag and station biases to many passes at once.`,
+              explain: t`The columns $\mathbf h$ and $(h_it_i)$ are orthogonal: $\sum h_i^2t_i = 0$ because the pass is symmetric about closest approach. So $$\delta s_0 = \frac{\sum h_i\delta\rho_i}{\sum h_i^2} = \frac{${tn(shr, 5)}}{${tn(sh2, 5)}} = ${tn(s0h, 4)}\ \text{m},$$ $$\delta v = \frac{\sum h_it_i\delta\rho_i}{\sum h_i^2t_i^2} = \frac{${tn(shtr, 5)}}{${tn(sht2, 5)}} = ${tn(vh, 4)}\ \text{m/min}.$$ At the next pass, $\delta s(${P}) = ${tn(s0h, 4)} ${vh < 0 ? '-' : '+'} ${P}\times${tn(Math.abs(vh), 4)} = ${tn(ans, 4)}$ m. The along-track error grows by tens of metres a minute because a slightly wrong orbital period accumulates — which is why orbits are re-determined every pass. Notice that the station is blind to along-track error at closest approach ($h \approx 0$ there), and sees it best far from it. A linearized one-pass teaching model; real orbit determination fits six orbital elements, drag and station biases to many passes at once.`,
               visual: {
                 type: 'graph',
                 params: {
                   x: [-7, 7], y: [r4(Math.min(0, ylo) - pad), r4(Math.max(0, yhi) + pad)], aspect: 'wide', xlabel: 't from closest approach (min)', ylabel: 'δρ (m)',
                   points: ts.map((tm, i) => ({ x: tm, y: drho[i], color: 'accent', r: 5 })),
-                  vlines: [{ x: 0, label: 'closest approach', color: 'ink3' }],
+                  vlines: [{ x: 0, color: 'ink3' }], axesAt: 'edge',
                 },
-                caption: 'The six range residuals of the pass, measured minus predicted. Each carries about ±3 m of noise; no fit is drawn.',
+                caption: 'The six range residuals of the pass, measured minus predicted, against time from closest approach (the grey line, t = 0). Each carries about ±3 m of noise; no fit is drawn.',
               },
             };
           },
@@ -774,7 +777,7 @@ export default boss({
                 ? t`With $\kappa \approx 10^{${p}}$ the normal equations keep only about ${16 - 2 * p} digits — not enough — while QR keeps about ${16 - p}, enough for ${d}, at half the SVD’s cost. Householder QR is what most least-squares solvers use by default for exactly this reason.`
                 : kind === 'lu'
                   ? t`With $\kappa \approx 10^{${p}}$ even the squared condition number $10^{${2 * p}}$ leaves about ${16 - 2 * p} digits — more than the ${d} required — so the cheapest route, the normal equations solved by Cholesky (LU for a symmetric positive-definite matrix), is the right one. Accuracy you do not need is not worth paying twice for.`
-                  : t`Only the SVD handles a rank-deficient $A$ gracefully: one singular value is (numerically) zero, its right singular vector $\mathbf v \propto$ (transponder delay $-$ station bias) is exactly the combination the data cannot see, and dropping that $\sigma$ gives the minimum-length solution. That is the pseudo-inverse, $A^+ = V\Sigma^+U${T}$.`,
+                  : t`Only the SVD handles a rank-deficient $A$ gracefully: one singular value is (numerically) zero, its right singular vector $\mathbf v$ has $+\tfrac{1}{\sqrt2}$ in the transponder-delay slot, $-\tfrac{1}{\sqrt2}$ in the station-bias slot and zeros elsewhere — exactly the combination (one up, the other down by the same amount) that the data cannot see — and dropping that $\sigma$ gives the minimum-length solution. That is the pseudo-inverse, $A^+ = V\Sigma^+U${T}$.`,
             };
           },
         }),
@@ -813,7 +816,7 @@ export default boss({
               visual: {
                 type: 'graph',
                 params: {
-                  x: [0, 17], y: [-2, 1], aspect: 'wide', ylog: true, xlabel: 'index j', ylabel: 'σⱼ', xticks: 8,
+                  x: [0, 17], y: [-2, 1], aspect: 'wide', ylog: true, axesAt: 'edge', xlabel: 'index j', ylabel: 'σⱼ', xticks: 8,
                   points: pts,
                 },
                 caption: 'The window’s first 16 singular values on a log scale (blue: the six listed). Read the numbers from the problem, not the plot.',
@@ -829,13 +832,13 @@ export default boss({
             const rho = [x, y], rhoC = [x, -y];
             const R = [[[P1, 0], rho], [rhoC, [P2, 0]]];
             const reOnly = m + Math.sqrt(d * d + x * x);
-            const sq = d * d + x * x - y * y;
+            const csq = d * d + x * x - y * y;
             return {
               prompt: t`At the ground station, two antennas a few metres apart both receive Kittiwake’s downlink. The sample covariance of their complex baseband signals, in units of one receiver’s noise power, is the Hermitian matrix $$R = ${cmatTeX(R)}.$$ Combining the two signals with complex weights $\mathbf w$ ($\|\mathbf w\| = 1$) gives output power $\mathbf w^{\mathsf H}R\,\mathbf w$. What is the largest output power any choice of weights can reach? Give 3 significant figures.`,
               answer: lmax, tol: { rel: 0.005 },
               errors: apart([
                 { value: reOnly, feedback: t`That keeps only the real part of $R_{12} = ${cTeX(rho)}$. The phase difference between the antennas is information too: the eigenvalues of a Hermitian matrix use $|R_{12}|^2 = ${x * x + y * y}$.` },
-                ...(sq >= 0 ? [{ value: m + Math.sqrt(sq), feedback: t`That squares $R_{12}$ as if it were real, $(${cTeX(rho)})^2$. The characteristic polynomial has $R_{12}R_{21} = R_{12}\overline{R_{12}} = |R_{12}|^2 = ${x * x + y * y}$.` }] : []),
+                ...(csq >= 0 ? [{ value: m + Math.sqrt(csq), feedback: t`That squares $R_{12}$ as if it were real, $(${cTeX(rho)})^2$. The characteristic polynomial has $R_{12}R_{21} = R_{12}\overline{R_{12}} = |R_{12}|^2 = ${x * x + y * y}$.` }] : []),
                 { value: P1 + P2, feedback: t`That would need the two signals to be perfectly correlated ($|R_{12}|^2 = R_{11}R_{22}$). Here they are only partly correlated: find the largest eigenvalue of $R$.` },
                 { value: Math.max(P1, P2), feedback: t`That is the better antenna alone. Weighting both — with the right phase — collects more.` },
               ], lmax),
@@ -845,7 +848,7 @@ export default boss({
                 t`$\lambda_{\max} = \dfrac{R_{11} + R_{22}}{2} + \sqrt{\left(\dfrac{R_{11} - R_{22}}{2}\right)^2 + |R_{12}|^2}$.`,
               ],
               teach: t`A Hermitian matrix has real eigenvalues and orthonormal eigenvectors, and its largest eigenvalue is the maximum of $\mathbf w^{\mathsf H}R\mathbf w$ over unit vectors — the best a weighted combination can do.`,
-              explain: t`$|R_{12}|^2 = ${x}^2 + ${y}^2 = ${x * x + y * y}$, so $$\lambda_{\max} = ${nv(m)} + \sqrt{${nv(d)}^2 + ${x * x + y * y}} = ${tn(lmax, 3)}.$$ The weights are the matching eigenvector: they shift one antenna’s phase to line its signal up with the other’s and weight each by how much signal it carries — maximum-ratio combining. That gives $${tn(lmax, 3)}$ against $${Math.max(P1, P2)}$ for the better antenna alone. (A teaching model: a real receiver separates signal from noise before combining, and the covariance is estimated from finitely many samples.)`,
+              explain: t`$|R_{12}|^2 = ${sq(x)} + ${sq(y)} = ${x * x + y * y}$, so $$\lambda_{\max} = ${nv(m)} + \sqrt{${sq(d)} + ${x * x + y * y}} = ${tn(lmax, 3)}.$$ The weights are the matching eigenvector: they shift one antenna’s phase to line its signal up with the other’s and weight each by its share of the signal — for one source in independent noise, this is maximum-ratio combining. That gives $${tn(lmax, 3)}$ against $${Math.max(P1, P2)}$ for the better antenna alone. (A teaching model: a real receiver separates signal from noise before combining, and the covariance is estimated from finitely many samples.)`,
               visual: phasors([{ name: 'R', v: [rho, rhoC], color: 'gold' }], { names: ['R₁₂', 'R₂₁'], labels: false, caption: 'The two off-diagonal entries of R as arrows in the complex plane (real part across, imaginary part up): R₂₁ is the mirror image of R₁₂ — its complex conjugate — as it must be in a Hermitian matrix.' }),
             };
           },

@@ -95,6 +95,11 @@ function integral(g, a, b) {
   if (a === -Infinity) return tanhSinh((t) => g(b - t / (1 - t)) / (1 - t) ** 2, 0, 1);
   return tanhSinh(g, a, b);
 }
+function bisected(g, a, b, whole, depth) {
+  const m = (a + b) / 2, l = tanhSinh(g, a, m), r = tanhSinh(g, m, b);
+  if (depth >= 24 || Math.abs(l + r - whole) <= 1e-10 * Math.max(1, Math.abs(whole))) return l + r;
+  return bisected(g, a, m, l, depth + 1) + bisected(g, m, b, r, depth + 1);
+}
 function tanhSinh(g, a, b) {
   const h = 1 / 64, r = (b - a) / 2;
   let s = 0;
@@ -142,9 +147,13 @@ function calculusProblem(item) {
     const val = (v) => (typeof v === 'number' ? v : compile(parse(String(v), { vars: [] }))({}));
     const [a, b] = item.limits.map(val);
     const G = (x) => g({ [wrt]: x });
-    const I = integral(G, a, b), tol = 1e-6;
-    const ans = item.answer;
-    if (Math.abs(I - ans) > tol * Math.max(1e-9, Math.abs(ans)) + 1e-9) return `the integral of ${item.integrand} over [${item.limits.join(', ')}] is ${I.toPrecision(7)} numerically, but the key is ${ans}`;
+    const tol = 1e-6, ans = item.answer;
+    const off = (I) => Math.abs(I - ans) > tol * Math.max(1e-9, Math.abs(ans)) + 1e-9;
+    let I = integral(G, a, b);
+    // tanh-sinh is exponentially fast on smooth integrands but slow across an
+    // interior kink (|x|, a piecewise rate): bisect until the halves agree
+    if (off(I) && Number.isFinite(a) && Number.isFinite(b)) I = bisected(G, a, b, integral(G, a, b), 0);
+    if (off(I)) return `the integral of ${item.integrand} over [${item.limits.join(', ')}] is ${I.toPrecision(7)} numerically, but the key is ${ans}`;
   }
   return null;
 }

@@ -20,7 +20,7 @@ export const sgn = (c, v = '') => `${c < 0 ? '-' : '+'} ${Math.abs(c) === 1 && v
  *   span       half-width of the drawn tangent segment (default: a fifth of the x range)
  *   points     extra points; curves: extra curves (drawn after the main one)
  */
-export function curveFig({ fn, x, y, xlabel, ylabel, at, f, df, span, domain, label, labelAt, points = [], curves = [], extra = {}, caption, aspect = 'wide', tangentLabel, color = 'accent' }) {
+export function curveFig({ fn, x, y, xlabel, ylabel, at, f, df, span, domain, label, labelAt, points = [], curves = [], extra = {}, caption, aspect = 'wide', tangentLabel, color = 'accent', ...rest }) {
   const cs = [{ fn, color, domain, label, labelAt }];
   const ps = [...points];
   if (at !== undefined) {
@@ -28,7 +28,7 @@ export function curveFig({ fn, x, y, xlabel, ylabel, at, f, df, span, domain, la
     cs.push({ fn: lineAt(at, y0, m), color: 'gold', width: 1.8, dash: true, domain: [at - w, at + w] });
     ps.push({ x: at, y: y0, color: 'gold', label: tangentLabel });
   }
-  return { type: 'graph', params: { x, y, aspect, xlabel, ylabel, curves: [...cs, ...curves], points: ps, ...extra }, caption };
+  return { type: 'graph', params: { x, y, aspect, xlabel, ylabel, curves: [...cs, ...curves], points: ps, ...rest, ...extra }, caption };   // other graph params (xticks, …) pass straight through
 }
 
 /** y-range [lo, hi] that fits f over [a, b] with a margin. */

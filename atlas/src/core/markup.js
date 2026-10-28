@@ -116,6 +116,8 @@ export function escapeDamage(text, { prose = true } = {}) {
     // a row break written as \\ inside String.raw arrives as one backslash (a control space): an
     // environment with columns, a lone "\ " and no row break at all was surely meant to have rows
     if (/\\begin\{(?:[pbvBV]?matrix|array|aligned|cases)\}/.test(m.tex) && /&/.test(m.tex) && !/\\\\/.test(m.tex) && /(?<!\\)\\ (?!\\)/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” has columns but no row break, and a lone “\\ ” (a control space) where \\\\ was probably meant — inside t\`…\` write \\\\`;
+    const lost = lostRowBreak(m.tex);
+    if (lost) return `the math “${m.tex.slice(0, 40)}” ${lost} — a row break \\\\ was probably lost (inside t\`…\` write \\\\)`;
     // a number that failed to compute: NaN, undefined or Infinity spliced into the math
     const junk = /(?<![A-Za-z\\])(NaN|undefined|Infinity|null)(?![A-Za-z])/.exec(m.tex);
     if (junk) return `the math “${m.tex.slice(0, 40)}” contains “${junk[1]}” — a value failed to compute before it was spliced in`;
@@ -149,4 +151,29 @@ export function escapeDamage(text, { prose = true } = {}) {
 export function bareCommand(tex) {
   const m = BARE_COMMAND.exec(String(tex).replace(/\\(?:text|mathrm|textrm|textbf|textit|operatorname|texttt|mbox)\s*\{[^{}]*\}/g, ''));
   return m ? m[1] : null;
+}
+
+// Rows of a tabular environment that hold more cells than the environment has
+// columns: the sign that a \\ between two rows lost a backslash (to a JS escape,
+// or a join(' \ ')) and two rows ran together. Nested environments are skipped.
+function lostRowBreak(tex) {
+  const re = /\\begin\{(array|[pbvBV]?matrix|cases)\}(\{[^{}]*\})?/g;
+  for (let m; (m = re.exec(tex));) {
+    const end = tex.indexOf(`\\end{${m[1]}}`, re.lastIndex);
+    if (end < 0) continue;
+    const body = tex.slice(re.lastIndex, end);
+    if (/\\begin\{/.test(body)) continue;
+    const rows = body.split(/\\\\(?:\[[^\]]*\])?/).map((r) => r.replace(/\\(?:hline|hdashline)/g, '').trim()).filter(Boolean);
+    const cells = rows.map((r) => (r.match(/(?<!\\)&/g) || []).length + 1);
+    if (m[1] === 'array' && m[2] && !m[2].includes('*')) {
+      const cols = (m[2].slice(1, -1).replace(/[@!]\{[^{}]*\}/g, '').replace(/\{[^{}]*\}/g, '').match(/[lcrpmb]/g) || []).length;
+      const over = cells.findIndex((c) => c > cols);
+      if (cols && over >= 0) return `has a row of ${cells[over]} cells in a ${cols}-column array`;
+    } else if (rows.length >= 2) {
+      const most = [...cells].sort((a, b) => a - b)[Math.floor((cells.length - 1) / 2)];
+      const over = cells.findIndex((c) => most > 1 && c >= 2 * most - 1);   // two rows run together: 2n − 1 cells
+      if (over >= 0) return `has a row of ${cells[over]} cells where the others have ${most}`;
+    }
+  }
+  return '';
 }

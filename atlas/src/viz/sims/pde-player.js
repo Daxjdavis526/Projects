@@ -30,7 +30,7 @@
 //       energy: false,          // wave: the energy density ½(u_t² + c²u_x²), shaded under the axis
 //       far: null,              // heat: a distant x where the readout shows u — the infinite speed of the model
 //       tag: true,              // transport, variable: a dot riding the characteristic from the peak
-//       controls: null,         // true, false, or a list of: mode profile init speed c lambda slow D w t
+//       controls: null,         // true, false, or a list of: mode profile init c lambda slow D w t
 //       play: null,             // animate (default: in the Explore step, not in a problem)
 //       readout: true,
 //       hide: [],               // readouts shown as “?”: u peak energy max area spread far foot
@@ -42,8 +42,8 @@ import * as M from '../model/pde-1d.js';
 export const defaults = { mode: 'transport', modes: null, profile: 'gauss', A: 1, w: 1, x0: 0, c: 1, lambda: 0, speed: 'river', slow: 0.35, init: 'pluck', D: 0.5, t: 0, tmax: 5, x: [-10, 10], xt: true, chars: true, sheet: true, probe: null, halves: false, flux: false, energy: false, far: null, tag: true, controls: null, play: null, readout: true, hide: [] };
 const MODES = ['transport', 'variable', 'wave', 'heat'];
 const MODE_LABEL = { transport: 'transport', variable: 'variable speed', wave: 'wave', heat: 'heat' };
-const CONTROLS = ['mode', 'profile', 'init', 'speed', 'c', 'lambda', 'slow', 'D', 'w', 't'];
-const DEFAULT_CONTROLS = { transport: ['profile', 'c', 't'], variable: ['speed', 'c', 't'], wave: ['init', 'profile', 'c', 't'], heat: ['profile', 'D', 't'] };
+const CONTROLS = ['mode', 'profile', 'init', 'c', 'lambda', 'slow', 'D', 'w', 't'];
+const DEFAULT_CONTROLS = { transport: ['profile', 'c', 't'], variable: ['c', 'slow', 't'], wave: ['init', 'profile', 'c', 't'], heat: ['profile', 'D', 't'] };
 const HIDE = ['u', 'peak', 'energy', 'max', 'area', 'spread', 'far', 'foot'];
 const f3 = (x) => (!Number.isFinite(x) ? '\\infty' : x === 0 ? '0' : Math.abs(x) >= 1e4 || Math.abs(x) < 1e-3 ? texExp(x) : String(+x.toPrecision(3)));
 function texExp(x) { const [m, e] = x.toExponential(2).split('e'); return `${+m}\\times10^{${+e}}`; }
@@ -66,7 +66,7 @@ export function mount(F, P0) {
   const nodes = {};
   const ctl = (key, make) => (wanted.includes(key) ? (nodes[key] = make()) : (F.params[key] = P[key]));
   // with several modes on offer, show only the controls that matter to the current one
-  const RELEVANT = { init: ['wave'], speed: ['variable'], slow: ['variable'], lambda: ['transport'], D: ['heat'], c: ['transport', 'variable', 'wave'] };
+  const RELEVANT = { init: ['wave'], slow: ['variable'], lambda: ['transport'], D: ['heat'], c: ['transport', 'variable', 'wave'] };
   const showRelevant = () => { for (const [k, ms] of Object.entries(RELEVANT)) if (nodes[k]?.node) nodes[k].node.style.display = ms.includes(F.params.mode) ? '' : 'none'; };
   const [XL, XR] = P.x;
   const TM = P.tmax;
@@ -74,7 +74,7 @@ export function mount(F, P0) {
   ctl('mode', () => F.choice({ key: 'mode', label: 'Equation', options: modes.map((m) => [m, MODE_LABEL[m]]), value: P.mode, explain: 'The same initial profile, evolved by a different law.' }));
   ctl('profile', () => F.choice({ key: 'profile', label: 'Initial profile', options: [['gauss', 'bump'], ['box', 'square'], ['tri', 'triangle'], ['rough', 'rippled']], value: P.profile, explain: 'What $u$ looks like at $t = 0$. The square has jumps, the triangle has corners.' }));
   ctl('init', () => F.choice({ key: 'init', label: 'Start the string by', options: [['pluck', 'displacing it'], ['strike', 'striking it'], ['right', 'one pulse moving right']], value: P.init, explain: 'Displaced from rest: $u = f$, $u_t = 0$. Struck while flat: $u = 0$, $u_t = g$. One pulse: $u_t = -c f\'$.' }));
-  ctl('speed', () => F.choice({ key: 'speed', label: 'Speed field', options: [['river', 'a slow reach'], ['stretch', '$c = a x$']], value: P.speed, explain: 'A river slowing where it widens, or a flow that speeds up in proportion to $x$.' }));
+  F.params.speed = P.speed;            // fixed per picture: the two fields need different windows and starting points
   ctl('c', () => F.slider(P.mode === 'variable' && P.speed === 'stretch'
     ? { key: 'c', label: 'Rate $a$', min: 0.1, max: 1, step: 0.05, value: P.c, unit: '\\mathrm{s^{-1}}', explain: 'In $c(x) = a x$: the farther from $x = 0$, the faster the flow.' }
     : modes.length > 1 ? { key: 'c', label: 'Speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'Transport: how fast the profile is carried. Wave: how fast each half runs.' }
@@ -194,6 +194,8 @@ export function mount(F, P0) {
       g.restore();
     }
     if (o.mode === 'variable' && o.speed === 'river') { xp.rect(-2, 0, 5, TM, { color: 'teal', alpha: 0.08, stroke: false }); xp.text('slow reach', 0.5, TM, { color: 'teal', align: 'center', size: fs - 0.5, dy: 9 }); }
+    const gc = xp.ctx;
+    gc.save(); xp._clip();            // keep characteristics and cones inside the frame
     if (P.chars) {
       if (o.mode === 'transport' || o.mode === 'variable') {
         // launch from the bottom edge, and (for flow into the window) from the side
@@ -209,13 +211,16 @@ export function mount(F, P0) {
         for (let k = XL; k <= XR + o.c * TM + 1e-9; k += d) xp.line(k, 0, k - o.c * TM, TM, { color: 'teal', width: 1, alpha: 0.5 });
       }
     }
+    gc.restore();
     // domain of dependence of the probe
     if (probe) {
       const g = xp.ctx;
       if (o.mode === 'wave') {
         const a = probe.x - o.c * probe.t, b = probe.x + o.c * probe.t;
+        gc.save(); xp._clip();
         xp.path([[a, 0], [probe.x, probe.t], [b, 0]], { color: 'gold', width: 2, fill: 'gold', fillAlpha: 0.2, close: true });
-        xp.line(a, 0, b, 0, { color: 'gold', width: 5 });
+        gc.restore();
+        xp.line(Math.max(a, XL), 0, Math.min(b, XR), 0, { color: 'gold', width: 5 });
       } else if (o.mode === 'heat') {
         xp.rect(XL, 0, XR - XL, probe.t, { color: 'gold', alpha: 0.13, stroke: false });
         xp.line(XL, 0, XR, 0, { color: 'gold', width: 5 });
