@@ -23,7 +23,7 @@ const kGraph = (b, caption) => ({
   type: 'graph',
   params: {
     x: [0, 1.05], y: [0, 4], xlabel: 'speed v / c', ylabel: 'K / mc²',
-    curves: [{ fn: '1/sqrt(1 - x^2) - 1', color: 'accent', domain: [0, 0.997], label: 'relativity: (γ − 1)mc²', labelAt: 0.82, labelDx: -150, labelDy: -6 }, { fn: '0.5*x^2', color: 'ink3', dash: true, label: 'Newton: ½mv²', labelAt: 0.95, labelDx: -20, labelDy: 18 }],
+    curves: [{ fn: '1/sqrt(1 - x^2) - 1', color: 'accent', domain: [0, 0.997], label: 'relativity: (γ − 1)mc²', labelAt: 0.93, labelDx: -176, labelDy: -4 }, { fn: '0.5*x^2', color: 'ink3', dash: true, label: 'Newton: ½mv²', labelAt: 0.7, labelDx: -10, labelDy: 16 }],
     vlines: [{ x: 1, label: 'c', color: 'warn' }, ...(b !== undefined ? [{ x: b, color: 'gold' }] : [])],
   },
   caption: caption ?? 'Kinetic energy in units of the rest energy, against speed. Gold: this particle’s speed.',
@@ -44,7 +44,7 @@ const gunPicture = (V, caption) => ({
   params: {
     x: [-0.5, 8.5], y: [-1.6, 1.8], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [seg(0.6, -1.1, 0.6, 1.1, 'ink', 4), seg(5.2, -1.1, 5.2, -0.18, 'ink', 4), seg(5.2, 0.18, 5.2, 1.1, 'ink', 4), seg(0.8, 0, 7.6, 0, 'gold', 1.6, true)],
-    points: [{ x: 0.9, y: 0, r: 5, color: 'accent', label: 'electron starts at rest', labelDx: 8, labelDy: -14 }, label(0.6, -1.1, 'cathode', 'ink2', -22, 14), label(5.2, -1.1, `anode, ${V} higher`, 'ink2', -40, 14)],
+    points: [{ x: 0.9, y: 0, r: 5, color: 'accent', label: 'electron starts at rest', labelDx: 6, labelDy: 18 }, label(0.6, -1.1, 'cathode', 'ink2', -22, 14), label(5.2, -1.1, `anode, ${V} higher`, 'ink2', -40, 14)],
     arrows: [{ from: [5.6, 0.55], to: [7.6, 0.55], color: 'accent', label: 'v = ?', labelDx: 8, labelDy: 0 }],
   },
   caption: caption ?? 'An electron gun: the electron gains kinetic energy eV crossing the gap. Not to scale.',
@@ -85,7 +85,7 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
       constants: { me: MEC2 },
       sliders: [{ key: 'K', label: 'Kinetic energy $K$', min: 0.05, max: 5, step: 0.05, value: 0.5, unit: '\\mathrm{MeV}', explain: t`The work done on the electron; accelerating it through 1 million volts gives 1 MeV.` }],
       curves: [
-        { fn: '2*x/me', color: 'ink3', dash: true, label: 'Newton', labelAt: 0.75, labelDx: 8, labelDy: 0 },
+        { fn: '2*x/me', color: 'ink3', dash: true, label: 'Newton', labelAt: 0.32, labelDx: 10, labelDy: 0 },
         { fn: '1 - 1/(1 + x/me)^2', color: 'accent', label: 'relativity', labelAt: 3.6, labelDx: -20, labelDy: 16 },
       ],
       hlines: [{ y: 1, label: 'v = c', color: 'warn' }],
@@ -106,7 +106,7 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
     visual: kGraph(undefined, t`Kinetic energy in units of $mc^2$ against speed: the relativistic curve rises without limit at $v = c$, while Newton’s $\tfrac12 mv^2$ reaches only $\tfrac12 mc^2$ there.`),
     steps: [
       { label: 'Work as an integral of momentum', text: t`$W = \displaystyle\int F\,dx = \int \frac{dp}{dt}\,dx = \int v\,dp$, because $dx/dt = v$. The force does not need to be constant.` },
-      { label: 'Integrate by parts', text: t`With $u = v$ and $dv$-part $dp$: $\displaystyle\int_0^p v\,dp = pv - \int_0^v p\,dv' = \gamma m v^2 - \int_0^v \frac{m v'}{\sqrt{1 - v'^2/c^2}}\,dv'$.` },
+      { label: 'Integrate by parts', text: t`Use $\int f\,dg = fg - \int g\,df$ with $f = v$ and $g = p$: $\displaystyle\int_0^p v\,dp = pv - \int_0^v p\,dv' = \gamma m v^2 - \int_0^v \frac{m v'}{\sqrt{1 - v'^2/c^2}}\,dv'$.` },
       { label: 'The remaining integral', text: t`Substitute $s = 1 - v'^2/c^2$: $\displaystyle\int_0^v \frac{m v'\,dv'}{\sqrt{1 - v'^2/c^2}} = \Big[-mc^2\sqrt{1 - v'^2/c^2}\,\Big]_0^v = mc^2\left(1 - \frac1\gamma\right)$.` },
       { label: 'Simplify', text: t`$K = \gamma m v^2 - mc^2 + \dfrac{mc^2}{\gamma}$. Since $\gamma m v^2 + \dfrac{mc^2}{\gamma} = \gamma m\left(v^2 + c^2 - v^2\right) = \gamma mc^2$, this is $K = \gamma mc^2 - mc^2 = (\gamma - 1)mc^2$.` },
       { label: 'Sense check', text: t`For $v \ll c$, $\gamma \approx 1 + \dfrac{v^2}{2c^2}$, so $K \approx \tfrac12 mv^2$ ✓. As $v \to c$, $\gamma \to \infty$: reaching $c$ would take infinite work.` },

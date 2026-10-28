@@ -49,8 +49,11 @@ export function contourSegments(grid, c) {
     const v = q.map(([a, b]) => val(a, b));
     if (v.some((w) => !Number.isFinite(w))) continue;
     const cross = [];
-    for (const [a, b] of EDGES) {
-      if ((v[a] - c) * (v[b] - c) < 0) {
+    for (const [a0, b0] of EDGES) {
+      if ((v[a0] - c) * (v[b0] - c) < 0) {
+        // interpolate from the lower grid node, so the two cells that share
+        // this edge compute exactly the same point and the pieces join
+        const [a, b] = q[a0][0] + q[a0][1] < q[b0][0] + q[b0][1] ? [a0, b0] : [b0, a0];
         const s = (c - v[a]) / (v[b] - v[a]);
         const [ia, ja] = q[a], [ib, jb] = q[b];
         cross.push([x0 + (ia + (ib - ia) * s) * dx, y0 + (ja + (jb - ja) * s) * dy]);
@@ -68,9 +71,14 @@ export function contourSegments(grid, c) {
   return segs;
 }
 
-/** Join segments that share endpoints into polylines [[x, y], …] (closed loops repeat their first point). */
-export function joinSegments(segs, tol = 1e-9) {
-  const key = (p) => `${Math.round(p[0] / tol)},${Math.round(p[1] / tol)}`;
+/**
+ * Join segments that share endpoints into polylines [[x, y], …] (closed loops
+ * repeat their first point). contourSegments computes a shared point exactly
+ * the same way in both cells, so by default endpoints must match exactly;
+ * tol > 0 matches them to within tol instead.
+ */
+export function joinSegments(segs, tol = 0) {
+  const key = tol > 0 ? (p) => `${Math.round(p[0] / tol)},${Math.round(p[1] / tol)}` : (p) => `${p[0]},${p[1]}`;
   const ends = new Map();
   const used = new Array(segs.length).fill(false);
   segs.forEach((s, k) => { for (const p of s) { const kk = key(p); if (!ends.has(kk)) ends.set(kk, []); ends.get(kk).push(k); } });

@@ -557,7 +557,7 @@ export async function mount(F, P0) {
     const W0 = A.w, H0 = A.h, p = F.params, n = +p.n;
     const angs = [p.a1, p.a2, p.a3].slice(0, n).map((a) => rad(a));
     const input = p.input === 'unpolarized' ? 'unpolarized' : rad(+p.input);
-    const Is = W.polarizerChain(angs, input);
+    const Is = W.polarizerChain(angs, input).map((v) => (v < 1e-9 ? 0 : v));   // crossed polarizers: exactly nothing, not rounding dust
     aCtl?.forEach((c, i) => { if (c) c.node.hidden = i >= n; });
     frame(A, { l: 10, r: 10, t: 10, b: 10 });
     A.setView([0, 10], [-2.1, 2.1]);

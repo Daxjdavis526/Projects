@@ -16,6 +16,7 @@ export const cosd = (d) => Math.cos(d * DEG);
 export const tand = (d) => Math.tan(d * DEG);
 export const asind = (x) => Math.asin(x) / DEG;
 export const atand = (x) => Math.atan(x) / DEG;
+export const acosd = (x) => Math.acos(x) / DEG;
 
 /** A number as TeX with n significant figures: ×10ⁿ outside [10⁻³, 10⁵), thin-space thousands. */
 export function tn(x, n = 3) {
@@ -48,40 +49,40 @@ export const apart = (errs, key) => errs.filter((e) => Number.isFinite(e.value) 
 // ─── pictures ──────────────────────────────────────────────────────────────
 
 /** A ray meeting a flat boundary (optics-rays, interface mode), still. */
-export const iface = (params, caption) => ({ type: 'optics-rays', params: { mode: 'interface', controls: false, waves: false, ...params }, ...(caption ? { caption } : {}) });
+export const iface = (params, caption) => ({ type: 'optics-rays', params: { mode: 'interface', controls: false, readout: false, waves: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Light through a prism (optics-rays, prism mode), still. */
-export const prismPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'prism', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const prismPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'prism', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A ray in a fibre (optics-rays, fibre mode), still. */
-export const fibrePic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'fibre', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const fibrePic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'fibre', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Looking through one refracting surface (optics-rays, surface mode), still. */
-export const surfacePic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'surface', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const surfacePic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'surface', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A thin lens (optics-rays, lens mode), still. */
-export const lensPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'lens', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const lensPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'lens', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A mirror (optics-rays, mirror mode), still. */
-export const mirrorPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'mirror', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const mirrorPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'mirror', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Two lenses (optics-rays, system mode), still. */
-export const systemPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'system', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const systemPic = (params, caption) => ({ type: 'optics-rays', params: { mode: 'system', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Slits (optics-waves, slits mode), still; no phasor panel unless asked. */
-export const slitsPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'slits', controls: false, phasors: false, ...params }, ...(caption ? { caption } : {}) });
+export const slitsPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'slits', controls: false, readout: false, phasors: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A thin film (optics-waves, film mode), still. */
-export const filmPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'film', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const filmPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'film', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A Michelson interferometer (optics-waves, michelson mode), still. */
-export const michelsonPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'michelson', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const michelsonPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'michelson', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Two stars through an aperture (optics-waves, airy mode), still. */
-export const airyPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'airy', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const airyPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'airy', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** Polarizers (optics-waves, polar mode), still. */
-export const polarPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'polar', controls: false, ...params }, ...(caption ? { caption } : {}) });
+export const polarPic = (params, caption) => ({ type: 'optics-waves', params: { mode: 'polar', controls: false, readout: false, ...params }, ...(caption ? { caption } : {}) });
 
 /** A text label placed at (x, y) on a graph (a point too small to see). */
 export const label = (x, y, text, color = 'ink2', dx = 0, dy = 0) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: dx, labelDy: dy });

@@ -43,7 +43,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
   visual: {
     type: 'surface3d',
     title: 'One surface, a different height in every direction',
-    lead: t`This is the graph of $f(x, y) = \dfrac{2xy}{x^2 + y^2}$, which is undefined at the origin. The gold line is a straight path into the origin at angle $\varphi$ to the $x$-axis. Follow it in: what height does $f$ approach?`,
+    lead: t`This is the graph of $f(x, y) = \dfrac{2xy}{x^2 + y^2}$, which is undefined at the origin. The red line is a straight path into the origin at angle $\varphi$ to the $x$-axis. Follow it in: what height does $f$ approach?`,
     tasks: [
       t`Start at $\varphi = 0^\circ$: along the $x$-axis, $f$ is $0$ all the way in.`,
       t`Turn to $45^\circ$, then to $135^\circ$: along $y = x$ the height is $1$, along $y = -x$ it is $-1$. Different paths, different limits — so $f$ has no limit at the origin.`,
@@ -53,18 +53,18 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
       z: '2x*y/(x^2 + y^2)', domain: [[-2, 2], [-2, 2]], n: 41, levels: 10, pitch: 1.0, dist: 9.5, alpha: 0.8,
       sliders: [{ key: 'phi', label: t`Direction of approach $\varphi$`, min: 0, max: 180, step: 5, value: 20, unit: '^\\circ', explain: t`The path is the line through the origin at angle $\varphi$: $y = x\tan\varphi$.` }],
       curves: [
-        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [0.06, 2.1], color: 'gold', width: 3 },
-        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [-2.1, -0.06], color: 'gold', width: 3 },
-        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', '-1.7'], t: [-2.1, 2.1], color: 'gold', width: 1.2 },
+        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [0.06, 2.1], color: 'bad', width: 3 },
+        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [-2.1, -0.06], color: 'bad', width: 3 },
+        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', '-1.7'], t: [-2.1, 2.1], color: 'bad', width: 1.2 },
       ],
       readouts: [{ label: 'height along this line', expr: 'sin(2*phi*pi/180)', digits: 3 }],
     },
-    caption: t`The graph of $f = 2xy/(x^2 + y^2)$, undefined at the origin. The thin gold line on the floor is the path’s shadow; the pale floor lines are level curves of $f$. In polar coordinates $f = \sin 2\theta$. Drag to rotate.`,
+    caption: t`The graph of $f = 2xy/(x^2 + y^2)$, undefined at the origin. The thin red line on the floor is the path’s shadow; the pale floor lines are level curves of $f$. In polar coordinates $f = \sin 2\theta$. Drag to rotate.`,
   },
   example: {
     prompt: t`Does $\displaystyle\lim_{(x,y)\to(0,0)} \frac{x^2 y}{x^4 + y^2}$ exist?`,
     visual: alongPaths([
-      { fn: 'x/(x^2 + 1)', color: 'accent', label: 'along y = x', labelAt: 1.25 },
+      { fn: 'x/(x^2 + 1)', color: 'accent', label: 'along y = x', labelAt: -0.55, labelDx: 4, labelDy: 16 },
       { fn: '2x/(x^2 + 4)', color: 'violet', label: 'along y = 2x', labelAt: -1.9, labelDy: 14 },
       { fn: '0.5', color: 'gold', label: 'along y = x²', labelAt: -1.9 },
     ], {
@@ -77,7 +77,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
       { label: 'Try every line', text: t`On $y = mx$: $f = \dfrac{m x^3}{x^4 + m^2 x^2} = \dfrac{m x}{x^2 + m^2} \to 0$ as $x \to 0$, for every slope $m$. So **every straight line** gives $0$.` },
       { label: 'Do not stop there', text: t`Lines are not every path. The $x^4$ next to $y^2$ suggests comparing $y$ with $x^2$: on the parabola $y = x^2$, $f = \dfrac{x^4}{x^4 + x^4} = \dfrac12$ for every $x \ne 0$.` },
       { label: 'Conclude', text: t`Two paths give two different values, $0$ and $\tfrac12$, so the limit **does not exist**.` },
-      { label: 'Sense check', text: t`On $y = kx^2$, $f = \dfrac{k}{1 + k^2}$: the graph has a ridge of height $\tfrac12$ along $y = x^2$ and a valley of depth $-\tfrac12$ along $y = -x^2$. Both hug the $x$-axis so tightly near the origin that every straight line slips between them.` },
+      { label: 'Sense check', text: t`On $y = kx^2$, $f = \dfrac{k}{1 + k^2}$: the graph has a ridge of height $\tfrac12$ along $y = x^2$ and a valley of depth $-\tfrac12$ along $y = -x^2$. Both are tangent to the $x$-axis at the origin, so close to the origin every straight line stays clear of them, where $f$ is near $0$.` },
     ],
     answer: t`No. Every line gives $0$, but the parabola $y = x^2$ gives $\tfrac12$.`,
   },
@@ -104,7 +104,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
         const L = (k * m) / (1 + m * m);
         return {
           prompt: t`Let $f(x, y) = \dfrac{${k}xy}{x^2 + y^2}$. What value does $f$ approach as $(x, y) \to (0, 0)$ along the line $y = ${m}x$?`,
-          visual: surf((x, y) => `${k}*${x}*${y}/(${x}^2 + ${y}^2)`, { n: 40, zscale: 0.5, dist: 9.5, paths: linePaths(m, 2), caption: t`The graph of $f$ (heights halved), with the path $y = ${m}x$ in gold. Drag to rotate.` }),
+          visual: surf((x, y) => `${k}*${x}*${y}/(${x}^2 + ${y}^2)`, { n: 40, zscale: 0.5, dist: 9.5, paths: linePaths(m, 2), caption: t`The graph of $f$ (heights halved), with the path $y = ${m}x$ in red. Drag to rotate.` }),
           answer: L, tol: { rel: 1e-3 },
           errors: [{ value: (k * m) / (1 + m), feedback: t`Square the slope: on $y = ${m}x$, $x^2 + y^2 = x^2 + ${m * m}x^2 = ${1 + m * m}x^2$.` }],
           hints: [t`Substitute $y = ${m}x$ and cancel the $x^2$.`, t`$f = \dfrac{${k}\cdot ${m}\,x^2}{(1 + ${m * m})\,x^2}$ for $x \ne 0$.`],
@@ -117,7 +117,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
       id: 'two-paths', difficulty: 1,
       prompt: t`As $(x, y) \to (0, 0)$, a function $f$ approaches $0$ along the $x$-axis and $\tfrac12$ along the line $y = x$. What can you conclude about $\displaystyle\lim_{(x,y)\to(0,0)} f(x,y)$?`,
       visual: alongPaths([
-        { fn: '0', color: 'accent', label: 'along the x-axis', labelAt: 0.5, labelDy: 14 },
+        { fn: '0', color: 'accent', label: 'along the x-axis', labelAt: -1.6, labelDy: -12 },
         { fn: '0.5', color: 'gold', label: 'along y = x', labelAt: 0.5 },
       ], { y: [-0.4, 0.8], points: [{ x: 0, y: 0, color: 'accent', r: 4 }, { x: 0, y: 0.5, color: 'gold', r: 4 }], caption: t`The value of $f$ along the two paths, plotted against the path’s $x$-coordinate. The dots mark the values each path approaches.` }),
       choices: ['It does not exist', t`It is $0$, the value along the axis`, t`It is $\tfrac14$, the average of the two`, 'Nothing yet: more paths must be checked before deciding'],
@@ -138,7 +138,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
         const L = k / (1 + k * k), reach = r6(Math.sqrt(1.15 / Math.abs(k)));
         return {
           prompt: t`For $f(x, y) = \dfrac{x^2 y}{x^4 + y^2}$, what value does $f$ approach as $(x, y) \to (0, 0)$ along the parabola $y = ${k}x^2$?`,
-          visual: surf(RIDGE, { domain: [[-1.2, 1.2], [-1.2, 1.2]], n: 48, zscale: 1.6, dist: 6.5, pitch: 0.6, paths: [{ x: 't', y: `${k}*t^2`, t: [-reach, -0.02] }, { x: 't', y: `${k}*t^2`, t: [0.02, reach] }], caption: t`The graph of $f$ (heights scaled by 1.6) with the parabola $y = ${k}x^2$ in gold. Drag to rotate.` }),
+          visual: surf(RIDGE, { domain: [[-1.2, 1.2], [-1.2, 1.2]], n: 48, zscale: 1.6, dist: 6.5, pitch: 0.6, paths: [{ x: 't', y: `${k}*t^2`, t: [-reach, -0.02] }, { x: 't', y: `${k}*t^2`, t: [0.02, reach] }], caption: t`The graph of $f$ (heights scaled by 1.6) with the parabola $y = ${k}x^2$ in red. Drag to rotate.` }),
           answer: L, tol: { rel: 1e-3 },
           errors: [
             { value: 0, feedback: t`That is the limit along every straight line, not along this parabola: substitute $y = ${k}x^2$.` },
@@ -153,7 +153,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
     mcq({
       id: 'squeeze', difficulty: 2,
       prompt: t`In polar coordinates, $\dfrac{x^3}{x^2 + y^2} = \dfrac{r^3\cos^3\theta}{r^2} = r\cos^3\theta$. What is $\displaystyle\lim_{(x,y)\to(0,0)} \frac{x^3}{x^2 + y^2}$?`,
-      visual: surf((x, y) => `${x}^3/(${x}^2 + ${y}^2)`, { n: 40, dist: 9, caption: t`The graph of $x^3/(x^2 + y^2)$, which is undefined at the origin. Drag to rotate.` }),
+      visual: surf((x, y) => `${x}^3/(${x}^2 + ${y}^2)`, { n: 40, dist: 7.5, caption: t`The graph of $x^3/(x^2 + y^2)$, which is undefined at the origin. Drag to rotate.` }),
       choices: ['0', t`It does not exist: the value depends on $\theta$`, t`$\cos^3\theta$`, '1'],
       answer: 0,
       why: {
@@ -209,7 +209,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
         const L = (a + b * m * m) / (1 + m * m);
         return {
           prompt: t`Let $f(x, y) = \dfrac{${a}x^2 + ${b}y^2}{x^2 + y^2}$. What value does $f$ approach as $(x, y) \to (0, 0)$ along the line $y = ${m}x$?`,
-          visual: surf((x, y) => `(${a}*${x}^2 + ${b}*${y}^2)/(${x}^2 + ${y}^2)`, { n: 40, zscale: 0.35, dist: 9.5, paths: linePaths(m, 2).map((p) => ({ ...p, color: 'gold' })), caption: t`The graph of $f$ (heights scaled by 0.35), with the path $y = ${m}x$ in gold. Drag to rotate.` }),
+          visual: surf((x, y) => `(${a}*${x}^2 + ${b}*${y}^2)/(${x}^2 + ${y}^2)`, { n: 40, zscale: 0.35, dist: 9.5, paths: linePaths(m, 2), caption: t`The graph of $f$ (heights scaled by 0.35), with the path $y = ${m}x$ in red. Drag to rotate.` }),
           answer: L, tol: { rel: 1e-3 },
           hints: [t`Substitute $y = ${m}x$ and cancel $x^2$.`],
           teach: 'On a line y = mx, a ratio of quadratics becomes a constant that depends on m.',
@@ -220,7 +220,7 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
     mcq({
       id: 'cp-which', difficulty: 2,
       prompt: t`Which of these functions has a limit as $(x, y) \to (0, 0)$?`,
-      visual: { type: 'graph', params: { x: [-2.4, 2.4], y: [-1.6, 1.6], equal: true, aspect: 'wide', curves: polarGrid({ rings: [0.4, 0.8, 1.2], rays: 8, reach: 1.5, color: 'ink3' }), points: [{ x: 0, y: 0, color: 'gold', r: 4, label: 'origin', labelDx: 8, labelDy: 12 }] }, caption: t`In polar coordinates, approaching the origin means $r \to 0$ while the direction $\theta$ does anything it likes. A limit exists when what is left depends on $r$ alone and settles down.` },
+      visual: { type: 'graph', params: { x: [-2.4, 2.4], y: [-1.6, 1.6], equal: true, aspect: 'wide', grid: false, curves: polarGrid({ rings: [0.4, 0.8, 1.2], rays: 8, reach: 1.5, color: 'ink3' }), points: [{ x: 0, y: 0, color: 'gold', r: 4, label: 'origin', labelDx: 8, labelDy: 12 }] }, caption: t`In polar coordinates, approaching the origin means $r \to 0$ while the direction $\theta$ does anything it likes. A limit exists when what is left depends on $r$ alone and settles down.` },
       choices: [t`$\dfrac{x^2 y}{x^2 + y^2}$`, t`$\dfrac{xy}{x^2 + y^2}$`, t`$\dfrac{x^2 - y^2}{x^2 + y^2}$`, t`$\dfrac{x}{\sqrt{x^2 + y^2}}$`],
       answer: 0,
       why: {

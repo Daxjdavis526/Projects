@@ -208,7 +208,7 @@ The constant in front is $\mu_0\varepsilon_0 = 1/c^2$. Where there is no charge 
       answer: 0,
       why: { 1: 'That is Faraday’s experimental law of induction (1831).', 2: 'That is Gauss’s law, the flux form of Coulomb’s law.', 3: 'That is Ampère’s original law (1820s).' },
       hints: ['Which term would be needed between the plates of a charging capacitor, where no current flows?'],
-      teach: 'Maxwell added the displacement current, μ₀ε₀ dΦ_E/dt, to Ampère’s law.',
+      teach: t`Maxwell added the displacement-current term, $\mu_0\varepsilon_0\,d\Phi_E/dt$, to Ampère’s law.`,
       explain: t`The displacement-current term $\mu_0\varepsilon_0\,d\Phi_E/dt$ made Ampère’s law consistent for changing fields (the charging capacitor) and, with Faraday’s law, predicted electromagnetic waves.`,
     }),
     num({

@@ -188,13 +188,14 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       try { item = instantiate(L, def, v); } catch (e) { firstProblem = `variant ${v} threw: ${e.message}`; break; }
       instances++;
       seen.add(JSON.stringify([item.prompt, item.answer]));
+      // a picture; or, for programming, the code itself: an exercise's editor and output,
+      // or a listing to read in the prompt (counted before validation, so a broken item
+      // does not also read as one without a picture)
+      if (item.visual || item.diagram || item.type === 'code' || /(\\?`){3}/.test(item.prompt)) hasVisual = true;
       const p = validateItem(item, tex);
       const calc = calculusProblem(item);
       if (calc) p.push(calc);
       if (p.length) { firstProblem = `variant ${v}: ${p.join('; ')}`; break; }
-      // a picture; or, for programming, the code itself: an exercise's editor and output,
-      // or a listing to read in the prompt
-      if (item.visual || item.diagram || item.type === 'code' || /(\\?`){3}/.test(item.prompt)) hasVisual = true;
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
     }
     if (hasVisual) withVisual++;

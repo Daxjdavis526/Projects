@@ -209,7 +209,7 @@ export async function mount(F, P0) {
     const kind0 = mode === 'lens' ? (P.f > 0 ? 'conv' : 'div') : (!Number.isFinite(P.f) ? 'plane' : P.f > 0 ? 'concave' : 'convex');
     choice({ key: 'kind', label: mode === 'lens' ? 'Lens' : 'Mirror', options: kinds, value: kind0, explain: mode === 'lens' ? 'Thicker in the middle (converging) or at the edges (diverging).' : 'Curved in toward the object (concave), out toward it (convex), or flat.' });
     const fabs = Number.isFinite(P.f) ? Math.abs(P.f) : 10;
-    fCtl = slider({ key: 'fabs', label: 'Focal length $|f|$', min: 4, max: 20, step: 0.5, value: clamp(fabs, 4, 20), unit: `\\mathrm{${P.unit}}`, explain: mode === 'lens' ? 'Distance from the lens to its focal points F and F′.' : 'Half the radius of curvature, $f = R/2$.' });
+    fCtl = slider({ key: 'fabs', label: 'Focal length $|f|$', min: 4, max: 20, step: 0.5, value: clamp(fabs, 4, 20), unit: `\\mathrm{${P.unit}}`, explain: mode === 'lens' ? 'Distance from the lens to each of its focal points F.' : 'Half the radius of curvature, $f = R/2$.' });
     F.params.f = P.f;
     if (P.obj === 'star') slider({ key: 'tilt', label: 'Star’s angle off axis', min: 0, max: 15, step: 0.5, value: P.tilt, unit: '^\\circ', explain: 'Light from a star arrives as parallel rays at this angle.' });
     else {
@@ -309,7 +309,9 @@ export async function mount(F, P0) {
     const crit = O.criticalAngle(n1, n2);
     if (!Number.isNaN(crit) && !hide.has('critical')) {
       main.line(0, 0, -Math.sin(crit) * 0.9, Math.cos(crit) * 0.9, { color: 'bad', width: 1.2, dash: [3, 4], alpha: 0.7 });
-      if (P.labels) main.text(`critical angle ${trim(deg(crit))}°`, -Math.sin(crit) * 0.92, Math.cos(crit) * 0.92, { color: 'bad', size: 11, align: 'right', dx: -4, dy: -6 });
+      // the label goes on the side of the dashed line away from the incident ray
+      const beyond = th1 > crit;
+      if (P.labels) main.text(`critical angle ${trim(deg(crit))}°`, -Math.sin(crit) * 0.78, Math.cos(crit) * 0.78, { color: 'bad', size: 11, align: beyond ? 'left' : 'right', dx: beyond ? 7 : -7, dy: beyond ? 6 : -4 });
     }
     // wavefronts in a beam about the incident and refracted rays
     if (F.params.waves && !tir && !hide.has('refracted')) {
@@ -357,12 +359,13 @@ export async function mount(F, P0) {
       main.path(pts, { color, width: 1.6 });
     };
     if (angle > 0.5) {
+      // labels sit beside the rays, at the outer ends of their arcs
       arc(Math.PI / 2, Math.PI / 2 + th1, 0.26, 'ink2');
-      if (P.labels && !hide.has('theta1')) main.text(`θ₁ = ${trim(angle)}°`, -Math.sin(th1 / 2) * 0.3, Math.cos(th1 / 2) * 0.3 + 0.05, { color: 'ink', size: 12, align: 'right', dx: -4 });
-      if (!hide.has('reflected')) { arc(Math.PI / 2 - th1, Math.PI / 2, 0.2, 'ink3'); if (P.labels && !hide.has('theta1')) main.text(`${trim(angle)}°`, Math.sin(th1 / 2) * 0.24, Math.cos(th1 / 2) * 0.24 + 0.04, { color: 'ink2', size: 11, dx: 4 }); }
+      if (P.labels && !hide.has('theta1')) main.text(`θ₁ = ${trim(angle)}°`, -Math.sin(th1) * 0.36, Math.cos(th1) * 0.36, { color: 'ink', size: 12, align: 'right', dx: -10, dy: -2 });
+      if (!hide.has('reflected')) { arc(Math.PI / 2 - th1, Math.PI / 2, 0.2, 'ink3'); if (P.labels && !hide.has('theta1')) main.text(`${trim(angle)}°`, Math.sin(th1) * 0.28, Math.cos(th1) * 0.28, { color: 'ink2', size: 11, dx: 9, dy: -2 }); }
       if (!tir && !hide.has('refracted')) {
         arc(-Math.PI / 2, -Math.PI / 2 + th2, 0.26, 'ink2');
-        if (P.labels) main.text(hide.has('theta2') ? 'θ₂ = ?' : `θ₂ = ${trim(deg(th2))}°`, Math.sin(th2 / 2) * 0.3, -Math.cos(th2 / 2) * 0.3 - 0.06, { color: 'ink', size: 12, dx: 6 });
+        if (P.labels) main.text(hide.has('theta2') ? 'θ₂ = ?' : `θ₂ = ${trim(deg(th2))}°`, Math.sin(th2) * 0.36, -Math.cos(th2) * 0.36, { color: 'ink', size: 12, dx: 10, dy: 2 });
       }
     }
     if (tir && P.labels && !hide.has('refracted')) main.text('total internal reflection: no light crosses', 0.06, -0.3, { color: 'bad', size: 12, weight: 600 });
@@ -629,7 +632,8 @@ export async function mount(F, P0) {
     const hI = star ? -f * Math.tan(rad(p.tilt)) : im.m * hO;
     const yHalf = Math.max(1.35 * Math.max(star ? af * Math.tan(rad(15)) : 8, Math.min(Math.abs(hI), 2.4 * Math.max(hO, 1))), 3);
     main.setView([x0, x1], [-yHalf, yHalf]);
-    const ap = P.ap ?? Math.max(star ? 0.5 * af : 1.3 * Math.max(P.hO, 3), 0.35 * af);
+    // the aperture: tall enough for the object and, where it fits, for the focal ray (which meets the element at the image's height)
+    const ap = P.ap ?? Math.max(star ? 0.5 * af : 1.3 * Math.max(P.hO, 3), 0.35 * af, star || !Number.isFinite(hI) ? 0 : Math.min(1.12 * Math.abs(hI), 0.9 * yHalf));
     const X = (u) => (mirror ? -u : u);           // unfolded → real x for the outgoing side
     const lt = lightTheme(main);
     // axis
@@ -809,20 +813,21 @@ export async function mount(F, P0) {
     const im1 = tele ? { dI: f1, m: 0 } : O.thinLens(f1, p.dO);
     const sep = tele ? f1 + f2 : im1.dI + f2;
     frame(main, { l: 6, r: 6, t: 8, b: 8 });
-    const x0 = tele ? -0.18 * sep : -p.dO - 0.12 * sep, x1 = sep + Math.max(1.4 * f2, 0.28 * sep);
+    const x0 = tele ? -0.18 * sep : -p.dO - 0.12 * sep, x1 = sep + Math.max(1.4 * Math.abs(f2), 0.28 * sep);
     const hI1 = tele ? f1 * Math.tan(rad(p.tilt)) : Math.abs(im1.m * p.hO);
     const ap1 = tele ? Math.max(2.4, 0.11 * sep) : Math.max(1.6, 1.15 * hI1, 1.2 * p.hO), ap2 = tele ? Math.max(1.5, 0.085 * sep) : Math.max(1.5, 1.2 * hI1);
     const yHalf = tele ? Math.max(ap1 * 1.8, f1 * Math.tan(rad(p.tilt)) * 1.6) : Math.max(ap1 * 2.2, Math.abs(im1.m * p.hO) * 1.5);
     main.setView([x0, x1], [-yHalf, yHalf]);
     main.line(main.vx0, 0, main.vx1, 0, { color: 'ink3', width: 1.1 });
-    const lensShape = (x, ap) => {
-      const w = Math.max(0.012 * (x1 - x0), 0.25), pts = [];
-      for (let i = 0; i <= 24; i++) { const y = -ap + (2 * ap * i) / 24, u = y / ap; pts.push([x + w * 0.5 * (1 - u * u) + 0.05 * w, y]); }
-      for (let i = 24; i >= 0; i--) { const y = -ap + (2 * ap * i) / 24, u = y / ap; pts.push([x - w * 0.5 * (1 - u * u) - 0.05 * w, y]); }
+    const lensShape = (x, ap, f) => {
+      const w = Math.max(0.012 * (x1 - x0), 0.25), pts = [], conv = f > 0;
+      const half = (u) => (conv ? 0.5 * (1 - u * u) + 0.05 : 0.5 * (0.35 + 0.65 * u * u) + 0.05) * w;
+      for (let i = 0; i <= 24; i++) { const y = -ap + (2 * ap * i) / 24; pts.push([x + half(y / ap), y]); }
+      for (let i = 24; i >= 0; i--) { const y = -ap + (2 * ap * i) / 24; pts.push([x - half(y / ap), y]); }
       region(main, pts, 'accent', 0.22);
       main.path(pts.concat([pts[0]]), { color: 'accent2', width: 1.6 });
     };
-    lensShape(0, ap1); lensShape(sep, ap2);
+    lensShape(0, ap1, f1); lensShape(sep, ap2, f2);
     const els = [{ x: 0, f: f1 }, { x: sep, f: f2 }];
     const cols = ['gold', 'teal', 'violet'];
     let beta = 0;
@@ -835,16 +840,20 @@ export async function mount(F, P0) {
         ray(main, [...r.pts, end], { color: cols[i], width: 2, at: 0.5 });
         beta = Math.atan(r.slope);
       });
-      // the intermediate image of the star, at the focal point of both lenses
+      // the intermediate image of the star, at the focal point of both lenses (a Galilean
+      // telescope's diverging eyepiece catches the light before it gets there)
       const yi = -f1 * Math.tan(a);
-      main.point(f1, yi, { color: 'good', r: 4.5 });
-      main.line(f1, -yHalf * 0.8, f1, yHalf * 0.8, { color: 'good', width: 1, dash: [5, 5], alpha: 0.7 });
+      if (f2 > 0) {
+        main.point(f1, yi, { color: 'good', r: 4.5 });
+        main.line(f1, -yHalf * 0.8, f1, yHalf * 0.8, { color: 'good', width: 1, dash: [5, 5], alpha: 0.7 });
+      }
       if (P.labels) {
-        main.text('image of the star', f1, yi, { color: 'good', size: 11, dx: 6, dy: 14 });
+        if (f2 > 0) main.text('image of the star', f1, yi, { color: 'good', size: 11, dx: 6, dy: 14 });
+        else main.text('no image forms inside: the view is upright', sep, -yHalf * 0.8, { color: 'good', size: 11, align: 'center' });
         main.text(`objective, fₒ = ${trim(f1)} cm`, 0, ap1, { color: 'accent2', size: 11, dy: -12, align: 'center' });
         main.text(`eyepiece, fₑ = ${trim(f2)} cm`, sep, ap2, { color: 'accent2', size: 11, dy: -12, align: 'center' });
       }
-      eye(main, sep + 1.05 * f2, 0, -1, 0);
+      eye(main, sep + 1.05 * Math.abs(f2), 0, -1, 0);
     } else {
       const h = p.hO, T = [-p.dO, h];
       arrowObj(main, -p.dO, h, { color: 'accent', width: 2.6 });
@@ -942,7 +951,8 @@ export function validate(P0) {
     if (!['cm', 'mm', 'm'].includes(P.unit)) problems.push('optics-rays: unit must be cm, mm or m');
   } else if (mode === 'system') {
     if (!['telescope', 'microscope'].includes(P.kind)) problems.push('optics-rays: kind must be telescope or microscope');
-    num('f1', 1, 60); num('f2', 1, 20);
+    num('f1', 1, 60);
+    if (!(typeof P.f2 === 'number' && Math.abs(P.f2) >= 1 && Math.abs(P.f2) <= 20 && (P.f2 > 0 || P.kind === 'telescope'))) problems.push('optics-rays: f2 must have 1 ≤ |f2| ≤ 20 (negative only for a Galilean telescope)');
     if (P.kind === 'telescope') num('tilt', 0.25, 8);
     else { num('dO', 1, 20); num('hO', 0.1, 3); if (!(P.dO > P.f1)) problems.push('optics-rays: a microscope’s object must lie outside the objective’s focal length'); }
   }

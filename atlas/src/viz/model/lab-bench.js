@@ -644,21 +644,21 @@ export const EXPERIMENTS = {
     apparatus: 'ohm',
     note: 'A copper wire 2.000 m long and 0.200 mm across (±0.002 mm by micrometer), wound on an open frame. The current is switched on only while the meters are read, so the wire stays at 20 °C. Each meter scatters by ±0.002 (A or V) and reads to 0.001.',
     defaults: { L: 2.000, d: 0.200e-3, sd: 0.002e-3, rho: 1.68e-8, alpha: 0.0039, heat: 12, RA: 0.100, sI: 0.002, sV: 0.002, sL: 0.001, sR: 0.003, Rlead: 0.250 },
-    setting: { key: 'I', sym: 'supply', label: 'Current set on the supply $I$', unit: 'A', min: 0.05, max: 1.0, step: 0.05, value: 0.5, series: [0.10, 0.25, 0.40, 0.55, 0.70, 0.85, 1.00], explain: 'The supply holds this current; the ammeter measures what actually flows.' },
+    setting: { key: 'I', sym: 'supply', label: 'Current set on the supply $I$', unit: 'A', min: 0.05, max: 1.0, step: 0.05, value: 0.55, series: [0.10, 0.25, 0.40, 0.55, 0.70, 0.85, 1.00], explain: 'The supply holds this current; the ammeter measures what actually flows.' },
     nz: 2,
     read: (I, P, sys, z) => {
       const R = wireR(P) * (1 + (sys === 'heating' ? P.alpha * P.heat * I * I : 0));
-      return [I + P.sI * z[0], I * R + (sys === 'wiring' ? I * P.RA : 0) + P.sV * z[1]];
+      return [I * R + (sys === 'wiring' ? I * P.RA : 0) + P.sV * z[1], I + P.sI * z[0]];
     },
     series: [
-      { key: 'I', sym: 'I', label: 'current', unit: 'A', res: 0.001, sigma: (I, P) => Math.hypot(P.sI, resolutionU(0.001)) },
       { key: 'V', sym: 'V', label: 'voltage', unit: 'V', res: 0.001, sigma: (I, P) => Math.hypot(P.sV, resolutionU(0.001)) },
+      { key: 'I', sym: 'I', label: 'current', unit: 'A', res: 0.001, sigma: (I, P) => Math.hypot(P.sI, resolutionU(0.001)) },
     ],
     axes: {
       VI: {
         label: 'V against I', slopeUnit: 'Ω', expectLabel: 'V = IR with R = ρL/A',
-        x: { sym: 'I', unit: 'A', of: (I, R) => R[0], sigma: (I, R, P) => Math.hypot(P.sI, resolutionU(0.001)) },
-        ys: [{ sym: 'V', unit: 'V', of: (I, R) => R[1], sigma: (I, R, P) => Math.hypot(P.sV, resolutionU(0.001)) }],
+        x: { sym: 'I', unit: 'A', of: (I, R) => R[1], sigma: (I, R, P) => Math.hypot(P.sI, resolutionU(0.001)) },
+        ys: [{ sym: 'V', unit: 'V', of: (I, R) => R[0], sigma: (I, R, P) => Math.hypot(P.sV, resolutionU(0.001)) }],
         expect: (P) => ({ a: 0, b: wireR(P) }),
         results: [{ sym: 'R', name: 'resistance', unit: 'Ω', of: (f) => f.b, sigma: (f) => f.sb, accepted: (P) => wireR(P), acceptedLabel: 'ρL/A' }],
         intercept: { sym: 'V₀', name: 'intercept', unit: 'V' },
@@ -698,6 +698,139 @@ export const EXPERIMENTS = {
     defaultAxes: 'RL',
     systematics: { wiring: { label: 'The voltage is sensed across more than the wire: outside the ammeter (V against I) or through the current leads (R against L)', short: 'voltmeter placement', explain: 'In V against I the voltmeter is clipped outside the ammeter, so it also reads the 0.100 Ω ammeter’s drop; in R against L the meter senses through the same two leads that carry the current, adding 0.250 Ω of leads and clips.' } },
     defaultSys: 'wiring',
+  },
+
+  // 2225 L.3 — a capacitor discharging through a resistor
+  rc: {
+    title: 'A capacitor discharging through a resistor',
+    apparatus: 'rc',
+    note: 'A 10.0 µF capacitor (checked on a capacitance meter) discharges from 10.00 V through a 1.00 MΩ resistor. A high-impedance data logger (10 GΩ input, negligible here) reads the voltage at exactly known times, to 0.001 V with ±0.010 V of noise. The capacitor’s own leakage is ignored.',
+    defaults: { R: 1.00e6, C: 10.0e-6, V0: 10.0, sV: 0.010, RV: 10.0e6, off: 0.050 },
+    setting: { key: 't', sym: 't', label: 'Time after the switch moves $t$', unit: 's', min: 0, max: 40, step: 1, value: 12, series: [0, 4, 8, 12, 16, 20, 24, 28], explain: 'The logger’s clock starts as the switch disconnects the battery and connects the resistor.' },
+    nz: 1,
+    read: (t, P, sys, z) => [P.V0 * Math.exp(-t / rcTau(P, sys === 'meter')) + (sys === 'offset' ? P.off : 0) + P.sV * z[0]],
+    series: [{ key: 'V', sym: 'V', label: 'capacitor voltage', unit: 'V', res: 0.001, sigma: (t, P) => Math.hypot(P.sV, resolutionU(0.001)) }],
+    axes: {
+      log: {
+        label: 'ln V against t', slopeUnit: '1/s', expectLabel: 'τ = RC: no loading, no offset',
+        x: { sym: 't', unit: 's', of: (t) => t },
+        ys: [{ sym: 'ln V', unit: '', of: (t, R) => Math.log(Math.max(R[0], 1e-4)), sigma: (t, R, P) => Math.hypot(P.sV, resolutionU(0.001)) / Math.max(R[0], 1e-4) }],
+        expect: (P) => ({ a: Math.log(P.V0), b: -1 / (P.R * P.C) }),
+        results: [{ sym: 'τ', name: 'time constant', unit: 's', of: (f) => -1 / f.b, sigma: (f) => f.sb / f.b ** 2, accepted: (P) => P.R * P.C, acceptedLabel: 'RC' }],
+        intercept: { sym: 'ln V₀', name: 'ln of the starting voltage', unit: '' },
+      },
+      raw: {
+        label: 'V against t', slopeUnit: 'V/s', x: { sym: 't', unit: 's', of: (t) => t },
+        ys: [{ sym: 'V', unit: 'V', of: (t, R) => R[0], sigma: (t, R, P) => Math.hypot(P.sV, resolutionU(0.001)) }], curved: true,
+      },
+    },
+    defaultAxes: 'log',
+    systematics: {
+      meter: { label: 'An ordinary 10 MΩ voltmeter instead of the logger: it is a second path for the charge', short: 'meter loading', explain: 'A digital multimeter’s 10 MΩ input sits in parallel with the 1.00 MΩ resistor, so the capacitor discharges through both.' },
+      offset: { label: 'The logger’s zero is off: it reads 0.050 V with nothing connected', short: 'zero offset', explain: 'Every reading is 0.050 V too high — negligible at 10 V, but not once the capacitor is nearly empty.' },
+    },
+    defaultSys: 'meter',
+  },
+
+  // 2225 L.4 — a flat coil: the field at its centre against the current …
+  coil: {
+    title: 'The field at the centre of a flat coil', method: 'B against I (centre)',
+    apparatus: 'coil',
+    note: 'A flat coil of 200 turns with a mean radius of 10.00 cm (±0.05 cm), its turns treated as one circle. The Hall probe was zeroed at the coil with the current off; it reads to 0.001 mT with ±0.003 mT of noise, and its calibration is good to 1%. The supply’s ammeter is taken as exact.',
+    defaults: { N: 200, R: 0.100, sR: 0.0005, cal: 0.01, sB: 0.003, Bbg: 0.040, I: 1.50, sz: 0.001 },
+    setting: { key: 'I', sym: 'I', label: 'Coil current $I$', unit: 'A', min: -2.0, max: 2.0, step: 0.25, value: 1.0, series: [-1.5, -1.0, -0.5, 0.5, 1.0, 1.5], explain: 'Negative means the current runs the other way round the coil.' },
+    nz: 1,
+    read: (I, P, sys, z) => [1e3 * coilB(P, I, 0) + (sys === 'background' ? P.Bbg : 0) + P.sB * z[0]],
+    series: [{ key: 'B', sym: 'B', label: 'field at the centre', unit: 'mT', res: 0.001, sigma: (I, P) => Math.hypot(P.sB, resolutionU(0.001)) }],
+    axes: {
+      BI: {
+        label: 'B against I', slopeUnit: 'mT/A', expectLabel: 'μ₀NI/2R, probe zeroed',
+        x: { sym: 'I', unit: 'A', of: (I) => I },
+        ys: [{ sym: 'B', unit: 'mT', of: (I, R) => R[0], sigma: (I, R, P) => Math.hypot(P.sB, resolutionU(0.001)) }],
+        expect: (P) => ({ a: 0, b: 1e3 * coilB(P, 1, 0) }),
+        results: [{
+          sym: 'μ₀', name: 'magnetic constant', unit: 'μN/A²', of: (f, P) => (1e3 * 2 * P.R * f.b) / P.N, sigma: (f, P) => (1e3 * 2 * P.R * f.sb) / P.N, accepted: () => 1e6 * MU0, acceptedLabel: 'CODATA 2022',
+          typeB: (P) => [{ label: 'radius', rel: P.sR / P.R }, { label: 'probe calibration', rel: P.cal }],
+        }],
+        intercept: { sym: 'B₀', name: 'field with no current', unit: 'mT' },
+      },
+    },
+    defaultAxes: 'BI',
+    systematics: { background: { label: 'The Hall probe was zeroed away from the coil, so it also reads Earth’s field and the bench’s (0.040 mT along the axis)', short: 'background field', explain: 'Zeroed in the stockroom, the probe adds the local background — Earth’s field plus the magnetised steel of the bench — to every reading.' } },
+    defaultSys: 'background',
+  },
+
+  // … and along its axis, plotted against the shape the Biot–Savart law predicts
+  'coil-axis': {
+    title: 'The field along the axis of a flat coil', method: 'B along the axis',
+    apparatus: 'coil',
+    note: 'The same coil at 1.50 A. The probe slides along the axis on a rule read to ±1 mm, and its position error is folded into each error bar. Biot–Savart: B = B(0)/(1 + z²/R²)^(3/2) for a single circle of radius R.',
+    defaults: { N: 200, R: 0.100, sR: 0.0005, cal: 0.01, sB: 0.003, Bbg: 0.040, I: 1.50, sz: 0.001 },
+    setting: { key: 'z', sym: 'z', label: 'Distance from the centre along the axis $z$', unit: 'cm', min: 0, max: 30, step: 1, value: 8, series: [0, 4, 8, 12, 16, 20, 24], explain: 'Measured from the coil’s centre plane to the probe’s sensing element.' },
+    nz: 2,
+    read: (zc, P, sys, z) => [1e3 * coilB(P, P.I, zc / 100 + P.sz * z[0]) + (sys === 'background' ? P.Bbg : 0) + P.sB * z[1]],
+    series: [{ key: 'B', sym: 'B', label: 'field on the axis', unit: 'mT', res: 0.001, sigma: (zc, P) => Math.hypot(P.sB, coilAxisSigma(P, zc / 100), resolutionU(0.001)) }],
+    axes: {
+      shape: {
+        label: 'B against u = (1 + z²/R²)^(−3/2)', slopeUnit: 'mT', expectLabel: 'Biot–Savart, probe zeroed',
+        x: { sym: 'u', unit: '', of: (zc, R, P) => coilShape(P, zc / 100) },
+        ys: [{ sym: 'B', unit: 'mT', of: (zc, R) => R[0], sigma: (zc, R, P) => Math.hypot(P.sB, coilAxisSigma(P, zc / 100), resolutionU(0.001)) }],
+        expect: (P) => ({ a: 0, b: 1e3 * coilB(P, P.I, 0) }),
+        results: [{
+          sym: 'μ₀', name: 'magnetic constant', unit: 'μN/A²', of: (f, P) => (1e3 * 2 * P.R * f.b) / (P.N * P.I), sigma: (f, P) => (1e3 * 2 * P.R * f.sb) / (P.N * P.I), accepted: () => 1e6 * MU0, acceptedLabel: 'CODATA 2022',
+          typeB: (P) => [{ label: 'radius', rel: P.sR / P.R }, { label: 'probe calibration', rel: P.cal }],
+        }],
+        intercept: { sym: 'B∞', name: 'field far away', unit: 'mT' },
+      },
+      raw: {
+        label: 'B against z', slopeUnit: 'mT/m', x: { sym: 'z', unit: 'm', of: (zc) => zc / 100 },
+        ys: [{ sym: 'B', unit: 'mT', of: (zc, R) => R[0], sigma: (zc, R, P) => Math.hypot(P.sB, coilAxisSigma(P, zc / 100), resolutionU(0.001)) }], curved: true,
+      },
+    },
+    defaultAxes: 'shape',
+    systematics: { background: { label: 'The Hall probe was zeroed away from the coil, so it also reads Earth’s field and the bench’s (0.040 mT along the axis)', short: 'background field', explain: 'Zeroed in the stockroom, the probe adds the local background — Earth’s field plus the magnetised steel of the bench — to every reading.' } },
+    defaultSys: 'background',
+  },
+
+  // 2225 L.5 — Faraday induction: a search coil inside a solenoid driven by an alternating current
+  induction: {
+    title: 'A search coil inside a solenoid carrying an alternating current',
+    apparatus: 'induction',
+    note: 'A long solenoid (500 turns on 0.500 m, radius 3.0 cm, inductance 1.78 mH) is driven through a 20 Ω circuit by a sine-wave amplifier of fixed voltage, so its current falls a little as the frequency rises. A 100-turn search coil 2.00 cm across (±0.05 mm) sits at its centre, square to the axis. A scope reads both peaks: the EMF to ±(0.2 mV + 0.5%), the current (from a 1.00 Ω sense resistor) to ±(1 mA + 0.3%); its gain calibration is good to 1%.',
+    defaults: { n: 1000, N2: 100, d2: 0.0200, sd2: 0.00005, Rs: 0.030, len: 0.500, Rc: 20, I100: 0.500, tilt: 25, cal: 0.01 },
+    setting: { key: 'f', sym: 'f', label: 'Drive frequency $f$', unit: 'Hz', min: 50, max: 1200, step: 50, value: 550, series: [100, 250, 400, 550, 700, 850, 1000], explain: 'Set on the signal generator that feeds the amplifier.' },
+    nz: 2,
+    read: (f, P, sys, z) => {
+      const I0 = solI0(P, f), e0 = 1e3 * mutualM(P) * 2 * Math.PI * f * I0 * (sys === 'tilt' ? Math.cos(P.tilt * D2R) : 1);
+      return [e0 + Math.hypot(0.2, 0.005 * e0) * z[0], 1e3 * I0 + Math.hypot(1, 0.003 * 1e3 * I0) * z[1]];
+    },
+    series: [
+      { key: 'e0', sym: 'ℰ₀', label: 'peak EMF', unit: 'mV', res: 0.1, sigma: (f, P) => { const e = 1e3 * mutualM(P) * 2 * Math.PI * f * solI0(P, f); return Math.hypot(0.2, 0.005 * e, resolutionU(0.1)); } },
+      { key: 'I0', sym: 'I₀', label: 'peak current', unit: 'mA', res: 1, sigma: (f, P) => Math.hypot(1, 0.003 * 1e3 * solI0(P, f), resolutionU(1)) },
+    ],
+    axes: {
+      eI: {
+        label: 'ℰ₀ against ωI₀', slopeUnit: 'µH', expectLabel: 'ℰ₀ = MωI₀ with M = μ₀nN₂A',
+        x: { sym: 'ωI₀', unit: 'kA/s', of: (f, R, P, sys) => (2 * Math.PI * f * (sys === 'nominal' ? 1e3 * P.I100 : R[1])) / 1e6, sigma: (f, R, P, sys) => (sys === 'nominal' ? 0 : (2 * Math.PI * f * Math.hypot(1, 0.003 * R[1], resolutionU(1))) / 1e6) },
+        ys: [{ sym: 'ℰ₀', unit: 'mV', of: (f, R) => R[0], sigma: (f, R) => Math.hypot(0.2, 0.005 * R[0], resolutionU(0.1)) }],
+        expect: (P) => ({ a: 0, b: 1e6 * mutualM(P) }),
+        results: [{
+          sym: 'M', name: 'mutual inductance', unit: 'µH', of: (f) => f.b, sigma: (f) => f.sb, accepted: (P) => 1e6 * mutualM(P), acceptedLabel: 'μ₀nN₂A',
+          typeB: (P) => [{ label: 'scope calibration', rel: P.cal }],
+        }],
+        intercept: { sym: 'ℰ(0)', name: 'intercept', unit: 'mV' },
+      },
+      ef: {
+        label: 'ℰ₀ against f', slopeUnit: 'mV/Hz', x: { sym: 'f', unit: 'Hz', of: (f) => f },
+        ys: [{ sym: 'ℰ₀', unit: 'mV', of: (f, R) => R[0], sigma: (f, R) => Math.hypot(0.2, 0.005 * R[0], resolutionU(0.1)) }], curved: true,
+      },
+    },
+    defaultAxes: 'eI',
+    systematics: {
+      nominal: { label: 'The current is assumed to stay at its 100 Hz value, 500 mA, instead of being read at each frequency', short: 'unmeasured current', explain: 'The solenoid’s own inductance makes its impedance grow with frequency, so the current really falls — by about 13% at 1 kHz.' },
+      tilt: { label: 'The search coil sits tilted 25° from square to the axis', short: 'tilted coil', explain: 'Only the component of the field along the coil’s own axis threads it: the flux, and every EMF, is cos 25° = 0.906 of the full value.' },
+    },
+    defaultSys: 'nominal',
   },
 };
 
@@ -828,3 +961,31 @@ export function dotsE(x, P, contact = false) {
 // L.2 — a round wire of diameter d: cross-section and resistance at 20 °C
 export const wireA = (P) => (Math.PI * P.d * P.d) / 4;
 export const wireR = (P) => (P.rho * P.L) / wireA(P);
+
+// L.3 — the discharge time constant, with a voltmeter of input resistance R_V
+// in parallel with R when `loaded`
+export const rcTau = (P, loaded = false) => (loaded ? (P.R * P.RV) / (P.R + P.RV) : P.R) * P.C;
+
+// L.4 — a flat coil of N turns and radius R, its turns taken as one circle
+export const MU0 = 1.25663706127e-6;        // N/A², CODATA 2022
+/** The shape of the axial field, B(z)/B(0) = (1 + z²/R²)^(−3/2). */
+export const coilShape = (P, z) => (1 + (z * z) / (P.R * P.R)) ** -1.5;
+/** The field (T) on the axis at z (m) from the centre, current I (A). */
+export const coilB = (P, I, z = 0) => ((MU0 * P.N * I) / (2 * P.R)) * coilShape(P, z);
+/** The field error (mT) from the probe's position error σz along the axis: |dB/dz|·σz. */
+export function coilAxisSigma(P, z) {
+  const B0 = 1e3 * coilB(P, P.I, 0);
+  return Math.abs((3 * B0 * z) / (P.R * P.R) * (1 + (z * z) / (P.R * P.R)) ** -2.5) * P.sz;
+}
+
+// L.5 — a long solenoid (n turns per metre, radius Rs, length len) and a
+// search coil of N2 turns and diameter d2 square to its axis at the centre.
+/** The mutual inductance M = μ₀ n N₂ A₂ (H). */
+export const mutualM = (P) => MU0 * P.n * P.N2 * (Math.PI * P.d2 * P.d2) / 4;
+/** The solenoid's self-inductance μ₀n²(πRs²)·len (H), end effects ignored. */
+export const solL = (P) => MU0 * P.n * P.n * Math.PI * P.Rs * P.Rs * P.len;
+/** The current amplitude (A) at f (Hz) from a fixed drive voltage, set to give I100 at 100 Hz, through Rc and the solenoid's reactance. */
+export function solI0(P, f) {
+  const Z = (ff) => Math.hypot(P.Rc, 2 * Math.PI * ff * solL(P));
+  return (P.I100 * Z(100)) / Z(f);
+}

@@ -91,7 +91,7 @@ The new term also says that a changing electric field makes a magnetic field, ev
       ],
       answer: 0,
       why: {
-        1: 'That is the paradox Maxwell resolved: without the displacement term the law gives two answers. With it, surface 2 catches ε₀dΦ_E/dt = I.',
+        1: t`That is the paradox Maxwell resolved: without the displacement term the law gives two answers. With it, surface 2 catches $\varepsilon_0\,d\Phi_E/dt = I$.`,
         2: 'Any surface bounded by the loop is allowed — that freedom is what exposed the problem.',
         3: 'The field lines run from one plate to the other: surface 2 is crossed by each of them once, giving one I, not two.',
       },

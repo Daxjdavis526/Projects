@@ -107,3 +107,27 @@ export const dist = (P, Q) => norm(sub(Q, P));
 
 /** The point a fraction s of the way from P to Q. */
 export const lerp = (P, Q, s) => add(P, scale(sub(Q, P), s));
+
+/** Component-wise sum of two vectors whose entries may be numbers or expression strings. */
+export const vsum = (u, v) => u.map((x, k) => (typeof x === 'number' && typeof v[k] === 'number' ? x + v[k] : `(${x}) + (${v[k]})`));
+
+/**
+ * calc-vectors3d params for the parallelepiped spanned by a, b, c (numbers or
+ * expressions): the three faces at the origin, the three opposite faces
+ * fainter, and the three edge vectors with labels.
+ */
+export function box(a, b, c, { labels = ['\\vec a', '\\vec b', '\\vec c'], colors = ['accent', 'warn', 'good'], face = 'gold' } = {}) {
+  return {
+    parallelograms: [
+      { u: a, v: b, color: face, alpha: 0.22 }, { u: b, v: c, color: 'violet', alpha: 0.14 }, { u: a, v: c, color: 'violet', alpha: 0.14 },
+      { at: c, u: a, v: b, color: face, alpha: 0.1 }, { at: a, u: b, v: c, color: 'violet', alpha: 0.07 }, { at: b, u: a, v: c, color: 'violet', alpha: 0.07 },
+    ],
+    vectors: [a, b, c].map((to, k) => ({ to, color: colors[k], label: labels[k] })),
+  };
+}
+
+/** a · (b × c) as an expression, for entries that may be numbers or expression strings. */
+export const tripleExpr = (a, b, c) => {
+  const m = (x, y) => `(${x})*(${y})`;
+  return `(${a[0]})*(${m(b[1], c[2])} - ${m(b[2], c[1])}) - (${a[1]})*(${m(b[0], c[2])} - ${m(b[2], c[0])}) + (${a[2]})*(${m(b[0], c[1])} - ${m(b[1], c[0])})`;
+};

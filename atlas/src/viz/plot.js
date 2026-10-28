@@ -18,6 +18,13 @@ export function themeColors() {
   };
 }
 
+// a logarithmic axis whose values are log₁₀ of the quantity: label whole decades 10ⁿ
+export function pow10Label(t) {
+  const n = Math.round(t);
+  if (Math.abs(t - n) > 1e-9) return '';
+  return n === 0 ? '1' : n === 1 ? '10' : `10${String(n).replace('-', '⁻').replace(/\d/g, (d) => SUP[d])}`;
+}
+
 // a tick label: plain below 10⁴, otherwise m×10ⁿ with superscript digits (never "1e+4")
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
 export function tickLabel(t) {
@@ -115,7 +122,7 @@ export class Plot {
     g.beginPath(); g.moveTo(Math.round(x0) + 0.5, this.T); g.lineTo(Math.round(x0) + 0.5, this.B); g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'top';
     const fmt = this.o.tickFormat || tickLabel;
-    for (const t of Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) {
+    for (const t of this.o.xticks === 0 ? [] : Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) {
       if (Math.abs(t) < 1e-12 && x0 > this.L) continue;
       const ly = Math.min(this.B + 4, Math.max(this.T, y0 + 4));
       g.fillText(this.o.xfmt ? this.o.xfmt(t) : fmt(t), this.X(t), ly);

@@ -268,6 +268,50 @@ for (const [P, why] of bad) check(`validate rejects ${why}`, validate(P).length 
   for (const Q of [{ exp: ['fieldmap', 'fieldmap-dots'] }, { exp: 'fieldmap-dots', view: 'plot', axes: 'raw', fit: false }, { exp: 'fieldmap', sys: true, view: 'apparatus' }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
   check('validate rejects bars plotted on the dots’ log axes', validate({ exp: 'fieldmap', axes: 'log' }).length > 0);
 }
+{
+  // L.2 — Ohm’s law and resistivity
+  const P = B.EXPERIMENTS.ohm.defaults, R0 = (1.68e-8 * 2) / (Math.PI * 0.0002 ** 2 / 4);
+  check('ohm: R = ρL/A = 1.0695 Ω for 2 m of 0.200 mm copper', near(B.wireR(P), R0, 1e-12) && Math.abs(R0 - 1.0695) < 1e-4);
+  const r = exact('ohm'), w = exact('ohm', { sys: 'wiring' }), h = exact('ohm', { sys: 'heating' });
+  check('ohm: V against I is a line through the origin with slope R', near(r.results[0].value, R0, 1e-9) && Math.abs(r.series[0].fit.a) < 1e-12);
+  check('ohm: a voltmeter clipped outside the ammeter adds R_A = 0.100 Ω to the slope, still through the origin', near(w.results[0].value, R0 + 0.1, 1e-9) && Math.abs(w.series[0].fit.a) < 1e-12);
+  const hr = B.makeData('ohm', { noiseless: true, sys: 'heating', settings: [1] }).rows[0];
+  check('ohm: left on, the wire is 12 K warmer at 1 A, so V/I = R(1 + 12α)', near(hr.R[0] / hr.R[1], R0 * (1 + 0.0039 * 12), 1e-12));
+  check('ohm: heating bends the line (straight-line slope too high, χ² ≫ 0 without noise)', h.results[0].value > R0 * 1.03 && h.series[0].fit.chi2 > 20, `${h.results[0].value} ${h.series[0].fit.chi2}`);
+  const s = exact('resistivity'), l = exact('resistivity', { sys: 'wiring' });
+  check('resistivity: ρ = slope × πd²/4 = 16.8 nΩ·m', near(s.results[0].value, 16.8, 1e-9) && Math.abs(s.series[0].fit.a) < 1e-12);
+  check('resistivity: a two-wire meter adds 0.250 Ω as the intercept and leaves ρ alone', near(l.series[0].fit.a, 0.25, 1e-9) && near(l.results[0].value, 16.8, 1e-9));
+  check('resistivity: the budget carries the diameter twice (2 %)', s.results[0].terms.some((q) => q.label === 'diameter' && near(q.rel, 0.02, 1e-12)));
+  for (const Q of [{ exp: ['ohm', 'resistivity'] }, { exp: 'ohm', sys: true, sysKind: 'heating', view: 'plot', residuals: true }, { exp: 'resistivity', view: 'apparatus', sys: true, at: 0.5 }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
+{
+  // L.3 — RC discharge
+  const r = exact('rc'), m = exact('rc', { sys: 'meter' }), o = exact('rc', { sys: 'offset' });
+  check('rc: ln V against t is straight with slope −1/RC (τ = 10.0 s) and intercept ln V₀', near(r.results[0].value, 10, 1e-9) && near(r.series[0].fit.a, Math.log(10), 1e-9) && r.series[0].fit.chi2 < 1e-12);
+  check('rc: a 10 MΩ meter in parallel gives τ = (R ∥ R_V)C = 9.09 s, still a straight line', near(m.results[0].value, 10 / 1.1, 1e-9) && m.series[0].fit.chi2 < 1e-12);
+  check('rc: a +0.050 V offset bends ln V upward at late times and lengthens τ', o.results[0].value > 10.08 && o.series[0].fit.chi2 > 5 && o.series[0].fit.residuals.at(-1) > 0, `${o.results[0].value} ${o.series[0].fit.chi2}`);
+  const rows = B.makeData('rc', { noiseless: true, settings: [0, 10, 20] }).rows;
+  check('rc: V falls to 1/e of V₀ in one time constant', near(rows[1].R[0], 10 / Math.E, 1e-12) && near(rows[2].R[0], 10 / Math.E ** 2, 1e-12));
+  const sd = B.analyse('rc', B.makeData('rc', { seed: 3 }).rows).series[0].pts.map((p) => p.sy);
+  check('rc: the error bars on ln V are σ_V/V, growing as V falls', sd[0] < 0.0011 && sd.at(-1) > 10 * sd[0]);
+  for (const Q of [{ exp: 'rc', axes: 'raw', view: 'plot', fit: false }, { exp: 'rc', sys: true, sysKind: 'offset', residuals: true }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
+{
+  // L.4 — the field of a flat coil
+  const P = B.EXPERIMENTS.coil.defaults;
+  check('coil: μ₀ is CODATA 2022’s 1.25663706127×10⁻⁶ N/A²', B.MU0 === 1.25663706127e-6);
+  check('coil: the centre field μ₀NI/2R is 1.885 mT at 1.5 A for 200 turns of radius 10 cm', near(1e3 * B.coilB(P, 1.5, 0), 1.88496, 1e-5));
+  const r = exact('coil'), g = exact('coil', { sys: 'background' });
+  check('coil: B against I recovers μ₀ exactly, through the origin', near(r.results[0].value, 1.25663706127, 1e-9) && Math.abs(r.series[0].fit.a) < 1e-12);
+  check('coil: an unzeroed probe adds 0.040 mT as the intercept and leaves μ₀ alone', near(g.series[0].fit.a, 0.04, 1e-9) && near(g.results[0].value, 1.25663706127, 1e-9));
+  const [m, p] = B.makeData('coil', { noiseless: true, sys: 'background', settings: [-1.5, 1.5] }).rows.map((q) => q.R[0]);
+  check('coil: reversing the current, (B₊ − B₋)/2 is the coil’s field and (B₊ + B₋)/2 the background', near((p - m) / 2, 1e3 * B.coilB(P, 1.5, 0), 1e-12) && near((p + m) / 2, 0.04, 1e-12));
+  check('coil: on the axis the field is (1 + z²/R²)^(−3/2) of the centre’s: 2^(−3/2) at z = R, half at z = 0.766R', near(B.coilShape(P, 0.1), 2 ** -1.5, 1e-12) && Math.abs(B.coilShape(P, 0.1 * Math.sqrt(2 ** (2 / 3) - 1)) - 0.5) < 1e-12);
+  const a = exact('coil-axis'), ab = exact('coil-axis', { sys: 'background' });
+  check('coil-axis: B against the Biot–Savart shape u is straight, slope B(0), intercept 0', near(a.series[0].fit.b, 1e3 * B.coilB(P, 1.5, 0), 1e-9) && Math.abs(a.series[0].fit.a) < 1e-12 && near(a.results[0].value, 1.25663706127, 1e-9));
+  check('coil-axis: the background is the intercept against u', near(ab.series[0].fit.a, 0.04, 1e-9));
+  for (const Q of [{ exp: ['coil', 'coil-axis'] }, { exp: 'coil-axis', axes: 'raw', view: 'plot', fit: false }, { exp: 'coil', view: 'apparatus', at: 1.5, params: { N: 100, R: 0.15 } }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

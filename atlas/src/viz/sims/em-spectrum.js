@@ -102,6 +102,7 @@ export function mount(F, P0) {
     ctx.clearRect(0, 0, W, H);
 
     // ── the band strip ──
+    const xm = hasMarker ? X(Math.log10(fNow())) : null;
     for (const b of M.BANDS) {
       const x0 = X(Math.max(lo, Math.log10(b.from))), x1 = X(Math.min(hi, Math.log10(b.to)));
       if (x1 <= x0) continue;
@@ -119,8 +120,24 @@ export function mount(F, P0) {
         ctx.save(); ctx.translate((x0 + x1) / 2, (yStrip0 + yStrip1) / 2); ctx.rotate(-Math.PI / 2);
         ctx.font = `700 ${FS - 2.5}px Inter, system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.strokeText('visible', 0, 0.5); ctx.fillStyle = '#fff'; ctx.fillText('visible', 0, 0.5); ctx.restore();
-      } else if (w + 6 < x1 - x0) text(b.name, (x0 + x1) / 2, (yStrip0 + yStrip1) / 2, { size: FS, color: C.ink, weight: 650 });
-      else { const sh = SHORT[b.id]; if (sh && measure(sh, { size: FS }) + 4 < x1 - x0) text(sh, (x0 + x1) / 2, (yStrip0 + yStrip1) / 2, { size: FS, color: C.ink, weight: 650 }); }
+      } else {
+        // the name, kept clear of the marker when there is room beside it; else the short name
+        const o = { size: FS, color: C.ink, weight: 650 }, sh = SHORT[b.id];
+        const clear = (wd) => {
+          if (wd + 6 > x1 - x0) return null;
+          const c0 = (x0 + x1) / 2;
+          if (xm === null || Math.abs(xm - c0) >= wd / 2 + 9) return c0;
+          const L = xm - 9 - x0, R = x1 - (xm + 9);
+          if (L >= R && L >= wd + 4) return x0 + L / 2;
+          if (R > L && R >= wd + 4) return xm + 9 + R / 2;
+          return null;
+        };
+        let cx = clear(w), name = b.name;
+        if (cx === null && sh) { cx = clear(measure(sh, o)); name = sh; }
+        if (cx === null && xm === null && sh && measure(sh, o) + 4 < x1 - x0) { cx = (x0 + x1) / 2; name = sh; }
+        // (no room beside the marker: leave the band unnamed rather than half-hidden; the readout names it)
+        if (cx !== null) text(name, cx, (yStrip0 + yStrip1) / 2, o);
+      }
     }
     ctx.save(); ctx.strokeStyle = C.line3; ctx.lineWidth = 1; ctx.strokeRect(X(lo) + 0.5, yStrip0 + 0.5, X(hi) - X(lo) - 1, stripH - 1); ctx.restore();
 

@@ -11,7 +11,7 @@
 //       riemann: { fn: 'x^2', from: 0, to: 2, n: 'n', rule: 'left' },
 //       readouts: [{ label: 'slope', expr: 'a*cos(x0)' }] } }
 
-import { Plot, PALETTE } from '../plot.js';
+import { Plot, PALETTE, pow10Label } from '../plot.js';
 import { fn } from '../model/exprfn.js';
 import { simpson } from '../model/numeric.js';
 
@@ -19,7 +19,9 @@ export const defaults = { x: [-5, 5], y: [-3, 3] };
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: P.aspect || '', label: P.alt || 'Interactive graph' });
-  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y', xticks: P.xticks, yticks: P.yticks, grid: P.grid ?? true, axes: P.axes ?? true, axesAt: P.axesAt });
+  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y', xticks: P.xticks, yticks: P.yticks, grid: P.grid ?? true, axes: P.axes ?? true, axesAt: P.axesAt,
+    // xlog / ylog: the coordinates are log₁₀ of the quantity, and the axis is labelled in decades
+    xfmt: P.xlog ? pow10Label : undefined, yfmt: P.ylog ? pow10Label : undefined });
   const sliders = P.sliders || [];
   for (const s of sliders) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
@@ -136,7 +138,7 @@ export function mount(F, P) {
       if (p.when && !ev(p.when, E, vars)) continue;
       plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
     }
-    for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: 2.2, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
+    for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: a.dash, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
     if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
   }

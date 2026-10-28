@@ -7,6 +7,7 @@
 // CODATA 2022 (as in the research notes and src/core/units.js).
 
 import { fmt } from '../../src/core/format.js';
+import { wavelengthToRGB } from '../../src/viz/model/qm-light.js';
 
 export const C = 299792458;                 // m/s, exact
 export const H = 6.62607015e-34;            // J s, exact
@@ -73,4 +74,32 @@ export function shipCurves(x0, len, y = 0, h = 0.5, color = 'accent', dash = fal
     seg(X(x0), y - h / 2, X(x0), y + h / 2, color, 2.2, dash),
     seg(X(x1), y - h / 2, X(x0 + len), y, color, 2.2, dash), seg(X(x1), y + h / 2, X(x0 + len), y, color, 2.2, dash),
   ];
+}
+
+/**
+ * The spectrum as a coloured strip (graph): ultraviolet, the visible colours
+ * (approximate screen colours), infrared, with optional marked wavelengths.
+ *   marks: [{ nm, label, color?, dy? }]
+ */
+export function spectrumStrip({ from = 150, to = 1150, marks = [], caption, extraPoints = [] } = {}) {
+  const shade = [];
+  for (let nm = 380; nm < 750; nm += 10) {
+    const [r, g, b] = wavelengthToRGB(nm + 5);
+    shade.push({ fn: '1', lower: '0', from: Math.max(from, nm), to: Math.min(to, nm + 10), color: `rgb(${r}, ${g}, ${b})`, alpha: 0.85 });
+  }
+  const curves = [], points = [];
+  for (const m of marks) {
+    curves.push(seg(m.nm, -0.15, m.nm, 1.2, m.color || 'ink', 2.2));
+    points.push(label(m.nm, 1.2, m.label, m.color || 'ink', 0, m.dy ?? -12, 'center'));
+  }
+  return {
+    type: 'graph',
+    params: {
+      x: [from, to], y: [-0.4, 1.9], aspect: 'wide', axesAt: 'edge', xlabel: 'wavelength (nm)', ylabel: '', yticks: 0, grid: false,
+      shade: [{ fn: '1', lower: '0', from, to: Math.max(from, 380), color: 'violet', alpha: 0.12 }, ...shade.filter((sh) => sh.to > sh.from), { fn: '1', lower: '0', from: Math.min(to, 750), to, color: 'bad', alpha: 0.1 }],
+      curves,
+      points: [...(from < 330 ? [label((from + 380) / 2, 0.5, 'ultraviolet', 'ink3', 0, 0, 'center')] : []), ...(to > 820 ? [label((750 + to) / 2, 0.5, 'infrared', 'ink3', 0, 0, 'center')] : []), ...points, ...extraPoints],
+    },
+    caption: caption ?? 'The spectrum from ultraviolet to infrared. The visible colours are approximate: a screen cannot show pure spectral colours.',
+  };
 }

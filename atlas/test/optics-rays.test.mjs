@@ -175,6 +175,7 @@ check('refraction works with the normal on either side', near(O.refractDir([0.6,
 // ─── two-lens systems ──────────────────────────────────────────────────────
 {
   check('afocal telescope: angular magnification −f₁/f₂', near(O.angularMagnification(100, 2.5, 102.5, 0.01), -40));
+  check('Galilean telescope (diverging eyepiece, lenses f₁ + f₂ apart): magnification +f₁/|f₂|, upright', near(O.angularMagnification(98, -4.9, 93.1, 0.01), 20));
   const t = O.twoLens(100, 2.5, 102.5, Infinity);
   check('…the objective images the star at its focal point, which is the eyepiece’s focal point', near(t.i1.dI, 100) && near(t.o2, 2.5) && t.i2.dI === Infinity);
   // a microscope: f_o = 4 mm, f_e = 25 mm, objective images to 160 mm beyond its focal point
@@ -193,6 +194,7 @@ for (const mode of ['interface', 'prism', 'fibre', 'surface', 'lens', 'mirror', 
 check('optics-rays validate accepts a plane mirror and a convex one', validate({ mode: 'mirror', f: Infinity }).length === 0 && validate({ mode: 'mirror', f: -12 }).length === 0);
 check('optics-rays validate accepts a microscope and a fish bowl', validate({ mode: 'system', kind: 'microscope' }).length === 0 && validate({ mode: 'surface', R: -15, dO: 10 }).length === 0);
 check('optics-rays validate rejects an unknown mode, a lens with f = 0.5 and gold prisms', validate({ mode: 'nope' }).length > 0 && validate({ mode: 'lens', f: 0.5 }).length > 0 && validate({ mode: 'prism', mat: 'gold' }).length > 0);
+check('optics-rays validate accepts a Galilean telescope (diverging eyepiece) but not a diverging microscope eyepiece', validate({ mode: 'system', f1: 40, f2: -5 }).length === 0 && validate({ mode: 'system', kind: 'microscope', f2: -5 }).length > 0);
 check('optics-rays validate rejects a microscope object inside the focal length', validate({ mode: 'system', kind: 'microscope', f1: 4, dO: 3 }).length > 0);
 
 console.log(`${pass} passed, ${fail} failed`);

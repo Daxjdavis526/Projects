@@ -963,10 +963,120 @@ const APPARATUS = {
     pl.path([[vx + 0.55, vy], [T2[0] - 0.5, vy], [T2[0] - 0.5, T2[1]], T2], { color: 'violet', width: 1.2 });
     if (st.labels) {
       const R = st.row?.R;
-      display(pl, 16.2, 8.6, [`I = ${R ? R[0].toFixed(3) : '—'} A`, `V = ${R ? R[1].toFixed(3) : '—'} V`], { compact: o.compact, title: 'ammeter and voltmeter' });
+      display(pl, 16.2, 8.6, [`I = ${R ? R[1].toFixed(3) : '—'} A`, `V = ${R ? R[0].toFixed(3) : '—'} V`], { compact: o.compact, title: 'ammeter and voltmeter' });
       pl.text('copper wire: 2.000 m, 0.200 mm', (T1[0] + T2[0]) / 2, 3.15, { color: hot ? 'warn' : 'gold', size: 10.5, align: 'center' });
       if (bad) sysTag(pl, 3.0, 9.55, 'voltmeter clipped outside the ammeter (0.100 Ω)', { size: 10.5 });
       if (hot) sysTag(pl, (T1[0] + T2[0]) / 2, 1.2, `left on: the wire warms ${(P.heat * I * I).toFixed(1)} K`, { size: 10.5, align: 'center' });
+    }
+  },
+
+  // the discharge loop: capacitor, closed switch, resistor; the logger (or a loading voltmeter) across C
+  rc(pl, E, P, st, o) {
+    const sys = st.sys, loaded = sys === 'meter';
+    const t = st.setting ?? E.setting.value, Vt = st.row?.R?.[0];
+    const frac = Math.max(0, Math.min(1, (Number.isFinite(Vt) ? Vt : P.V0 * Math.exp(-t / B.rcTau(P, loaded))) / P.V0));
+    const cx = 6.6, yT = 8.2, yB = 1.8, xR = 11.8, w = { color: 'ink2', width: 1.5 };
+    pl.path([[cx, 5.45], [cx, yT], [8.4, yT]], w);
+    pl.circle(8.4, yT, 0.11, { fill: 'ink2', stroke: false }); pl.line(8.4, yT, 9.65, yT + 0.1, { color: 'ink2', width: 2.2 }); pl.circle(9.7, yT, 0.11, { fill: 'ink2', stroke: false });
+    pl.path([[9.7, yT], [xR, yT], [xR, 6.8]], w);
+    zigzag2(pl, [xR, 6.8], [xR, 3.2], 12, 0.42, 'ink');
+    pl.path([[xR, 3.2], [xR, yB], [cx, yB], [cx, 4.55]], w);
+    pl.line(cx - 0.95, 5.45, cx + 0.95, 5.45, { color: 'bad', width: 4 });
+    pl.line(cx - 0.95, 4.55, cx + 0.95, 4.55, { color: 'accent', width: 4 });
+    const nq = Math.round(6 * frac);
+    for (let k = 0; k < nq; k++) { pl.text('+', cx - 0.8 + 0.32 * k, 5.85, { color: 'bad', size: 12, weight: 700, align: 'center' }); pl.text('−', cx - 0.8 + 0.32 * k, 4.12, { color: 'accent', size: 12, weight: 700, align: 'center' }); }
+    if (frac > 0.04) pl.arrow(xR - 1.6, yT + 0.45, xR - 0.4, yT + 0.45, { color: 'gold', width: 1.2 + 2 * frac, head: 6 + 5 * frac });
+    // the meter across the capacitor
+    const mcol = loaded ? 'warn' : 'violet';
+    pl.path([[cx, 6.6], [3.6, 6.6], [3.6, 6.1]], { color: mcol, width: 1.1 });
+    pl.path([[cx, 3.4], [3.6, 3.4], [3.6, 3.9]], { color: mcol, width: 1.1 });
+    block(pl, 2.4, 3.9, 2.4, 2.2, 'ink4', 0.35);
+    if (loaded) zigzag2(pl, [3.6, 5.85], [3.6, 4.15], 8, 0.25, 'warn');
+    else pl.text('logger', 3.6, 5.0, { color: 'violet', size: 11, weight: 600, align: 'center' });
+    if (st.labels) {
+      pl.text(`C = ${fx(P.C * 1e6, 1)} µF`, cx + 1.25, 5.0, { color: 'ink2', size: 11.5, weight: 600 });
+      pl.text(`R = ${fx(P.R / 1e6, 2)} MΩ`, xR + 0.65, 5.0, { color: 'ink2', size: 11.5, weight: 600 });
+      pl.text(`charged to ${fx(P.V0, 2)} V, then switched across R`, (cx + xR) / 2, 9.25, { color: 'ink3', size: 10.5, align: 'center' });
+      display(pl, 14.0, 7.6, [`t = ${t} s`, `V = ${Number.isFinite(Vt) ? Vt.toFixed(3) : '—'} V`], { compact: o.compact, title: loaded ? 'multimeter, 10 MΩ input' : 'data logger' });
+      if (loaded) sysTag(pl, 0.6, 2.9, '10 MΩ inside the meter: a second path', { size: 10.5 });
+      if (sys === 'offset') sysTag(pl, 14.0, 5.3, 'reads +0.050 V with nothing connected', { size: 10.5 });
+    }
+  },
+
+  // a flat coil seen at an angle, its axial field as arrows, and a Hall probe on the axis
+  coil(pl, E, P, st, o) {
+    const sys = st.sys, axial = E === B.EXPERIMENTS['coil-axis'];
+    const I = axial ? P.I : st.setting ?? E.setting.value, zc = axial ? st.setting ?? E.setting.value : 0;
+    const cx = 4.2, cy = 5.0, rx = 0.75, ry = 3.3, k = 0.4;             // k: world units per cm along the axis
+    pl.line(0.4, cy, 19.6, cy, { color: 'ink4', width: 1, dash: [5, 4] });
+    // the field along the axis, to scale with the Biot–Savart profile (sign follows the current)
+    const s = Math.sign(I) || 1, mag = Math.min(1, Math.abs(I) / 1.5);
+    for (let zz = -8; zz <= 32; zz += 4) {
+      const len = 2.6 * mag * B.coilShape(P, zz / 100);
+      if (len < 0.12) continue;
+      const x = cx + k * zz;
+      pl.arrow(x - (s * len) / 2, cy + 0.55, x + (s * len) / 2, cy + 0.55, { color: 'accent', width: 1.8, head: 7 });
+    }
+    // the coil: two ellipses for its thickness
+    for (const dx of [-0.18, 0.18]) pl.curve((t) => cx + dx + rx * Math.cos(t), (t) => cy + ry * Math.sin(t), 0, 2 * Math.PI, { color: 'gold', width: 3 });
+    // the Hall probe: a rod from the right, its sensor at the tip
+    const tip = cx + k * zc;
+    pl.rect(tip, cy - 0.32, 19.8 - tip, 0.3, { fill: 'ink3', alpha: 0.85, stroke: 'ink2', width: 1 });
+    pl.circle(tip + 0.12, cy - 0.17, 0.13, { fill: 'violet', stroke: false });
+    if (axial) {
+      for (let zz = 0; zz <= 30; zz += 2) pl.line(cx + k * zz, 1.3, cx + k * zz, zz % 10 ? 1.55 : 1.8, { color: 'gold', width: 1 });
+      pl.line(cx, 1.3, cx + k * 30, 1.3, { color: 'gold', width: 1 });
+      if (st.labels) for (const zz of [0, 10, 20, 30]) pl.text(`${zz} cm`, cx + k * zz, 0.75, { color: 'ink3', size: 10.5, align: 'center' });
+    }
+    if (st.labels) {
+      const Bv = st.row?.R?.[0];
+      pl.text(`${P.N} turns, R = ${fx(P.R * 100, 2)} cm`, cx, cy + ry + 0.55, { color: 'gold', size: 11, align: 'center' });
+      pl.text('B', cx + k * (axial ? 12 : 4) + 0.2, cy + 1.25, { color: 'accent', size: 12, weight: 700 });
+      display(pl, 14.6, 8.4, [`I = ${I >= 0 ? '+' : '−'}${Math.abs(I).toFixed(2)} A`, axial ? `z = ${zc} cm` : null, `B = ${Number.isFinite(Bv) ? Bv.toFixed(3) : '—'} mT`].filter(Boolean), { compact: o.compact, title: 'supply and Hall probe' });
+      if (sys === 'background') {
+        pl.arrow(12.6, 2.6, 14.4, 2.6, { color: 'warn', width: 2, head: 8 });
+        sysTag(pl, 11.0, 3.4, 'probe not zeroed here: +0.040 mT background', { size: 10.5 });
+      }
+    }
+  },
+
+  // a solenoid with a search coil inside, and a two-channel scope: current (CH1) and EMF (CH2)
+  induction(pl, E, P, st, o) {
+    const sys = st.sys, f = st.setting ?? E.setting.value, R = st.row?.R;
+    const x0 = 0.8, x1 = 10.4, yc = 5.6, h = 1.9;
+    pl.rect(x0, yc - h, x1 - x0, 2 * h, { fill: 'ink4', alpha: 0.12, stroke: 'ink3', width: 1 });
+    for (let x = x0 + 0.15; x < x1; x += 0.32) pl.line(x, yc - h, x + 0.16, yc + h, { color: 'gold', width: 1.1, alpha: 0.85 });
+    pl.line(x0 - 0.4, yc, x1 + 0.4, yc, { color: 'ink4', width: 1, dash: [5, 4] });
+    // the search coil at the centre, square to the axis or tilted
+    const cx = (x0 + x1) / 2, th = sys === 'tilt' ? P.tilt * D2R : 0;
+    pl.curve((t) => cx + 0.32 * Math.cos(t) * Math.cos(th) - 1.05 * Math.sin(t) * Math.sin(th), (t) => yc + 0.32 * Math.cos(t) * Math.sin(th) + 1.05 * Math.sin(t) * Math.cos(th), 0, 2 * Math.PI, { color: sys === 'tilt' ? 'warn' : 'violet', width: 2.6 });
+    pl.path([[cx, yc - 1.05], [cx, 1.0], [11.6, 1.0], [11.6, 4.5], [12.0, 4.5]], { color: 'violet', width: 1.1 });
+    // the drive: generator and amplifier, with a sense resistor in the return
+    block(pl, 0.8, 0.5, 2.8, 1.1, 'ink4', 0.4);
+    pl.path([[x0 + 0.15, yc - h], [x0 + 0.15, 1.6]], { color: 'ink2', width: 1.2 });
+    pl.path([[x1 - 0.15, yc - h], [x1 - 0.15, 2.5], [7.2, 2.5]], { color: 'ink2', width: 1.2 });
+    zigzag2(pl, [7.2, 2.5], [5.2, 2.5], 8, 0.22, 'ink2');
+    pl.path([[5.2, 2.5], [3.6, 2.5], [3.6, 1.2]], { color: 'ink2', width: 1.2 });
+    // the scope
+    const sx0 = 12.0, sx1 = 19.6, sy0 = 3.3, sy1 = 8.7, my = (sy0 + sy1) / 2;
+    pl.rect(sx0, sy0, sx1 - sx0, sy1 - sy0, { fill: 'void', alpha: 0.85, stroke: 'ink3', width: 1.2 });
+    for (let k = 1; k < 8; k++) pl.line(sx0 + (k * (sx1 - sx0)) / 8, sy0, sx0 + (k * (sx1 - sx0)) / 8, sy1, { color: 'ink4', width: 0.6, alpha: 0.5 });
+    for (let k = 1; k < 6; k++) pl.line(sx0, sy0 + (k * (sy1 - sy0)) / 6, sx1, sy0 + (k * (sy1 - sy0)) / 6, { color: 'ink4', width: 0.6, alpha: 0.5 });
+    const I0 = R ? R[1] / 1e3 : B.solI0(P, f), e0 = R ? R[0] : 1e3 * B.mutualM(P) * 2 * Math.PI * f * B.solI0(P, f);
+    const aI = 1.9 * (I0 / P.I100), aE = 1.9 * Math.min(1.2, e0 / 110);
+    const X = (u) => sx0 + 0.15 + u * (sx1 - sx0 - 0.3);                      // u from 0 to 1: two periods
+    pl.curve((u) => X(u), (u) => my + aI * Math.sin(4 * Math.PI * u), 0, 1, { color: 'accent', width: 1.8 });
+    pl.curve((u) => X(u), (u) => my + aE * Math.cos(4 * Math.PI * u), 0, 1, { color: 'violet', width: 1.8 });
+    if (st.labels) {
+      pl.text('CH1: current', sx0 + 0.15, sy1 + 0.35, { color: 'accent', size: 10.5, weight: 600 });
+      pl.text('CH2: EMF', sx1 - 0.15, sy1 + 0.35, { color: 'violet', size: 10.5, weight: 600, align: 'right' });
+      pl.text(`${fx(P.n * P.len, 0)} turns`, x0 + 0.2, yc + h + 0.45, { color: 'gold', size: 10.5 });
+      pl.text(`search coil, ${P.N2} turns`, cx, yc + h + 0.45, { color: sys === 'tilt' ? 'warn' : 'violet', size: 10.5, align: 'center' });
+      pl.text('sense 1.00 Ω', 6.2, 3.05, { color: 'ink3', size: 10, align: 'center' });
+      pl.text(`f = ${f} Hz`, 2.2, 1.05, { color: 'good', size: 11, weight: 650, align: 'center', font: 'ui-monospace, SFMono-Regular, Menlo, monospace' });
+      display(pl, 15.8, 1.6, [`ℰ₀ = ${R ? R[0].toFixed(1) : '—'} mV`, `I₀ = ${R ? R[1].toFixed(0) : '—'} mA`], { compact: o.compact, align: 'center' });
+      if (sys === 'nominal') sysTag(pl, 0.8, 9.55, 'I₀ assumed to be 500 mA at every frequency', { size: 10.5 });
+      if (sys === 'tilt') sysTag(pl, 0.8, 9.55, `search coil tilted ${P.tilt}°`, { size: 10.5 });
     }
   },
 };

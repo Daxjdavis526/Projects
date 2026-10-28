@@ -196,3 +196,56 @@ export function impedanceTriangle({ R, X, labels = { R: 'R', X: 'net reactance',
     caption: caption ?? 'The impedance triangle: R along the current’s direction, the net reactance at right angles, and Z their phasor sum.',
   };
 }
+
+// ─── light: em-wave, em-spectrum and direction pictures (B6.3–B6.5) ─────────
+/** An em-wave picture for a problem: a still, no controls, no readout. */
+export const wavePic = (params, caption) => ({ type: 'em-wave', params: { controls: [], readout: false, phase: 40, ...params }, ...(caption ? { caption } : {}) });
+/** An em-spectrum picture for a problem: no slider, no readout. */
+export const specPic = (params, caption) => ({ type: 'em-spectrum', params: { controls: [], readout: false, ...params }, ...(caption ? { caption } : {}) });
+
+/** Unit vectors along the axes, by name. */
+export const AXES = { '+x': [1, 0, 0], '-x': [-1, 0, 0], '+y': [0, 1, 0], '-y': [0, -1, 0], '+z': [0, 0, 1], '-z': [0, 0, -1] };
+export const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+/** The name ('+x', '-z', …) of an axis direction; null if v is not along an axis. */
+export const axisName = (v) => Object.keys(AXES).find((k) => AXES[k].every((c, i) => c === (v[i] || 0))) ?? null;
+/** The opposite axis direction: '+x' ↔ '-x'. */
+export const flip = (d) => (d[0] === '+' ? '-' : '+') + d[1];
+
+/**
+ * Directions in a wave drawn as arrows on labelled x, y, z axes (calc-vectors3d):
+ * E violet, B teal, the direction of travel gold. Each is an axis name
+ * ('+x', '-z', …) or null to leave it out.
+ */
+export function triad({ E = null, B = null, k = null, caption }) {
+  const vectors = [];
+  const add = (d, color, label, len) => { if (d) vectors.push({ to: AXES[d].map((c) => c * len), color, label, width: 3.4 }); };
+  add(E, 'violet', '\\vec E', 1.2);
+  add(B, 'teal', '\\vec B', 1.2);
+  add(k, 'gold', '\\text{travel}', 1.6);
+  return {
+    type: 'calc-vectors3d',
+    params: { range: 2.2, grid: false, vectors, aspect: 'wide' },
+    caption: caption ?? 'The axes are right-handed; dashed lines are the negative axes. Drag to turn the picture.',
+  };
+}
+
+/**
+ * A snapshot of a plane wave along x at one instant: E (violet) and B (teal,
+ * drawn smaller so both can be seen) in step, with one wavelength marked.
+ * Axis numbers hidden.
+ */
+export function fieldSnapshot({ waves = 2, showB = true, mark = 'λ', caption }) {
+  const curves = [{ fn: 'sin(2*pi*x)', domain: [0, waves], color: COL.E, width: 2.6, label: 'E', labelAt: 1.75, labelDy: 18 }];
+  if (showB) curves.push({ fn: '0.62*sin(2*pi*x)', domain: [0, waves], color: COL.B, width: 2.4, label: 'B', labelAt: 1.75, labelDy: -14 });
+  const y = 1.22;
+  return {
+    type: 'graph',
+    params: {
+      x: [0, waves], y: [-1.45, 1.55], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: '', xticks: 0.001, yticks: 0.001, curves,
+      arrows: mark ? [{ from: [0.75, y], to: [0.25, y], color: 'ink2' }, { from: [0.75, y], to: [1.25, y], color: 'ink2' }] : [],
+      points: mark ? [lab(0.75, y, mark, 'ink2', 0, -11)] : [],
+      vlines: mark ? [{ x: 0.25, color: 'ink4' }, { x: 1.25, color: 'ink4' }] : [],
+    },
+    caption: caption ?? 'The fields along the line of travel at one instant: electric field violet, magnetic field teal (drawn to a smaller scale so the two can be told apart).',
+  };
+}
