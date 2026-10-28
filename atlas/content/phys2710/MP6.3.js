@@ -53,7 +53,7 @@ function hydrogen({ ask = false } = {}) {
         { fn: `${k}/x^2 - ${u}/x`, domain: [0.37, 4], color: 'accent', width: 2.6, label: 'total', labelAt: 2.4, labelDx: 0, labelDy: -12 },
       ],
       hlines: [{ y: 0, color: 'ink4' }],
-      points: [{ x: 1, y: r6(E_EST), r: 5, color: 'accent', ...(ask ? {} : { label: 'lowest: r = a₀, E = −13.6 eV', labelDx: 10, labelDy: 16 }) }],
+      points: [{ x: 1, y: r6(E_EST), r: 5, color: 'accent' }, ...(ask ? [] : [label(0.97, -18.5, 'minimum: r = a₀, E = −13.6 eV', 'accent', 0, 0, 'right')])],
     },
     caption: ask
       ? 'The estimate of the energy of an electron held within a distance r of a proton: squeezing it raises the kinetic energy (gold) faster than it lowers the potential energy (violet).'
@@ -120,7 +120,7 @@ const forbidden = (() => {
       x: [-1.7, 0.7], y: [-1, 1.5], aspect: 'wide', xlog: true, ylog: true, axesAt: 'edge',
       xlabel: 'position spread Δx (nm)', ylabel: 'momentum spread Δp (10⁻²⁵ kg m/s)',
       shade: [{ fn: `${b} - x`, lower: '-1', from: -1.7, to: 0.7, color: 'bad', alpha: 0.16 }],
-      curves: [{ fn: `${b} - x`, domain: [-1.7, 0.7], color: 'accent', width: 2.4, label: 'Δx Δp = ħ/2: Gaussian packets', labelAt: 0.05, labelDx: 8, labelDy: -10 }],
+      curves: [{ fn: `${b} - x`, domain: [-1.7, 0.7], color: 'accent', width: 2.4, label: 'Δx Δp = ħ/2: Gaussian packets', labelAt: -0.65, labelDx: 6, labelDy: -12, labelAlign: 'left' }],
       points: [label(-1.25, -0.55, 'forbidden: Δx Δp < ħ/2', 'bad', 0, 0, 'left')],
     },
     caption: 'The plane of position and momentum spreads, on logarithmic axes. Every state lies on or above the line Δx·Δp = ħ/2; only Gaussian packets lie on it.',
@@ -251,7 +251,7 @@ The rest of this lesson uses these relations as tools: to size atoms, to find th
         : t`Impossible: $\Delta x\,\Delta p_x = ${fmt(ratio(s), 3)}\hbar$, below $\hbar/2$.`])),
       hints: [t`Multiply each pair and compare with $\hbar/2 = 5.27\times10^{-35}$ J s.`],
       teach: 'A state is possible only if Δx·Δp ≥ ħ/2 — no matter how the two spreads are shared out.',
-      explain: t`The products, in units of $\hbar$: ${STATES.map((s) => fmt(ratio(s), 3)).join(', ')}. The second and fourth fall below $\tfrac12$ and cannot exist; the last, at ${fmt(ratio(STATES[4]), 3)}, is close to a Gaussian packet. A small $\Delta x$ is no problem in itself — it only has to be paid for with a large $\Delta p_x$.`,
+      explain: t`The products $\Delta x\,\Delta p_x$, in units of $\hbar$: ${STATES.map((s) => t`${s[0]} nm → $${fmt(ratio(s), 3)}$`).join('; ')}. The states with $\Delta x = 0.5$ nm and $0.05$ nm fall below $\tfrac12$ and cannot exist; the one with $\Delta x = 1$ nm, at ${fmt(ratio(STATES[4]), 3)}, is close to a Gaussian packet. A small $\Delta x$ is no problem in itself — it only has to be paid for with a large $\Delta p_x$.`,
       visual: forbidden,
     }),
     num({
