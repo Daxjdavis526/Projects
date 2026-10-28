@@ -841,6 +841,7 @@ export const LESSONS = {
   'st-d.D1.2': () => import('./st-d/D1.2.js'),
   'st-d.D10.1': () => import('./st-d/D10.1.js'),
   'st-d.D10.2': () => import('./st-d/D10.2.js'),
+  'st-d.D11.1': () => import('./st-d/D11.1.js'),
   'st-d.D2.1': () => import('./st-d/D2.1.js'),
   'st-d.D2.2': () => import('./st-d/D2.2.js'),
   'st-d.D3.1': () => import('./st-d/D3.1.js'),

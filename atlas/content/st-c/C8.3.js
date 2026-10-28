@@ -287,7 +287,7 @@ A chart is any small open square, read off in the plane; where two overlap the t
   ],
   sources: [
     { label: 'Lee, Introduction to Smooth Manifolds (2nd ed.), ch. 1 and 21 (quotients)', url: 'https://link.springer.com/book/10.1007/978-1-4419-9982-5' },
-    { label: 'Carroll, Spacetime and Geometry, §2.2 and §5.7 (Rindler)', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
+    { label: 'Carroll, Spacetime and Geometry, §2.2', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
     { label: 'USGS: Landsat 8 (233 orbits, 16-day repeat cycle)', url: 'https://www.usgs.gov/landsat-missions/landsat-8' },
   ],
 });

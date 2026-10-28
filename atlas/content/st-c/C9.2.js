@@ -279,6 +279,6 @@ Draw $df$ as you did in [st-a A3.1](#/lesson/st-a.A3.1) and [A3.2](#/lesson/st-a
   ],
   sources: [
     { label: 'Carroll, Spacetime and Geometry, §2.3', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
-    { label: 'Misner, Thorne & Wheeler, Gravitation, §2.5–2.7 (1-forms as stacks of surfaces)', url: 'https://press.princeton.edu/books/hardcover/9780691177793/gravitation' },
+    { label: 'Misner, Thorne & Wheeler, Gravitation, ch. 2 (1-forms as stacks of surfaces)', url: 'https://press.princeton.edu/books/hardcover/9780691177793/gravitation' },
   ],
 });

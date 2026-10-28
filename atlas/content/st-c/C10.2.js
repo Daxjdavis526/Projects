@@ -230,7 +230,7 @@ Two facts make $d$ special. It needs **no metric and no connection**: it is the 
   ],
   sources: [
     { label: 'Carroll, Spacetime and Geometry, §2.9', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
-    { label: 'Needham, Visual Differential Geometry and Forms, ch. 36–37', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
+    { label: 'Needham, Visual Differential Geometry and Forms, Act V (forms)', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
     { label: 'Tonomura et al., Evidence for Aharonov–Bohm effect with magnetic field completely shielded from electron wave, Phys. Rev. Lett. 56, 792 (1986)', url: 'https://doi.org/10.1103/PhysRevLett.56.792' },
   ],
 });

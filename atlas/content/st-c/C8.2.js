@@ -256,6 +256,6 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
   sources: [
     { label: 'Lee, Introduction to Smooth Manifolds (2nd ed.), ch. 1–2', url: 'https://link.springer.com/book/10.1007/978-1-4419-9982-5' },
     { label: 'Carroll, Spacetime and Geometry, §2.2', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
-    { label: 'Stevens, Lewis & Johnson, Aircraft Control and Simulation (3rd ed.), §1.3 (Euler kinematics)', url: 'https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882' },
+    { label: 'Stevens, Lewis & Johnson, Aircraft Control and Simulation (3rd ed.), ch. 1 (Euler-angle kinematics)', url: 'https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882' },
   ],
 });

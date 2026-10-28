@@ -217,7 +217,7 @@ $$\begin{array}{c|c|c} \omega & M & \text{classical theorem} \\ \hline f & \text
   ],
   sources: [
     { label: 'Carroll, Spacetime and Geometry, §2.9–2.10', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
-    { label: 'Needham, Visual Differential Geometry and Forms, ch. 37–38', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
-    { label: 'Rycroft, Israelsson & Price, The global atmospheric electric circuit, J. Atmos. Sol.-Terr. Phys. 62, 1563 (2000)', url: 'https://doi.org/10.1016/S1364-6826(00)00112-7' },
+    { label: 'Needham, Visual Differential Geometry and Forms, Act V (forms)', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
+    { label: 'Rycroft, Israelsson & Price, The global atmospheric electric circuit, solar activity and climate change, J. Atmos. Sol.-Terr. Phys. 62, 1563 (2000)', url: 'https://doi.org/10.1016/S1364-6826(00)00112-7' },
   ],
 });

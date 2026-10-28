@@ -61,7 +61,7 @@ export default lesson({
     tasks: [
       t`At 1.5 m (hand height) the ball lands about 18 cm behind the point beneath it — enough to miss a cup.`,
       t`At 30 m the miss is about 22 m: on a small station, "down" is not straight.`,
-      t`In the inertial view the floor point beneath the release moves on round while the ball flies straight — it gets there first.`,
+      t`In the inertial view the floor point that was beneath the release moves on round while the ball flies straight, and is ahead of the ball when it lands.`,
     ],
     params: {
       aspect: 'wide', x: [-1.15, 1.15], y: [-1.15, 1.15], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',

@@ -271,7 +271,7 @@ The basic case: $dx\wedge dy\,(\mathbf u, \mathbf v) = u^xv^y - u^yv^x$, the sig
     }),
   ],
   sources: [
-    { label: 'Needham, Visual Differential Geometry and Forms, ch. 33–34', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
+    { label: 'Needham, Visual Differential Geometry and Forms, Act V (forms)', url: 'https://press.princeton.edu/books/paperback/9780691203706/visual-differential-geometry-and-forms' },
     { label: 'Carroll, Spacetime and Geometry, §2.9', url: 'https://www.preposterousuniverse.com/spacetimeandgeometry/' },
   ],
 });
