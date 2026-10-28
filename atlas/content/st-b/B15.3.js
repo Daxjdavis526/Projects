@@ -111,7 +111,7 @@ $$\mathsf M_{\text{ADM-like}} = \begin{pmatrix} 0 & -1 \\ 0 & 0 \end{pmatrix},\q
     num({
       id: 'bssn-count', difficulty: 1,
       prompt: t`BSSN evolves the conformal factor $\phi$ ($\gamma_{ij} = e^{4\phi}\tilde\gamma_{ij}$), the trace $K$ of the extrinsic curvature, the conformal metric $\tilde\gamma_{ij}$ (symmetric, $3\times3$), the trace-free extrinsic curvature $\tilde A_{ij}$ (symmetric, $3\times3$) and the conformal connection functions $\tilde\Gamma^i = -\partial_j\tilde\gamma^{ij}$ (one per direction). How many functions per point does it evolve?`,
-      visual: { ...countBars, caption: 'Variables per point: ADM’s 12 above; BSSN’s pieces below (to be counted).' },
+      visual: { type: 'graph', params: { ...countBars.params, shade: countBars.params.shade.slice(0, 2), points: countBars.params.points.slice(0, 1) }, caption: 'ADM’s 12 variables per point: γᵢⱼ (6) and Kᵢⱼ (6). BSSN’s are the question.' },
       answer: 17, tol: { rel: 0, abs: 0.5 },
       errors: [{ value: 12, feedback: 'That is ADM’s count. BSSN adds the scalars φ and K and the three Γ̃ⁱ, keeping two symmetric 3×3 arrays.' }, { value: 23, feedback: 'The symmetric arrays have 6 components each, not 9.' }],
       hints: ['Two scalars, two symmetric 3×3 arrays (6 each), one vector (3).'],

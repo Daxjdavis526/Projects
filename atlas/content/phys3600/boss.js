@@ -47,7 +47,7 @@ function apart(errors, key, rel = 0.03) {
 /** ∫(r² + r·a)δ³(r − b)dτ over a sphere of radius R about the origin. */
 export function deltaCase(r) {
   const R = r.pick([2, 3]);
-  const b = r.pick([[1, 1, 0], [1, -1, 1], [0, 2, 1], [2, 1, 2], [3, 1, 1], [-1, 0, 1], [2, -2, 1]]);
+  const b = r.pick([[1, 1, 0], [1, -1, 1], [0, 2, 1], [2, 2, 2], [3, 1, 1], [-1, 0, 1], [2, -1, 1]]);   // |b|² = 2, 3, 5, 12, 11, 2, 6: never on the sphere
   const a = [r.intExcept(-3, 3, [0]), r.int(-2, 2), r.intExcept(-3, 3, [0])];
   const b2 = b[0] ** 2 + b[1] ** 2 + b[2] ** 2, ab = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   const inside = b2 < R * R;
@@ -365,7 +365,7 @@ export default boss({
                 { value: C.V0 * Math.exp(-PI * C.f), feedback: t`Keep the Fourier coefficient $4V_0/n\pi$: the first term is $\tfrac{4V_0}{\pi}e^{-\pi x/a}$.` },
               ], C.key),
               hints: [t`At $y = a/2$, $\sin(n\pi/2) = +1, -1, +1, \dots$ for $n = 1, 3, 5, \dots$`, t`Sum $\tfrac{4V_0}{\pi}\left(e^{-\pi x/a} - \tfrac13e^{-3\pi x/a} + \tfrac15e^{-5\pi x/a} - \dots\right)$ until the terms are negligible.`],
-              teach: 'Each Fourier mode of a slot dies as e^{−nπx/a}: near the electrode several terms matter, deeper in only the first.',
+              teach: t`Each Fourier mode of a slot dies as $e^{-n\pi x/a}$: near the electrode several terms matter, deeper in only the first.`,
               explain: t`The series gives $V \approx ${nice(sf(C.key, 4))}$ V (the first term alone gives $${nice(sf(C.one, 4))}$ V). Its terms die as $e^{-n\pi x/a}$, so ${C.f >= 0.5 ? 'here the first term is almost all of it' : 'this close to the electrode the higher modes still count'}. The series sums in closed form, $V = \tfrac{2V_0}{\pi}\arctan\dfrac{\sin(\pi y/a)}{\sinh(\pi x/a)}$ — a check worth making.`,
             };
           },
@@ -425,7 +425,7 @@ export default boss({
                 { value: (3 * C.P.eps * C.E0) / (C.P.eps + 2), feedback: t`That is $D/\varepsilon_0$ inside; $E$ is smaller by $\varepsilon_r$.` },
               ], C.E),
               hints: [t`Inside $V = Ar\cos\theta$, outside $V = -E_0r\cos\theta + \dfrac{B\cos\theta}{r^2}$: match $V$ and $\varepsilon_rE_r$ at the surface.`, t`The result: $E_{\text{in}} = \dfrac{3E_0}{\varepsilon_r + 2}$, uniform.`],
-              teach: 'A linear dielectric sphere has a uniform field inside, 3E₀/(ε_r + 2): weaker than outside, but less so than in a slab.',
+              teach: t`A linear dielectric sphere has a uniform field inside, $3E_0/(\varepsilon_r + 2)$: weaker than outside, but less so than in a slab.`,
               explain: t`$E_{\text{in}} = \dfrac{3(${C.E0})}{${C.P.eps} + 2} \approx ${nice(sf(C.E, 3))}$ kV/m, uniform and along $E_0$. Cryogenic propellants have permittivities so close to 1 that a gauge must resolve a few per cent change in capacitance between liquid and vapour — which is why such gauges need careful calibration in both phases.`,
             };
           },

@@ -145,7 +145,7 @@ For the ellipse $a$ is the **semi-major** axis (the long half), $b$ the semi-min
           hints: [t`The string length is $PF_1 + PF_2 = 2a$; the pin separation is $2c$.`, t`At the top of the ellipse each piece of string is $a$ long, the hypotenuse of a right triangle with legs $c$ and $b$.`],
           teach: t`At the end of the minor axis, $a$, $b$ and $c$ form a right triangle: $a^2 = b^2 + c^2$.`,
           explain: t`$a = ${a}$, $c = ${c}$, so $b = \sqrt{${a * a} - ${c * c}} = ${sig(ans, 4)}$ cm.`,
-          visual: ellPic(a, ans, t`The curve the pencil draws, with the two pins (orange). To scale, in cm.`, { pins: true }),
+          visual: ellPic(a, ans, t`The curve the pencil draws, with the two pins (orange). To scale; axis numbers hidden.`, { pins: true, ticks: false }),
         };
       },
     }),

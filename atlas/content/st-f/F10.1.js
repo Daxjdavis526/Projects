@@ -122,7 +122,7 @@ Here $\theta = ${HW}$: entries $${(1 - HW * HW / 2).toFixed(2)},\ ${H},\ ${(-H *
     order({
       id: 'kdk-order', difficulty: 1,
       prompt: t`Put one velocity Verlet step in order (the force $a(x_n)$ is already known from the previous step).`,
-      items: [t`$v \leftarrow v + \tfrac{h}{2}a(x)$`, t`$x \leftarrow x + h\,v$`, t`compute the new force $a(x)$ at the new position`, t`$v \leftarrow v + \tfrac{h}{2}a(x)$ with that new force`],
+      items: [t`$v \leftarrow v + \tfrac{h}{2}a(x)$ with the force from the last step`, t`$x \leftarrow x + h\,v$`, t`compute the new force $a(x)$ at the new position`, t`$v \leftarrow v + \tfrac{h}{2}a(x)$ with that new force`],
       visual: {
         type: 'graph',
         params: { x: [-0.2, 2.4], y: [-0.4, 1.6], aspect: 'wide', axesAt: 'edge', xlabel: 't (steps)', ylabel: '', yticks: 0,

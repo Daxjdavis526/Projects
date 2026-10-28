@@ -47,13 +47,13 @@ export default lesson({
   visual: {
     type: 'cm4-rigid',
     title: 'Flips, wobbles and an energy sink',
-    lead: t`The box of [M7.3](#/lesson/phys3550.M7.3), moments $1 : 2 : 2.6$ kg·m². Right: $\vec L$ seen from the body moves along a **polhode**, where the sphere $|\vec L| = $ const meets the energy ellipsoid. The violet separatrix passes through axis 2. The whole run is drawn; press Play to watch it.`,
+    lead: t`A torque-free box with principal moments 1.5, 2 and 2.6 kg·m². Right: $\vec L$ seen from the body moves along a **polhode**, where the sphere $|\vec L| = $ const meets the energy ellipsoid. The violet separatrix passes through axis 2. The whole run is drawn; press Play to watch it.`,
     tasks: [
-      t`Axis 2: $\vec L$ runs along the separatrix and round the far side — each crossing is a flip. Slide the middle moment $I_2$ down to 1 or up to 2.6: the body becomes symmetric and the flipping stops.`,
-      t`Axis 1, energy sink $\kappa = 0.05$: $\vec L$ spirals away from axis 1, crosses the separatrix and settles on axis 3, while $E/E_0$ falls to about $0.39 = \lambda_1/\lambda_3$ and $|\vec L|$ stays at 1.`,
+      t`Axis 2: $\vec L$ runs along the separatrix and round the far side — each crossing is a flip. Slide the middle moment $I_2$ down to 1.5 or up to 2.6: the body becomes symmetric and the flipping stops.`,
+      t`Axis 1, energy sink $\kappa = 0.08$: $\vec L$ spirals away from axis 1, crosses the separatrix and settles on axis 3, while $E/E_0$ falls to about $0.58 = \lambda_1/\lambda_3$ and $|\vec L|$ stays at 1.`,
       t`Axis 3 with the sink on: nothing happens. The largest axis is the only spin a leaky body keeps.`,
     ],
-    params: { I: [1, 2, 2.6], axis: 1, tilt: 5, w: 2, damp: 0, T: 120, controls: ['axis', 'tilt', 'damp', 'I2'], panels: ['body', 'sphere', 'omega'] },
+    params: { I: [1.5, 2, 2.6], axis: 1, tilt: 5, w: 2, damp: 0, T: 120, controls: ['axis', 'tilt', 'damp', 'I2'], panels: ['body', 'sphere', 'omega'] },
     caption: t`Euler's equations integrated numerically (RK4) for a uniform box. The energy sink is a teaching model: a term that removes energy while keeping $|\vec L|$ fixed. Real dissipation (flexing antennas, sloshing fuel) works through extra moving parts, but drives the spin the same way.`,
   },
   example: {
@@ -165,7 +165,7 @@ export default lesson({
       hints: [t`$\lambda_{\text{long}} = \tfrac12(13.97)(0.076)^2$ and $\lambda_{\text{trans}} = \tfrac{1}{12}(13.97)(3\times0.076^2 + 2.03^2)$.`, t`$\omega_f = \omega_i\,\lambda_{\text{long}}/\lambda_{\text{trans}}$.`],
       teach: t`At fixed angular momentum a spin migrating to a larger moment slows down in proportion.`,
       explain: t`$\lambda_{\text{long}} = ${sci(EXP1.Il, 3)}$ and $\lambda_{\text{trans}} = ${sci(EXP1.It, 3)}$ kg·m², a ratio of $${sci(EXP1.Eratio, 3)}$, so the model ends at $${sci(EXP1.rpm, 3)}$ rpm tumbling end over end, with under 1% of its starting rotational energy. The real satellite's mass was not uniform, so treat this as an estimate. Its lesson — spin a non-rigid spacecraft only about its **major** axis, or carry a nutation damper — has been a design rule ever since.`,
-      visual: rigidPic({ I: [EXP1.Il * 10, EXP1.It * 10, EXP1.It * 10], axis: 1, tilt: 4, w: 2, damp: 0.0, T: 10, panels: ['body'], dims: [2.03, 0.152, 0.152], vectors: ['L'] }, t`The Explorer 1 model as a long uniform rod, spinning about its long (minor) axis, $\vec L$ up. Drawn to scale. Drag to turn.`),
+      visual: rigidPic({ I: [EXP1.Il * 10, EXP1.It * 10, EXP1.It * 10], axis: 1, tilt: 0.02, w: 2, T: 10, panels: ['body'], dims: [2.03, 0.152, 0.152], vectors: ['L'] }, t`The Explorer 1 model as a long uniform rod, spinning about its long (minor) axis, $\vec L$ up. Drawn to scale. Drag to turn.`),
     }),
     num({
       id: 'cp-wobble', difficulty: 3,

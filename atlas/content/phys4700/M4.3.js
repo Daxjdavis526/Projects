@@ -60,7 +60,7 @@ $$f_p(x) = \frac{e^{ipx/\hbar}}{\sqrt{2\pi\hbar}}, \qquad \langle f_p|f_{p'}\ran
     ],
     params: {
       x: [-6, 6], y: [-4, 17], aspect: 'wide', xlabel: 'Δk = k′ − k (nm⁻¹)', ylabel: 'overlap (nm)', xticks: 6, yticks: 4, axesAt: 'edge',
-      sliders: [{ key: 'L', label: 'Box length $L$', min: 5, max: 100, step: 1, value: 10, unit: '\\text{nm}', explain: 'The length over which the two plane waves are compared.' }],
+      sliders: [{ key: 'L', label: 'Box length $L$', min: 5, max: 100, step: 1, value: 40, unit: '\\text{nm}', explain: 'The length over which the two plane waves are compared.' }],
       curves: [{ fn: 'sin(L*x/2)/(pi*x)', color: 'accent', width: 2.4, samples: 4000 }],
       shade: [{ fn: 'sin(L*x/2)/(pi*x)', from: -6, to: 6, color: 'accent', alpha: 0.15 }],
       readouts: [

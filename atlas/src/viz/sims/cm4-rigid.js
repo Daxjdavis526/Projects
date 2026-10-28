@@ -85,7 +85,8 @@ export function mount(F, P0) {
   if (C.has('damp')) F.slider({ key: 'damp', label: 'Energy sink $\\kappa$', min: 0, max: 0.2, step: 0.005, value: P.damp, unit: '', explain: 'A teaching model of flexing parts: energy drains while $|\\vec L|$ stays fixed. 0 is a perfectly rigid body.' });
   else F.params.damp = P.damp;
   const sortedI = [...I0].sort((a, b) => a - b);
-  if (C.has('I2')) F.slider({ key: 'I2', label: 'Middle moment $I_2$', min: sortedI[0], max: sortedI[2], step: (sortedI[2] - sortedI[0]) / 100, value: I0[1], unit: '\\mathrm{kg\\,m^2}', explain: 'Slide it to either end and the body becomes symmetric: the flips stop.' });
+  const i2lo = Math.max(sortedI[0], sortedI[2] - sortedI[0]);   // a real body needs I₁ + I₂ ≥ I₃
+  if (C.has('I2')) F.slider({ key: 'I2', label: 'Middle moment $I_2$', min: i2lo, max: sortedI[2], step: (sortedI[2] - i2lo) / 100, value: I0[1], unit: '\\mathrm{kg\\,m^2}', explain: 'Slide it to either end and the body becomes symmetric: the flips stop.' });
   const Inow = () => (C.has('I2') ? [I0[0], +F.params.I2, I0[2]] : I0);
 
   // the run, recomputed when a control changes

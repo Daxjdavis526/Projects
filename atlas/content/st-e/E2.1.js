@@ -35,7 +35,7 @@ Mean square is the cheap one: it holds for **every** $f$ with $\int|f|^2 < \inft
     title: 'Three errors, three behaviours',
     lead: t`Top: a function and its partial sum, with a probe at $x_0$. Bottom, on log–log axes: the rms error (blue), the error at the probe (gold) and the largest error anywhere (red, dashed), against $N$.`,
     tasks: [
-      'Square wave: the rms error falls like N^(−1/2), but the largest error stays at 1 — half the jump — for every N.',
+      t`Square wave: the rms error falls like $N^{-1/2}$, but the largest error stays at 1 — half the jump — for every N.`,
       'Move the probe to x₀ = 0, on the jump: the error there is exactly 0 (the midpoint). Move it to 0.05: the error swings up and down as the ringing sweeps past, and is still several per cent at N = 200.',
       'Triangle: all three errors fall. Smooth function: they plunge exponentially.',
     ],

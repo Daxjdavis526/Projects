@@ -114,7 +114,7 @@ export function mount(F, P0) {
       const ymax = Math.max(0.5, Math.ceil(Math.max(...all) + 0.3));
       pe.setView([0, Math.log10(P.errN)], [Math.max(ymin, -16), ymax]);
       pe.clear();
-      const line = (arr, o) => pe.path(arr.map((v, i) => [Math.log10(i + 1), L(v)]), o);
+      const lo = pe.vy0, line = (arr, o) => pe.path(arr.map((v, i) => [Math.log10(i + 1), Math.max(lo, L(v))]), o);
       line(curves.sup, { color: 'bad', width: 1.8, dash: [6, 4] });
       line(curves.pt, { color: 'gold', width: 1.8 });
       line(curves.rms, { color: 'accent', width: 2.4 });

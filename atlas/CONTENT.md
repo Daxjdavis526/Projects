@@ -141,6 +141,8 @@ Brace multi-letter subscripts and commands in them: `v_{\max}`, `T_{\text{eff}}`
 Write thousands as `$6{,}371$` or with a thin space, `$6\,371$` — and never
 put `toLocaleString()` output inside math (its commas render as "42, 164").
 Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
+`\big(` followed by a minus sign spaces the minus as a subtraction: use
+`\bigl(` and `\bigr)` for sized brackets.
 Inline math does not wrap: on a 390 px phone a long `$…$` runs off the
 screen. Break a long chain into several pieces at its `=` signs
 (`$a = b$, $= c$`) or give it a display line (`$$…$$`). A display line
@@ -263,6 +265,8 @@ num({ id: 'f-over-m', difficulty: 1,
   makes typing a unit compulsory. Omit `units` for pure numbers. Angles take
   `'deg'` or `'rad'`, rotation rates `'rpm'`. (A slider's `unit` is TeX, so it
   may be words: `'\\mathrm{thousand\\ km}'`.)
+- A generator whose prompt and answer cannot vary is a fixed item: write it
+  without `gen` (the test fails a generator that never varies).
 - A generator may `throw` to guard a numerical check while you write it, but
   every seed the test tries must succeed: a throw on any seed fails the item.
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
