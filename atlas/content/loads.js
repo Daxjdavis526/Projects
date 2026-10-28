@@ -117,6 +117,7 @@ export const LESSONS = {
   'math1210.C1-4.8': () => import('./math1210/C1-4.8.js'),
   'math1210.C1-5.1': () => import('./math1210/C1-5.1.js'),
   'math1210.C1-5.2': () => import('./math1210/C1-5.2.js'),
+  'math1210.C1-5.3': () => import('./math1210/C1-5.3.js'),
   'math1220.C2-0.1': () => import('./math1220/C2-0.1.js'),
   'math1220.C2-0.2': () => import('./math1220/C2-0.2.js'),
   'math1220.C2-1.1': () => import('./math1220/C2-1.1.js'),
@@ -535,6 +536,7 @@ export const LESSONS = {
   'phys3710.N1.1': () => import('./phys3710/N1.1.js'),
   'phys3710.N1.2': () => import('./phys3710/N1.2.js'),
   'phys3710.N2.1': () => import('./phys3710/N2.1.js'),
+  'phys3710.N2.2': () => import('./phys3710/N2.2.js'),
   'phys3710.R0.1': () => import('./phys3710/R0.1.js'),
   'phys3710.R0.2': () => import('./phys3710/R0.2.js'),
   'phys3710.R0.3': () => import('./phys3710/R0.3.js'),
@@ -617,6 +619,7 @@ export const LESSONS = {
   'st-b.B1.1': () => import('./st-b/B1.1.js'),
   'st-b.B1.2': () => import('./st-b/B1.2.js'),
   'st-b.B2.1': () => import('./st-b/B2.1.js'),
+  'st-b.B2.2': () => import('./st-b/B2.2.js'),
 };
 
 export const BOSSES = {

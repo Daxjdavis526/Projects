@@ -3,6 +3,8 @@
 // the readout gives their coordinates in both frames and the invariant
 // interval between them. Lines of simultaneity, the light cone and the
 // hyperbolae of constant interval can be switched on.
+// signature: '+---' (default) reads out Δt² − Δx²; '-+++' (Hartle, Carroll,
+// MTW, and PHYS 3710) reads out Δs² = −Δt² + Δx², negative when timelike.
 
 import { Plot } from '../plot.js';
 import { gamma, boost } from '../model/relativity.js';
@@ -15,7 +17,8 @@ export function mount(F, P) {
   const plot = new Plot(canvas, { x: [-R, R], y: [-R * 0.2, R * 1.4], equal: true, xlabel: 'x', ylabel: 't' });
   F.slider({ key: 'beta', label: 'Velocity of the moving frame $\\beta = v/c$', min: -0.95, max: 0.95, step: 0.01, value: P.beta, unit: '', explain: 'Its time axis is the worldline $x = \\beta t$; its space axis tilts by the same angle toward the light cone.' });
   F.toggle({ key: 'sim', label: 'Lines of simultaneity', value: P.simultaneity, explain: 'Events on a gold dashed line happen at the same $t\'$ for the moving observer.' });
-  F.toggle({ key: 'hyp', label: 'Hyperbolae of constant interval', value: P.hyperbolae, explain: 'Every observer agrees on $t^2 - x^2$; a boost slides events along these curves.' });
+  const mostlyPlus = P.signature === '-+++';
+  F.toggle({ key: 'hyp', label: 'Hyperbolae of constant interval', value: P.hyperbolae, explain: mostlyPlus ? 'Every observer agrees on $-t^2 + x^2$; a boost slides events along these curves.' : 'Every observer agrees on $t^2 - x^2$; a boost slides events along these curves.' });
   // names: labels for the events (default A, B, …; a multiple-choice problem should use others, P, Q …)
   const ev = P.events.map(([t, x], k) => ({ t, x, name: P.names?.[k] ?? String.fromCharCode(65 + k) }));
   for (const e of ev) plot.handle(() => [e.x, e.t], (x, t) => { e.x = x; e.t = t; });
@@ -53,7 +56,7 @@ export function mount(F, P) {
     if (ev.length >= 2) {
       const dt = ev[1].t - ev[0].t, dx = ev[1].x - ev[0].x;
       const s2 = dt * dt - dx * dx;
-      rows.push(['$\\Delta t^2 - \\Delta x^2$', s2.toFixed(3)], ['separation', s2 > 1e-9 ? '\\text{timelike}' : s2 < -1e-9 ? '\\text{spacelike}' : '\\text{lightlike}']);
+      rows.push(mostlyPlus ? ['$\\Delta s^2 = -\\Delta t^2 + \\Delta x^2$', (s2 === 0 ? 0 : -s2).toFixed(3)] : ['$\\Delta t^2 - \\Delta x^2$', s2.toFixed(3)], ['separation', s2 > 1e-9 ? '\\text{timelike}' : s2 < -1e-9 ? '\\text{spacelike}' : '\\text{lightlike}']);
     }
     rows.push(['$\\gamma$', g.toFixed(4)]);
     plot.drawHandles();
@@ -70,5 +73,6 @@ export function validate(P) {
   if (!Array.isArray(P.events) || !P.events.every((e) => Array.isArray(e) && e.length === 2 && e.every(Number.isFinite))) p.push('spacetime: events must be [[t, x], …] with finite numbers');
   if (P.names && (!Array.isArray(P.names) || P.names.length < (P.events || []).length)) p.push('spacetime: names needs one label per event');
   if (!(Math.abs(P.beta) < 1)) p.push('spacetime: beta must lie between −1 and 1');
+  if (P.signature !== undefined && P.signature !== '+---' && P.signature !== '-+++') p.push("spacetime: signature is '+---' or '-+++'");
   return p;
 }

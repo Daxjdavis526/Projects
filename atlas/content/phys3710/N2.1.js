@@ -116,7 +116,7 @@ Chains of these equations — solved by Bateman in 1910 — explain why uranium 
           answer: f * 100, units: '%', tol: { rel: 0.005 },
           errors: [{ value: 2 ** (-d / 3.8215) * 100, feedback: t`That is the fraction of radon that would be *left* if it were not replenished. Here it starts at zero and grows: $1 - 2^{-t/T}$.` }],
           hints: ['On a scale of days the radium does not decay: radon is made at a constant rate and decays at its own.', t`$A_{\text{Rn}}/A_{\text{Ra}} = 1 - e^{-\lambda_{\text{Rn}}t} = 1 - 2^{-t/3.8215\ \text{d}}$.`],
-          teach: 'A short-lived daughter grows toward its long-lived parent’s activity as 1 − e^(−λ₂t): half-way after one daughter half-life.',
+          teach: t`A short-lived daughter grows toward its long-lived parent’s activity as $1 - e^{-\lambda_2t}$: half-way after one daughter half-life.`,
           explain: t`$1 - 2^{-${d}/3.8215} = ${fmt(f, 4)}$, i.e. $${fmt(f * 100, 3)}$%. After about 30 days (eight radon half-lives) the ampoule is in secular equilibrium: its radon decays as fast as the radium makes it. The same balance keeps the radon under a house topped up.`,
           visual: { type: 'nuc-chain', params: { chain: 'radium', readout: false }, caption: 'Radon (orange) growing into a sealed sample of pure radium (blue), with bismuth-214 (green) a few hours behind it. Activities divided by the radium’s. Bateman’s solution, NUBASE2020 half-lives.' },
         };

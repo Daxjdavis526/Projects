@@ -180,9 +180,9 @@ where $f(x) = u(x, 0)$ is the initial profile. One initial condition fixes every
         return {
           prompt: t`Coolant flows through a regeneratively cooled nozzle’s channels at ${v} m/s. A valve transient sends a warm slug into the channel inlet that lasts ${ms} ms. Treating the coolant temperature as carried by the flow ($T_t + ${v}T_x = 0$), how long, in metres, is the warm slug inside the channel?`,
           visual: xtPlane({ x: [0, 1.5], y: [0, 0.12], xticks: 6, yticks: 4, xlabel: 'x along the channel (m)', ylabel: 't (s)',
-            shade: [{ fn: `x/${v} + ${ms / 1000}`, lower: `x/${v}`, from: 0, to: 1.5, color: 'warn', alpha: 0.3 }],
-            curves: [0, 0.02, 0.04, 0.06, 0.08, 0.1].map((k) => ({ fn: `x/${v} + ${k}`, color: 'ink3', width: 1 })) },
-            t`Characteristics enter through the inlet $x = 0$ (inflow data), carrying the warm interval (shaded) down the channel. Heat exchange with the walls, which would smear the slug, is ignored.`),
+            shade: [{ fn: 'x/10 + 0.03', lower: 'x/10', from: 0, to: 1.5, color: 'warn', alpha: 0.3 }],
+            curves: [0, 0.02, 0.04, 0.06, 0.08, 0.1].map((k) => ({ fn: `x/10 + ${k}`, color: 'ink3', width: 1 })) },
+            t`How inflow data travel, with illustrative numbers (10 m/s, a 30 ms slug): characteristics enter through the inlet $x = 0$ and carry the warm interval (shaded) down the channel. Heat exchange with the walls, which would smear the slug, is ignored.`),
           answer: len, units: 'm', tol: { rel: 0.01 },
           errors: [{ value: ms / 1000 / v, feedback: 'Length = speed × duration, not duration ÷ speed.' }, { value: v * ms, feedback: 'Convert milliseconds to seconds.' }],
           hints: [t`At the inlet the data are given in time, $T(0, t) = g(t)$; inside, $T(x, t) = g(t - x/${v})$.`, 'A duration τ at the inlet occupies a length cτ in the channel.'],

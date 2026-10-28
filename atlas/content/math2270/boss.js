@@ -62,7 +62,7 @@ const picture = (params, caption) => ({ type: 'graph', params: { equal: true, ax
 // ── round 1: thrusters ──────────────────────────────────────────────────────
 const BUS = [1, 0.5];   // half-length and half-width of the bus, m (top view)
 /** A thruster's column of the allocation matrix: its force (dₓ, d_y) and torque x d_y − y dₓ at 1 N. */
-const colOf = ({ p, d }) => [d[0], d[1], r4(p[0] * d[1] - p[1] * d[0])];
+const colOf = ({ p, d, tau }) => [d[0], d[1], tau ?? r4(p[0] * d[1] - p[1] * d[0])];
 const allocation = (thr) => [0, 1, 2].map((i) => thr.map((th) => colOf(th)[i]));
 
 /** The bus from above, its centre of mass, and each thruster as a dot with the push it gives (arrow) and its plume. */
@@ -137,7 +137,7 @@ export function concurrentCase(r) {
         const other = 1 - axis, lim = axis === 1 ? 0.88 : 0.4;
         if (Math.abs(P[other]) > lim) continue;
         if (Math.hypot(P[0] - T1.p[0], P[1] - T1.p[1]) < 0.35 || Math.hypot(P[0] - T2.p[0], P[1] - T2.p[1]) < 0.35) continue;
-        opts.push({ p: P.map(r4), d });
+        opts.push({ p: P.map(r4), d, tau: r4(Q[0] * d[1] - Q[1] * d[0]) });   // its torque, exactly: its line passes through Q
       }
     }
     if (!opts.length) continue;
@@ -340,7 +340,7 @@ export function compressCase(r) {
     const k = [1, 2, 3, 4, 5, 6].find((q) => err(q) <= X);
     if (k !== S) continue;
     const kSpec = [1, 2, 3, 4, 5].find((q) => shown[q] / shown[0] <= X) ?? 6;
-    return { mm, nn, S, st, sv, shown, tail, X, k, kSpec, errs: [0, 1, 2, 3, 4, 5, 6].map(err), ans: k * (mm + nn + 1) };
+    return { mm, nn, S, st, A, sv, shown, tail, X, k, kSpec, errs: [0, 1, 2, 3, 4, 5, 6].map(err), ans: k * (mm + nn + 1) };
   }
   throw new Error('compressCase');
 }
@@ -532,8 +532,8 @@ export default boss({
               prompt: t`Kittiwake’s star-tracker head A has the verified mounting matrix $$M = ${ninthTeX(N)},$$ whose columns are the head’s axes $\mathbf x_{\mathrm A}, \mathbf y_{\mathrm A}, \mathbf z_{\mathrm A}$ (the boresight) in body components. The onboard catalogue and the current attitude estimate say a guide star lies along the unit vector $$\mathbf s = ${ct(sB)}$$ in body components. Through the head’s lens of focal length $f = ${f}$ mm, a star with head components $(s_x', s_y', s_z')$ lands on the detector at $\big(f\,s_x'/s_z',\ f\,s_y'/s_z'\big)$. Where should the star appear: what is its $${ax}$ position on the detector, in mm?`,
               answer: ans, units: 'mm', tol: { rel: 0.01, abs: 0.01 },
               errors: apart([
-                ...(wrong[2] > 0.3 ? [{ value: (f * wrong[i]) / wrong[2], feedback: t`That multiplies by $M$. $M$ turns head components into body ones; to go from body to head, use $M^{-1}$, which for an orthogonal matrix is $M${T}$.` }] : []),
-                ...(sB[2] > 0.3 ? [{ value: (f * sB[i]) / sB[2], feedback: t`Those are the body components. The detector sees the star in the head’s own axes: change basis first, $\mathbf s' = M${T}\mathbf s$.` }] : []),
+                ...(Math.abs(wrong[2]) > 0.2 ? [{ value: (f * wrong[i]) / wrong[2], feedback: t`That multiplies by $M$. $M$ turns head components into body ones; to go from body to head, use $M^{-1}$, which for an orthogonal matrix is $M${T}$.` }] : []),
+                ...(Math.abs(sB[2]) > 0.2 ? [{ value: (f * sB[i]) / sB[2], feedback: t`Those are the body components. The detector sees the star in the head’s own axes: change basis first, $\mathbf s' = M${T}\mathbf s$.` }] : []),
               ], ans),
               hints: [
                 t`$\mathbf s = M\mathbf s'$: the head components $\mathbf s'$ weight the columns of $M$. So $\mathbf s' = M^{-1}\mathbf s$.`,
