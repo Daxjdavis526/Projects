@@ -30,7 +30,7 @@ function poleBarn({ LP, LB, b, numbers = true, caption, labels = true }) {
     ],
     simul: [{ at: [0, 0], beta: b, color: 'gold' }],
     events: labels ? [[0, 0, 'E1: back of pole at front door', 'accent2', -10, 16, 'right'], [LB, 0, 'E2: front of pole at back door', 'accent2', 10, 16]] : [[0, 0, 'E1', 'accent2', -10, 14, 'right'], [LB, 0, 'E2', 'accent2', 10, 14]],
-    extra: { points: [label(0, top * 0.92, 'front door', 'ink2', -8, 0, 'right'), label(LB, top * 0.92, 'back door', 'ink2', 8, 0), label(b * top * 0.75, top * 0.75, 'rear of pole', 'accent', -8, 0, 'right'), label(LB + b * top * 0.6, top * 0.6, 'front of pole', 'accent', 8, 0), label(x2 * 0.97, b * x2 * 0.97, 'pole’s “now”', 'gold', 0, -12, 'right'), label(x1 * 0.95, 0, 'barn’s “now”', 'ink3', 0, -12, 'left')] },
+    extra: { points: [label(0, top * 0.92, 'front door', 'ink2', -8, 0, 'right'), label(LB, -LB * 0.38, 'back door', 'ink2', 8, 0), label(b * top * 0.75, top * 0.75, 'rear of pole', 'accent', -8, 0, 'right'), label(LB + b * top * 0.6, top * 0.6, 'front of pole', 'accent', 8, 0), label(x2 * 0.97, b * x2 * 0.97, 'pole’s “now”', 'gold', 0, -12, 'right'), label(x1 * 0.95, 0, 'barn’s “now”', 'ink3', 0, -12, 'left')] },
     caption: caption ?? 'The barn’s frame, with time drawn as ct in metres: the doors (grey) stand still, the pole’s two ends (blue) move right. Dashed grey: the barn’s “now” through E1; gold: the pole’s.',
   });
 }
@@ -46,7 +46,7 @@ function twins({ D, b, numbers = false, caption }) {
       { pts: [[D, tu], [0, tu - b * D]], color: 'violet', width: 1.6, dash: true }, { pts: [[D, tu], [0, tu + b * D]], color: 'warn', width: 1.6, dash: true },
     ],
     events: [[D, tu, 'turnaround', 'gold', 10, 0], [0, tu - b * D, '“now” just before', 'violet', -10, 0, 'right'], [0, tu + b * D, '“now” just after', 'warn', -10, 0, 'right']],
-    extra: { points: [label(0, 0.08 * T, 'Earth', 'accent', 8, 0), label(D * 0.45, tu * 0.45, 'traveller', 'gold', 10, 4)] },
+    extra: { points: [label(0, 0.08 * T, 'Earth', 'accent', -8, 0, 'right'), label(D * 0.45, tu * 0.45, 'traveller', 'gold', 10, 4)] },
     caption: caption ?? 'Earth’s frame, years up and light-years across (c = 1). Gold: the traveller. Dashed: the traveller’s lines of simultaneity just before (violet) and just after (orange) turning around. Not to scale.',
   });
 }

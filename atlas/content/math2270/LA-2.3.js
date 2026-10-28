@@ -41,7 +41,7 @@ one particular solution plus any combination of solutions of $A\mathbf x = \math
   example: {
     prompt: t`Find every solution of
 $$x + 2y - z = 3,\qquad 2x + 4y + z = 9,\qquad 3x + 6y = 12.$$`,
-    visual: rr(LINE, { mode: 'rref', step: 5, solution: true, view: 3.5, caption: 'The RREF, and the three planes sharing one gold line: the solution set. Drag the picture to rotate.' }),
+    visual: rr(LINE, { mode: 'rref', step: 5, solution: true, view: 3.5, caption: 'The RREF has two nonzero rows: two planes, meeting in the gold line of solutions. The zero row is no plane at all. Drag the picture to rotate.' }),
     steps: [
       { label: 'Forward', text: t`$R_2 \leftarrow R_2 - 2R_1$ and $R_3 \leftarrow R_3 - 3R_1$ both give $(0, 0, 3 \mid 3)$; then $R_3 \leftarrow R_3 - R_2$ leaves a row of zeros. Column 2 has no pivot: the next pivot is the 3 in column 3.` },
       { label: 'Backward', text: t`Scale $R_2 \leftarrow \tfrac13 R_2$ to get $(0, 0, 1 \mid 1)$, then clear above it: $R_1 \leftarrow R_1 + R_2$ gives $(1, 2, 0 \mid 4)$.

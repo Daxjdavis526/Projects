@@ -191,12 +191,12 @@ A **homogeneous** equation $y' = F(y/x)$ depends only on the ratio $y/x$; writin
           visual: {
             type: 'graph',
             params: {
-              x: [-5, W + 5], y: [-0.35 * W, 0.15 * W], equal: true, xlabel: 'distance from the far bank (m)', ylabel: '',
+              x: [-5, W * 1.22], y: [-0.12 * W, 0.38 * W], equal: true, xlabel: 'distance from the far bank (m)', ylabel: '',
               vlines: [{ x: 0, label: 'far bank', color: 'good' }, { x: W, label: 'near bank', color: 'good' }],
               points: [{ x: 0, y: 0, color: 'good', label: 'dock', labelDx: 8, labelDy: -12 }, { x: W, y: 0, color: 'gold', label: 'start', labelDx: -36, labelDy: -12 }],
-              arrows: [{ from: [W / 2, -0.12 * W], to: [W / 2, -0.28 * W], color: 'teal', label: 'current', labelDx: 8, labelDy: 0 }],
+              arrows: [{ from: [W / 2, 0.12 * W], to: [W / 2, 0.3 * W], color: 'teal', label: 'current', labelDx: 8, labelDy: 0 }],
             },
-            caption: 'The river from above, with downstream pointing down the page. The boat steers at the dock all the way across; its path is for you to work out.',
+            caption: 'The river from above, with downstream pointing up the page (the direction of positive drift y). The boat steers at the dock all the way across; its path is for you to work out.',
           },
         };
       },

@@ -5,10 +5,12 @@
 // particular solution whose coefficient blows up at a characteristic root.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { nice, fmt, frac } from '../../src/core/format.js';
-import { r6, um, co, sg, lead } from './_second.js';
+import { r6, um, co, sg, lead, sup } from './_second.js';
 
 const t = String.raw;
 const G0 = 9.80665;
+/** e^{rt} as a canvas label: eᵗ, e⁻ᵗ, e³ᵗ, e⁻⁴ᵗ. */
+const expLabel = (r, pre = '') => `${pre}e${r === 1 ? '' : r === -1 ? '⁻' : sup(r)}ᵗ`;
 
 /** The forcing (blue) beside the homogeneous solutions (dashed), as a still graph. */
 function forcingPic({ g, homs, x = [0, 3], y = [-1, 4], caption }) {
@@ -23,6 +25,22 @@ function forcingPic({ g, homs, x = [0, 3], y = [-1, 4], caption }) {
     },
     caption,
   };
+}
+
+/** x(t) from rest for x″ + b x′ + c x = c(αt + β) + bα, i.e. x_p = αt + β plus the transient, as an expression of x. */
+function rampResponse(b, c, al, be) {
+  const d = b * b - 4 * c, xp = `${al}*x + ${be}`;
+  if (Math.abs(d) < 1e-9) {
+    const rr = -b / 2, C1 = -be, C2 = -al - rr * C1;
+    return `${xp} + (${r6(C1)} + ${r6(C2)}*x)*exp(${r6(rr)}*x)`;
+  }
+  if (d > 0) {
+    const r1 = (-b + Math.sqrt(d)) / 2, r2 = (-b - Math.sqrt(d)) / 2;
+    const C1 = (-al + r2 * be) / (r1 - r2), C2 = -be - C1;
+    return `${xp} + ${r6(C1)}*exp(${r6(r1)}*x) + ${r6(C2)}*exp(${r6(r2)}*x)`;
+  }
+  const ar = -b / 2, w = Math.sqrt(-d) / 2, C1 = -be, C2 = (-al - ar * C1) / w;
+  return `${xp} + exp(${r6(ar)}*x)*(${r6(C1)}*cos(${r6(w)}*x) + ${r6(C2)}*sin(${r6(w)}*x))`;
 }
 
 export default lesson({
@@ -75,7 +93,7 @@ Find $y(t)$.`,
       params: {
         x: [0, 10], y: [-12, 32], aspect: 'wide', xlabel: 't (s)', ylabel: 'y',
         curves: [
-          { fn: 'x', color: 'gold', width: 1.6, dash: true, label: 'ramp part t', labelAt: 8.4, labelDx: 4, labelDy: 14 },
+          { fn: 'x', color: 'gold', width: 1.6, dash: true, label: 'ramp part t', labelAt: 2.9, labelDx: 4, labelDy: 16 },
           { fn: '0.5*sin(2x) + x - 2x*cos(2x)', color: 'accent', width: 2.4, label: 'y(t)', labelAt: 6.6, labelDx: 8, labelDy: -6 },
         ],
       },
@@ -97,31 +115,31 @@ Find $y(t)$.`,
       gen(r) {
         const V = r.pick([
           {
-            g: t`4t^2`, gfn: '4x^2', y: [-0.5, 5],
+            g: t`4t^2`, gfn: '4x^2', y: [-0.5, 5], gat: 0.9,
             choices: [t`$At^2 + Bt + C$`, t`$At^2$`, t`$t(At^2 + Bt + C)$`, t`$At^2 + C$`],
             why: { 1: t`$L[At^2] = 2A + 6At + 2At^2$: the derivatives bring in $t$ and constant terms, which need coefficients of their own.`, 2: t`Multiply by $t$ only when a term of the guess solves the homogeneous equation. The roots are $-1$ and $-2$; no polynomial does.`, 3: t`The $3y'$ term turns $t^2$ into $t$, so the guess needs a $Bt$ term to absorb it.` },
             explain: t`$t^2$ and its derivatives span $\{t^2, t, 1\}$, so the guess is $At^2 + Bt + C$. None of these solves $y'' + 3y' + 2y = 0$, so no factor $t$ is needed.`,
           },
           {
-            g: t`5e^{3t}`, gfn: '5*exp(3x)', y: [-0.5, 5], x: [0, 0.6],
+            g: t`5e^{3t}`, gfn: '5*exp(3x)', y: [-0.5, 17], x: [0, 0.4], gat: 0.2,
             choices: [t`$Ae^{3t}$`, t`$Ate^{3t}$`, t`$A\cos 3t + B\sin 3t$`, t`$Ae^{3t} + Be^{-3t}$`],
             why: { 1: t`The factor $t$ is for duplication, and 3 is not a root of $r^2 + 3r + 2$ (the roots are $-1$ and $-2$).`, 2: t`An exponential forcing calls for an exponential guess; sines and cosines go with $e^{\pm3it}$, not $e^{3t}$.`, 3: t`The forcing has no $e^{-3t}$ in it, and neither do its derivatives — that term would come out 0.` },
             explain: t`$L[Ae^{3t}] = A(9 + 9 + 2)e^{3t} = 20Ae^{3t}$, so $A = \tfrac14$. Since 3 is not a characteristic root, the plain guess works.`,
           },
           {
-            g: t`6e^{-t}`, gfn: '6*exp(-x)', y: [-0.5, 6.5],
+            g: t`6e^{-t}`, gfn: '6*exp(-x)', y: [-0.5, 6.5], gat: 1,
             choices: [t`$Ate^{-t}$`, t`$Ae^{-t}$`, t`$At^2e^{-t}$`, t`$Ate^{-2t}$`],
             why: { 1: t`$e^{-t}$ solves $y'' + 3y' + 2y = 0$ ($-1$ is a root), so $L[Ae^{-t}] = 0$ for every $A$: it cannot produce $6e^{-t}$.`, 2: t`$t^2$ is for a double root. $-1$ is a single root of $(r + 1)(r + 2)$, so one factor $t$ is enough.`, 3: t`The guess follows the forcing, $e^{-t}$; the other root, $-2$, has nothing to do with it.` },
             explain: t`$-1$ is a simple root, so the guess is $Ate^{-t}$. Substituting: $L[te^{-t}] = (2r + 3)e^{-t}|_{r = -1} = e^{-t}$, so $A = 6$ and $y_p = 6te^{-t}$.`,
           },
           {
-            g: t`10\cos 2t`, gfn: '10*cos(2x)', y: [-11, 11], x: [0, 6],
+            g: t`10\cos 2t`, gfn: '10*cos(2x)', y: [-11, 11], x: [0, 6], gat: 0.4,
             choices: [t`$A\cos 2t + B\sin 2t$`, t`$A\cos 2t$`, t`$t(A\cos 2t + B\sin 2t)$`, t`$Ae^{2t}$`],
             why: { 1: t`The $3y'$ term turns $\cos 2t$ into $\sin 2t$, so the guess needs a sine too.`, 2: t`Multiply by $t$ only if $\pm2i$ were characteristic roots; here they are $-1$ and $-2$.`, 3: t`$e^{2t}$ is not in the forcing’s family: $\cos 2t$ goes with $e^{\pm 2it}$.` },
             explain: t`Cosines and sines turn into each other under differentiation, so both are needed: $A\cos 2t + B\sin 2t$. $\pm2i$ are not roots of $r^2 + 3r + 2$, so no factor $t$.`,
           },
           {
-            g: t`t\,e^{2t}`, gfn: 'x*exp(2x)', y: [-0.5, 5], x: [0, 1.1],
+            g: t`t\,e^{2t}`, gfn: 'x*exp(2x)', y: [-0.5, 5], x: [0, 1.1], gat: 0.8,
             choices: [t`$(At + B)e^{2t}$`, t`$Ate^{2t}$`, t`$t(At + B)e^{2t}$`, t`$At + B$`],
             why: { 1: t`Differentiating $te^{2t}$ gives $e^{2t}$ terms too: the guess needs the constant $B$ inside.`, 2: t`2 is not a root of $r^2 + 3r + 2$, so no extra factor $t$.`, 3: t`The exponential $e^{2t}$ must stay in the guess: $L$ of a polynomial is a polynomial.` },
             explain: t`$te^{2t}$ and its derivatives span $\{te^{2t}, e^{2t}\}$, so guess $(At + B)e^{2t}$. Since 2 is not a characteristic root, no factor $t$ is needed.`,
@@ -133,7 +151,7 @@ Find $y(t)$.`,
           hints: [t`First solve the homogeneous equation: $r^2 + 3r + 2 = (r + 1)(r + 2)$, so $y_c = c_1e^{-t} + c_2e^{-2t}$.`, t`Write the family the forcing and its derivatives live in, then check whether any member of that family is already in $y_c$.`],
           teach: 'Guess the forcing’s whole family with unknown coefficients — and multiply by t only when a member of it already solves the homogeneous equation.',
           explain: V.explain,
-          visual: forcingPic({ g: [V.gfn, 'g(t)', (V.x || [0, 3])[1] * 0.55], homs: [['exp(-x)', 'e⁻ᵗ', 0.25, -8], ['exp(-2x)', 'e⁻²ᵗ', 0.5, 14]], x: V.x || [0, 3], y: V.y, caption: 'The forcing (blue) and the two homogeneous solutions (dashed). Is the forcing one of them?' }),
+          visual: forcingPic({ g: [V.gfn, 'g(t)', V.gat, -12], homs: [['exp(-x)', 'e⁻ᵗ', 0.25, -8], ['exp(-2x)', 'e⁻²ᵗ', 0.5, 14]], x: V.x || [0, 3], y: V.y, caption: 'The forcing (blue) and the two homogeneous solutions (dashed). Is the forcing one of them?' }),
         };
       },
     }),
@@ -150,7 +168,14 @@ Find $y(t)$.`,
           hints: [t`$x_p = At + B$ has $x_p' = A$ and $x_p'' = 0$, so $L[x_p] = ${b}A + ${c === 1 ? '' : c}At + ${c === 1 ? '' : c}B$.`, t`Match the $t$ terms: $${c === 1 ? '' : c}A = ${K1}$. Match the constants: $${b}A + ${c === 1 ? '' : c}B = ${K0}$.`],
           teach: 'For a polynomial forcing, substitute a full polynomial of the same degree and match the coefficients of each power of t.',
           explain: t`$${c === 1 ? '' : c}A = ${K1}$ gives $A = ${al}$; then $${b}(${al}) + ${c === 1 ? '' : c}B = ${K0}$ gives $B = ${be}$. So $x_p = ${lead(al, 't')}${sg(be, '')}$: the sensor’s offset follows the ramp, slightly delayed by the damping term.`,
-          visual: forcingPic({ g: [`${K1}*x + ${K0}`, 'forcing', 2.2, 14], homs: [], x: [0, 3], y: [Math.min(-1, K0 - 2), K1 * 3 + K0 + 2], caption: 'The ramp forcing: it grows steadily as the thrust builds. A polynomial of degree 1, so the guess is one too.' }),
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 6], y: [r6(Math.min(-0.5, be - 1)), r6(al * 6 + be + 1)], yticks: 0, aspect: 'wide', xlabel: 't (s)', ylabel: 'x (no scale)',
+              curves: [{ fn: rampResponse(b, c, al, be), color: 'accent', width: 2.4 }],
+            },
+            caption: 'The sensor’s displacement after the ramp starts, from rest (vertical axis unnumbered): after a short transient it climbs at a steady rate. That steady climb is the particular solution.',
+          },
         };
       },
     }),
@@ -169,7 +194,7 @@ Find $y(t)$.`,
           hints: [t`The roots are $${r1}$ and $${r2}$: the forcing $e^{${co(r1)}t}$ already solves the homogeneous equation, so guess $y_p = Ate^{${co(r1)}t}$.`, t`$L[te^{${co(r1)}t}] = (2\cdot${r1}${sg(b, '')})e^{${co(r1)}t} = ${d}e^{${co(r1)}t}$, so $A = ${m}$. Then $y = ${co(m)}te^{${co(r1)}t} + c_1e^{${co(r1)}t} + c_2e^{${co(r2)}t}$ with $c_1 + c_2 = 0$ and $${m} + ${r1}c_1 + (${r2})c_2 = 0$.`],
           teach: t`When the forcing’s exponent is a simple characteristic root, guess $Ate^{rt}$; the initial conditions then fix $y_c$ on top.`,
           explain: t`$y_p = ${co(m)}te^{${co(r1)}t}$. With $y_c = c_1e^{${co(r1)}t} + c_2e^{${co(r2)}t}$: $c_1 + c_2 = 0$ and $${m} + ${r1}c_1 + (${r2})c_2 = 0$ give $c_1 = ${frac(-q)}$, $c_2 = ${frac(q)}$. So $y = ${co(m)}te^{${co(r1)}t} + ${frac(q)}\left(e^{${co(r2)}t} - e^{${co(r1)}t}\right)$.`,
-          visual: forcingPic({ g: [`${K}*exp(${r1}*x)`, 'forcing', 0.3, -12], homs: [[`exp(${r1}*x)`, `e^(${um(r1)}t)`, 0.7, 14], [`exp(${r2}*x)`, `e^(${um(r2)}t)`, 0.15, 14]], x: [0, 1], y: [-0.5, Math.max(4, 1.15 * K * Math.max(1, Math.exp(r1)))], caption: 'The forcing (blue) and the two homogeneous solutions (dashed): the forcing is a multiple of one of them.' }),
+          visual: forcingPic({ g: [`exp(${r1}*x)`, `forcing ÷ ${K}`, 0.35, -12], homs: [[`exp(${r1}*x)`, expLabel(r1), 0.8, 16], [`exp(${r2}*x)`, expLabel(r2), 0.12, 16]], x: [0, 1], y: [-0.2, r6(1.2 * Math.max(1, Math.exp(r1), Math.exp(r2)))], caption: `The forcing divided by ${K} (blue) and the two homogeneous solutions (dashed): it lies exactly on one of them.` }),
         };
       },
     }),
@@ -188,7 +213,7 @@ Find $y(t)$.`,
           hints: [t`$r^2${sg(-2 * rr, 'r')}${sg(rr * rr, '')} = (r ${rr > 0 ? '-' : '+'} ${Math.abs(rr)})^2$: a double root, so $e^{${co(rr)}t}$ and $te^{${co(rr)}t}$ are both homogeneous solutions. Guess $At^2e^{${co(rr)}t}$.`, t`For a double root, $L[t^2e^{rt}] = 2e^{rt}$, so $A = ${h}$ — and $${co(h)}t^2e^{${co(rr)}t}$ already has value and slope 0 at $t = 0$.`],
           teach: t`When the forcing’s exponent is a double root, both $e^{rt}$ and $te^{rt}$ are taken: guess $At^2e^{rt}$.`,
           explain: t`$y_p = ${co(h)}t^2e^{${co(rr)}t}$, since $L[t^2e^{${co(rr)}t}] = 2e^{${co(rr)}t}$. It starts with $y = y' = 0$, so $y_c = 0$ and $y = ${co(h)}t^2e^{${co(rr)}t}$.`,
-          visual: forcingPic({ g: [`${K}*exp(${rr}*x)`, 'forcing', 0.2, -12], homs: [[`exp(${rr}*x)`, rr === 1 ? 'eᵗ' : rr === -1 ? 'e⁻ᵗ' : rr === 2 ? 'e²ᵗ' : 'e⁻²ᵗ', 0.9, 14], [`x*exp(${rr}*x)`, rr === 1 ? 't eᵗ' : rr === -1 ? 't e⁻ᵗ' : rr === 2 ? 't e²ᵗ' : 't e⁻²ᵗ', 1.25, -10]], x: [0, 1.5], y: [-0.3, Math.max(3.5, 1.1 * K * Math.exp(Math.max(0, rr * 1.5)))], caption: t`The forcing (blue) and the two homogeneous solutions it collides with (dashed): both are already in $y_c$.` }),
+          visual: forcingPic({ g: [`exp(${rr}*x)`, `forcing ÷ ${K}`, 0.3, -12], homs: [[`exp(${rr}*x)`, expLabel(rr), 1.1, 16], [`x*exp(${rr}*x)`, expLabel(rr, 't '), 1.3, -10]], x: [0, 1.5], y: [-0.2, r6(1.15 * Math.max(1, Math.exp(rr * 1.5), 1.5 * Math.exp(rr * 1.5)))], caption: t`The forcing divided by ${K} (blue) and the two homogeneous solutions (dashed): it lies on one of them, and both are already in $y_c$.` }),
         };
       },
     }),
@@ -212,6 +237,8 @@ Find $y(t)$.`,
       gen(r) {
         const k = r.pick([1, 2, 4]), al = r.pick([1, 2, 3]), be = r.pick([1, 2, -1]);
         const P = k * al, E = (1 + k) * be;
+        const vals = []; for (let i = 0; i <= 40; i++) { const x = i / 20; vals.push(P * x, E * Math.exp(x), P * x + E * Math.exp(x), 0); }
+        const lo = Math.min(...vals), hi = Math.max(...vals), pad = 0.1 * (hi - lo);
         return {
           prompt: t`Using the guess $y_p = At + B + Ce^{t}$, find the particular solution of $y'' + ${k === 1 ? '' : k}y = ${P}t${sg(E, 'e^{t}')}$.`,
           answer: `${al}t + (${be})*e^t`, answerTeX: t`${lead(al, 't')}${sg(be, 'e^{t}')}`, lhs: 'y_p(t)',
@@ -223,11 +250,11 @@ Find $y(t)$.`,
           visual: {
             type: 'graph',
             params: {
-              x: [0, 2], y: [Math.min(-1, 2 * E), P * 2 + Math.max(0, E * 7.5) + 1], aspect: 'wide', xlabel: 't', ylabel: '',
+              x: [0, 2], y: [r6(lo - pad), r6(hi + pad)], aspect: 'wide', xlabel: 't', ylabel: '',
               curves: [
                 { fn: `${P}*x`, color: 'violet', width: 2, dash: true, label: 'ramp part', labelAt: 1.6, labelDx: 6, labelDy: 14 },
-                { fn: `${E}*exp(x)`, color: 'teal', width: 2, dash: true, label: 'exponential part', labelAt: 1.2, labelDx: -100, labelDy: E > 0 ? -10 : 14 },
-                { fn: `${P}*x + ${E}*exp(x)`, color: 'accent', width: 2.6, label: 'g(t)', labelAt: 1.85, labelDx: -30, labelDy: -10 },
+                { fn: `${E}*exp(x)`, color: 'teal', width: 2, dash: true, label: 'exponential part', labelAt: 0.3, labelDx: 6, labelDy: E > 0 ? -10 : 16 },
+                { fn: `${P}*x + ${E}*exp(x)`, color: 'accent', width: 2.6, label: 'g(t)', labelAt: 1.0, labelDx: 6, labelDy: E > 0 ? -12 : 16 },
               ],
             },
             caption: 'The forcing (blue) is the sum of a ramp and an exponential (dashed); its particular solution is the sum of theirs.',
@@ -308,7 +335,17 @@ Find $y(t)$.`,
           hints: [t`$\sin ${w}t$ solves $y'' + ${w * w}y = 0$: guess $t(A\cos ${w}t + B\sin ${w}t)$.`, t`$L[t\cos ${w}t] = -${2 * w}\sin ${w}t$, so $A = -${m}$, $B = 0$. Then fit $c_1\cos ${w}t + c_2\sin ${w}t$ to the start.`],
           teach: t`At exact resonance the guess is $t$ times the usual one; the initial conditions then fix $y_c$ as usual.`,
           explain: t`$y_p = -${co(m)}t\cos ${w}t$ (from $L[t\cos ${w}t] = -${2 * w}\sin ${w}t$). Then $y = c_1\cos ${w}t + c_2\sin ${w}t - ${co(m)}t\cos ${w}t$: $y(0) = c_1 = 0$ and $y'(0) = ${w}c_2 - ${m} = 0$ give $c_2 = ${frac(m / w)}$.`,
-          visual: { type: 'c3-roots', params: { mode: 'forced', zeta: 0, w0: w, W: 1, T: r6(30 / w), sliders: false, readout: false, panels: 'motion', yname: 'y' }, caption: 'An undamped oscillator driven exactly at its natural frequency, from rest: swings that grow without limit (vertical scale arbitrary).' },
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, r6(30 / w)], y: [r6(-33 * m / w), r6(33 * m / w)], yticks: 0, aspect: 'wide', xlabel: 't (s)', ylabel: 'y (no scale)',
+              curves: [
+                { fn: `${r6(m / w)}*sin(${w}*x) - ${m}*x*cos(${w}*x)`, color: 'accent', width: 2 },
+                { fn: `${m}*x`, color: 'ink3', width: 1.2, dash: true }, { fn: `-${m}*x`, color: 'ink3', width: 1.2, dash: true },
+              ],
+            },
+            caption: 'The motion from rest under this drive (vertical axis unnumbered): swings that grow linearly, between the dashed lines, without limit — there is no damping.',
+          },
         };
       },
     }),

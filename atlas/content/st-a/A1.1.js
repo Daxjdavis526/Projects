@@ -12,7 +12,7 @@ const SQ = [[1, 0], [0, 1]];
 // components in a perpendicular unit basis turned anticlockwise by φ
 const turnedComps = ([a, b], phi) => [a * Math.cos(phi * DEG) + b * Math.sin(phi * DEG), -a * Math.sin(phi * DEG) + b * Math.cos(phi * DEG)];
 // one arrow, an old basis (faint) and a turned one (bold)
-const twoBases = (v, phi, caption, o = {}) => still({ basis: turned(phi), ghost: SQ, vector: v.map(r6), view: Math.max(2.2, Math.max(...v.map(Math.abs)) + 0.9), construction: false, grid: 'none', ...o }, caption);
+const twoBases = (v, phi, caption, o = {}) => still({ basis: turned(phi), ghost: SQ, vector: v.map(r6), construction: false, grid: 'none', ...o }, caption);
 
 export default lesson({
   id: 'st-a.A1.1',
@@ -41,12 +41,12 @@ Turn the basis and the components change while the arrow stays put. So **a compo
       t`Turn it by $90^\circ$: the two components swap places and one of them changes sign.`,
       t`Drag the arrow’s tip anywhere and turn again: $\sqrt{(V^1)^2 + (V^2)^2}$ always matches the true length — for a basis like this one.`,
     ],
-    params: { mode: 'vector', basis: SQ, rotate: true, rotateRange: [-180, 180], vector: [2.4, 1.3], readout: ['V', 'len'], view: 3 },
+    params: { mode: 'vector', basis: SQ, rotate: true, rotateRange: [-180, 180], vector: [2.4, 1.3], readout: ['V', 'len'], view: 2.3 },
     caption: t`A plane with no axes of its own: the only reference arrows are the basis you choose, turned rigidly by $\varphi$. The faint lines are where $V^1$ or $V^2$ is a whole number. Lengths are in the arrow’s own units (say metres).`,
   },
   example: {
     prompt: t`A drone’s displacement is 3.0 m east and 4.0 m north. A second observer uses runway axes: $\mathbf e'_1$ along a runway pointing $30^\circ$ north of east, and $\mathbf e'_2$ at right angles to it, $30^\circ$ west of north. Find the components in both bases, and the length.`,
-    visual: twoBases([3, 4].map((x) => x * 0.6), 30, t`The displacement (drawn at 0.6 of scale) with the compass basis faint and the runway basis bold. Same arrow, two bases.`),
+    visual: twoBases([3, 4], 30, t`The displacement to scale, with basis arrows 1 m long: the compass basis faint, the runway basis bold, and the dashed parallelogram that splits the arrow along the runway basis.`, { construction: true }),
     steps: [
       { label: 'First basis', text: t`With $\mathbf e_1$ east and $\mathbf e_2$ north, the components are read off directly: $(V^1, V^2) = (3.0, 4.0)$ m.` },
       { label: 'Turned basis', text: t`Because these basis arrows are perpendicular and one unit long, each component is the arrow’s projection onto one of them. The runway basis is the compass basis turned $30^\circ$ anticlockwise, so
@@ -162,7 +162,7 @@ $$V'^2 = -V^1\sin30^\circ + V^2\cos30^\circ = -1.500 + 3.464 = 1.964\ \text{m}.$
         const th = Math.atan2(y, x) / DEG;
         return {
           prompt: t`Turn the basis until $\mathbf e_1$ points along the gold arrow, so that $V^2 = 0$.`,
-          visual: { type: 'ten-basis', params: { mode: 'vector', basis: SQ, rotate: true, rotateRange: [-90, 90], vector: [x, y], dragVector: false, readout: false, view: 2.8 }, caption: 'The arrow is fixed; only the basis turns. The dashed parallelogram shows the two components.' },
+          visual: { type: 'ten-basis', params: { mode: 'vector', basis: SQ, rotate: true, rotateRange: [-90, 90], vector: [x, y], dragVector: false, readout: false }, caption: 'The arrow is fixed; only the basis turns. The dashed parallelogram shows the two components.' },
           param: 'phi', answer: [Math.floor(th - 2.5), Math.ceil(th + 2.5)],
           instruction: 'Turn the basis with the slider, then check.',
           hints: [t`When $V^2 = 0$, the parallelogram collapses onto the line of $\mathbf e_1$.`, t`You need $\tan\varphi = ${y}/${x}$.`],
@@ -174,7 +174,7 @@ $$V'^2 = -V^1\sin30^\circ + V^2\cos30^\circ = -1.500 + 3.464 = 1.964\ \text{m}.$
     mcq({
       id: 'two-pilots', difficulty: 2,
       prompt: 'Two observers describe the same crosswind at an airfield. One, using runway axes, says its component along the runway is 8 m/s. The other, using compass axes, says its east component is 11 m/s. A student concludes that one of them must have measured badly. What is wrong with that conclusion?',
-      visual: twoBases([2.6, 0.9], 40, 'One wind arrow. Faint: the compass basis (east, north). Bold: runway axes turned 40°. Each basis gives the arrow its own components.', { names: ['along runway', 'across'], ghostNames: ['east', 'north'], vname: 'wind' }),
+      visual: twoBases([2.75, -0.165], 40, 'One wind arrow, 11 m/s east and 0.66 m/s south (drawn at a quarter of scale). Faint: the compass basis (east, north). Bold: runway axes turned 40°, along which the same wind has the component 8 m/s.', { names: ['along runway', 'across'], ghostNames: ['east', 'north'], vname: 'wind' }),
       choices: [
         'Components depend on the basis: different numbers can describe the same wind, so both can be right',
         'Nothing: a vector has only one correct set of components',
@@ -221,7 +221,7 @@ $$V'^2 = -V^1\sin30^\circ + V^2\cos30^\circ = -1.500 + 3.464 = 1.964\ \text{m}.$
         const draw = [s * (body[0] * e1[0] + body[1] * e2[0]), s * (body[0] * e1[1] + body[1] * e2[1])];
         return {
           prompt: t`A rocket climbs with its long axis tilted $${pitch}^\circ$ from vertical toward downrange. In its body axes — $\mathbf e_1$ along the long axis, $\mathbf e_2$ at right angles to it, pointing down-and-downrange — the gimballed engine’s thrust has components $(T^1, T^2) = (${nice(body[0], 4)}, ${nice(body[1], 3)})$ MN. What is the thrust’s vertical component in launch-site axes?`,
-          visual: still({ basis: [e1.map(r6), e2.map(r6)], ghost: [[0, 1], [1, 0]], ghostNames: ['up', 'downrange'], names: ['e₁ (long axis)', 'e₂'], vector: draw.map(r6), vname: 'thrust', view: 3, center: [0.6, 1.2], construction: true, grid: 'none' }, t`Body axes (bold) and launch-site axes (faint), at the problem’s angles. The thrust arrow shows its direction; its length is not to scale.`),
+          visual: still({ basis: [e1.map(r6), e2.map(r6)], ghost: [[0, 1], [1, 0]], ghostNames: ['up', 'downrange'], names: ['e₁', 'e₂'], vector: draw.map(r6), vname: 'thrust', construction: false, grid: 'none' }, t`Body axes (bold) and launch-site axes (faint), at the problem’s angles. The thrust arrow shows its direction; its length is not to scale.`),
           answer: up, units: 'MN', tol: { rel: 0.005 },
           errors: [
             { value: T * Math.cos(pitch * DEG), feedback: t`That ignores the gimbal: $T^2$ contributes to the vertical component too.` },

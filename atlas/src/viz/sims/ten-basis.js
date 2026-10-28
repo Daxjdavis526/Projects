@@ -33,7 +33,8 @@
 //       dual: false,                    // the dual basis as two stacks
 //       arrows: [],                     // extra fixed arrows [{ from, to, color, label }] (paper coordinates)
 //       readout: true,                  // false hides every number; or a list of 'V', 'Vold', 'w', 'wold', 'pair', 'A', 'len'
-//       view: 3, center: [0, 0], snap: 0.1, aspect: '' } }
+//       view: 'auto', center: 'auto',   // the window's half-height and centre; 'auto' frames what is drawn at the start
+//       snap: 0.1, aspect: '' } }
 //
 // A point item may read the arrow's tip (get('point')); a slider item the
 // rotation 'phi'. A picture must not show its answer: readout: false.
@@ -45,7 +46,7 @@ export const defaults = {
   mode: 'vector', basis: [[1, 0], [0, 1]], dragBasis: false, rotate: false, rotateRange: [-90, 90], presets: null,
   vector: [2, 1], dragVector: true, tail: [0, 0], vname: 'V', vtex: 'V', construction: true, grid: 'basis', ghost: false, names: null,
   covector: [1, 0.5], covSliders: true, wname: 'ω', wtex: '\\omega', levelLabels: true, crossings: true, dual: false,
-  ghostNames: ['e₁', 'e₂'], arrows: [], readout: true, view: 3, center: [0, 0], snap: 0.1, aspect: '',
+  ghostNames: ['e₁', 'e₂'], arrows: [], readout: true, view: 'auto', center: 'auto', snap: 0.1, aspect: '',
 };
 
 const DEG = Math.PI / 180;
@@ -74,7 +75,18 @@ export function mount(F, P) {
     F.slider({ key: 'w2', label: `$${P.wtex}_2 = ${P.wtex}(\\mathbf e_2)$`, min: -3, max: 3, step: 0.1, value: P.covector[1], explain: `How many lines $\\mathbf e_2$ crosses. Both zero: no stack at all.` });
   }
 
-  const plot = new Plot(canvas, { x: [P.center[0] - P.view * 1.6, P.center[0] + P.view * 1.6], y: [P.center[1] - P.view, P.center[1] + P.view], equal: true, grid: false, axes: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
+  // the window: given, or framed around everything drawn at the start (and the circle a turning basis sweeps)
+  const ratio = P.aspect === 'wide' ? 2 : P.aspect === 'square' ? 1 : 1.6;
+  let [cx, cy] = Array.isArray(P.center) ? P.center : [0, 0], view = typeof P.view === 'number' ? P.view : 2;
+  if (P.center === 'auto' || P.view === 'auto') {
+    const pts = [[0, 0], tail, P.vector, ...start, ...(Array.isArray(P.ghost) ? P.ghost : []), ...(P.arrows || []).flatMap((a) => [a.from, a.to])];
+    if (P.rotate || P.presets) { const R = Math.max(...[...start, ...(P.presets || []).flatMap((q) => q.basis)].map(M.len)); pts.push([R, R], [-R, -R]); }
+    const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]), m = 0.55;
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    if (P.center === 'auto') [cx, cy] = [(x0 + x1) / 2, (y0 + y1) / 2];
+    if (P.view === 'auto') view = Math.max(1.3, (y1 - y0) / 2 + m, ((x1 - x0) / 2 + m) / ratio);
+  }
+  const plot = new Plot(canvas, { x: [cx - view * ratio, cx + view * ratio], y: [cy - view, cy + view], equal: true, grid: false, axes: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
   const snap = (v) => (P.snap ? Math.round(v / P.snap) * P.snap : v);
   const inside = (x, y) => [Math.max(plot.vx0 + 0.15, Math.min(plot.vx1 - 0.15, x)), Math.max(plot.vy0 + 0.15, Math.min(plot.vy1 - 0.15, y))];
 
@@ -126,6 +138,22 @@ export function mount(F, P) {
     }
   }
 
+  // a label beside the segment p→q (at fraction f along it), on the side toward `ref` (inside) or away from it
+  function sideLabel(p, q, text, color, ref, inside, f = 0.5) {
+    const mx = p[0] + (q[0] - p[0]) * f, my = p[1] + (q[1] - p[1]) * f;
+    const sx = plot.X(q[0]) - plot.X(p[0]), sy = plot.Y(q[1]) - plot.Y(p[1]), L = Math.hypot(sx, sy) || 1;
+    let nx = -sy / L, ny = sx / L;
+    const toward = nx * (plot.X(ref[0]) - plot.X(mx)) + ny * (plot.Y(ref[1]) - plot.Y(my));
+    if ((toward < 0) === inside) { nx = -nx; ny = -ny; }
+    plot.text(text, mx, my, { color, dx: nx * 15, dy: ny * 13, size: 12, weight: 650, align: 'center' });
+  }
+
+  // a label just beyond the tip of the arrow from the origin to e
+  function tipLabel(e, text, color) {
+    const sx = plot.X(e[0]) - plot.X(0), sy = plot.Y(e[1]) - plot.Y(0), L = Math.hypot(sx, sy) || 1;
+    plot.text(text, e[0], e[1], { color, dx: (sx / L) * 16, dy: (sy / L) * 12, size: 11.5, weight: 600, align: sx / L > 0.5 ? 'left' : sx / L < -0.5 ? 'right' : 'center' });
+  }
+
   function draw() {
     plot.clear();
     const g = plot.ctx;
@@ -152,7 +180,7 @@ export function mount(F, P) {
       stack(row, { color: 'teal', width: 1.5, labels: P.levelLabels, bold });
     }
     // the starting basis, kept faint for comparison
-    if (ghost) old.forEach((e, i) => plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 1.8, alpha: 0.45, dash: [5, 4], label: P.ghostNames[i], ldx: -22, ldy: 12 }));
+    if (ghost) old.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 1.8, alpha: 0.45, dash: [5, 4] }); tipLabel(e, P.ghostNames[i], 'ink3'); });
     // the parallelogram of components
     if (P.construction && Number.isFinite(c[0])) {
       const a = M.combine(basis, [c[0], 0]), b = M.combine(basis, [0, c[1]]);
@@ -162,11 +190,12 @@ export function mount(F, P) {
       plot.line(A[0], A[1], tip.x, tip.y, { color: 'violet', width: 1.6, dash: [6, 4], alpha: 0.85 });
       plot.line(tail[0], tail[1], B[0], B[1], { color: 'violet', width: 2, dash: [6, 4] });
       plot.line(B[0], B[1], tip.x, tip.y, { color: 'accent', width: 1.6, dash: [6, 4], alpha: 0.85 });
-      if (Math.hypot(a[0], a[1]) * pxPerUnit() > 40) plot.text(`${P.vname}${pr ? '′' : ''}¹${names[0]}`, (tail[0] + A[0]) / 2, (tail[1] + A[1]) / 2, { color: 'accent', dx: 0, dy: 14, size: 11.5, weight: 650, align: 'center' });
-      if (Math.hypot(b[0], b[1]) * pxPerUnit() > 40) plot.text(`${P.vname}${pr ? '′' : ''}²${names[1]}`, (tail[0] + B[0]) / 2, (tail[1] + B[1]) / 2, { color: 'violet', dx: -10, dy: 0, size: 11.5, weight: 650, align: 'right' });
+      const mid = [(tail[0] + tip.x) / 2, (tail[1] + tip.y) / 2];
+      if (Math.hypot(a[0], a[1]) * pxPerUnit() > 40) sideLabel(tail, A, `${P.vname}${pr ? '′' : ''}¹${names[0]}`, 'accent', mid, true);
+      if (Math.hypot(b[0], b[1]) * pxPerUnit() > 40) sideLabel(tail, B, `${P.vname}${pr ? '′' : ''}²${names[1]}`, 'violet', mid, true);
     }
     for (const a of P.arrows || []) plot.arrow(a.from[0], a.from[1], a.to[0], a.to[1], { color: a.color || 'ink2', width: 2.2, label: a.label });
-    basis.forEach((e, i) => plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 3, label: names[i], ldx: 6, ldy: i ? -10 : 12 }));
+    basis.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 3 }); sideLabel([0, 0], e, names[i], i ? 'violet' : 'accent', [tip.x, tip.y], false, 0.8); });
     plot.arrow(tail[0], tail[1], tip.x, tip.y, { color: 'gold', width: 3.2, label: P.vname, ldx: 8, ldy: -10 });
     plot.point(0, 0, { color: 'ink2', r: 3 });
     g.restore();
@@ -206,7 +235,8 @@ export function validate(P) {
   if (P.presets && P.presets.length && JSON.stringify(P.presets[0].basis) !== JSON.stringify(P.basis)) p.push('ten-basis: the first preset must be the starting basis');
   if (Array.isArray(P.ghost) && !(P.ghost.length === 2 && P.ghost.every(isVec) && Math.abs(M.det(P.ghost)) > 0.05)) p.push('ten-basis: ghost must be true, false or a basis [[x, y], [x, y]]');
   if (!['basis', 'paper', 'none'].includes(P.grid)) p.push(`ten-basis: grid must be basis, paper or none (got ${P.grid})`);
-  if (!(P.view > 0.5 && P.view < 50)) p.push('ten-basis: view (the half-height) must lie in (0.5, 50)');
+  if (!(P.view === 'auto' || (P.view > 0.5 && P.view < 50))) p.push('ten-basis: view (the half-height) must be auto or lie in (0.5, 50)');
+  if (!(P.center === 'auto' || isVec(P.center))) p.push('ten-basis: center must be auto or [x, y]');
   if (!(P.readout === true || P.readout === false || (Array.isArray(P.readout) && P.readout.every((k) => ['V', 'Vold', 'w', 'wold', 'pair', 'A', 'len'].includes(k))))) p.push('ten-basis: readout must be true, false or a list of V, Vold, w, wold, pair, A, len');
   for (const a of P.arrows || []) if (!isVec(a.from) || !isVec(a.to)) p.push('ten-basis: arrows need from: [x, y] and to: [x, y]');
   for (const s of [P.vname, P.wname, ...(P.names || []), ...(P.ghostNames || []), ...(P.arrows || []).map((a) => a.label).filter(Boolean)]) if (typeof s === 'string' && /\$|\\[A-Za-z]|_[{A-Za-z0-9]|\^[{A-Za-z0-9]/.test(s)) p.push(`ten-basis: canvas label “${s}” must be plain text (Unicode), not TeX`);

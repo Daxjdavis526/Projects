@@ -222,7 +222,7 @@ export function mount(F, P) {
     });
     const s = solutionKind();
     if (P.solution && s?.kind === 'point') view.point(s.p, { color: 'gold', r: 5.5, bias: 0.5 });
-    if (P.solution && s?.kind === 'line') view.line(G.linePoints(s.p, G.unit(s.dirs[0]), -2.2 * W, 2.2 * W, 30), { color: 'gold', width: 4, bias: 0.3 });
+    if (P.solution && s?.kind === 'line') view.line(G.linePoints(s.p, G.unit(s.dirs[0]), -1.6 * W, 1.6 * W, 30), { color: 'gold', width: 4, bias: 0.3 });
     view.end();
     marks.forEach(([p, label, color], k) => {
       let el = pool[k];

@@ -50,7 +50,7 @@ export function mount(F, P) {
   if (modes.length > 1) F.choice({ key: '__mode', label: 'Picture', options: modes.map((m) => [m, NAMES[m]]), value: modes.includes(P.mode) ? P.mode : modes[0], explain: 'The same idea in each: cut into pieces, and the inside boundaries cancel.' });
   else F.params.__mode = MODES.includes(P.mode) ? P.mode : 'circ';
   const regions = (P.regions || []).filter((R) => R && R.kind);
-  if (regions.length > 1) F.choice({ key: '__region', label: 'Region', options: regions.map((R, k) => [k, R.label || R.kind]), value: 0, explain: 'A region with a hole has two boundary curves: the outer one walked anticlockwise, the inner one clockwise — the region always on your left.' });
+  if (regions.length > 1) F.choice({ key: '__region', label: 'Region', options: regions.map((R, k) => [k, R.label || R.kind]), value: 0, explain: regions.some((R) => R.kind === 'annulus') ? 'A region with a hole has two boundary curves: the outer one walked anticlockwise, the inner one clockwise — the region always on your left.' : 'The boundary is walked anticlockwise, with the region on your left.' });
   if (P.nSlider !== false && !F.compact) F.slider({ key: '__n', label: 'Cells across', min: 1, max: P.nMax || 10, step: 1, value: P.n ?? 3, explain: 'Cut finer: the cells always add up to the boundary, and each cell’s value per unit size settles on the derivative at its centre.' });
   else F.params.__n = P.n ?? 3;
 

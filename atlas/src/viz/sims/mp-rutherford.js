@@ -61,7 +61,7 @@ export function mount(F, P0) {
   ctl('K', () => F.slider({ key: 'K', label: 'Alpha energy $K$', min: 2, max: 10, step: 0.01, value: P.K, unit: '\\mathrm{MeV}', explain: 'Faster alphas get closer to the nucleus before they turn: every distance scales as $1/K$.' }));
   ctl('target', () => F.choice({ key: 'target', label: 'Target nucleus', options: Object.entries(R.TARGETS).map(([k, v]) => [k, `${v.label}, Z = ${v.Z}`]), value: P.target, explain: 'More charge pushes harder: every distance scales with $Z$.' }));
   ctl('b', () => F.slider({ key: 'b', label: 'Impact parameter $b$ (gold alpha)', min: 0, max: P.range, step: 0.5, value: P.b, unit: '\\mathrm{fm}', explain: 'How far off-centre the alpha is aimed: the distance between its starting line and the nucleus.' }));
-  ctl('model', () => F.choice({ key: 'model', label: 'The atom', options: [['nucleus', 'Rutherford: a tiny nucleus'], ['thomson', 'Thomson: plum pudding']], value: P.model, explain: 'Thomson spread the positive charge through the whole atom, 0.1 nm across; Rutherford packed it into a nucleus.' }));
+  ctl('model', () => F.choice({ key: 'model', label: 'The atom', options: [['nucleus', 'Rutherford: a tiny nucleus'], ['thomson', 'Thomson: plum pudding']], value: P.model, explain: 'Thomson spread the positive charge through the whole atom, about 0.2 nm across; Rutherford packed it into a nucleus.' }));
   if (P.panel !== 'none') ctl('panel', () => F.choice({ key: 'panel', label: 'Graph', options: [['angle', 'angle against b'], ['counts', 'Geiger and Marsden’s counts']], value: P.panel, explain: 'How θ depends on b — or the 1913 measurement that tested it.' }));
 
   const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'Alpha particles scattering off a nucleus' });
@@ -116,7 +116,7 @@ export function mount(F, P0) {
     const W = P.range;
     if (st.thomson) {
       plot.rect(plot.vx0, plot.vy0, plot.vx1 - plot.vx0, plot.vy1 - plot.vy0, { color: 'violet', alpha: 0.07, stroke: false });
-      plot.text('inside a Thomson atom: its positive charge spread evenly through a sphere 0.1 nm across — about 1000 times wider than this view', 8, 14, { screen: true, color: 'violet', size: fs - 0.5 });
+      plot.text(narrow ? 'inside a Thomson atom, ~800× wider than this view' : 'inside a Thomson atom: its charge fills a ball 0.2 nm across, about 800 times this view', 8, 14, { screen: true, color: 'violet', size: fs - 1 });
     }
     // the beam axis
     plot.line(plot.vx0, 0, plot.vx1, 0, { color: 'ink4', width: 1, dash: [3, 6] });
@@ -227,7 +227,7 @@ export function mount(F, P0) {
   }
   F.onChange(drawAll);
   F.draw(drawAll);
-  F.caption(P.caption || 'Distances to scale, in femtometres (1 fm = 10⁻¹⁵ m); the nucleus is drawn with radius 1.2 A^(1/3) fm. Each alpha follows a hyperbola set by Coulomb repulsion alone; the nucleus is held fixed (its recoil is a 2% effect for gold, larger for light nuclei) and the motion is non-relativistic. The dots slow down near the nucleus as their kinetic energy turns into electric potential energy.');
+  F.caption(P.caption || 'Distances to scale, in femtometres (1 fm = 10⁻¹⁵ m); the nucleus is drawn with radius 1.2 ∛A fm, A being its mass number. Each alpha follows a hyperbola set by Coulomb repulsion alone; the nucleus is held fixed (its recoil is a 2% effect for gold, larger for light nuclei) and the motion is non-relativistic. The dots slow down near the nucleus as their kinetic energy turns into electric potential energy.');
   return { get: (k) => F.params[k] };
 }
 

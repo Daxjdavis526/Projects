@@ -196,11 +196,13 @@ The altitude is right-aligned in 5 characters, followed by \` km\` and two space
           points: ATM.map(([hh, rho]) => ({ x: hh, y: Math.log10(rho), color: 'accent' })), curves: [{ fn: 'log10(1.225) - x/(2.303*7.6)', color: 'ink3', dash: true, label: 'scale height 7.6 km', labelAt: 22, labelDy: -14 }] },
         caption: 'The five densities on a logarithmic axis. The dashed line is a single exponential with a 7.6 km scale height — a rough guide, since the real atmosphere’s temperature changes with height.',
       },
-      starter: t`table = [${ATM.map(([hh, rho]) => `(${hh}, ${rho})`).join(', ')}]   # (km, kg/m3)
+      starter: t`# (altitude in km, density in kg/m3)
+table = [${ATM.map(([hh, rho]) => `(${hh}, ${rho})`).join(', ')}]
 for h, rho in table:
     print(h, rho)
 `,
-      answer: t`table = [${ATM.map(([hh, rho]) => `(${hh}, ${rho})`).join(', ')}]   # (km, kg/m3)
+      answer: t`# (altitude in km, density in kg/m3)
+table = [${ATM.map(([hh, rho]) => `(${hh}, ${rho})`).join(', ')}]
 for h, rho in table:
     print(f"{h:5d} km  {rho:.3e} kg/m3")`,
       tests: ATM.map((row) => ({ name: `the ${row[0]} km line reads \`${atmLine(row).trim()}\``, code: `${JSON.stringify(atmLine(row))} in _stdout.splitlines()` })).filter((x, i) => i % 2 === 0 || i === 1),

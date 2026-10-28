@@ -193,7 +193,8 @@ function sigfigNote(numberText, want) {
  *   vars     { x: [lo, hi], ... } sampling domain per variable (default [-2, 2])
  *   mode     'exact' | 'constant' (antiderivatives: equal up to + C) | 'equation' (lhs = rhs, up to a factor)
  *   wrt      'constant' mode: the variable integrated over (default: the first in vars) —
- *            the constant may depend on every other variable
+ *            the constant may depend on every other variable; '*' for a true constant
+ *            (a potential function, defined up to one number)
  *   errors   [{ answer, feedback }] known wrong forms
  *   forbid   function names the learner may not use (e.g. ['abs'])
  */
@@ -273,7 +274,8 @@ function usesFunction(node, name) {
 export function compareExpr(s, k, domains, mode = 'exact', seed = 1, wrt = null) {
   const rng = makeRng(seed);
   const names = Object.keys(domains);
-  if (mode === 'constant' && names.length > 1) return upToConstant(s, k, domains, rng, names.includes(wrt) ? wrt : names[0]);
+  // wrt: '*' asks for a true constant (a potential of a gradient field), the same at every point
+  if (mode === 'constant' && names.length > 1 && wrt !== '*') return upToConstant(s, k, domains, rng, names.includes(wrt) ? wrt : names[0]);
   const pts = [];
   for (let tries = 0; pts.length < 10 && tries < 200; tries++) {
     const env = {};

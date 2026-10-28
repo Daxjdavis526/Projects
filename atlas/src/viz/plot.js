@@ -276,8 +276,11 @@ export class Plot {
     const g = this.ctx;
     g.save();
     g.fillStyle = this.color(o.color || 'accent');
-    g.beginPath(); g.arc(this.X(x), this.Y(y), o.r || 4.5, 0, Math.PI * 2); g.fill();
-    if (o.ring) { g.strokeStyle = this.color(o.ring); g.lineWidth = 2; g.stroke(); }
+    const r = o.r ?? 4.5;                    // r: 0 draws only the label
+    if (r > 0) {
+      g.beginPath(); g.arc(this.X(x), this.Y(y), r, 0, Math.PI * 2); g.fill();
+      if (o.ring) { g.strokeStyle = this.color(o.ring); g.lineWidth = 2; g.stroke(); }
+    }
     g.restore();
     if (o.label) this.text(o.label, x, y, { dx: o.ldx ?? 9, dy: o.ldy ?? -9, color: o.lcolor || o.color, size: o.lsize, align: o.lalign });
     return this;

@@ -24,6 +24,7 @@
 //       grid: true, ghost: true,        // the image of the grid lines; the shape before the map, faint
 //       columns: true, colNames: ['Ae₁', 'Ae₂'],   // the column arrows and their labels (plain text)
 //       x: null,                        // an input vector [x₁, x₂] (numbers or expressions), drawn with its image Ax
+//       xName: 'x', imageName: 'Ax',    // their labels (plain text)
 //       combo: false,                   // build Ax tip to tail, x₁a₁ then x₂a₂ (the column picture)
 //       target: null, targetName: 'b',  // a point to reach (numbers or expressions)
 //       inverse: false,                 // a toggle that applies A⁻¹ after A, when it exists
@@ -39,7 +40,7 @@ import * as M from '../model/la-linear.js';
 
 export const defaults = {
   A: [[1, 0], [0, 1]], maps: null, order: false, stage: null, stages: true, drag: false, snap: 0.5, sliders: [], constants: {},
-  shape: 'F', grid: true, ghost: true, columns: true, colNames: ['Ae₁', 'Ae₂'], x: null, combo: false, target: null, targetName: 'b',
+  shape: 'F', grid: true, ghost: true, columns: true, colNames: ['Ae₁', 'Ae₂'], x: null, xName: 'x', imageName: 'Ax', combo: false, target: null, targetName: 'b',
   inverse: false, eigen: false, morph: false, view: 3, readout: true,
 };
 
@@ -163,8 +164,8 @@ export function mount(F, P) {
         const p1 = [x[0] * a1[0], x[0] * a1[1]];
         plot.arrow(0, 0, p1[0], p1[1], { color: 'good', width: 2, dash: [6, 4] });
         plot.arrow(p1[0], p1[1], Ax[0], Ax[1], { color: 'warn', width: 2, dash: [6, 4] });
-      } else plot.arrow(0, 0, x[0], x[1], { color: 'ink3', width: 1.8, dash: [5, 4], label: 'x', ldx: 6, ldy: -10 });
-      plot.arrow(0, 0, Ax[0], Ax[1], { color: 'gold', width: 3, label: P.combo ? 'x₁a₁ + x₂a₂' : 'Ax', ldx: 8, ldy: -12 });
+      } else plot.arrow(0, 0, x[0], x[1], { color: 'ink3', width: 1.8, dash: [5, 4], label: P.xName, ldx: 6, ldy: -10 });
+      plot.arrow(0, 0, Ax[0], Ax[1], { color: 'gold', width: 3, label: P.combo ? 'x₁a₁ + x₂a₂' : P.imageName, ldx: 8, ldy: -12 });
     }
     if (P.target) {
       const b = P.target.map((s) => ev(s, E));
@@ -213,6 +214,6 @@ export function validate(P) {
   if (!['F', 'square', 'circle', 'none'].includes(P.shape)) problems.push('shape must be F, square, circle or none');
   if (!(P.view > 0)) problems.push('view must be a positive number');
   if (P.stage != null && P.maps && !(P.stage >= 0 && P.stage <= P.maps.length)) problems.push('stage must be between 0 and the number of maps');
-  for (const s of [...(P.colNames || []), P.targetName, ...(P.maps || []).map((m) => m.label)]) if (s && /[$\\_^]/.test(String(s))) problems.push(`label “${s}” is plain text: use Unicode (a₁, e₂), not TeX`);
+  for (const s of [...(P.colNames || []), P.targetName, P.xName, P.imageName, ...(P.maps || []).map((m) => m.label)]) if (s && /[$\\_^]/.test(String(s))) problems.push(`label “${s}” is plain text: use Unicode (a₁, e₂), not TeX`);
   return problems;
 }
