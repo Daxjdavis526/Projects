@@ -79,7 +79,7 @@ function busPic(thr, { caption, extraArrows = [], extraPoints = [] } = {}) {
     const [x, y] = th.p, [dx, dy] = th.d;
     curves.push(seg([x, y], [x - 0.28 * dx, y - 0.28 * dy], 'ink3', 5));            // the nozzle, pointing out
     arrows.push({ from: [x, y], to: [x + 0.42 * dx, y + 0.42 * dy], color: 'warn', width: 2.6 });
-    points.push(dot2(x, y, 'gold', 5), tag(x - 0.5 * dx + 0.12 * dy, y - 0.5 * dy - 0.12 * dx, String(j + 1), 'gold', 0, 0, 'center'));
+    points.push(dot2(x, y, 'gold', 5), tag(x - 0.3 * dx + 0.13 * dy, y - 0.3 * dy - 0.13 * dx, String(j + 1), 'gold', 0, 0, 'center'));
   });
   return picture({ x: [-2, 2], y: [-1, 1], curves, arrows, points, alt: 'Top view of a rectangular satellite bus with thrusters at its edges' }, caption);
 }
@@ -145,27 +145,24 @@ export function concurrentCase(r) {
     const thr = r.shuffle([T1, T2, T3]);
     const B = allocation(thr);
     const y = [b, -a, 10];                                    // yᵀB = 0, scaled to integers
-    // a pure torque is out of reach; three wrenches that are not
-    const tau0 = r.pick([0.2, 0.3, 0.4, 0.5]) * r.sign();
-    const reach = [];
-    // a pure force (torques cancel) with nonnegative thrusts, if one exists
-    let pure = null;
-    for (let i = 0; i <= 4 && !pure; i++) for (let j = 0; j <= 4 && !pure; j++) for (let k = 0; k <= 4 && !pure; k++) {
-      const u = [i, j, k];
-      if (u.filter((x) => x > 0).length < 2) continue;
-      const w = matvec(B, u).map(r4);
-      if (Math.abs(w[2]) < 1e-9 && Math.hypot(w[0], w[1]) > 0.5) pure = { u, w, kind: 'pure' };
-    }
-    if (pure) reach.push(pure);
-    for (let tries = 0; tries < 60 && reach.length < 3; tries++) {
-      const u = [r.int(1, 4), r.int(1, 4), r.int(0, 3)];
-      const w = matvec(B, u).map(r4);
-      if (Math.abs(w[2]) < 0.25) continue;
-      if (reach.some((q) => q.w.every((x, m) => Math.abs(x - w[m]) < 1e-9))) continue;
-      reach.push({ u, w, kind: 'mixed' });
-    }
-    if (reach.length < 3) continue;
-    return { Q, a, b, thr, B, y, tau0, reach };
+    // four simple wrenches: one out of reach (yᵀw ≠ 0), three in the column space (yᵀw = 0)
+    const F1 = r.pick([1, 2, 3]) * r.sign(), F2 = r.pick([1, 2, 3]) * r.sign(), tau0 = r.pick([0.2, 0.3, 0.4, 0.5]) * r.sign();
+    const outKind = r.pick(['couple', 'couple', 'fx', 'fy']);
+    const out = outKind === 'couple' ? [0, 0, tau0] : outKind === 'fx' ? [F1, 0, 0] : [0, F2, 0];
+    const reachW = [
+      { kind: 'fx', w: [F1, 0, r4((-b * F1) / 10)] },
+      { kind: 'fy', w: [0, F2, r4((a * F2) / 10)] },
+      { kind: 'cmq', w: [r4(a / 2), r4(b / 2), 0] },
+    ];
+    // a signed firing for each, using the two axis-aligned thrusters (the canted one idle)
+    const iV = thr.findIndex((th) => th.d[0] === 0), iH = thr.findIndex((th) => th.d[1] === 0);
+    const reach = reachW.map((q) => {
+      const u = [0, 0, 0];
+      u[iH] = r4(q.w[0] / thr[iH].d[0]);
+      u[iV] = r4(q.w[1] / thr[iV].d[1]);
+      return { ...q, u };
+    });
+    return { Q, a, b, thr, B, y, out, outKind, reach };
   }
   throw new Error('concurrentCase: no layout');
 }
@@ -407,15 +404,24 @@ export default boss({
           id: 'r1-concurrent', skill: 'math2270.LA-5.4', difficulty: 3,
           gen(r) {
             const C = concurrentCase(r);
-            const { B, y, tau0, reach, thr, Q } = C;
+            const { B, y, out, outKind, reach, thr, Q } = C;
             const yT = t`(${y.join(',\\ ')})`;
-            const choices = [tt([0, 0, tau0]), ...reach.map((q) => tt(q.w))];
+            const yw = dot(y, out);
+            const choices = [t`$${tt(out)}$`, ...reach.map((q) => t`$${tt(q.w)}$`)];
             const why = {};
+            const LEAD = {
+              fx: t`A force along $x$ can come with a torque: this one’s line of action passes through the point where the thrust lines meet.`,
+              fy: t`A force along $y$ can come with a torque: this one’s line of action passes through the point where the thrust lines meet.`,
+              cmq: t`A pure force, with no torque about the centre of mass, is reachable when its line passes through the centre of mass *and* the point where the thrust lines meet — this one does.`,
+            };
             reach.forEach((q, i) => {
-              why[i + 1] = (q.kind === 'pure'
-                ? t`A pure force is reachable: $\mathbf u = ${tt(q.u)}$ N gives exactly $${tt(q.w)}$, the thrusters’ torques cancelling. `
-                : t`Reachable: $\mathbf u = ${tt(q.u)}$ N gives exactly $${tt(q.w)}$ — a large torque is no obstacle. `) + t`Every wrench in the column space passes the left-null-space test $${yT}\cdot\mathbf w = 0$, and this one does.`;
+              why[i + 1] = t`${LEAD[q.kind]} The signed thrusts $\mathbf u = ${tt(q.u)}$ N give exactly $${tt(q.w)}$, and it passes the left-null-space test $${yT}\cdot\mathbf w = 0$.`;
             });
+            const OUT = {
+              couple: t`A pure torque — a couple — turns the bus equally about every point, $Q$ included, so no firing of these three can give one.`,
+              fx: t`A pure force along $x$ through the centre of mass has a line that misses $Q$, so it has a torque about $Q$ — which these three cannot make.`,
+              fy: t`A pure force along $y$ through the centre of mass has a line that misses $Q$, so it has a torque about $Q$ — which these three cannot make.`,
+            };
             return {
               prompt: t`To save mass, the structures team proposes giving the next satellite only three thrusters, laid out as in the picture. Its allocation matrix (columns: what each thruster does at 1 N, as $(F_x, F_y, \tau)$ in newtons and newton-metres) is $$B = ${mt(B)}.$$ Allow, for the moment, thrusts of either sign. Which of these wrenches $(F_x, F_y, \tau)$ can **no** firing produce — which is outside the column space of $B$?`,
               choices, answer: 0, why,
@@ -425,7 +431,7 @@ export default boss({
                 t`Try $\mathbf y = (y_1, y_2, 10)$ and make it perpendicular to two of the columns; then test each wrench.`,
               ],
               teach: t`A wrench is reachable exactly when it lies in the column space, and the left null space is the test: $\mathbf y${T}\mathbf w$ must vanish for every $\mathbf y$ in $N(B${T})$.`,
-              explain: t`$B$ has rank 2, and its left null space is spanned by $\mathbf y = ${yT}$: $\mathbf y${T}B = \mathbf 0${T}$. So the reachable wrenches form the plane $${y[0]}F_x ${y[1] < 0 ? '-' : '+'} ${Math.abs(y[1])}F_y + 10\tau = 0$. Divided by 10 this reads $\tau - \big(${nv(Q[0])}\,F_y - (${nv(Q[1])})\,F_x\big) = 0$: the torque about the point $Q = ${tt(Q)}$ m is always zero, because all three thrust lines pass through $Q$. A pure torque $${tt([0, 0, tau0])}$ has $\mathbf y\cdot\mathbf w = ${nv(10 * tau0)} \ne 0$, and since a couple turns the bus equally about every point, no firing of these three can give one. The flight layout’s fourth thruster is there to break exactly this concurrency.`,
+              explain: t`$B$ has rank 2, and its left null space is spanned by $\mathbf y = ${yT}$: $\mathbf y${T}B = \mathbf 0${T}$. So the reachable wrenches form the plane $${y[0]}F_x ${y[1] < 0 ? '-' : '+'} ${Math.abs(y[1])}F_y + 10\tau = 0$. Divided by 10 it says $\tau - (Q_xF_y - Q_yF_x) = 0$ with $Q = ${tt(Q)}$ m: the torque about the point $Q$ is always zero, because all three thrust lines pass through $Q$. The wrench $${tt(out)}$ has $\mathbf y\cdot\mathbf w = ${nv(yw)} \ne 0$. ${OUT[outKind]} The flight layout’s fourth thruster is there to break exactly this concurrency.`,
               visual: busPic(thr, { caption: 'The proposed three-thruster layout, top view: gold dots are the thrusters (numbered by their nozzles), orange arrows the direction each pushes the bus. Arrow lengths do not show thrust.' }),
             };
           },
