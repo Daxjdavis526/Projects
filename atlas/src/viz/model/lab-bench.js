@@ -961,6 +961,66 @@ export const EXPERIMENTS = {
     systematics: { slip: { label: 'A slip in the analysis: the fringes beyond the missing 5th order counted one too low (double slit), or sin θ taken as y/L (grating)', short: 'analysis slip', explain: 'Counting visible fringes skips the dark 5th order without noticing it; and y/L is tan θ, which equals sin θ only for small angles.' } },
     defaultSys: 'slip',
   },
+
+  // 2225 L.8 — standing waves on a string: resonant frequency against the number of loops …
+  string: {
+    title: 'Resonances of a string driven by a vibrator', method: 'f against n (fixed tension)',
+    apparatus: 'string',
+    note: 'A string runs 1.200 m (±2 mm) from a mechanical vibrator to a pulley, tensioned by a hanging 0.500 kg (hanger included): T = 4.90 N. Weighing 2.000 m of the slack string gave 1.30 g/m. Each resonance is found by tuning the generator for the largest loops, which can be judged to ±(0.15 Hz + 0.2%); the generator reads to 0.1 Hz.',
+    defaults: { L: 1.200, sL: 0.002, M: 0.500, g: G_LOCAL, mu: 1.30e-3, eps: 0.04, nT: 3, sf: 0.15 },
+    setting: { key: 'n', sym: 'n', label: 'Number of loops $n$', unit: 'loops', min: 1, max: 10, step: 1, value: 3, series: [1, 2, 3, 4, 5, 6, 7, 8], explain: 'Loops between the vibrator and the pulley: n half-wavelengths.' },
+    nz: 1,
+    read: (n, P, sys, z) => { const f = (n / (2 * P.L)) * stringV(P, P.M * P.g, sys === 'stretch'); return [f + Math.hypot(P.sf, 0.002 * f) * z[0]]; },
+    series: [{ key: 'f', sym: 'f', label: 'resonant frequency', unit: 'Hz', res: 0.1, sigma: (n, P) => { const f = (n / (2 * P.L)) * stringV(P, P.M * P.g); return Math.hypot(P.sf, 0.002 * f, resolutionU(0.1)); } }],
+    axes: {
+      fn: {
+        label: 'f against n', slopeUnit: 'Hz', expectLabel: 'f = n√(T/μ)/2L, μ from the slack string',
+        x: { sym: 'n', unit: '', of: (n) => n },
+        ys: [{ sym: 'f', unit: 'Hz', of: (n, R) => R[0], sigma: (n, R, P) => Math.hypot(P.sf, 0.002 * R[0], resolutionU(0.1)) }],
+        expect: (P) => ({ a: 0, b: stringV(P, P.M * P.g) / (2 * P.L) }),
+        results: [{
+          sym: 'v', name: 'wave speed', unit: 'm/s', of: (f, P) => 2 * P.L * f.b, sigma: (f, P) => 2 * P.L * f.sb, accepted: (P) => stringV(P, P.M * P.g), acceptedLabel: '√(T/μ), slack μ',
+          typeB: (P) => [{ label: 'string length', rel: P.sL / P.L }],
+        }],
+        intercept: { sym: 'f₀', name: 'intercept', unit: 'Hz' },
+      },
+    },
+    defaultAxes: 'fn',
+    systematics: { stretch: { label: 'The string is elastic: at 4.90 N it stretches 4%, so its mass per metre is less than the slack string’s 1.30 g/m', short: 'stretching string', explain: 'Stretched, the same mass of string is spread over more length; the stretch grows in proportion to the tension.' } },
+    defaultSys: 'stretch',
+  },
+
+  // … and the frequency of three loops against the tension
+  'string-T': {
+    title: 'The three-loop resonance against tension', method: 'f² against T (three loops)',
+    apparatus: 'string',
+    note: 'The same string and vibrator. The hanging mass sets the tension T = Mg; the generator is tuned until the string shows three loops. Weighed slack, the string has 1.30 g/m.',
+    defaults: { L: 1.200, sL: 0.002, M: 0.500, g: G_LOCAL, mu: 1.30e-3, eps: 0.04, nT: 3, sf: 0.15 },
+    setting: { key: 'M', sym: 'M', label: 'Hanging mass $M$', unit: 'kg', min: 0.1, max: 1.0, step: 0.05, value: 0.4, series: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8], explain: 'Hanger included: the tension is T = Mg.' },
+    nz: 1,
+    read: (M, P, sys, z) => { const f = (P.nT / (2 * P.L)) * stringV(P, M * P.g, sys === 'stretch'); return [f + Math.hypot(P.sf, 0.002 * f) * z[0]]; },
+    series: [{ key: 'f', sym: 'f₃', label: 'three-loop frequency', unit: 'Hz', res: 0.1, sigma: (M, P) => { const f = (P.nT / (2 * P.L)) * stringV(P, M * P.g); return Math.hypot(P.sf, 0.002 * f, resolutionU(0.1)); } }],
+    axes: {
+      f2T: {
+        label: 'f² against T', slopeUnit: 'Hz²/N', expectLabel: 'f² = n²T/(4L²μ), μ from the slack string',
+        x: { sym: 'T', unit: 'N', of: (M, R, P) => M * P.g },
+        ys: [{ sym: 'f²', unit: 'Hz²', of: (M, R) => R[0] ** 2, sigma: (M, R, P) => 2 * R[0] * Math.hypot(P.sf, 0.002 * R[0], resolutionU(0.1)) }],
+        expect: (P) => ({ a: 0, b: (P.nT * P.nT) / (4 * P.L * P.L * P.mu) }),
+        results: [{
+          sym: 'μ', name: 'mass per unit length', unit: 'g/m', of: (f, P) => (1e3 * P.nT * P.nT) / (4 * P.L * P.L * f.b), sigma: (f, P) => ((1e3 * P.nT * P.nT) / (4 * P.L * P.L * f.b)) * (f.sb / f.b), accepted: (P) => 1e3 * P.mu, acceptedLabel: 'slack string',
+          typeB: (P) => [{ label: 'string length, squared', rel: (2 * P.sL) / P.L }],
+        }],
+        intercept: { sym: 'f²₀', name: 'intercept', unit: 'Hz²' },
+      },
+      fT: {
+        label: 'f against T', slopeUnit: 'Hz/N', x: { sym: 'T', unit: 'N', of: (M, R, P) => M * P.g },
+        ys: [{ sym: 'f₃', unit: 'Hz', of: (M, R) => R[0], sigma: (M, R, P) => Math.hypot(P.sf, 0.002 * R[0], resolutionU(0.1)) }], curved: true,
+      },
+    },
+    defaultAxes: 'f2T',
+    systematics: { stretch: { label: 'The string is elastic: at 4.90 N it stretches 4%, so its mass per metre is less than the slack string’s 1.30 g/m', short: 'stretching string', explain: 'Stretched, the same mass of string is spread over more length; the stretch grows in proportion to the tension.' } },
+    defaultSys: 'stretch',
+  },
 };
 
 export function inertiaRotary(P) {
@@ -1138,4 +1198,11 @@ export function gratingSin(P, Y, small = false) {
 export function gratingSinSigma(P, Y, small = false) {
   const y = Y / 2, L = 1e3 * P.Lg, sy = Math.hypot(P.sY, resolutionU(1)) / 2;
   return small ? sy / L : (L * L * sy) / (y * y + L * L) ** 1.5;
+}
+
+// L.8 — the wave speed √(T/μ) on a string; an elastic string stretches by a
+// fraction eps·T/(4.90 N), spreading its mass so μ = μ₀/(1 + stretch)
+export function stringV(P, T, stretch = false) {
+  const mu = stretch ? P.mu / (1 + (P.eps * T) / (0.5 * G_LOCAL)) : P.mu;
+  return Math.sqrt(T / mu);
 }

@@ -27,7 +27,7 @@ export default {
   note: 'Intuition Mode builds the physics without advanced mathematics; Derivation Mode works the real mathematics step by step and is gated by the Mathematics of Spacetime tracks. Conventions: Carroll’s, signature (−,+,+,+). Every lesson is badged Established, Mathematically allowed, Speculative or Teaching model.',
   summary: 'From Newton’s gravity to the field equations, black holes, gravitational waves and cosmology — in two modes — ending honestly at wormholes, warp drives and the open questions.',
   prereqs: ['phys3710'],
-  boss: { title: 'Einstein’s Field Equations Challenge', blurb: 'Read a metric, find its geodesics and curvature, and predict what an observer measures.' },
+  boss: { title: 'Einstein’s Field Equations Challenge', blurb: 'Read a metric, follow clocks, orbits and light around a black hole, feel its tides, and predict what an observer measures — down to a gravitational wave.' },
   modules: [
     S(1, 'Newtonian gravity and its limitations', ['est-obs'], { title: 'Newton’s gravity and the 43 arcseconds it cannot explain' }, { title: 'Newtonian gravity as a field theory: Poisson’s equation and instant action', prereqs: ['phys2210.M13'] }),
     S(2, 'Special relativity review', ['est-obs'], { title: 'Light clocks, time dilation and the muon', prereqs: [I(1)] }, { title: 'Lorentz transformations and invariance, reviewed', prereqs: [D(1)] }),

@@ -1,7 +1,7 @@
 // Screenshots of the Atlas for visual checks — pages, lesson steps and every
 // simulation in the gallery — in dark and light themes. Several rendering
 // bugs in this repository were only ever visible in a screenshot.
-//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<id>|all] [dark|light]
+//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<id>|boss:<course>|all] [dark|light]
 // It serves the repository itself on a free local port (so several runs can
 // go at once) and prints any page errors; exit status 1 if there were some.
 // Playwright comes preinstalled in this environment; nothing is installed.
@@ -78,6 +78,29 @@ for (const theme of themes) {
     const page = await newPage(theme);
     await page.goto(BASE + '#/explore/' + what.slice(4)); await page.waitForTimeout(1200);
     await page.screenshot({ path: `${out}${theme}-sim-${what.slice(4)}.png`, fullPage: true });
+  }
+  if (what.startsWith('boss:')) {
+    // an authored boss: the intro, then every problem before and after "I don't know"
+    const course = what.slice(5);
+    const page = await newPage(theme);
+    await page.goto(BASE + '#/boss/' + course); await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${out}${theme}-boss-${course}-00-intro.png`, fullPage: true });
+    const begin = await page.$('button:has-text("Begin")');
+    if (begin) { await begin.click(); await page.waitForTimeout(1500); }
+    for (let q = 1; q <= 16; q++) {
+      await page.waitForTimeout(800);
+      const n = String(q).padStart(2, '0');
+      await page.screenshot({ path: `${out}${theme}-boss-${course}-${n}-q.png`, fullPage: true });
+      const dunno = await page.$('.stage button:has-text("I don’t know")');
+      if (!dunno) break;
+      await dunno.click(); await page.waitForTimeout(700);
+      await page.screenshot({ path: `${out}${theme}-boss-${course}-${n}-a.png`, fullPage: true });
+      const next = await page.$('.q-actions button.btn.primary:has-text("Next"), .q-actions button.btn.primary:has-text("Finish")');
+      if (!next) break;
+      await next.click();
+    }
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${out}${theme}-boss-${course}-99-end.png`, fullPage: true });
   }
   if (what.startsWith('lesson:')) {
     // every step up to the first practice question, then each practice

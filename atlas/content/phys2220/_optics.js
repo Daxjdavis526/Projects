@@ -7,6 +7,8 @@
 // Answers are computed from the numbers the prompts quote (c = 3.00×10⁸ m/s
 // where a prompt says so), so a learner who uses them lands on the key.
 
+import { box } from './_waves.js';
+
 export const C = 2.998e8;              // m/s
 export const C3 = 3.0e8;               // m/s, the rounded value prompts quote
 export const DEG = Math.PI / 180;
@@ -103,6 +105,55 @@ export function bars(items, { unit = '', caption, max } = {}) {
       arrows: items.map(([lab, v, color], i) => ({ from: [0, n - 1 - i], to: [r6(v), n - 1 - i], color: color || 'accent', label: `${lab}${unit ? '' : ''}`, labelDx: 8, labelDy: 0 })),
       points: [],
     },
+    caption,
+  };
+}
+
+const lab = (x, y, text, color = 'ink2', align = 'left', dy = 0) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: 0, labelDy: dy, labelAlign: align });
+
+/**
+ * A Michelson interferometer from above as a graph (not to scale): laser, beam splitter, two arms, end mirrors and a
+ * detector, with one addition chosen by `kind`:
+ *   'cell'  a gas cell of length L in one arm, piped to a vacuum pump;
+ *   'mm'    Michelson and Morley's apparatus: everything on one slab that turns slowly, and Earth's motion along arm 1;
+ *   'ligo'  LIGO: each 4 km arm a Fabry–Pérot cavity between an input mirror and an end mirror, read by a photodetector.
+ */
+export function michelsonPlan({ kind = 'cell', caption } = {}) {
+  const beam = { color: 'bad', width: 1.6 }, mirror = { color: 'ink', width: 4 };
+  const curves = [
+    ...box(-3.4, 0, 0.55, 0.3, 'bad'),                                                   // laser
+    seg([-2.85, 0], [3.6, 0], beam), seg([0, 0], [0, 3.6], beam), seg([0, 0], [0, -2.4], beam),
+    seg([-0.45, -0.45], [0.45, 0.45], { color: 'ink2', width: 3 }),                      // beam splitter
+    seg([3.7, -0.6], [3.7, 0.6], mirror), seg([-0.6, 3.7], [0.6, 3.7], mirror),        // end mirrors
+    ...box(0, -2.75, 0.45, 0.3, 'good'),                                                 // detector
+  ];
+  const points = [lab(-0.55, -0.62, 'beam splitter', 'ink2', 'right')];
+  const arrows = [];
+  let x = [-4.6, 6.6];
+  if (kind === 'cell') {
+    curves.push(...box(2.0, 0, 0.8, 0.42, 'accent'), seg([2.0, -0.42], [2.0, -1.6], { color: 'ink3', width: 2 }));
+    points.push(lab(-4.0, 0.62, 'laser', 'bad'), lab(2.0, 0.85, 'gas cell, length L', 'accent', 'center'), lab(2.0, -1.9, 'to a vacuum pump', 'ink3', 'center'),
+      lab(0.85, 3.7, 'mirror'), lab(3.95, 0.85, 'mirror'), lab(0.6, -2.75, 'detector', 'good'));
+  } else if (kind === 'mm') {
+    curves.push(seg([-4.25, -3.3], [4.35, -3.3], { color: 'ink3', width: 1.6, dash: true }), seg([4.35, -3.3], [4.35, 4.2], { color: 'ink3', width: 1.6, dash: true }),
+      seg([4.35, 4.2], [-4.25, 4.2], { color: 'ink3', width: 1.6, dash: true }), seg([-4.25, 4.2], [-4.25, -3.3], { color: 'ink3', width: 1.6, dash: true }),
+      { param: ['5*cos(t)', '0.4 + 5*sin(t)'], t: [-0.32, 0.3], color: 'gold', width: 2 });
+    arrows.push({ from: [r6(5 * Math.cos(0.26)), r6(0.4 + 5 * Math.sin(0.26))], to: [r6(5 * Math.cos(0.34)), r6(0.4 + 5 * Math.sin(0.34))], color: 'gold', width: 2 },
+      { from: [4.75, -2.95], to: [6.55, -2.95], color: 'accent', width: 2.2, label: 'Earth’s motion', labelDx: 0, labelDy: -14, labelAlign: 'right' });
+    points.push(lab(-4.0, 0.62, 'source', 'bad'), lab(2.3, 0.4, 'arm 1', 'ink2', 'center'), lab(0.2, 2.3, 'arm 2'), lab(5.15, 0.4, 'slab turns', 'gold'),
+      lab(0.6, -2.75, 'telescope', 'good'));
+    x = [-4.6, 7.0];
+  } else if (kind === 'ligo') {
+    curves.push(seg([1.0, -0.6], [1.0, 0.6], mirror), seg([-0.6, 1.0], [0.6, 1.0], mirror),
+      seg([1.0, 0.13], [3.7, 0.13], { color: 'bad', width: 1 }), seg([1.0, -0.13], [3.7, -0.13], { color: 'bad', width: 1 }),
+      seg([0.13, 1.0], [0.13, 3.7], { color: 'bad', width: 1 }), seg([-0.13, 1.0], [-0.13, 3.7], { color: 'bad', width: 1 }));
+    points.push(lab(-4.0, 0.62, '1064 nm laser', 'bad'), lab(1.0, -0.95, 'input mirror', 'ink2', 'center'), lab(3.7, -0.95, 'end mirror', 'ink2', 'center'),
+      lab(2.35, 0.5, '4 km', 'gold', 'center'), lab(-0.8, 1.0, 'input mirror', 'ink2', 'right'), lab(-0.8, 3.7, 'end mirror', 'ink2', 'right'), lab(0.35, 2.35, '4 km', 'gold'),
+      lab(0.6, -2.75, 'photodetector', 'good'));
+  }
+  return {
+    type: 'graph',
+    params: { aspect: 'wide', x, y: [-3.45, 4.35], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves, points, arrows },
     caption,
   };
 }

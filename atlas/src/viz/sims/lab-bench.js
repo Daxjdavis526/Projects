@@ -1196,7 +1196,7 @@ const APPARATUS = {
       pl.text(grat ? 'grating' : 'double slit', 5.1, 4.15, { color: 'ink2', size: 10.5, align: 'center' });
       pl.text('screen', 12.4, 4.25, { color: 'ink2', size: 10.5, align: 'center' });
       pl.text('HeNe 632.8 nm', 1.4, 1.45, { color: 'ink3', size: 10, align: 'center' });
-      dim(pl, 5.1, 0.45, 12.4, 0.45, `L = ${fx(grat ? P.Lg : P.L, 3)} m`, { color: 'ink3', dy: -0.0, dx: 1.2 });
+      dim(pl, 5.1, 0.75, 12.4, 0.75, `L = ${fx(grat ? P.Lg : P.L, 3)} m`, { color: 'ink3', dy: -0.45, dx: -1.0 });
       pl.text(grat ? 'spots on the screen (mm)' : 'fringes on the screen (mm)', sx0, cy + hh + 1.25, { color: 'ink3', size: 10.5 });
       const label = grat ? `2y = ${Number.isFinite(r) ? r.toFixed(0) : '—'} mm` : `y = ${Number.isFinite(r) ? r.toFixed(1) : '—'} mm`;
       display(pl, 14.0, 3.0, [`m = ${slip && !grat ? `${B.slitCounted(P, m)} (really ${m})` : m}`, label], { compact: o.compact, title: grat ? `order ±${m}` : `bright fringe ${m}` });

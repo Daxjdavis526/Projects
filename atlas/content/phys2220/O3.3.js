@@ -5,7 +5,7 @@
 // fringes at all. Pictures from optics-waves (michelson mode) and the
 // course's Michelson schematic (_waves.js).
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { tn, apart, michelsonPic } from './_optics.js';
+import { tn, michelsonPic, michelsonPlan } from './_optics.js';
 import { michelson as michelsonSketch } from './_waves.js';
 
 const t = String.raw;
@@ -18,7 +18,7 @@ export default lesson({
 
 $$2\Delta L = N\lambda$$
 
-Michelson used it to measure the metre in wavelengths of light, and with Morley (1887) to look for Earth's motion through a supposed "ether" — finding none.`,
+Michelson used it to measure the metre in wavelengths of light, and with Morley (1887) to look for Earth’s motion through a supposed “ether” — finding none.`,
   symbols: [
     { tex: '\\Delta L', text: 'how far the movable mirror moves, in m' },
     { tex: '2\\Delta L', text: 'the change in path difference: the light crosses the extra distance twice' },
@@ -71,7 +71,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
         const key = (2 * dL * 1e-6) / (lam * 1e-9);
         return {
           prompt: t`Light of wavelength ${lam} nm lights a Michelson interferometer. How many fringes pass the detector as the mirror moves ${dL} µm?`,
-          answer: key, tol: { rel: 0.005, abs: 0.6 },
+          answer: Math.round(key), tol: { rel: 0.005, abs: 0.6 },
           errors: [{ value: key / 2, feedback: t`The path changes by *twice* the mirror's movement: $N = 2\Delta L/\lambda$.` }],
           hints: [t`$N = 2\Delta L/\lambda$, with both in metres.`],
           teach: 'Each half-wavelength of mirror motion moves one fringe past the detector.',
@@ -91,7 +91,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
           errors: [{ value: key * 2, feedback: t`Divide by 2: each fringe is half a wavelength of mirror motion, $\Delta L = N\lambda/2$.` }],
           hints: [t`$\Delta L = N\lambda/2$.`],
           teach: 'Distance = (number of fringes) × (half a wavelength): the interferometer as a ruler.',
-          explain: t`$\Delta L = ${N}\times${lam}\ \text{nm}/2 = ${tn(key * 1000)}$ nm $= ${tn(key)}\ \mu\text{m}$.`,
+          explain: t`$\Delta L = \dfrac{N\lambda}{2} = \dfrac{${N}\times${lam / 1000}\ \mu\text{m}}{2} = ${tn(key, 4)}\ \mu\text{m}$: a ${Math.round(key / 1000 * 100) / 100} mm move, measured to a fraction of a micrometre.`,
           visual: michelsonSketch({ caption: 'The mirror on the moving part changes one arm’s round trip by twice its movement (not to scale).' }),
         };
       },
@@ -126,8 +126,8 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
           errors: [{ value: key * 2, feedback: t`The light crosses the cell twice: the count is $N = 2L(n - 1)/\lambda$.` }, { value: 1 + key, feedback: t`The question asks for $n - 1$, the small part.` }],
           hints: [t`Pumping out the air changes the number of wavelengths in the cell, one way, by $L(n - 1)/\lambda$.`, t`There and back: $N = 2L(n - 1)/\lambda$.`, t`$n - 1 = N\lambda/(2L)$, with $L$ in metres.`],
           teach: 'Changing what fills one arm shifts the fringes too: an interferometer measures refractive indices of gases.',
-          explain: t`$n - 1 = \dfrac{N\lambda}{2L} = \dfrac{${N}(633\times10^{-9})}{2(${Lc / 100})} = ${tn(key)}$ — the index of ordinary air, $1.000\,29$, read to a few percent. The same idea, with air's index changing with density, is what Schlieren systems see.`,
-          visual: michelsonSketch({ arm: 'a gas cell in this arm', caption: 'A Michelson interferometer with a gas cell in one arm (not to scale).' }),
+          explain: t`$n - 1 = \dfrac{N\lambda}{2L} = \dfrac{${N}(633\times10^{-9})}{2(${Lc / 100})} = ${tn(key)}$, close to the textbook index of air at 0 °C and one atmosphere, $1.000\,29$. Air's index rises and falls with its density — which is what Schlieren photographs of a rocket plume make visible.`,
+          visual: michelsonPlan({ kind: 'cell', caption: 'A Michelson interferometer with a sealed glass cell in one arm; the light crosses the cell on its way out and again on its way back (not to scale).' }),
         };
       },
     }),
@@ -149,7 +149,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
       hints: ['The result is famous for what it did not find.', 'Special relativity takes the speed of light to be the same in every direction for every observer.'],
       teach: 'Michelson and Morley found no fringe shift: light’s speed did not depend on the direction of Earth’s motion.',
       explain: 'They saw less than one twentieth of the expected 0.4 fringe. Einstein’s 1905 postulate — light travels at the same speed for every observer — accounts for the null result directly. Modern versions with lasers and optical cavities confirm it to better than parts in 10¹⁷.',
-      visual: michelsonSketch({ arm: 'arm 1', caption: 'The Michelson–Morley arrangement: two perpendicular arms; rotating the whole table swaps their directions relative to Earth’s motion (not to scale).' }),
+      visual: michelsonPlan({ kind: 'mm', caption: 'The Michelson–Morley arrangement (simplified; their light reflected back and forth along each arm to make an 11 m path): the whole apparatus sat on a stone slab floating on mercury, turned slowly so the arms swapped directions relative to Earth’s motion.' }),
     }),
   ],
   checkpoint: [
@@ -176,17 +176,17 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
       errors: [{ value: (2 * 1e-21 * 4000) / 1064e-9, feedback: 'Include the factor of about 280 from the light’s many round trips in each arm.' }, { value: 1e-21 * 4000, feedback: t`That is $\Delta L$ in metres. Divide the path change by the wavelength to count fringes.` }],
       hints: [t`$\Delta L = hL = 1.0\times10^{-21}\times4000$ m $= 4.0\times10^{-18}$ m.`, t`One round trip: $2\Delta L/\lambda = 8.0\times10^{-18}/1.064\times10^{-6}$.`, 'Multiply by 280.'],
       teach: 'A gravitational wave shifts LIGO’s output by only billionths of a fringe — so LIGO measures light power, not fringe counts.',
-      explain: t`$\Delta L = 4.0\times10^{-18}$ m, a few thousandths of a proton's diameter. One round trip shifts the output by $7.5\times10^{-12}$ of a fringe; the cavities raise it to about $${tn((280 * 2 * 1e-21 * 4000) / 1064e-9)}$ of a fringe. Counting fringes could never see that. LIGO instead holds its output near a dark fringe and measures tiny changes in brightness, with hundreds of kilowatts of laser light stored in its arms and seismically isolated mirrors hanging as pendulums.`,
-      visual: michelsonSketch({ arm: '4 km arm', caption: 'LIGO’s layout: a Michelson interferometer (not to scale; each arm is also a cavity in which the light bounces about 280 times).' }),
+      explain: t`$\Delta L = 4.0\times10^{-18}$ m, a few thousandths of a proton's diameter. One round trip shifts the output by $7.5\times10^{-12}$ of a fringe; the cavities raise it to about $${tn((280 * 2 * 1e-21 * 4000) / 1064e-9)}$ of a fringe. Counting fringes could never see that. LIGO instead holds its output just off a dark fringe and measures tiny changes in brightness, with hundreds of kilowatts of laser light stored in its arms and seismically isolated mirrors hanging as pendulums.`,
+      visual: michelsonPlan({ kind: 'ligo', caption: 'LIGO’s layout (not to scale): a Michelson interferometer whose 4 km arms are each a cavity between an input mirror and an end mirror, in which the light makes about 280 round trips. Further mirrors that recycle light are not drawn.' }),
     }),
     mcq({
       id: 'cp-how', difficulty: 3, transfer: true,
       prompt: 'LIGO detects arm-length changes of about 10⁻¹⁸ m — far less than a millionth of a fringe. How is that possible?',
       choices: [
-        'It does not count fringes: it holds the output near a dark fringe and measures tiny changes in light power, using very high laser power, arm cavities that multiply the effect, and averaging over enormous numbers of photons',
-        'Its laser’s wavelength is about 10⁻¹⁸ m',
-        'It counts fringes extremely fast, a trillion per second',
-        'Its mirrors are single atoms, which can be placed exactly',
+        'It does not count fringes: it measures tiny changes in the output’s power, with very high laser power and cavities that multiply the effect',
+        'Its laser’s wavelength is about 10⁻¹⁸ m, so each change is a whole fringe',
+        'It counts fringes extremely fast, about a trillion of them every second',
+        'Its mirrors are single atoms, so their positions are known exactly',
       ],
       answer: 0,
       why: {
@@ -194,10 +194,10 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
         2: 'There are no whole fringes to count: the shift is a few billionths of one.',
         3: 'The mirrors are 40 kg fused-silica test masses, suspended as pendulums to isolate them from ground vibration.',
       },
-      hints: ['How much does the output brightness change for a tiny fraction of a fringe, near a dark fringe?', 'More photons make a small change in brightness easier to measure.'],
+      hints: ['A tiny fraction of a fringe changes the output’s brightness by a tiny fraction too.', 'More photons make a small change in brightness easier to measure.'],
       teach: 'An interferometer can measure a tiny fraction of a fringe by measuring brightness precisely, rather than counting whole fringes.',
-      explain: 'Near a dark fringe, the output power changes in proportion to the arm-length difference, so a billionth of a fringe gives a billionth-scale change in power. With hundreds of kilowatts circulating in the arms, enough photons arrive to measure that above the photon counting noise; cavities multiply the signal and the mirrors are isolated from vibrations. That is how GW150914’s 4×10⁻¹⁸ m stretch was seen.',
-      visual: michelsonPic({ lambda: 633, dL: 150 }, 'An interferometer near a dark fringe at its centre: there the output brightness is most sensitive to tiny shifts (a laboratory Michelson, not LIGO’s scale).'),
+      explain: 'LIGO holds its output just off a dark fringe, where the detected power changes in proportion to a tiny change in arm length: a few billionths of a fringe changes the power by a few billionths of a fringe’s full range. With hundreds of kilowatts circulating in the arms, enough photons arrive to measure that above the random arrival of photons; the cavities multiply the signal and the mirrors are isolated from vibration. That is how GW150914’s 4×10⁻¹⁸ m stretch was seen.',
+      visual: michelsonPic({ lambda: 633, dL: 150 }, 'A laboratory Michelson set just off a dark fringe at its centre (not LIGO’s scale): there a tiny change in arm length changes the detected brightness in proportion, against very little steady light.'),
     }),
   ],
   sources: [

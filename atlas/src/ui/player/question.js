@@ -131,7 +131,8 @@ export function mountQuestion(el, item, o = {}) {
     } else {
       // opening the solution is not a failure to scold: it gets a neutral heading
       parts.push(h('div.head', { html: S.solution ? `${icon('info')}Here’s how it goes` : `${icon('x')}${final ? 'Not this time' : 'Not quite'}` }));
-      const msg = r.feedback || (item.type === 'mcq' ? '' : 'That doesn’t match. Check each step against the hint.');
+      // without hints (checkpoint, boss) there is no hint to check the steps against
+      const msg = r.feedback || (item.type === 'mcq' ? '' : assisted ? 'That doesn’t match. Check each step against the hint.' : 'That doesn’t match.');
       if (msg) parts.push(item.type === 'code' ? md(msg, 'small') : mdi(msg, 'small'));
       if (!final && assisted) parts.push(h('div.small.faint', { style: { marginTop: '.3rem' } }, item.hints?.length > S.hints ? 'Try again, or take a hint.' : 'Try again, or open the solution.'));
     }
@@ -156,7 +157,7 @@ export function mountQuestion(el, item, o = {}) {
     ctl.reveal?.(item);
     // keep what the last attempt was told (an option's “why”, a named slip)
     const last = S.lastResult && !S.lastResult.correct ? S.lastResult.feedback || '' : '';
-    feedback(false, { feedback: o.context === 'checkpoint' && !last ? 'Counted as not yet known — here is how it goes.' : last }, true);
+    feedback(false, { feedback: (o.context === 'checkpoint' || o.context === 'boss') && !last ? 'Counted as not yet known — here is how it goes.' : last }, true);
   }
 
   function resolve() {

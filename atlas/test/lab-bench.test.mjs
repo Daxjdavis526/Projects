@@ -339,6 +339,22 @@ for (const [P, why] of bad) check(`validate rejects ${why}`, validate(P).length 
   check('lens: corrected by the mark’s offset, the readings satisfy 1/(s + 1) + 1/(s′ − 1) = 1/f', near(1 / 31 + 1 / (lr.R[0] - 1), 1 / 15, 1e-12));
   for (const Q of [{ exp: ['snell', 'lens'] }, { exp: 'snell', axes: 'raw', view: 'plot', fit: false }, { exp: 'lens', view: 'apparatus', sys: true, at: 30, params: { hold: 1.5 } }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
 }
+{
+  // L.7 — double slit and grating
+  const P = B.EXPERIMENTS.doubleslit.defaults;
+  const yAt = (m) => P.L * Math.tan(Math.asin((m * P.lam) / P.d));
+  check('doubleslit: bright fringes sit at d sin θ = mλ (cos² term = 1 there)', [1, 2, 3, 4, 6].every((m) => near(Math.cos((Math.PI * P.d * (yAt(m) / Math.hypot(yAt(m), P.L))) / P.lam) ** 2, 1, 1e-9)));
+  check('doubleslit: with d/a = 5 the 5th and 10th orders fall on the envelope’s zeros', B.slitPattern(P, yAt(5)) < 1e-12 && B.slitPattern(P, yAt(10)) < 1e-12 && B.slitPattern(P, yAt(4)) > 0.04);
+  check('doubleslit: counting visible fringes labels orders 6–9 as 5–8', [1, 2, 3, 4, 6, 7, 8, 9].map((m) => B.slitCounted(P, m)).join() === '1,2,3,4,5,6,7,8');
+  const r = exact('doubleslit'), s = exact('doubleslit', { sys: 'slip' });
+  check('doubleslit: y against m gives d = λL/slope = 0.200 mm (tan θ ≈ sin θ to 0.05 % at 1.6°)', Math.abs(r.results[0].value / 0.2 - 1) < 5e-4, r.results[0].value);
+  check('doubleslit: miscounting past the gap gives d about 16 % small and a bent line', s.results[0].value < 0.17 && s.series[0].fit.chi2 > 50, `${s.results[0].value} ${s.series[0].fit.chi2}`);
+  const g = exact('grating'), gs = exact('grating', { sys: 'slip' });
+  check('grating: sin θ against m gives λ = 632.8 nm exactly', near(g.results[0].value, 632.8, 1e-9) && Math.abs(g.series[0].fit.a) < 1e-12);
+  check('grating: taking sin θ as y/L (tan θ) at up to 49° wrecks λ', gs.results[0].value > 1000 && gs.series[0].fit.chi2 > 1000);
+  check('grating: 300 lines/mm sends order 4 of 632.8 nm out at 49.41°', Math.abs(Math.asin(4 * 632.8e-9 * 300e3) * 180 / Math.PI - 49.408) < 0.002);
+  for (const Q of [{ exp: ['doubleslit', 'grating'] }, { exp: 'grating', axes: 'raw', view: 'plot', fit: false }, { exp: 'doubleslit', view: 'apparatus', sys: true, at: 7 }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

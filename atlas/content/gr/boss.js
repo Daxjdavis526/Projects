@@ -234,7 +234,7 @@ export default boss({
       story: t`An expedition navigates by its clocks. Before leaving, it tests a navigation satellite around the Moon; at the black hole, it reads its own clocks straight from the metric.`,
       items: [
         num({
-          id: 'g3-moon', skill: 'gr.S23.i', difficulty: 3, signed: true,
+          id: 'g3-moon', skill: 'gr.S23.i', difficulty: 3,
           gen(r) {
             const alt = r.pick([300, 500, 2000, 3000, 5000]), rr = R_MOON + alt * 1e3, K = GM_MOON / (C * C);
             const grav = K * (1 / R_MOON - 1 / rr), speed = K / (2 * rr), net = grav - speed, us = net * DAY * 1e6;

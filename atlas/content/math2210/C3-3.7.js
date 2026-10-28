@@ -76,7 +76,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
     caption: t`Heights scaled by 0.6. Level curves on the floor: ellipses around an extremum, a crossing X of hyperbolas through a saddle, parallel lines when $D = 0$. Drag to rotate.`,
   },
   example: {
-    prompt: t`In a frame rotating with the Earth and the Moon, a spacecraft feels the effective potential $\Phi(x, y) = -\dfrac{1 - \mu}{r_1} - \dfrac{\mu}{r_2} - \tfrac12(x^2 + y^2)$, in units where the Earth–Moon distance, $G(M_1 + M_2)$ and the rotation rate are all 1; $\mu = 0.0122$ is the Moon’s share of the mass. Its critical points are the five Lagrange points, where the spacecraft can sit still in this frame. Classify L1 and L4.`,
+    prompt: t`In a frame rotating with the Earth and the Moon, a spacecraft feels the effective potential $\Phi(x, y) = -\dfrac{1 - \mu}{r_1} - \dfrac{\mu}{r_2} - \tfrac12(x^2 + y^2)$, where $r_1$ and $r_2$ are its distances from the Earth and the Moon, in units where the Earth–Moon distance, $G(M_1 + M_2)$ and the rotation rate are all 1; $\mu = 0.0122$ is the Moon’s share of the mass. Its critical points are the five Lagrange points, where the spacecraft can sit still in this frame. Classify L1 and L4.`,
     visual: lagrangeMap(t`Level curves of an effective potential $\Phi$ through its five critical points, drawn for a mass ratio of 1 : 9 ($\mu = 0.1$) so the shape is readable; for Earth and Moon ($\mu = 0.012$) the pattern is the same, with L1 and L2 crowded in near the Moon. Gold bands are high $\Phi$.`),
     steps: [
       { label: 'Why critical points', text: t`$-\nabla\Phi$ is the gravitational pull of both bodies plus the centrifugal push of the rotating frame. Where $\nabla\Phi = \vec 0$ they balance, and a body at rest stays at rest — a Lagrange point.` },
@@ -156,7 +156,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
         const x0 = (2 * a - b) / 3, y0 = (2 * b - a) / 3;
         return {
           prompt: t`Find the $x$-coordinate of the critical point of $f(x, y) = x^2 + xy + y^2 - ${a}x ${b < 0 ? '+' : '-'} ${Math.abs(b)}y$. (It turns out to be a minimum.)`,
-          visual: { type: 'c3-contour', params: { f: `x^2 + x*y + y^2 - ${a}*x - ${b}*y`, x: [-3, 5], y: [-3.5, 3.5], levels: 10, labels: false }, caption: t`Level curves of $f$ (unlabelled): nested tilted ellipses around one point.` },
+          visual: { type: 'c3-contour', params: { f: `x^2 + x*y + y^2 - ${a}*x - ${b}*y`, x: [r6(x0 - 4), r6(x0 + 4)], y: [r6(y0 - 3.2), r6(y0 + 3.2)], levels: 10, labels: false, axes: false }, caption: t`Level curves of $f$ (unlabelled, axes hidden): nested tilted ellipses around a single point.` },
           answer: x0, tol: { rel: 1e-3, abs: 1e-6 },
           errors: x0 === y0 ? [] : [{ value: y0, feedback: t`That is the $y$-coordinate. Solve $2x + y = ${a}$ and $x + 2y = ${b}$ for $x$.` }],
           hints: [t`Set both partials to zero: $f_x = 2x + y - ${a} = 0$ and $f_y = x + 2y ${b < 0 ? '+' : '-'} ${Math.abs(b)} = 0$.`, t`Double the first equation and subtract the second: $3x = ${2 * a - b}$.`],
@@ -205,7 +205,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
     mcq({
       id: 'D-zero', difficulty: 3,
       prompt: t`At the origin both $f = x^4 + y^4$ and $g = x^4 - y^4$ have $\nabla = \vec 0$ and every second partial equal to zero, so $D = 0$ for both. What can you conclude?`,
-      visual: traces([{ fn: 'x^4', color: 'accent', label: 's⁴', labelAt: 1.2, labelDx: 8 }, { fn: '-x^4', color: 'violet', label: '−s⁴', labelAt: 1.2, labelDx: 8, labelDy: 12 }, { fn: 'x^2', color: 'ink3', width: 1.4, label: 's² for comparison', labelAt: 0.75, labelDx: -100, labelDy: -12 }], { x: [-1.4, 1.4], y: [-2, 2], caption: t`Fourth powers are so flat at $0$ that their second derivative vanishes: $s^4$ and $-s^4$, with $s^2$ for comparison.` }),
+      visual: traces([{ fn: 'x^4', color: 'accent', label: 's⁴', labelAt: 1.1, labelDx: 8, labelDy: 0 }, { fn: '-x^4', color: 'violet', label: '−s⁴', labelAt: 1.1, labelDx: 8, labelDy: 0 }, { fn: 'x^2', color: 'ink3', width: 1.4, label: 's²', labelAt: 1.35, labelDx: 6, labelDy: 0 }], { x: [-1.4, 1.4], y: [-2, 2], caption: t`Fourth powers are so flat at $0$ that their second derivative vanishes: $s^4$ and $-s^4$, with $s^2$ for comparison.` }),
       choices: [
         t`The test is silent: $f$ has a minimum at the origin and $g$ a saddle, which only a closer look reveals`,
         t`Both have a minimum, since $D = 0$ means a flat bottom`,

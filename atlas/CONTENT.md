@@ -621,7 +621,12 @@ export default boss({
 
 Every item **must** name the lesson whose skill it measures (`skill`), so the
 result moves the right mastery estimate. Boss items follow all the item rules
-(hints are still required — they appear in later review, not in the battle).
+(hints are still required — they appear in later review, not in the battle);
+any item type may use a generator, and the test checks both the first seeds
+and the ones the boss page draws. The `intro`, round titles and `story` text
+are markup and are checked like prose. Screenshot it with
+`node atlas/tools/shots.mjs <dir> boss:<course> dark`, and look at a phone-width
+view as well: canvas labels that fit at 1280 px can collide at 390 px.
 
 ## Before you call a lesson done
 

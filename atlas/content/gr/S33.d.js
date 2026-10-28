@@ -37,10 +37,14 @@ const boostPic = ({ w = 0, sliders = false, caption } = {}) => ({
       ],
     } : { constants: { w } }),
     curves: [
-      { fn: '(1 + w*x^2)/(1 - x^2)', color: 'gold', width: 2.6, label: 'energy density measured', labelAt: 0.03, labelDx: 4, labelDy: -14 },
-      { fn: '(1 + w)/(1 - x^2) + (w - 1)/2', color: 'violet', width: 2.2, label: 'strong-condition combination', labelAt: 0.03, labelDx: 4, labelDy: 18 },
+      { fn: '(1 + w*x^2)/(1 - x^2)', color: 'gold', width: 2.6 },
+      { fn: '(1 + w)/(1 - x^2) + (w - 1)/2', color: 'violet', width: 2.2 },
     ],
     hlines: [{ y: 0, color: 'ink3' }],
+    points: [
+      { x: 0.02, y: 5.4, r: 0.01, color: 'gold', label: 'gold: energy density measured', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 0.02, y: 4.75, r: 0.01, color: 'violet', label: 'violet: strong-condition combination', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+    ],
   },
   caption: caption ?? t`What an observer moving at speed $\beta c$ through a perfect fluid measures, in units of the rest-frame $\rho c^2$: the energy density $T_{\mu\nu}t^\mu t^\nu = \gamma^2(\rho c^2 + p) - p$ (gold) and the strong-condition combination $\gamma^2(\rho c^2 + p) + \tfrac12(p - \rho c^2)$ (violet). A condition fails if its curve dips below zero for any speed.`,
 });
@@ -97,15 +101,17 @@ const platesPic = (caption) => ({
 const scalarPic = {
   type: 'graph',
   params: {
-    x: [-3, 3], y: [-4.5, 9.5], xlabel: 'field value φ', ylabel: 'potential V(φ)', axesAt: 'edge',
+    x: [-2.5, 2.5], y: [-4.5, 7.6], xlabel: 'field value φ', ylabel: 'potential V(φ)', axesAt: 'edge',
     curves: [
-      { fn: 'x^2', color: 'accent', width: 2.6, label: 'V ≥ 0 everywhere', labelAt: -2.6, labelDx: 10, labelDy: -2 },
-      { fn: 'x^2 - 4', color: 'bad', width: 2, dash: true, label: 'a potential dipping below zero', labelAt: 0.55, labelDx: 10, labelDy: 18 },
+      { fn: 'x^2', color: 'accent', width: 2.6 },
+      { fn: 'x^2 - 4', color: 'bad', width: 2, dash: true },
     ],
     hlines: [{ y: 0, color: 'ink3' }],
     points: [
-      { x: 2.7, y: 7.29, color: 'gold', r: 6, label: 'rolling slowly: V far above φ̇²', labelDx: -12, labelDy: -12, labelAlign: 'right' },
-      { x: 0.3, y: 0.09, color: 'ink2', r: 5, label: 'oscillating near the bottom', labelDx: 10, labelDy: -12 },
+      { x: -2.4, y: 7.15, r: 0.01, color: 'accent', label: 'solid: V ≥ 0 everywhere', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 2.4, y: 7.15, r: 0.01, color: 'bad', label: 'dashed: V dips below zero', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+      { x: 2.2, y: 4.84, color: 'gold', r: 6, label: 'rolling slowly: V far above φ̇²', labelDx: -12, labelDy: -10, labelAlign: 'right' },
+      { x: 0.3, y: 0.09, color: 'ink2', r: 5, label: 'oscillating near the bottom', labelDx: 10, labelDy: 18 },
     ],
   },
   caption: t`A homogeneous scalar field $\phi(t)$ in a potential $V(\phi)$, in units with $c = 1$: $\rho = \tfrac12\dot\phi^2 + V$, $p = \tfrac12\dot\phi^2 - V$. A field held high on its potential (gold) drives inflation; one oscillating about the minimum behaves, on average, like dust. Schematic shapes.`,
@@ -117,10 +123,14 @@ const focusPic = {
   params: {
     x: [0, 3], y: [0, 1.2], xlabel: 'affine parameter λ, in units of 1/|θ₀|', ylabel: 'bundle area ÷ starting area', axesAt: 'edge',
     curves: [
-      { fn: '(1 - x/2)^2', domain: [0, 2], color: 'gold', width: 2.6, label: 'vacuum: the rays meet', labelAt: 0.6, labelDx: -8, labelDy: -14 },
-      { fn: '1 - x + 0.45*x^2', domain: [0, 2.2], color: 'violet', width: 2, dash: true, label: 'null condition broken: a throat (schematic)', labelAt: 2.05, labelDx: -10, labelDy: -14, labelAlign: 'right' },
+      { fn: '(1 - x/2)^2', domain: [0, 2], color: 'gold', width: 2.6 },
+      { fn: '1 - x + 0.45*x^2', domain: [0, 2.2], color: 'violet', width: 2, dash: true },
     ],
     vlines: [{ x: 2, color: 'ink3', label: 'caustic' }],
+    points: [
+      { x: 0.85, y: 0.22, r: 0.01, color: 'gold', label: 'vacuum: the rays meet', labelAlign: 'right', labelDx: 0, labelDy: 0 },
+      { x: 0.6, y: 1.09, r: 0.01, color: 'violet', label: 'null condition broken: a throat (schematic)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+    ],
   },
   caption: t`The cross-section of a converging bundle of light rays with no shear or twist, starting with expansion $\theta_0 < 0$. In vacuum (gold) it shrinks to zero at $\lambda = 2/|\theta_0|$; matter obeying the null condition only brings that point closer. A bundle that turns around and re-expands (violet, a sketch) needs $T_{\mu\nu}k^\mu k^\nu < 0$ — a wormhole throat.`,
 };

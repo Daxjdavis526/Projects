@@ -212,12 +212,25 @@ for (const c of CATALOG.courses) {
   let B;
   try { B = (await c.bossLoad()).default; } catch (e) { check(`${c.id} boss loads`, false, e.message); continue; }
   check(`${c.id} boss: has rounds`, Array.isArray(B.rounds) && B.rounds.length >= 3, 'an authored boss needs 3+ rounds');
+  // the story text is markup too
+  for (const s of [B.title, B.intro, ...(B.rounds || []).flatMap((r) => [r.title, r.story])]) {
+    if (!s) continue;
+    const dmg = escapeDamage(s);
+    if (dmg) check(`${c.id} boss text`, false, `“${String(s).slice(0, 40)}…” ${dmg}`);
+    for (const m of mathIn(s)) { try { tex(m.tex, m.display); } catch (e) { check(`${c.id} boss text TeX`, false, `${m.tex}: ${e.message}`); } }
+  }
+  const bossIds = (B.rounds || []).flatMap((r) => (r.items || []).map((d) => d.id));
+  check(`${c.id} boss: item ids are unique`, new Set(bossIds).size === bossIds.length);
+  let slot = 0;
   for (const [k, round] of (B.rounds || []).entries()) {
     for (const def of round.items || []) {
-      for (let v = 0; v < (def.gen ? 10 : 1); v++) {
+      // the first 10 seeds, then the ones the boss page draws: 500 + 37·attempt + position
+      const seeds = def.gen ? [...Array(10).keys(), ...Array.from({ length: 20 }, (_, a) => 500 + 37 * a + slot)] : [0];
+      slot++;
+      for (const v of seeds) {
         const item = instantiate({ id: `${c.id}.boss`, skills: [def.skill || `${c.id}.boss`] }, def, v);
         const p = validateItem(item, tex);
-        if (p.length) { check(`${c.id} boss round ${k + 1}/${def.id}`, false, p.join('; ')); break; }
+        if (p.length) { check(`${c.id} boss round ${k + 1}/${def.id}`, false, `variant ${v}: ${p.join('; ')}`); break; }
         if (v === 0) {
           check(`${c.id} boss round ${k + 1}/${def.id}`, true);
           check(`${c.id} boss ${def.id}: measures a real lesson skill`, !!CATALOG.lessons[def.skill], `skill “${def.skill}” — set skill to the id of the lesson this problem draws on`);
