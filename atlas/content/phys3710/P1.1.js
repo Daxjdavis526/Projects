@@ -32,7 +32,7 @@ function multiplet({ show = 'm', caption, extra = {}, masses = true, hide = null
       if (j === 0) {
         points.push({ x: i3, y: s, r: 7, color: hidden ? 'ink4' : MCOL[k], when: w(k), label: hidden ? '?' : name, labelDx: 0, labelDy: -14, labelAlign: 'center' });
         if (masses && !hidden) points.push({ ...label(i3, s, `${Math.round(m)} MeV`, 'ink3', 0, 15, 'center'), when: w(k) });
-      } else points.push({ ...label(i3, s, masses ? `${name} ${Math.round(m)} MeV` : name, MCOL[k], 14, (j - 1) * 14 - 2, 'left'), when: w(k) });
+      } else points.push({ ...label(i3, s, masses ? `${name} ${Math.round(m)} MeV` : name, MCOL[k], 34, (j - 1) * 14 - 4, 'left'), when: w(k) });
     }
   });
   return {
@@ -161,7 +161,7 @@ The [MP13.2](#/lesson/phys2710.MP13.2) overview gave the particle table; here th
       hints: [t`$-\tfrac13\,\dfrac{e\hbar}{2m_s} = -0.613\,\dfrac{e\hbar}{2m_p}$.`, t`$m_s = \dfrac{m_p}{3\times0.613}$.`],
       teach: 'Magnetic moments measure constituent quark masses: about 336 MeV for u and d, about 510 MeV for s.',
       explain: t`$m_s = 938.3/(3\times0.613) = ${fmt(MPC2 / 3 / 0.613, 3)}$ MeV — about 170 MeV heavier than the up and down constituent masses (336 MeV). That difference is the ~150 MeV step between rows of the decuplet: the same strange quark seen two ways.`,
-      visual: quarkRing(['u', 'd', 's'], 'Λ: uds', { spins: [1, -1, 1], caption: 'The Λ: its up and down quarks pair to spin 0, so the strange quark carries the spin and the magnetic moment. A sketch.' }),
+      visual: multiplet({ show: 0, caption: 'The baryon octet (masses PDG 2024). The Λ shares the centre of the S = −1 row with the Σ⁰: both are uds, but in the Λ the u and d pair to spin 0, leaving the strange quark to carry the spin and the magnetic moment.' }),
     }),
     multi({
       id: 'fermions', difficulty: 2,

@@ -66,7 +66,7 @@ Each extra vertex costs a factor of about $1/137$, which is why the simplest dia
     steps: [
       { label: 'Why m to the fifth', text: t`The weak coupling $G_F$ has dimensions of $1/\text{energy}^2$. A rate $\Gamma$ (an energy, times $1/\hbar$) built from $G_F^2$ needs five more powers of energy, and the only energy around is the decaying mass: $\Gamma \propto G_F^2m^5$ — Sargent’s rule.` },
       { label: 'One channel', text: t`If the tau decayed only to $e\bar\nu_e\nu_\tau$, exactly like the muon, it would live $\tau_\mu(m_\mu/m_\tau)^5 = 2.197\times10^{-6}\times${tex(SCALE, 3)} = ${tex(TAU_MU * SCALE, 3)}$ s.` },
-      { label: 'Count the channels', text: t`The W⁻ can become $e^-\bar\nu_e$, $\mu^-\bar\nu_\mu$, or $d\bar u$ in each of **three colours**: five channels of nearly equal strength (the tau is too light for $s\bar c$). The rate is five times larger.` },
+      { label: 'Count the channels', text: t`The W⁻ can become $e^-\bar\nu_e$, $\mu^-\bar\nu_\mu$, or $d\bar u$ (strictly a mixture of $d\bar u$ and a little $s\bar u$, shared out by the quark-mixing angle) in each of **three colours**: five channels of nearly equal strength (the tau is too light for $s\bar c$). The rate is five times larger.` },
       { label: 'Estimate', text: t`$\tau_\tau \approx ${tex(TAU_MU * SCALE, 3)}/5 = ${tex(TAU_PRED, 3)}$ s.` },
       { label: 'Sense check', text: t`Measured: $2.903\times10^{-13}$ s, and the electron channel’s share is 17.8%, not 20% (the quark channel is boosted by gluon radiation and the muon channel slightly suppressed by its mass). Using that share, $\tau_\mu(m_\mu/m_\tau)^5\times0.178 = ${tex(TAU_MU * SCALE * BR_E, 4)}$ s — within 0.3%. Without colour there would be three channels and a lifetime near $5\times10^{-13}$ s.` },
     ],

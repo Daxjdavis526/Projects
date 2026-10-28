@@ -1,5 +1,5 @@
 // The curve of binding energy: binding energy per nucleon, B/A, against mass
-// number A, from measured atomic masses (AME2020), with the liquid-drop
+// number A, from measured atomic masses (AME2016), with the liquid-drop
 // (semi-empirical) formula as a smooth curve. Pick a nuclide to read its
 // mass defect and binding energy; switch on fusion and fission to see both
 // climb toward the peak near iron and nickel. Physics in

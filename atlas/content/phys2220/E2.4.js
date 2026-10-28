@@ -67,7 +67,7 @@ Field lines start on positive charges and end on negative ones (or run off to in
         return {
           prompt: t`In a field-line drawing, ${NA} lines leave charge A, which is $+${qA}$ nC, and ${NB} lines end on charge B. What is the charge on B (with its sign)?`,
           answer: qB, units: 'nC', tol: { rel: 0.005 },
-          errors: [{ value: -(qA * NA) / NB, feedback: 'Turned upside down: fewer lines means less charge. q_B/q_A = N_B/N_A.' }],
+          errors: [{ value: -(qA * NA) / NB, feedback: 'Turned upside down: fewer lines means less charge. $q_B/q_A = N_B/N_A$.' }],
           hints: ['The number of lines is proportional to the charge.', t`$|q_B| = q_A\cdot N_B/N_A$; lines *end* on negative charges.`],
           teach: 'The number of field lines at a charge is proportional to its size: lines start on + charges and end on − charges.',
           explain: t`$|q_B| = ${qA}\times\dfrac{${NB}}{${NA}} = ${s3(-qB, 3)}$ nC, and lines end on it, so $q_B = ${s3(qB, 3)}$ nC.`,
@@ -156,7 +156,7 @@ Field lines start on positive charges and end on negative ones (or run off to in
           vars: { x: [0.5, 5] },
           errors: [{ answer: `${y0}*x/${x0}`, feedback: t`That is a straight line through the origin, the field line of a point charge. Here $dy/dx = -y/x$.` }, { answer: `${c}*x`, feedback: t`Check: separating gives $\ln y = -\ln x + C$, so $y = C/x$.` }],
           hints: [t`$\dfrac{dy}{dx} = \dfrac{-y}{x}$. Separate the variables: $\dfrac{dy}{y} = -\dfrac{dx}{x}$.`, t`Integrate: $\ln y = -\ln x + C$, so $xy = \text{constant}$.`, t`Fix the constant with the point: $xy = ${x0}\times${y0}$.`],
-          teach: 'Drawing a field line means solving dy/dx = E_y/E_x — here a separable equation whose solutions are the hyperbolas xy = constant.',
+          teach: 'Drawing a field line means solving $dy/dx = E_y/E_x$ — here a separable equation whose solutions are the hyperbolas xy = constant.',
           explain: t`$\dfrac{dy}{y} = -\dfrac{dx}{x} \Rightarrow \ln y = -\ln x + C \Rightarrow xy = ${c}$, so $y = ${c}/x$: a hyperbola. Every field line near the lens's centre is one of these, which is why the field there squeezes a beam in one direction while stretching it in the other.`,
           visual: field({ x: [-6, 6], y: [-4.5, 4.5], lines: QUAD, fieldLines: true, density: 14 }, 'The four rods of a quadrupole lens seen end-on (+ on the y axis, − on the x axis, 3 cm from the centre) and their field lines. Within a few millimetres of the centre the field is very close to E₀(x, −y)/a.'),
         };

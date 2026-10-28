@@ -7,7 +7,7 @@
 
 export const U_MEV = 931.49410372;            // MeV per atomic mass unit (CODATA 2022)
 export const U_KG = 1.66053906892e-27;        // kg (CODATA 2022)
-export const M_H = 1.00782503223;             // u, the hydrogen-1 atom (AME2020)
+export const M_H = 1.00782503223;             // u, the hydrogen-1 atom (AME2016; AME2020 gives 1.0078250319)
 export const M_N = 1.00866491606;             // u, the neutron (CODATA 2022)
 export const NA = 6.02214076e23;              // mol⁻¹, exact
 export const QE = 1.602176634e-19;            // J per eV, exact
@@ -15,8 +15,11 @@ export const YEAR = 365.25 * 86400;           // s, Julian year
 export const LN2 = Math.LN2;
 
 /**
- * Atomic masses (u) from the 2020 Atomic Mass Evaluation (Wang et al., Chinese
- * Physics C 45, 030003), to the digits needed here. Atomic, not nuclear,
+ * Atomic masses (u), mostly from the 2016 Atomic Mass Evaluation (Wang et al.,
+ * Chinese Physics C 41, 030003, 2017) with some older values. The 2020
+ * evaluation differs from them by at most about 2×10⁻⁶ u (2 keV): invisible in
+ * binding energies per nucleon (MeV) and Q-values to the digits shown. For
+ * AME2020 values, see content/phys3710/_nuclear.js. Atomic, not nuclear,
  * masses: the electrons’ masses cancel against those in Z hydrogen atoms.
  */
 export const NUCLIDES = [

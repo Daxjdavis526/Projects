@@ -16,8 +16,8 @@ const D = PI / 180;
 const rhatArrows = (R, n = 10) => {
   const out = [];
   for (let i = 0; i < n; i++) {
-    const th = Math.acos(1 - (2 * (i + 0.5)) / n), ph = 2.39996 * i;
-    const p = [Math.sin(th) * Math.cos(ph), Math.sin(th) * Math.sin(ph), Math.cos(th)];
+    const tt = Math.acos(1 - (2 * (i + 0.5)) / n), ph = 2.39996 * i;
+    const p = [Math.sin(tt) * Math.cos(ph), Math.sin(tt) * Math.sin(ph), Math.cos(tt)];
     out.push({ from: p.map((v) => +(R * v).toFixed(4)), to: p.map((v) => +((R + 0.8) * v).toFixed(4)), color: 'gold' });
   }
   return out;
@@ -56,7 +56,7 @@ The tensor view, where all of these come from the metric, is in [Tensor calculus
       t`Double $r$: the $\theta$- and $\phi$-edges double, so the box’s volume grows as $r^2$ — the $r^2$ in $d\tau$.`,
     ],
     params: { system: 'spherical', choose: true, point: [2.2, 55, 40], element: true, elementToggle: true, readouts: ['x', 'y', 'z'] },
-    caption: t`Physics convention: $\theta$ from the $+z$ axis, $\phi$ from the $+x$ axis. The box is drawn with exaggerated steps so its edges are visible.`,
+    caption: t`Physics convention: $\theta$ from the $+z$ axis, $\phi$ from the $+x$ axis. The cylindrical mode labels the distance from the axis $\rho$; this lesson calls it $s$. The box is drawn with exaggerated steps so its edges are visible.`,
   },
   example: {
     prompt: t`Find the divergence of $\vec v = r\cos\theta\,\hat r - r\sin\theta\,\hat\theta$, and check the answer in Cartesian coordinates.`,
@@ -135,7 +135,7 @@ The tensor view, where all of these come from the metric, is in [Tensor calculus
           visual: { type: 'graph', params: { x: [-2.6, 2.6], y: [-1.6, 1.6], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves: [1, 2, 3].map((c) => ({ param: [`${0.6 * c}*sin(t)^2*sin(t)`, `${0.6 * c}*sin(t)^2*cos(t)`], t: [0, 2 * PI], color: 'accent', width: 1.3 })).concat([1, 2, 3].map((c) => ({ param: [`-${0.6 * c}*sin(t)^2*sin(t)`, `${0.6 * c}*sin(t)^2*cos(t)`], t: [0, 2 * PI], color: 'accent', width: 1.3 }))), points: [{ x: 0, y: 0.06, color: 'bad', r: 4 }, { x: 0, y: -0.06, color: 'accent', r: 4 }, { x: +(1.3 * Math.sin(thd * D)).toFixed(3), y: +(1.3 * Math.cos(thd * D)).toFixed(3), color: 'gold', r: 5, label: 'P' }], arrows: [{ from: [0, 0], to: [0, 1.5], color: 'ink3', label: 'z' }] }, caption: t`Field lines of the pair (sketch) in a plane through the $z$-axis, and the point $P$ at polar angle $${thd}^\circ$. Not to scale.` },
           answer: ans, units: 'V/m', tol: { rel: 0.005 },
           errors: [
-            { value: ans * rr, feedback: t`The $\theta$-component of the gradient is $\tfrac1r\tfrac{\partial V}{\partial\theta}$: a step $d\theta$ moves you $r\,d\theta$, not $d\theta$. Your answer has the wrong units.` },
+            ...(rr === 1 ? [] : [{ value: ans * rr, feedback: t`The $\theta$-component of the gradient is $\tfrac1r\tfrac{\partial V}{\partial\theta}$: a step $d\theta$ moves you $r\,d\theta$, not $d\theta$. Your answer has the wrong units.` }]),
             ...(thd !== 90 ? [{ value: (2 * k * Math.cos(thd * D)) / rr ** 3, feedback: t`That is $E_r = -\partial V/\partial r$. The question asks for $E_\theta$.` }] : []),
           ],
           hints: [t`$\nabla V = \dfrac{\partial V}{\partial r}\hat r + \dfrac1r\dfrac{\partial V}{\partial\theta}\hat\theta + \dfrac{1}{r\sin\theta}\dfrac{\partial V}{\partial\phi}\hat\phi$.`, t`$E_\theta = -\dfrac1r\dfrac{\partial V}{\partial\theta} = \dfrac{k\sin\theta}{r^3}$.`],
@@ -216,7 +216,7 @@ $$\nabla^2 T = \frac{1}{r^2}\frac{\partial}{\partial r}\left(r^2\frac{\partial T
         const sy = (rk / RE) * sc;
         return {
           prompt: t`What percentage of Earth’s surface can ${name} see at one moment, from ${th(rk)} km from Earth’s centre? Treat Earth as a sphere of radius 6 371 km; the visible region is the cap within polar angle $\theta_{\max}$ of the point beneath the satellite, where $\cos\theta_{\max} = R_E/r$.`,
-          visual: { type: 'graph', params: { x: [-1.9, 1.9], y: [-1.3, sy + 0.25], equal: true, aspect: 'square', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ param: [`${sc}*cos(t)`, `${sc}*sin(t)`], t: [0, 2 * PI], color: 'teal', width: 2 }, { param: [`${sc}*sin(t)`, `${sc}*cos(t)`], t: [-tm, tm], color: 'gold', width: 5 }], points: [{ x: 0, y: +sy.toFixed(3), color: 'gold', r: 5, label: 'satellite' }, { x: 0, y: 0, color: 'ink3', r: 3 }], arrows: [{ from: [0, +sy.toFixed(3)], to: [+(sc * Math.sin(tm)).toFixed(3), +(sc * Math.cos(tm)).toFixed(3)], color: 'ink3', dash: true }, { from: [0, +sy.toFixed(3)], to: [-(sc * Math.sin(tm)).toFixed(3), +(sc * Math.cos(tm)).toFixed(3)], color: 'ink3', dash: true }] }, caption: t`Earth in cross-section (teal) and the visible cap (gold) bounded by the lines of sight that graze the surface. ${rk / RE > 2.6 ? 'Distance to the satellite shortened to fit.' : 'To scale.'}` },
+          visual: { type: 'graph', params: { x: [-1.9, 1.9], y: [-1.3, sy + 0.25], equal: true, aspect: 'square', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ param: [`${sc}*cos(t)`, `${sc}*sin(t)`], t: [0, 2 * PI], color: 'teal', width: 2 }, { param: [`${sc}*sin(t)`, `${sc}*cos(t)`], t: [-tm, tm], color: 'gold', width: 5 }], points: [{ x: 0, y: +sy.toFixed(3), color: 'gold', r: 5, label: 'satellite' }, { x: 0, y: 0, color: 'ink3', r: 3 }], arrows: [{ from: [0, +sy.toFixed(3)], to: [+(sc * Math.sin(tm)).toFixed(3), +(sc * Math.cos(tm)).toFixed(3)], color: 'ink3', dash: true }, { from: [0, +sy.toFixed(3)], to: [-(sc * Math.sin(tm)).toFixed(3), +(sc * Math.cos(tm)).toFixed(3)], color: 'ink3', dash: true }] }, caption: t`Earth in cross-section (teal) and the visible cap (gold) bounded by the lines of sight that graze the surface. To scale.` },
           answer: ans, units: '%', tol: { rel: 0.01 },
           errors: [
             { value: 100 * (1 - c), feedback: t`The cap’s area is $2\pi R_E^2(1 - \cos\theta_{\max})$; divide by the **whole** sphere, $4\pi R_E^2$, not by $2\pi R_E^2$.` },

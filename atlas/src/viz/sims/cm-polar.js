@@ -42,7 +42,22 @@ export const defaults = {
 const SHOW = ['path', 'basis', 'v', 'a', 'terms', 'rvec'];
 const READ = { t: ['$t$', 's'], r: ['$r$', 'm'], rd: ['$\\dot r$', 'm/s'], rdd: ['$\\ddot r$', 'm/s^2'], th: ['$\\theta$', 'rad'], thd: ['$\\dot\\theta$', 'rad/s'], thdd: ['$\\ddot\\theta$', 'rad/s^2'], vr: ['$v_r$', 'm/s'], vt: ['$v_\\theta$', 'm/s'], speed: ['$|\\vec v|$', 'm/s'], ar: ['$a_r$', 'm/s^2'], at: ['$a_\\theta$', 'm/s^2'], a: ['$|\\vec a|$', 'm/s^2'] };
 const TERMS = [['rdd', 'r̈', 'accent', 'r'], ['cent', '−rθ̇²', 'bad', 'r'], ['tang', 'rθ̈', 'teal', 't'], ['cor', '2ṙθ̇', 'gold', 't']];
-const trim = (x, n = 3) => { const v = +(+x).toPrecision(n); return Math.abs(v) < 1e-9 ? '0' : String(v); };
+// numbers: 3 significant figures, as TeX (×10ⁿ outside 10⁻³ … 10⁵) or as plain canvas text
+const trim = (x, n = 3) => {
+  const v = +(+x).toPrecision(n), a = Math.abs(v);
+  if (a < 1e-12) return '0';
+  if (a >= 1e5 || a < 1e-3) { const [m, e] = v.toExponential(n - 1).split('e'); return `${m}\\times10^{${+e}}`; }
+  return String(v);
+};
+const plain = (x, n = 3) => { const v = +(+x).toPrecision(n); return Math.abs(v) < 1e-12 ? '0' : String(v).replace('-', '−'); };
+// central differences leave round-off of order 10⁻⁸ of the largest term: call anything that small zero
+function clean(k) {
+  const big = Math.max(1e-12, ...Object.values(k.terms).map(Math.abs));
+  const z = (v) => (Math.abs(v) < 1e-6 * big ? 0 : v);
+  for (const key of Object.keys(k.terms)) k.terms[key] = z(k.terms[key]);
+  k.ar = z(k.ar); k.at = z(k.at); k.rdd = z(k.rdd); k.thdd = z(k.thdd);
+  return k;
+}
 
 export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
@@ -84,7 +99,7 @@ export function mount(F, P0) {
     const rf = fn(C.r, vars), thf = fn(C.theta, vars);
     const R = (t) => rf({ ...env, t }), TH = (t) => thf({ ...env, t });
     const t = +F.params.t;
-    const k = M.kin(R, TH, t, Math.max(1e-4, (C.T[1] - C.T[0]) * 2e-4));
+    const k = clean(M.kin(R, TH, t, Math.max(1e-4, (C.T[1] - C.T[0]) * 2e-4)));
     const pts = M.path(R, TH, C.T[0], C.T[1]);
     const win = C.x && C.y ? { x: C.x, y: C.y } : M.fit([...pts, [0, 0]], 0.28);
     plot.setView(win.x, win.y);
@@ -94,16 +109,20 @@ export function mount(F, P0) {
     const sc = { v: 0.5, a: 0.25, basis: span * 0.14, ...(C.scale || {}) };
     // the polar grid: rings and spokes about the origin
     {
+      plot.ctx.save(); plot._clip();
       const rmax = Math.hypot(Math.max(Math.abs(plot.vx0), Math.abs(plot.vx1)), Math.max(Math.abs(plot.vy0), Math.abs(plot.vy1)));
       const step = Plot.ticks(0, rmax, 5)[1] || rmax / 4;
       for (let rr = step; rr <= rmax; rr += step) plot.circle(0, 0, rr, { color: 'ink4', width: 1, alpha: 0.35 });
       for (let a = 0; a < 360; a += 30) { const c = Math.cos(a * Math.PI / 180), s = Math.sin(a * Math.PI / 180); plot.line(0, 0, rmax * c, rmax * s, { color: 'ink4', width: 1, alpha: 0.25 }); }
+      plot.ctx.restore();
     }
     plot.point(0, 0, { color: 'ink2', r: 3.5, label: C.labels !== false ? 'O' : '', ldx: -14, ldy: 10, lcolor: 'ink3' });
     if (show.has('path')) {
+      plot.ctx.save(); plot._clip();          // a fixed window may cut the path: keep it inside the frame
       plot.path(pts, { color: 'ink3', width: 1.4, dash: [4, 4] });
       const done = pts.filter((_, i) => C.T[0] + ((C.T[1] - C.T[0]) * i) / (pts.length - 1) <= t);
       if (done.length > 1) plot.path(done, { color: 'teal', width: 2.2 });
+      plot.ctx.restore();
     }
     const [px, py] = k.xy;
     const L = C.labels !== false;
@@ -153,9 +172,9 @@ export function mount(F, P0) {
       const y = 6.3 - i - (i >= 3 ? 0.2 : 0), total = i === 2 || i === 5;
       const w = (v / m) * 0.62;
       bplot.rect(Math.min(0, w), y - 0.32, Math.abs(w), 0.64, { color, alpha: total ? 0.55 : 0.35, width: total ? 1.6 : 1 });
-      const label = name === 'a_r' ? 'aᵣ (radial)' : name === 'a_θ' ? 'aθ (transverse)' : name;
+      const label = name === 'a_r' ? 'radial total' : name === 'a_θ' ? 'transverse total' : name;
       mark(bplot, label, -1.02, y, { color: total ? 'ink' : 'ink2', size: 12.5, weight: total ? 700 : 500 });
-      if (C.values !== false) bplot.text(`${trim(v)} m/s²`, w >= 0 ? w + 0.02 : w - 0.02, y, { color: 'ink2', size: 11.5, align: w >= 0 ? 'left' : 'right' });
+      if (C.values !== false) bplot.text(`${plain(v)} m/s²`, w >= 0 ? w + 0.02 : w - 0.02, y, { color: 'ink2', size: 11.5, align: w >= 0 ? 'left' : 'right' });
     });
   }
 

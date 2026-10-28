@@ -167,7 +167,7 @@ The **signed curvature** $\kappa_s$ is positive where the curve turns left, nega
         ]);
         return {
           prompt: t`Find the total signed curvature $\displaystyle\oint\kappa_s\,ds$ of ${name}, once round ($${T}$), in radians.`,
-          visual: pic([{ param: [X, Y], t: [0, '2*pi'], color: 'accent', width: 2.4 }], win[0], win[1], { arrows: [{ from: [r6(+eval0(X, 0)), r6(+eval0(Y, 0))], to: [r6(eval0(X, 0) + 0.25 * d0(X)), r6(eval0(Y, 0) + 0.25 * d0(Y))], color: 'gold', label: 't = 0' }], caption: 'The closed curve, and the direction of travel at t = 0.' }),
+          visual: pic([{ param: [X, Y], t: [0, '2*pi'], color: 'accent', width: 2.4 }], win[0], win[1], { arrows: [{ from: [r6(+eval0(X, 0)), r6(+eval0(Y, 0))], to: [r6(eval0(X, 0) + (0.6 * d0(X)) / Math.hypot(d0(X), d0(Y))), r6(eval0(Y, 0) + (0.6 * d0(Y)) / Math.hypot(d0(X), d0(Y)))], color: 'gold', label: 't = 0' }], caption: 'The closed curve, and the direction of travel at t = 0.' }),
           answer: ans, units: 'rad', tol: { rel: 0, abs: 0.05 },
           errors: [{ value: Math.abs(ans) === 2 * Math.PI ? -ans : ans === 0 ? 2 * Math.PI : 2 * Math.PI, feedback: 'Follow the tangent all the way round and count its net turns, with sign: anticlockwise turns count +2π, clockwise −2π.' }].filter((e) => Math.abs(e.value - ans) > 0.1),
           hints: [t`$\oint\kappa_s\,ds = \oint d\theta$: the net angle the tangent turns through.`, 'Trace the curve with a finger and watch the direction of the tangent: how many full turns, and which way?'],

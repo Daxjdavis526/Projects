@@ -76,7 +76,7 @@ and $u(x_0, t_0)$ does not notice. In the $x$–$t$ plane this interval is the b
         const xs = b + d, T = d / c;
         return {
           prompt: t`A long cable ($c = ${c}$ m/s) is disturbed at $t = 0$ only on $0 \le x \le ${b}$ m. A sensor at $x = ${xs}$ m reads exactly zero until when? Give $t$ in seconds.`,
-          visual: xtPlane({ x: [-2, xs + 5], y: [0, 1.6 * T], xticks: 8, yticks: 4, xlabel: 'x (m)', ylabel: 't (s)', shade: [{ fn: `${1.6 * T}`, lower: `max(0, (x - ${b})/${c}, -x/${c})`, from: -2, to: xs + 5, color: 'gold', alpha: 0.18 }], vlines: [{ x: xs, label: 'sensor', color: 'gold' }] }, 'The range of influence of the disturbed stretch (shaded), and the sensor’s position.'),
+          visual: xtPlane({ x: [-2, xs + 5], y: [0, 1.6 * T], xticks: 8, yticks: 4, xlabel: 'x (m)', ylabel: 't (s)', curves: [{ fn: '0*x', color: 'gold', width: 6, domain: [0, b] }], vlines: [{ x: xs, label: 'sensor', color: 'gold' }] }, 'The disturbed stretch at t = 0 (gold) and the sensor’s position in the x–t plane.'),
           answer: T, units: 's', tol: { rel: 0.01 },
           errors: [{ value: xs / c, feedback: t`Measure from the nearest disturbed point, $x = ${b}$ m, not from $x = 0$.` }].filter((e) => Math.abs(e.value - T) > 0.03 * T),
           hints: ['The earliest signal comes from the nearest end of the disturbed stretch.', t`$t = (x_s - ${b})/c$.`],

@@ -3,7 +3,7 @@
 // mass defect and binding energy B = (Z m_H + N m_n − M)c² from measured
 // atomic masses; the curve of binding energy per nucleon, peaking near iron
 // and nickel; why fusing light nuclei and splitting heavy ones both release
-// energy. Masses from AME2020 via model/qm-nuclear.js.
+// energy. Masses from the Atomic Mass Evaluation via model/qm-nuclear.js.
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
 import { fmt, tex } from '../../src/core/format.js';
 import * as Nu from '../../src/viz/model/qm-nuclear.js';
@@ -391,7 +391,7 @@ Divided by $A$, it makes the most important graph in nuclear physics. Binding en
   ],
   sources: [
     { label: 'OpenStax University Physics Vol. 3, §10.2 Nuclear binding energy', url: 'https://openstax.org/books/university-physics-volume-3/pages/10-2-nuclear-binding-energy' },
-    { label: 'Wang et al. (2021), The AME 2020 atomic mass evaluation (II), Chinese Physics C 45, 030003 — the atomic masses', url: 'https://www-nds.iaea.org/amdc/' },
+    { label: 'The Atomic Mass Evaluation (Wang et al., AME2016 and AME2020, Chinese Physics C) — the atomic masses; the two evaluations agree to within about 2 millionths of a u (2 keV), far below the MeV binding energies computed here', url: 'https://www-nds.iaea.org/amdc/' },
     { label: 'Fewell (1995), The atomic nuclide with the highest mean binding energy, Am. J. Phys. 63, 653', url: 'https://doi.org/10.1119/1.17828' },
     { label: 'CODATA 2022 recommended values (NIST): the atomic mass unit and neutron mass', url: 'https://physics.nist.gov/cuu/Constants/' },
   ],

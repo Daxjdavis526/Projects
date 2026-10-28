@@ -63,7 +63,7 @@ function fissionBarrier(Sn6, { compound = 'U-236', showSn = true, caption } = {}
     params: {
       x: [0, 10], y: [-4, 9], aspect: 'wide', axesAt: 'edge', xlabel: 'deformation (elongation of the nucleus)', xticks: 0, ylabel: 'energy (MeV)',
       curves: [{ fn: '6*exp(-((x - 3.2)/1.3)^2) - 0.35*(x - 3.2)*step(x - 3.2)^2', domain: [0, 10], color: 'accent', width: 2.6 },
-        { fn: String(r6(Sn6)), domain: [0, 10], color: 'gold', width: 2, dash: true, label: showSn ? `after capture: ${fmt(Sn6, 3)} MeV` : 'after capture: ?', labelAt: 0.3, labelDy: -10 }],
+        ...(showSn ? [{ fn: String(r6(Sn6)), domain: [0, 10], color: 'gold', width: 2, dash: true, label: `after capture: ${fmt(Sn6, 3)} MeV`, labelAt: 0.3, labelDy: -10 }] : [])],
       hlines: [{ y: 6, label: 'barrier ≈ 6 MeV', color: 'ink3' }],
       points: [label(0.3, 0, `${uni(compound)} at rest`, 'accent', 0, 12, 'left'), label(9.6, -3.2, 'two fragments, flying apart', 'accent', 0, 0, 'right')],
     },
@@ -130,7 +130,7 @@ The Sun burns at 6 keV, far above its 1.35 keV thermal energy and far below its 
       hints: [t`The energy changes by $\Delta E = \tfrac15\varepsilon^2(2E_S - E_C)$. It is negative when $E_C > 2E_S$.`, t`$a_C\dfrac{Z^2}{A^{1/3}} > 2a_SA^{2/3} \Rightarrow \dfrac{Z^2}{A} > \dfrac{2a_S}{a_C}$.`],
       teach: t`Bohr and Wheeler’s liquid drop has no fission barrier once $Z^2/A$ exceeds $2a_S/a_C \approx 50$; real heavy nuclei sit well below and must be pushed over.`,
       explain: t`$Z^2/A > 2\times17.8/0.711 = ${fmt((2 * aS) / aC, 3)}$. Uranium-235 has $Z^2/A = 92^2/235 = ${fmt(92 * 92 / 235, 3)}$, about 72% of the limit: stable against small wobbles, but with a barrier of only about 6 MeV. The heaviest nuclei made, near $Z^2/A \approx 44$, survive at all only thanks to shell effects the liquid drop leaves out.`,
-      visual: fissionBarrier(Sn('U-236'), { caption: 'A sketch of the energy against deformation for a heavy nucleus: a barrier, then the long fall as the fragments repel. As Z²/A approaches 2a_S/a_C, the barrier shrinks to nothing.' }),
+      visual: fissionBarrier(Sn('U-236'), { caption: 'A sketch of the energy against deformation for a heavy nucleus: a barrier, then the long fall as the fragments repel. As $Z^2/A$ approaches $2a_S/a_C$, the barrier shrinks to nothing.' }),
     }),
     num({
       id: 'sn-compound', difficulty: 2,
@@ -144,7 +144,7 @@ The Sun burns at 6 keV, far above its 1.35 keV thermal energy and far below its 
           hints: ['A slow neutron brings almost no kinetic energy; the excitation is the energy released by binding it.', t`$E^* = [M({}^A\text{X}) + m_n - M({}^{A+1}\text{X})]c^2$.`],
           teach: 'A captured neutron excites the compound nucleus by its separation energy; pairing makes that larger when the compound nucleus is even–even.',
           explain: t`$E^* = ${fmt(s, 4)}$ MeV — ${s > 6 ? `above the barrier, so ${tn} is **fissile**: slow neutrons split it.` : `short of the barrier, so ${tn} does not fission with slow neutrons; the compound nucleus emits a gamma ray instead, and a neutron needs about 1 MeV of kinetic energy to make up the difference.`}`,
-          visual: fissionBarrier(s, { compound: comp, showSn: false, caption: `The energy of ${cn} against deformation (a sketch). The dashed line, withheld, is the excitation the captured neutron brings.` }),
+          visual: fissionBarrier(s, { compound: comp, showSn: false, caption: `The energy of ${cn} against deformation (a sketch; real barriers have two humps). Where the captured neutron leaves it — above or below the barrier — is the question.` }),
         };
       },
     }),

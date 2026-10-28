@@ -67,7 +67,7 @@ with $M$ the diagonal matrix of masses and $K$ the **stiffness matrix**. Look fo
           answer: w2, units: 'rad/s', tol: { rel: 0.005 },
           errors: [{ value: Math.sqrt((k + kc) / m), feedback: t`When the masses move oppositely by $x$, the coupling spring stretches by $2x$, so it pulls each with $2k_cx$: $\omega^2 = (k + 2k_c)/m$.` }, { value: Math.sqrt(k / m), feedback: t`That is the in-phase mode, where the coupling spring never stretches.` }],
           hints: [t`In the out-of-phase mode $x_2 = -x_1$, so the coupling spring’s stretch is $x_2 - x_1 = -2x_1$.`, t`$m x_1'' = -kx_1 + k_c(x_2 - x_1) = -(k + 2k_c)x_1$, so $\omega = \sqrt{(k + 2k_c)/m}$.`],
-          teach: 'For two equal masses the modes are (1, 1) at √(k/m) and (1, −1) at √((k + 2k_c)/m): the coupling spring works only in the second, and works from both ends.',
+          teach: 'For two equal masses the modes are (1, 1) at $\\sqrt{k/m}$ and (1, −1) at $\\sqrt{(k + 2k_c)/m}$: the coupling spring works only in the second, and works from both ends.',
           explain: t`$\omega_2 = \sqrt{(${k} + 2\times${kc})/${m}} = ${fmt(w2, 4)}$ rad/s, against $\sqrt{k/m} = ${fmt(Math.sqrt(k / m), 4)}$ rad/s for the in-phase mode.`,
           visual: pairPic({ m, m2: m, k, kc, start: 'mode2' }, 'The two masses displaced in opposite directions, squeezing the coupling spring (gold) from both ends. Not to scale.'),
         };

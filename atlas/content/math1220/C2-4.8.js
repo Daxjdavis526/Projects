@@ -95,8 +95,8 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
           prompt: t`Find the ratio-test limit $L = \displaystyle\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|$ for $\displaystyle\sum_{n=1}^\infty ${aT}$. Give a decimal.`,
           answer: L, tol: { rel: 2e-3 },
           errors: [{ value: 1 / L, feedback: t`Upside down: the ratio is $a_{n+1}$ over $a_n$ — the later term on top.` }].filter((e) => Math.abs(e.value - L) > 0.01 * L),
-          hints: ['Write a_{n+1}/a_n, cancel what you can (powers and factorials), then let n → ∞.', t`$${why}$.`],
-          teach: 'The ratio test cancels factorials and powers neatly: write a_{n+1}/a_n and simplify before taking the limit.',
+          hints: ['Write $a_{n+1}/a_n$, cancel what you can (powers and factorials), then let n → ∞.', t`$${why}$.`],
+          teach: 'The ratio test cancels factorials and powers neatly: write $a_{n+1}/a_n$ and simplify before taking the limit.',
           explain: t`$${why} = ${fmt(L, 4)}$. ${L < 1 ? 'Since L < 1, the series converges absolutely.' : 'Since L > 1, the series diverges.'}`,
           visual: { type: 'calc-series', params: { view: 'ratio', term, N: 15 }, caption: 'The first 15 ratios of neighbouring terms.' },
         };

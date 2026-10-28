@@ -215,7 +215,7 @@ Both depend only on how hard the air is squeezed, and both equal $1 - T_1/T_2$: 
       answer: 0,
       why: {
         1: t`The rejected heat grows in proportion: $Q_c/Q_h = T_1/T_2$ stays fixed.`,
-        2: 'That would be negative. The Carnot limit is 1 − T_cold/T_hot.',
+        2: 'That would be negative. The Carnot limit is $1 - T_\\text{cold}/T_\\text{hot}$.',
         3: 'It does apply — it is just not reached. The ideal Brayton cycle sits below it.',
       },
       hints: [t`What does the formula $e_{\text{Brayton}} = 1 - r_p^{-(\gamma-1)/\gamma}$ depend on?`, t`Raise $T_3$: the heat in, $nC_P(T_3 - T_2)$, and the heat out, $nC_P(T_4 - T_1)$, grow in the same proportion, because $T_4/T_3 = T_1/T_2$.`],

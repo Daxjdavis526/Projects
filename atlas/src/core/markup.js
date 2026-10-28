@@ -137,7 +137,7 @@ export function escapeDamage(text, { prose = true } = {}) {
     // a subscript in prose (I_cm, v_0) prints its underscore: it belongs in math (link targets excepted)
     // (a symbol: a base of one or two letters — v_0, mL_f, PV^γ, e^{3x}; longer snake_case
     // names like kinetic_energy are identifiers and print as written)
-    const sub = /(?<![\w\\/.-])([A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
+    const sub = /(?<![A-Za-zα-ωΑ-Ω_\\/.-])([A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))(?![\w])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
     if (sub) return `“${sub[1]}” is a subscript or power outside $…$ and would print literally — write $${sub[1]}$`;
     // …and after a bracket: (∂P/∂T)_V, (a + b)^2
     const after = /\)([_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));

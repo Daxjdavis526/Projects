@@ -226,7 +226,7 @@ For light only the ratio $b = L/E$ matters: it is the impact parameter, how far 
           answer: q, tol: { rel: 0.02 },
           errors: [{ value: q / 2, feedback: 'That is M/r. The ratio is (ML²/r³) ÷ (L²/2r²) = 2M/r: keep the 2 from the denominator.' }, { value: 1 / q, feedback: 'Upside down: the GR term is the smaller one far from the mass.' }],
           hints: [t`$\dfrac{ML^2/r^3}{L^2/(2r^2)} = \dfrac{2M}{r}$, and $2M$ means $2GM/c^2 = r_s$.`, t`So the ratio is $r_s/r$.`],
-          teach: 'The GR term is the centrifugal term times r_s/r: negligible in the Solar System, decisive near a horizon.',
+          teach: 'The GR term is the centrifugal term times rₛ/r: negligible in the Solar System, decisive near a horizon.',
           explain: t`$r_s/r = ${sci(q)}$. ${note} At $r = 2M$, the horizon, the two terms are equal.`,
           visual: twoTerms,
         };

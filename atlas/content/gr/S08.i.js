@@ -218,9 +218,9 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
         return {
           prompt: t`Outside a black hole, the part of the metric you need for a clock that stays at one place is $ds^2 = -\left(1 - \dfrac{r_s}{r}\right)c^2dt^2$, where $r_s$ is the horizon radius and $t$ is the time kept by clocks far away. A probe hovers, rockets firing, at $r = ${label}$. How many seconds does its clock record for each second that passes far away?`,
           answer: rate, tol: { rel: 0.005 },
-          errors: [{ value: 1 - 1 / x, feedback: 'Take the square root: dτ = √(−ds²)/c = √(1 − r_s/r) dt.' }, { value: 1 / rate, feedback: 'Clocks low down run slow: the ratio dτ/dt is less than 1.' }],
+          errors: [{ value: 1 - 1 / x, feedback: 'Take the square root: dτ = √(−ds²)/c = √(1 − rₛ/r) dt.' }, { value: 1 / rate, feedback: 'Clocks low down run slow: the ratio dτ/dt is less than 1.' }],
           hints: [t`For a clock at rest only the $dt^2$ term survives, and $d\tau = \sqrt{-ds^2}/c$.`, t`$d\tau/dt = \sqrt{1 - r_s/r}$ with $r_s/r = ${nice(1 / x)}$.`],
-          teach: 'Reading a metric: for a clock at rest, the coefficient of c²dt² sets its rate — here √(1 − r_s/r), slower near a black hole.',
+          teach: 'Reading a metric: for a clock at rest, the coefficient of c²dt² sets its rate — here √(1 − rₛ/r), slower near a black hole.',
           explain: t`$d\tau/dt = \sqrt{1 - ${nice(1 / x)}} = ${fmt(rate, 4)}$. The hovering clock runs slow compared with clocks far away; at the horizon the factor would reach zero. This metric (Schwarzschild’s) is the subject of step 20.`,
           visual: {
             type: 'graph',

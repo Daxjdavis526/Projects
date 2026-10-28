@@ -227,7 +227,7 @@ For particles released at rest at distance $r$ from a mass $M$, $u^0 = c$ and th
         return {
           prompt: t`The simplest number built from the Riemann tensor, $K = R_{\rho\sigma\mu\nu}R^{\rho\sigma\mu\nu}$, is the same for every observer. Outside a non-spinning mass $K = \dfrac{48G^2M^2}{c^4r^6}$, which at the horizon $r = r_s = 2GM/c^2$ equals $12/r_s^4$. Evaluate it at the horizon of ${name}, in $\text{m}^{-4}$ ($r_s = ${sci(R, 4)}$ m).`,
           answer: K, units: 'm^-4', tol: { rel: 0.01 },
-          errors: [{ value: 48 / R ** 4, feedback: 'Use GM/c² = r_s/2: 48(r_s/2)²/r_s⁶ = 12/r_s⁴, not 48/r_s⁴.' }],
+          errors: [{ value: 48 / R ** 4, feedback: 'Use GM/c² = rₛ/2: 48(rₛ/2)²/rₛ⁶ = 12/rₛ⁴, not 48/rₛ⁴.' }],
           hints: [t`$r_s^4 = (${sci(R, 4)})^4 = ${sci(R ** 4, 4)}\ \text{m}^4$.`, t`$K = 12/r_s^4$.`],
           teach: 'The curvature invariant is finite at a horizon and smaller for bigger black holes; only at r = 0 does it blow up.',
           explain: t`$K = 12/(${sci(R, 4)})^4 = ${sci(K)}\ \text{m}^{-4}$ — finite. The horizon is not a curvature singularity, and since $K \propto 1/M^4$ there, a giant black hole's horizon is far gentler than a small one's. At $r = 0$, $K \to \infty$: that is the real singularity.`,

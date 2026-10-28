@@ -13,7 +13,7 @@ const t = String.raw;
 const g = gamma;
 const L_SUN = 3.828e26;               // W, IAU 2015 nominal solar luminosity
 const UC2 = 931.49410372;             // MeV per atomic mass unit (CODATA 2022)
-const M_U235 = 235.0439301;           // u, atomic mass of uranium-235 (AME2020)
+const M_U235 = 235.0439281;           // u, atomic mass of uranium-235 (AME2020)
 const U235_REST = Math.round(M_U235 * UC2);  // MeV
 const thin = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,');   // 218942 → 218\,942 (TeX)
 const betaFromK = (K, m) => { const G = 1 + K / m; return Math.sqrt(1 - 1 / (G * G)); };

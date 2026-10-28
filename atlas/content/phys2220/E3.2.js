@@ -84,7 +84,7 @@ The shape and size of the surface do not matter, and charges **outside** it add 
           answer: Phi, units: 'N m^2/C', tol: { rel: 0.01 },
           errors: [{ value: ((a + b + c) * 1e-9) / EPS0, feedback: 'The charge outside contributes no net flux: its field lines go in and come out again.' }, { value: ((a - b) * 1e-9) / EPS0, feedback: 'Add the enclosed charges with their signs.' }],
           hints: [t`$\Phi = Q_\text{enc}/\varepsilon_0$, counting only charges inside, with their signs.`],
-          teach: 'Only the charge inside a closed surface sets its net flux: Φ = Q_enc/ε₀.',
+          teach: 'Only the charge inside a closed surface sets its net flux: $\\Phi = Q_\\text{enc}/\\varepsilon_0$.',
           explain: t`$Q_\text{enc} = ${a} + (${b}) = ${a + b}$ nC, so $\Phi = \dfrac{${a + b}\times10^{-9}}{8.854\times10^{-12}} = ${tn(Phi)}$ N·m²/C.`,
           visual: gaussPic([{ x: -1.3, y: 0.6, q: a }, { x: 1.4, y: -0.7, q: b }, { x: 6.5, y: 2, q: c }], 3.4, 'The Gaussian surface (green) with the two charges inside and one outside.'),
         };
@@ -122,7 +122,7 @@ The shape and size of the surface do not matter, and charges **outside** it add 
       },
       hints: ['What could make the field go in on one side and out on the other?'],
       teach: 'Zero net flux means zero net enclosed charge, not zero field: outside charges thread field through the surface.',
-      explain: 'Gauss’s law fixes the total flux, Q_enc/ε₀ = 0. Field lines from an outside charge cross the surface twice — in, then out — so the field on the surface is far from zero, yet the flux cancels.',
+      explain: 'Gauss’s law fixes the total flux, $Q_\\text{enc}/\\varepsilon_0 = 0$. Field lines from an outside charge cross the surface twice — in, then out — so the field on the surface is far from zero, yet the flux cancels.',
       visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: -6.5, y: 0.5, q: 3 }], gauss: { shape: 'sphere', x: 1, y: 0, r: 3.5 }, normals: true, fieldLines: true, density: 12 }, 'A Gaussian surface with no charge inside and a charge outside. Green arrows: field leaving; orange: field entering.'),
     }),
     num({
@@ -187,7 +187,7 @@ The shape and size of the surface do not matter, and charges **outside** it add 
       },
       hints: ['Separate two questions: what makes the field at a point, and what makes the net flux?'],
       teach: 'Every charge makes the field on a Gaussian surface; only the charges inside make its net flux.',
-      explain: 'The field anywhere is the sum of the fields of all charges, A and B. But B’s field lines enter and leave, so its net flux is zero: the flux is Q_A/ε₀, wherever A is inside and wherever B is outside.',
+      explain: 'The field anywhere is the sum of the fields of all charges, A and B. But B’s field lines enter and leave, so its net flux is zero: the flux is $Q_A/\\varepsilon_0$, wherever A is inside and wherever B is outside.',
       visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: -1, y: 0, q: 2, label: 'A' }, { x: 6, y: 1, q: 2, label: 'B' }], gauss: { shape: 'sphere', x: -0.5, y: 0, r: 3.5 }, fieldLines: true, density: 12 }, 'Charge A inside the Gaussian surface, charge B outside it.'),
     }),
     mcq({
@@ -267,7 +267,7 @@ The shape and size of the surface do not matter, and charges **outside** it add 
       },
       hints: ['Separate the field at each point from the total flux.'],
       teach: 'Outside charges change the field on a Gaussian surface but never its net flux.',
-      explain: 'Moving the charge changes the field all over the surface — more strongly on the near side. But each of its field lines still enters and leaves, so its net flux is still zero, and the total stays Q_enc/ε₀.',
+      explain: 'Moving the charge changes the field all over the surface — more strongly on the near side. But each of its field lines still enters and leaves, so its net flux is still zero, and the total stays $Q_\\text{enc}/\\varepsilon_0$.',
       visual: fieldLive({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: 6.5, y: 1, q: 3 }], gauss: { shape: 'sphere', x: -1, y: 0, r: 3.5, move: false, resize: false }, normals: true, fieldLines: true, density: 12 }, 'A Gaussian surface and a charge outside it (you can drag the charge). Green arrows: field leaving; orange: entering.'),
     }),
   ],

@@ -26,7 +26,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
     lead: t`Violet bars are the terms $a_n$ and blue dots their partial sums; the dashed line of dots is the benchmark’s partial sums. With positive terms, partial sums never fall, so a ceiling or a floor decides everything.`,
     tasks: [
       'Smaller than convergent: every term of 1/(n² + 1) is below 1/n², so its sums stay under the benchmark’s, which never pass π²/6 ≈ 1.645.',
-      'Same shape: (2n + 1)/(n³ + 5) behaves like 2/n² — watch the readout of the ratio a_N/b_N approach 1.',
+      'Same shape: (2n + 1)/(n³ + 5) behaves like 2/n² — watch the readout of the ratio $a_N/b_N$ approach 1.',
       'No verdict: 1/n² is below 1/n, but being smaller than a divergent series proves nothing.',
     ],
     params: {

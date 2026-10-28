@@ -42,7 +42,7 @@ export function mount(F, P0) {
   const a = F.canvas({ aspect: 'wide', label: P.alt || 'Walkers scattered along x' });
   const pa = new Plot(a.canvas, { x: [-P.xr, P.xr], y: [0, 1], xlabel: 'x (mm)', ylabel: '', yticks: 0, xticks: 8 });
   const b = F.canvas({ aspect: 'wide', label: 'The histogram of positions against the heat-equation Gaussian' });
-  const pb = new Plot(b.canvas, { x: [-P.xr, P.xr], y: [0, 0.5], xlabel: 'x (mm)', ylabel: 'fraction per mm', xticks: 8 });
+  const pb = new Plot(b.canvas, { x: [-P.xr, P.xr], y: [0, 0.5], xlabel: 'x (mm)', ylabel: 'fraction per mm', xticks: 8, axesAt: 'edge' });
 
   let W = null;
   const reset = () => { W = M.walkers(F.params.N, P.seed); for (let i = 0; i < P.steps; i++) M.hop(W, F.params.p); };

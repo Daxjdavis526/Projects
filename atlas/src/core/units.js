@@ -46,6 +46,7 @@ export const UNITS = {
   mph: [0.44704, D(1, 0, -1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
   mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], t: [1000, D(0, 1)],   // tonne (kt, Mt)
    lbf: [4.4482216152605, D(1, 1, -2)],
+  b: [1e-28, D(2)], barn: [1e-28, D(2)],   // nuclear cross-section: mb, μb, nb, pb, fb by prefix
   percent: [0.01, ZERO], '%': [0.01, ZERO],
   // a decibel is a level, not a size: "85 dB" is read as the number 85, so a sound
   // level can carry its unit; levels never convert multiplicatively to anything else

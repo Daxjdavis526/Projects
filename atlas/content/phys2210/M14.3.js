@@ -88,7 +88,7 @@ For a block of height $h$ and top area $A$: the bottom is pushed up by $\rho g h
           answer: f, units: '%', tol: { rel: 0.003 },
           errors: [{ value: 100 - f, feedback: 'That is the part above the surface. The question asks for the part below.' }, { value: (100 * rf) / rb, feedback: 'The ratio is upside down: a floating body has the smaller density on top.' }],
           hints: ['Floating: the buoyant force equals the weight.', t`$\rho_\text{fluid} V_\text{under} g = \rho_\text{body} V g$, so $\dfrac{V_\text{under}}{V} = \dfrac{\rho_\text{body}}{\rho_\text{fluid}}$.`],
-          teach: 'A floating body displaces its own weight, so the fraction under is ρ_body/ρ_fluid.',
+          teach: 'A floating body displaces its own weight, so the fraction under is $\\rho_\\text{body}/\\rho_\\text{fluid}$.',
           explain: t`$\dfrac{V_\text{under}}{V} = \dfrac{${tn(rb)}}{${tn(rf)}} = ${tn(rb / rf)}$, so ${s3(f)}% is under the surface${body === 'An iceberg' ? ' — hence “the tip of the iceberg”' : ''}.`,
           visual: bodyFBD([force('B', 30, 90, 'lift'), force('W', 30, 270, 'weight')], { icon: 'block', name: 'the floating body', caption: 'Floating: the buoyant force B and the weight W are equal and opposite. Arrows to scale.' }),
         };
