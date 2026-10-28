@@ -100,7 +100,7 @@ export default lesson({
         const m = r.pick([0.2, 0.3, 0.5, 0.8]), l = r.pick([0.2, 0.3, 0.4, 0.5]);
         const small = (m * l * l) / 12;
         return {
-          prompt: t`An L-shaped bracket is two thin uniform rods, each of mass ${m} kg and length ${l} m, joined at a right-angled corner: one along $+x$ from the origin, one along $+y$. About its centre of mass, $(\ell/4, \ell/4)$, its in-plane tensor is $\begin{bmatrix} \tfrac{5}{24} & \tfrac18 \\ \tfrac18 & \tfrac{5}{24} \end{bmatrix} m\ell^2$. Find the **smaller** in-plane principal moment.`,
+          prompt: t`An L-shaped bracket is two thin uniform rods, each of mass ${m} kg and length ${l} m, joined at a right-angled corner: one along $+x$ from the origin, one along $+y$. About its centre of mass, $(\ell/4, \ell/4)$, its in-plane tensor is $$\begin{bmatrix} I_{xx} & I_{xy} \\ I_{xy} & I_{yy} \end{bmatrix} = \begin{bmatrix} 5/24 & 1/8 \\ 1/8 & 5/24 \end{bmatrix} m\ell^2.$$ Find the **smaller** in-plane principal moment.`,
           answer: small, units: 'kg m^2', tol: { rel: 0.005 },
           errors: distinct([{ value: (5 * m * l * l) / 24, feedback: t`That is a diagonal element, the moment about the $x$-direction through the centre of mass. The product of inertia is not zero, so $x$ is not a principal axis.` }, { value: (m * l * l) / 3, feedback: t`That is the larger principal moment, $(\tfrac{5}{24} + \tfrac18)m\ell^2$, about the line $y = x$.` }, { value: (m * l * l) / 8, feedback: t`$\tfrac18$ is the product of inertia. The eigenvalues of $\begin{bmatrix} a & c \\ c & a \end{bmatrix}$ are $a \pm c$.` }], small),
           hints: [t`The bracket is mirror-symmetric across the line $y = x$, so that line and the one perpendicular to it are the principal directions.`, t`For $\begin{bmatrix} a & c \\ c & a \end{bmatrix}$ the eigenvectors are $(1, 1)$ and $(1, -1)$ with eigenvalues $a + c$ and $a - c$.`],
@@ -194,7 +194,7 @@ export default lesson({
           hints: [t`$y$ is still principal ($y = 0$ is a mirror plane). Work with the $xz$ block.`, t`The principal angle of a block $\begin{bmatrix} a & c \\ c & b \end{bmatrix}$ satisfies $\tan2\theta = 2c/(a - b)$; or find the eigenvector of the larger root directly.`],
           teach: t`An off-axis appendage brings a product of inertia that tips the principal axes; a spinner must be re-balanced to spin about its new major axis.`,
           explain: t`The $xz$ block's larger eigenvalue is $${sci(vals[2], 4)}$ kg·m², and its eigenvector lies $${sci(tilt, 3)}^\circ$ from $z$. Left alone, a probe spun about its geometric $z$-axis would now cone about this tilted axis — which is why spinners carry balance masses and are re-trimmed after a boom deploys.`,
-          visual: gpic({ x: [-1.6, 4.4], y: [-1.4, 2.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', shade: [{ fn: '0.6', lower: '-0.6', from: -1, to: 1, color: 'accent', alpha: 0.35 }], curves: [seg([0, 0], [r6(4 * Math.cos(a * DEG)), r6(4 * Math.sin(a * DEG))], 'ink2', 1.6), seg([0, -1.3], [0, 2.4], 'ink4', 1, true), seg([-1.5, 0], [4.3, 0], 'ink4', 1, true)], points: [{ x: r6(4 * Math.cos(a * DEG)), y: r6(4 * Math.sin(a * DEG)), color: 'warn', r: 6, label: 'magnetometer', labelDx: -40, labelDy: -14 }, lab(0.12, 2.45, 'z (spin)', 'ink3'), lab(4.25, 0.15, 'x', 'ink3'), lab(0.75, 0.3, `${a}°`, 'ink2')] }, t`The probe seen side-on (in the $xz$-plane): the bus (blue) and the boom. Schematic, not to scale.`, 'A cylinder with a long boom at an angle'),
+          visual: gpic({ x: [-1.6, 4.8], y: [-1.4, 3.2], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', shade: [{ fn: '0.6', lower: '-0.6', from: -1, to: 1, color: 'accent', alpha: 0.35 }], curves: [seg([0, 0], [r6(4 * Math.cos(a * DEG)), r6(4 * Math.sin(a * DEG))], 'ink2', 1.6), seg([0, -1.3], [0, 2.4], 'ink4', 1, true), seg([-1.5, 0], [4.3, 0], 'ink4', 1, true)], points: [{ x: r6(4 * Math.cos(a * DEG)), y: r6(4 * Math.sin(a * DEG)), color: 'warn', r: 6, label: 'magnetometer', labelDx: -100, labelDy: 2 }, lab(0.12, 2.45, 'z (spin)', 'ink3'), lab(4.25, 0.15, 'x', 'ink3'), lab(0.75, 0.3, `${a}°`, 'ink2')] }, t`The probe seen side-on (in the $xz$-plane): the bus (blue) and the boom. Schematic, not to scale.`, 'A cylinder with a long boom at an angle'),
         };
       },
     }),
@@ -215,13 +215,13 @@ export default lesson({
         const l1 = r.pick([100, 150, 200]), l3 = r.pick([300, 400, 500]);
         const ang = Math.atan(l3 / l1) / DEG - 45;
         return {
-          prompt: t`A body with principal moments $\lambda_1 = ${l1}$ and $\lambda_3 = ${l3}$ kg·m² is spun with $\vec\omega$ exactly halfway between $\hat e_1$ and $\hat e_3$ ($45^\circ$ from each). By how many degrees does $\vec L$ lean from $\vec\omega$, and toward which axis?`,
+          prompt: t`A body with principal moments $\lambda_1 = ${l1}$ and $\lambda_3 = ${l3}$ kg·m² is spun with $\vec\omega$ exactly halfway between $\hat e_1$ and $\hat e_3$ ($45^\circ$ from each). By how many degrees does $\vec L$ lean away from $\vec\omega$?`,
           answer: ang, units: 'deg', tol: { rel: 0.01 },
           errors: distinct([{ value: Math.atan(l3 / l1) / DEG, feedback: t`That is the angle of $\vec L$ from $\hat e_1$. Subtract the $45^\circ$ at which $\vec\omega$ sits.` }, { value: 45 - Math.atan(l1 / l3) / DEG, feedback: t`$\vec L$ leans toward the axis with the **larger** moment, $\hat e_3$: $\tan\phi = L_3/L_1 = \lambda_3/\lambda_1$.` }], ang),
           hints: [t`In principal axes $\vec L = (\lambda_1\omega_1, 0, \lambda_3\omega_3)$ with $\omega_1 = \omega_3$.`, t`$\vec L$'s angle from $\hat e_1$ is $\arctan(\lambda_3/\lambda_1)$.`],
           teach: t`In principal axes $\vec L$ is $\vec\omega$ with each component stretched by its own moment, so it leans toward the axis with the larger moment.`,
           explain: t`$\vec L \propto (${l1}, 0, ${l3})$, at $\arctan(${l3}/${l1}) = ${sci(ang + 45, 3)}^\circ$ from $\hat e_1$: $${sci(ang, 3)}^\circ$ past $\vec\omega$, toward $\hat e_3$.`,
-          visual: blockMap([[r6(l1 / 100), 0], [0, r6(l3 / 100)]], { view: r6(Math.max(3, (l3 / 100) * 0.75 + 0.6)) }, t`In principal axes ($\hat e_1$ across, $\hat e_3$ up), in units of 100 kg·m²: unit $\vec\omega$'s (faint circle) and their $\vec L$'s (bold ellipse).`),
+          visual: blockMap([[r6(l1 / 100), 0], [0, r6(l3 / 100)]], { view: r6(l3 / 100 + 0.5) }, t`In principal axes ($\hat e_1$ across, $\hat e_3$ up), in units of 100 kg·m²: unit $\vec\omega$'s (faint circle) and their $\vec L$'s (bold ellipse).`),
         };
       },
     }),

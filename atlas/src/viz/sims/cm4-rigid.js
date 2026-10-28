@@ -130,7 +130,7 @@ export function mount(F, P0) {
   const gp = gw ? new Plot(gw.canvas, { x: [0, P.T], y: [-1, 1], xlabel: 't (s)', ylabel: 'ω (rad/s)', yticks: 5 }) : null;
 
   // play
-  const S = { i: P.play ? 0 : null, running: false };
+  const S = { i: null, running: false };   // the whole run is shown until Play is pressed
   let btn = null;
   const anim = P.play ? F.animate((dt) => {
     if (!S.running) return;
@@ -147,7 +147,7 @@ export function mount(F, P0) {
     } });
     F.button({ label: 'Whole run', onClick: () => { S.running = false; S.i = null; btn.textContent = 'Play'; draw(); } });
   }
-  F.onChange(() => { S.running = false; S.i = P.play ? 0 : null; if (btn) btn.textContent = 'Play'; draw(); });
+  F.onChange(() => { S.running = false; S.i = null; if (btn) btn.textContent = 'Play'; draw(); });
 
   const idxAt = (r) => {
     const n = r.t.length - 1;
@@ -240,7 +240,7 @@ export function mount(F, P0) {
         }
       } else {
         const hs = [];
-        for (const bdeg of [12, 25, 40, 55, 70]) {
+        for (const bdeg of [15, 35, 55, 75]) {
           const b = (bdeg * Math.PI) / 180, c2 = Math.cos(b) ** 2, s2 = Math.sin(b) ** 2;
           hs.push(c2 / I[s[0]] + s2 / I[s[1]], c2 / I[s[2]] + s2 / I[s[1]]);
         }

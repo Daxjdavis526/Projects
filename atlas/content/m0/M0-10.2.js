@@ -104,10 +104,10 @@ The **modulus** $|z|$ is the distance from $0$; the **argument** $\arg z$ is the
       type: 'point', id: 'drag-sum', difficulty: 2,
       gen(r) {
         const z = r.pick([[2, 1], [-1, 2], [3, -1], [1, 3]]), w = r.pick([[-3, 1], [1, -2], [-2, -1], [2, 2]]), s = M.add(z, w);
-        const v = argand({ arrows: [{ to: z, color: 'accent', label: 'z' }, { to: w, color: 'warn', label: 'w' }], view: 4.2, caption: t`$z$ (blue) and $w$ (orange). Drag the gold point.` });
+        const v = argand({ arrows: [{ to: z, color: 'accent', label: 'z' }, { to: w, color: 'warn', label: 'w' }], view: 4.2, caption: t`$z$ (blue) and $w$ (orange). Drag the ring.` });
         v.params.drag = [{ key: 'p', x: 0.5, y: -3.5, snap: 0.5 }];
         return {
-          prompt: t`Drag the gold point to $z + w$, where $z = ${cTeX(z)}$ and $w = ${cTeX(w)}$.`,
+          prompt: t`Drag the ring to $z + w$, where $z = ${cTeX(z)}$ and $w = ${cTeX(w)}$.`,
           visual: v, answer: { x: s[0], y: s[1] }, tol: { x: 0.3, y: 0.3 },
           instruction: 'Drag the point to z + w, then check.',
           hints: [t`Add real parts and imaginary parts separately.`, t`Or slide $w$’s arrow so its tail sits on $z$’s tip: the sum is where its tip lands.`],

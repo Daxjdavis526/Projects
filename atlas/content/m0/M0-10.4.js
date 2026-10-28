@@ -139,11 +139,11 @@ Roots run it backwards — but there is a twist. The angle of $c = re^{i\theta}$
       gen(r) {
         const [cT, c, n, q, quad] = r.pick([['-8', [-8, 0], 3, 1, 'first'], ['2i', [0, 2], 2, 1, 'first'], ['-4', [-4, 0], 4, 1, 'second'], ['8i', [0, 8], 3, 1, 'second'], ['-8', [-8, 0], 3, 2, 'fourth']]);
         const W = roots(c, n), w = W.find((p) => (quad === 'first' ? p[0] > 0 && p[1] > 0 : quad === 'second' ? p[0] < 0 && p[1] > 0 : p[0] > 0 && p[1] < 0));
-        const v = argand({ circles: [{ r: M.abs(W[0]) }], view: 2.6, caption: t`The dashed circle has radius $|${cT}|^{1/${n}} = ${sig(M.abs(W[0]), 3)}$: every root lies on it. Drag the gold point.` });
+        const v = argand({ circles: [{ r: M.abs(W[0]) }], view: 2.6, caption: t`The dashed circle has radius $|${cT}|^{1/${n}} = ${sig(M.abs(W[0]), 3)}$: every root lies on it. Drag the ring.` });
         v.params.drag = [{ key: 'p', x: 0.2, y: -0.2, snap: 0.05 }];
         void q;
         return {
-          prompt: t`Drag the gold point to the ${n === 2 ? 'square' : n === 3 ? 'cube' : 'fourth'} root of $${cT}$ that lies in the **${quad} quadrant**.`,
+          prompt: t`Drag the ring to the ${n === 2 ? 'square' : n === 3 ? 'cube' : 'fourth'} root of $${cT}$ that lies in the **${quad} quadrant**.`,
           visual: v, answer: { x: +w[0].toFixed(6), y: +w[1].toFixed(6) }, tol: { x: 0.2, y: 0.2 },
           instruction: 'Drag the point to the root, then check.',
           hints: [t`$${cT}$ has argument $${sig(deg(M.arg(c)), 3)}^\circ$; the roots are at $\tfrac{${sig(deg(M.arg(c)), 3)}^\circ + 360^\circ k}{${n}}$.`, t`List those angles for $k = 0, 1${n > 2 ? ', 2' : ''}${n > 3 ? ', 3' : ''}$ and pick the one in the ${quad} quadrant.`],
@@ -185,7 +185,7 @@ Roots run it backwards — but there is a twist. The angle of $c = re^{i\theta}$
           hints: [t`Neighbours are $360^\circ/${n} = ${360 / n}^\circ$ apart.`, t`Angle $= ${a0}^\circ + ${k} \times ${360 / n}^\circ = ${ang}^\circ$; $x = 7\,000\cos ${ang}^\circ$.`],
           teach: t`Multiplying by the $k$th root of unity $\omega^k$ turns a position by $k \cdot 360^\circ/n$.`,
           explain: t`$x = 7\,000\cos ${ang}^\circ = ${thou(ans)}$ km.`,
-          visual: (() => { const v = rootPic(roots(M.polar(1, n * a0 * D2R), n).map((p) => [7 * p[0], 7 * p[1]]), t`The ring of satellites (in thousands of km), to scale; the gold dot labelled is the one at $${a0}^\circ$.`); v.params.points[0].label = `${a0}°`; return v; })(),
+          visual: (() => { const v = rootPic(roots(M.polar(1, n * a0 * D2R), n).map((p) => [7 * p[0], 7 * p[1]]), t`The ring of satellites (in thousands of km), to scale; the labelled dot is the satellite at $${a0}^\circ$.`); v.params.points[0].label = `${a0}°`; return v; })(),
         };
       },
     }),

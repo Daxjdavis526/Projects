@@ -126,10 +126,10 @@ So every complex number is $re^{i\theta}$: a length $r = |z|$ times a unit arrow
       type: 'point', id: 'rotate', difficulty: 2,
       gen(r) {
         const z = r.pick([[2, 1], [1, 2], [2, -1], [-1, 2]]), [al, alT] = r.pick([[90, t`e^{i\pi/2}`], [180, t`e^{i\pi}`], [-90, t`e^{-i\pi/2}`], [60, t`e^{i\pi/3}`]]), p = M.mul(z, P(1, al));
-        const v = argand({ arrows: [{ to: z, color: 'accent', label: 'z' }], circles: [{ r: Math.hypot(...z) }], view: 2.9, caption: t`$z$ and the circle through it (centred on $0$). Drag the gold point.` });
+        const v = argand({ arrows: [{ to: z, color: 'accent', label: 'z' }], circles: [{ r: Math.hypot(...z) }], view: 2.9, caption: t`$z$ and the circle through it (centred on $0$). Drag the ring.` });
         v.params.drag = [{ key: 'p', x: 0.3, y: -0.3, snap: 0.05 }];
         return {
-          prompt: t`Drag the gold point to $${alT}\,z$, where $z = ${cTeX(z)}$.`,
+          prompt: t`Drag the ring to $${alT}\,z$, where $z = ${cTeX(z)}$.`,
           visual: v, answer: { x: +p[0].toFixed(6), y: +p[1].toFixed(6) }, tol: { x: 0.25, y: 0.25 },
           instruction: 'Drag the point to the product, then check.',
           hints: [t`$${alT}$ has modulus $1$ and argument $${al}^\circ$: it turns $z$ without stretching it.`, t`Stay on the dashed circle and turn $${Math.abs(al)}^\circ$ ${al > 0 ? 'anticlockwise' : 'clockwise'} from $z$.`],

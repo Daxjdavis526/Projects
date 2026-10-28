@@ -35,7 +35,7 @@ Integrate by parts and a pattern appears: every time $f$ can be differentiated o
     tasks: [
       'Square wave (a jump): the dots fall slowly, like 1/n. N = 15 still looks rough.',
       'Triangle (corners only): the dots fall like 1/n² — two decades by n = 15, and the sum looks right early.',
-      'Smooth e^(cos x − 1): the dots fall on a straight line — exponential decay — and reach 10⁻¹² by n = 15.',
+      'Smooth e^(cos x − 1): the dots fall on a straight line — exponential decay — and are below 10⁻¹² by n = 12.',
     ],
     params: { wave: 'square', waves: ['square', 'triangle', 'parabola', 'smooth'], N: 5, Nmax: 30, panels: ['x', 'spec'], spec: 'log', nshow: 15, readouts: [] },
     caption: 'Amplitudes √(aₙ² + bₙ²) on a log scale (zeros, such as the even harmonics of the square wave, are not drawn). Exact coefficients; each function has period 2π.',
@@ -46,7 +46,8 @@ Integrate by parts and a pattern appears: every time $f$ can be differentiated o
     steps: [
       { label: 'Use the symmetry', text: t`$x^2$ is even and $\sin nx$ is odd, so every $b_n = 0$: a pure cosine series.` },
       { label: 'The constant', text: t`$a_0 = \dfrac1\pi\displaystyle\int_{-\pi}^{\pi} x^2\,dx = \dfrac{2\pi^2}{3}$, so the mean is $a_0/2 = \pi^2/3 \approx ${r4(PI * PI / 3)}$.` },
-      { label: 'By parts, twice', text: t`$\displaystyle\int_{-\pi}^{\pi} x^2\cos nx\,dx = \Big[\frac{x^2\sin nx}{n}\Big]_{-\pi}^{\pi} - \frac2n\int_{-\pi}^{\pi} x\sin nx\,dx = -\frac2n\Big(\Big[-\frac{x\cos nx}{n}\Big]_{-\pi}^{\pi} + \frac1n\int_{-\pi}^{\pi}\cos nx\,dx\Big)$. The first bracket and the last integral vanish; $\big[-x\cos nx/n\big]_{-\pi}^{\pi} = -2\pi(-1)^n/n$.` },
+      { label: 'By parts, twice', text: t`Integrate by parts twice, differentiating the power of $x$ each time:
+$$\begin{aligned}\int_{-\pi}^{\pi} x^2\cos nx\,dx &= \Big[\frac{x^2\sin nx}{n}\Big]_{-\pi}^{\pi} - \frac2n\int_{-\pi}^{\pi} x\sin nx\,dx \\ &= 0 - \frac2n\Big[-\frac{x\cos nx}{n}\Big]_{-\pi}^{\pi} - \frac{2}{n^2}\int_{-\pi}^{\pi}\cos nx\,dx \\ &= -\frac2n\cdot\Big(-\frac{2\pi(-1)^n}{n}\Big) - 0 = \frac{4\pi(-1)^n}{n^2}.\end{aligned}$$` },
       { label: 'The coefficients', text: t`$a_n = \dfrac1\pi\cdot\dfrac{4\pi(-1)^n}{n^2} = \dfrac{4(-1)^n}{n^2}$, so
 $$x^2 \sim \frac{\pi^2}{3} + 4\sum_{n=1}^{\infty}\frac{(-1)^n}{n^2}\cos nx .$$` },
       { label: 'Why 1/n²', text: t`The repeated function is continuous (both ends of the period are at $\pi^2$), so the first boundary term vanished; its slope jumps from $2\pi$ to $-2\pi$ at $x = \pm\pi$, and that jump is what survives the second integration by parts. One clean derivative buys one power of $n$.` },

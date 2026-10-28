@@ -33,7 +33,7 @@
 //       P: null, Q: null, drag: true,   // P, Q as [a, b]; drag: false fixes them
 //       heading: 30, speed: 0, length: 4, fan: 0, spread: 15,
 //       angle: 90, alpha: 0, alphaMax: 0.3,
-//       sliders: null,               // any of heading speed length alpha angle k (default: what the mode needs)
+//       sliders: null,               // any of heading speed length alpha angle k (default: what the mode needs; none when drag: false)
 //       field: true, cells: 8,       // ellipses or cones; about how many across
 //       eps: null,                   // the ellipses' step length (chart units at a unit metric)
 //       panel: false,                // vary mode: the length-against-α panel
@@ -127,7 +127,7 @@ export function mount(F, P) {
   else F.params.metric = P.metric;
 
   const defaultSliders = { chart: [], geodesic: ['heading', 'speed', 'length'], transport: ['angle', 'speed'], vary: ['alpha'] }[P.mode];
-  const sl = P.sliders || defaultSliders;
+  const sl = P.sliders || (P.drag === false ? [] : defaultSliders);   // a fixed picture (drag: false) gets no sliders unless asked
   const ctl = {};
   const mk = (key, o) => { if (sl.includes(key)) ctl[key] = F.slider({ key, ...o }); else F.params[key] = o.value; };
   mk('heading', { label: 'Launch direction at P', min: -180, max: 180, step: 1, value: P.heading, unit: '^\\circ', explain: 'Measured with the metric: 0° along $\\hat e_a$ (the first coordinate increasing), 90° along the unit vector at right angles to it.' });

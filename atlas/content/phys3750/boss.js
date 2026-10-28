@@ -234,7 +234,7 @@ export default boss({
               hints: [t`$\bar P = \tfrac12Z\omega^2A^2$ with $Z = \sqrt{T\mu}$.`, t`$Z = ${tn(Z)}$ kg/s and $\omega = 2\pi(${f})$ rad/s; $A$ in metres.`],
               teach: t`A harmonic wave on a string carries $\bar P = \tfrac12Z\omega^2A^2$, with impedance $Z = \sqrt{T\mu}$.`,
               explain: t`$Z = \sqrt{${T}\times${tn(mu)}} = ${tn(Z)}$ kg/s, so $\bar P = \tfrac12(${tn(Z)})(${tn(w)})^2(${A}\times10^{-6})^2 = ${tn(key)}$ nW. Tiny — but the mirror’s position is measured to $10^{-19}$ m, so even this much shaking matters.`,
-              visual: { type: 'wv2-junction', params: { controls: false, readout: false, play: false }, caption: 'A pulse on a string with its energy density (shaded) and the flux carrying it along. Illustrative, not the fibre’s numbers.' },
+              visual: curvesPic([{ fn: '0.6*sin(2*pi*x)', color: 'accent', width: 2.2, label: 'y', labelAt: 0.27, labelDy: -10 }, { fn: 'cos(2*pi*x)^2', color: 'gold', dash: [5, 4], width: 1.6, label: 'energy density', labelAt: 1.5, labelDy: -14 }], [0, 2.5], [-0.8, 1.35], t`One instant of the travelling wave (blue) and its energy density (gold), carried toward the mirror at the wave speed. Relative units.`, { xlabel: 'x (wavelengths)', ylabel: '', yticks: 0, arrows: [{ from: [1.9, 1.2], to: [2.4, 1.2], color: 'gold', label: 'S' }] }),
             };
           },
         }),

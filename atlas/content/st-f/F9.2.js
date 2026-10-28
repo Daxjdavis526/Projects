@@ -89,7 +89,7 @@ Choosing the numbers to match the Taylor series of the true solution term by ter
     },
     steps: [
       { label: 'The tableau', text: t`Heun: $c = (0, 1)$, $a_{21} = 1$, $b = (\tfrac12, \tfrac12)$ — slope at the start, slope at the Euler-predicted end, averaged.` },
-      { label: 'Apply it to y′ = λy', text: t`$k_1 = \lambda y_n$, $k_2 = \lambda(y_n + hk_1) = \lambda y_n(1 + z)$, so $y_{n+1} = y_n + \tfrac{h}{2}(k_1 + k_2) = \left(1 + z + \tfrac12z^2\right)y_n$. The Taylor series of $e^z$ to second order: that is what order 2 means.` },
+      { label: 'On the test equation', text: t`$k_1 = \lambda y_n$, $k_2 = \lambda(y_n + hk_1) = \lambda y_n(1 + z)$, so $y_{n+1} = y_n + \tfrac{h}{2}(k_1 + k_2) = \left(1 + z + \tfrac12z^2\right)y_n$. The Taylor series of $e^z$ to second order: that is what order 2 means.` },
       { label: 'Oscillation', text: t`$x'' = -\omega^2x$ as a first-order system has eigenvalues $\pm i\omega$, so $z = \pm i\omega h = \pm ${Y.toFixed(4)}i$. With $z = iy$: $\lvert R\rvert^2 = (1 - \tfrac12y^2)^2 + y^2 = 1 + \tfrac14y^4$ — larger than 1 for **every** $y \ne 0$.` },
       { label: 'Heun’s growth', text: t`$\lvert R\rvert = ${RH.toFixed(7)}$ per step, so after $${NST}$ steps the amplitude is multiplied by $${RH.toFixed(7)}^{${NST}} = ${AMP.heun.toFixed(0)}$. The simulation — 20 steps per period, which looks generous — shows the array flapping a thousandfold harder than it should.` },
       { label: 'RK4', text: t`For RK4, $\lvert R(iy)\rvert^2 = 1 - \tfrac{y^6}{72} + \tfrac{y^8}{576} < 1$ for $0 < y < 2\sqrt2$: $\lvert R\rvert = ${R4.toFixed(8)}$, and the amplitude after ten minutes is $${AMP.rk4.toFixed(3)}$ of its true value — a small **numerical damping**. (RK3 damps far more: to $${AMP.rk3.toFixed(3)}$.)` },
