@@ -184,18 +184,18 @@ export default boss({
           gen(r) {
             const U = ullage(r), Tend = 4;
             const exact = U.p(Tend);
-            const E = Object.fromEntries(['euler', 'heun', 'rk4'].map((k) => [k, Math.abs(integrate(k, U.f, U.ps, Tend, 0.5) - exact)]));
+            const E = Object.fromEntries(['euler', 'heun', 'rk4'].map((k) => [k, Math.abs(integrate(k, U.f, U.ps, Tend, 1) - exact)]));
             const tol = ladder(2 * E.rk4);
-            const hH = STEPS.find((h) => E.heun * (h / 0.5) ** 2 <= tol / 2), hE = STEPS.find((h) => E.euler * (h / 0.5) <= tol / 2);
+            const hH = STEPS.find((h) => E.heun * h ** 2 <= tol / 2), hE = STEPS.find((h) => E.euler * h <= tol / 2);
             const nH = Math.round((2 * Tend) / hH), nE = Math.round(Tend / hE);
             const tolT = tn(tol, 1);
             return {
-              prompt: t`The flight computer re-runs the ullage model of the last problem every control cycle, now for a tank with $p_s = ${U.ps}$ kPa, $V_0 = ${U.V0}$ m³, $Q = ${U.Q}$ m³/s and $G = ${U.G}$ m³/s: $$p' = \frac{${r6(U.G * U.ps)} - ${U.GQ}\,p}{${U.V0} + ${U.Q}\,t},\qquad p(0) = ${U.ps},$$ from $t = 0$ to $4$ s. It must keep the error in $p(4)$ below $${tolT}$ kPa while evaluating the right-hand side as few times as possible: Euler evaluates it once per step, improved Euler twice and RK4 four times. A ground run with $h = 0.5$ s, against the exact solution, gave these errors in $p(4)$: $$\begin{array}{l|c} \text{method} & \text{error at } h = 0.5\ \text{s} \\ \hline \text{Euler} & ${tn(E.euler, 2)}\ \text{kPa} \\ \text{improved Euler} & ${tn(E.heun, 2)}\ \text{kPa} \\ \text{RK4} & ${tn(E.rk4, 2)}\ \text{kPa} \end{array}$$ Which integrator and step should it fly?`,
-              choices: [t`RK4 with $h = 0.5$ s`, t`RK4 with $h = 1$ s`, t`Improved Euler with $h = ${hT(hH)}$ s`, t`Euler with $h = ${hT(hE)}$ s`],
+              prompt: t`The flight computer re-runs the ullage model of the last problem every control cycle, now for a tank with $p_s = ${U.ps}$ kPa, $V_0 = ${U.V0}$ m³, $Q = ${U.Q}$ m³/s and $G = ${U.G}$ m³/s: $$p' = \frac{${r6(U.G * U.ps)} - ${U.GQ}\,p}{${U.V0} + ${U.Q}\,t},\qquad p(0) = ${U.ps},$$ from $t = 0$ to $4$ s. It must keep the error in $p(4)$ below $${tolT}$ kPa while evaluating the right-hand side as few times as possible: Euler evaluates it once per step, improved Euler twice and RK4 four times. A ground run with $h = 1$ s, against the exact solution, gave these errors in $p(4)$: $$\begin{array}{l|c} \text{method} & \text{error at } h = 1\ \text{s} \\ \hline \text{Euler} & ${tn(E.euler, 2)}\ \text{kPa} \\ \text{improved Euler} & ${tn(E.heun, 2)}\ \text{kPa} \\ \text{RK4} & ${tn(E.rk4, 2)}\ \text{kPa} \end{array}$$ Which integrator and step should it fly?`,
+              choices: [t`RK4 with $h = 1$ s`, t`RK4 with $h = 2$ s`, t`Improved Euler with $h = ${hT(hH)}$ s`, t`Euler with $h = ${hT(hE)}$ s`],
               answer: 0,
               why: {
-                1: t`It is the cheapest — 16 evaluations — but RK4’s error grows as $h^4$: doubling $h$ multiplies it by about $16$, to roughly $${tn(16 * E.rk4, 2)}$ kPa, over the $${tolT}$ kPa limit.`,
-                2: t`It meets the limit (its error falls as $h^2$, to about $${tn(E.heun * (hH / 0.5) ** 2, 2)}$ kPa), but it takes ${nH} evaluations, against RK4’s 32 at $h = 0.5$ s.`,
+                1: t`It is the cheapest — 8 evaluations — but RK4’s error grows as $h^4$: doubling $h$ multiplies it by about $16$, to roughly $${tn(16 * E.rk4, 2)}$ kPa, over the $${tolT}$ kPa limit.`,
+                2: t`It meets the limit (its error falls as $h^2$, to about $${tn(E.heun * hH ** 2, 2)}$ kPa), but it takes ${nH} evaluations, against RK4’s 16 at $h = 1$ s.`,
                 3: t`It meets the limit, but Euler’s error falls only in proportion to $h$: it needs ${nE.toLocaleString('en-GB').replace(/,/g, ' ')} evaluations. One evaluation per step is cheap; a million steps are not.`,
               },
               hints: [
@@ -203,15 +203,15 @@ export default boss({
                 t`For each method find the largest $h$ that meets $${tolT}$ kPa, then count the evaluations: (number of steps $4/h$) × (evaluations per step).`,
               ],
               teach: t`The cheapest accurate integrator is the one whose error, scaled by its order $h^p$, meets the tolerance with the fewest function evaluations — usually a high-order method with a moderate step.`,
-              explain: t`RK4 already meets $${tolT}$ kPa at $h = 0.5$ s (error $${tn(E.rk4, 2)}$ kPa) for $8 \times 4 = 32$ evaluations; at $h = 1$ s its error would be about $16$ times larger, $${tn(16 * E.rk4, 2)}$ kPa — too big. Improved Euler must shrink $h$ until $${tn(E.heun, 2)}\,(h/0.5)^2$ is under the limit, $h = ${hT(hH)}$ s, which costs ${nH} evaluations; Euler, with error proportional to $h$, needs ${nE.toLocaleString('en-GB').replace(/,/g, ' ')}. The higher the order, the faster the error falls as the step shrinks — which is why RK4 and its adaptive cousins are the default for smooth problems like this one.`,
+              explain: t`RK4 already meets $${tolT}$ kPa at $h = 1$ s (error $${tn(E.rk4, 2)}$ kPa) for $4 \times 4 = 16$ evaluations; at $h = 2$ s its error would be about $16$ times larger, $${tn(16 * E.rk4, 2)}$ kPa — too big. Improved Euler must shrink $h$ until $${tn(E.heun, 2)}\,h^2$ (with $h$ in s) is under the limit, $h = ${hT(hH)}$ s, which costs ${nH} evaluations; Euler, with error proportional to $h$, needs ${nE.toLocaleString('en-GB').replace(/,/g, ' ')}. The higher the order, the faster the error falls as the step shrinks — which is why RK4 and its adaptive cousins are the default for smooth problems like this one.`,
               visual: {
                 type: 'de-stepper',
                 params: {
-                  f: U.fE, exact: U.pE('t'), t0: 0, y0: U.ps, T: Tend, hs: [1, 0.5, 0.25], h: 0.5,
+                  f: U.fE, exact: U.pE('t'), t0: 0, y0: U.ps, T: Tend, hs: [2, 1, 0.5], h: 1,
                   methods: ['euler', 'heun', 'rk4'], method: 'euler', views: ['run'], view: 'run', compare: true, readout: false, errorPlot: false,
                   xlabel: 't (s)', ylabel: 'p (kPa)',
                 },
-                caption: t`The three methods with $h = 0.5$ s against the exact solution, $p$ in kPa. At this scale RK4’s polygon cannot be told from the exact curve; the numbers are in the table.`,
+                caption: t`The three methods with $h = 1$ s against the exact solution, $p$ in kPa. At this scale RK4’s polygon cannot be told from the exact curve; the numbers are in the table.`,
               },
             };
           },

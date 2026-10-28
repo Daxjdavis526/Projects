@@ -10,6 +10,7 @@ const t = String.raw;
 
 // the polar basis at n points round the circle of radius R, one of them marked
 function ringPic(R, th, caption, { n = 8, k = 0.3 } = {}) {
+  R = Math.min(Math.max(R, 1.8), 3);                 // a schematic radius: unit ∂r arrows stay readable
   const S = Math.max(3, R + 1.6);
   return plane({
     x: [r6(-S * 1.6), r6(S * 1.6)], y: [-S, S],

@@ -50,7 +50,7 @@ export function mount(F, P) {
     for (const d of pointsDrag) { E[d.key + 'x'] = d.x; E[d.key + 'y'] = d.y; }
     const vars = ['x', 'x0', ...keys, ...pointsDrag.flatMap((d) => [d.key + 'x', d.key + 'y'])];
     // shaded areas under curves
-    const shown = (o) => !o.when || ev(o.when, E, vars);     // `when`: draw only while the expression is nonzero
+    const shown = (o) => o.when === undefined || o.when === null || !!ev(o.when, E, vars);     // `when`: draw only while the expression is nonzero
     for (const s of P.shade || []) {
       if (!shown(s)) continue;
       const f = fn(s.fn, vars), lo = s.lower ? fn(s.lower, vars) : () => 0;
@@ -92,7 +92,7 @@ export function mount(F, P) {
     (P.curves || []).forEach((c, k) => {
       const color = c.color || PALETTE[k % PALETTE.length];
       const style = { color, width: c.width || 2.4, dash: dashOf(c.dash) };
-      if (c.when && !ev(c.when, E, vars)) return;
+      if (!shown(c)) return;
       if (c.fn) { const f = fn(c.fn, vars); plot.fn((x) => f({ ...E, x }), { ...style, domain: c.domain ? [ev(c.domain[0], E, vars), ev(c.domain[1], E, vars)] : undefined }); }
       else if (c.param) {
         const fx = fn(c.param[0], ['t', ...vars]), fy = fn(c.param[1], ['t', ...vars]);
@@ -136,7 +136,7 @@ export function mount(F, P) {
       plot.point(x0, y0, { color: 'gold', r: 3 });
     }
     for (const p of P.points || []) {
-      if (p.when && !ev(p.when, E, vars)) continue;
+      if (!shown(p)) continue;
       plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
     }
     for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: dashOf(a.dash), label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });

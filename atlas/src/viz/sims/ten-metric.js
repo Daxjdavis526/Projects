@@ -218,7 +218,7 @@ function mountForm(F, P) {
 }
 
 // ── chart: a metric field on a coordinate chart ──────────────────────────────
-const EPS = { cartesian: 0.25, polar: 0.22, sphere: 0.13, halfplane: 0.16, minkowski: 0.2, skew: 0.22 };
+const EPS = { cartesian: 0.25, polar: 0.22, sphere: 0.13, halfplane: 0.12, minkowski: 0.2, skew: 0.22 };
 const LABEL = { cartesian: 'Cartesian (x, y)', polar: 'Polar (r, θ)', sphere: 'The 2-sphere (θ, φ)', halfplane: 'The half-plane', minkowski: 'Minkowski (t, x)', skew: 'Skewed axes (u, v)' };
 // grid points for the ellipses, in chart coordinates
 function gridPoints(chart) {

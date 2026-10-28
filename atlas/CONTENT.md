@@ -530,6 +530,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `qm-slits`, `qm-hydrogen` | electrons through slits arriving one at a time and building fringes; hydrogen's levels and series, the spectrum in true colour, Bohr orbits or probability clouds |
 | `qm-binding`, `qm-decay` | binding energy per nucleon from AME2020 masses with the liquid-drop curve; a sample decaying nucleus by nucleus against the exponential law |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
+| `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |
 | `mp-schrodinger`, `mp-orbitals` | infinite, finite, harmonic and double wells (levels, ψ and |ψ|², forbidden regions, a sloshing superposition) and scattering off steps and barriers with exact transmission; hydrogen orbitals for n ≤ 5 — a cloud slice, the |Y_lm|² shape, P(r) with its markers, real or complex orbitals |
 | `mp-collide` | collisions and decays on the energy–momentum diagram: four-momentum arrows, mass hyperbolas, √s and thresholds, any frame |
 | `mp-rutherford`, `mp-franck-hertz`, `mp-packet` | alpha particles on exact Coulomb hyperbolas past a nucleus (against Thomson's atom) with angle and count-rate panels; a mercury or neon Franck–Hertz tube with its current dips; a packet built from plane waves under four dispersion laws, and the x–k trade-off |
