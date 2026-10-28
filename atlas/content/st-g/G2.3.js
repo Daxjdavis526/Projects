@@ -25,7 +25,7 @@ export default lesson({
   minutes: 14, difficulty: 3,
   intro: t`A sequence of functions $f_n$ converges **pointwise** to $f$ when $f_n(x) \to f(x)$ at each $x$ separately — each point may need its own $N$. It converges **uniformly** when one $N$ serves every $x$ at once, which is the same as the largest gap going to zero:
 
-$$\lVert f_n - f\rVert_\infty = \sup_{x \in I}\,|f_n(x) - f(x)| \;\longrightarrow\; 0$$
+$$\begin{gathered}\lVert f_n - f\rVert_\infty = \sup_{x \in I}\,|f_n(x) - f(x)| \\ \longrightarrow\; 0\end{gathered}$$
 
 The difference decides whether limits can be swapped. A uniform limit of continuous functions is continuous, and on a bounded interval $\int f_n \to \int f$. Under mere pointwise convergence both can fail. Physics swaps limits all the time — integrating a perturbation series term by term, differentiating under an integral sign, taking a continuum limit — and uniform convergence is the usual licence. Fourier series meet these ideas in [pointwise and mean-square convergence](#/lesson/st-e.E2.1).`,
   symbols: [

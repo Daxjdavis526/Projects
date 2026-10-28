@@ -294,7 +294,8 @@ export function validate(P) {
   if (!(Array.isArray(P.bif) && P.bif.length === 2 && P.bif[0] < P.bif[1] && P.bif[0] >= 0)) out.push('cm5-pendulum: bif must be [lo, hi] with lo < hi');
   if (!(Number.isInteger(P.bifN) && P.bifN >= 10 && P.bifN <= 300)) out.push('cm5-pendulum: bifN must be a whole number from 10 to 300');
   if (!(Number.isInteger(P.keep) && P.keep >= 1 && P.keep <= 400)) out.push('cm5-pendulum: keep must be a whole number from 1 to 400');
-  if (!(Array.isArray(P.gRange) && P.gRange[0] < P.gRange[1] && P.gamma >= P.gRange[0] && P.gamma <= P.gRange[1])) out.push('cm5-pendulum: gRange must be [lo, hi] containing gamma');
+  if (!(Array.isArray(P.gRange) && P.gRange[0] < P.gRange[1])) out.push('cm5-pendulum: gRange must be [lo, hi]');
+  else if ((P.controls || []).includes('gamma') && !(P.gamma >= P.gRange[0] && P.gamma <= P.gRange[1])) out.push('cm5-pendulum: with a gamma slider, gRange must contain gamma');
   if (P.y !== null && !(Array.isArray(P.y) && P.y[0] < P.y[1])) out.push('cm5-pendulum: y must be [lo, hi] or null');
   for (const c of P.controls || []) if (!CONTROLS.includes(c)) out.push(`cm5-pendulum: unknown control “${c}”`);
   for (const r of [...(P.hide || []), ...(P.readouts || [])]) if (!ROWS.includes(r)) out.push(`cm5-pendulum: unknown readout “${r}”`);

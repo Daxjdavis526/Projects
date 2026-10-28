@@ -32,7 +32,7 @@ export default lesson({
   minutes: 13, difficulty: 3,
   intro: t`A sequence $a_n$ **converges** to $L$ when $\forall\varepsilon > 0\ \exists N\ \forall n \ge N:\ |a_n - L| < \varepsilon$ — eventually every term stays in any band you name. To use that you must know $L$. The **Cauchy criterion** asks only that the terms eventually crowd together:
 
-$$\forall\varepsilon > 0\ \ \exists N\ \ \forall m, n \ge N:\ \ |a_m - a_n| < \varepsilon$$
+$$\begin{gathered}\forall\varepsilon > 0\ \ \exists N\ \ \forall m, n \ge N: \\ |a_m - a_n| < \varepsilon\end{gathered}$$
 
 Every convergent sequence is Cauchy. The converse is the defining property of the real numbers — **completeness**: in $\mathbb R$ every Cauchy sequence converges. The rationals $\mathbb Q$ fail it: a sequence of fractions can crowd together around $\sqrt2$, a point that is not there. Series convergence in [Calculus II](#/lesson/math1220.C2-4.1) silently relies on completeness at every step.`,
   symbols: [

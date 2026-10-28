@@ -37,26 +37,26 @@ const r4 = (v) => +(+v).toPrecision(4);
  */
 function bcPic(n1, n2, thDeg, caption, { arrows = true, labels = true } = {}) {
   const th = thDeg * DEG, f = fresnel(n1, n2, th), tt = f.thT;
-  const L = 1.35, m = 0.8, s = 0.42;
+  const L = 1.25, m = 0.75, s = 0.45;
   const I0 = [-m * Math.sin(th), m * Math.cos(th)], R0 = [m * Math.sin(th), m * Math.cos(th)], T0 = [m * Math.sin(tt), -m * Math.cos(tt)];
   const eI = [Math.cos(th), Math.sin(th)].map((v) => v * s), eR = [Math.cos(th), -Math.sin(th)].map((v) => v * s * f.rp), eT = [Math.cos(tt), Math.sin(tt)].map((v) => v * s * f.tp);
   const arr = (c, v, label) => ({ from: [r4(c[0] - v[0]), r4(c[1] - v[1])], to: [r4(c[0] + v[0]), r4(c[1] + v[1])], color: 'violet', width: 2.4, ...(labels && label ? { label } : {}) });
   return {
     type: 'graph',
     params: {
-      x: [-2, 2], y: [-1.5, 1.5], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
-      shade: [{ fn: '0', lower: '-1.5', from: -2.5, to: 2.5, color: 'teal', alpha: Math.min(0.32, 0.05 + 0.06 * n2) }, ...(n1 > 1.01 ? [{ fn: '1.5', lower: '0', from: -2.5, to: 2.5, color: 'teal', alpha: Math.min(0.32, 0.05 + 0.06 * n1) }] : [])],
+      x: [-2, 2], y: [-1.3, 1.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
+      shade: [{ fn: '0', lower: '-1.3', from: -5, to: 5, color: 'teal', alpha: Math.min(0.32, 0.05 + 0.06 * n2) }, ...(n1 > 1.01 ? [{ fn: '1.3', lower: '0', from: -5, to: 5, color: 'teal', alpha: Math.min(0.32, 0.05 + 0.06 * n1) }] : [])],
       curves: [
-        { fn: '0', domain: [-2.5, 2.5], color: 'ink3', width: 1.5 },
-        { param: ['0', 't'], t: [-1.4, 1.4], color: 'ink4', dash: [4, 4], width: 1 },
+        { fn: '0', domain: [-5, 5], color: 'ink3', width: 1.5 },
+        { param: ['0', 't'], t: [-1.25, 1.25], color: 'ink4', dash: [4, 4], width: 1 },
         { param: [`${r4(-L * Math.sin(th))}*(1 - t)`, `${r4(L * Math.cos(th))}*(1 - t)`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
         { param: [`${r4(L * Math.sin(th))}*t`, `${r4(L * Math.cos(th))}*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
         { param: [`${r4(L * Math.sin(tt))}*t`, `${r4(-L * Math.cos(tt))}*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
       ],
       arrows: arrows ? [arr(I0, eI, 'Eᵢ'), ...(Math.abs(f.rp) > 0.02 ? [arr(R0, eR, 'Eᵣ')] : []), arr(T0, eT, 'Eₜ')] : [],
       points: [
-        { x: -1.95, y: 1.3, r: 0, label: `n₁ = ${n1}`, color: 'ink2' },
-        { x: -1.95, y: -1.3, r: 0, label: `n₂ = ${nice(sf(n2, 3))}`, color: 'ink2' },
+        { x: -2.6, y: 1.1, r: 0, label: `n₁ = ${n1}`, color: 'ink2' },
+        { x: -2.6, y: -1.1, r: 0, label: `n₂ = ${nice(sf(n2, 3))}`, color: 'ink2' },
         { x: r4(-0.3 * Math.sin(th / 2)), y: r4(0.42 * Math.cos(th / 2)), r: 0, label: 'θ', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 },
       ],
     },
@@ -70,7 +70,7 @@ const powerPic = (n1, n2, angle, caption, hide = []) => ({ type: 'op-fresnel', p
 // expressions for the Explore graph (n₁ = 1, sliders th in degrees and n2)
 const TH = 'th*pi/180', TT = `asin(sin(${TH})/n2)`, AL = `(cos(${TT})/cos(${TH}))`;
 const RP = `((${AL} - n2)/(${AL} + n2))`, TP = `(2/(${AL} + n2))`;
-const S = 0.42;
+const S = 0.45;
 
 export default lesson({
   id: 'phys4600.M3.3',
@@ -97,25 +97,25 @@ export default lesson({
       t`Check $R + T = 1$ at a few angles; $T$ needs the factor $\alpha\beta$, not just $t^2$.`,
     ],
     params: {
-      x: [-2, 2], y: [-1.5, 1.5], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
+      x: [-2, 2], y: [-1.3, 1.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
       sliders: [
         { key: 'th', label: t`Angle of incidence $\theta_I$`, min: 0, max: 85, step: 1, value: 30, unit: '^\\circ', explain: 'Measured from the normal (dashed).' },
         { key: 'n2', label: t`Index of medium 2, $n_2$`, min: 1.1, max: 3, step: 0.05, value: 1.5, explain: t`Medium 1 is vacuum ($n_1 = 1$); both are non-magnetic. Ice is 1.77 at microwave frequencies, glass about 1.5 for light.` },
       ],
-      shade: [{ fn: '0', lower: '-1.5', from: -2.5, to: 2.5, color: 'teal', alpha: 0.18 }],
+      shade: [{ fn: '0', lower: '-1.3', from: -5, to: 5, color: 'teal', alpha: 0.18 }],
       curves: [
-        { fn: '0', domain: [-2.5, 2.5], color: 'ink3', width: 1.5 },
-        { param: ['0', 't'], t: [-1.4, 1.4], color: 'ink4', dash: [4, 4], width: 1 },
-        { param: [`-1.35*sin(${TH})*(1 - t)`, `1.35*cos(${TH})*(1 - t)`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
-        { param: [`1.35*sin(${TH})*t`, `1.35*cos(${TH})*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
-        { param: [`1.35*sin(${TT})*t`, `-1.35*cos(${TT})*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
+        { fn: '0', domain: [-5, 5], color: 'ink3', width: 1.5 },
+        { param: ['0', 't'], t: [-1.25, 1.25], color: 'ink4', dash: [4, 4], width: 1 },
+        { param: [`-1.25*sin(${TH})*(1 - t)`, `1.25*cos(${TH})*(1 - t)`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
+        { param: [`1.25*sin(${TH})*t`, `1.25*cos(${TH})*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
+        { param: [`1.25*sin(${TT})*t`, `-1.25*cos(${TT})*t`], t: [0, 1], color: 'gold', dash: [6, 4], width: 1.6 },
       ],
       arrows: [
-        { from: [`-0.8*sin(${TH}) - ${S}*cos(${TH})`, `0.8*cos(${TH}) - ${S}*sin(${TH})`], to: [`-0.8*sin(${TH}) + ${S}*cos(${TH})`, `0.8*cos(${TH}) + ${S}*sin(${TH})`], color: 'violet', width: 2.4, label: 'Eᵢ' },
-        { from: [`0.8*sin(${TH}) - ${S}*${RP}*cos(${TH})`, `0.8*cos(${TH}) + ${S}*${RP}*sin(${TH})`], to: [`0.8*sin(${TH}) + ${S}*${RP}*cos(${TH})`, `0.8*cos(${TH}) - ${S}*${RP}*sin(${TH})`], color: 'violet', width: 2.4, label: 'Eᵣ' },
-        { from: [`0.8*sin(${TT}) - ${S}*${TP}*cos(${TT})`, `-0.8*cos(${TT}) - ${S}*${TP}*sin(${TT})`], to: [`0.8*sin(${TT}) + ${S}*${TP}*cos(${TT})`, `-0.8*cos(${TT}) + ${S}*${TP}*sin(${TT})`], color: 'violet', width: 2.4, label: 'Eₜ' },
+        { from: [`-0.75*sin(${TH}) - ${S}*cos(${TH})`, `0.75*cos(${TH}) - ${S}*sin(${TH})`], to: [`-0.75*sin(${TH}) + ${S}*cos(${TH})`, `0.75*cos(${TH}) + ${S}*sin(${TH})`], color: 'violet', width: 2.4, label: 'Eᵢ' },
+        { from: [`0.75*sin(${TH}) - ${S}*${RP}*cos(${TH})`, `0.75*cos(${TH}) + ${S}*${RP}*sin(${TH})`], to: [`0.75*sin(${TH}) + ${S}*${RP}*cos(${TH})`, `0.75*cos(${TH}) - ${S}*${RP}*sin(${TH})`], color: 'violet', width: 2.4, label: 'Eᵣ' },
+        { from: [`0.75*sin(${TT}) - ${S}*${TP}*cos(${TT})`, `-0.75*cos(${TT}) - ${S}*${TP}*sin(${TT})`], to: [`0.75*sin(${TT}) + ${S}*${TP}*cos(${TT})`, `-0.75*cos(${TT}) + ${S}*${TP}*sin(${TT})`], color: 'violet', width: 2.4, label: 'Eₜ' },
       ],
-      points: [{ x: -1.95, y: 1.3, r: 0, label: 'vacuum', color: 'ink2' }, { x: -1.95, y: -1.3, r: 0, label: 'medium 2', color: 'ink2' }],
+      points: [{ x: -2.6, y: 1.1, r: 0, label: 'vacuum', color: 'ink2' }, { x: -2.6, y: -1.1, r: 0, label: 'medium 2', color: 'ink2' }],
       readouts: [
         { label: t`$\theta_T$`, expr: `${TT}*180/pi`, unit: '^\\circ', digits: 3 },
         { label: t`$r_p = E_R/E_I$`, expr: RP, digits: 3, zero: 1e-6 },
@@ -222,7 +222,7 @@ export default lesson({
         const thB = brewster(1, Math.sqrt(er)) / DEG;
         return {
           prompt: t`At what angle of incidence does a radar wave polarized in the plane of incidence reflect not at all from flat ${mat} ($\varepsilon_r \approx ${er}$, non-magnetic)? Give it in degrees from the normal.`,
-          visual: powerPic(1, Math.sqrt(er), 30, t`Reflected power against angle for $\vec E$ perpendicular to (s) and in (p) the plane of incidence. Brewster’s mark is hidden.`, ['brewster']),
+          visual: bcPic(1, Math.sqrt(er), 40, t`Rays at the surface of the ${mat} for one angle of incidence. Flat, lossless boundary.`, { arrows: false }),
           answer: thB, units: 'deg', tol: { rel: 0.005 },
           errors: [{ value: Math.atan(er) / DEG, feedback: t`Use the index, $n = \sqrt{\varepsilon_r}$, not $\varepsilon_r$.` }, { value: 90 - thB, feedback: t`That is the refraction angle at Brewster incidence; $\tan\theta_B = n_2/n_1$ measures from the normal.` }],
           hints: [t`$r_p = 0$ when $\alpha = \beta$.`, t`For non-magnetic media that gives $\tan\theta_B = n_2/n_1$, with $n_2 = \sqrt{\varepsilon_r}$.`],

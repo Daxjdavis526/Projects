@@ -28,7 +28,7 @@ export default lesson({
   minutes: 16, difficulty: 4,
   intro: t`An **operator** is a linear map $A$ on a Hilbert space. It is **bounded** if it stretches no vector by more than a fixed factor, the operator norm; bounded operators are exactly the continuous ones. Its **spectrum** generalizes the eigenvalues of a matrix:
 
-$$\begin{gathered}\lVert A\rVert = \sup_{f \ne 0}\frac{\lVert Af\rVert}{\lVert f\rVert} \\ \sigma(A) = \{\lambda:\ A - \lambda I\ \text{has no bounded inverse}\}\end{gathered}$$
+$$\begin{gathered}\lVert A\rVert = \sup_{f \ne 0}\frac{\lVert Af\rVert}{\lVert f\rVert} \\ \sigma(A) = \{\lambda:\ A - \lambda I\ \text{has} \\ \text{no bounded inverse}\}\end{gathered}$$
 
 For a matrix, $\sigma(A)$ is just the set of eigenvalues. In infinite dimensions $A - \lambda I$ can fail to have a bounded inverse **without** $\lambda$ being an eigenvalue: multiplication by $x$ has a whole interval of spectrum and no eigenvectors at all. And the operators physics cares most about — momentum, the Hamiltonian, $d^2/dx^2$ — are **unbounded**, defined only on a domain of smooth enough functions. The physicist’s side of this is [observables and Hermitian operators](#/lesson/phys4700.M4.2) and [self-adjoint operators](#/lesson/st-e.E5.1).`,
   symbols: [

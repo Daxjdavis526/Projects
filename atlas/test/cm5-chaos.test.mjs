@@ -116,7 +116,7 @@ for (const [g, n] of [[0.9, 1], [1.06, 1], [1.073, 2], [1.078, 2], [1.081, 4], [
 check('cm5-pendulum defaults valid', SP.validate({ ...SP.defaults }).length === 0, SP.validate({ ...SP.defaults }).join('; '));
 check('cm5-logistic defaults valid', SL.validate({ ...SL.defaults }).length === 0, SL.validate({ ...SL.defaults }).join('; '));
 check('cm5-pendulum rejects a bad panel', SP.validate({ ...SP.defaults, panels: ['nope'] }).length > 0);
-check('cm5-pendulum rejects γ outside its slider range', SP.validate({ ...SP.defaults, gamma: 1.5 }).length > 0);
+check('cm5-pendulum rejects γ outside its slider range', SP.validate({ ...SP.defaults, gamma: 1.5 }).length > 0 && SP.validate({ ...SP.defaults, gamma: 1.5, controls: [] }).length === 0);
 check('cm5-logistic rejects r > 4', SL.validate({ ...SL.defaults, r: 4.2 }).length > 0);
 check('cm5-logistic rejects an unknown readout', SL.validate({ ...SL.defaults, hide: ['x'] }).length > 0);
 

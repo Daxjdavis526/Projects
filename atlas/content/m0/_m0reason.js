@@ -119,9 +119,9 @@ export function euler({ inner = 'P', outer = 'Q', outsideLabel, points = [], cap
   const curves = [ring(0, 0, outerR, { color: 'teal' }), ring(innerAt[0], innerAt[1], innerR, { color: 'accent' })];
   const pts = [
     { x: N(innerAt[0]), y: N(innerAt[1]), r: 0, label: inner, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'accent' },
-    { x: N(outerR * 0.5), y: N(outerR * 0.55), r: 0, label: outer, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'teal' },
+    { x: N(outerR * 0.71 + 0.15), y: N(outerR * 0.71 + 0.15), r: 0, label: outer, labelAlign: 'left', labelDx: 0, labelDy: 0, color: 'teal' },
   ];
-  if (outsideLabel) pts.push({ x: N(outerR + 1.9), y: N(outerR - 0.3), r: 0, label: outsideLabel, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink3' });
+  if (outsideLabel) pts.push({ x: N(outerR + 1.6), y: N(-outerR + 0.2), r: 0, label: outsideLabel, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink3' });
   return {
     type: 'graph',
     params: { x: [-5, 5], y: [-2.5, 2.5], equal: true, aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', shade, curves, points: [...pts, ...points], ...extra },

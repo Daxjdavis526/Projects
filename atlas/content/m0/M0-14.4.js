@@ -49,7 +49,7 @@ In the step you **assume** $P(k)$ for one arbitrary $k$ — the induction hypoth
       { label: 'State P(n)', text: t`$P(n)$: “$1 + 2 + \cdots + 2^{n-1} = 2^n - 1$.”` },
       { label: 'Base case', text: t`$n = 1$: the left side is just $1$, and $2^1 - 1 = 1$. True.` },
       { label: 'Induction hypothesis', text: t`Assume $P(k)$ for some $k \ge 1$: $1 + 2 + \cdots + 2^{k-1} = 2^k - 1$.` },
-      { label: 'Inductive step', text: t`Add the next term, $2^k$, to both sides: $1 + \cdots + 2^{k-1} + 2^k = (2^k - 1) + 2^k = 2\cdot2^k - 1 = 2^{k+1} - 1$. That is exactly $P(k + 1)$.` },
+      { label: 'Inductive step', text: t`Add the next term, $2^k$, to both sides: $$\begin{aligned} 1 + \cdots + 2^{k-1} + 2^k &= (2^k - 1) + 2^k \\ &= 2\cdot2^k - 1 = 2^{k+1} - 1. \end{aligned}$$ That is exactly $P(k + 1)$.` },
       { label: 'Conclude', text: t`$P(1)$ holds and $P(k) \Rightarrow P(k+1)$ for every $k \ge 1$, so $P(n)$ holds for every $n \ge 1$. (In binary it is plain to see: $111\ldots1 + 1 = 1000\ldots0$.)` },
     ],
     answer: t`Base: $1 = 2^1 - 1$. Step: $(2^k - 1) + 2^k = 2^{k+1} - 1$. So the formula holds for all $n \ge 1$. $\blacksquare$`,
@@ -119,7 +119,7 @@ In the step you **assume** $P(k)$ for one arbitrary $k$ — the induction hypoth
     mcq({
       id: 'broken-link', difficulty: 3,
       prompt: t`Claim: $2^n \ge n^2$ for every $n \ge 1$. It holds for $n = 1$ and $n = 2$. Trying the step: from $2^k \ge k^2$ we get $2^{k+1} \ge 2k^2$, and $2k^2 \ge (k + 1)^2$ holds only when $k \ge 3$. Which link $P(k) \Rightarrow P(k + 1)$ fails?`,
-      choices: [t`$P(2) \Rightarrow P(3)$: indeed $2^3 = 8 < 9 = 3^2$`, t`$P(1) \Rightarrow P(2)$`, t`$P(3) \Rightarrow P(4)$`, t`none: the claim is true for every $n$`],
+      choices: [t`$P(2) \Rightarrow P(3)$`, t`$P(1) \Rightarrow P(2)$`, t`$P(3) \Rightarrow P(4)$`, t`none: the claim is true for every $n$`],
       answer: 0,
       why: {
         1: t`$P(2)$ is true ($4 \ge 4$), so this link holds; the trouble is the next one.`,
@@ -128,7 +128,7 @@ In the step you **assume** $P(k)$ for one arbitrary $k$ — the induction hypoth
       },
       hints: [t`For which $k$ is $2k^2 \ge (k + 1)^2$ false?`, t`Check $n = 3$ directly.`],
       teach: t`One broken link stops the chain: the step must hold for every $k$ from the base case on.`,
-      explain: t`At $k = 2$, $2k^2 = 8 < 9$: the link fails, and so does $P(3)$. The fix is a later start: $P(4)$ ($16 \ge 16$) is true and the step works for every $k \ge 3$, so $2^n \ge n^2$ for every $n \ge 4$.`,
+      explain: t`At $k = 2$, $2k^2 = 8 < 9$: the link fails, and so does $P(3)$, since $2^3 = 8 < 9 = 3^2$. The fix is a later start: $P(4)$ ($16 \ge 16$) is true and the step works for every $k \ge 3$, so $2^n \ge n^2$ for every $n \ge 4$.`,
       visual: dominoes({ n: 8, fallen: 2, missing: [3], caption: t`The first two dominoes fall; with domino $3$ missing, the chain stops there.` }),
     }),
     num({

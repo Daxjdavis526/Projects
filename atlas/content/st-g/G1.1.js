@@ -59,7 +59,7 @@ export default lesson({
   minutes: 12, difficulty: 2,
   intro: t`A **statement** is a sentence that is definitely true or definitely false. Mathematics builds its definitions from two quantifiers: $\forall$, “for every”, and $\exists$, “there exists”. Their order matters — “every point has a nearby flat frame” is not “one frame is flat at every point” — and negating a chain of them is mechanical: **flip every quantifier and negate what is inside**.
 
-$$\neg\bigl(\forall x\ \exists y:\ P(x, y)\bigr) \iff \exists x\ \forall y:\ \neg P(x, y)$$
+$$\begin{gathered}\neg\bigl(\forall x\ \exists y:\ P(x, y)\bigr) \\ \iff \exists x\ \forall y:\ \neg P(x, y)\end{gathered}$$
 
 This is the rigorous sequel to [statements, implication and negation](#/lesson/m0.M0-14.1): here the strings of quantifiers get long, as they are in every definition of analysis and relativity.`,
   symbols: [

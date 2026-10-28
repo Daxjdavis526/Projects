@@ -102,7 +102,7 @@ export default lesson({
           hints: [t`Small swings: $\sin\phi \approx \phi$, a linear driven oscillator with $f_0 = \gamma\omega_0^2$.`, t`$A = \gamma\omega_0^2/\sqrt{(\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2}$; everything can be written in units of $\omega$, so the period drops out.`],
           teach: t`For small swings the driven pendulum is the linear driven oscillator, with amplitude $\gamma\omega_0^2/\sqrt{(\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2}$.`,
           explain: t`In units of $\omega$: $\omega_0^2 = ${sci(k * k, 3)}\omega^2$ and $2\beta\omega = ${sci(k / 2, 3)}\omega^2$, so $A = \dfrac{${g}\times${sci(k * k, 3)}}{\sqrt{${sci((k * k - 1) ** 2, 4)} + ${sci((k / 2) ** 2, 4)}}} = ${sci(A, 3)}$ rad. The drive period does not matter: only the ratios $\omega_0/\omega$ and $\beta/\omega$ do.`,
-          visual: pendPic({ gamma: g, w: r6x(w), w0: r6x(w0), beta: r6x(beta), start: [0, 0], skip: 20, periods: 1, panels: ['swing'], gRange: [0, 1.2] }, t`The pendulum at one moment of its steady swing, drawn at its true angle. The gold arrow shows only the drive's phase.`),
+          visual: pendPic({ gamma: g, w: r6x(w), w0: r6x(w0), beta: r6x(beta), start: [0, 0], skip: 20, periods: 1, panels: ['swing'] }, t`The pendulum at one moment of its steady swing, drawn at its true angle. The gold arrow shows only the drive's phase.`),
         };
       },
     }),

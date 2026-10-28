@@ -192,7 +192,8 @@ export function validate(P) {
   if (!Array.isArray(P.panels) || !P.panels.length || P.panels.some((p) => !PANELS.includes(p))) out.push(`cm5-logistic: panels must be a list of ${PANELS.join(', ')}`);
   if (!(Array.isArray(P.bif) && P.bif[0] < P.bif[1] && P.bif[0] >= 0 && P.bif[1] <= 4)) out.push('cm5-logistic: bif must be [lo, hi] inside 0–4');
   if (!(Array.isArray(P.bifY) && P.bifY[0] < P.bifY[1])) out.push('cm5-logistic: bifY must be [lo, hi]');
-  if (!(Array.isArray(P.rRange) && P.rRange[0] < P.rRange[1] && P.rRange[0] >= 0 && P.rRange[1] <= 4 && P.r >= P.rRange[0] && P.r <= P.rRange[1])) out.push('cm5-logistic: rRange must lie in 0–4 and contain r');
+  if (!(Array.isArray(P.rRange) && P.rRange[0] < P.rRange[1] && P.rRange[0] >= 0 && P.rRange[1] <= 4)) out.push('cm5-logistic: rRange must lie in 0–4');
+  else if ((P.controls || []).includes('r') && !(P.r >= P.rRange[0] && P.r <= P.rRange[1])) out.push('cm5-logistic: with an r slider, rRange must contain r');
   for (const c of P.controls || []) if (!CONTROLS.includes(c)) out.push(`cm5-logistic: unknown control “${c}”`);
   for (const k of [...(P.hide || []), ...(P.readouts || [])]) if (!ROWS.includes(k)) out.push(`cm5-logistic: unknown readout “${k}”`);
   return out;

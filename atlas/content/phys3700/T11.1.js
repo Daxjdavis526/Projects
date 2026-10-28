@@ -45,7 +45,7 @@ export default lesson({
   minutes: 20, difficulty: 3,
   intro: t`A star is a ball of gas holding itself up against its own gravity. While it burns, ordinary gas pressure does the holding, and the **virial theorem** ties its temperature to its size: a star that loses energy contracts and gets *hotter* — a negative heat capacity. When the fuel runs out, the core shrinks until its electrons are **degenerate** (T7.3), and their pressure, which needs no heat, holds it up as a white dwarf the size of the Earth. But only up to a point. Squeeze harder and the electrons become relativistic; then their pressure grows with density just as gravity does, and there is a largest mass they can support:
 
-$$M_\text{Ch} = 3.10\left(\frac{\hbar c}{G}\right)^{3/2}\frac{1}{(\mu_e m_p)^2} \approx ${fmt(MCH2, 3)}\,M_\odot \quad(\mu_e = 2).$$
+$$\begin{gathered}M_\text{Ch} = 3.10\left(\frac{\hbar c}{G}\right)^{3/2}\frac{1}{(\mu_e m_p)^2} \\ \approx ${fmt(MCH2, 3)}\,M_\odot \quad(\mu_e = 2).\end{gathered}$$
 
 Subrahmanyan Chandrasekhar found it in 1931, aged 20; it is quantum mechanics, special relativity and gravity in one number.`,
   symbols: [
