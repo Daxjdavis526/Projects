@@ -149,3 +149,30 @@ export function epsSlices({ values = true, rings = [], sliders, readouts, captio
     caption: caption || t`The symbol $\varepsilon_{ijk}$ as three slices, one for each value of $i$; in each slice $j$ numbers the rows (top to bottom) and $k$ the columns (left to right). Only six of the 27 entries are not zero.`,
   };
 }
+
+/**
+ * The lines a·x + b·y = k·step of a covector's stack, as graph curves (drawn
+ * parametrically, so any direction works) for every level k crossing the
+ * window x × y. Returns { curves, points }: points label the levels at the
+ * top or right edge when labels is true.
+ */
+export function stackCurves([a, b], { x = [-3, 3], y = [-2, 2], step = 1, color = 'teal', labels = false, width = 1.4, only = null } = {}) {
+  const n2 = a * a + b * b, n = Math.sqrt(n2), L = 4 * (Math.abs(x[1] - x[0]) + Math.abs(y[1] - y[0]));
+  const vals = [[x[0], y[0]], [x[1], y[0]], [x[0], y[1]], [x[1], y[1]]].map(([u, v]) => (a * u + b * v) / step);
+  const curves = [], points = [];
+  for (let k = Math.ceil(Math.min(...vals)); k <= Math.floor(Math.max(...vals)); k++) {
+    if (only && !only.includes(k)) continue;
+    const c = (k * step) / n2;          // the foot of the line on the normal through the origin
+    curves.push({ param: [`${r6(a * c)} - ${r6(b / n)}*t`, `${r6(b * c)} + ${r6(a / n)}*t`], t: [-L, L], color, width: k === 0 ? width + 0.8 : width });
+    if (labels) {
+      // where the line leaves the window through its top edge (or its right edge, for steep-free lines)
+      const top = Math.abs(a) > 1e-9 ? [(k * step - b * y[1]) / a, y[1]] : null;
+      const right = Math.abs(b) > 1e-9 ? [x[1], (k * step - a * x[1]) / b] : null;
+      const inX = (p) => p && p[0] > x[0] + 0.05 * (x[1] - x[0]) && p[0] < x[1] - 0.05 * (x[1] - x[0]);
+      const inY = (p) => p && p[1] > y[0] + 0.05 * (y[1] - y[0]) && p[1] < y[1] - 0.05 * (y[1] - y[0]);
+      const at = inX(top) ? top : inY(right) ? right : null;
+      if (at) points.push({ x: r6(at[0]), y: r6(at[1]), r: 0.01, color, label: String(k).replace('-', '−'), labelDx: at === top ? 0 : -10, labelDy: at === top ? 10 : 0, labelAlign: 'center' });
+    }
+  }
+  return { curves, points };
+}

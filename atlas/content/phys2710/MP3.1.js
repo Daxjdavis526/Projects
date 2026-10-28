@@ -244,7 +244,7 @@ where $m$ is the particle’s mass — the same in every frame — and $\gamma$ 
         const G = 1 + K / MPC2;
         return {
           prompt: t`A cyclotron’s alternating voltage is tuned to the orbit frequency of slow protons, $f_0 = qB/(2\pi m)$. A proton with kinetic energy $K = ${K}$ MeV circles in the same field. Its momentum is $\gamma mv$, so its orbit frequency is $f = qB/(2\pi\gamma m)$. What is $f/f_0$? ($m_pc^2 = ${fmt(MPC2, 6)}$ MeV.)`,
-          answer: 1 / G, tol: { abs: 0.0004 },
+          answer: 1 / G, tol: { abs: 0.0005, rel: 0 },
           errors: [{ value: 1, feedback: t`With Newton’s $p = mv$ the frequency would not depend on speed — the cyclotron’s whole trick. The relativistic $\gamma$ spoils it.` }],
           hints: [t`$f/f_0 = 1/\gamma$, and $\gamma = E/(mc^2) = 1 + K/(mc^2)$.`, t`$\gamma = 1 + ${K}/${fmt(MPC2, 5)}$.`],
           teach: 'In a magnet the orbit period grows with γ: f = qB/(2πγm). A fixed-frequency cyclotron falls out of step once γ − 1 is a few per cent.',

@@ -140,7 +140,7 @@ export function situation({ mode, beam = 'p', target = 'p', products = [], paren
 }
 
 /**
- * The frame slider’s value s (from −0.5 to 2), turned into a rapidity:
+ * The frame slider’s value s (from −1 to 2), turned into a rapidity:
  *   fixed target: y = s·y_cm, so s = 0 is the lab, 1 the centre of momentum,
  *                 and (for equal masses) 2 the beam particle’s rest frame;
  *   collider:     y = s·½ln 3 (lab = CM at 0; β = 0.5 at s = 1, 0.8 at s = 2);
@@ -150,6 +150,10 @@ export function frameRapidity(S, s) {
   if (S.mode === 'collider') return (s * Math.log(3)) / 2;
   return s * S.ycm;
 }
-export const FRAME_RANGE = [-0.5, 2];
-/** Head-on, the lab is already the CM frame: a symmetric range, |β| up to 0.5. */
-export const frameRange = (mode) => (mode === 'collider' ? [-1, 1] : FRAME_RANGE);
+export const FRAME_RANGE = [-1, 2];
+/**
+ * The useful stretch of the frame slider for each mode: fixed target from the
+ * lab through the CM to the beam's rest frame; head-on symmetric, |β| up to
+ * 0.5; a decay from the lab to a little beyond the parent's rest frame.
+ */
+export const frameRange = (mode) => (mode === 'collider' ? [-1, 1] : mode === 'decay' ? [0, 1.5] : [0, 2]);

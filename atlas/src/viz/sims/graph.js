@@ -112,6 +112,7 @@ export function mount(F, P) {
         if (c.fn) ly = fn(c.fn, vars)({ ...E, x: at });
         else if (c.param) { lx = fn(c.param[0], ['t', ...vars])({ ...E, t: at }); ly = fn(c.param[1], ['t', ...vars])({ ...E, t: at }); }
         else if (c.polar) { const r = fn(c.polar, ['theta', ...vars])({ ...E, theta: at }); lx = r * Math.cos(at); ly = r * Math.sin(at); }
+        else if (c.sum) { const term = fn(c.sum, ['k', ...vars]), k0 = ev(c.k[0], E, vars), k1 = Math.round(ev(c.k[1], E, vars)); ly = 0; for (let j = k0; j <= k1; j++) ly += term({ ...E, x: at, k: j }); }
         plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650, align: c.labelAlign });
       }
     });
@@ -174,7 +175,7 @@ export function validate(P) {
   if (P.riemann) { tryParse(P.riemann.fn, [], 'riemann'); tryParse(P.riemann.from); tryParse(P.riemann.to); tryParse(P.riemann.n); }
   if (P.integral) { tryParse(P.integral.fn, [], 'integral'); tryParse(P.integral.from); tryParse(P.integral.to); }
   if (P.tangent) { tryParse(P.tangent.fn, [], 'tangent'); if (P.tangent.secant) tryParse(P.tangent.secant); }
-  for (const p of P.points || []) { tryParse(p.x, [], 'point'); tryParse(p.y, [], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
+  for (const p of P.points || []) { tryParse(p.x, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'point'); tryParse(p.y, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
   for (const o of [...(P.shade || []), ...(P.vlines || []), ...(P.hlines || []), ...(P.arrows || [])]) if (o.when) tryParse(o.when, [], 'when');
   for (const l of P.vlines || []) tryParse(l.x, [], 'vline');
   for (const l of P.hlines || []) tryParse(l.y, [], 'hline');

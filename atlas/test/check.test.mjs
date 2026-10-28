@@ -143,6 +143,9 @@ const tortoise = { type: 'expression', answer: 'r + 2M ln(r - 2M)', vars: { r: [
 check('expr: a constant that depends on a parameter (M) is still a constant', grade(tortoise, 'r + 2M ln((r - 2M)/M)').correct);
 check('expr: …but not one that depends on the variable integrated over', !grade(tortoise, 'r + 2M ln(r - 2M) + r/M').correct);
 check('expr: …and a wrong coefficient is still caught', !grade(tortoise, 'r + M ln(r - 2M)').correct);
+check('expr: Bessel J of integer order', grade({ type: 'expression', answer: 'besselj(0, x)', vars: { x: [0, 10] } }, 'besselj(0, x)').correct
+  && !grade({ type: 'expression', answer: 'besselj(0, x)', vars: { x: [0, 10] } }, 'besselj(1, x)').correct
+  && grade({ type: 'expression', answer: 'besselj(1, x)', vars: { x: [0.5, 10] } }, '-besselj(-1, x)').correct);
 check('expr: wrt * wants a true constant (a potential)', grade({ type: 'expression', answer: 'x^2 y', vars: { x: [1, 2], y: [1, 2] }, mode: 'constant', wrt: '*' }, 'x^2 y + 5').correct
   && !grade({ type: 'expression', answer: 'x^2 y', vars: { x: [1, 2], y: [1, 2] }, mode: 'constant', wrt: '*' }, 'x^2 y + y').correct);
 check('expr: wrt names the variable of integration', grade({ type: 'expression', answer: 'x t^2/2', vars: { x: [1, 3], t: [0, 2] }, mode: 'constant', wrt: 't' }, 'x t^2/2 + x^3').correct

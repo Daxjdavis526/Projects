@@ -10,8 +10,8 @@
 //   { type: 'mp-collide', params: {
 //       scenario: 'bevatron',  // bevatron pion pp ppbar lhc lhcfixed lambda (see SCENARIOS)
 //       K: null,               // MeV: the beam's kinetic energy (each beam's, head-on; the parent's, for a decay); null = the scenario's
-//       frame: 0,              // −0.5…2: 0 the lab; fixed target 1 = CM, 2 = the beam's rest frame;
-//                              //   head-on 1 = a frame at 0.5c, 2 = 0.8c; decay 1 = the parent's rest frame
+//       frame: 0,              // 0 the lab; fixed target (0…2) 1 = CM, 2 = the beam's rest frame;
+//                              //   head-on (−1…1) ±1 = a frame at 0.5c; decay (0…1.5) 1 = the parent's rest frame
 //       products: null,        // override the scenario's products (particle keys) — [] for none
 //       range: null,           // [Kmin, Kmax] for the K slider (MeV)
 //       controls: null,        // true, false, or a list of: scenario K frame
@@ -94,7 +94,9 @@ export function mount(F, P0) {
 
     // a view that holds every arrow at both ends of the frame slider, so sliding never rescales
     let xmin = 0, xmax = 0, ymax = 0;
-    for (const ss of [frameLo, 0, frameHi]) {
+    // the view covers this mode's own stretch of the slider (and the frame shown, if beyond it)
+    const [vLo, vHi] = R.frameRange(S.mode);
+    for (const ss of [Math.min(vLo, s), 0, Math.max(vHi, s)]) {
       const yy = R.frameRapidity(S, ss);
       for (const V of [...S.parts.map((q) => q.P), S.total]) {
         const [E, p] = R.boost(V, yy);
@@ -120,8 +122,9 @@ export function mount(F, P0) {
     plot.line(0, 0, Math.min(X1, top), Math.min(X1, top), { color: 'ink3', width: 1.2, dash: [4, 5] });
     plot.line(0, 0, Math.max(X0, -top), Math.min(-X0, top), { color: 'ink3', width: 1.2, dash: [4, 5] });
     {
-      const t = Math.min(X1, top) * 0.93;
-      plot.text('light: E = |pc|', t, t, { color: 'ink3', dx: -8, dy: -2, align: 'right', size: fs - 1 });
+      // on the left light line, outside the cone, where no arrow or hyperbola label goes
+      const t = Math.min(-X0, top) * 0.3;
+      plot.text('light: E = |pc|', -t, t, { color: 'ink3', dx: -10, dy: 0, align: 'right', size: fs - 1 });
     }
     // mass hyperbolas: one per distinct mass, then the threshold and the total
     const hyper = (m, o) => plot.curve((u) => (m * Math.sinh(u)) / uf, (u) => (m * Math.cosh(u)) / uf, -Math.acosh(Math.max(1, (top * uf) / m)), Math.acosh(Math.max(1, (top * uf) / m)), o);
@@ -134,7 +137,11 @@ export function mount(F, P0) {
     const showTh = S.Mth > 0;   // hide: ['threshold'] keeps the line but hides the number and the verdict
     if (showTh) {
       hyper(S.Mth, { color: 'bad', width: 1.6, dash: [6, 4] });
-      plot.text(`products at rest: Σmc² = ${sig(S.Mth / uf, 4)} ${un}`, 0, S.Mth / uf, { color: 'bad', dx: -8, dy: 0, align: 'right', size: fs - 1, baseline: 'bottom' });
+      // labelled on the left branch, inside the bowl, clear of the arrows
+      // labelled on the left branch, just outside the curve (the √s label goes inside)
+      const pl = 0.55 * Math.max(X0, -top) * uf;
+      const what = sc.products.map((k) => PLAIN[k] || k).join(' + ');
+      plot.text(`${what} at rest: ${sig(S.Mth / uf, 4)} ${un}`, pl / uf, Math.hypot(S.Mth, pl) / uf, { color: 'bad', dx: -10, dy: 6, align: 'right', size: fs - 1 });
     }
     hyper(S.M, { color: 'gold', width: 1.3, alpha: 0.7 });
 
@@ -152,19 +159,22 @@ export function mount(F, P0) {
     const name = (q) => PLAIN[q.key] || q.key;
     const decay = S.mode === 'decay';
     const lab = (P2, text, color, right) => plot.text(text, P2[0], P2[1], { color, dx: right ? 9 : -9, dy: 0, align: right ? 'left' : 'right', size: fs, weight: 650 });
-    if (Math.hypot(...A.map((v, i) => px(A)[i] - px([0, 0])[i])) > 14) lab(A, decay ? name(a) : `${name(a)} (beam)`, 'accent', A[0] >= Bv[0]);
+    if (Math.hypot(...A.map((v, i) => px(A)[i] - px([0, 0])[i])) > 14) lab(A, decay ? name(a) : `${name(a)} (beam)`, 'accent', A[0] >= Bv[0] && px(A)[0] < plot.R - 90);
     if (far(Bv, [0, 0], 14) && far(Bv, A)) lab(Bv, decay ? name(b) : S.mode === 'collider' ? `${name(b)} (beam)` : `${name(b)} (target)`, 'violet', Bv[0] > A[0]);
     const Tlabel = decay ? `${PLAIN[S.parent.key]} (total)` : 'total';
     if (far(T, A, 30)) plot.text(Tlabel, T[0], T[1], { color: 'gold', dx: T[0] >= 0 ? -10 : 10, dy: -12, align: T[0] >= 0 ? 'right' : 'left', size: fs, weight: 700 });
     else plot.text(Tlabel, T[0], T[1], { color: 'gold', dx: -10, dy: -14, align: 'right', size: fs, weight: 700 });
     if (!hide.has('mass')) {
       const apex = S.M / uf;
-      if (apex < top * 0.98) plot.text(`√s = ${sig(S.M / uf, 4)} ${un}`, 0, apex, { color: 'gold', dx: 12, dy: 4, align: 'left', size: fs - 1, baseline: 'top' });
+      if (apex < top * 0.98) {
+        const pl = 0.4 * Math.max(X0, -top) * uf;
+        plot.text(`√s = ${sig(S.M / uf, 4)} ${un}`, pl / uf, Math.hypot(S.M, pl) / uf, { color: 'gold', dx: 10, dy: -4, align: 'left', size: fs - 1 });
+      }
     }
 
     if (P.readout !== false) {
       const beta = Math.tanh(y);
-      const ok = !S.Mth || S.M >= S.Mth * (1 - 1e-12);
+      const verdict = !S.Mth ? '' : S.M > S.Mth * (1 + 1e-6) ? 'allowed' : S.M >= S.Mth * (1 - 1e-6) ? 'just at threshold' : 'too little energy';
       F.readout([
         ['observer', `\\beta = ${beta === 0 ? '0' : sig(beta, 4)}`],
         hide.has('K') ? ['$K$', '?'] : ['$K$ (lab)', texE(K, 4)],
@@ -172,7 +182,7 @@ export function mount(F, P0) {
         ['$p_{\\rm total}c$', Math.abs(total[1]) < 1e-9 * total[0] ? '0' : texE(total[1], 4)],
         ['$\\sqrt{s}$', hide.has('mass') ? '?' : texE(S.M, 5)],
         showTh ? ['threshold', `K = ${hide.has('threshold') ? '?' : texE(S.Kth, 4)}`] : null,
-        showTh && !hide.has('threshold') ? ['', ok ? '\\text{allowed}' : '\\text{too little energy}'] : null,
+        showTh && !hide.has('threshold') ? ['', `\\text{${verdict}}`] : null,
       ]);
     }
   }

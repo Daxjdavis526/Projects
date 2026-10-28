@@ -77,6 +77,8 @@ const FUNCS = {
   gamma: { f: gammaFn, tex: '\\Gamma' },
   erf: { f: erf, tex: '\\operatorname{erf}' },
   atan2: { f: Math.atan2, tex: '\\operatorname{atan2}', arity: 2 },
+  // Bessel function of the first kind of integer order: besselj(n, x) = Jₙ(x)
+  besselj: { f: besselJ, tex: '\\operatorname{J}', arity: 2 },
   min: { f: Math.min, tex: '\\min', arity: -1 },
   max: { f: Math.max, tex: '\\max', arity: -1 },
 };
@@ -112,6 +114,22 @@ export function gammaFn(x) {
 }
 
 // Abramowitz & Stegun 7.1.26 is only 1e-7; use a series/continued fraction good to ~1e-14.
+/**
+ * Jₙ(x) for integer n, from Bessel's integral (1/π)∫₀^π cos(nτ − x sin τ) dτ. The
+ * integrand is smooth and periodic, so the trapezoid rule converges exponentially;
+ * enough nodes to resolve the oscillation keep it at ~1e-13 for |x| up to hundreds.
+ */
+export function besselJ(n, x) {
+  n = Math.round(n);
+  const N = 2 * Math.ceil(Math.abs(x) + Math.abs(n)) + 48;
+  let s = 0;
+  for (let k = 0; k <= N; k++) {
+    const t = (Math.PI * k) / N, w = k === 0 || k === N ? 0.5 : 1;
+    s += w * Math.cos(n * t - x * Math.sin(t));
+  }
+  return s / N;
+}
+
 export function erf(x) {
   const s = Math.sign(x); x = Math.abs(x);
   if (x < 3) {

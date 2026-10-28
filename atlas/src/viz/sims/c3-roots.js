@@ -109,7 +109,8 @@ export function mount(F, P) {
     const pk = M.peak(zeta);
     const g = M.gain(W, zeta);
     if (pTop) {
-      const ymax = Math.min(30, Math.max(3, 1.15 * (Number.isFinite(pk.M) ? pk.M : 30), 1.15 * g));
+      const cap = P.gainMax ?? 120;          // the gain axis follows the peak up to this
+      const ymax = Math.min(cap, Math.max(3, 1.15 * (Number.isFinite(pk.M) ? pk.M : cap), 1.15 * g));
       pTop.setView([0, 3], [0, ymax]);
       pTop.clear();
       for (const z of [0.05, 0.1, 0.2, 0.4, 0.7, 1]) if (Math.abs(z - zeta) > 0.004) pTop.fn((u) => M.gain(u, z), { color: 'ink4', width: 1 });

@@ -13,7 +13,7 @@
 //
 //   { type: 'de-modes', params: {
 //       system: 'pair',                 // or 'co2'
-//       m: 1, m2: 1, k: 10, kc: 1,      // pair: masses (kg), wall springs and coupling spring (N/m)
+//       m: 1, m2: 1, k: 10, kc: 1,      // pair: masses (kg), wall springs and coupling spring (N/m); k: 0 frees the ends
 //       ratio: 0.75,                    // co2: carbon mass over oxygen mass (12/16)
 //       controls: ['kc'],               // sliders to offer: any of 'k', 'kc', 'm2' (pair), 'ratio' (co2)
 //       start: 'one',                   // 'one' (the first mass pulled aside alone), 'mode1', 'mode2' (co2: also 'mode0')
@@ -103,12 +103,12 @@ export async function mount(F, P0) {
     // the picture, in pixels
     pp.clear();
     const g = pp.ctx, W = pp.w, H = pp.h, y = H * 0.52, col = pp.col;
-    const wallW = co2 ? 0 : 14, left = 12 + wallW, right = W - 12 - wallW - (P.energy && !co2 ? 70 : 0);
+    const walls = !co2 && sys.springs[0] > 0, wallW = walls ? 14 : 0, left = 12 + wallW, right = W - 12 - wallW - (P.energy && !co2 ? 70 : 0);
     const gap = (right - left) / (n + 1), amp = gap * 0.32;
     const scale = Math.max(...[0, 0.25, 0.5, 0.75].map((f) => Math.max(...B.x(f * B.T).x.map(Math.abs))), 1e-9);
     const pos = (i, xi) => left + gap * (i + 1) + (amp * xi) / scale;
     g.save();
-    if (!co2) {
+    if (walls) {
       g.fillStyle = col.ink4; g.fillRect(12, y - 34, wallW, 68); g.fillRect(right, y - 34, wallW, 68);
     }
     const r = co2 ? [16, 13, 16] : sys.masses.map((m) => 12 + 6 * Math.sqrt(m / Math.max(...sys.masses)));
@@ -182,8 +182,9 @@ export async function mount(F, P0) {
 export function validate(P) {
   const out = [];
   if (!['pair', 'co2'].includes(P.system)) out.push('de-modes: system must be pair or co2');
-  for (const k of ['m', 'm2', 'k', 'ratio']) if (!(P[k] > 0)) out.push(`de-modes: ${k} must be positive`);
-  if (!(P.kc >= 0)) out.push('de-modes: kc must be zero or positive');
+  for (const k of ['m', 'm2', 'ratio']) if (!(P[k] > 0)) out.push(`de-modes: ${k} must be positive`);
+  if (!(P.k >= 0) || !(P.kc >= 0)) out.push('de-modes: k and kc must be zero or positive');
+  if (P.system === 'pair' && !(P.k > 0) && !(P.kc > 0)) out.push('de-modes: a pair needs some spring');
   const ok = P.system === 'co2' ? ['one', 'mode0', 'mode1', 'mode2'] : ['one', 'mode1', 'mode2'];
   if (!ok.includes(P.start)) out.push(`de-modes: start must be one of ${ok.join(', ')}`);
   for (const c of P.controls || []) if (!['k', 'kc', 'm2', 'ratio'].includes(c)) out.push(`de-modes: unknown control “${c}”`);

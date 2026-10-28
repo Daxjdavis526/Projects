@@ -97,7 +97,8 @@ export function mount(F, P) {
       plot.point(x0, y0, { color: pal[k % pal.length], r: 3.5 });
     });
     if (P.matrix) {
-      const [a, b, c, d] = P.matrix.map((m) => (typeof m === 'number' ? m : env[m]));
+      // each entry: a number, a slider key or an expression of the slider keys ('-b')
+      const [a, b, c, d] = P.matrix.map((m) => (typeof m === 'number' ? m : m in env ? env[m] : fn(m, Object.keys(env))(env)));
       const tr = a + d, det = a * d - b * c, disc = tr * tr - 4 * det;
       const kind = det < 0 ? 'saddle' : disc < 0 ? (Math.abs(tr) < 1e-9 ? 'center' : tr < 0 ? 'stable spiral' : 'unstable spiral') : tr < 0 ? 'stable node' : 'unstable node';
       F.readout([['trace', tr.toFixed(3)], ['determinant', det.toFixed(3)], ['$\\tau^2 - 4\\Delta$', disc.toFixed(3)], ['equilibrium type', `\\text{${kind}}`]]);

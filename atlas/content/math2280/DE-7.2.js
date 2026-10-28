@@ -22,8 +22,8 @@ function drumPic(m, n, { kind = 'membrane', caption } = {}) {
     type: 'surface3d',
     params: {
       aspect: 'wide', surface: ['u*cos(v)', 'u*sin(v)', `${amp}*${jExpr(m, `${r6(j)}*u`, j + 0.3)}*cos(${m}*v)`],
-      domain: [[0, 1], [0, TAU]], n: 40, axes: false, dist: 3.6, pitch: 0.42, yaw: -0.7, alpha: 0.92,
-      curves: kind === 'membrane' ? [{ param: ['cos(t)', 'sin(t)', '0'], t: [0, TAU], color: 'ink2', width: 2 }] : [],
+      domain: [[0, 1], [0, TAU]], n: 40, axes: false, dist: 3.6, pitch: kind === 'membrane' ? 0.42 : 0.7, yaw: kind === 'membrane' ? -0.7 : 0.25, alpha: 0.92,
+      curves: [{ param: ['cos(t)', 'sin(t)', '0'], t: [0, TAU], color: kind === 'membrane' ? 'ink2' : 'ink3', width: kind === 'membrane' ? 2 : 1.2 }],
     },
     caption,
   };
@@ -305,7 +305,7 @@ print(first_zero(), jn_zeros(0, 1)[0])`,
         const R = r.pick([0.2, 0.3, 0.45]), c = r.pick([1000, 1200]);
         const jp = besselZeroP(1, 1), f = (jp * c) / (2 * Math.PI * R);
         return {
-          prompt: t`The most dangerous acoustic mode in a rocket’s cylindrical combustion chamber is often the **first tangential** mode, a pressure wave sloshing round the chamber with the shape $p = J_1(kr)\cos\theta$. The rigid wall at $r = R$ allows no flow through it, so $\partial p/\partial r = 0$ there: $kR$ must be a zero of $J_1'$, the first being $j'_{1,1} = 1.8412$. For a chamber of radius ${R} m filled with hot gas in which sound travels at ${c} m/s, at what frequency does this mode oscillate? ($f = ck/2\pi$.)`,
+          prompt: t`The most dangerous acoustic mode in a rocket’s cylindrical combustion chamber is often the **first tangential** mode, a pressure wave sloshing round the chamber with the shape $p = J_1(kr)\cos\theta$. The rigid wall at $r = R$ allows no flow through it, so $\partial p/\partial r = 0$ there: $kR$ must be a zero of $J_1'$, the first being $j'_{1,1} = 1.8412$. For a chamber of radius ${R} m filled with hot gas in which sound travels at ${c} m/s, at what frequency does this mode oscillate? ($f = ck/2\pi$.)`,
           answer: f, units: 'Hz', tol: { rel: 0.005 },
           errors: [
             { value: (besselZero(1, 1) * c) / (2 * Math.PI * R), feedback: t`3.832 is a zero of $J_1$ itself — the condition for a wall where the pressure vanishes. A rigid wall needs a zero of $J_1'$: 1.8412.` },
@@ -314,7 +314,7 @@ print(first_zero(), jn_zeros(0, 1)[0])`,
           hints: [t`$k = 1.8412/R$, then $f = \dfrac{ck}{2\pi}$.`, t`$f = \dfrac{1.8412\times${c}}{2\pi\times${R}}$.`],
           teach: 'Acoustic modes of a cylinder are Bessel functions; a rigid wall picks zeros of their derivative, and the first tangential mode sits at j′₁,₁ = 1.841.',
           explain: t`$k = 1.8412/${R} = ${tex(jp / R, 3)}$ m⁻¹ and $f = \dfrac{${c}\times${tex(jp / R, 3)}}{2\pi} = ${tex(f, 4)}$ Hz — kilohertz, as observed in combustion instability. If the burning couples to this frequency it can grow until it destroys the injector; large engines such as the F-1 of Saturn V needed baffles on the injector face to break up tangential modes.`,
-          visual: drumPic(1, 1, { kind: 'neumann', caption: 'The first tangential mode across the chamber’s cross-section: pressure high on one side and low on the other, with a node line across the middle; the pattern spins or sloshes round. Flat slope at the wall (the rim), where no gas can flow out. Amplitude exaggerated.' }),
+          visual: drumPic(1, 1, { kind: 'neumann', caption: 'The first tangential mode across the chamber’s cross-section: pressure high on one side and low on the other, with a node line across the middle; the pattern spins or sloshes round. The grey circle marks the wall, where the pressure’s slope across the wall is zero because no gas can flow out. Amplitude exaggerated.' }),
         };
       },
     }),

@@ -104,6 +104,11 @@ labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it. Markup has no
 tables; for a small one, use display math with `\begin{array}{c|c} … \hline … \end{array}`
 (text cells in `\text{…}`).
+Every line a learner reads is checked the same way, `teach` and `hints`
+included: `$e^{rt}$`, not e^{rt}. Inside math, format numbers with `tex(x)`, not
+`fmt(x)` — `fmt` gives computer notation (`1.2e-7`) for very large or small
+numbers, which the test rejects. Keep a unit with its number inside the math:
+`$4.7\,\mu\text{F}$` cannot break between μ and F at a line end.
 Formatting helpers that return TeX (`tex(x)`, `frac(x)`, `polyTeX`, a
 `×10ⁿ` number) must land inside `$…$` (`t\`about $${tex(x)}$ m\``); labels that
 a simulation draws on its canvas — graph point, curve and arrow labels and
@@ -269,7 +274,8 @@ write `'y ='`), `keys: [['ω', 'omega']]` (extra keypad buttons).
 `answer`): `+ - * / ^`, brackets, implicit multiplication (`2x`, `x(x+1)`,
 `mgh` = m·g·h when m, g, h are declared), functions with or without brackets
 (`sin x`, `sin^2 x`, `sin^-1 x`), `sqrt cbrt abs exp ln log log2 log10
-sin cos tan sec csc cot asin acos atan sinh cosh tanh gamma erf min max`
+sin cos tan sec csc cot asin acos atan sinh cosh tanh gamma erf min max
+step round floor ceil atan2`, `besselj(n, x)` (Jₙ, integer n)
 (and `arcsin` etc.), constants `pi`, `e` (unless declared as a variable),
 Greek names (`omega`, `theta`, `Delta`…) or the Unicode letters, and
 subscripted names declared as such (`v_0`, `r_s`, `k_B`, `omega_0` — declare
