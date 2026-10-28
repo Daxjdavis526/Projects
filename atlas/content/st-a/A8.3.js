@@ -37,7 +37,7 @@ const NB = `(${MR}*(${DRT}) + ${MT}*(${DTT}))`;                  // naive: ∂_�
 const CA = `(${MT}*(-${R}*(${VT})))`;                             // Γ^r_μλ V^λ
 const CB = `(${MR}*(${VT})/${R} + ${MT}*(${VR})/${R})`;           // Γ^θ_μλ V^λ
 const cx = (a, b) => `((${a})*px/${R} - (${b})*py)`, cy = (a, b) => `((${a})*py/${R} + (${b})*px)`;
-const K = 0.9;
+const K = 2;
 const grid = (k, f, o = {}) => fieldArrows(f, { x: [-4.4, 4.4], y: [-2.9, 2.9], maxLen: 0.6, skip: (x, y) => Math.hypot(x, y) < 0.5, ...o }).map((a) => ({ ...a, when: S(k) }));
 const explore = {
   type: 'graph',
@@ -72,7 +72,7 @@ const explore = {
       { label: t`$\nabla_\mu V^\theta$`, expr: `${NB} + ${CB}`, digits: 3 },
     ],
   },
-  caption: t`Grey: the field (arrows to scale with one another, capped near the origin). At P: red dashed, the naive derivative built from the partials of the polar components; violet, the Christoffel correction; gold, the covariant derivative, which equals the change of the field’s Cartesian arrow. All three drawn at 0.9 of their length. Drag P.`,
+  caption: t`Grey: the field (arrows to scale with one another, capped near the origin). At P: red dashed, the naive derivative built from the partials of the polar components; violet, the Christoffel correction; gold, the covariant derivative, which equals the change of the field’s Cartesian arrow. All three drawn at twice their length. Drag P.`,
 };
 
 export default lesson({

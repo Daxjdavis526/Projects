@@ -75,6 +75,7 @@ export function mount(F, P) {
 function mountForm(F, P) {
   const { canvas } = F.canvas({ aspect: P.aspect, label: P.alt || 'Two arrows on component axes, and the stack of lines a tensor makes from one of them' });
   const tt = P.tname, R = P.range;
+  const tPlain = { '\\eta': 'η', '\\gamma': 'γ', '\\omega': 'ω' }[tt] || tt.replace(/^\\/, '');
   const raiseMode = Array.isArray(P.covector);
   let T = P.T.map((r) => r.slice());
   if (P.sliders === 'full') [[0, 0], [0, 1], [1, 0], [1, 1]].forEach(([i, j]) => F.slider({ key: `T${i + 1}${j + 1}`, label: `$${tt}_{${i + 1}${j + 1}}$`, min: -R, max: R, step: 0.1, value: T[i][j], explain: `$${tt}(\\mathbf e_${i + 1}, \\mathbf e_${j + 1})$: what the machine gives for basis arrow ${i + 1} in the first slot and ${j + 1} in the second.` }));
@@ -90,7 +91,7 @@ function mountForm(F, P) {
     F.slider({ key: 'b1', label: '$\\eta_1$', min: -R, max: R, step: 0.1, value: b[0], explain: 'The second factor η: its component on e₁.' });
     F.slider({ key: 'b2', label: '$\\eta_2$', min: -R, max: R, step: 0.1, value: b[1], explain: 'The second factor η: its component on e₂.' });
   }
-  if (P.presets?.length) F.choice({ key: 'preset', label: P.presetLabel || 'Tensor', options: P.presets.map((p, i) => [i, p.label]), value: 0, explain: 'The same arrows fed to a different machine.' });
+  if (P.presets?.length) F.choice({ key: 'preset', label: P.presetLabel || 'Tensor', options: P.presets.map((p, i) => [i, p.label]), value: 0, explain: raiseMode ? 'The same covector, raised with a different metric.' : 'The same arrows fed to a different machine.' });
   if (raiseMode && P.covSliders) {
     F.slider({ key: 'w1', label: `$\\omega_1$`, min: -R, max: R, step: 0.1, value: P.covector[0], explain: 'The covector’s first component: how many of its lines e₁ crosses.' });
     F.slider({ key: 'w2', label: `$\\omega_2$`, min: -R, max: R, step: 0.1, value: P.covector[1], explain: 'The covector’s second component: how many lines e₂ crosses.' });
@@ -155,7 +156,7 @@ function mountForm(F, P) {
           // label the curve where it is highest on the screen inside the window
           let best = null;
           for (const run of runs) for (const p of run) if (p[0] > wx[0] + 0.4 && p[0] < wx[1] - 0.4 && p[1] < wy[1] - 0.25 && p[1] > wy[0] + 0.25 && (!best || p[1] > best[1])) best = p;
-          if (best) plot.text(`${tt}(X, X) = ${lev > 0 ? '1' : '−1'}`, best[0], best[1], { color: col, dy: -11, align: 'center', size: 11.5, weight: 650 });
+          if (best) plot.text(`${tPlain}(X, X) = ${lev > 0 ? '1' : '−1'}`, best[0], best[1], { color: col, dy: -11, align: 'center', size: 11.5, weight: 650 });
         }
       }
     }

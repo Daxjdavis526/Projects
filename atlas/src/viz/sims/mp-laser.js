@@ -130,13 +130,14 @@ export function mount(F, P0) {
       const items = [];
       const pumpW = 1.2 + 2.6 * Math.log10(S.W / WMIN) / Math.log10(WMAX / WMIN);
       plot.arrow(ax(0), yOf(sch.pump[0]) + 0.6, ax(0), yOf(sch.pump[1]), { color: 'violet', width: pumpW, head: 7 });
-      items.push(['violet', `pump${real.pump ? ` (${real.pump} nm)` : ''}`]);
-      if (S.scheme !== 'two') { arrow(1, 'p', 'u', 'ink3', true); items.push(['ink3', 'fast decay (heat)']); }
-      arrow(2, sch.upper, sch.lower, 'bad'); items.push(['bad', `laser transition${real.laser ? ` (${real.laser} nm)` : ''}`]);
+      const nar = w < 520;
+      items.push(['violet', `pump${real.pump && !nar ? ` (${real.pump} nm)` : ''}`]);
+      if (S.scheme !== 'two') { arrow(1, 'p', 'u', 'ink3', true); items.push(['ink3', nar ? 'fast decay' : 'fast decay (heat)']); }
+      arrow(2, sch.upper, sch.lower, 'bad'); items.push(['bad', nar ? `laser${real.laser ? ` ${real.laser} nm` : ''}` : `laser transition${real.laser ? ` (${real.laser} nm)` : ''}`]);
       if (S.scheme === 'four') { arrow(3, 'l', 'g', 'ink3', true); }
       items.forEach(([c, txt], k) => { const y = levY1 - 2 - 3.6 * k; plot.line(ax(4) + 2, y, ax(4) + 4.5, y, { color: c, width: 2.4 }); plot.text(txt, ax(4) + 5.2, y, { color: c, size: fs - 1 }); });
       const inv = counts[sch.upper] - counts[sch.lower];
-      plot.text(inv > 0 ? `inverted: ${inv} more atoms up` : `not inverted: ${-inv} more atoms down`, ax(4) + 2, levY1 - 2 - 3.6 * items.length - 1, { color: inv > 0 ? 'good' : 'warn', size: fs - 1 });
+      plot.text(nar ? (inv > 0 ? `inverted: +${inv}` : `not inverted: ${inv}`) : inv > 0 ? `inverted: ${inv} more atoms up` : `not inverted: ${-inv} more atoms down`, ax(4) + 2, levY1 - 2 - 3.6 * items.length - 1, { color: inv > 0 ? 'good' : 'warn', size: fs - 1 });
       plot.text('atoms', x1 + 0.8, levY1 - 0.5, { color: 'ink3', size: fs - 2 });
       plot.text(real.name, x0, levY1 + 0.5, { color: 'ink2', size: fs, weight: 650 });
     }
@@ -188,8 +189,8 @@ export function mount(F, P0) {
     cplot.point(lw(S.W), Math.max(cplot.vy0, ss.inversion / dth), { color: 'gold', r: 5 });
     if (!hide.has('output')) cplot.point(lw(S.W), ss.output / C.top, { color: 'bad', r: 5 });
     const narrow = (cur.canvas.clientWidth || 600) < 520;
-    cplot.text('inversion ÷ threshold inversion (clamps at 1)', lw(WMIN) + 0.05, 1, { color: 'gold', dy: -10, size: narrow ? 9.5 : 11.5 });
-    if (!hide.has('output')) cplot.text(`laser output, relative${P.compare ? ' (dashed: the other schemes)' : ''}`, lw(WMIN) + 0.05, 1.32, { color: 'bad', size: narrow ? 9.5 : 11.5 });
+    cplot.text(narrow ? 'inversion ÷ threshold' : 'inversion ÷ threshold inversion (clamps at 1)', lw(WMIN) + 0.05, 1, { color: 'gold', dy: -10, size: narrow ? 9.5 : 11.5 });
+    if (!hide.has('output')) cplot.text(narrow ? 'output' : `laser output, relative${P.compare ? ' (dashed: the other schemes)' : ''}`, narrow ? lw(WMAX) - 0.03 : lw(WMIN) + 0.05, 1.32, { color: 'bad', size: narrow ? 9.5 : 11.5, align: narrow ? 'right' : 'left' });
   }
 
   let lastRead = '';

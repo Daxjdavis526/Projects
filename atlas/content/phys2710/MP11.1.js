@@ -115,10 +115,10 @@ The sum piles charge up *between* the protons, where it is attracted by both: a 
       params: {
         x: [0.15, 1.2], y: [-6, 3], aspect: 'wide', xlabel: 'separation r (nm)', ylabel: 'energy (eV)', axesAt: 'edge',
         curves: [{ fn: `${r6(NACL.ie - NACL.ea)} - ${r6(KE2)}/x + ${r6(KE2 * 0.2361 ** 8 / 9)}/x^9`, domain: [0.16, 1.2], color: 'accent', width: 2.6, label: 'the ion pair Na⁺ + Cl⁻', labelAt: 0.55, labelDy: 14 }],
-        hlines: [{ y: 0, color: 'ink3', label: 'Na + Cl atoms' }, { y: r6(NACL.ie - NACL.ea), color: 'warn', label: `Na⁺ + Cl⁻ far apart: +${(NACL.ie - NACL.ea).toFixed(2)} eV` }],
+        hlines: [{ y: 0, color: 'ink3' }, { y: r6(NACL.ie - NACL.ea), color: 'warn', label: `Na⁺ + Cl⁻ far apart: +${(NACL.ie - NACL.ea).toFixed(2)} eV` }],
         points: [{ x: 0.2361, y: r6(NACL.ie - NACL.ea - NACL.coul + (KE2 * 0.2361 ** 8) / 9 / 0.2361 ** 9), r: 5, color: 'gold' }, { x: r6(KE2 / (NACL.ie - NACL.ea)), y: 0, r: 5, color: 'bad', label: 'curves cross', labelDx: 8, labelDy: 12 }],
       },
-      caption: 'The ionic route for NaCl: making the ions costs 1.53 eV; their Coulomb attraction, plus a short-range repulsion (modelled here as 1/r⁹, chosen to put the minimum at the bond length), more than pays it back. Schematic in the repulsion.',
+      caption: 'The ionic route for NaCl, with energies measured from neutral Na and Cl atoms far apart (grey line): making the ions costs 1.53 eV; their Coulomb attraction, plus a short-range repulsion (modelled here as 1/r⁹, chosen to put the minimum at the bond length), more than pays it back. Schematic in the repulsion.',
     },
     steps: [
       { label: 'Make the ions', text: t`Removing sodium’s 3s electron costs ${fmt(NACL.ie, 4)} eV; chlorine taking it releases ${fmt(NACL.ea, 4)} eV. Net cost: $${fmt(NACL.ie - NACL.ea, 4)}$ eV — so isolated atoms do *not* swap electrons on their own.` },

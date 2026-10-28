@@ -12,7 +12,7 @@
 //   { type: 'mp-molecule', params: {
 //       molecule: 'HCl',      // 'HCl', 'DCl' or 'CO'
 //       mode: 'ir',           // 'ir' (the fundamental vibration–rotation band) or 'microwave' (pure rotation)
-//       T: 300,               // temperature, K (20–1000)
+//       T: 300,               // temperature, K (5–1000; the slider runs 20–1000)
 //       isotopes: true,       // also draw the heavier isotopologue’s lines
 //       line: null,           // a line to highlight: in 'ir' the signed m (R(J): m = J + 1; P(J): m = −J); in 'microwave' the lower J
 //       Jmax: 7,              // the highest J drawn in the ladders (3–10)
@@ -53,7 +53,7 @@ export function mount(F, P0) {
   const splot = bot ? new Plot(bot.canvas, { x: [0, 1], y: [0, 1.25], xlabel: '', ylabel: 'relative absorption', yticks: 0, axesAt: 'edge', grid: false }) : null;
 
   const now = () => {
-    const pair = PAIRS[F.params.molecule] || PAIRS.HCl, T = Math.min(1000, Math.max(20, F.params.T));
+    const pair = PAIRS[F.params.molecule] || PAIRS.HCl, T = Math.min(1000, Math.max(5, F.params.T));
     const mode = F.params.mode === 'microwave' ? 'microwave' : 'ir';
     const main = M.constants(pair[0]), iso = M.constants(pair[1]);
     return { pair, T, mode, main, iso, iso_on: !!F.params.isotopes };
@@ -70,7 +70,7 @@ export function mount(F, P0) {
     plot.clear();
     const fs = w < 520 ? 9 : 11;
     const x0 = 13, x1 = 97;
-    const ladders = S.mode === 'ir' ? [[0, 3, H * 0.44], [1, H * 0.54, H - 3]] : [[0, 4, H - 4]];
+    const ladders = S.mode === 'ir' ? [[0, 3.6, H * 0.44], [1, H * 0.54, H - 3]] : [[0, 4, H - 4]];
     const yOf = {};
     for (const [v, ya, yb] of ladders) {
       const top_ = M.F(c, v, Jmax);
@@ -78,11 +78,11 @@ export function mount(F, P0) {
       for (let J = 0; J <= Jmax; J++) {
         const y = yOf[v](J);
         plot.line(x0, y, x1, y, { color: 'ink3', width: 1.2 });
-        if (J <= 1 || J === Jmax || (yOf[v](J) - yOf[v](J - 1)) > 2.2) plot.text(`J = ${J}`, x0 - 1, y, { color: 'ink3', align: 'right', size: fs - 1.5 });
+        if (J === 0 || (yOf[v](J) - yOf[v](J - 1)) > 2.2) plot.text(`J = ${J}`, x0 - 1, y, { color: 'ink3', align: 'right', size: fs - 1.5 });
       }
       plot.text(S.mode === 'ir' ? `v = ${v}` : 'v = 0', 1, (ya + yb) / 2, { color: 'ink2', size: fs, weight: 650 });
     }
-    if (S.mode === 'ir') plot.text(`the gap between v = 0 and v = 1, ${Math.round(M.origin(c))} cm⁻¹, is not to scale`, (x0 + x1) / 2, H * 0.49, { color: 'ink3', align: 'center', size: fs - 1.5 });
+    if (S.mode === 'ir') plot.text(`gap of ${Math.round(M.origin(c))} cm⁻¹, not to scale`, 1, H * 0.49, { color: 'ink3', size: fs - 2 });
     // the transitions, ordered left to right like the spectrum
     const L = linesOf(c, S).filter((l) => (S.mode === 'ir' ? (l.branch === 'R' ? l.J + 1 <= Jmax : l.J <= Jmax) : l.J + 1 <= Jmax));
     L.forEach((l, k) => {
@@ -93,8 +93,8 @@ export function mount(F, P0) {
       if (!hide.has('labels') && (L.length <= 16 || k % 2 === 0)) plot.text(name(l), x, yOf[vu](Ju), { color: col, align: 'center', dy: -8, size: fs - 2 });
     });
     if (S.mode === 'ir') {
-      plot.text('P branch: J → J − 1', x0 + 2, H - 1.6, { color: 'warn', size: fs - 1 });
-      plot.text('R branch: J → J + 1', x1 - 2, H - 1.6, { color: 'accent', size: fs - 1, align: 'right' });
+      plot.text('P branch: J → J − 1', x0 + 2, 1.2, { color: 'warn', size: fs - 1 });
+      plot.text('R branch: J → J + 1', x1 - 2, 1.2, { color: 'accent', size: fs - 1, align: 'right' });
     }
   }
 
@@ -155,7 +155,7 @@ export function validate(P) {
   const p = [];
   if (!PAIRS[P.molecule]) p.push(`mp-molecule: unknown molecule “${P.molecule}”`);
   if (!['ir', 'microwave'].includes(P.mode)) p.push('mp-molecule: mode must be ir or microwave');
-  if (!(P.T >= 20 && P.T <= 1000)) p.push('mp-molecule: T must lie in 20–1000 K');
+  if (!(P.T >= 5 && P.T <= 1000)) p.push('mp-molecule: T must lie in 5–1000 K');
   if (!(Number.isInteger(P.Jmax) && P.Jmax >= 3 && P.Jmax <= 10)) p.push('mp-molecule: Jmax must be an integer 3–10');
   if (P.line !== null && P.mode === 'ir' && !(Number.isInteger(P.line) && P.line !== 0 && Math.abs(P.line) <= P.Jmax)) p.push('mp-molecule: in ir mode, line is a nonzero integer m within ±Jmax (or null)');
   if (P.line !== null && P.mode === 'microwave' && !(Number.isInteger(P.line) && P.line >= 0 && P.line < P.Jmax)) p.push('mp-molecule: in microwave mode, line is the lower J, 0 to Jmax − 1');

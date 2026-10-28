@@ -111,7 +111,7 @@ No cross terms remain. So the eigenvalues decide the shape: all positive and $q 
       hints: ['Try x = 1, y = −1.', t`The matrix is $\begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}$: its trace is 2 and its determinant $-3$.`],
       teach: 'A form is positive definite exactly when every eigenvalue of its matrix is positive — positive diagonal entries are not enough.',
       explain: t`$\det A = -3 < 0$ means the eigenvalues have opposite signs (3 and −1): an indefinite form, a saddle. In principal axes $q = 3y_1^2 - y_2^2$, negative along $\mathbf q_2 = \tfrac1{\sqrt2}(1, -1)$.`,
-      visual: { type: 'graph', params: { x: [-2, 2], y: [-0.5, 4], aspect: 'wide', xlabel: 's', ylabel: 'q', curves: [{ fn: 'x^2', color: 'accent', label: 'along the x-axis: q(s, 0)', labelAt: 1.3, labelDx: 8 }, { fn: 'x^2', color: 'warn', dash: [6, 4], label: 'along the y-axis: q(0, s)', labelAt: -1.7, labelDy: 18 }] }, caption: 'Slices of the form along the two coordinate axes: both are upward parabolas s². Is that enough to make q a bowl?' },
+      visual: { type: 'graph', params: { x: [-2, 2], y: [-0.5, 4], aspect: 'wide', xlabel: 's', ylabel: 'q', curves: [{ fn: 'x^2', color: 'accent', label: 'along the x-axis: q(s, 0)', labelAt: 0.9, labelDx: 10, labelDy: 12 }, { fn: 'x^2', color: 'warn', dash: [6, 4], label: 'along the y-axis: q(0, s)', labelAt: -1.7, labelDy: 18 }] }, caption: 'Slices of the form along the two coordinate axes: both are upward parabolas s². Is that enough to make q a bowl?' },
     }),
     num({
       id: 'semi-axis', difficulty: 2,
@@ -161,7 +161,7 @@ No cross terms remain. So the eigenvalues decide the shape: all positive and $q 
           hints: [t`At the origin the cubic term contributes nothing to second derivatives. $f_{xx} = ${2 * a}$, $f_{xy} = ${2 * b}$, $f_{yy} = ${2 * c}$.`, t`$H = ${matTeX(H)}$: use $\lambda = \tfrac{f_{xx} + f_{yy}}2 \pm \sqrt{\left(\tfrac{f_{xx} - f_{yy}}2\right)^2 + f_{xy}^2}$.`],
           teach: 'Near a critical point f ≈ f(p) + ½ hᵀHh: the Hessian’s eigenvalues classify the point — all positive a minimum, mixed signs a saddle.',
           explain: t`$H = ${matTeX(H)}$ has eigenvalues $${2 * l[0]}$ and $${2 * l[1]}$: ${l[1] > 0 ? 'both positive, so the origin is a local minimum (a bowl)' : 'opposite signs, so the origin is a saddle'}. The second-derivative test of Calculus III ($D = f_{xx}f_{yy} - f_{xy}^2$) is the same statement: $D = \det H = \lambda_1\lambda_2$.`,
-          visual: { type: 'surface3d', params: { z: `${a}*x^2 + ${2 * b}*x*y + ${c}*y^2 + ${cubic.replace(' ', '*')}`, domain: [[-1.2, 1.2], [-1.2, 1.2]] }, caption: 'The surface z = f(x, y) near the origin. Drag to rotate.' },
+          visual: { type: 'surface3d', params: { z: `${a}*x^2 + ${2 * b}*x*y + ${c}*y^2 + ${cubic.replace(' ', '*')}`, domain: [[-1.2, 1.2], [-1.2, 1.2]], zscale: 0.25 }, caption: 'The surface z = f(x, y) near the origin, heights shrunk to a quarter. Drag to rotate.' },
         };
       },
     }),

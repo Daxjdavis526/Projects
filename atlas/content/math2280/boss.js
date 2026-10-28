@@ -25,6 +25,8 @@ const r4 = (v) => +(+v).toFixed(4);
 const r6 = (v) => +(+v).toPrecision(6);
 const r12 = (v) => +(+v).toPrecision(12);     // for the calculus-check integrands
 const tn = (x, n = 3) => tex(x, n);
+/** An integer as TeX with a thin space in thousands: 10000 → 10\,000. */
+const th = (x) => (Math.abs(x) >= 10000 ? String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,') : String(x));
 /** Keep only the slips whose values are finite and clearly apart from the key (and a little apart from each other). */
 function apart(errors, key, rel = 0.03, mutual = 0.012) {
   const kept = [];
@@ -127,7 +129,7 @@ export function recovers(u, th, q) {
   return Math.hypot(th, q) < 0.05;
 }
 // the four gust states, as multiples of θ* (θ, q): P and Q recover, R and S do not
-const GUSTS = { P: [0.3, 0.5], Q: [1.3, -2], R: [0.5, 1.5], S: [-1.3, 0.3] };
+const GUSTS = { P: [0.3, 0.5], Q: [1.3, -2], R: [0.5, 1.5], S: [-1.25, -0.3] };
 
 // ── round 5: slosh ──────────────────────────────────────────────────────────
 const sloshOmega = (k, a, h) => Math.sqrt(a * k * Math.tanh(k * h));
@@ -171,7 +173,7 @@ export default boss({
                 params: {
                   f: U.fE, x: [0, 2 * T], y: [Math.floor(pinf - 25), ps + 15], xlabel: 't (s)', ylabel: 'p (kPa)', grid: [21, 13], aspect: 'wide',
                   isoclines: [0], seeds: [{ t: 0, y: Math.round(pinf - 15), color: 'teal' }, { t: 0, y: Math.round(pinf + 0.45 * (ps - pinf)), color: 'violet' }],
-                  points: [{ x: 0, y: ps, label: 'start: pₛ', color: 'gold', labelDx: 8, labelDy: -6 }],
+                  points: [{ x: 0, y: ps, label: 'start: pₛ', color: 'gold', labelDx: 10, labelDy: 14 }],
                   vlines: [{ x: T, label: `t = ${T} s`, color: 'ink3' }],
                 },
                 caption: t`The slope field of the ullage equation. The gold dashed line is where $p' = 0$, the level $p_\infty$; two other solutions (from lower starting pressures) are drawn, not the one asked about. The model holds the gas at one temperature.`,
@@ -254,7 +256,7 @@ export default boss({
                   curves: [{ fn: 'step(x)', color: 'accent', width: 2.6, domain: [-0.4, T + 0.6] }],
                   arrows: [{ from: [to, 0], to: [to, 1.45], color: 'bad', width: 2.6, label: 'overpressure impulse', labelDx: 8, labelDy: 2 }],
                   vlines: [{ x: T, label: 'clamps release', color: 'gold' }],
-                  points: [tag(0.9 * T, 1, 'thrust bending (step)', 'accent', -40, -12)],
+                  points: [tag(0.45 * T, 1, 'thrust bending (step)', 'accent', -40, -12)],
                 },
                 caption: t`The two forcings, not to scale with each other: the thrust’s bending switched on at $t = 0$ as a step, and the overpressure as an impulse at $t = ${to}$ s (an arrow, since $\delta$ has no height). Real overpressure lasts a few milliseconds.`,
               },
@@ -283,7 +285,7 @@ export default boss({
               explain: t`The staggered thrust transforms to $\frac{1 + e^{-sd}}{2s}$, so every pole’s term in the response is the all-at-once term times $\tfrac12(1 + e^{-pd})$. At $p = -\sigma + i\omega_d$, with $\sigma = ${tn(M.s, 3)}\ \text{s}^{-1}$ and $\omega_d = ${tn(M.wd, 4)}$ rad/s, the second half’s sway is opposite the first’s when $\omega_d d = \pi$: $d = ${tn(d)}$ s, half a damped period. Then $\big|1 + e^{-pd}\big| = e^{\sigma d} - 1$, and the fraction left is $$\tfrac12\big(e^{\sigma d} - 1\big) = \tfrac12\big(e^{${tn(M.s * d, 3)}} - 1\big) = ${tn(ratio)}.$$ It does not depend on the frequency at all — only on $\zeta$. The cancellation is not perfect because the first half’s sway has decayed a little by the time the second half lights; splitting the thrust unequally, in the ratio $1 : e^{-\sigma d}$, would cancel it exactly. This is **input shaping** (Singer and Seering, 1990), used to slew flexible spacecraft and cranes without ringing; real engine clusters are often lit in a staggered sequence to soften their start-up loads.`,
               visual: {
                 type: 'de-poles',
-                params: { poles: [{ re: r4(-M.s), im: r4(M.wd) }], drag: false, readout: false, panels: ['s', 't'], response: 'step', T: r4(4 / fn), window: { re: [-6, 1.5], im: [-4.6, 4.6] }, labels: true, tname: 'y/yₛ' },
+                params: { poles: [{ re: r4(-M.s), im: r4(M.wd) }], drag: false, readout: false, panels: ['s', 't'], response: 'step', T: r4(4 / fn), window: { re: [-4, 1], im: [-r4(M.wd + 1), r4(M.wd + 1)] }, labels: true, tname: 'y/yₛ' },
                 caption: t`The bending mode’s poles $-\sigma \pm i\omega_d$, just left of the imaginary axis, and the sway after lighting all the engines at once, as a fraction of the static deflection. One mode only: a real stack has more.`,
               },
             };
@@ -318,8 +320,8 @@ export default boss({
               explain: t`The net damping ratio is $\zeta = ${zs} - ${zp} = -${r6(dz)}$, so the roots $r = -\zeta\omega \pm i\omega\sqrt{1 - \zeta^2}$ have real part $+${r6(dz)}\times${tn(w, 4)} = ${tn(grow)}\ \text{s}^{-1}$: the envelope grows as $e^{${tn(grow)}t}$. Tenfold takes $t = \ln 10/${tn(grow)} = ${tn(t10)}$ s — a few seconds of a burn of minutes. Pogo is a closed loop between structure and propulsion; folding it into one negative damping term is a teaching model, good near the frequency where the loop locks. On Apollo 6 the Saturn V’s pogo reached about $\pm0.6\,g$ near 5 Hz, and the cure was the next problem.`,
               visual: {
                 type: 'c3-roots',
-                params: { mode: 'free', zeta: -dz, w0: r4(w), x0: 1, v0: 0, T: 1, sliders: false, readout: false, yname: 'x' },
-                caption: t`The two characteristic roots, just right of the imaginary axis (top), and the first second of the motion from a small start (below), with its growing envelope. The feed-system coupling is folded into a negative damping ratio — a teaching model.`,
+                params: { mode: 'free', zeta: -dz, w0: r4(w), x0: 1, v0: 0, T: r4(3 / f), sliders: false, readout: false, yname: 'x' },
+                caption: t`The two characteristic roots, just right of the imaginary axis (top), and the first three cycles of the motion from a small start (below), with its growing envelope. The feed-system coupling is folded into a negative damping ratio — a teaching model.`,
               },
             };
           },
@@ -349,7 +351,7 @@ export default boss({
               visual: {
                 type: 'graph',
                 params: {
-                  x: [0, 20], y: [-1.6, 1.5], xlabel: 'drive frequency (Hz)', ylabel: 'amplitude (log scale)', yticks: 0, aspect: 'wide',
+                  x: [0, 20], y: [-1.6, 1.5], axesAt: 'edge', xlabel: 'drive frequency (Hz)', ylabel: 'amplitude (log scale)', yticks: 0, aspect: 'wide',
                   curves: [curve(f1, z1, 'bad', 'without', f1 + 2.5), curve(f2, z2, 'good', 'with accumulator', 1.6)],
                   vlines: [{ x: fs, label: 'structure', color: 'gold' }],
                 },
@@ -362,7 +364,7 @@ export default boss({
     },
     {
       title: 'Max-q',
-      story: t`A minute into the flight Corvid passes maximum dynamic pressure, where the air pushes hardest. Its centre of pressure sits ahead of its centre of mass, so the air tries to turn it sideways, and the attitude controller swivels the engines to hold it straight. The guidance team checks the control loops.`,
+      story: t`A minute into the flight Corvid passes maximum dynamic pressure, where the air pushes hardest. Its centre of pressure sits ahead of its centre of mass, so the air tries to turn it sideways, and the attitude controller swivels the engines to hold it straight. The guidance team checks the control loops — this one, and the upper stage’s, which takes over after staging.`,
       items: [
         num({
           id: 'r4-roll', skill: 'math2280.DE-4.5', difficulty: 3,
@@ -373,7 +375,7 @@ export default boss({
             const wH = Math.sqrt((B + D) / (2 * A)), wL = Math.sqrt((B - D) / (2 * A)), fH = wH / (2 * PI);
             const kaT = t`${ka / 1e6}\times10^{6}`;
             return {
-              prompt: t`In roll, Corvid’s second stage and its payload are two rotors on one axis. The stage has moment of inertia $J_1 = ${J1}$ kg m² about the axis and the payload $J_2 = ${J2}$ kg m²; the payload adapter between them twists like a torsion spring of stiffness $k_a = ${kaT}$ N m/rad. The roll controller pushes the stage back toward its target like a torsion spring to the stars, $k_c = ${kc}$ N m/rad (its rate damping is left out here). With roll angles $\phi_1$ (stage) and $\phi_2$ (payload), $$J_1\phi_1'' = -k_c\phi_1 - k_a(\phi_1 - \phi_2),\qquad J_2\phi_2'' = -k_a(\phi_2 - \phi_1).$$ What is the frequency of the higher normal mode, in Hz? Give 3 significant figures.`,
+              prompt: t`After staging, the upper stage’s roll controller takes over. In roll, the upper stage and its payload are two rotors on one axis. The stage has moment of inertia $J_1 = ${th(J1)}\ \text{kg m}^2$ about the axis and the payload $J_2 = ${th(J2)}\ \text{kg m}^2$; the payload adapter between them twists like a torsion spring of stiffness $k_a = ${kaT}\ \text{N m/rad}$. The roll controller pushes the stage back toward its target like a torsion spring to the stars, $k_c = ${th(kc)}\ \text{N m/rad}$ (its rate damping is left out here). With roll angles $\phi_1$ (stage) and $\phi_2$ (payload), $$\begin{aligned}J_1\phi_1'' &= -k_c\phi_1 - k_a(\phi_1 - \phi_2),\\ J_2\phi_2'' &= -k_a(\phi_2 - \phi_1).\end{aligned}$$ What is the frequency of the higher normal mode, in Hz? Give 3 significant figures.`,
               answer: fH, units: 'Hz', tol: { rel: 0.005 },
               errors: apart([
                 { value: wH, feedback: t`That is the angular frequency $\omega$ in rad/s. The frequency in Hz is $\omega/2\pi$.` },
@@ -389,7 +391,7 @@ export default boss({
               teach: t`Normal modes of $J\phi'' = -K\phi$ come from $\det(K - \omega^2J) = 0$; each root $\omega^2$ is a mode in which every part moves at the same frequency.`,
               explain: t`With $\phi = \mathbf v\cos\omega t$, $\det(K - \omega^2J) = 0$ gives $$J_1J_2\,\omega^4 - \big[J_2(k_c + k_a) + J_1k_a\big]\omega^2 + k_ck_a = 0,$$ whose roots are $\omega^2 = ${tn(wL * wL, 3)}$ and $${tn(wH * wH, 4)}\ \text{s}^{-2}$. The higher mode has $\omega = ${tn(wH, 4)}$ rad/s, $f = ${tn(fH)}$ Hz: stage and payload twisting against each other on the adapter, almost exactly the free–free value $\sqrt{k_a(1/J_1 + 1/J_2)}$ because the controller is so soft beside the adapter. The lower mode, $\omega = ${tn(wL)}$ rad/s, is the whole vehicle turning together under control. That gap — a factor of $${Math.round(wH / wL)}$ — is what lets a controller ignore the flexible mode; if its bandwidth crept up toward the flexible mode it could pump energy into it. The derivative part of a real controller damps both modes.`,
               visual: schematic({
-                x: [-0.6, 12], y: [-2.4, 2.6],
+                x: [-0.6, 11.4], y: [-3, 2.8], aspect: '',
                 curves: [
                   seg([0, -1.5], [0, 1.5], 'ink2', 3), ...[-1.2, -0.6, 0, 0.6, 1.2].map((y) => seg([0, y], [-0.4, y - 0.35], 'ink3', 1.4)),
                   ...spring(0, 2.2, 0), ...box(2.2, -1.5, 6.2, 1.5), ...spring(6.2, 8.4, 0, 0.3, 5, 'violet'), ...box(8.4, -0.9, 10.8, 0.9),
@@ -398,7 +400,7 @@ export default boss({
                   { from: [3.4, 1.9], to: [5.0, 1.9], color: 'accent', width: 2, label: 'φ₁', labelDx: 6, labelDy: 4 },
                   { from: [9.0, 1.3], to: [10.2, 1.3], color: 'accent', width: 2, label: 'φ₂', labelDx: 6, labelDy: 4 },
                 ],
-                points: [tag(4.2, 0, 'stage J₁', 'ink', -26, 4), tag(9.6, 0, 'payload J₂', 'ink', -32, 4), tag(1.1, -0.6, 'controller', 'gold', -30, 18), tag(7.3, -0.5, 'adapter kₐ', 'violet', -30, 18), tag(0, 1.6, 'stars', 'ink3', -14, -8)],
+                points: [tag(4.2, -1.5, 'stage J₁', 'ink', -26, 20), tag(9.6, -0.9, 'payload J₂', 'ink', -32, 20), tag(1.1, 0.4, 'controller', 'gold', -30, -10), tag(7.3, 0.35, 'adapter kₐ', 'violet', -32, -10), tag(0, 1.6, 'stars', 'ink3', -14, -8)],
                 alt: 'Two blocks joined by a spring, the left one tied to a wall by another spring',
               }, 'The roll model drawn as a sketch: two rotors on one axis, the adapter a torsion spring between them and the controller a torsion spring from the stage to a fixed direction in space. Arrows show the sense of φ₁ and φ₂. Not to scale.'),
             };
@@ -425,7 +427,7 @@ export default boss({
               : t`$\Delta = ${nice(Del)} < 0$ makes one eigenvalue positive. Real eigenvalues, yes, but of opposite signs: a saddle, not a stable node.`);
             why[3] = t`A centre needs $\tau = 0$ and $\Delta > 0$. The rate gain makes $\tau = -k_d = ${tau} \ne 0$${kind === 'saddle' ? t`, and here $\Delta < 0$ as well` : ''}.`;
             return {
-              prompt: t`At max-q, Corvid’s pitch error $\theta$ (with $q = \theta'$) obeys, per unit of pitch inertia, $$\theta'' = a\,\theta - k_p\,\theta - k_d\,\theta',$$ where $a = ${a}\ \text{s}^{-2}$ is the air’s overturning push, and the controller’s gains are $k_p = ${kp}\ \text{s}^{-2}$ (stiffness) and $k_d = ${kd}\ \text{s}^{-1}$ (rate damping). As the system $\begin{bmatrix}\theta \\ q\end{bmatrix}' = \begin{bmatrix} 0 & 1 \\ a - k_p & -k_d\end{bmatrix}\begin{bmatrix}\theta \\ q\end{bmatrix}$, what kind of equilibrium is $\theta = q = 0$ at max-q?`,
+              prompt: t`At max-q, Corvid’s pitch error $\theta$ (with $q = \theta'$) obeys, per unit of pitch inertia, $$\theta'' = a\,\theta - k_p\,\theta - k_d\,\theta',$$ where $a = ${a}\ \text{s}^{-2}$ is the air’s overturning push, and the controller’s gains are $k_p = ${kp}\ \text{s}^{-2}$ (stiffness) and $k_d = ${kd}\ \text{s}^{-1}$ (rate damping). Written as a system, $$\begin{bmatrix}\theta \\ q\end{bmatrix}' = \begin{bmatrix} 0 & 1 \\ a - k_p & -k_d\end{bmatrix}\begin{bmatrix}\theta \\ q\end{bmatrix}.$$ What kind of equilibrium is $\theta = q = 0$ at max-q?`,
               choices: [
                 'A saddle: the vehicle turns away from almost every disturbed state',
                 'A stable spiral: the pitch error overshoots and rings down',
@@ -443,7 +445,7 @@ export default boss({
                 type: 'de-tracedet',
                 params: {
                   tau: -kd, Delta: kp, drag: false, marker: false, labels: false, readout: false, panels: 'map', map: { tau: [-6, 2], Delta: [-3, 9] },
-                  points: [{ tau: -kd, Delta: kp, label: 'lift-off (a = 0)', color: 'gold' }],
+                  points: [{ tau: -kd, Delta: kp, label: 'lift-off', color: 'gold' }],
                 },
                 caption: t`The trace–determinant map with its region names left off. The gold point is the pitch loop at lift-off, where the air does not push; at max-q the air’s push moves it straight down by $a$.`,
               },
@@ -463,12 +465,12 @@ export default boss({
             for (const x0 of [ts, -ts]) for (const sgn of [1, -1]) seeds.push(sep(x0, L.ls, sgn, 'backward', 'gold'), sep(x0, L.lu, sgn, 'forward', 'teal'));
             const choice = (p) => t`${p.name}: $\theta = ${p.th}^\circ$, $q = ${p.q}^\circ$/s`;
             return {
-              prompt: t`Near max-q the pitch controller of the last problem has limited authority: the engines swivel only so far, so its push saturates at $${u}$ °/s². With $\theta$ in degrees and $q = \theta'$ in °/s, $$\theta' = q,\qquad q' = 2\theta - ${u}\tanh\!\left(\frac{6\theta + 3q}{${u}}\right).$$ The phase portrait shows the equilibria: straight flight at the origin and two more at $\theta = \pm${tsR}^\circ$, where the air’s push $2\theta$ equals the controller’s whole authority. The gold curves are the trajectories that run into those two equilibria. A gust can leave the vehicle at any of the states P, Q, R, S marked. From which of them does the controller bring it back to straight flight? Select all.`,
+              prompt: t`Near max-q the pitch controller also has limited authority: the engines swivel only so far, so its push saturates at $${u}$ °/s². With the gains it flies here, $\theta$ in degrees and $q = \theta'$ in °/s, $$\begin{aligned}\theta' &= q,\\ q' &= 2\theta - ${u}\tanh\!\left(\frac{6\theta + 3q}{${u}}\right).\end{aligned}$$ The phase portrait shows the equilibria: straight flight at the origin and two more at $\theta = \pm${tsR}^\circ$, where the air’s push $2\theta$ equals the controller’s whole authority. The gold curves are the trajectories that run into those two equilibria. A gust can leave the vehicle at any of the states P, Q, R, S marked. From which of them does the controller bring it back to straight flight? Select all.`,
               choices: pts.map(choice),
               answer,
               why: {
                 2: t`R starts at a smaller angle than the outer equilibria, but its rate carries it outward, across the gold separatrix: past it, the air’s push beats everything the controller can do. Being inside $\pm${tsR}^\circ$ is not enough.`,
-                3: t`S is beyond the outer equilibrium at $-${tsR}^\circ$, and its small rate back toward zero is not enough to recross the separatrix: there the air’s push already exceeds the controller’s whole authority.`,
+                3: t`S is beyond the outer equilibrium at $-${tsR}^\circ$ and still turning away. Out there the air’s push $2\theta$ already exceeds the controller’s whole authority of $${u}$ °/s², so nothing brings it back across the separatrix.`,
               },
               hints: [
                 t`Linearize at the origin: the Jacobian is $\begin{bmatrix} 0 & 1 \\ 2 - 6 & -3 \end{bmatrix}$, $\tau = -3$, $\Delta = 4$ — a stable spiral. Near it, everything returns.`,
@@ -480,7 +482,7 @@ export default boss({
               visual: {
                 type: 'de-plane',
                 params: {
-                  fx: 'y', fy: `2*x - ${u}*tanh((6*x + 3*y)/${u})`, x: [r4(-2.3 * ts), r4(2.3 * ts)], y: [r4(-4.5 * ts), r4(4.5 * ts)], equal: false, aspect: 'wide',
+                  fx: 'y', fy: `2*x - ${u}*tanh((6*x + 3*y)/${u})`, x: [r4(-2.3 * ts), r4(2.3 * ts)], y: [r4(-4.5 * ts), r4(4.5 * ts)], equal: false, aspect: '',
                   xlabel: 'θ (deg)', ylabel: 'q (deg/s)', grid: 17, equilibria: true, seeds, T: 20, readout: false, click: false,
                   points: pts.map((p) => ({ x: p.th, y: p.q, label: p.name, color: 'accent', labelDx: 8, labelDy: -6 })),
                 },
@@ -498,11 +500,11 @@ export default boss({
         num({
           id: 'r5-baffle', skill: 'math2280.DE-8.2', difficulty: 3,
           gen(r) {
-            const L = r.pick([3, 3.6, 4.2]), h = r.pick([1, 1.5, 2]), n = r.pick([1.5, 2, 2.5]), a = r6(n * G0);
+            const L = r.pick([3, 3.6, 4.2]), h = r.pick([1, 1.5, 2]), n = r.pick([1.5, 2, 2.5]), a = +(n * G0).toPrecision(3);
             const k = (2 * PI) / L, w = sloshOmega(k, a, h), f = w / (2 * PI);
             const k1 = PI / L;
             return {
-              prompt: t`The review models a slice across the oxygen tank as a box of width $L = ${L}$ m holding liquid $h = ${h}$ m deep, with the vehicle accelerating at $${n}g$, so the effective gravity is $a = ${a}$ m/s². Separating variables in the liquid’s flow gives a horizontal shape $X(x)$ with $$X'' + \lambda X = 0,\qquad X'(0) = X'(L) = 0,$$ because no liquid flows through a wall, and each eigenvalue $\lambda = k^2 > 0$ sloshes at $$\omega^2 = a\,k\tanh(kh).$$ A full-depth baffle is fitted across the middle of the tank, at $x = ${L / 2}$ m. What is the lowest slosh frequency now, in Hz? Give 3 significant figures.`,
+              prompt: t`The review models a slice across the oxygen tank as a box of width $L = ${L}\ \text{m}$ holding liquid $h = ${h}\ \text{m}$ deep, with the vehicle accelerating at $${n}g$, so the effective gravity is $a = ${a}$ m/s². Separating variables in the liquid’s flow gives a horizontal shape $X(x)$ with $$X'' + \lambda X = 0,\qquad X'(0) = X'(L) = 0,$$ because no liquid flows through a wall, and each eigenvalue $\lambda = k^2 > 0$ sloshes at $$\omega^2 = a\,k\tanh(kh).$$ A full-depth baffle is fitted across the middle of the tank, at $x = ${L / 2}$ m. What is the lowest slosh frequency now, in Hz? Give 3 significant figures.`,
               answer: f, units: 'Hz', tol: { rel: 0.005 },
               errors: apart([
                 { value: sloshOmega(k1, a, h) / (2 * PI), feedback: t`That is the tank without the baffle, $k = \pi/L$. The baffle is a wall too: no flow through it, so each half is its own problem on $[0, L/2]$.` },
@@ -521,12 +523,11 @@ export default boss({
               visual: schematic({
                 x: [-0.8, L + 1.6], y: [-0.5, h + 1.1],
                 shade: [{ fn: `${h}`, lower: '0', from: 0, to: L, color: 'accent', alpha: 0.3 }],
-                curves: [...poly([[0, h + 0.7], [0, 0], [L, 0], [L, h + 0.7]], 'ink2', 2.6), seg([L / 2, 0], [L / 2, h + 0.5], 'gold', 3.2)],
+                curves: [...poly([[0, h + 0.7], [0, 0], [L, 0], [L, h + 0.7]], 'ink2', 2.6), seg([L / 2, 0], [L / 2, h + 0.5], 'gold', 3.2), ...poly([[0, -0.36], [0, -0.2], [0, -0.28], [L, -0.28], [L, -0.36], [L, -0.2]], 'ink3', 1.4)],
                 arrows: [
                   { from: [L + 0.8, h + 0.4], to: [L + 0.8, h - 0.6], color: 'bad', width: 2.4, label: 'a', labelDx: 8, labelDy: 4 },
-                  { from: [0, -0.28], to: [L, -0.28], color: 'ink3', width: 1.4, label: `L = ${L} m`, labelDx: -L * 30, labelDy: 14 },
-                ],
-                points: [tag(L / 2, h + 0.5, 'baffle', 'gold', -20, -6), tag(-0.15, h / 2, `h = ${h} m`, 'ink2', -52, 4)],
+                                  ],
+                points: [tag(L / 2, h + 0.5, 'baffle', 'gold', -20, -6), tag(-0.15, h / 2, `h = ${h} m`, 'ink2', -52, 4), tag(L / 4, -0.28, `L = ${L} m`, 'ink3', -24, 16)],
                 alt: 'A rectangular tank, partly full, with a wall across its middle',
               }, 'A slice across the tank, to scale, with the baffle (gold) dividing it in two. The effective gravity a points away from the nose, opposite the thrust. A two-dimensional model of a round tank.'),
             };
@@ -539,7 +540,7 @@ export default boss({
             const c1 = (-4 * D) / (PI * PI), h = 1.5, ex = 4;   // drawn depth and tilt exaggeration
             const surf = `${h} + ${r6((ex * s) / 100)}*(x - ${L / 2})`;
             return {
-              prompt: t`Without the baffle, a pitch manoeuvre tilts the oxygen’s surface in a tank of width $L = ${L}$ m. When the manoeuvre ends, the surface is released from rest as a plane, ${D} cm higher at the far wall than at the near one: its height above the mean level is $$\eta(x, 0) = ${nice(r6(s))}\,\big(x - ${L / 2}\big)\ \text{cm},\qquad 0 \le x \le ${L}\ \text{m}.$$ It then sloshes as a sum of the tank’s modes, $\eta = \sum_n c_n\cos\dfrac{n\pi x}{L}\cos\omega_n t$. What is the first mode’s coefficient $c_1$, in cm, with its sign? Give 3 significant figures.`,
+              prompt: t`Without the baffle, a pitch manoeuvre tilts the oxygen’s surface in a tank of width $L = ${L}\ \text{m}$. When the manoeuvre ends, the surface is released from rest as a plane, ${D} cm higher at the far wall than at the near one: its height above the mean level is $$\eta(x, 0) = ${nice(r6(s))}\,\big(x - ${L / 2}\big)\ \text{cm},\qquad 0 \le x \le ${L}\ \text{m}.$$ It then sloshes as a sum of the tank’s modes, $\eta = \sum_n c_n\cos(n\pi x/L)\cos\omega_n t$. What is the first mode’s coefficient $c_1$, in cm, with its sign? Give 3 significant figures.`,
               answer: c1, units: 'cm', tol: { rel: 0.005 },
               integrand: `(2/${L})*${r12(s)}*(x - ${L / 2})*cos(pi*x/${L})`, vars: { x: [0, L] }, limits: [0, L],
               errors: apart([
@@ -552,12 +553,12 @@ export default boss({
                 t`Integrate by parts: $\displaystyle\int_0^L\Big(x - \frac L2\Big)\cos\frac{\pi x}{L}\,dx = \Big[\big(x - \tfrac L2\big)\tfrac{L}{\pi}\sin\tfrac{\pi x}{L}\Big]_0^L - \frac{L}{\pi}\int_0^L\sin\frac{\pi x}{L}\,dx = -\frac{2L^2}{\pi^2}$.`,
               ],
               teach: t`An initial shape is split into a boundary-value problem’s eigenfunctions by orthogonality: each coefficient is the shape’s projection onto that eigenfunction.`,
-              explain: t`$$c_1 = \frac{2}{L}\int_0^L ${nice(r6(s))}\Big(x - \frac L2\Big)\cos\frac{\pi x}{L}\,dx = \frac{2}{L}\cdot${nice(r6(s))}\cdot\Big(-\frac{2L^2}{\pi^2}\Big) = -\frac{4\,(${D})}{\pi^2} = ${tn(c1)}\ \text{cm}.$$ The sign says the first mode starts high at the near wall, where $\cos 0 = 1$, and low at the far one — the tilt’s shape. Only odd $n$ appear, $c_n = -\dfrac{4\,(${D})}{n^2\pi^2}$ cm, so the first mode holds $c_1^2\big/\sum c_n^2 = 96/\pi^4 \approx 98.6\%$ of the slosh’s potential energy. That is why control engineers model a tank’s slosh as one pendulum, tuned to the first mode — and why the baffle of the last problem, which forbids exactly that mode, matters so much. Linear slosh: small amplitudes, no damping.`,
+              explain: t`$$c_1 = \frac{2}{L}\int_0^L ${nice(r6(s))}\Big(x - \frac L2\Big)\cos\frac{\pi x}{L}\,dx = \frac{2}{L}\cdot${nice(r6(s))}\cdot\Big(-\frac{2L^2}{\pi^2}\Big) = -\frac{4\,(${D})}{\pi^2} = ${tn(c1)}\ \text{cm}.$$ The minus sign says the first mode starts low at the near wall, where $\cos 0 = 1$, and high at the far one, where $\cos\pi = -1$ — the same way round as the tilt. Only odd $n$ appear, $c_n = -\dfrac{4\,(${D})}{n^2\pi^2}$ cm, so the first mode holds $c_1^2\big/\sum c_n^2 = 96/\pi^4 \approx 98.6\%$ of the slosh’s potential energy. That is why control engineers model a tank’s slosh as one pendulum, tuned to the first mode — and why the baffle of the last problem, which forbids exactly that mode, matters so much. Linear slosh: small amplitudes, no damping.`,
               visual: schematic({
                 x: [-0.6, L + 0.6], y: [-0.3, h + 1],
                 shade: [{ fn: surf, lower: '0', from: 0, to: L, color: 'accent', alpha: 0.3 }],
                 curves: [...poly([[0, h + 0.8], [0, 0], [L, 0], [L, h + 0.8]], 'ink2', 2.6), { fn: surf, domain: [0, L], color: 'accent', width: 2.4 }, seg([0, h], [L, h], 'ink3', 1.4, true)],
-                points: [tag(L, r4(h + (ex * D) / 200), 'tilted surface', 'accent', -96, -12), tag(0.1, h, 'mean level', 'ink3', 4, 16)],
+                points: [tag(L, r4(h + (ex * D) / 200), 'tilted surface', 'accent', -96, -12), tag(0.62 * L, h, 'mean level', 'ink3', 4, 16)],
                 alt: 'A tank with its liquid surface tilted, higher at the right wall',
               }, `The tank at release, to scale except the tilt, which is drawn ${ex} times too steep. The dashed line is the mean level, η = 0.`),
             };

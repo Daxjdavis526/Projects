@@ -28,7 +28,7 @@
 //       names: true,                  // label those arrows (plain text, drawn on the canvas)
 //       grid: true,                   // the image of the grid, faint
 //       x: null,                      // a slider key (or expression) for the angle of a unit vector x, in degrees: x and Ax drawn
-//       rank1: false,                 // a toggle: keep only σ₁ (the best rank-1 approximation)
+//       rank1: false,                 // a toggle: keep only σ₁ (the best rank-1 approximation); 'on' starts it checked
 //       view: null,                   // the window's half-height (default: fitted to σ₁)
 //       // image
 //       image: 'satellite',           // satellite | blocks | checker | disc | stripe | noise (model/la-svd.js)
@@ -75,7 +75,7 @@ function mountMap(F, P) {
   const ev = (src, E) => (typeof src === 'number' ? src : fn(src, keys)(E));
   const mat = (E) => P.A.map((row) => row.map((s) => ev(s, E)));
   if (P.stages) F.choice({ key: 'stage', label: 'Factors applied', options: [[0, 'none'], [1, '$V^{\\mathsf T}$ (turn)'], [2, '$\\Sigma V^{\\mathsf T}$ (stretch)'], [3, '$U\\Sigma V^{\\mathsf T} = A$ (turn)']], value: P.stage, explain: 'The SVD applies $A$ to a vector in three steps, right to left: first $V^{\\mathsf T}$, then $\\Sigma$, then $U$.' });
-  if (P.rank1) F.toggle({ key: 'r1', label: 'Keep only $\\sigma_1$ (rank 1)', value: false, explain: 'Replaces $A$ by $\\sigma_1\\mathbf u_1\\mathbf v_1^{\\mathsf T}$, the closest rank-1 matrix: every vector lands on the line of $\\mathbf u_1$.' });
+  if (P.rank1) F.toggle({ key: 'r1', label: 'Keep only $\\sigma_1$ (rank 1)', value: P.rank1 === 'on', explain: 'Replaces $A$ by $\\sigma_1\\mathbf u_1\\mathbf v_1^{\\mathsf T}$, the closest rank-1 matrix: every vector lands on the line of $\\mathbf u_1$.' });
   const across = narrow ? 1.6 : 2;
   const s0 = S.svd2(mat(env())).s[0];
   const W = P.view || Math.max(1.25, 1.18 * s0);
@@ -171,10 +171,12 @@ function mountImage(F, P) {
     const name = P.choose ? F.params.img : P.image, { A, svd } = get(name);
     const k = Math.round(+F.params.k), Ak = S.rankK(svd, k), err = S.truncationError(svd.s, k), st = S.storage(m, n, k);
     // layout: two pictures side by side, the spectrum to the right (wide) or below (narrow)
-    const gap = 14, top = 26;
-    const specH = P.spectrum && narrow ? Ht * 0.36 : 0, specW = P.spectrum && !narrow ? Wd * 0.3 : 0;
-    const availW = Wd - specW - 3 * gap, availH = Ht - top - specH - gap - (narrow ? 14 : 8);
+    const gap = 14;
+    const specH = P.spectrum && narrow ? Ht * 0.42 : 0, specW = P.spectrum && !narrow ? Wd * 0.28 : 0;
+    const availW = Wd - specW - 3 * gap, availH = Ht - 26 - specH - gap - (narrow ? 14 : 22);
     const pw = Math.min(availW / 2, (availH * n) / m), ph = (pw * m) / n;
+    // centre the group vertically in whatever height is left over
+    const top = 26 + (narrow ? 0 : Math.max(0, (availH - ph) / 2));
     const x1 = gap + Math.max(0, (availW - 2 * pw) / 2), x2 = x1 + pw + gap;
     cells(g, A, x1, top, pw, ph);
     cells(g, Ak, x2, top, pw, ph);
@@ -182,7 +184,7 @@ function mountImage(F, P) {
     plot.text(`rank ${k}`, x2 + pw / 2, top - 11, { screen: true, align: 'center', color: 'accent', weight: 700 });
     if (P.spectrum) {
       // σⱼ against j on a log scale
-      const sx0 = narrow ? 44 : Wd - specW - gap + 34, sy0 = narrow ? top + ph + 34 : top, sw = (narrow ? Wd - 44 - gap : specW - 34), sh = narrow ? specH - 30 : ph;
+      const sx0 = narrow ? 44 : Wd - specW - gap + 34, sy0 = narrow ? top + ph + 16 : top, sw = (narrow ? Wd - 44 - gap : specW - 34), sh = narrow ? Ht - sy0 - 22 : ph;
       const s = svd.s, smax = s[0], floor = Math.max(smax * 1e-4, s[Math.min(s.length - 1, Math.max(P.kmax, 30))] || smax * 1e-4);
       const lo = Math.log10(floor) - 0.1, hi = Math.log10(smax) + 0.1, J = Math.min(s.length, Math.max(P.kmax, 30));
       const X = (j) => sx0 + ((j - 0.5) / J) * sw, Y = (v) => sy0 + sh - ((Math.log10(Math.max(v, floor)) - lo) / (hi - lo)) * sh;
