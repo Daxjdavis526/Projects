@@ -74,7 +74,7 @@ const discPic = ({ k = 1, interactive = false, caption } = {}) => ({
   params: {
     surface: ['u*k*cos(v)', 'u*k*sin(v)', 'u*sqrt(1 - k^2)'], domain: [[0, 2], [0, 6.2832]], n: 36, axes: false, pitch: 0.5, dist: 7.5, target: [0, 0, 0.5],
     ...(interactive ? {
-      choices: [{ key: 'k', label: 'Period of imaginary time', options: [[1, '8πGM/c³: smooth (T = T_H)'], [0.75, '¾ of that: a cone tip'], [0.5, '½ of that: a sharper tip']], value: k, explain: 'Imaginary time τ, rescaled to an angle cτ/(2rₛ), must run once round in 2π for the geometry to be smooth at the horizon.' }],
+      choices: [{ key: 'k', label: 'Period of imaginary time', options: [[1, '8πGM/c³: smooth (the Hawking temperature)'], [0.75, '¾ of that: a cone tip'], [0.5, '½ of that: a sharper tip']], value: k, explain: 'Imaginary time τ, rescaled to an angle cτ/(2rₛ), must run once round in 2π for the geometry to be smooth at the horizon.' }],
     } : { constants: { k } }),
     curves: [{ param: ['1.5*k*cos(t)', '1.5*k*sin(t)', '1.5*sqrt(1 - k^2)'], t: [0, 6.2832], color: 'gold', width: 2.6 }],
   },
