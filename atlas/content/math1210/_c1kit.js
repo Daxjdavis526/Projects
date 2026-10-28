@@ -41,3 +41,9 @@ export function fitY(f, a, b, pad = 0.12, n = 200) {
 
 /** TeX for a degree angle: 30 → 30^\circ. */
 export const degTeX = (d) => t`${d}^\circ`;
+
+/** TeX for a number with thin-space thousands separators: 32500 → 32\,500 (decimals kept as given). */
+export const thou = (v, digits = 0) => {
+  const [i, f] = Math.abs(v).toFixed(digits).split('.');
+  return `${v < 0 ? '-' : ''}${i.replace(/\B(?=(\d{3})+(?!\d))/g, '\\,')}${f ? '.' + f : ''}`;
+};

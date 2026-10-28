@@ -2,7 +2,7 @@
 // largest and smallest: critical points and endpoints, nothing else.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
-import { N, curveFig, fitY } from './_c1kit.js';
+import { N, curveFig, fitY, thou } from './_c1kit.js';
 
 const t = String.raw;
 
@@ -230,7 +230,7 @@ So the **closed-interval method** is: find the critical points inside the interv
           errors: [{ value: rmax, feedback: t`That is the distance from Earth’s **centre**. Subtract the radius, $6371$ km, for the altitude.` }, { value: p / (1 + e) - 6371, feedback: t`That is the **lowest** point, at $\theta = 0$, where the denominator is largest.` }],
           hints: [t`$r'(\theta) = \dfrac{${String(p).replace(/(\d{3})$/, '\\,$1')}\cdot ${e}\sin\theta}{(1 + ${e}\cos\theta)^2}$, zero at $\theta = 0$, $\pi$ and $2\pi$.`, t`$r$ is largest where $1 + ${e}\cos\theta$ is smallest: at $\theta = \pi$, $r = \dfrac{${String(p).replace(/(\d{3})$/, '\\,$1')}}{1 - ${e}}$.`],
           teach: 'Extremes of a periodic quantity over one full period sit at its critical points — here perigee and apogee.',
-          explain: t`Candidates: $r(0) = r(2\pi) = ${nice(p / (1 + e), 5)}$ km and $r(\pi) = ${nice(rmax, 5)}$ km. Apogee altitude $= ${nice(rmax, 5)} - 6371 = ${nice(ans, 5)}$ km.`,
+          explain: t`Candidates: $r(0) = r(2\pi) = ${thou(p / (1 + e))}$ km and $r(\pi) = ${thou(rmax)}$ km. Apogee altitude $= ${thou(rmax)} - 6371 = ${thou(ans)}$ km.`,
           visual: curveFig({ fn: `${p}/(1 + ${e}*cos(x))`, x: [-0.3, 6.6], y: [0, 1.15 * rmax], xlabel: 'θ (rad)', ylabel: 'r (km)', domain: [0, 2 * Math.PI], extra: { hlines: [{ y: 6371, label: 'Earth’s surface' }] }, caption: t`Distance from Earth’s centre around one orbit: a Kepler ellipse with Earth at a focus. No drag, no perturbations.` }),
         };
       },
