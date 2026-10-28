@@ -17,7 +17,8 @@ const t = String.raw;
 const DEG = 180 / Math.PI;
 const ARCSEC = 206264.806;
 // the floor of U_eff for F = −krⁿ with k = μ = ℓ = 1 (circle at r = 1), plus a margin
-const near = (n, m = 0.05) => +((Math.abs(n + 1) < 1e-9 ? 0.5 : 1 / (n + 1) + 0.5) + m).toFixed(4);
+const floor = (n) => (Math.abs(n + 1) < 1e-9 ? 0.5 : 1 / (n + 1) + 0.5);
+const near = (n, m) => +(floor(n) + (n < -1 ? 0.3 * Math.abs(floor(n)) : m ?? 0.08)).toFixed(4);
 
 export default lesson({
   id: 'phys3550.M5.5',
@@ -71,14 +72,14 @@ export default lesson({
           hints: [t`$\psi = \pi/\sqrt{3 + n}$.`],
           teach: t`For $F = -kr^n$, a nearly circular orbit turns through $\pi/\sqrt{3 + n}$ between periapsis and apoapsis.`,
           explain: t`$\psi = 180^\circ/\sqrt{3 + (${n})} = ${sci(psi, 4)}^\circ$.${psi > 180 ? ' More than 180°: the apsides advance.' : ' Less than 180°: the apsides regress, or (if it divides 360° evenly) the orbit closes.'}`,
-          visual: orb({ force: 'power', n, L: 1, E: near(n, n < -2 ? 0.03 : 0.1), turns: 4, view: 2, r: [0, 2.4], y: [-1, 1], panels: ['orbit'], apsides: false }, t`A nearly circular orbit under this force (units with $k = \mu = \ell = 1$; the wobble is exaggerated slightly for visibility). Apsides not marked.`),
+          visual: orb({ force: 'power', n, L: 1, E: near(n), turns: 4, view: 2, r: [0, 2.4], y: [-1, 1], panels: ['orbit'], apsides: false }, t`A nearly circular orbit under this force (units with $k = \mu = \ell = 1$; the wobble is exaggerated slightly for visibility). Apsides not marked.`),
         };
       },
     }),
     mcq({
       id: 'spring-orbit', difficulty: 2,
       prompt: t`A puck tied to a post by a spring ($F = -kr$) moves on a nearly circular path. How many times per revolution does its distance from the post reach a maximum?`,
-      visual: orb({ force: 'power', n: 1, L: 1, E: 1.25, turns: 2, view: 1.7, r: [0, 2], y: [0, 3], panels: ['orbit'], apsides: false }, t`An orbit under a spring force (units with $k = \mu = \ell = 1$), force centre gold.`),
+      visual: orb({ force: 'power', n: 1, L: 1, E: 1.08, turns: 2, view: 1.7, r: [0, 2], y: [0, 3], panels: ['orbit'], apsides: false }, t`An orbit under a spring force (units with $k = \mu = \ell = 1$), force centre gold.`),
       choices: [t`Twice: $\psi = 90^\circ$, so it is an ellipse centred on the post`, t`Once: it is a Kepler ellipse with the post at a focus`, t`Never exactly: the orbit precesses`, t`Four times`],
       answer: 0,
       why: { 1: t`That is gravity, $n = -2$, $\psi = 180^\circ$. For a spring $n = 1$ and $\psi = \pi/\sqrt4 = 90^\circ$.`, 2: t`$\psi = 90^\circ$ divides $360^\circ$ exactly, so the orbit closes: the spring is one of Bertrand's two closed cases.`, 3: t`Maxima come every $2\psi = 180^\circ$: twice per turn, not four times (that would count minima too).` },
@@ -89,7 +90,7 @@ export default lesson({
     mcq({
       id: 'advance-or-regress', difficulty: 3,
       prompt: t`A force law a little steeper than gravity, $F = -k/r^{2.1}$, acts on a nearly circular orbit. Seen from above, the periapsis:`,
-      visual: orb({ force: 'power', n: -2.1, L: 1, E: near(-2.1, 0.06), turns: 6, view: 1.5, r: [0, 2], y: [-1.2, 0], panels: ['orbit'], apsides: false }, t`Six turns of the orbit (units with $k = \mu = \ell = 1$), moving anticlockwise. Apsides not marked.`),
+      visual: orb({ force: 'power', n: -2.1, L: 1, E: near(-2.1), turns: 6, view: 1.5, r: [0, 2], y: [-1.2, 0], panels: ['orbit'], apsides: false }, t`Six turns of the orbit (units with $k = \mu = \ell = 1$), moving anticlockwise. Apsides not marked.`),
       choices: [t`Advances — moves forward, in the direction of motion`, t`Regresses — moves backward against the motion`, t`Stays fixed: any force near $1/r^2$ gives closed orbits`, t`Advances or regresses depending on the orbit's size`],
       answer: 0,
       why: { 1: t`$\psi = \pi/\sqrt{3 + n} = \pi/\sqrt{0.9} > \pi$: the body travels **more** than $180^\circ$ between apsides, so each periapsis is ahead of the last.`, 2: t`Only exactly $n = -2$ closes; $n = -2.1$ gives $\psi = 189.7^\circ$.`, 3: t`For a power law, $\beta = \sqrt{3 + n}$ is the same at every radius.` },
@@ -109,7 +110,7 @@ export default lesson({
           hints: [t`$n = -2 - \delta$, so $\psi = \pi/\sqrt{1 - \delta}$.`, t`The advance per cycle is $2\psi - 2\pi$; for small $\delta$ it is about $\pi\delta$.`],
           teach: t`A small change $\delta$ in the force's exponent advances the periapsis by about $\pi\delta$ radians per orbit.`,
           explain: t`$2\psi - 360^\circ = 360^\circ\big(1/\sqrt{1 - ${d}} - 1\big) = ${sci(adv, 4)}^\circ$; the small-$\delta$ estimate $\pi\delta = ${sci(180 * d, 3)}^\circ$ is close. Precision orbit measurements turn this around: an observed advance limits any deviation from the inverse-square law.`,
-          visual: orb({ force: 'power', n: -2 - d, L: 1, E: near(-2 - d, 0.04), turns: 3, view: 1.6, r: [0, 2], y: [-1, 0], panels: ['orbit'], apsides: false }, t`Three turns of such an orbit (units with $k = \mu = \ell = 1$): the advance is too small to see by eye for small $\delta$.`),
+          visual: orb({ force: 'power', n: -2 - d, L: 1, E: near(-2 - d), turns: 3, view: 1.6, r: [0, 2], y: [-1, 0], panels: ['orbit'], apsides: false }, t`Three turns of such an orbit (units with $k = \mu = \ell = 1$): the advance is too small to see by eye for small $\delta$.`),
         };
       },
     }),
@@ -156,7 +157,7 @@ export default lesson({
           hints: [t`Find $n$: $F \propto -r^{3 - \gamma}/r^2 = -r^{1 - \gamma}$.`, t`$\psi = 180^\circ/\sqrt{3 + n} = 180^\circ/\sqrt{4 - \gamma}$.`],
           teach: t`Inside an extended mass the force is not inverse-square, so stellar orbits are rosettes whose apsidal angle reports the density profile.`,
           explain: t`$n = 1 - ${g} = ${r6(n)}$, so $\psi = 180^\circ/\sqrt{${r6(4 - g)}} = ${sci(psi, 4)}^\circ$${g === 0 ? ' — exactly the spring’s: a uniform core makes closed ellipses centred on the galaxy’s middle.' : t` — between the spring's $90^\circ$ and Kepler's $180^\circ$: galactic orbits are rosettes, with the periapsis regressing.`}`,
-          visual: orb({ force: 'power', n, L: 1, E: near(n, 0.12), turns: 5, view: 2, r: [0, 2.4], y: [-1, 2], panels: ['orbit'], apsides: false }, t`A star's orbit in such a galaxy, five turns (units with $k = \mu = \ell = 1$; not a real galaxy's scale).`),
+          visual: orb({ force: 'power', n, L: 1, E: near(n), turns: 5, view: 2, r: [0, 2.4], y: [-1, 2], panels: ['orbit'], apsides: false }, t`A star's orbit in such a galaxy, five turns (units with $k = \mu = \ell = 1$; not a real galaxy's scale).`),
         };
       },
     }),
@@ -176,14 +177,14 @@ export default lesson({
           hints: [t`Compute $\Delta\phi$ in radians, then convert: $1\ \text{rad} = 206\,265''$.`, t`Multiply by the number of orbits in a century, $36\,525\ \text{d}/T$.`],
           teach: t`GR's perihelion advance is a small per-orbit angle that accumulates over many orbits.`,
           explain: t`$\Delta\phi = ${sci(per, 3)}$ rad $= ${sci(per * ARCSEC, 3)}''$ per orbit, times $${sci(36525 / P.T, 4)}$ orbits: $${sci(cent, 3)}''$ per century.${P.name.includes('Icarus') ? ' Its large eccentricity brings it so close to the Sun that its advance is a quarter of Mercury’s despite its larger orbit.' : ''} For where this formula comes from — the $3GMu^2/c^2$ term it adds to Binet's equation — see [Mercury's 43 arcseconds](#/lesson/gr.S25.i) and [the derivation](#/lesson/gr.S25.d).`,
-          visual: orb({ force: 'gr', delta: 0.004, L: 1, E: -0.25, turns: 6, view: 2.2, r: [0, 2.6], y: [-0.6, 0.1], panels: ['orbit'], apsides: false }, t`What the extra term does, enormously exaggerated: the GR strength $GM/c^2$ here is about $10^6$ times Mercury's (units with $GM = 1$).`),
+          visual: orb({ force: 'gr', delta: 0.004, L: 1, E: -0.38, turns: 6, view: 2.6, r: [0, 2.6], y: [-0.6, 0.1], panels: ['orbit'], apsides: false }, t`What the extra term does, enormously exaggerated: the GR strength $GM/c^2$ here is about $10^5$ times Mercury's (units with $GM = 1$).`),
         };
       },
     }),
     mcq({
       id: 'cp-rate-ratio', difficulty: 2,
       prompt: t`On a nearly circular orbit the distance oscillates $\beta$ times per revolution. For which force does the radial oscillation keep exact step with the revolution, so that each periapsis falls in the same place?`,
-      visual: orb({ force: 'power', n: -1.5, L: 1, E: near(-1.5, 0.2), turns: 6, view: 2.2, r: [0, 2.6], y: [-1, 0], panels: ['orbit'], apsides: false }, t`An orbit whose radial oscillation does **not** keep step: six turns (units with $k = \mu = \ell = 1$).`),
+      visual: orb({ force: 'power', n: -1.5, L: 1, E: near(-1.5), turns: 6, view: 2.2, r: [0, 2.6], y: [-1, 0], panels: ['orbit'], apsides: false }, t`An orbit whose radial oscillation does **not** keep step: six turns (units with $k = \mu = \ell = 1$).`),
       choices: [t`Gravity, $F \propto -1/r^2$: $\beta = 1$`, t`Any attractive force, by conservation of angular momentum`, t`$F \propto -1/r^3$: $\beta = 0$`, t`$F \propto -1/r$: $\beta = 1$`],
       answer: 0,
       why: { 1: t`Angular momentum fixes the plane and the areal rate, not $\beta$.`, 2: t`$\beta = 0$ means no radial restoring at all: $n = -3$ has no stable circle.`, 3: t`For $n = -1$, $\beta = \sqrt2$.` },

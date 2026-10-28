@@ -5,6 +5,10 @@
 // shows the circulation ∮F·dr against the flux of the curl (Green's theorem).
 // readout: false hides every number (so a problem's picture does not print its
 // answer); probe: false also removes the probe and its arrow.
+//
+// The divergence it reads is the 2D one, ∂Fx/∂x + ∂Fy/∂y. For a field that lives in
+// the plane (long cylinders, line charges) that is the truth; for a slice through a
+// 3D field (a sphere's dipole, a point charge) it is not ∇·F — turn the readout off.
 
 import { Plot, themeColors } from '../plot.js';
 import { fn } from '../model/exprfn.js';

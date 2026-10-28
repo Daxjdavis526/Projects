@@ -9,7 +9,7 @@ export { add, sub, scale, dot, cross, norm, QUADS } from '../math1220/_vectors.j
 export { pickExpr, is } from '../math2210/_space.js';
 
 /** Vacuum permittivity (CODATA 2018), F/m. */
-export const EPS0 = 8.8541878128e-12;
+export const EPS0 = 8.8541878188e-12;   // F/m, CODATA 2022
 /** Coulomb constant 1/(4πε₀), N·m²/C². */
 export const KC = 1 / (4 * Math.PI * EPS0);
 

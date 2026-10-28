@@ -143,7 +143,9 @@ put `toLocaleString()` output inside math (its commas render as "42, 164").
 Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
 Inline math does not wrap: on a 390 px phone a long `$…$` runs off the
 screen. Break a long chain into several pieces at its `=` signs
-(`$a = b$, $= c$`) or give it a display line (`$$…$$`).
+(`$a = b$, $= c$`) or give it a display line (`$$…$$`). A display line
+overflows too when it is wider than a phone: stack it with
+`\begin{gathered}…\\…\end{gathered}` or an `aligned` block.
 A number in math followed by its unit in prose (`$${v}$ km/s`) may wrap
 between the two; keep them together with the unit inside the math,
 `$${v}\ \text{km/s}$`, or a no-break space (`$${v}$\u00a0km/s`).
@@ -252,10 +254,13 @@ num({ id: 'f-over-m', difficulty: 1,
   `'K'` or `'°C'`: a learner may type either, and a bare temperature is
   converted with the 273.15 offset. A temperature *change* is the same number
   in K and °C: mark such an item `difference: true` so no offset is applied.
-  A sound level takes `'dB'` (read as a plain number: "85 dB" is 85).
+  A sound level takes `'dB'` (read as a plain number: "85 dB" is 85). Radio flux
+  densities take `'Jy'` (10⁻²⁶ W m⁻² Hz⁻¹, with prefixes: mJy, μJy); cross-sections `'b'` (barns: mb, fb).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
   makes typing a unit compulsory. Omit `units` for pure numbers.
+- A generator may `throw` to guard a numerical check while you write it, but
+  every seed the test tries must succeed: a throw on any seed fails the item.
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
   for: "to 3 significant figures" → `rel: 0.005`. The two add: giving only
   `abs` keeps the default 1% relative part, so an exact integer answer wants
@@ -496,7 +501,7 @@ The library (read the header comment of a sim's file for its full options):
 |---|---|---|
 | `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks` (about how many ticks; `0` hides them and their numbers), `xlog`, `ylog` (the coordinates are log₁₀ of the quantity and the axis is labelled 1, 10, 10², …), `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, labelDx, labelDy, color, r, hollow, when }]` (`r: 0` for a label with no dot; `hollow: true` for an open circle — a hole in a graph), `arrows: [{ from: [x, y], to: [x, y], color, width, dash, label, labelDx, labelDy, labelAlign }]`, `vlines: [{ x, label, color, when }]`, `hlines: [{ y, label, color, when }]`, `drag`, `readouts: [{ label, expr, unit, digits, zero, when }]` (digits: significant figures, ≥ 1; values below `zero`, default 10⁻¹², print as 0 to hide round-off — set `zero: 0` for genuinely tiny quantities such as 10⁻³⁵ m), `legend: [{ label, color, dash, point }]` with `legendAt: 'tl' | 'tr' | 'bl' | 'br'` (plain-text labels, drawn in a box in that corner). Positions, ranges and `when` (on curves, points, shade, lines and arrows — drawn while nonzero; use `step(a - b)` for a ≥ b — `step` is 0 below its jump, 1 above and ½ at it; `min`/`max` clamp; to show one curve per value of a choice `n`, give each `when: 'step(0.5 - abs(k - n))'` with its own k) may be expressions; `axesAt: 'edge'` keeps the axes on the frame; point labels sit about 9 px right of and above the point (`labelDx`, `labelDy`, `labelAlign` move them — screen pixels, with `labelDy` positive *downward*); an arrow's label sits at its tip; `equal: true` keeps one unit the same length on both axes by widening one range, so labels near a nominal edge move; `x0` is the tangent point; readouts, point coordinates and `hlines`/`vlines` may also use `slope`, `secant`, `riemann`, `integral` (an average-value line: `hlines: [{ y: 'integral / (b - a)' }]`) A curve's label is anchored at its point at `labelAt` and drawn 6 px right and 12 px above it by default, so on a rising curve it often sits on the line: nudge with `labelDx`/`labelDy` (labelDy positive is *down*). Axis labels are plain text and cannot take `^` (put such a quantity in a readout, where TeX works). Labels sit on a middle baseline, so `labelAlign: 'center'` with `labelDx: 0, labelDy: 0` centres one on its point. Powers associate to the right: `10^x^2` is $10^{x^2}$; write `(10^x)^2` for the other. There is no `a ? b : c`: use `step`, `min` and `max`. A parametric or polar curve is drawn through 1000 points (`samples: 4000` on a curve for a sharp feature such as a narrow resonance). Slider, choice and constant keys must not be names the graph uses: `x`, `slope`, `secant`, `riemann`, `integral`, and `t` beside a parametric curve, `theta` beside a polar one, `k` beside a series, `x0` with a tangent. |
 | `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b], when }]`, `colorBy`, `zscale` (scales every height — surface, parametric surface and curves alike; give curves their true z), `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` It has no points or arrows (use `calc-vectors3d` for those), and draws a tangent plane only for a graph z = f(x, y). In every 3D sim, `yaw` turns the camera about the z-axis: change it when a vector points straight at the viewer. |
-| `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }`, `probe: [x, y]` (or `false`), `readout: false` (hides the numbers), `choices` |
+| `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }`, `probe: [x, y]` (or `false`), `readout: false` (hides the numbers), `choices` Its divergence readout is the 2D divergence: right for fields in the plane (long cylinders, line charges), wrong for a slice through a 3D field (a dipole, a point charge) — hide it there. |
 | `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h`, `hRange: [min, max]` (the Euler-step slider; default [0.05, 1]) |
 | `diagram` | static force diagrams: a block with labelled force arrows, a block on an incline | `kind: 'block' \| 'incline'`, `mass`, `forces: [{ dir (deg), label, size (0–1) }]`, `angle` |
 | `force-cart` | a cart pushed by a force with friction; v–t graph | `F`, `m`, `mu` |
@@ -589,6 +594,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `cx2-contour` | a contour integral as little arrows f·Δz, beside the same arrows laid head to tail from 0; a draggable contour, the integral (or ÷ 2πi), winding numbers and the ML bound; colour view, annuli, integrands as complex expressions | see the file header |
 | `th-einstein` | two Einstein solids exchanging quanta at random above the exact Ω_A·Ω_B bars, the 1/√N sharpening of the peak, or every microstate of a small solid in stars and bars | `mode` (pair, list), `NA`, `NB`, `q`, `N`, `start`, `scale`, `x`, `tie`, `qper`, `controls`, `ranges`, `cells`, `visits`, `panels`, `numbers`, `play`, `readouts`, `hide` — see the file header |
 | `wv-chain` | N masses on springs (fixed, free or ring ends): start in a mode, pluck a mass or launch a pulse, motion as an exact sum of modes, beside the dispersion curve ω = 2√(k/m)|sin(qa/2)| with ω = vq and the cutoff | `N`, `bc`, `k`, `start`, `n`, `pluck`, `x0`, `width`, `view`, `panels`, `ghost`, `line`, `spectrum`, `labels`, `controls`, `maxN`, `play`, `time`, `readouts`, `hide` — see the file header |
+| `wv2-junction` | a pulse meeting the junction of two strings, solved exactly: the strings, the energy density with flux arrows, and bars of energy on each side against r² and 4Z₁Z₂/(Z₁ + Z₂)² | see the file header |
 | `em3-relax` | Laplace's equation in a box solved by relaxation (Jacobi, Gauss–Seidel, SOR), walls at set voltages and an optional electrode, a second guess converging alongside, a log convergence panel and a probe against the exact series | `n`, `aspect`, `walls`, `top`, `electrode`, `init`, `method`, `sweeps`, `compare`, `exact`, `probe`, `levels`, `labels`, `history`, `controls`, `play`, `readout`, `hide` |
 | `em3-images` | a draggable charge beside a grounded plane or a grounded or neutral sphere: the image charge, equal-flux field lines, induced-charge shading, a σ panel, force and induced-charge readouts | `geometry`, `q`, `pos`, `R`, `ground`, `x`, `image`, `lines`, `equip`, `shade`, `force`, `panel`, `drag`, `controls`, `readout`, `hide` |
 | `cm2-vary` | a true path, a family of varied paths, and the functional (length, bead travel time or action) against the variation — flat at the true path | `preset`, `n`, `alpha`, `T`, `sliders`, `modes`, `panels`, `ghosts`, `marks`, `readouts`, `labels` |
@@ -596,6 +602,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `cm2-noether` | a puck over potential contours beside its conserved quantities in time, with a slider that breaks a rotation, translation or time symmetry | `kind`, `kinds`, `eps`, `sliders`, `show`, `panels`, `play`, `labels`, `readout` |
 | `num-float` | the bits of a float64 or float32 coloured by field: flip a bit, step to the neighbouring floats, read the exact stored decimal and the gap; presets such as 0.1 and 2⁵³ + 1 mark the true value | see the file header |
 | `qm4-sg` | an oven or a prepared state feeding up to three Stern–Gerlach analysers (z, x, y or a tilted n̂(θ)), each passing its + beam, its − beam, or both recombined unobserved; atoms one at a time or by thousands against \|⟨±n\|ψ⟩\|² | see the file header |
+| `m0-unitcircle` | drag a point round the unit circle: cosine and sine as projections, radian ticks, quadrant signs and the reference angle; `unroll` beside the sine/cosine graph; `inverse` with the principal branch bold and other solutions hollow; `get('theta')` answers slider items | see the file header |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
 | `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
 | `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |
@@ -646,7 +653,9 @@ Expressions in `graph`, `surface3d`, `field2d` and `phase` use the Atlas
 syntax above; the test parses all of them, so a typo fails the test rather
 than drawing nothing.
 
-### A new simulation
+### A new simulation A Play/Pause control is `F.compact`, `F.animate` and `F.button` together (copy `wv-chain`).
+
+Two `Plot`s on one canvas: `Plot.clear()` wipes the whole canvas, so call it on the first only (see `gr-timewarp`).
 
 When no existing sim can show the idea, write one: `src/viz/sims/<name>.js`
 (pick a specific name; check it does not exist). It exports

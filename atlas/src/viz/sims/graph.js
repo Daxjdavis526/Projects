@@ -157,6 +157,8 @@ export function validate(P) {
   if (P.legend && !(Array.isArray(P.legend) && P.legend.every((it) => typeof it.label === 'string'))) problems.push('graph: legend must be [{ label, color, dash, point }]');
   if (P.legendAt && !['tl', 'tr', 'bl', 'br'].includes(P.legendAt)) problems.push('graph: legendAt must be tl, tr, bl or br');
   const keys = [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
+  // label offsets are screen pixels, numbers: a string would be concatenated, not added
+  for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || [])]) for (const k of ['labelDx', 'labelDy']) if (o[k] !== undefined && typeof o[k] !== 'number') problems.push(`graph: ${k} is a number of screen pixels (got ${JSON.stringify(o[k])})`);
   // names the graph itself uses: a slider by one of them would be shadowed or would shadow it
   // (t only beside a parametric curve, theta a polar one, k a series, x0 a tangent)
   const cs = P.curves || [];

@@ -271,6 +271,6 @@ The arc dies when $Q$’s degree beats $P$’s by **at least 2**: then $|P/Q| \l
   sources: [
     { label: 'Brown & Churchill, Complex Variables and Applications (9th ed.), §§85–86 (improper integrals by residues)', url: 'https://openlibrary.org/isbn/9780073383170' },
     { label: 'Needham, Visual Complex Analysis (25th anniversary ed.), ch. 9', url: 'https://global.oup.com/academic/product/visual-complex-analysis-9780192868916' },
-    { label: 'Miles, “On structural fatigue under random loading”, J. Aeronautical Sciences 21, 753 (1954)', url: 'https://doi.org/10.2514/8.3201' },
+    { label: 'Miles, “On structural fatigue under random loading”, J. Aeronautical Sciences 21, 753 (1954)', url: 'https://scholar.google.com/scholar?q=Miles+%22On+structural+fatigue+under+random+loading%22' },
   ],
 });
