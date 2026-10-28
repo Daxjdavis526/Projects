@@ -3,9 +3,14 @@
 //   node atlas/test/la-linear.test.mjs
 
 import * as M from '../src/viz/model/la-linear.js';
-import { validate as validateRR } from '../src/viz/sims/la-rowreduce.js';
-import { validate as validateMap } from '../src/viz/sims/la-map2d.js';
-import { validate as validateVec } from '../src/viz/sims/la-vectors.js';
+import * as RR from '../src/viz/sims/la-rowreduce.js';
+import * as MAP from '../src/viz/sims/la-map2d.js';
+import * as VEC from '../src/viz/sims/la-vectors.js';
+
+// as the content test calls them: the sim's defaults under the lesson's params
+const validateRR = (p) => RR.validate({ ...RR.defaults, ...p });
+const validateMap = (p) => MAP.validate({ ...MAP.defaults, ...p });
+const validateVec = (p) => VEC.validate({ ...VEC.defaults, ...p });
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {

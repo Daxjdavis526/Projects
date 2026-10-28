@@ -28,10 +28,10 @@ const nmT = (x, n = 5) => fmt(x, n);
  * each series, crowding toward its limit (dashed). `omit` leaves out one line
  * (a problem asks for it); `ask` marks the row it belongs to.
  */
-function seriesMap({ series = [1, 2, 3, 4], omit = null, limits = true, caption, highlight = null } = {}) {
+function seriesMap({ series = [1, 2, 3, 4], omit = null, limits = true, caption, highlight = null, arrows = [] } = {}) {
   const curves = [], points = [], shade = [];
   const X = (nm) => r6(Math.log10(nm));
-  shade.push({ fn: '5.2', lower: '0.4', from: X(380), to: X(750), color: 'gold', alpha: 0.1 });
+  shade.push({ fn: '5.2', lower: '0.4', from: X(380), to: X(750), color: 'gold', alpha: 0.14 });
   points.push(label(X(530), 5.2, 'visible', 'gold', 0, 10, 'center'));
   for (const n1 of series) {
     const y = 5 - n1;
@@ -46,7 +46,7 @@ function seriesMap({ series = [1, 2, 3, 4], omit = null, limits = true, caption,
   }
   return {
     type: 'graph',
-    params: { x: [1.85, 4.05], y: [0.2, 5.6], xlog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'wavelength (nm)', ylabel: '', yticks: 0, grid: false, curves, points, shade },
+    params: { x: [1.85, 4.05], y: [0.2, 5.6], xlog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'wavelength (nm)', ylabel: '', yticks: 0, grid: false, curves, points, shade, arrows },
     caption: caption ?? 'Hydrogen’s spectral series on one logarithmic axis: each row is the lines ending on one value of n₁, crowding toward the series limit (dashed). Vacuum wavelengths; the visible band is shaded.',
   };
 }
@@ -55,16 +55,17 @@ function seriesMap({ series = [1, 2, 3, 4], omit = null, limits = true, caption,
 function terms(arrows, caption) {
   const curves = [], points = [];
   const y = (n) => r6(-1 / (n * n));
-  for (let n = 1; n <= 6; n++) {
+  const zoom = arrows.every(([a, b]) => a >= 2 && b >= 2);
+  for (let n = zoom ? 2 : 1; n <= 6; n++) {
     curves.push(seg(0, y(n), 6, y(n), 'ink2', n <= 4 ? 2 : 1.4));
-    if (n <= 4) points.push(label(6, y(n), `n = ${n}: term R/${n * n}`, 'ink2', 8, 0));
+    if (n <= (zoom ? 5 : 4)) points.push(label(6, y(n), `n = ${n}: term R/${n * n}`, 'ink2', 8, zoom ? 0 : n === 4 ? -5 : n === 3 ? 4 : 0));
   }
   curves.push(seg(0, 0, 6, 0, 'ink3', 1.2, true));
   points.push(label(6, 0, 'n → ∞: 0', 'ink3', 8, 0));
   return {
     type: 'graph',
-    params: frame([-0.6, 9.6], [-1.12, 0.12], { equal: false, aspect: 'wide', curves, points, arrows: arrows.map(([a, b, x, col, text]) => ({ from: [x, y(a)], to: [x, y(b)], color: col, label: text, labelDx: 6, labelDy: 14 })) }),
-    caption: caption ?? 'Ritz’s terms R/n², to scale: every hydrogen line has a wavenumber 1/λ equal to the gap between two of them.',
+    params: frame([-0.6, 9.6], zoom ? [-0.28, 0.03] : [-1.12, 0.12], { equal: false, aspect: 'wide', curves, points, arrows: arrows.map(([a, b, x, col, text]) => ({ from: [x, y(a)], to: [x, y(b)], color: col, label: text, labelDx: 6, labelDy: 14 })) }),
+    caption: caption ?? `Ritz’s terms R/n², to scale${zoom ? ' (n = 1, four times deeper than n = 2, is off the bottom)' : ''}: every hydrogen line has a wavenumber 1/λ equal to the gap between two of them.`,
   };
 }
 
@@ -103,7 +104,7 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
     visual: spectrumStrip({ from: 350, to: 690, marks: [{ nm: lam(3, 2), label: 'Hα 656.5' }, { nm: lam(4, 2), label: 'Hβ 486.3' }, { nm: lam(5, 2), label: 'Hγ', dx: 0 }, { nm: lam(6, 2), label: 'Hδ', dy: -24 }, { nm: B_BALMER, label: 'limit', color: 'ink3', dash: true }], caption: 'Hydrogen’s Balmer lines (vacuum wavelengths) and the series limit, on the visible spectrum. Screen colours are approximate.' }),
     steps: [
       { label: 'Fit B to one line', text: t`With $n = 3$: $B = \lambda_3\,\dfrac{n^2 - 4}{n^2} = ${nmT(lam(3, 2), 6)}\ \text{nm}\times\dfrac{5}{9} = ${nmT(B_BALMER, 6)}$ nm.` },
-      { label: 'Predict another', text: t`With $n = 6$: $\lambda_6 = ${nmT(B_BALMER, 6)}\times\dfrac{36}{32} = ${nmT(lam(6, 2), 6)}$ nm — violet, and exactly where Hδ is measured. Balmer’s fitted formula reproduced the four lines then known to better than one part in a thousand.` },
+      { label: 'Predict another', text: t`With $n = 6$: $\lambda_6 = ${nmT(B_BALMER, 6)}\times\dfrac{36}{32} = ${nmT(lam(6, 2), 6)}$ nm — violet, and exactly where Hδ is measured. Balmer’s formula matched Ångström’s measurements of the four lines then known to about 0.01 nm — a few parts in 100 000.` },
       { label: 'Turn it upside down', text: t`$\dfrac{1}{\lambda} = \dfrac{1}{B}\,\dfrac{n^2 - 4}{n^2} = \dfrac{4}{B}\left(\dfrac{1}{2^2} - \dfrac{1}{n^2}\right)$: Rydberg’s form with $n_1 = 2$ and $R_H = 4/B = 4/(${nmT(B_BALMER, 6)}\times10^{-9}\ \text{m}) = ${tex(RH, 5)}\ \text{m}^{-1}$.` },
       { label: 'The limit', text: t`As $n \to \infty$, $\lambda \to B = ${nmT(B_BALMER, 4)}$ nm: the lines crowd together toward the near ultraviolet and stop there — the Balmer limit.` },
       { label: 'Sense check', text: t`Rydberg’s form invites other values of $n_1$. Lyman found the $n_1 = 1$ series in the ultraviolet (1906–1914) and Paschen the $n_1 = 3$ series in the infrared (1908), at the predicted wavelengths. A formula that predicts lines nobody has yet seen is more than curve fitting.` },
@@ -209,13 +210,13 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
       visual: {
         type: 'graph',
         params: {
-          x: [380, 860], y: [0, 3], aspect: 'wide', axesAt: 'edge', xlabel: 'frequency (THz)', ylabel: '', yticks: 0, grid: false,
+          x: [380, 860], y: [0, 3.2], aspect: 'wide', axesAt: 'edge', xlabel: 'frequency (THz)', ylabel: '', yticks: 0, grid: false,
           curves: [
             ...[456.67, 616.51, 690.49, 730.68, 754.91, 770.64, 780.89].map((f) => seg(f, 1.9, f, 2.6, 'accent', 2.2)),
             seg(822.0, 1.8, 822.0, 2.7, 'ink3', 1.4, true),
             ...[420, 480, 540, 600, 660, 720, 780, 840].map((f) => seg(f, 0.4, f, 1.1, 'violet', 2)),
           ],
-          points: [label(390, 2.25, 'hydrogen (Balmer)', 'accent', 0, -26, 'left'), label(822, 2.7, 'limit', 'ink3', 0, -10, 'center'), label(390, 0.75, 'a classical comb: f₀, 2f₀, 3f₀ …', 'violet', 0, -26, 'left')],
+          points: [label(386, 2.9, 'hydrogen (Balmer)', 'accent', 0, 0, 'left'), label(822, 2.7, 'limit', 'ink3', 0, -10, 'center'), label(386, 1.4, 'a classical comb: f₀, 2f₀, 3f₀ …', 'violet', 0, 0, 'left')],
         },
         caption: 'Top: hydrogen’s Balmer lines by frequency, crowding toward a limit. Bottom: the evenly spaced comb a periodic classical orbit would radiate (its spacing chosen for illustration).',
       },
@@ -237,7 +238,11 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
     }),
     num({
       id: 'deuterium', difficulty: 3,
-      prompt: t`The Rydberg constant depends slightly on the mass $M$ of the nucleus: $R_M = \dfrac{R_\infty}{1 + m_e/M}$ (a correction you will derive with the Bohr model). Ordinary hydrogen has $m_e/m_p = 1/1836.15$; deuterium, whose nucleus is a proton and a neutron, has $m_e/m_d = 1/3670.48$. Hydrogen’s Hα line is at 656.470 nm. How much shorter is deuterium’s Hα? Answer in nm.`,
+      prompt: t`The Rydberg constant depends slightly on the mass $M$ of the nucleus — a correction you will derive with the Bohr model:
+
+$$R_M = \frac{R_\infty}{1 + m_e/M}$$
+
+ Ordinary hydrogen has $m_e/m_p = 1/1836.15$; deuterium, whose nucleus is a proton and a neutron, has $m_e/m_d = 1/3670.48$. Hydrogen’s Hα line is at 656.470 nm. How much shorter is deuterium’s Hα? Answer in nm.`,
       answer: D_SHIFT, units: 'nm', tol: { rel: 0.01 },
       errors: [{ value: lam(3, 2) * ME_MP, feedback: t`That is roughly how far hydrogen’s own line sits from the infinitely heavy nucleus case. Deuterium’s correction is about half as big; the shift between them is the *difference*, $m_e/m_p - m_e/m_d$.` }],
       hints: [t`Wavelength scales as $1/R_M$, so $\dfrac{\lambda_D}{\lambda_H} = \dfrac{1 + m_e/m_d}{1 + m_e/m_p}$.`, t`$\lambda_H - \lambda_D = \lambda_H\left(1 - \dfrac{1 + 1/3670.48}{1 + 1/1836.15}\right)$.`],
@@ -274,7 +279,7 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
           hints: [t`$\lambda_{\text{obs}} = (1 + z)\,\lambda_{\text{emit}}$.`, t`$\lambda_{\text{obs}} = ${1 + z}\times${nmT(lam(2, 1), 6)}$ nm.`],
           teach: 'Cosmological redshift multiplies every emitted wavelength by 1 + z, carrying ultraviolet lines into the visible.',
           explain: t`$\lambda_{\text{obs}} = ${1 + z}\times${nmT(lam(2, 1), 6)} = ${nmT(obs, 5)}$ nm${z === 3 ? ' — exactly where Hβ sits in the laboratory, since Rydberg’s formula makes 4 × λ(2 → 1) equal to λ(4 → 2). Astronomers therefore identify a redshifted line by the pattern of its neighbours, whose wavelength ratios the formula fixes, never by one line alone' : obs > 750 ? ' — in the near infrared. Hydrogen clouds between us and such a quasar absorb its light at every wavelength shorter than this, so its spectrum goes dark below it' : ' — now visible light. The pattern of the other lines, whose ratios Rydberg’s formula fixes, confirms the identification'}.`,
-          visual: seriesMap({ series: [1], limits: true, highlight: [2, 1], caption: 'The Lyman series where it is emitted, in the far ultraviolet (Lyman-α highlighted). Redshift stretches the whole pattern by the factor 1 + z, keeping its ratios.' }),
+          visual: seriesMap({ series: [1, 2], limits: true, highlight: [2, 1], arrows: [{ from: [r6(Math.log10(lam(2, 1))), 4.55], to: [r6(Math.log10(330)), 4.55], color: 'gold', width: 2.2, label: 'stretched × (1 + z)', labelDx: -150, labelDy: -14 }], caption: 'Hydrogen’s Lyman and Balmer series where they are emitted, with Lyman-α highlighted. Redshift stretches the whole pattern by the factor 1 + z, keeping the ratios between its lines.' }),
         };
       },
     }),

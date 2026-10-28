@@ -50,7 +50,7 @@ export function qparse(x) {
   if (typeof x === 'number') {
     if (!Number.isFinite(x)) throw new Error(`not a finite number: ${x}`);
     if (Number.isInteger(x)) return Q(x, 1);
-    const [p, q] = toFraction(x);
+    const [p, q] = toFraction(x, 1e4);       // decimals with up to four places, and fractions like 1/3
     if (Math.abs(p / q - x) > 1e-9 * Math.max(1, Math.abs(x))) throw new Error(`${x} is not a simple fraction`);
     return Q(p, q);
   }

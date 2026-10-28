@@ -47,6 +47,20 @@ const fitScale = (f, a, b) => {
   for (let k = 0; k <= 60; k++) m = Math.max(m, ...f(a + ((b - a) * k) / 60).map(Math.abs));
   return 2.6 / m;
 };
+// a curve whose length is asked for, scaled to fit, with the straight chord between its ends
+function arcPic(param, f, a, b) {
+  const s = +fitScale(f, a, b).toFixed(4), P = (u) => f(u).map((v) => +(v * s).toFixed(4));
+  return {
+    type: 'calc-vectors3d',
+    params: {
+      range: 3,
+      curves: [{ param: param.map((p) => `${s}*(${p})`), t: [a, b], color: 'accent', width: 2.6 }],
+      segments: [{ from: P(a), to: P(b), color: 'ink3', dash: true }],
+      points: [{ at: P(a), color: 'gold' }, { at: P(b), color: 'gold' }],
+    },
+    caption: 'Drag to rotate. The curve (blue), scaled down to fit, and the straight chord between its ends (dashed).',
+  };
+}
 
 export default lesson({
   id: 'math2210.C3-2.3',
@@ -111,14 +125,13 @@ A circle of radius $R$ has $\kappa = 1/R$ everywhere; a straight line has $\kapp
         const F = r.pick(ARC), b = r.pick(F.bs), a = F.a, L = F.L(a, b);
         const chord = norm(sub(F.f(b), F.f(a)));
         const errors = distinct(L, [{ value: chord, feedback: 'That is the straight-line distance between the endpoints. The curve is longer than its chord: integrate the speed along the way.' }]);
-        const s = nice(fitScale(F.f, a, b), 3);
         return {
           prompt: t`Find the length of the curve $\vec r(t) = ${F.tex}$ for $${a} \le t \le ${b}$. Give 3 significant figures.`,
           answer: L, tol: { rel: 0.005 }, errors,
           hints: [F.hint, t`$L = ${F.int.replace('A', a).replace('B', b)}$.`],
           teach: 'Arc length is the integral of the speed |r′(t)| over the parameter interval.',
           explain: t`$L = ${F.int.replace('A', a).replace('B', b)} = ${nice(L, 4)}$. For comparison, the straight chord between the endpoints is only $${nice(chord, 4)}$.`,
-          visual: { type: 'c3-curve', params: { curve: { param: F.param.map((p) => `${s}*(${p})`), t: [a, b] }, at: b, fixed: true, show: [], readouts: [] }, caption: 'Drag to rotate. The curve from the start to the gold end point, scaled down to fit.' },
+          visual: arcPic(F.param, F.f, a, b),
         };
       },
     }),
@@ -248,14 +261,13 @@ A circle of radius $R$ has $\kappa = 1/R$ everywhere; a straight line has $\kapp
         const b = r.pick([1, 1.5, 2, 2.5]), L = Math.exp(b) - Math.exp(-b);
         const f = (u) => [Math.SQRT2 * u, Math.exp(u), Math.exp(-u)], chord = norm(sub(f(b), f(0)));
         const errors = distinct(L, [{ value: chord, feedback: 'That is the straight-line distance between the endpoints, which is shorter than the curve.' }]);
-        const sc = nice(fitScale(f, 0, b), 3);
         return {
           prompt: t`Find the length of $\vec r(t) = \langle \sqrt2\,t,\ e^t,\ e^{-t}\rangle$ for $0 \le t \le ${b}$, to 3 significant figures.`,
           answer: L, tol: { rel: 0.005 }, errors,
           hints: [t`$|\vec r\,'(t)|^2 = 2 + e^{2t} + e^{-2t}$ — a perfect square.`],
           teach: 'When |r′|² is a perfect square, the arc-length integral becomes elementary.',
           explain: t`$|\vec r\,'(t)|^2 = 2 + e^{2t} + e^{-2t} = (e^t + e^{-t})^2$, so $L = \int_0^{${b}} (e^t + e^{-t})\,dt = e^{${b}} - e^{-${b}} = ${nice(L, 4)}$.`,
-          visual: { type: 'c3-curve', params: { curve: { param: [`${sc}*sqrt(2)*t`, `${sc}*exp(t)`, `${sc}*exp(-t)`], t: [0, b] }, at: b, fixed: true, show: [], readouts: [] }, caption: 'Drag to rotate. The curve, scaled down to fit.' },
+          visual: arcPic(['sqrt(2)*t', 'exp(t)', 'exp(-t)'], f, 0, b),
         };
       },
     }),
@@ -273,7 +285,7 @@ A circle of radius $R$ has $\kappa = 1/R$ everywhere; a straight line has $\kapp
           explain: half
             ? t`At $t = \pi/2$: $\vec r\,' = \langle -${a}, 0, ${c}\rangle$, $\vec r\,'' = \langle 0, -${b}, 0\rangle$, $\vec r\,'\times\vec r\,'' = \langle ${b * c}, 0, ${a * b}\rangle$, so $\kappa = \frac{${b === 1 ? '' : b}\sqrt{${a * a + c * c}}}{(${a * a + c * c})^{3/2}} = \frac{${b}}{${a * a + c * c}} = ${nice(kappa, 3)}$.`
             : t`At $t = 0$: $\vec r\,' = \langle 0, ${b}, ${c}\rangle$, $\vec r\,'' = \langle -${a}, 0, 0\rangle$, $\vec r\,'\times\vec r\,'' = \langle 0, -${a * c}, ${a * b}\rangle$, so $\kappa = \frac{${a}\sqrt{${b * b + c * c}}}{(${b * b + c * c})^{3/2}} = \frac{${a}}{${b * b + c * c}} = ${nice(kappa, 3)}$.`,
-          visual: { type: 'c3-curve', params: { curve: { param: [`${a}*cos(t)`, `${b}*sin(t)`, `${c}*t`], t: [t0 - 1.6, t0 + 1.6] }, at: t0, fixed: true, show: ['trail', 'T', 'N'], readouts: [], range: 4, target: [0, 0, c * t0] }, caption: 'Drag to rotate. Part of the elliptical helix, to scale, with T and N at the gold point.' },
+          visual: { type: 'c3-curve', params: { curve: { param: [`${a}*cos(t)`, `${b}*sin(t)`, `${c}*t`], t: [t0 - 2.5, t0 + 2.5] }, at: t0, fixed: true, show: ['trail', 'T', 'N'], readouts: [], range: 4, yaw: 1.1, target: [0, 0, c * t0] }, caption: 'Drag to rotate. Part of the elliptical helix, to scale, with T and N at the gold point.' },
         };
       },
     }),
@@ -292,7 +304,7 @@ A circle of radius $R$ has $\kappa = 1/R$ everywhere; a straight line has $\kapp
           hints: [t`For a plane curve $\kappa = d\varphi/ds$: the direction angle turns at the rate $\kappa$ per metre.`, t`$\varphi(s) = \int_0^s \frac{u}{A^2}\,du = \frac{s^2}{2A^2}$; set it equal to $${deg}^\circ$ in radians.`],
           teach: 'For a plane curve the tangent’s angle turns at the rate dφ/ds = κ, so the total turn is the integral of κ along the arc.',
           explain: t`$\varphi = \frac{s^2}{2A^2} = ${deg}^\circ = ${nice(phi, 4)}$ rad gives $s = A\sqrt{2\varphi} = ${A}\sqrt{${nice(2 * phi, 4)}} = ${nice(s, 3)}$ m, where the radius of curvature has come down to $A^2/s = ${nice((A * A) / s, 3)}$ m. Because $\kappa$ grows steadily, a driver turns the wheel at a steady rate — and on a railway the cant can be ramped in evenly.`,
-          visual: { type: 'c3-curve', params: { curve: { param: clothoid(A), t: [0, 1.9 * A] }, at: 1.3 * A, fixed: true, plane: 'xy', show: ['trail', 'T', 'circle'], readouts: [], xlabel: 'x (m)', ylabel: 'y (m)' }, caption: `The transition curve leaving the straight along the x-axis, for its first ${nice(1.9 * A, 3)} m, with the osculating circle at one point: it shrinks as the track runs on.` },
+          visual: { type: 'c3-curve', params: { curve: { param: clothoid(A), t: [0, 1.9 * A] }, at: 1.75 * A, fixed: true, plane: 'xy', show: ['trail', 'T', 'circle'], readouts: [], x: [-0.15 * A, 1.75 * A], y: [-0.15 * A, 1.45 * A], xlabel: 'x (m)', ylabel: 'y (m)' }, caption: `The transition curve leaving the straight along the x-axis, for its first ${nice(1.9 * A, 3)} m, with the osculating circle near its end, where the track has turned through about 88°.` },
         };
       },
     }),
