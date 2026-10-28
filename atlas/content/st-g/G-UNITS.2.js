@@ -29,7 +29,7 @@ const OBJ = [
   ['proton (ħ/mc)', Math.log10(1.67262192e-27), Math.log10(HBAR / (1.67262192e-27 * C)), 8, 12],
   ['Planck mass', Math.log10(MPL), Math.log10(LP), 10, 4],
   ['Earth', Math.log10(5.9722e24), Math.log10(6.371e6), -8, -8, 'right'],
-  ['Sun', Math.log10(MSUN), Math.log10(6.957e8), -8, -8, 'right'],
+  ['Sun', Math.log10(MSUN), Math.log10(6.957e8), 8, 14],
   ['Sgr A* (horizon)', Math.log10(4.3e6 * MSUN), Math.log10(2 * G * 4.3e6 * MSUN / (C * C)), -8, -8, 'right'],
 ];
 
@@ -37,7 +37,7 @@ const OBJ = [
 function map({ mark = null, sliders = null, readouts = null, density = null, vlines = null, caption }) {
   const curves = [
     { fn: `x + ${r6(L2G)}`, color: 'bad', width: 1.8, label: 'horizon: R = 2GM/c²', labelAt: 18, labelDx: 10, labelDy: 14 },
-    { fn: `${r6(LHC)} - x`, color: 'violet', width: 1.8, label: 'quantum: ħ/Mc', labelAt: -24, labelDx: 10, labelDy: 0 },
+    { fn: `${r6(LHC)} - x`, color: 'violet', width: 1.8, label: 'quantum: ħ/Mc', labelAt: -14, labelDx: 10, labelDy: 0 },
   ];
   if (density) curves.push({ fn: `(x + ${r6(Math.log10(3 / (4 * Math.PI * density.rho)))})/3`, color: 'gold', dash: true, width: 1.6, label: density.label, labelAt: density.at ?? 10, labelDx: -4, labelDy: -10, labelAlign: 'right' });
   return {
@@ -79,9 +79,9 @@ $$\ell_P = \sqrt{\frac{\hbar G}{c^3}} = 1.616\times10^{-35}\ \text{m}, \qquad m_
       vlines: [{ x: 'm', color: 'gold', label: 'your mass' }],
       readouts: [
         { label: t`$M$`, expr: '10^m', digits: 3, unit: t`\text{kg}` },
-        { label: t`horizon radius $2GM/c^2$`, expr: `10^(m + ${r6(L2G)})`, digits: 3, unit: t`\text{m}` },
-        { label: t`quantum length $\hbar/Mc$`, expr: `10^(${r6(LHC)} - m)`, digits: 3, unit: t`\text{m}` },
-        { label: t`ratio $= 2(M/m_P)^2$`, expr: `10^(2*m + ${r6(L2G - LHC)})`, digits: 3 },
+        { label: t`$\log_{10}$ of the horizon radius $2GM/c^2$ in m`, expr: `m + ${r6(L2G)}`, digits: 3 },
+        { label: t`$\log_{10}$ of the quantum length $\hbar/Mc$ in m`, expr: `${r6(LHC)} - m`, digits: 3 },
+        { label: t`$\log_{10}$ of their ratio, $2(M/m_P)^2$`, expr: `2*m + ${r6(L2G - LHC)}`, digits: 3 },
       ],
     }),
     title: 'Where gravity meets the quantum',
@@ -89,7 +89,7 @@ $$\ell_P = \sqrt{\frac{\hbar G}{c^3}} = 1.616\times10^{-35}\ \text{m}, \qquad m_
     tasks: [
       t`At an electron’s mass the horizon radius is about $10^{-57}$ m — some $10^{44}$ times smaller than its quantum wavelength. Gravity is irrelevant to single particles.`,
       t`At the Sun’s mass the order reverses by an even larger factor: quantum fuzz is irrelevant to stars.`,
-      t`Near $10^{-7.7}$ kg (the default) the ratio is about 1. Particles sit on the violet line and stars and planets far above the red one; nothing known sits at the crossing.`,
+      t`Near $10^{-7.7}$ kg (the default) the two lengths are about equal: the logarithm of their ratio is near 0. Particles sit on the violet line and stars and planets far above the red one; nothing known sits at the crossing.`,
     ],
   },
   example: {

@@ -19,7 +19,7 @@ function cvGraph({ T = null, n2 = true, marks = true, sliders, readouts, caption
   return {
     type: 'graph',
     params: {
-      x: [1, 4], y: [1, 4], aspect: 'wide', xlabel: 'temperature T (K, log scale)', ylabel: 'Cᵥ / R per molecule-mole', xlog: true, axesAt: 'edge',
+      x: [1, 4], y: [1, 4], aspect: 'wide', xlabel: 'temperature T (K, log scale)', ylabel: 'molar Cᵥ / R', xlog: true, axesAt: 'edge',
       hlines: [{ y: 1.5, label: '3/2: translation', color: 'ink3' }, { y: 2.5, label: '5/2: + rotation', color: 'ink3' }, { y: 3.5, label: '7/2: + vibration', color: 'ink3' }],
       curves, vlines, ...(sliders ? { sliders } : {}), ...(readouts ? { readouts } : {}),
       alt: alt || 'The molar heat capacity of hydrogen rising in steps as rotation and vibration switch on',
@@ -165,7 +165,7 @@ A monatomic gas has $f = 3$; a diatomic one adds 2 rotations; a vibration adds 2
     num({
       id: 'theta-vib', difficulty: 2,
       gen(r) {
-        const [name, nu] = r.pick([['nitrogen, N₂', 2329.9], ['oxygen, O₂', 1556.4], ['carbon monoxide, CO', 2143.3], ['hydrogen, H₂', 4161.2]]);
+        const [name, nu] = r.pick([['nitrogen (N₂)', 2329.9], ['oxygen (O₂)', 1556.4], ['carbon monoxide (CO)', 2143.3], ['hydrogen (H₂)', 4161.2]]);
         const th = nu * HCK;
         return {
           prompt: t`The vibrational quantum of ${name} is measured in its infrared or Raman spectrum as $${nu}\ \text{cm}^{-1}$, meaning $\Delta E = hc\tilde\nu$ with $\tilde\nu$ in cm⁻¹. What is $\theta_\text{vib} = \Delta E/k$?`,
@@ -174,7 +174,7 @@ A monatomic gas has $f = 3$; a diatomic one adds 2 rotations; a vibration adds 2
           hints: [t`$\theta = hc\tilde\nu/k$, and $hc/k = 1.4388$ cm·K.`],
           teach: t`$hc/k = 1.4388$ cm·K turns a spectroscopic wavenumber straight into a temperature.`,
           explain: t`$\theta_\text{vib} = 1.4388 \times ${nu} = ${Math.round(th)}$ K — so at room temperature this vibration is frozen.`,
-          visual: { type: 'graph', params: { x: [0, 4], y: [0, 3.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ fn: '0.9*(x - 2)^2', color: 'accent', domain: [0.2, 3.8] }, ...[0, 1, 2].map((v) => ({ param: [`2 - ${r4(Math.sqrt((v + 0.5) * 0.8 / 0.9))} + 2*${r4(Math.sqrt((v + 0.5) * 0.8 / 0.9))}*t`, String(r4((v + 0.5) * 0.8))], t: [0, 1], color: 'gold', width: 2 }))], points: [{ x: 3.15, y: 0.4, r: 0.01, color: 'gold', label: 'v = 0', labelDx: 4 }, { x: 3.3, y: 1.2, r: 0.01, color: 'gold', label: 'v = 1', labelDx: 4 }, { x: 3.45, y: 2.0, r: 0.01, color: 'gold', label: 'v = 2', labelDx: 4 }], arrows: [{ from: [1.6, 0.4], to: [1.6, 1.2], color: 'bad', label: 'ΔE = hcν̃', labelDx: -86, labelDy: 0 }] }, caption: 'A vibration’s levels in its potential well, evenly spaced by ΔE (harmonic approximation; schematic).' },
+          visual: { type: 'graph', params: { x: [0, 4], y: [0, 3.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ fn: '0.9*(x - 2)^2', color: 'accent', domain: [0.2, 3.8] }, ...[0, 1, 2].map((v) => ({ param: [`2 - ${r4(Math.sqrt((v + 0.5) * 0.8 / 0.9))} + 2*${r4(Math.sqrt((v + 0.5) * 0.8 / 0.9))}*t`, String(r4((v + 0.5) * 0.8))], t: [0, 1], color: 'gold', width: 2 }))], points: [{ x: 3.15, y: 0.4, r: 0.01, color: 'gold', label: 'v = 0', labelDx: 4 }, { x: 3.3, y: 1.2, r: 0.01, color: 'gold', label: 'v = 1', labelDx: 4 }, { x: 3.45, y: 2.0, r: 0.01, color: 'gold', label: 'v = 2', labelDx: 4 }], arrows: [{ from: [2, 0.4], to: [2, 1.2], color: 'bad', label: 'ΔE = hcν̃', labelDx: 8, labelDy: 22 }] }, caption: 'A vibration’s levels in its potential well, evenly spaced by ΔE (harmonic approximation; schematic).' },
         };
       },
     }),
