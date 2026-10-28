@@ -97,6 +97,7 @@ export default [
   { id: 'vectors3d', title: 'Vectors, lines and planes in 3D', track: 'math', blurb: 'Turn vectors, planes and lines in 3D: components, cross products, orbital planes.', lesson: 'math1220.C2-7.4' },
   { id: 'polar', title: 'Polar curves and the area they sweep', track: 'math', blurb: 'Roses, cardioids and spirals traced by a turning ray; thin wedges add up to ½∫r²dθ.', lesson: 'math1220.C2-6.4' },
   { id: 'revolve', title: 'Solids of revolution', track: 'math', blurb: 'Sweep a flat region around an axis into a solid; see its disks, washers and shells.', lesson: 'math1220.C2-1.2' },
+  { id: 'basis-covector', title: 'Vectors, covectors and a basis you can drag', track: 'gr', blurb: 'One arrow, one stack of lines and a basis you can drag: the components change, but the arrow and the number of lines it crosses do not.', lesson: 'st-a.A2.1' },
   { id: 'light-clock', title: 'Light clocks and time dilation', track: 'gr', blurb: 'Two identical clocks, one moving: same light speed, longer path, slower ticks.', spec: { type: 'gr-light-clock', params: {} } },
   { id: 'coordinates', title: 'Coordinates are labels', track: 'gr', blurb: 'One flat plane, three sets of labels: lengths agree, components don’t, the grid turns.', spec: { type: 'gr-coordinates', params: {} } },
   { id: 'sphere-transport', title: 'Parallel transport on a sphere', track: 'gr', blurb: 'Carry an arrow round a loop on a sphere without turning it — it comes back turned by the enclosed area.', spec: { type: 'gr-sphere-transport', params: {} } },

@@ -126,14 +126,15 @@ export function board(M, { cross = null, ring = [], signs = false, caption, dim 
   const points = [];
   M.forEach((row, i) => row.forEach((v, j) => {
     const faint = struck(i, j) || dim.some(([a, b]) => a === i && b === j);
-    points.push({ x: X(j), y: Y(i), r: 0, label: plain(v), labelAlign: 'center', labelDx: 0, labelDy: 0, color: faint ? 'ink4' : 'ink' });
+    points.push({ x: X(j), y: Y(i), r: 0, label: plain(v), labelAlign: 'center', labelDx: 0, labelDy: 0, color: faint ? 'ink3' : 'ink' });
     if (signs) points.push({ x: X(j) + 0.32, y: Y(i) + 0.22, r: 0, label: (i + j) % 2 ? '−' : '+', labelAlign: 'center', labelDx: 0, labelDy: 0, color: (i + j) % 2 ? 'bad' : 'good' });
   }));
   for (const [i, j] of ring) points.push({ x: X(j), y: Y(i), r: 15, color: 'gold' }, { x: X(j), y: Y(i), r: 12.5, color: 'panel' }, { x: X(j), y: Y(i), r: 0, label: plain(M[i][j]), labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink' });
-  const curves = [];
+  const curves = [], shade = [];
   if (cross) {
-    curves.push({ param: [`t`, `${Y(cross[0])}`], t: [-0.45, X(m - 1) + 0.45], color: 'bad', width: 2.5, dash: [6, 4] });
-    curves.push({ param: [`${X(cross[1])}`, `t`], t: [-0.4, Y(0) + 0.4], color: 'bad', width: 2.5, dash: [6, 4] });
+    // translucent bands over the deleted row and column, so their entries stay readable
+    shade.push({ fn: `${Y(cross[0]) + 0.28}`, lower: `${Y(cross[0]) - 0.28}`, from: -0.45, to: X(m - 1) + 0.45, color: 'bad', alpha: 0.2 });
+    shade.push({ fn: `${Y(0) + 0.38}`, lower: `${Y(n - 1) - 0.38}`, from: X(cross[1]) - 0.3, to: X(cross[1]) + 0.3, color: 'bad', alpha: 0.2 });
   }
   // brackets
   const top = Y(0) + 0.45, bot = -0.45, L = -0.6, R = X(m - 1) + 0.6;
@@ -147,7 +148,7 @@ export function board(M, { cross = null, ring = [], signs = false, caption, dim 
   const cx = (L + R) / 2, cy = (top + bot) / 2;
   return {
     type: 'graph',
-    params: { x: [cx - 2 * half, cx + 2 * half], y: [cy - half, cy + half], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, points, curves },
+    params: { x: [cx - 2 * half, cx + 2 * half], y: [cy - half, cy + half], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, points, curves, shade },
     caption: caption || 'The matrix, entry by entry.',
   };
 }

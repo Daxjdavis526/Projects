@@ -88,10 +88,10 @@ Now nothing is promised. The general solution still has two constants, but they 
       id: 'count', difficulty: 2,
       gen(r) {
         const [L, LT] = r.pick(LS), B = r.pick([0, 1, 3]);
-        const s2 = Math.sin(2 * L), zero = Math.abs(s2) < 1e-9;
+        const s2 = Math.sin(2 * L), zero = Math.abs(s2) < 1e-9, s3 = zero ? '0' : nice(+s2.toPrecision(3));
         const ans = !zero ? 0 : B === 0 ? 2 : 1;
         const WHY = {
-          0: { 1: t`$\sin(2\cdot${LT}) = ${n(s2)} \ne 0$, so $c_2 = ${B}/${n(s2)}$ fits the far end.`, 2: t`Since $\sin 2L \ne 0$, only one value of $c_2$ satisfies $c_2\sin 2L = ${B}$.` },
+          0: { 1: t`$\sin(2\cdot${LT}) = ${s3} \ne 0$, so $c_2 = ${B}/${s3}$ fits the far end.`, 2: t`Since $\sin 2L \ne 0$, only one value of $c_2$ satisfies $c_2\sin 2L = ${B}$.` },
           1: { 0: t`Solving $c_2\sin 2L = ${B}$ needs $\sin 2L \ne 0$, and here $\sin(2\cdot${LT}) = 0$.`, 2: t`$c_2\cdot 0 = ${B}$ holds for no $c_2$, let alone all of them.` },
           2: { 0: t`$\sin(2\cdot${LT}) = 0$, so $c_2\cdot 0 = 0$ holds for **every** $c_2$, not just one.`, 1: t`$c_2\cdot 0 = 0$ is true for every $c_2$: each $c_2\sin 2x$ is a solution.` },
         };
@@ -102,7 +102,7 @@ Now nothing is promised. The general solution still has two constants, but they 
           answer: ans, why,
           hints: [t`Every solution with $y(0) = 0$ is $c\sin 2x$.`, t`Evaluate $\sin 2L$ at $L = ${LT}$: can $c\sin 2L$ equal ${B}?`],
           teach: t`Fit the general solution to both boundary conditions: the count depends on whether the homogeneous problem has a nonzero solution.`,
-          explain: t`$y = c\sin 2x$ and $\sin(2\cdot${LT}) = ${n(s2)}$. ${!zero ? t`So $c = ${B}/${n(s2)}$: exactly one solution${B === 0 ? ', the zero function' : ''}.` : B === 0 ? t`So $c\cdot 0 = 0$ holds for every $c$: infinitely many solutions, $c\sin 2x$.` : t`So $c\cdot 0 = ${B}$ is impossible: no solution.`}`,
+          explain: t`$y = c\sin 2x$ and $\sin(2\cdot${LT}) = ${s3}$. ${!zero ? t`So $c = ${B}/${s3}$: exactly one solution${B === 0 ? ', the zero function' : ''}.` : B === 0 ? t`So $c\cdot 0 = 0$ holds for every $c$: infinitely many solutions, $c\sin 2x$.` : t`So $c\cdot 0 = ${B}$ is impossible: no solution.`}`,
           visual: shots(2, 3.3, [2, 1, -1.5], t`Solutions of $y'' + 4y = 0$ with $y(0) = 0$: the family $c\sin 2x$, for three values of $c$.`, null, 1.3),
         };
       },
@@ -218,7 +218,7 @@ Now nothing is promised. The general solution still has two constants, but they 
           hints: [t`With $k^2 = P/(EI)$ the equation is $y'' + k^2y = 0$; $y(0) = 0$ leaves $y = c\sin kx$.`, t`A bent solution needs $\sin kL = 0$ with $c \ne 0$: the smallest is $kL = \pi$, so $P = \pi^2EI/L^2$.`],
           teach: 'Buckling is a boundary-value problem gaining a nonzero solution: the load at which the straight shape stops being the only one.',
           explain: t`$P_\text{cr} = \dfrac{\pi^2EI}{L^2} = \dfrac{\pi^2\times${E}\times10^9\times${I}\times10^{-7}}{${L}^2} = ${fmt(P, 3)}$ kN. Below it only $y = 0$ satisfies both ends; at it, $c\sin(\pi x/${L})$ does for any $c$ — the linear model cannot say how far it bends, only that it can. Real struts with small imperfections fail somewhat below this load.`,
-          visual: fpic(null, [-0.2, L + 0.2], [-0.5, 0.5], t`The strut’s two pinned ends, where $y = 0$. The question is whether any shape other than the straight line can join them. (Deflection would be exaggerated.)`, { xlabel: 'x (m)', ylabel: 'y', curves: [{ fn: '0', color: 'ink2', width: 3, domain: [0, L] }], points: [{ x: 0, y: 0, color: 'gold', r: 6, label: 'pin', labelDx: 8, labelDy: -12 }, { x: L, y: 0, color: 'gold', r: 6, label: 'pin', labelDx: -30, labelDy: -12 }], arrows: [{ from: [-0.15, 0.25], to: [0, 0.02], color: 'bad', label: 'P', labelDx: -14, labelDy: -6 }, { from: [L + 0.15, 0.25], to: [L, 0.02], color: 'bad' }] }),
+          visual: fpic(null, [-0.5, L + 0.5], [-0.5, 0.5], t`The strut’s two pinned ends, where $y = 0$. The question is whether any shape other than the straight line can join them. (Deflection would be exaggerated.)`, { xlabel: 'x (m)', ylabel: 'y', curves: [{ fn: '0', color: 'ink2', width: 3, domain: [0, L] }], points: [{ x: 0, y: 0, color: 'gold', r: 6, label: 'pin', labelDx: 8, labelDy: -12 }, { x: L, y: 0, color: 'gold', r: 6, label: 'pin', labelDx: -30, labelDy: -12 }], arrows: [{ from: [-0.45, 0], to: [-0.04, 0], color: 'bad', label: 'P', labelDx: -30, labelDy: -12 }, { from: [L + 0.45, 0], to: [L + 0.04, 0], color: 'bad', label: 'P', labelDx: 18, labelDy: -12 }] }),
         };
       },
     }),

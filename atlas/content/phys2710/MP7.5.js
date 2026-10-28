@@ -20,7 +20,8 @@ NH3.f = NH3.dE / (H_EVFS * 1e-15) / 1e9;                            // GHz
 /** |ψ|² = (4/a³)x²e^{−2x/a} for x > 0 (a in nm), with optional marks. */
 const lopsided = (a, marks = [], caption) => density({
   fn: `4*x^2*exp(-2*x/${a})/${r6(a ** 3)}`, x: [0, r6(6 * a)], y: [0, r6(0.7 / a)], xlabel: 'x (nm)',
-  vlines: marks.map((m) => ({ x: r6(m.x * a), label: m.text, color: m.color })),
+  curves: marks.map((m) => seg(m.x * a, 0, m.x * a, 0.66 / a, m.color, 1.6, [5, 4])),
+  points: marks.map((m, i) => label(m.x * a, 0.66 / a, m.text, m.color, i ? 6 : -6, 0, i ? 'left' : 'right')),
   caption: caption ?? t`The probability density of $\psi(x) = 2a^{-3/2}\,x\,e^{-x/a}$ for $x > 0$ (zero for $x < 0$), with $a = ${a}$ nm. It rises from zero, peaks, and has a long tail to the right.`,
 });
 
@@ -31,7 +32,7 @@ const twoWays = {
     x: [0, 1], y: [-0.7, 1.75], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [seg(0, -0.2, 0, 1.5, 'ink2', 2.4), seg(1, -0.2, 1, 1.5, 'ink2', 2.4), { fn: 'sin(pi*x)', domain: [0, 1], color: 'violet', width: 2.4 }],
     arrows: [{ from: [0.35, 1.3], to: [0.65, 1.3], color: 'accent', width: 2 }, { from: [0.65, -0.35], to: [0.35, -0.35], color: 'warn', width: 2 }],
-    points: [label(0.5, 1.3, 'half the wave moves right: p = +ħk', 'accent', 0, -13, 'center'), label(0.5, -0.35, 'half moves left: p = −ħk', 'warn', 0, 15, 'center'), label(0.5, 1, 'ψ = sin kx = (e^(ikx) − e^(−ikx))/2i', 'violet', 0, 18, 'center')],
+    points: [label(0.5, 1.3, 'half the wave moves right: p = +ħk', 'accent', 0, -13, 'center'), label(0.5, -0.35, 'half moves left: p = −ħk', 'warn', 0, 15, 'center'), label(0.5, 0.45, 'ψ = sin kx = (e^(ikx) − e^(−ikx))/2i', 'violet', 0, 0, 'center')],
   },
   caption: 'The ground state of a box is a standing wave: the sum of a wave moving right and an equal one moving left. Schematic.',
 };
@@ -116,7 +117,7 @@ The spreads are standard deviations, $\Delta x = \sqrt{\langle x^2\rangle - \lan
         const a = 0.5, base = lopsided(a, [{ x: 1, text: 'most probable', color: 'gold' }, { x: 1.5, text: '⟨x⟩', color: 'violet' }], 'The probability density of a lopsided state (a = 0.5 nm), with its peak and its expectation value marked, and the results of 60 position measurements (gold dots). The dots are a random draw from |ψ|².');
         const xs = samples((x) => 4 * x * x * Math.exp(-2 * x / a) / a ** 3, 0, 3, 60, 5);
         base.params.y = [-0.35, r6(0.7 / a + 0.05)];
-        base.params.points = xs.map((x, i) => ({ x: r6(x), y: r6(-0.1 - 0.1 * (i % 2)), r: 2.6, color: 'gold' }));
+        base.params.points = [...base.params.points, ...xs.map((x, i) => ({ x: r6(x), y: r6(-0.1 - 0.1 * (i % 2)), r: 2.6, color: 'gold' }))];
         return base;
       })(),
     }),
@@ -178,12 +179,12 @@ The spreads are standard deviations, $\Delta x = \sqrt{\langle x^2\rangle - \lan
       answer: 0,
       why: {
         1: t`A particle at rest would have $\Delta p = 0$ and infinite $\Delta x$. In the box $\langle p^2\rangle = (\pi\hbar/L)^2 \ne 0$: it is moving, in both directions.`,
-        2: 'It can be measured: each measurement gives a value near +πħ/L or −πħ/L (spread out by the box’s finite size), equally often.',
+        2: 'It can be measured: the results scatter on both sides of zero, positive and negative equally often, with spread Δp = πħ/L.',
         3: 'In a stationary state nothing changes on average; the walls reverse the motion, they do not remove it.',
       },
       hints: [t`Write $\sin kx$ as a sum of $e^{ikx}$ and $e^{-ikx}$. What momentum does each carry?`],
       teach: 'A zero average momentum is equal amounts of opposite momenta — not stillness.',
-      explain: t`$\sin kx = (e^{ikx} - e^{-ikx})/2i$: equal parts of momentum $+\hbar k$ and $-\hbar k$, which average to zero. The kinetic energy $\langle p^2\rangle/2m = E_1$ is not zero — that is the zero-point energy.`,
+      explain: t`Inside the box $\sin kx = (e^{ikx} - e^{-ikx})/2i$: equal parts moving right ($+\hbar k$) and left ($-\hbar k$), which average to zero. (The walls cut both waves off, which smears the momenta so much that individual results scatter widely around zero.) The kinetic energy $\langle p^2\rangle/2m = E_1$ is not zero — that is the zero-point energy.`,
       visual: twoWays,
     }),
     num({
@@ -301,13 +302,13 @@ print("<x> =", mx, " dx =", dx, " <p> =", mp, " dp =", dp, " dx*dp =", dx * dp)`
     }),
     num({
       id: 'cp-ammonia', difficulty: 3, transfer: true,
-      prompt: t`In an ammonia molecule, NH₃, the nitrogen atom sits on one side or the other of the plane of the three hydrogens: a double well. Tunnelling through the barrier between the sides splits each level into a pair, $\Delta E = ${tex(NH3.dE, 4)}$ eV apart. A molecule prepared on one side is the superposition $(\psi_\text{even} + \psi_\text{odd})/\sqrt2$, and its $\langle z\rangle$ swings from side to side at the frequency $f = \Delta E/h$. What is $f$, in GHz?`,
+      prompt: t`In an ammonia molecule, NH₃, the nitrogen atom sits on one side or the other of the plane of the three hydrogens: a double well. Tunnelling through the barrier between the sides splits each level into a pair; for the rotational state used in the first clocks the pair is $\Delta E = ${tex(NH3.dE, 4)}$ eV apart. A molecule prepared on one side is the superposition $(\psi_\text{even} + \psi_\text{odd})/\sqrt2$, and its $\langle z\rangle$ swings from side to side at the frequency $f = \Delta E/h$. What is $f$, in GHz?`,
       answer: NH3.f, units: 'GHz', tol: { rel: 0.005 },
       errors: [{ value: NH3.f * 2 * Math.PI, feedback: t`Use $h = 4.136\times10^{-15}$ eV s, not $\hbar$: $f = \Delta E/h$.` }],
       hints: [t`$f = \Delta E/h$ with $h = 4.136\times10^{-15}$ eV s.`, t`$f = ${tex(NH3.dE, 4)}/4.1357\times10^{-15}$ Hz; divide by $10^9$ for GHz.`],
       teach: 'A two-state superposition oscillates at (E₂ − E₁)/h — the frequency an atomic clock counts.',
       explain: t`$f = ${tex(NH3.dE, 4)}/${tex(4.135667696e-15, 5)} = ${fmt(NH3.f, 4)}$ GHz, a microwave frequency. Microwaves at exactly this frequency drive the inversion, and in 1949 the US National Bureau of Standards locked an oscillator to this ammonia line: the first atomic clock. In 1954 Townes used the same transition for the maser, forerunner of the laser.`,
-      visual: well({ well: 'double', L: 1.4, w: 0.12, V0: 2, n: 1, super: [1, 2], show: 'prob', play: false }, 'A double well (top) with its lowest pair of levels (gold) and the superposition of the pair (bottom), localised on one side. A model double well for an electron, not ammonia’s actual potential: the nitrogen’s levels are far more closely spaced.'),
+      visual: well({ well: 'double', L: 1.6, w: 0.2, V0: 3, n: 1, super: [1, 2], show: 'prob', play: false, hide: ['energy'] }, 'A double well (top) with its lowest pair of levels (gold) and the superposition of the pair (bottom), localised on one side. A model double well for an electron, not ammonia’s actual potential: the nitrogen’s levels are far more closely spaced.'),
     }),
   ],
   sources: [

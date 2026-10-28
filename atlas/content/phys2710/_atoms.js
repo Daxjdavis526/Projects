@@ -29,7 +29,7 @@ export const KALPHA1 = {
   21: 4.0906, 22: 4.51084, 23: 4.95220, 24: 5.41472, 25: 5.89875, 26: 6.40384, 27: 6.93032, 28: 7.47815, 29: 8.04778, 30: 8.63886,
   31: 9.25174, 32: 9.88642, 33: 10.54372, 34: 11.2224, 35: 11.9242, 36: 12.649, 37: 13.3953, 38: 14.1650, 39: 14.9584, 40: 15.7751,
   41: 16.6151, 42: 17.47934, 44: 19.2792, 45: 20.2161, 46: 21.1771, 47: 22.16292, 48: 23.1736, 50: 25.2713,
-  74: 59.31824, 79: 68.8037, 82: 74.9694,
+  49: 24.2097, 51: 26.3591, 56: 32.1936, 74: 59.31824, 78: 66.832, 79: 68.8037, 82: 74.9694,
 };
 // ---- K absorption edges, keV (Bearden & Burr 1967 via the X-ray Data Booklet)
 export const K_EDGE = { 26: 7.11198, 27: 7.70895, 28: 8.33328, 29: 8.97903, 39: 17.0384, 40: 17.9976, 41: 18.9856, 42: 19.9995 };
@@ -155,5 +155,48 @@ export function bars(items, { ylabel = '', ymax, caption, digits = 3, unit = '' 
     type: 'graph',
     params: { x: [-0.2, items.length + 0.2], y: [0, r6(top)], aspect: 'wide', xticks: 0, xlabel: '', ylabel, axesAt: 'edge', grid: false, shade, points },
     caption,
+  };
+}
+
+/**
+ * The X-ray levels of a heavy atom (a graph, schematic, not to scale): the K,
+ * L and M shells under the ionization limit, a vacancy in K, and arrows for
+ * the Kα (L → K) and Kβ (M → K) lines and the K absorption edge.
+ *   show: any of 'ka', 'kb', 'edge'; ask: a key whose label reads “?”.
+ */
+export function xrayLevels({ show = ['ka', 'kb', 'edge'], ask = null, caption } = {}) {
+  const Y = { K: 0.6, L: 6.4, M: 8.2, top: 9.6 };
+  const curves = [seg(0, Y.K, 6.6, Y.K, 'ink2', 2.4), seg(0, Y.L, 6.6, Y.L, 'ink2', 2.4), seg(0, Y.M, 6.6, Y.M, 'ink2', 2.4), seg(0, Y.top, 6.6, Y.top, 'ink3', 1.2, true)];
+  const points = [
+    label(0, Y.K, 'K shell (n = 1)', 'ink2', -8, 0, 'right'), label(0, Y.L, 'L shell (n = 2)', 'ink2', -8, 0, 'right'),
+    label(0, Y.M, 'M shell (n = 3)', 'ink2', -8, 0, 'right'), label(0, Y.top, 'ionized', 'ink3', -8, 0, 'right'),
+    { x: 0.7, y: Y.K, r: 6, color: 'accent' }, { x: 1.4, y: Y.K, r: 6, color: 'bad' }, label(1.4, Y.K, 'vacancy', 'bad', 0, 16, 'center'),
+  ];
+  const arrows = [];
+  const lab = (k, txt) => (ask === k ? `${txt} = ?` : txt);
+  if (show.includes('ka')) { arrows.push({ from: [2.6, Y.L], to: [2.6, Y.K + 0.2], color: 'gold', width: 2.6 }); points.push(label(2.6, 3.4, lab('ka', 'Kα'), 'gold', 7, 0, 'left')); }
+  if (show.includes('kb')) { arrows.push({ from: [3.9, Y.M], to: [3.9, Y.K + 0.2], color: 'violet', width: 2.6 }); points.push(label(3.9, 4.4, lab('kb', 'Kβ'), 'violet', 7, 0, 'left')); }
+  if (show.includes('edge')) { arrows.push({ from: [5.5, Y.K], to: [5.5, Y.top + 0.4], color: 'accent', width: 2.2 }); points.push(label(5.5, 2.6, lab('edge', 'K edge'), 'accent', 7, 0, 'left')); }
+  return {
+    type: 'graph',
+    params: frame([-4.6, 8.6], [-0.6, 10.4], { aspect: 'wide', equal: false, curves, points, arrows }),
+    caption: caption ?? 'X-ray levels of a heavy atom, schematic and not to scale: in copper the K shell lies 8.98 keV below the ionization limit and the L shell only about 0.93 keV. A vacancy in K (red) is filled from L (the Kα line) or M (Kβ); the K edge is the least energy that can make the vacancy.',
+  };
+}
+
+/**
+ * An X-ray fluorescence spectrum (a graph): Gaussian peaks on a small
+ * background, widths growing as √E like a silicon drift detector’s
+ * (about 130 eV across at 6 keV). peaks: [[keV, height, label, color]].
+ */
+export function xrfSpectrum(peaks, { x = [0, 10], ask = null, caption, numbers = true } = {}) {
+  const w = (E) => r6(0.055 * Math.sqrt(E / 6) + 0.012);
+  const fn = ['0.04*exp(-x/6)', ...peaks.map(([E, h]) => `${r6(h)}*exp(-((x - ${r6(E)})/${w(E)})^2)`)].join(' + ');
+  const top = Math.max(...peaks.map((p) => p[1]));
+  const points = peaks.filter((p) => p[2]).map(([E, h, lab, color]) => label(E, h, ask !== null && Math.abs(E - ask) < 1e-9 ? '?' : lab, color || 'ink2', 0, -12, 'center'));
+  return {
+    type: 'graph',
+    params: { x, y: [0, r6(top * 1.22)], aspect: 'wide', xlabel: 'photon energy (keV)', ylabel: 'counts', yticks: 0, axesAt: 'edge', ...(numbers ? {} : { xticks: 0 }), curves: [{ fn, domain: [r6(x[0] + 0.3), x[1]], color: 'accent', width: 2 }], points },
+    caption: caption ?? 'An X-ray fluorescence spectrum, schematic: peak heights illustrative, widths those of a good silicon drift detector.',
   };
 }

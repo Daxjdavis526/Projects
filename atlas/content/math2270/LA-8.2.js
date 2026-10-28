@@ -53,7 +53,7 @@ Since $\det A^{\mathsf T} = \det A$, everything said about rows holds for column
   visual: {
     type: 'calc-vectors3d',
     title: 'Row operations and the volume of a box',
-    lead: t`The three rows of $A = ${matTeX([[2, 0, 0], [0.5, 1.5, 0], [0.5, 0.5, 1.5]])}$ are the edges of the box; its signed volume is $\det A = 2\times1.5\times1.5 = 4.5$ (the matrix is triangular). Apply row operations and watch the readout.`,
+    lead: t`The three rows of $A = \begin{bmatrix} 2 & 0 & 0 \\ 0.5 & 1.5 & 0 \\ 0.5 & 0.5 & 1.5 \end{bmatrix}$ are the edges of the box; its signed volume is $\det A = 2\times1.5\times1.5 = 4.5$ (the matrix is triangular). Apply row operations and watch the readout.`,
     tasks: [
       'Slide k (R₂ ← R₂ + kR₁): the box shears sideways, but its volume — the determinant — stays 4.5.',
       'Slide s (R₃ ← sR₃): the volume scales by s; at s = 0 the box is flat; for s < 0 the determinant is negative.',
@@ -74,12 +74,12 @@ Since $\det A^{\mathsf T} = \det A$, everything said about rows holds for column
   },
   example: {
     prompt: t`Find $\det A$ for $A = ${matTeX([[2, 0, 1], [3, -1, 4], [1, 0, 5]])}$, then check by elimination.`,
-    visual: board([[2, 0, 1], [3, -1, 4], [1, 0, 5]], { cross: [1, 1], signs: true, caption: 'Column 2 has two zeros, so expand down it. Deleting row 2 and column 2 (dashed) leaves the minor M₂₂. Small signs: the cofactor checkerboard.' }),
+    visual: board([[2, 0, 1], [3, -1, 4], [1, 0, 5]], { cross: [1, 1], signs: true, caption: 'Column 2 has two zeros, so expand down it. Deleting row 2 and column 2 (shaded) leaves the minor M₂₂. Small signs: the cofactor checkerboard.' }),
     steps: [
       { label: 'Choose a line', text: t`Column 2 is $(0, -1, 0)$: two zeros. Expanding down it, only $a_{22} = -1$ contributes: $\det A = a_{22}C_{22}$.` },
       { label: 'The cofactor', text: t`Delete row 2 and column 2: $M_{22} = \det${matTeX([[2, 1], [1, 5]])} = 10 - 1 = 9$. The sign is $(-1)^{2+2} = +$, so $C_{22} = 9$.` },
       { label: 'Multiply', text: t`$\det A = (-1)(9) = -9$.` },
-      { label: 'Check by elimination', text: t`$R_2 \leftarrow R_2 - \tfrac32R_1$ and $R_3 \leftarrow R_3 - \tfrac12R_1$ give $${matTeX([[2, 0, 1], [0, -1, 2.5], [0, 0, 4.5]])}$ — no swaps, and these operations do not change $\det$. Triangular: $2\cdot(-1)\cdot4.5 = -9$. ✓` },
+      { label: 'Check by elimination', text: t`$R_2 \leftarrow R_2 - \tfrac32R_1$ and $R_3 \leftarrow R_3 - \tfrac12R_1$ give $\begin{bmatrix} 2 & 0 & 1 \\ 0 & -1 & 2.5 \\ 0 & 0 & 4.5 \end{bmatrix}$ — no swaps, and these operations do not change $\det$. Triangular: $2\cdot(-1)\cdot4.5 = -9$. ✓` },
       { label: 'Which to use', text: t`Cofactors win when a row or column is mostly zeros. Otherwise eliminate: for a $10\times10$, expansion needs about $10! \approx 3.6$ million products; elimination about 330.` },
     ],
     answer: t`$\det A = -9$.`,
@@ -118,7 +118,7 @@ Since $\det A^{\mathsf T} = \det A$, everything said about rows holds for column
             hints: [t`Delete row ${i + 1} and column ${j + 1}: the minor is $\det${matTeX(sub)}$.`, t`Then apply the checkerboard sign: position $(${i + 1}, ${j + 1})$ has $(-1)^{${i + j + 2}} = ${sgn(i, j)}1$.`],
             teach: t`A cofactor is a minor times the checkerboard sign $(-1)^{i+j}$.`,
             explain: t`$M_{${i + 1}${j + 1}} = \det${matTeX(sub)} = ${M}$ and $C_{${i + 1}${j + 1}} = (-1)^{${i + j + 2}}\cdot${M < 0 ? `(${M})` : M} = ${C}$.`,
-            visual: board(A, { cross: [i, j], signs: true, caption: `Row ${i + 1} and column ${j + 1} struck out (dashed): what is left is the minor. Small signs: the checkerboard.` }),
+            visual: board(A, { cross: [i, j], signs: true, caption: `Row ${i + 1} and column ${j + 1} shaded: what is left is the minor. Small signs: the checkerboard.` }),
           };
         }
         return { prompt: t`For $A = ${matTeX([[1, 2, 3], [4, 5, 6], [7, 8, 10]])}$, find $C_{12}$.`, answer: 2, hints: ['M₁₂ = 40 − 42 = −2.', 'The sign at (1, 2) is −.'], teach: 'Cofactor = sign × minor.', explain: t`$C_{12} = -(-2) = 2$.` };

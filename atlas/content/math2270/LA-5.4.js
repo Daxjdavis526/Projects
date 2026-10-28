@@ -85,7 +85,7 @@ The first is the **rank–nullity theorem**: every input direction either surviv
       id: 'which-space', difficulty: 2,
       prompt: t`Match each subspace of an $m\times n$ matrix $A$ with its description.`,
       left: [t`$C(A)$`, t`$N(A)$`, t`$C(A${T})$`, t`$N(A${T})$`],
-      right: ['every b for which Ax = b has a solution', 'every x with Ax = 0', 'every combination of the rows of A', 'every combination of the rows that equals the zero row', 'every x with Ax = b, for a fixed nonzero b'],
+      right: ['every b for which Ax = b has a solution', 'every x with Ax = 0', 'every combination of the rows of A', 'row weights that combine to zero', 'every x with Ax = b (b ≠ 0)'],
       answer: [0, 1, 2, 3],
       hints: [t`$C$ stands for “column space of”: $C(A${T})$ is the column space of $A${T}$, whose columns are the rows of $A$.`, t`$N(A${T})$ holds $\mathbf y$ with $A${T}\mathbf y = \mathbf 0$, which is $\mathbf y${T}A = \mathbf 0${T}$: weights on the rows that cancel.`],
       teach: 'C(A) and N(Aᵀ) live among the outputs, ℝᵐ; C(Aᵀ) and N(A) among the inputs, ℝⁿ.',
@@ -252,7 +252,7 @@ print(r, len(N), len(LN))
             hints: [t`Self-stresses are $N(A)$, in $\mathbb R^b$ (one entry per bar); mechanisms are $N(A${T})$, in $\mathbb R^d$ (one entry per displacement component).`, t`$\dim N(A) = b - r$ and $\dim N(A${T}) = d - r$.`],
             teach: 'For a truss, the four subspaces have names: self-stresses N(A), mechanisms N(Aᵀ), loads it can carry C(A), compatible stretches C(Aᵀ) — and rank–nullity counts them.',
             explain: t`${ask === 'left' ? t`Mechanisms: $d - r = ${d} - ${rk} = ${mech}$.` : t`Self-stresses: $b - r = ${b} - ${rk} = ${self}$.`} Subtracting the two counts, $s - m = (b - r) - (d - r) = b - d = ${b - d}$ whatever the rank: Maxwell’s 1864 counting rule, in the form Calladine gave it in 1978. A frame with a mechanism can flop (here only to first order: a real finite motion may be blocked); a frame with self-stress can hold locked-in tensions with no load at all, which is how tensegrity structures and pre-tensioned cable nets stay stiff.`,
-            visual: shape(d, b, rk, { hide: [ask], names: { row: 'compatible stretches', null: 'self-stress states', col: 'loads it can carry', left: 'mechanisms' }, titles: [`ℝ${sup(b)}: bar tensions`, `ℝ${sup(d)}: joint forces`], caption: 'The equilibrium matrix’s four subspaces under their structural names. Schematic: square areas ∝ dimensions; the one asked about is marked “?”.' }),
+            visual: shape(d, b, rk, { hide: [ask], names: { row: 'stretches', null: 'self-stresses', col: 'loads carried', left: 'mechanisms' }, titles: [`ℝ${sup(b)}: bar tensions`, `ℝ${sup(d)}: joint forces`], caption: 'The equilibrium matrix’s four subspaces under their structural names. Schematic: square areas ∝ dimensions; the one asked about is marked “?”.' }),
           };
         }
         return { prompt: t`A frame has $d = 4$, $b = 3$ and rank 3. Mechanisms?`, answer: 1, hints: ['d − r.'], teach: 'Count.', explain: t`$4 - 3 = 1$.` };

@@ -70,7 +70,9 @@ export function mount(F, P) {
 
     // sizes: a square's area ∝ its dimension; everything fits under the titles
     const lowMax = Math.max(Math.sqrt(d.null), Math.sqrt(d.left));
-    const k = Math.min(2.6, 7.6 / Math.max(1e-9, Math.sqrt(r) + lowMax));
+    // (a phone's 16:10 canvas is taller in world units, so its squares may grow; each space keeps 9 units of width)
+    const rt = Math.sqrt(r), tall = plot.vy1 - plot.vy0 - (compact ? 2.1 : 1.8);
+    const k = Math.min(compact ? 3.2 : 2.6, tall / Math.max(1e-9, rt + lowMax), 9 / Math.max(1e-9, rt + Math.sqrt(d.null)), 9 / Math.max(1e-9, rt + Math.sqrt(d.left)));
     const side = (key) => (hidden.has(key) ? k * 1.1 : k * Math.sqrt(d[key]));
     const top = plot.vy1 - (compact ? 1.5 : 1.2), bottom = plot.vy0 + 0.35;
     const up = side('row'), low = Math.max(side('null'), side('left'));
@@ -103,19 +105,21 @@ export function mount(F, P) {
         continue;
       }
       plot.path(square(B.O, B.u, B.v, B.s), { close: true, color: col, width: 2, fill: col, fillAlpha: 0.16, dash: hidden.has(key) ? [6, 5] : [] });
-      // labels: inside a big enough square, else beside it on the outer side
+      // labels: inside a big enough square, else just outside it — below a
+      // lower square, above an upper one — clear of the arrows between them
       const c = at(B.O, B.u, B.v, B.s / 2, B.s / 2);
       const px = Math.abs(plot.X(B.s) - plot.X(0));
-      const fs = compact ? 10.5 : 12.5;
-      if (px > (compact ? 62 : 120)) {
+      const fs = compact ? 10.5 : 12;
+      if (px > (compact ? 58 : 92)) {
         if (!compact) plot.text(names[key], c[0], c[1], { color: col, weight: 700, size: fs, align: 'center', dy: -16 });
-        plot.text(sym(key), c[0], c[1], { color: 'ink', weight: 700, size: fs + 0.5, align: 'center', dy: compact ? -7 : 0 });
+        // on a phone a lesson's own name for the subspace replaces its symbol
+        const own = compact && P.names?.[key];
+        plot.text(own ? names[key] : sym(key), c[0], c[1], { color: own ? col : 'ink', weight: 700, size: own ? fs - 0.5 : fs + 0.5, align: 'center', dy: compact ? -7 : 0 });
         plot.text(dimText(key), c[0], c[1], { color: 'ink2', weight: 600, size: fs, align: 'center', dy: compact ? 8 : 16 });
       } else {
-        const edge = at(B.O, B.u, B.v, B.s / 2, B.s);
-        const ax = edge[0] + B.outer * 0.25, al = B.outer < 0 ? 'right' : 'left';
-        if (!compact) plot.text(names[key], ax, edge[1], { color: col, weight: 700, size: fs, align: al, dy: -14 });
-        plot.text(`${sym(key)}  ${dimText(key)}`, ax, edge[1], { color: col, weight: 700, size: fs, align: al, dy: compact ? 0 : 2 });
+        const below = B.u[1] < 0, edge = at(B.O, B.u, B.v, B.s, B.s / 2);
+        const lines = compact ? [`${P.names?.[key] ? names[key] : sym(key)}  ${dimText(key)}`] : [names[key], `${sym(key)}  ${dimText(key)}`];
+        lines.forEach((line, i) => plot.text(line, edge[0], edge[1], { color: i === 0 && !compact ? col : 'ink', weight: 700, size: fs, align: 'center', dy: below ? 12 + 15 * i : -12 - 15 * (lines.length - 1 - i) }));
       }
     }
     // right-angle marks at both origins, and the origins themselves
@@ -156,15 +160,16 @@ export function mount(F, P) {
       if (blocks.null.dim) plot.point(xn[0], xn[1], { color: 'warn', r: 4.5, label: 'xₙ', ldx: -10, ldy: 12, lalign: 'right' });
       plot.point(bpt[0], bpt[1], { color: 'gold', r: 5, label: 'Ax', ldx: 8, ldy: -12 });
     } else if (P.arrows) {
+      // A: row space → column space, across the upper squares (above their labels)
       if (blocks.row.dim && blocks.col.dim) {
-        plot.arrow(xr[0] + 0.15, xr[1], bpt[0] - 0.15, bpt[1], { color: 'gold', width: 2.2 });
-        const mid = [(xr[0] + bpt[0]) / 2, (xr[1] + bpt[1]) / 2];
-        plot.text(compact ? 'A' : 'A: row space onto column space', mid[0], mid[1], { color: 'gold', weight: 700, size: compact ? 11 : 12, align: 'center', dy: -11 });
+        const y = oy + 0.84 * Math.min(blocks.row.s, blocks.col.s);
+        plot.arrow(OL[0] - 0.25 * blocks.row.s, y, OR[0] + 0.25 * blocks.col.s, y, { color: 'gold', width: 2.2 });
+        plot.text(compact ? 'A' : 'A: row space onto column space', 10, y, { color: 'gold', weight: 700, size: compact ? 11 : 12, align: 'center', dy: -11 });
       }
+      // A sends the null space to 0: along the seam between the squares, from the null space to the right-hand origin
       if (blocks.null.dim) {
-        plot.arrow(xn[0] + 0.15, xn[1], OR[0] - 0.15, OR[1] - 0.05, { color: 'warn', width: 1.8, dash: [6, 4] });
-        const mid = [(xn[0] + OR[0]) / 2, (xn[1] + OR[1]) / 2];
-        plot.text(compact ? 'A → 0' : 'A sends it to 0', mid[0], mid[1], { color: 'warn', weight: 650, size: compact ? 10.5 : 12, align: 'center', dy: 12 });
+        plot.arrow(OL[0] + 0.5 * blocks.null.s, oy - Math.min(0.3, 0.2 * blocks.null.s), OR[0] - 0.15, oy - 0.04, { color: 'warn', width: 1.8, dash: [6, 4] });
+        plot.text(compact ? 'A → 0' : 'A sends it to 0', 10, oy, { color: 'warn', weight: 650, size: compact ? 10.5 : 12, align: 'center', dy: -11 });
       }
     }
 

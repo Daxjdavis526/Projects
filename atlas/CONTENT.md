@@ -484,6 +484,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `mech-collide` | 1D and 2D collisions with momentum and kinetic-energy charts, restitution, the centre of mass |
 | `mech-rotor` | a rigid body about a fixed axis: moments of inertia, the parallel-axis theorem, torques with lever arms |
 | `mech-kepler` | Kepler orbits with real data (ISS, GPS, the Moon, Mercury, Halley, S2) and Newton's cannon |
+| `ten-basis` | a 2D vector or a covector (a stack of level lines) against a draggable basis: old-basis ghost, dual basis, components, the pairing as lines crossed; `get('point')` returns the arrow's tip |
 | `gr-light-clock` | two light clocks, one moving: time dilation from the constancy of c |
 | `gr-coordinates` | one flat plane under different coordinate labels: lengths agree, components do not |
 | `gr-sphere-transport` | parallel transport around a loop on a sphere: the arrow returns rotated by area/R² |
