@@ -56,15 +56,15 @@ That rule, applied to the trigonometric functions, gives the derivatives of the 
     ],
     params: {
       x: [-1.8, 1.8], y: [-1.8, 1.8], equal: true,
-      sliders: [{ key: 'p', label: 'Position of P', min: -1.45, max: 1.45, step: 0.01, value: 0.75, unit: t`\text{rad}`, explain: t`The angle $a$ of the point $P = (a, \sin a)$ on the sine; its mirror image is $Q = (\sin a, a)$.` }],
+      sliders: [{ key: 'p', label: 'Position of P', min: -1.45, max: 1.45, step: 0.01, value: 1.2, unit: t`\text{rad}`, explain: t`The angle $a$ of the point $P = (a, \sin a)$ on the sine; its mirror image is $Q = (\sin a, a)$.` }],
       curves: [
-        { fn: 'sin(x)', color: 'accent', domain: [-Math.PI / 2, Math.PI / 2], label: 'sin', labelAt: -1.2, labelDx: 10 },
-        { fn: 'asin(x)', color: 'violet', domain: [-1, 1], label: 'arcsin', labelAt: -0.8, labelDx: -58, labelDy: 4 },
+        { fn: 'sin(x)', color: 'accent', domain: [-Math.PI / 2, Math.PI / 2], label: 'sin', labelAt: -1.2, labelDx: -4, labelDy: 18 },
+        { fn: 'asin(x)', color: 'violet', domain: [-1, 1], label: 'arcsin', labelAt: -0.97, labelDx: 10, labelDy: 6 },
         { fn: 'x', color: 'ink3', dash: true, width: 1.2 },
         { fn: 'sin(p) + cos(p)*(x - p)', color: 'gold', width: 1.8, domain: ['p - 0.45', 'p + 0.45'] },
         { fn: 'p + (x - sin(p))/cos(p)', color: 'gold', width: 1.8, domain: ['sin(p) - 0.45*cos(p)', 'sin(p) + 0.45*cos(p)'] },
       ],
-      points: [{ x: 'p', y: 'sin(p)', color: 'accent', label: 'P' }, { x: 'sin(p)', y: 'p', color: 'violet', label: 'Q' }],
+      points: [{ x: 'p', y: 'sin(p)', color: 'accent', label: 'P', labelDx: 8, labelDy: 18 }, { x: 'sin(p)', y: 'p', color: 'violet', label: 'Q', labelDx: -10, labelAlign: 'right' }],
       readouts: [
         { label: t`slope of sin at P`, expr: 'cos(p)', digits: 4 },
         { label: t`slope of arcsin at Q`, expr: '1/cos(p)', digits: 4 },

@@ -5,7 +5,7 @@
 // gr.S08.i/d (the sphere's metric, its short circles on Earth and Ganymede)
 // without reusing those examples; the saddle is new here.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
-import { nice, fmt } from '../../src/core/format.js';
+import { nice, fmt, tex } from '../../src/core/format.js';
 import { r6 } from './_geom.js';
 
 const t = String.raw;
@@ -84,12 +84,12 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
     visual: saddle(),
     steps: [
       { label: 'Read off the circle', text: t`Along the circle $\rho$ is fixed, so $d\rho = 0$ and $ds = f\,d\phi$. Going once round: $C = 2\pi f(\rho) = 2\pi\times500\sinh(0.6)\ \text{km} = ${nice(2 * Math.PI * 500 * Math.sinh(0.6), 5)}$ km. A plane gives $2\pi\times300 = ${nice(2 * Math.PI * 300, 5)}$ km; a sphere of radius 500 km gives $2\pi\times500\sin(0.6) = ${nice(2 * Math.PI * 500 * Math.sin(0.6), 5)}$ km.` },
-      { label: 'The area', text: t`A thin ring of width $d\rho$ has area $2\pi f(\rho)\,d\rho$ (circumference times width — the metric makes the two directions perpendicular). So $A = \int_0^{\rho}2\pi a\sinh(\rho'/a)\,d\rho' = 2\pi a^2\left[\cosh(\rho/a) - 1\right] = ${nice(2 * Math.PI * 250000 * (Math.cosh(0.6) - 1), 5)}\ \text{km}^2$, against $\pi\rho^2 = ${nice(Math.PI * 90000, 5)}\ \text{km}^2$ flat and $2\pi R^2(1 - \cos 0.6) = ${nice(2 * Math.PI * 250000 * (1 - Math.cos(0.6)), 5)}\ \text{km}^2$ on the sphere.` },
+      { label: 'The area', text: t`A thin ring of width $d\rho$ has area $2\pi f(\rho)\,d\rho$ (circumference times width — the metric makes the two directions perpendicular). So $A = \int_0^{\rho}2\pi a\sinh(\rho'/a)\,d\rho' = 2\pi a^2\left[\cosh(\rho/a) - 1\right] = ${tex(2 * Math.PI * 250000 * (Math.cosh(0.6) - 1), 5)}\ \text{km}^2$, against $\pi\rho^2 = ${tex(Math.PI * 90000, 5)}\ \text{km}^2$ flat and $2\pi R^2(1 - \cos 0.6) = ${tex(2 * Math.PI * 250000 * (1 - Math.cos(0.6)), 5)}\ \text{km}^2$ on the sphere.` },
       { label: 'The curvature', text: t`Gauss showed that for this form of metric $K = -f''/f$. With $f = a\sinh(\rho/a)$, $f'' = \sinh(\rho/a)/a$, so $K = -1/a^2 = -4\times10^{-6}\ \text{km}^{-2}$ — the same at every point. (For the sphere $f'' = -f/R^2$ gives $K = +1/R^2$; for the plane $f'' = 0$.)` },
       { label: 'Triangles', text: t`The Gauss–Bonnet theorem says the angles of a triangle made of straightest lines (geodesics) add up to $\pi + \int K\,dA$. Here that is $\pi - A/a^2 = \pi - 10^4/(2.5\times10^{5}) = \pi - 0.04$ rad: $180° - ${fmt(1e4 / 250000 * DEG, 3)}° = ${fmt(180 - 1e4 / 250000 * DEG, 4)}°$.` },
       { label: 'Sense check', text: t`All the differences shrink as $\rho/a \to 0$: for small circles $C \approx 2\pi\rho\,(1 - K\rho^2/6)$, so a negative $K$ lengthens circles and a positive one shortens them. Nothing here needed a third dimension — the ant computed $K$ from measurements made in its own world.` },
     ],
-    answer: t`$C = ${nice(2 * Math.PI * 500 * Math.sinh(0.6), 4)}$ km (flat ${nice(2 * Math.PI * 300, 4)}, sphere ${nice(2 * Math.PI * 500 * Math.sin(0.6), 4)}); $A = ${nice(2 * Math.PI * 250000 * (Math.cosh(0.6) - 1), 4)}\ \text{km}^2$; $K = -4\times10^{-6}\ \text{km}^{-2}$; the triangle’s angles add to $${fmt(180 - 1e4 / 250000 * DEG, 4)}°$.`,
+    answer: t`$C = ${nice(2 * Math.PI * 500 * Math.sinh(0.6), 4)}$ km (flat ${nice(2 * Math.PI * 300, 4)}, sphere ${nice(2 * Math.PI * 500 * Math.sin(0.6), 4)}); $A = ${tex(2 * Math.PI * 250000 * (Math.cosh(0.6) - 1), 4)}\ \text{km}^2$; $K = -4\times10^{-6}\ \text{km}^{-2}$; the triangle’s angles add to $${fmt(180 - 1e4 / 250000 * DEG, 4)}°$.`,
   },
   practice: [
     num({
@@ -137,7 +137,7 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
           errors: [{ value: Math.PI * rho * rho, feedback: t`That is the flat $\pi\rho^2$. Integrate $2\pi a\sinh(\rho/a)$, not $2\pi\rho$.` }, { value: 2 * Math.PI * a * a * Math.cosh(rho / a), feedback: t`Evaluate between the limits: at $\rho = 0$ the antiderivative is $2\pi a^2\cosh 0 = 2\pi a^2$, which must be subtracted.` }],
           hints: [t`$A = \int_0^{\rho}2\pi a\sinh(\rho'/a)\,d\rho'$.`, t`The antiderivative of $a\sinh(\rho'/a)$ is $a^2\cosh(\rho'/a)$, so $A = 2\pi a^2[\cosh(\rho/a) - 1]$.`],
           teach: 'Area comes from the metric too: rings of circumference 2πf(ρ) and width dρ, added up.',
-          explain: t`$A = 2\pi\times${a}^2\left[\cosh(${fmt(rho / a, 3)}) - 1\right] = ${nice(ans, 4)}\ \text{km}^2$, against $\pi\rho^2 = ${nice(Math.PI * rho * rho, 4)}\ \text{km}^2$ flat: ${nice(ans / (Math.PI * rho * rho), 3)} times as much room.`,
+          explain: t`$A = 2\pi\times${a}^2\left[\cosh(${fmt(rho / a, 3)}) - 1\right] = ${tex(ans, 4)}\ \text{km}^2$, against $\pi\rho^2 = ${tex(Math.PI * rho * rho, 4)}\ \text{km}^2$ flat: ${nice(ans / (Math.PI * rho * rho), 3)} times as much room.`,
         };
       },
     }),
@@ -170,7 +170,7 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
       },
       hints: [t`Compare with the flat value $2\pi\rho$.`, 'Which surface makes circles longer than 2πρ?'],
       teach: 'Circles longer than 2πρ mean negative curvature; shorter mean positive; exactly 2πρ means flat.',
-      explain: t`$5{,}200/(2\pi\times800) = ${fmt(5200 / (2 * Math.PI * 800), 4)} > 1$: the circles grow faster than on a plane, the mark of negative curvature. From $C \approx 2\pi\rho(1 - K\rho^2/6)$, $K \approx ${fmt(-6 * (5200 / (2 * Math.PI * 800) - 1) / 640000, 2)}\ \text{km}^{-2}$, a curvature radius near ${nice(1 / Math.sqrt(6 * (5200 / (2 * Math.PI * 800) - 1) / 640000), 2)} km.`,
+      explain: t`$5{,}200/(2\pi\times800) = ${fmt(5200 / (2 * Math.PI * 800), 4)} > 1$: the circles grow faster than on a plane, the mark of negative curvature. From $C \approx 2\pi\rho(1 - K\rho^2/6)$, $K \approx ${tex(-6 * (5200 / (2 * Math.PI * 800) - 1) / 640000, 2)}\ \text{km}^{-2}$, a curvature radius of roughly ${nice(1 / Math.sqrt(6 * (5200 / (2 * Math.PI * 800) - 1) / 640000), 2)} km.`,
     }),
     mcq({
       id: 'cylinder', difficulty: 2,
@@ -198,7 +198,7 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
           prompt: t`Cosmologists test the shape of space with the hot spots of the cosmic microwave background, whose true size $L$ is known. In a space with the saddle geometry, light from a ruler at distance $\rho$ spreads its length over a circle of circumference $2\pi a\sinh(\rho/a)$, so the ruler subtends $\theta = L/(a\sinh(\rho/a))$, against $L/\rho$ in flat space. If $\rho = ${x}a$, what is the ratio $\theta_{\text{saddle}}/\theta_{\text{flat}}$?`,
           visual: circles({ vlines: [{ x, color: 'accent', label: `ρ = ${x}a` }], caption: t`Circumference against radius. Spreading a fixed length over a longer circle makes it span a smaller angle. (A static picture: real cosmology uses the comoving distance in an expanding universe.)` }),
           answer: ans, tol: { rel: 0.003 },
-          errors: [{ value: Math.sinh(x) / x, feedback: 'Invert it: the longer circle makes the angle smaller, so the ratio is below 1.' }, { value: Math.sin(x) / x, feedback: t`That uses $\sin$, the sphere. The saddle has $\sinh$.` }],
+          errors: [{ value: Math.sinh(x) / x, feedback: 'Invert it: the longer circle makes the angle smaller, so the ratio is below 1.' }, ...(Math.abs(Math.sin(x) / x - ans) > 0.05 * ans ? [{ value: Math.sin(x) / x, feedback: t`That uses $\sin$, the sphere. The saddle has $\sinh$.` }] : [])],
           hints: [t`$\theta_{\text{saddle}}/\theta_{\text{flat}} = \rho/(a\sinh(\rho/a))$.`, t`With $\rho/a = ${x}$: $${x}/\sinh(${x})$.`],
           teach: 'In a negatively curved space circles are longer, so distant objects look smaller than in flat space.',
           explain: t`$${x}/\sinh ${x} = ${fmt(ans, 4)}$: the spots would look ${nice(100 * (1 - ans), 2)}% smaller. Planck’s measurements of the spots’ size find space flat to within a few tenths of a percent.`,
@@ -211,13 +211,13 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
         const [A, ex] = r.pick([[50000, 0.5], [2.0e5, 1.2], [1.0e4, 0.25]]);
         const ans = Math.sqrt(A / (ex / DEG));
         return {
-          prompt: t`Surveyors on a round asteroid lay out a triangle of geodesics enclosing ${nice(A)} km². Its angles add up to $${180 + ex}°$. Assuming a perfect sphere, what is the asteroid’s radius?`,
+          prompt: t`Surveyors on a round asteroid lay out a triangle of geodesics enclosing $${tex(A, 2)}\ \text{km}^2$. Its angles add up to $${180 + ex}°$. Assuming a perfect sphere, what is the asteroid’s radius?`,
           visual: { type: 'gr-surface', params: { mode: 'loop', surface: 'sphere', surfaces: false, size: 0.35, readout: false, controls: false }, caption: 'A loop on a sphere: the curvature it encloses shows up as an angle — the triangle’s excess. Not to scale.' },
           answer: ans, units: 'km', tol: { rel: 0.005 },
           errors: [{ value: Math.sqrt(A / ex), feedback: 'Convert the excess to radians before using A/R².' }, { value: A / (ex / DEG), feedback: t`The excess is $A/R^2$: you found $R^2$; take its square root.` }],
           hints: [t`Excess $= A/R^2$ in radians: $${ex}° = ${fmt(ex / DEG, 4)}$ rad.`, t`$R = \sqrt{A/\text{excess}}$.`],
           teach: 'The angle excess of a geodesic triangle is A/R² on a sphere: curvature measured from inside.',
-          explain: t`$R = \sqrt{${nice(A)}/${fmt(ex / DEG, 4)}} = ${nice(ans, 4)}$ km.`,
+          explain: t`$R = \sqrt{${tex(A, 2)}/${fmt(ex / DEG, 4)}} = ${nice(ans, 4)}$ km.`,
         };
       },
     }),
@@ -238,7 +238,7 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
     }),
   ],
   sources: [
-    { label: 'Hartle, Gravity, ch. 2 (geometry as physics) and §7.? (metrics of curved surfaces)', url: 'https://web.physics.ucsb.edu/~gravitybook/' },
+    { label: 'Hartle, Gravity, ch. 2 (geometry as physics: the metrics of curved surfaces)', url: 'https://web.physics.ucsb.edu/~gravitybook/' },
     { label: 'Weeks, The Shape of Space (2nd ed.)', url: 'https://www.routledge.com/The-Shape-of-Space/Weeks/p/book/9781138061217' },
     { label: 'Planck Collaboration (2020), Planck 2018 results VI, A&A 641, A6 (spatial curvature)', url: 'https://doi.org/10.1051/0004-6361/201833910' },
   ],
