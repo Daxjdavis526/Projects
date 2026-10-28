@@ -145,7 +145,7 @@ export function epsSlices({ values = true, rings = [], sliders, readouts, captio
   }
   return {
     type: 'graph',
-    params: { x: [-0.8, 10.2], y: [-1.7, 1.5], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, points: pts, ...(sliders ? { sliders } : {}), ...(readouts ? { readouts } : {}) },
+    params: { x: [-0.9, 11.1], y: [-2.55, 1.55], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, points: pts, ...(sliders ? { sliders } : {}), ...(readouts ? { readouts } : {}) },
     caption: caption || t`The symbol $\varepsilon_{ijk}$ as three slices, one for each value of $i$; in each slice $j$ numbers the rows (top to bottom) and $k$ the columns (left to right). Only six of the 27 entries are not zero.`,
   };
 }

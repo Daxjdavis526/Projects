@@ -202,6 +202,7 @@ export const LESSONS = {
   'math2280.DE-2.5': () => import('./math2280/DE-2.5.js'),
   'math2280.DE-2.6': () => import('./math2280/DE-2.6.js'),
   'math2280.DE-2.7': () => import('./math2280/DE-2.7.js'),
+  'math2280.DE-2.8': () => import('./math2280/DE-2.8.js'),
   'math2280.DE-3.1': () => import('./math2280/DE-3.1.js'),
   'math2280.DE-3.2': () => import('./math2280/DE-3.2.js'),
   'math2280.DE-3.3': () => import('./math2280/DE-3.3.js'),
