@@ -131,7 +131,7 @@ export default lesson({
           prompt: t`In the lab there is a pure electric field of ${E} MV/m along $y$. An observer moves along $x$ at $${b}c$. What magnetic field, in mT, does the observer measure?`,
           visual: boostPic({ preset: 'pureE', beta: b, panels: ['fields'], hide: ['arrows'] }, t`The lab’s field (dashed, along $y$) and the observer’s motion along $x$; the observer’s own fields are not drawn. $c = 1$.`),
           answer: B * 1e3, units: 'mT', tol: { rel: 0.01 },
-          errors: [{ value: ((b * E * 1e6) / C) * 1e3, feedback: t`Keep the $\gamma$: $B'_\perp = \gamma(\vec B - \vec v\times\vec E/c^2)_\perp$.` }, { value: ((g * b * E * 1e6) / (C * C)) * 1e3 * C / 1e3, feedback: t`Check the powers of $c$: $vE/c^2$ has units of tesla.` }].filter((e) => Math.abs(e.value - B * 1e3) > 0.02 * B * 1e3),
+          errors: [{ value: ((b * E * 1e6) / C) * 1e3, feedback: t`Keep the $\gamma$: $B'_\perp = \gamma(\vec B - \vec v\times\vec E/c^2)_\perp$.` }],
           hints: [t`$\vec B' = -\gamma\,\vec v\times\vec E/c^2$ when the lab has no $\vec B$.`, t`Its size is $\gamma vE/c^2 = \gamma\beta E/c$.`],
           teach: 'A pure electric field seen from a moving frame has a magnetic partner, B′ = γvE/c².',
           explain: t`$B' = \gamma\beta E/c = ${nice(sf(g, 3))} \times ${b} \times ${E}\times10^{6}/c \approx ${nice(sf(B * 1e3, 3))}$ mT, along $-z$ for $\vec v$ along $+x$ and $\vec E$ along $+y$.`,
