@@ -12,7 +12,7 @@ const PI = Math.PI;
 
 // e^z on a strip, and Log on a polar grid
 const expPic = (o, caption) => cxmap({ f: 'exp', x: [-2, 1.5], y: [-3.4, 3.4], wx: [-3, 3], wy: [-3, 3], grid: 'cartesian', gx: [-1.5, 1], gy: [-PI, PI], gn: 9, ...o }, caption);
-const logPic = (o, caption) => cxmap({ f: 'log', x: [-3, 3], y: [-3, 3], wx: [-1.8, 1.4], wy: [-3.5, 3.5], grid: 'polar', gr: [0.25, 2.5], gth: [-PI, PI], gn: 7, gm: 12, ...o }, caption);
+const logPic = (o, caption) => cxmap({ f: 'log', ...(o.drag ? { drag: { label: 'w', wlabel: 'Log w', ...o.drag } } : {}), x: [-3, 3], y: [-3, 3], wx: [-1.8, 1.4], wy: [-3.5, 3.5], grid: 'polar', gr: [0.25, 2.5], gth: [-PI, PI], gn: 7, gm: 12, ...o, ...(o.drag ? { drag: { label: 'w', wlabel: 'Log w', ...o.drag } } : {}) }, caption);
 
 export default lesson({
   id: 'st-d.D4.1',
@@ -189,7 +189,7 @@ The real part $x$ sets the **distance** from $0$, $e^x$; the imaginary part $y$ 
         const ans = Math.exp(-sg * T);
         return {
           prompt: t`A flight-control computer samples an attitude loop every $T = ${T}$ s. A continuous mode $e^{st}$ with $s = -${sg} + ${om}i\ \text{s}^{-1}$ appears in the sampled system as powers of $z = e^{sT}$, and the sampled system is stable when $|z| < 1$. Find $|z|$, to 3 significant figures.`,
-          visual: cxmap({ f: 'exp', x: [-1.2, 0.6], y: [-1.6, 1.6], wx: [-1.4, 1.4], wy: [-1.4, 1.4], grid: 'cartesian', gx: [-1, 0], gy: [-PI / 2, PI / 2], gn: 7, ticks: false, drag: { x: r6(-sg * T), y: r6(Math.min(1.5, om * T)) }, curves: [{ param: ['0', 't'], t: [-1.6, 1.6], color: 'gold', label: 'Re(sT) = 0' }] }, t`Left: the point $sT$ and part of the left half-plane; right, their images under $z = e^{sT}$. The gold line $\operatorname{Re}(sT) = 0$ maps onto the unit circle. Axes without numbers.`),
+          visual: cxmap({ f: 'exp', x: [-1.2, 0.6], y: [-2.3, 2.3], wx: [-1.4, 1.4], wy: [-1.4, 1.4], grid: 'cartesian', gx: [-1, 0], gy: [-2.2, 2.2], gn: 7, ticks: false, drag: { x: r6(-sg * T), y: r6(om * T), label: 'sT', wlabel: 'z' }, curves: [{ param: ['0', 't'], t: [-2.3, 2.3], color: 'gold', label: 'Re(sT) = 0' }] }, t`Left: the point $sT$ and part of the left half-plane; right, their images under $z = e^{sT}$. The gold line $\operatorname{Re}(sT) = 0$ maps onto the unit circle. Axes without numbers.`),
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: Math.exp(-sg), feedback: t`Multiply by the sample time: $|z| = e^{\operatorname{Re}(s)\,T}$.` }, { value: Math.exp(-sg * T) * Math.cos(om * T), feedback: t`That is $\operatorname{Re} z$. The size of $z$ comes from the real part of $sT$ alone.` }]),
           hints: [t`$|e^{sT}| = e^{\operatorname{Re}(sT)}$.`, t`$\operatorname{Re}(sT) = -${sg}\times${T} = ${nm(-sg * T, 3)}$.`],

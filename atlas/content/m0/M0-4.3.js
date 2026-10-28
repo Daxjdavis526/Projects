@@ -56,7 +56,7 @@ Order matters — $f(g(x))$ is usually not $g(f(x))$ — and $f^{-1}$ is **not**
   example: {
     prompt: t`Find the inverse of $f(x) = \dfrac{2x + 1}{x - 3}$, and its domain.`,
     visual: { type: 'graph', params: { x: [-8, 12], y: [-6, 10], equal: true, aspect: 'wide',
-      curves: [{ fn: 'x', color: 'ink3', dash: true }, { fn: '(2x + 1)/(x - 3)', color: 'accent', domain: [-12, 2.3] }, { fn: '(2x + 1)/(x - 3)', color: 'accent', domain: [3.7, 14], label: 'f', labelAt: 9, labelDx: 4, labelDy: -10 }, { fn: '(3x + 1)/(x - 2)', color: 'gold', domain: [-12, 1.3] }, { fn: '(3x + 1)/(x - 2)', color: 'gold', domain: [2.7, 14], label: 'f⁻¹', labelAt: 10, labelDx: 4, labelDy: 14 }],
+      curves: [{ fn: 'x', color: 'ink3', dash: true }, { fn: '(2x + 1)/(x - 3)', color: 'accent', domain: [-12, 2.3], label: 'f', labelAt: -9, labelDx: 0, labelDy: 14 }, { fn: '(2x + 1)/(x - 3)', color: 'accent', domain: [3.7, 14] }, { fn: '(3x + 1)/(x - 2)', color: 'gold', domain: [-12, 1.3], label: 'f⁻¹', labelAt: -9, labelDx: 0, labelDy: -12 }, { fn: '(3x + 1)/(x - 2)', color: 'gold', domain: [2.7, 14] }],
       vlines: [{ x: 3, color: 'accent' }, { x: 2, color: 'gold' }], hlines: [{ y: 2, color: 'accent' }, { y: 3, color: 'gold' }] },
       caption: t`$f$ (blue) and $f^{-1}$ (gold), mirror images in $y = x$. Each has a vertical and a horizontal asymptote (dashed), and they swap: $x = 3,\ y = 2$ for $f$ become $x = 2,\ y = 3$.` },
     steps: [
