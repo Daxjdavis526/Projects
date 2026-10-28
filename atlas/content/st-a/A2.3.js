@@ -67,7 +67,7 @@ The vector **is** that operator, $V = V^\mu\,\partial_\mu$. The coordinate basis
         { label: t`$V(f) = V^x\partial_xf + V^y\partial_yf$`, expr: 'vx*(py + px) + vy*px', digits: 3 },
       ],
     },
-    caption: t`Level curves of $f$ every 0.5, labelled. The arrow is drawn with its components in units of $x$ and $y$ per unit $\lambda$; the dashed line is the straight curve $x^\mu(\lambda) = P^\mu + \lambda V^\mu$, whose velocity at P is $V$.`,
+    caption: t`Level curves of $f$, labelled with their values. The arrow is drawn with its components in units of $x$ and $y$ per unit $\lambda$; the dashed line is the straight curve $x^\mu(\lambda) = P^\mu + \lambda V^\mu$, whose velocity at P is $V$.`,
   },
   example: {
     prompt: t`A research aircraft flies along $x(t) = 2 + 3t$, $y(t) = 1 + t^2$ (km, with $t$ in minutes) through air whose temperature is $T(x, y) = 280 + 5x - 2xy$ kelvin. At $t = 1$ min, how fast is the temperature it measures changing?`,

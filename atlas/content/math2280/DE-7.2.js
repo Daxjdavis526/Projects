@@ -23,7 +23,7 @@ function drumPic(m, n, { kind = 'membrane', caption } = {}) {
     params: {
       aspect: 'wide', surface: ['u*cos(v)', 'u*sin(v)', `${amp}*${jExpr(m, `${r6(j)}*u`, j + 0.3)}*cos(${m}*v)`],
       domain: [[0, 1], [0, TAU]], n: 40, axes: false, dist: 3.6, pitch: 0.42, yaw: -0.7, alpha: 0.92,
-      curves: [{ param: ['cos(t)', 'sin(t)', '0'], t: [0, TAU], color: 'ink2', width: 2 }],
+      curves: kind === 'membrane' ? [{ param: ['cos(t)', 'sin(t)', '0'], t: [0, TAU], color: 'ink2', width: 2 }] : [],
     },
     caption,
   };
