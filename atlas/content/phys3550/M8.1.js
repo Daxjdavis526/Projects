@@ -48,7 +48,7 @@ export default lesson({
     tasks: [
       t`Mode 1: both bobs swing the same way, the lower one about $\sqrt2$ times as far out (in angle). Mode 2: they swing opposite ways, and much faster.`,
       t`Pull the lowest mass aside: the motion is a mixture of both modes, and never quite repeats (the frequency ratio is $1 + \sqrt2$, irrational).`,
-      t`Make the lower mass light (0.1 kg): mode 1 becomes the upper pendulum alone, nearly at $\sqrt{g/\ell}$, with the light bob trailing behind.`,
+      t`Make the lower mass light (0.1 kg): the two frequencies close in on a single pendulum's $\sqrt{g/\ell} = 4.43$ rad/s from either side, and the light bob swings more than three times as far (in angle) as the upper one.`,
     ],
     params: { system: 'chain', N: 2, m: 1, l: 0.5, start: 'mode', n: 1, panels: ['system', 'gallery', 'det'], controls: ['start', 'n', 'm2', 'l2'] },
     caption: t`Point masses on light rigid rods, no friction; small oscillations solved exactly as a sum of normal modes. Sideways swings are exaggerated for visibility. The determinant is divided by its value at $\omega = 0$.`,

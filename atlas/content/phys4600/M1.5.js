@@ -57,7 +57,7 @@ export default lesson({
   id: 'phys4600.M1.5',
   title: 'Maxwell’s equations in matter and boundary conditions',
   minutes: 15, difficulty: 3,
-  equation: t`\begin{gathered}\nabla\cdot\vec D = \rho_f, \qquad \nabla\cdot\vec B = 0, \\ \nabla\times\vec E = -\frac{\partial\vec B}{\partial t}, \qquad \nabla\times\vec H = \vec J_f + \frac{\partial\vec D}{\partial t}\end{gathered}`,
+  equation: t`\begin{gathered}\nabla\cdot\vec D = \rho_f, \qquad \nabla\cdot\vec B = 0, \\ \nabla\times\vec E = -\frac{\partial\vec B}{\partial t}, \\ \nabla\times\vec H = \vec J_f + \frac{\partial\vec D}{\partial t}\end{gathered}`,
   intro: t`Inside matter, polarization and magnetization add bound sources: a charge density $\rho_b = -\nabla\cdot\vec P$ and a current density $\vec J_b = \nabla\times\vec M$ ([PHYS 3600 M8.1](#/lesson/phys3600.M8.1)). Time brings one more. When $\vec P$ changes, the bound charges at the ends of every little dipole move, and that is a current: the **polarization current** $\vec J_p = \partial\vec P/\partial t$. It carries exactly the bound charge that piles up, $\nabla\cdot\vec J_p = -\partial\rho_b/\partial t$. Gather all the bound pieces into $\vec D = \varepsilon_0\vec E + \vec P$ and $\vec H = \vec B/\mu_0 - \vec M$, and Maxwell’s equations speak only of **free** charge and current. In a linear medium, $\vec D = \varepsilon\vec E$ and $\vec H = \vec B/\mu$. Across a surface between two materials, the integral forms give four boundary conditions — the same as in statics, because the time derivatives are integrated over a pillbox or a loop that shrinks to nothing.`,
   symbols: [
     { tex: '\\vec D', text: t`the electric displacement $\varepsilon_0\vec E + \vec P$, in $\text{C/m}^2$` },

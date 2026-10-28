@@ -47,7 +47,7 @@ export default lesson({
   visual: {
     type: 'cm4-rigid',
     title: 'Euler’s equations, integrated',
-    lead: t`A torque-free box with principal moments $1 : 2 : 2.6$ (kg·m²). Left: the body turning in space with its fixed $\vec L$ (gold) and its $\vec\omega$ (red). Right: the tip of $\vec L$ as seen from the body, on the sphere $|\vec L| = $ const. Below: $\omega_1$, $\omega_2$, $\omega_3$ from Euler's equations. Choose an axis and press Play.`,
+    lead: t`A torque-free box with principal moments $1 : 2 : 2.6$ (kg·m²). Left (top, on a phone): the body turning in space with its fixed $\vec L$ (gold) and its $\vec\omega$ (red). Right (below it): the tip of $\vec L$ as seen from the body, on the sphere $|\vec L| = $ const. Below: $\omega_1$, $\omega_2$, $\omega_3$ from Euler's equations. Choose an axis and press Play.`,
     tasks: [
       t`Axis 3 (largest moment): $\omega_3$ stays near 2 rad/s while $\omega_1$ and $\omega_2$ wobble gently — a stable spin, with $\vec L$ circling axis 3 on the sphere.`,
       t`Axis 1 (smallest moment): stable too. Now axis 2: after a quiet start, $\omega_2$ swings all the way to $-2$ and back — the body flips over again and again.`,

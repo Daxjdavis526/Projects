@@ -47,7 +47,7 @@ export default lesson({
   visual: {
     type: 'cm4-rigid',
     title: 'Flips, wobbles and an energy sink',
-    lead: t`A torque-free box with principal moments 1.5, 2 and 2.6 kg·m². Right: $\vec L$ seen from the body moves along a **polhode**, where the sphere $|\vec L| = $ const meets the energy ellipsoid. The violet separatrix passes through axis 2. The whole run is drawn; press Play to watch it.`,
+    lead: t`A torque-free box with principal moments 1.5, 2 and 2.6 kg·m². Right (lower, on a phone): $\vec L$ seen from the body moves along a **polhode**, where the sphere $|\vec L| = $ const meets the energy ellipsoid. The violet separatrix passes through axis 2. The whole run is drawn; press Play to watch it.`,
     tasks: [
       t`Axis 2: $\vec L$ runs along the separatrix and round the far side — each crossing is a flip. Slide the middle moment $I_2$ down to 1.5 or up to 2.6: the body becomes symmetric and the flipping stops.`,
       t`Axis 1, energy sink $\kappa = 0.08$: $\vec L$ spirals away from axis 1, crosses the separatrix and settles on axis 3, while $E/E_0$ falls to about $0.58 = \lambda_1/\lambda_3$ and $|\vec L|$ stays at 1.`,

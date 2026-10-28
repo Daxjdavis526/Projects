@@ -64,7 +64,7 @@ export default lesson({
   id: 'phys4600.M1.3',
   title: 'Inductance and magnetic energy',
   minutes: 17, difficulty: 3,
-  equation: t`\begin{gathered}\Phi_2 = M I_1, \qquad M = \frac{\mu_0}{4\pi}\oint\!\!\oint\frac{d\vec l_1\cdot d\vec l_2}{|\vec r_1 - \vec r_2|}, \\ W = \tfrac12 LI^2 = \frac{1}{2\mu_0}\int B^2\,d\tau\end{gathered}`,
+  equation: t`\begin{gathered}\Phi_2 = M I_1, \\ M = \frac{\mu_0}{4\pi}\oint\!\!\oint\frac{d\vec l_1\cdot d\vec l_2}{|\vec r_1 - \vec r_2|}, \\ W = \tfrac12 LI^2 = \frac{1}{2\mu_0}\int B^2\,d\tau\end{gathered}`,
   intro: t`A current $I_1$ in one loop makes a field whose flux through a second loop is proportional to $I_1$: $\Phi_2 = MI_1$. The constant $M$ is the **mutual inductance**, and writing the flux as $\oint\vec A\cdot d\vec l$ turns it into **Neumann’s formula** — a double line integral round both loops that depends only on their shapes and places. It is symmetric in the two loops, so $M_{12} = M_{21}$: the flux through loop 2 when 1 carries a current equals the flux through loop 1 when 2 carries the same current, however different the loops. A loop’s field threads itself too, $\Phi = LI$, with $L$ its **self-inductance**, and changing currents meet emfs $-M\,dI_1/dt$ and $-L\,dI/dt$. Pushing current up against that back emf costs work $\tfrac12LI^2$, and that energy is stored in the field, at $B^2/2\mu_0$ per cubic metre — the magnetic twin of $\tfrac12\varepsilon_0E^2$.`,
   symbols: [
     { tex: 'M', text: 'mutual inductance, in henries (H = Wb/A): flux through one loop per ampere in the other' },

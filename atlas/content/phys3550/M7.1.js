@@ -243,7 +243,7 @@ export default lesson({
       },
       hints: [t`$I_{xy} = -\sum m\,xy$ with both stars: $x = \pm r\cos\phi$, $y = \pm r\sin\phi$ (same signs for each star).`, t`Use $2\sin\phi\cos\phi = \sin2\phi$. After how much of an orbit does the pair look the same?`],
       teach: t`A two-body system looks the same after half a turn, so its inertia tensor — and its gravitational-wave signal — repeats at twice the orbital frequency.`,
-      explain: t`$I_{xy} = -2m\,r^2\cos\phi\sin\phi = -mr^2\sin2\Omega t$, and $I_{xx} = 2mr^2\sin^2\Omega t = mr^2(1 - \cos2\Omega t)$. Everything that changes, changes at $2\Omega$, so the gravitational waves come at twice the orbital frequency: a neutron-star pair LIGO hears at 100 Hz is orbiting 50 times a second. (The quadrupole $Q_{ij} = (\operatorname{tr}\mathbf I)\delta_{ij} - 3I_{ij}$; see [the gravitational-wave chirp](#/explore/gr-chirp).)`,
+      explain: t`$I_{xy} = -2m\,r^2\cos\phi\sin\phi = -mr^2\sin2\Omega t$, and $I_{xx} = 2mr^2\sin^2\Omega t = mr^2(1 - \cos2\Omega t)$. Everything that changes, changes at $2\Omega$, so the gravitational waves come at twice the orbital frequency: a neutron-star pair LIGO hears at 100 Hz is orbiting 50 times a second. (The quadrupole $Q_{ij} = (\operatorname{tr}\mathbf I)\delta_{ij} - 3I_{ij}$; see [the gravitational-wave chirp](#/explore/chirp).)`,
     }),
     mcq({
       id: 'cp-mirror', difficulty: 2,

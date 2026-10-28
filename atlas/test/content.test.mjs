@@ -270,6 +270,27 @@ for (const c of CATALOG.courses) {
 }
 
 if (lowVisual.length) console.log(`note: problems with a visual below 60% in ${lowVisual.length} lesson(s): ${lowVisual.join(', ')}`);
+// links between lessons: every #/lesson/<id> (and #/explore/<id>) must name a real lesson
+// (or gallery entry); a link to a lesson not written yet is counted, not failed
+if (!only) {
+  const { readdirSync } = await import('node:fs');
+  const root = new URL('../content/', import.meta.url);
+  const galleryIds = new Set(GALLERY.map((g) => g.id));
+  let pending = 0;
+  const pendingList = new Set();
+  for (const dir of readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+    for (const f of readdirSync(new URL(dir.name + '/', root)).filter((f) => f.endsWith('.js'))) {
+      const src = readFileSync(new URL(`${dir.name}/${f}`, root), 'utf8');
+      for (const m of src.matchAll(/#\/lesson\/([\w.-]+?)(?=[)'"`\s]|$)/g)) {
+        const id = m[1], L = CATALOG.lessons[id];
+        if (!L) check(`content/${dir.name}/${f}: link to #/lesson/${id}`, false, 'no such lesson in the catalog');
+        else if (!L.ready) { pending++; pendingList.add(id); }
+      }
+      for (const m of src.matchAll(/#\/explore\/([\w-]+)/g)) if (!galleryIds.has(m[1])) check(`content/${dir.name}/${f}: link to #/explore/${m[1]}`, false, 'no such gallery entry');
+    }
+  }
+  if (pending) console.log(`${pending} links point to lessons not written yet (${pendingList.size} lessons: ${[...pendingList].slice(0, 12).join(', ')}${pendingList.size > 12 ? ', …' : ''})`);
+}
 console.log(`${lessons} lessons, ${items} items (${items ? Math.round((100 * withVisual) / items) : 0}% with a visual), ${instances} instances checked`);
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

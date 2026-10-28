@@ -194,7 +194,7 @@ print(E)`,
       ],
       hints: ['`np.diag(v, 1)` puts v just above the diagonal and `np.diag(v, -1)` just below.', '`np.linalg.eigh` returns eigenvalues in ascending order and eigenvectors as columns; slice the first n of each.'],
       teach: 'Discretized, a Hamiltonian is a real symmetric matrix: its eigenvalues are real and its eigenvectors orthonormal, as the theorem promises.',
-      explain: t`The matrix is Hermitian by construction, so \`eigh\` returns real energies and orthonormal vectors. The oscillator’s come out at $0.5000, 1.5000, 2.4999, \dots$; the error, from the finite grid, grows with $n$ as the states get wigglier. Any 1D potential can be dropped in — this is how the double well of [the mp-schrodinger explorer](#/explore/mp-schrodinger) is solved.`,
+      explain: t`The matrix is Hermitian by construction, so \`eigh\` returns real energies and orthonormal vectors. The oscillator’s come out at $0.5000, 1.5000, 2.4999, \dots$; the error, from the finite grid, grows with $n$ as the states get wigglier. Any 1D potential can be dropped in — this is how the double well of [the mp-schrodinger explorer](#/explore/quantum-wells) is solved.`,
     }),
     mcq({
       id: 'no-eigen', difficulty: 2, kind: 'error',

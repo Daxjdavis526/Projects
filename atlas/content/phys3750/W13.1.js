@@ -26,7 +26,7 @@ export default lesson({
   id: 'phys3750.W13.1',
   title: 'Solitons and the KdV equation',
   minutes: 18, difficulty: 4,
-  intro: t`Two effects pull a wave apart in opposite ways. **Dispersion** makes short waves travel at different speeds from long ones, so a hump spreads into ripples ([W6.4](#/lesson/phys3750.W6.4)). **Nonlinearity** — a speed that grows with height — makes the crest outrun the base until the front steepens and breaks, as in [Burgers’ equation](#/explore/pde3-burgers). The Korteweg–de Vries (KdV) equation has both, and for one shape they cancel exactly:
+  intro: t`Two effects pull a wave apart in opposite ways. **Dispersion** makes short waves travel at different speeds from long ones, so a hump spreads into ripples ([W6.4](#/lesson/phys3750.W6.4)). **Nonlinearity** — a speed that grows with height — makes the crest outrun the base until the front steepens and breaks, as in [Burgers’ equation](#/explore/burgers-shocks). The Korteweg–de Vries (KdV) equation has both, and for one shape they cancel exactly:
 
 $$u = \frac c2\,\text{sech}^2\Big[\frac{\sqrt c}{2}(x - ct)\Big]$$
 

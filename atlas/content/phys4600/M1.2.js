@@ -49,7 +49,7 @@ export default lesson({
   id: 'phys4600.M1.2',
   title: 'Faraday’s law and induced fields',
   minutes: 16, difficulty: 3,
-  equation: t`\oint\vec E\cdot d\vec l = -\frac{d\Phi_B}{dt}, \qquad \nabla\times\vec E = -\frac{\partial\vec B}{\partial t}`,
+  equation: t`\begin{gathered}\oint\vec E\cdot d\vec l = -\frac{d\Phi_B}{dt}, \\ \nabla\times\vec E = -\frac{\partial\vec B}{\partial t}\end{gathered}`,
   intro: t`Faraday found that an emf appears in a loop whether the loop moves through a magnet’s field, the magnet moves past the loop, or the current making the field changes. The first is the magnetic force of [M1.1](#/lesson/phys4600.M1.1). The other two have no moving charges in the loop to push — so Faraday’s law says something new: **a changing magnetic field makes an electric field**, with circulation $-d\Phi_B/dt$ round any loop, wire or no wire. In differential form, $\nabla\times\vec E = -\partial\vec B/\partial t$. With no charge around, $\nabla\cdot\vec E = 0$ too, so the induced field obeys the same equations as a magnetostatic $\vec B$ with $-\partial\vec B/\partial t$ in place of $\mu_0\vec J$ — and where there is symmetry, an Amperian-style loop finds it in one line.`,
   symbols: [
     { tex: '\\vec E', text: 'the induced electric field, in V/m' },
@@ -219,7 +219,7 @@ export default lesson({
           ].filter((e) => Math.abs(e.value - N * 1e6) > 0.02 * N * 1e6),
           hints: [t`$\dot B = -\omega B\sin\omega t$, so $\langle\dot B^2\rangle = \tfrac12\omega^2B^2$ and $\langle P\rangle = \dfrac{\pi\sigma h\omega^2B^2a^4}{16}$.`, t`The torque does work at the rate $\tau\omega = \langle P\rangle$, so $\tau = \dfrac{\pi\sigma h\omega B^2a^4}{16}$.`],
           teach: 'A conductor spinning in a field dissipates eddy-current power that grows as ω²: the braking torque grows as ω, so the spin decays exponentially.',
-          explain: t`$\langle P\rangle = \pi\sigma h\omega^2B^2a^4/16$ and $\tau = \langle P\rangle/\omega \approx ${tex(N * 1e6, 3)}$ μN·m. Tiny, but it never stops: since $\tau\propto\omega$, the spin decays exponentially, with a time constant of months to years for a small satellite. Early spin-stabilized satellites slowed down measurably this way, and some missions use it deliberately to damp a tumble.`,
+          explain: t`$\langle P\rangle = \pi\sigma h\omega^2B^2a^4/16$ and $\tau = \langle P\rangle/\omega \approx ${tex(N * 1e6, 3)}$ μN·m. Tiny, but it never stops: since $\tau\propto\omega$, the spin decays exponentially, with a time constant of weeks to months for a small satellite (a few kg m² of moment of inertia). Early spin-stabilized satellites slowed down measurably this way, and some missions use it deliberately to damp a tumble.`,
         };
       },
     }),

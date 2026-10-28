@@ -36,7 +36,7 @@ $e = 0$ is a circle (the foci merge at the centre), $0 < e < 1$ an ellipse, $e =
     { tex: 'r_p,\\ r_a', text: 'the closest and farthest distances from the focus (periapsis, apoapsis), in km or AU' },
     { tex: 'PF,\\ PD', text: 'a point’s distance to the focus and to the directrix' },
   ],
-  why: t`Eccentricity is how mission designers, astronomers and the [Kepler orbit explorer](#/explore/mech-kepler) describe an orbit’s shape. A burn that raises the speed at perigee raises $e$; at $e = 1$ the spacecraft escapes on a parabola, and above it leaves on a hyperbola. [Calculus II](#/lesson/math1220.C2-6.6) writes every conic as $r = p/(1 + e\cos\theta)$, the form Kepler’s first law takes.`,
+  why: t`Eccentricity is how mission designers, astronomers and the [Kepler orbit explorer](#/explore/kepler) describe an orbit’s shape. A burn that raises the speed at perigee raises $e$; at $e = 1$ the spacecraft escapes on a parabola, and above it leaves on a hyperbola. [Calculus II](#/lesson/math1220.C2-6.6) writes every conic as $r = p/(1 + e\cos\theta)$, the form Kepler’s first law takes.`,
   visual: {
     type: 'calc-polar',
     title: 'Same closest approach, faster launch',
