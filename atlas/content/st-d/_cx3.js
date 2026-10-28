@@ -48,7 +48,7 @@ export function realPic({ fn, x, y, xlabel = 'x', ylabel = '', color = 'accent',
 // Leaver's continued fraction (1985), solved for this course to 30 digits:
 // Schwarzschild ℓ = 2 (n = 0, 1) and ℓ = 3, 4 (n = 0); Kerr ℓ = m = 2, n = 0 at
 // several spins χ = a/M. Berti, Cardoso & Will's fit agrees with every Kerr
-// value here to about 1%.
+// value here to within about 2% (1% for χ ≥ 0.3).
 export const QNM = {
   s20: [0.37367168, -0.08896232],
   s21: [0.34671100, -0.27391488],

@@ -166,10 +166,11 @@ export function mount(F, P0) {
     }
     p.path(o.pts, { color: 'accent', width: 1.8 });
     p.point(0, 0, { color: 'gold', r: 5 });
+    const lbl = P.labels && Math.min(p.R - p.L, p.B - p.T) > 220;      // apsis labels only where there is room
     if (P.apsides && o.rp && o.fate !== 'circle') {
       const start = o.fate === 'plunge' ? null : [o.rp, 0];
-      if (start) p.point(start[0], start[1], { color: 'good', r: 4, label: P.labels ? 'periapsis' : '', ldx: 8, ldy: 12, lsize: 11 });
-      if (o.fate === 'bound' && o.apsidal) p.point(o.ra * Math.cos(o.apsidal), o.ra * Math.sin(o.apsidal), { color: 'good', r: 4, label: P.labels ? 'apoapsis' : '', ldx: 8, ldy: -10, lsize: 11 });
+      if (start) p.point(start[0], start[1], { color: 'good', r: 4, label: lbl ? 'periapsis' : '', ldx: 8, ldy: 12, lsize: 11 });
+      if (o.fate === 'bound' && o.apsidal) p.point(o.ra * Math.cos(o.apsidal), o.ra * Math.sin(o.apsidal), { color: 'good', r: 4, label: lbl ? 'apoapsis' : '', ldx: 8, ldy: -10, lsize: 11 });
     }
     const [bx, by] = o.pts[idx] || [o.rp, 0];
     if (S.time !== null) {
@@ -208,13 +209,14 @@ export function mount(F, P0) {
     }
     if (P.labels) {
       const items = [['U eff', 'accent', []], ...(P.parts ? [['U(r)', 'ink3', [5, 4]], ['ℓ²/2μr²', 'violet', [5, 4]]] : []), ['E', 'gold', []]];
-      const g = ctx, x0 = p.R - 92, y0 = p.T + 10;
-      g.save(); g.font = '500 11.5px Inter, system-ui, sans-serif'; g.textBaseline = 'middle';
-      g.fillStyle = p.col.bg; g.globalAlpha = 0.8; g.fillRect(x0 - 6, y0 - 8, 96, items.length * 15 + 2); g.globalAlpha = 1;
+      const small = p.R - p.L < 260, fs = small ? 10 : 11.5, dy = small ? 12 : 15, sw = small ? 12 : 18;
+      const g = ctx, x0 = p.R - (small ? 70 : 92), y0 = p.T + 10;
+      g.save(); g.font = `500 ${fs}px Inter, system-ui, sans-serif`; g.textBaseline = 'middle';
+      g.fillStyle = p.col.bg; g.globalAlpha = 0.85; g.fillRect(x0 - 6, y0 - 8, small ? 74 : 96, items.length * dy + 2); g.globalAlpha = 1;
       items.forEach(([s, c, d], i) => {
-        const y = y0 + i * 15;
-        g.strokeStyle = p.color(c); g.lineWidth = 2; g.setLineDash(d); g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + 18, y); g.stroke();
-        g.setLineDash([]); g.fillStyle = p.color('ink2'); g.fillText(s, x0 + 24, y);
+        const y = y0 + i * dy;
+        g.strokeStyle = p.color(c); g.lineWidth = 2; g.setLineDash(d); g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + sw, y); g.stroke();
+        g.setLineDash([]); g.fillStyle = p.color('ink2'); g.fillText(s, x0 + sw + 5, y);
       });
       g.restore();
     }

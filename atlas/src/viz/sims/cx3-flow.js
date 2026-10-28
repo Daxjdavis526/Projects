@@ -56,7 +56,7 @@ export function mount(F, P) {
   const split = P.panels.includes('circle');
   const airfoil = P.mode === 'airfoil';
   const { canvas, box } = F.canvas({ aspect: split ? (narrow ? '' : 'wide') : '', label: P.alt || (airfoil ? 'Streamlines of ideal flow past an airfoil, with parcels released together upstream' : 'Streamlines of ideal flow past a cylinder') });
-  if (split && narrow) box.style.aspectRatio = '4 / 5';
+  if (split && narrow) box.style.aspectRatio = '3 / 4';
   const fp = new Plot(canvas, { x: P.x, y: P.y, equal: true, grid: false, axes: false });
   const cp = split ? new Plot(canvas, { x: [-2.6, 2.6], y: [-2, 2], equal: true, grid: false, axes: false }) : null;
 
@@ -183,9 +183,9 @@ export function mount(F, P) {
     }
     if (P.labels && stag.length) {
       const pts = stag.map(map).sort((a, b) => a[0] - b[0]);
-      fp.text('stagnation', pts[0][0], pts[0][1], { dx: -8, dy: 14, align: 'right', color: 'bad', size: 11.5 });
+      fp.text('stagnation', pts[0][0], pts[0][1], { dx: 0, dy: 16, align: 'center', color: 'bad', size: 11.5 });
     }
-    if (airfoil && P.labels) fp.text('trailing edge', 2, 0, { dx: 6, dy: 16, color: 'ink3', size: 11 });
+    if (airfoil && P.labels) fp.text('trailing edge', 2, 0, { dx: 2, dy: 16, align: 'right', color: 'ink3', size: 11 });
     // the parcels
     if (P.dots && dots.length) {
       const pts = dots.map((d) => ({ p: map(d.z), above: d.above }));

@@ -260,7 +260,9 @@ num({ id: 'f-over-m', difficulty: 1,
   densities take `'Jy'` (10⁻²⁶ W m⁻² Hz⁻¹, with prefixes: mJy, μJy); cross-sections `'b'` (barns: mb, fb).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
-  makes typing a unit compulsory. Omit `units` for pure numbers.
+  makes typing a unit compulsory. Omit `units` for pure numbers. Angles take
+  `'deg'` or `'rad'`, rotation rates `'rpm'`. (A slider's `unit` is TeX, so it
+  may be words: `'\\mathrm{thousand\\ km}'`.)
 - A generator may `throw` to guard a numerical check while you write it, but
   every seed the test tries must succeed: a throw on any seed fails the item.
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
@@ -523,7 +525,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | type | what it shows |
 |---|---|
 | `calc-polar` | polar and parametric curves, swept areas as thin wedges (½∫r²dθ), tangents, arc length, conics with focus and directrix, Kepler's equation with equal-time sectors A preset may carry its own sliders and window. |
-| `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
+| `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel Its `functions[].a` and `.b` are numbers, not expression strings. |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
 | `calc-vectors3d` | (camera `yaw` and `pitch` in radians; in the default view a vector near (2, 1, 1) points at the viewer — turn the camera) a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
 | `c3-contour` | (x and y share one scale: give a window with the canvas's aspect, 16:10 by default or 2:1 when wide) a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c Curve expressions cannot use the probe's `px`, `py`; only readouts can. |
@@ -602,6 +604,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `cm2-vary` | a true path, a family of varied paths, and the functional (length, bead travel time or action) against the variation — flat at the true path | `preset`, `n`, `alpha`, `T`, `sliders`, `modes`, `panels`, `ghosts`, `marks`, `readouts`, `labels` |
 | `cm2-race` | beads racing downhill on a line, a circular arc, a cycloid, a steep curve and a drop; a tautochrone mode | `mode`, `x1`, `curves`, `p`, `sliders`, `a`, `times`, `play`, `at`, `slow`, `labels` |
 | `cm2-noether` | a puck over potential contours beside its conserved quantities in time, with a slider that breaks a rotation, translation or time symmetry | `kind`, `kinds`, `eps`, `sliders`, `show`, `panels`, `play`, `labels`, `readout` |
+| `cm3-orbit` | an orbit beside its effective-potential curve: a draggable energy line, turning points matched to dashed circles, Play at the true rate; inverse-square, power-law or Newton + GR forces; apsidal angle and advance per orbit | see the file header |
 | `num-float` | the bits of a float64 or float32 coloured by field: flip a bit, step to the neighbouring floats, read the exact stored decimal and the gap; presets such as 0.1 and 2⁵³ + 1 mark the true value | see the file header |
 | `qm4-sg` | an oven or a prepared state feeding up to three Stern–Gerlach analysers (z, x, y or a tilted n̂(θ)), each passing its + beam, its − beam, or both recombined unobserved; atoms one at a time or by thousands against \|⟨±n\|ψ⟩\|² | see the file header |
 | `m0-unitcircle` | drag a point round the unit circle: cosine and sine as projections, radian ticks, quadrant signs and the reference angle; `unroll` beside the sine/cosine graph; `inverse` with the principal branch bold and other solutions hollow; `get('theta')` answers slider items | see the file header |

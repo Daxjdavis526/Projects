@@ -56,7 +56,7 @@ Everything hinges on the **growth factor** $\rho$. Without row swaps a tiny pivo
     title: 'A tiny pivot, with and without a swap',
     lead: t`The system $\begin{pmatrix}\varepsilon & 1\\ 1 & 1\end{pmatrix}x = \begin{pmatrix}1\\ 2\end{pmatrix}$ has $x_1 = 1/(1 - \varepsilon) \approx 1$ and a condition number of only $${KAPPA2.toFixed(3)}$. Slide $\varepsilon$ down. The curves are the relative error of $x_1$ actually computed in float64, by elimination as written (red) and after swapping the rows (blue).`,
     tasks: [
-      'At ε = 10⁻⁴ the unpivoted answer has lost 4 digits; the error grows like u/ε (dashed).',
+      'At ε = 10⁻⁴ the unpivoted answer has already lost three or four digits; the error grows like u/ε (dashed).',
       'At ε = 10⁻¹⁶ the readout gives x₁ = 2.22 without pivoting; below about 10⁻¹⁷ it gives exactly 0. The pivoted answer stays right to the last digit.',
       'Watch the growth factor: it is 1/ε − 1 without the swap, 1 with it.',
     ],

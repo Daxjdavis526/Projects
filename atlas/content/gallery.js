@@ -83,6 +83,7 @@ export default [
   { id: 'action-variations', title: 'Wiggle a path', track: 'physics', blurb: 'Wiggle a path and watch its length, time or action: the true path is where the curve goes flat.', lesson: 'phys3550.M3.1' },
   { id: 'brachistochrone', title: 'The brachistochrone race', track: 'physics', blurb: 'Bernoulli’s challenge: five beads race downhill, and the cycloid always wins.', lesson: 'phys3550.M3.3' },
   { id: 'noether', title: 'Noether’s theorem', track: 'physics', blurb: 'Break a symmetry and watch exactly one conservation law fail.', lesson: 'phys3550.M4.5' },
+  { id: 'effective-potential', title: 'Orbits and the effective potential', track: 'physics', blurb: 'An orbit beside its effective potential: drag the energy, watch the turning points, and see power laws and GR make orbits precess.', lesson: 'phys3550.M5.2' },
   { id: 'mass-chain', title: 'From a chain to a string', track: 'physics', blurb: 'Masses on springs become a string: pick a mode, pluck a bead or launch a pulse, and watch each mode ride the dispersion curve ω = 2√(k/m)|sin(qa/2)|.', lesson: 'phys3750.W3.2' },
   { id: 'string-junction', title: 'A pulse at a string junction', track: 'physics', blurb: 'A pulse hits a junction between two strings: watch the energy density flow, and split into reflected and transmitted parts set by the impedances.', lesson: 'phys3750.W9.1' },
   { id: 'laplace-relax', title: 'Laplace by relaxation', track: 'physics', blurb: 'Watch Laplace’s equation solve itself: two guesses relax to one answer.', lesson: 'phys3600.M4.1' },

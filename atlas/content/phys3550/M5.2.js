@@ -43,7 +43,7 @@ export default lesson({
   visual: {
     type: 'cm3-orbit',
     title: 'An orbit beside its effective potential',
-    lead: t`Right: $U_{\text{eff}}$ (blue) is the gravitational well (dashed grey) plus the centrifugal barrier (dashed violet). The gold line is the energy — drag it. The green band is where the body is allowed; its ends $r_p$ and $r_a$ are the dashed circles on the left. Press Play and watch the orange gap $E - U_{\text{eff}} = \tfrac12\mu\dot r^2$.`,
+    lead: t`In the energy panel, $U_{\text{eff}}$ (blue) is the gravitational well (dashed grey) plus the centrifugal barrier (dashed violet). The gold line is the energy — drag it. The green band is where the body is allowed; its ends $r_p$ and $r_a$ are the dashed circles round the orbit. Press Play and watch the orange gap $E - U_{\text{eff}} = \tfrac12\mu\dot r^2$.`,
     tasks: [
       t`Drag $E$ down to the floor of the well: the two turning points merge and the orbit becomes a circle.`,
       t`Drag $E$ above zero: there is no outer turning point — the body escapes on a hyperbola.`,
