@@ -305,9 +305,11 @@ print(eig_s, steps_s, steps_0)`,
       prompt: t`The QR algorithm on the (real, nonsymmetric) linearized attitude dynamics of a spinning spacecraft converges to a matrix that is upper-triangular **except** for a $2\times2$ block on the diagonal that never becomes triangular. What does the block mean?`,
       visual: {
         type: 'graph',
-        params: { x: [-0.5, 4.5], y: [-0.5, 4.5], aspect: 'square', equal: true, axesAt: 'edge', xlabel: '', ylabel: '', xticks: 0, yticks: 0, grid: false, axes: false,
-          points: [...Array.from({ length: 16 }, (_, q) => ({ i: Math.floor(q / 4), j: q % 4 })).filter(({ i, j }) => i <= j || (i === 2 && j === 1)).map(({ i, j }) => ({ x: 0.5 + j, y: 3.5 - i, r: 6, color: (i === 1 || i === 2) && (j === 1 || j === 2) ? 'gold' : 'accent' }))] },
-        caption: 'The converged pattern of nonzero entries: triangular except for one 2 × 2 block (gold) on the diagonal.',
+        params: { x: [-2.5, 6.5], y: [-0.1, 4.1], aspect: 'wide', equal: true, axesAt: 'edge', xlabel: '', ylabel: '', xticks: 0, yticks: 0, grid: false, axes: false,
+          points: Array.from({ length: 16 }, (_, q) => ({ i: Math.floor(q / 4), j: q % 4 })).map(({ i, j }) => (i <= j || (i === 2 && j === 1)
+            ? { x: 0.5 + j, y: 3.5 - i, r: 6, color: (i === 1 || i === 2) && (j === 1 || j === 2) ? 'gold' : 'accent' }
+            : { x: 0.5 + j, y: 3.5 - i, r: 4, color: 'ink4', hollow: true })) },
+        caption: 'The converged pattern of a 4 × 4: nonzero entries filled, zeros hollow — triangular except for one 2 × 2 block (gold) on the diagonal.',
       },
       choices: [
         'It holds a complex-conjugate pair of eigenvalues — an oscillatory (nutation-like) mode — which a real orthogonal similarity cannot split; its eigenvalues come from the 2 × 2 block',
