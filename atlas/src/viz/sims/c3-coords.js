@@ -18,13 +18,15 @@
 //       guides: true,                    // dashed lines from the origin, and down to the point's shadow on the floor
 //       curves: true,                    // the coordinate curves through the point
 //       element: false,                  // the small coordinate box; elementToggle: true offers a switch
+//       edgeLabels: true,                // the box edges' lengths as labels (dr, r dθ, r sin θ dφ …); false hides them
 //       readouts: ['x', 'y', 'z'],       // any of x y z rho r theta phi (angles in degrees); [] for none
 //       labels: true, pointLabel: 'P',   // TeX labels at the point and on the unit vectors
 //       range: 3, yaw, pitch, dist } }
 //
 // The geometry lives in model/c3-coords.js, tested in test/c3-coords.test.mjs.
 // A picture must not show its answer: set readouts: [] (and maybe angles:
-// false) when a question asks for a coordinate.
+// false) when a question asks for a coordinate, and edgeLabels: false when it
+// asks for the volume element.
 
 import { View3D } from '../three-d.js';
 import { tex } from '../../ui/dom.js';
@@ -32,7 +34,7 @@ import * as M from '../model/c3-coords.js';
 
 export const defaults = {
   system: 'spherical', choose: false, point: null, sliders: true, surfaces: null, basis: true, angles: true, guides: true,
-  curves: true, element: false, elementToggle: false, readouts: ['x', 'y', 'z'], labels: true, pointLabel: 'P', range: 3,
+  curves: true, element: false, elementToggle: false, edgeLabels: true, readouts: ['x', 'y', 'z'], labels: true, pointLabel: 'P', range: 3,
 };
 
 const SYSTEMS = ['cylindrical', 'spherical'];
@@ -164,7 +166,7 @@ export function mount(F, P) {
       // label the three edges through the base corner, pushed away from the box's middle on screen
       const all = edges.flatMap((e) => e.pts), mid = [0, 1, 2].map((k) => all.reduce((s, q2) => s + q2[k], 0) / all.length);
       const [mx, my] = view.project(mid), placed = [];
-      for (let axis = 0; axis < 3; axis++) {
+      for (let axis = 0; axis < 3 && P.edgeLabels !== false; axis++) {
         const e = edges.find((g) => g.axis === axis), at = e.pts[Math.floor(e.pts.length / 2)];
         const [sx, sy] = view.project(at), len = Math.hypot(sx - mx, sy - my) || 1, ux = (sx - mx) / len, uy = (sy - my) / len;
         // push the label outward until it clears the ones already placed
@@ -226,5 +228,6 @@ export function validate(P) {
   }
   if (P.surfaces) for (const s of P.surfaces) if (!SURF_KEYS[P.system]?.includes(s) && !(P.choose && [...SURF_KEYS.cylindrical, ...SURF_KEYS.spherical].includes(s))) problems.push(`c3-coords: unknown surface “${s}” for ${P.system} coordinates`);
   for (const r of P.readouts || []) if (!READOUTS.includes(r)) problems.push(`c3-coords: unknown readout “${r}” (use ${READOUTS.join(', ')})`);
+  if (P.edgeLabels != null && typeof P.edgeLabels !== 'boolean') problems.push('c3-coords: edgeLabels must be true or false');
   return problems;
 }

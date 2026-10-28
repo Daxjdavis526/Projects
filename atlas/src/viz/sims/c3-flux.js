@@ -30,7 +30,10 @@
 //       readouts: ['flux', 'area', 'circ', 'volume', 'patch'],   // which numbers to show; [] or false hides them all
 //       n: 22, quad: 16,                    // the drawn grid; Gauss–Legendre panels per direction for the integrals
 //       sliders, choices, toggles, constants,
-//       range: 2, axes: true, axisLabels, yaw, pitch, dist, target, scale } }
+//       range: 2, axes: true, axisLabels, yaw, pitch, dist, target, scale } }   // range: the axes' length and arrow scale
+//
+// The camera aims at the middle of the surfaces and stands back far enough to see them
+// whole, unless target or dist says otherwise.
 //
 // The integrals are computed numerically by model/c3-vector.js.
 
@@ -70,7 +73,25 @@ export function mount(F, P) {
 
   const env = () => { const e = { ...(P.constants || {}) }; for (const k of keys) if (F.params[k] !== undefined) e[k] = +F.params[k]; return e; };
   const R = P.range ?? 1.6;
-  const view = new View3D(canvas, { yaw: P.yaw ?? 0.6, pitch: P.pitch ?? 0.42, dist: P.dist ?? R * 4.6, scale: P.scale ?? 1, target: P.target || [0, 0, 0] });
+  // the camera aims at the middle of everything the surfaces span at the starting values, from far
+  // enough back to take it all in (and the axes, when they are near), unless target or dist is given
+  const frame = (() => {
+    const E0 = env(), lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+    for (const s of surfaces) for (const p of piecesOf(s)) {
+      try {
+        const X = fn(p.x, ['u', 'v', ...keys]), Y = fn(p.y, ['u', 'v', ...keys]), Z = fn(p.z, ['u', 'v', ...keys]);
+        const [u0, u1] = p.u.map((t) => num(t, E0, keys)), [v0, v1] = p.v.map((t) => num(t, E0, keys));
+        for (let i = 0; i <= 8; i++) for (let j = 0; j <= 8; j++) {
+          const e = { ...E0, u: u0 + ((u1 - u0) * i) / 8, v: v0 + ((v1 - v0) * j) / 8 }, q = [X(e), Y(e), Z(e)];
+          if (q.every(Number.isFinite)) q.forEach((c, k) => { lo[k] = Math.min(lo[k], c); hi[k] = Math.max(hi[k], c); });
+        }
+      } catch { /* validate() reports bad expressions */ }
+    }
+    if (!Number.isFinite(lo[0])) return { target: [0, 0, 0], dist: R * 3.6 };
+    const target = lo.map((v, k) => (v + hi[k]) / 2), diag = Math.hypot(...hi.map((v, k) => v - lo[k]));
+    return { target, dist: Math.max(1.9 * diag, 2.2) };
+  })();
+  const view = new View3D(canvas, { yaw: P.yaw ?? 0.6, pitch: P.pitch ?? 0.42, dist: P.dist ?? frame.dist, scale: P.scale ?? 1, target: P.target || frame.target });
   view.onChange = () => draw();
   let cache = null;
   F.onChange(() => { cache = null; draw(); });

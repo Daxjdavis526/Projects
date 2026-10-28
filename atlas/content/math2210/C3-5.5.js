@@ -76,7 +76,7 @@ In the plane only the last component survives: $Q_x - P_y$, Green’s integrand.
           prompt: t`Find the divergence of $\vec F = \langle ${co(a, 'x^2y')},\ ${co(b, 'yz')},\ ${co(c, 'xz^2')}\rangle$.`,
           visual: {
             type: 'c3-flux',
-            params: { F: [`${a}*x^2*y`, `${b}*y*z`, `${c}*x*z^2`], surfaces: [boxSurface([0.6, 1.4], [0.6, 1.4], [0.6, 1.4], 'Box')], readouts: [], range: 1.6, n: 8, arrowLen: 0.3, arrowGrid: [3, 3], normals: false, target: [0.8, 0.8, 0.8], dist: 7 },
+            params: { F: [`${a}*x^2*y`, `${b}*y*z`, `${c}*x*z^2`], surfaces: [boxSurface([0.6, 1.4], [0.6, 1.4], [0.6, 1.4], 'Box')], readouts: [], range: 1.6, n: 8, arrowLen: 0.22, arrowGrid: [2, 2], normals: false },
             caption: 'A small box in the field. Each face is tinted by where the field leaves (blue) or enters (red); gold arrows show the field, lengths compressed. The divergence is the net outflow per unit volume as such a box shrinks. Drag to rotate.',
           },
           answer: `${2 * a} x y + ${b} z + ${2 * c} x z`, answerTeX: t`${co(2 * a, 'xy')} + ${co(b, 'z')} + ${co(2 * c, 'xz')}`,
@@ -222,7 +222,7 @@ In the plane only the last component survives: $Q_x - P_y$, Green’s integrand.
           prompt: t`Inside a ball of uniform density $\rho$, Newtonian gravity has potential $\Phi = \tfrac{2\pi}{3}G\rho\,(x^2 + y^2 + z^2) + C$, and the gravitational field is $\vec g = -\nabla\Phi$. Treating ${name} as uniform, with its mean density $\rho = ${rho}$ kg/m³, compute the Laplacian $\nabla^2\Phi = \nabla\cdot\nabla\Phi = \Phi_{xx} + \Phi_{yy} + \Phi_{zz}$. ($G = 6.674\times10^{-11}$ N·m²/kg².)`,
           visual: {
             type: 'c3-flux',
-            params: { F: ['-x*step(1 - x^2 - y^2 - z^2)', '-y*step(1 - x^2 - y^2 - z^2)', '-z*step(1 - x^2 - y^2 - z^2)'], surfaces: [{ label: 'Planet', x: 'sin(u)*cos(v)', y: 'sin(u)*sin(v)', z: 'cos(u)', u: [0, 'pi'], v: [0, '2*pi'] }], integrand: 'none', arrowsOn: 'grid', grid: 5, range: 1.3, normals: false, readouts: [], alpha: 0.25, arrowLen: 0.35, arrowColor: 'accent', dist: 6.5 },
+            params: { F: ['-x*step(1 - x^2 - y^2 - z^2)', '-y*step(1 - x^2 - y^2 - z^2)', '-z*step(1 - x^2 - y^2 - z^2)'], surfaces: [{ label: 'Planet', x: 'sin(u)*cos(v)', y: 'sin(u)*sin(v)', z: 'cos(u)', u: [0, 'pi'], v: [0, '2*pi'] }], integrand: 'none', arrowsOn: 'grid', grid: 5, range: 1.3, normals: false, readouts: [], alpha: 0.25, arrowLen: 0.35, arrowColor: 'accent' },
             caption: t`Inside a uniform planet (the translucent ball), $\vec g = -\nabla\Phi$ points to the centre and grows in proportion to the distance from it. Arrows to scale with one another. Drag to rotate.`,
           },
           answer: val, units: 's^-2', tol: { rel: 0.01 },

@@ -19,7 +19,7 @@
 //       grid: [21, 15],                  // how many segments across and up
 //       seeds: [[0, 1], { t: 0, y: -1, color: 'good' }],   // solution curves through these points
 //       seedColor: null,                 // one colour for every seed (a family), instead of a palette
-//       start: [0, 0.5],                 // a draggable start point whose solution is drawn bold
+//       start: [0, 0.5],                 // a draggable start point whose solution is drawn bold (a point item's answer)
 //       click: true,                     // a click adds a solution (Explore view only, never in a problem)
 //       isoclines: [-1, 0, 1],           // the slopes c whose isoclines f = c are drawn, dashed and labelled
 //       isoToggle: false,                // offer a switch for them (they then start hidden)
@@ -73,7 +73,8 @@ export function mount(F, P0) {
       start.t = Math.max(plot.vx0, Math.min(plot.vx1, t));
       start.y = Math.max(plot.vy0, Math.min(plot.vy1, y));
     }, { hollow: true });
-    plot.onDrag = () => { dragged = true; draw(); };
+    // a dragged start point can be a point item's answer: tell the question to re-read it
+    plot.onDrag = () => { dragged = true; draw(); F.notify('point'); };
   }
   const added = [];
   if (P.click && !F.compact) {
@@ -217,7 +218,7 @@ export function mount(F, P0) {
   else F.caption(P.phaseLine
     ? 'Segments show the slope only (their length means nothing). On the phase line: filled dot, stable equilibrium; hollow, unstable; half-filled, semi-stable. Curves are traced numerically (RK4).'
     : 'Segments show the slope only (their length means nothing). Curves are traced numerically with RK4 from the marked points.');
-  return { get: (k) => (k === 'start' && start ? { x: start.t, y: start.y } : F.params[k]) };
+  return { get: (k) => ((k === 'start' || k === 'point') && start ? { x: start.t, y: start.y } : F.params[k]) };
 }
 
 /** Node-side check used by the content tests. */

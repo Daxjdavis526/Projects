@@ -20,6 +20,7 @@ const R3 = '{}^{(3)}\\!R';
 const bill = (R, sigma, beta) => (beta ** 2 * C ** 2 * R * R * sigma) / (36 * G);   // |E|/c², kg (thin wall)
 const SIGMA_QI = 2 / (100 * L_PLANCK);                                              // wall ~100 Planck lengths
 const AXIS = C ** 4 / (48 * Math.PI * G);                                            // J/m³ per (β²σ²·m²)
+const NUCLEAR = 2.3e17 * C ** 2;                                                     // J/m³, nuclear matter
 
 // ── pictures ────────────────────────────────────────────────────────────────
 
@@ -251,8 +252,8 @@ The total is roughly $-\beta^2c^2R^2\sigma/(36G)$ as a mass — about $-0.2$ sol
             { value: val * 4, feedback: t`$(f')^2 = (\sigma/2)^2 = \sigma^2/4$.` },
           ],
           hints: [t`$(1 - f)f'' - (f')^2 \approx -\sigma^2/4$.`, t`So the average is $-\dfrac{c^4\beta^2\sigma^2}{48\pi G}$, with $c^4/(48\pi G) = ${sci(AXIS)}$ J/m; times $\sigma^2$ in m⁻² it gives J/m³.`],
-          teach: t`Where the free-falling observers see nothing, light rays crossing the wall see on average $-c^4\beta^2\sigma^2/(48\pi G)$ — of order $10^{41}$ J/m³ for a 2 m wall at light speed.`,
-          explain: t`$-\dfrac{c^4\beta^2\sigma^2}{48\pi G} = ${sci(val)}$ J/m³ — some $10^{7}$ to $10^{8}$ times the energy density of nuclear matter, and negative. The average being negative means at least one direction is: light rays crossing the axis in the wall see negative energy where the Eulerian observers measure none.`,
+          teach: t`Where the free-falling observers see nothing, light rays crossing the wall see on average $-c^4\beta^2\sigma^2/(48\pi G)$ — about $${sci(-AXIS, 2)}$ J/m³ for a 2 m wall at light speed.`,
+          explain: t`$-\dfrac{c^4\beta^2\sigma^2}{48\pi G} = ${sci(val)}$ J/m³ — $${sci(Math.abs(val) / NUCLEAR, 2)}$ times the energy density of nuclear matter, and negative. The average being negative means at least one direction is: light rays crossing the axis in the wall see negative energy where the Eulerian observers measure none.`,
           visual: linePic({ h: 0, s: 4, caption: t`On the axis ($h = 0$): the Eulerian energy density (gold) is zero everywhere, while the null energy averaged over light rays (violet) dips negative in the wall. Units $v^2/(32\pi)$, $G = c = 1$, $\sigma R = 4$.` }),
         };
       },
