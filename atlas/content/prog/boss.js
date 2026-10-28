@@ -332,7 +332,7 @@ def with_drag(t, s, k=1e-7):
         num({
           id: 'r3-c', skill: 'prog.P15.2', difficulty: 2,
           gen(r) {
-            const [shown, cval] = r.pick([['3e8', 3e8], ['2.998e8', 2.998e8], ['2.9979e8', 2.9979e8]]), cT = tex(cval, 5);
+            const [shown, cval, nd] = r.pick([['3e8', 3e8, 1], ['2.998e8', 2.998e8, 4], ['2.9979e8', 2.9979e8, 5]]), cT = tex(cval, nd);
             const ps = A_NS * 1000 * Math.abs(1 - (299792458 / cval) ** 2);
             return {
               prompt: t`The orbit code and the clock analysis each define the speed of light:
