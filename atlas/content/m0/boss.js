@@ -181,7 +181,7 @@ function dipPic(C) {
   return plane({
     x: [-1.3, 1.3], y: [-0.05, 1.25], ticks: false, xlabel: '', ylabel: '', grid: false,
     curves: [{ param: [`${Rd}*cos(t)`, `${Rd}*sin(t)`], t: [0.35, 2.8], color: 'teal', width: 2.4 }, seg(P, Tg, { color: 'gold', width: 2 }), seg([-0.6, 1], [0.6, 1], { color: 'ink3', width: 1.4, dash: true }), seg([0, 0], P, { color: 'ink4', width: 1.2, dash: true }), seg([0, 0], Tg, { color: 'ink4', width: 1.2, dash: true })],
-    points: [dot(P, 'Kestrel', { labelDy: -10 }), dot(Tg, 'horizon', { color: 'teal', r: 4, labelDx: 8, labelDy: 12 }), note([0.62, 1.06], 'local horizontal', { color: 'ink3' }), dot([0, 0], 'Earth’s centre', { color: 'teal', r: 3, labelDx: 8, labelDy: -8 })],
+    points: [dot(P, 'Kestrel', { labelDy: -10 }), dot(Tg, 'horizon', { color: 'teal', r: 4, labelDx: 8, labelDy: 12 }), note([-0.75, 1.07], 'local horizontal', { color: 'ink3' }), dot([0, 0], 'Earth’s centre', { color: 'teal', r: 3, labelDx: 8, labelDy: -8 })],
     caption: t`The line of sight from the spacecraft to the horizon (gold) just grazes the Earth, so it meets the radius there at a right angle. Not to scale: the altitude is hugely exaggerated.`,
   });
 }
