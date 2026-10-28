@@ -131,6 +131,7 @@ export function seeds(S, which, n) {
     // equal flux through the midplane disc: invert Φ(ρ) by bisection
     const tot = fluxUp(S, 1);
     for (let i = 0; i < n; i++) {
+      if (i === 0) { out.push([0, 0]); continue; }
       const target = (i / n) * tot;
       let lo = 0, hi = 1;
       for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (fluxUp(S, mid) < target) lo = mid; else hi = mid; }

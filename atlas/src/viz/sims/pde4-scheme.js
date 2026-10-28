@@ -42,6 +42,7 @@ const CONTROLS = ['scheme', 'nu', 'N', 'profile', 't', 'noise'];
 const PANELS = ['profile', 'cone', 'gain'];
 const HIDE = ['steps', 'maxu', 'gain', 'error'];
 const L = 10;
+const EXPLAIN = { upwind: 'Upwind takes its difference from the side the wave comes from.', downwind: 'Downwind takes it from the wrong side.', ftcs: 'FTCS (forward in time, centred in space) uses both neighbours equally.', laxf: 'Lax–Friedrichs replaces the old value by the average of its neighbours.', lw: 'Lax–Wendroff adds a second-order correction from the Taylor series.' };
 const texNum = (x) => {
   if (!Number.isFinite(x)) return '\\infty';
   const a = Math.abs(x);
@@ -60,7 +61,7 @@ export function mount(F, P0) {
   const isHeat = P.eq === 'heat';
   const nuName = isHeat ? 'r' : 'ν';
 
-  ctl('scheme', () => F.choice({ key: 'scheme', label: 'Scheme', options: schemes.map((s) => [s, M.NAME[s]]), value: P.scheme, explain: 'Upwind takes its difference from the side the wave comes from; downwind from the wrong side; FTCS is centred; Lax–Wendroff adds the second-order correction.' }));
+  ctl('scheme', () => F.choice({ key: 'scheme', label: 'Scheme', options: schemes.map((s) => [s, M.NAME[s]]), value: P.scheme, explain: schemes.map((k) => EXPLAIN[k]).join(' ') }));
   ctl('nu', () => F.slider({ key: 'nu', label: isHeat ? 'Mesh ratio $r = D\\,\\Delta t/\\Delta x^2$' : 'Courant number $\\nu = c\\,\\Delta t/\\Delta x$', min: 0.05, max: P.numax, step: 0.01, value: P.nu, explain: isHeat ? 'How big a time step is, measured against $\\Delta x^2/D$.' : 'How many cells the wave crosses in one time step.' }));
   ctl('N', () => F.choice({ key: 'N', label: 'Grid points $N$', options: (P.Ns || [P.N]).map((n) => [n, String(n)]), value: P.N, explain: `Points across the ${L} m domain: $\\Delta x = ${L}/N$.` }));
   ctl('profile', () => F.choice({ key: 'profile', label: 'Initial profile', options: [['gauss', 'bump'], ['box', 'square'], ['sine', 'sine wave']], value: P.profile, explain: 'The square’s jumps contain every wavelength, the shortest the grid can hold included.' }));
@@ -69,7 +70,7 @@ export function mount(F, P0) {
 
   const cvP = panels.includes('profile') ? F.canvas({ aspect: 'wide', label: P.alt || 'Grid values of the numerical solution over the exact solution' }) : null;
   const cvC = panels.includes('cone') ? F.canvas({ aspect: 'wide', label: 'The grid in the x–t plane: the numerical and physical domains of dependence of one point' }) : null;
-  const cvG = panels.includes('gain') ? F.canvas({ aspect: P.gain === 'abs' ? 'wide' : '', label: 'The amplification factor G(θ) against the unit circle' }) : null;
+  const cvG = panels.includes('gain') ? F.canvas({ aspect: 'wide', label: 'The amplification factor G(θ) against the unit circle' }) : null;
   const pP = cvP && new Plot(cvP.canvas, { x: [0, L], y: P.ylim, xlabel: 'x (m)', ylabel: 'u', axesAt: 'edge', xticks: 10 });
   const pC = cvC && new Plot(cvC.canvas, { x: [-10, 10], y: [-0.7, P.levels + 0.9], axes: false, grid: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
   const pG = cvG && (P.gain === 'abs'
@@ -169,7 +170,7 @@ export function mount(F, P0) {
     }
     const z0 = M.gain(key, 0, nu)[0];
     pG.point(z0[0], z0[1], { color: 'good', r: 4, label: 'θ = 0', ldx: 6, ldy: -10, lsize: fs });
-    pG.text('unit circle', -0.71, 0.71, { dx: -6, dy: -8, align: 'right', size: fs, color: 'ink3' });
+    pG.text('unit circle', -0.78, 0.78, { dx: -6, dy: -6, align: 'right', size: fs, color: 'ink3' });
   }
 
   function readout() {
@@ -184,7 +185,7 @@ export function mount(F, P0) {
       rows.push(['$\\max|u|$', q('maxu', texNum(R.maxu))]);
       if (P.exact) rows.push(['largest error', q('error', texNum(e))]);
     }
-    rows.push([`largest $|G|$ at $${nuName === 'r' ? 'r' : '\\nu'} = ${F.params.nu.toFixed(2)}$`, q('gain', texNum(M.maxGain(gkey(), F.params.nu, 720)))]);
+    if (pG || !hide.has('gain')) rows.push([`largest $|G|$ at $${nuName === 'r' ? 'r' : '\\nu'} = ${F.params.nu.toFixed(2)}$`, q('gain', texNum(M.maxGain(gkey(), F.params.nu, 720)))]);
     F.readout(rows);
   }
 

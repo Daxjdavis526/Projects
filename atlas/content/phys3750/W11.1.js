@@ -55,7 +55,7 @@ Add these up over a region and you get the divergence theorem and Stokes’s the
   visual: {
     type: 'field2d',
     title: 'Sources, swirls and paddle wheels',
-    lead: t`Four flows in the plane. Drag the probe: it reads the field, its divergence and its curl. The dashed circle compares the circulation round it with the flux of the curl through it.`,
+    lead: t`Four flows in the plane. Drag the probe: it reads the field, its divergence and its curl. The gold circle compares the circulation round it with the flux of the curl through it.`,
     tasks: [
       t`Source: tracers spread apart, the divergence is $2$ everywhere and the curl is $0$.`,
       t`Shear flow, $\vec F = (y, 0)$: every tracer moves in a straight line, yet the curl is $-1$ — a paddle wheel would spin, because the top of it is pushed harder than the bottom.`,

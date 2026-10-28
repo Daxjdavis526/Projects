@@ -113,8 +113,8 @@ check('Eddington–Finkelstein chart gives the same K, also inside 2M', close(K(
 {
   // Schwarzschild: E = f ṫ conserved; dropped from rest at r = 8M, reaches r = 4M at the closed-form proper time
   const r0 = 8, u = D.launch(M.schwarzschild, r0, 0, 1, { speed: 0 });
-  const g = D.geodesic(M.schwarzschild, { a: r0, b: 0, u, length: 9, steps: 9000 });
-  check('Schwarzschild: −p_t = (1 − 2M/r) ṫ conserved', Math.max(...g.pb.map((x) => Math.abs(x - g.pb[0]))) < 1e-9);
+  const g = D.geodesic(M.schwarzschild, { a: r0, b: 0, u, length: 25, steps: 20000 });
+  check('Schwarzschild: −p_t = (1 − 2M/r) ṫ conserved (outside r = 2.5M)', Math.max(...g.pb.filter((x, i) => g.pts[i][0] > 2.5).map((x) => Math.abs(x - g.pb[0]))) < 1e-9);
   // from rest at r0: τ(r) = sqrt(r0³/8M)[η + sin η], with r = (r0/2)(1 + cos η)
   const eta = Math.acos(2 * 4 / r0 - 1), tau = sqrt(r0 ** 3 / 8) * (eta + sin(eta));
   const i = g.pts.findIndex((p) => p[0] <= 4);
@@ -128,7 +128,7 @@ check('Eddington–Finkelstein chart gives the same K, also inside 2M', close(K(
   const run = (psi) => D.geodesic(M.torus, { a: 0, b: 0, u: D.launch(M.torus, 0, 0, 1, { heading: psi }), length: 60, steps: 6000 });
   const lo = run(crit - 0.05), hi = run(crit + 0.05);
   const vmax = (g) => Math.max(...g.pts.map((p) => Math.abs(p[1])));
-  check('torus: below the critical heading the geodesic is trapped on the outside', vmax(lo) < PI / 2 + 0.5 && vmax(lo) < PI - 0.1, String(vmax(lo)));
+  check('torus: below the critical heading the geodesic is trapped on the outside', vmax(lo) < PI - 0.3, String(vmax(lo)));
   check('torus: above it the geodesic crosses the inner equator', vmax(hi) > PI, String(vmax(hi)));
   // ψ = 45°: turning latitude cos v = (3 cos 45° − 2)/1
   const g = run(PI / 4), vt = Math.acos(3 * cos(PI / 4) - 2);

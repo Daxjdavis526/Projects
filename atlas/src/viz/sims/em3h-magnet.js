@@ -27,6 +27,8 @@
 //       labels: true,           // N and S, and the names of the sources
 //       controls: null,         // true, false, or a list of: show ratio shape sources kind
 //       readout: true,
+//       readouts: null,         // which rows to show (default all): B H M N
+//       views: null,            // which views the Show choice offers (default B H M)
 //       hide: [],               // readouts shown as “?”: B H M N
 //   } }
 
@@ -35,7 +37,7 @@ import * as Mod from '../model/em3h-magnet.js';
 
 export const defaults = {
   kind: 'magnet', shape: 'cylinder', ratio: 1, show: 'B', M: 1000, sources: true, lines: 5,
-  probe: [0.4, 0.5], inset: true, x: null, y: null, labels: true, controls: null, readout: true, hide: [],
+  probe: [0.4, 0.5], inset: true, x: null, y: null, labels: true, controls: null, readout: true, readouts: null, views: null, hide: [],
 };
 const CONTROLS = ['show', 'ratio', 'shape', 'sources', 'kind'];
 const HIDE = ['B', 'H', 'M', 'N'];
@@ -55,7 +57,12 @@ export function mount(F, P0) {
   const nm = () => NAMES[kindNow()];
   ctl('kind', () => F.choice({ key: 'kind', label: 'The body', options: [['magnet', 'a magnet ($\\vec M$)'], ['electret', 'an electret ($\\vec P$)']], value: P.kind, explain: 'A uniformly magnetized body, or a uniformly polarized one: the same mathematics with bound current replaced by bound charge.' }), P.kind);
   const toView = (s) => ({ B: 'B', H: 'H', M: 'M', D: 'B', E: 'H', P: 'M' }[s] || 'B');
-  ctl('show', () => F.choice({ key: 'show', label: 'Show', options: P.kind === 'electret' && !wanted.includes('kind') ? [['B', '$\\vec D$'], ['H', '$\\vec E$'], ['M', '$\\vec P$']] : [['B', 'the field ($\\vec B$ or $\\vec D$)'], ['H', 'the auxiliary field ($\\vec H$ or $\\vec E$)'], ['M', 'the magnetization or polarization']], value: toView(P.show), explain: 'B and D have closed field lines; H and E start and end on the faces; M and P live only inside the material.' }), toView(P.show));
+  const OPTS = wanted.includes('kind')
+    ? { B: 'the field ($\\vec B$ or $\\vec D$)', H: 'the auxiliary field ($\\vec H$ or $\\vec E$)', M: 'the magnetization or polarization' }
+    : P.kind === 'electret' ? { B: '$\\vec D$', H: '$\\vec E$', M: '$\\vec P$' } : { B: '$\\vec B$', H: '$\\vec H$', M: '$\\vec M$' };
+  const views = (P.views || ['B', 'H', 'M']).map(toView);
+  const EXPL = { B: 'B and D have closed field lines', H: 'H and E start and end on the end faces', M: 'M and P live only inside the material' };
+  ctl('show', () => F.choice({ key: 'show', label: 'Show', options: views.map((v) => [v, OPTS[v]]), value: toView(P.show), explain: `${views.map((v) => EXPL[v]).join('; ')}.` }), toView(P.show));
   ctl('shape', () => F.choice({ key: 'shape', label: 'Shape', options: [['cylinder', 'cylinder'], ['sphere', 'sphere']], value: P.shape, explain: 'A sphere’s inside fields are uniform: B = ⅔μ₀M and H = −M/3.' }), P.shape);
   ctl('ratio', () => F.slider({ key: 'ratio', label: 'Length ÷ diameter', min: 0.1, max: 4, step: 0.05, value: P.ratio, explain: 'A thin disk on the left of the scale, a long rod on the right.' }), P.ratio);
   ctl('sources', () => F.toggle({ key: 'sources', label: 'Show the sources', value: P.sources, explain: 'Bound current K = M × n̂ for B; the pole density M·n̂ on the end faces for H (bound charge for an electret).' }), P.sources);
@@ -201,19 +208,21 @@ export function mount(F, P0) {
     const q = (k, v) => (hide.has(k) ? '?' : v);
     const elec = kindNow() === 'electret', Mv = P.M;
     const rows = [];
+    const want = new Set(P.readouts || HIDE);
     if (pr) {
       const x = pr.v, z = pr.u, b = Mod.B(S, x, z), h = Mod.H(S, x, z), m = Mod.M(S, x, z);
+      const lead = (k) => (rows.length ? '' : ' at the probe');
       if (elec) {
-        rows.push(['$D$ along the axis at the probe', q('B', `${f3(b[1] * Mv)}\\,\\mu\\text{C/m}^2`)]);
-        rows.push(['$E$ along the axis', q('H', `${f3((h[1] * Mv * 1e-6) / Mod.EPS0 / 1e3)}\\,\\text{kV/m}`)]);
-        rows.push(['$P$', q('M', `${f3(m[1] * Mv)}\\,\\mu\\text{C/m}^2`)]);
+        if (want.has('B')) rows.push([`$D$ along the axis${lead()}`, q('B', `${f3(b[1] * Mv)}\\,\\mu\\text{C/m}^2`)]);
+        if (want.has('H')) rows.push([`$E$ along the axis${lead()}`, q('H', `${f3((h[1] * Mv * 1e-6) / Mod.EPS0 / 1e3)}\\,\\text{kV/m}`)]);
+        if (want.has('M')) rows.push(['$P$', q('M', `${f3(m[1] * Mv)}\\,\\mu\\text{C/m}^2`)]);
       } else {
-        rows.push(['$B$ along the axis at the probe', q('B', `${f3(b[1] * Mod.MU0 * Mv * 1e3)}\\,\\text{T}`)]);
-        rows.push(['$H$ along the axis', q('H', `${f3(h[1] * Mv)}\\,\\text{kA/m}`)]);
-        rows.push(['$M$', q('M', `${f3(m[1] * Mv)}\\,\\text{kA/m}`)]);
+        if (want.has('B')) rows.push([`$B$ along the axis${lead()}`, q('B', `${f3(b[1] * Mod.MU0 * Mv * 1e3)}\\,\\text{T}`)]);
+        if (want.has('H')) rows.push([`$H$ along the axis${lead()}`, q('H', `${f3(h[1] * Mv)}\\,\\text{kA/m}`)]);
+        if (want.has('M')) rows.push(['$M$', q('M', `${f3(m[1] * Mv)}\\,\\text{kA/m}`)]);
       }
     }
-    rows.push([elec ? 'depolarizing factor at the centre' : 'demagnetizing factor at the centre', q('N', `N = ${f3(Mod.centreN(S))}`)]);
+    if (want.has('N')) rows.push([elec ? 'depolarizing factor at the centre' : 'demagnetizing factor at the centre', q('N', `N = ${f3(Mod.centreN(S))}`)]);
     F.readout(rows);
   }
 
@@ -237,5 +246,7 @@ export function validate(P) {
   for (const k of ['x', 'y']) if (P[k] !== null && !(Array.isArray(P[k]) && P[k].length === 2 && P[k][0] < P[k][1])) p.push(`em3h-magnet: ${k} is a range [lo, hi]`);
   if (Array.isArray(P.controls)) for (const c of P.controls) if (!CONTROLS.includes(c)) p.push(`em3h-magnet: unknown control “${c}”`);
   for (const h of P.hide || []) if (!HIDE.includes(h)) p.push(`em3h-magnet: unknown hide “${h}”`);
+  for (const h of P.readouts || []) if (!HIDE.includes(h)) p.push(`em3h-magnet: unknown readout “${h}”`);
+  for (const v of P.views || []) if (!['B', 'H', 'M', 'D', 'E', 'P'].includes(v)) p.push(`em3h-magnet: unknown view “${v}”`);
   return p;
 }

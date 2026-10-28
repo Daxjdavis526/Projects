@@ -23,7 +23,7 @@ export const MU0 = 1.25663706127e-6;   // N/A², CODATA 2022
  *   NdFeB N42: B_r ≈ 1.31 T, H_cJ ≈ 1000 kA/m (grade minimum 955), (BH)max ≈ 320 kJ/m³
  */
 export const MATERIALS = {
-  iron: { name: 'soft iron', Js: 2.15, Hc: 80, w: 120, n: 2, scale: 1, unit: 'A/m', Hmax: 600 },
+  iron: { name: 'soft iron', Js: 2.15, Hc: 80, w: 120, n: 2, scale: 1, unit: 'A/m', Hmax: 1000 },
   alnico: { name: 'Alnico 5', Js: 1.28, Hc: 52e3, w: 15e3, n: 6, scale: 1e3, unit: 'kA/m', Hmax: 150e3 },
   ndfeb: { name: 'NdFeB (N42)', Js: 1.31, Hc: 1000e3, w: 150e3, n: 4, scale: 1e3, unit: 'kA/m', Hmax: 2400e3 },
 };
@@ -75,7 +75,7 @@ export function bhMax(m, steps = 4000) {
   return best;
 }
 
-/** The loop's area ∮H dB = ∫(J↓ − J↑) dH over ±Hmax (J/m³): the energy dissipated per cycle per unit volume. */
+/** The loop's area ∮H dB = ∫(J↓ − J↑) dH over ±Hmax (J/m³), the path closed at ±Hmax: the energy dissipated per cycle per unit volume. */
 export function loss(m, steps = 20000) {
   let s = 0;
   const h = (2 * m.Hmax) / steps;
