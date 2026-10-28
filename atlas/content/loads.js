@@ -100,6 +100,7 @@ export const LESSONS = {
   'm0.M0-10.4': () => import('./m0/M0-10.4.js'),
   'm0.M0-11.1': () => import('./m0/M0-11.1.js'),
   'm0.M0-11.2': () => import('./m0/M0-11.2.js'),
+  'm0.M0-11.3': () => import('./m0/M0-11.3.js'),
   'm0.M0-2.1': () => import('./m0/M0-2.1.js'),
   'm0.M0-2.2': () => import('./m0/M0-2.2.js'),
   'm0.M0-2.3': () => import('./m0/M0-2.3.js'),
