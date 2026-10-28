@@ -77,7 +77,7 @@ export function mount(F, P0) {
   F.params.speed = P.speed;            // fixed per picture: the two fields need different windows and starting points
   ctl('c', () => F.slider(P.mode === 'variable' && P.speed === 'stretch'
     ? { key: 'c', label: 'Rate $a$', min: 0.1, max: 1, step: 0.05, value: P.c, unit: '\\mathrm{s^{-1}}', explain: 'In $c(x) = a x$: the farther from $x = 0$, the faster the flow.' }
-    : modes.length > 1 ? { key: 'c', label: 'Speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'Transport: how fast the profile is carried. Wave: how fast each half runs.' }
+    : modes.length > 1 ? { key: 'c', label: 'Speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: modes.includes('transport') && modes.includes('wave') ? 'Transport: how fast the profile is carried. Wave: how fast each half runs.' : modes.includes('wave') ? 'How fast each half of the disturbance runs (wave equation).' : 'How fast the profile is carried.' }
     : P.mode === 'wave' ? { key: 'c', label: 'Wave speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'How fast each half of the disturbance runs along the string.' }
       : P.mode === 'variable' ? { key: 'c', label: 'Speed outside the reach $c$', min: 0.5, max: 3, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'The flow speed upstream and downstream of the slow reach.' }
         : { key: 'c', label: 'Speed $c$', min: -3, max: 3, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'Positive: the profile is carried toward $+x$. Negative: toward $-x$.' }));

@@ -3,7 +3,7 @@
 // the on-ramp for counting microstates.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { fmt, nice } from '../../src/core/format.js';
-import { KB, AMU, MOLAR, bars, binomBars, r4 } from './_count.js';
+import { KB, AMU, MOLAR, bars, binomBars, r4, apart } from './_count.js';
 
 const t = String.raw;
 
@@ -68,7 +68,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
       ],
       riemann: { fn: 'N*gamma(N+1)/(gamma(floor(x*N+0.5)+1)*gamma(N-floor(x*N+0.5)+1))*p^floor(x*N+0.5)*(1-p)^(N-floor(x*N+0.5))', from: '-0.5/N', to: '1+0.5/N', n: 'N+1', rule: 'mid' },
       curves: [{ fn: '1/sqrt(2*pi*p*(1-p)/N)*e^(-(x-p)^2/(2*p*(1-p)/N))', color: 'gold', width: 2, when: 'step(N - 4.5)' }],
-      vlines: [{ x: 'p', label: 'mean Np', color: 'ink2' }],
+      vlines: [{ x: 'p', label: 'mean', color: 'ink2' }],
       readouts: [
         { label: 'mean $Np$', expr: 'N*p', digits: 4 },
         { label: '$\\sigma = \\sqrt{Np(1-p)}$', expr: 'sqrt(N*p*(1-p))', digits: 3 },
@@ -101,7 +101,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
         return {
           prompt: t`A molecule can be found in four states, labelled 0 to 3. States 0, 1 and 3 have probabilities $${nice(ps[0])}$, $${nice(ps[1])}$ and $${nice(ps[3])}$. What is the probability of state 2?`,
           answer: miss, tol: { rel: 0, abs: 0.004 },
-          errors: [{ value: +(a + b + c).toFixed(2), feedback: 'That is the probability of *not* being in state 2. Subtract it from 1.' }],
+          errors: apart([{ value: +(a + b + c).toFixed(2), feedback: 'That is the probability of *not* being in state 2. Subtract it from 1.' }], miss),
           hints: ['The four probabilities must add to exactly 1.'],
           teach: t`Normalisation: $\sum_x P(x) = 1$ — the system is certainly in *some* state.`,
           explain: t`$P(2) = 1 - ${nice(ps[0])} - ${nice(ps[1])} - ${nice(ps[3])} = ${nice(miss)}$.`,
@@ -135,7 +135,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
         return {
           prompt: t`A quantity takes the value $${xs[0]}$ with probability $${nice(ps[0])}$ and $${xs[1]}$ with probability $${nice(ps[1])}$. Find its standard deviation $\sigma$.`,
           answer: s, tol: { rel: 0.01 },
-          errors: [{ value: m2 - m * m, feedback: t`That is the variance $\sigma^2$. Take its square root.` }, { value: Math.sqrt(m2), feedback: t`You took $\sqrt{\langle x^2\rangle}$ (the rms value). Subtract $\langle x\rangle^2$ first.` }],
+          errors: apart([{ value: m2 - m * m, feedback: t`That is the variance $\sigma^2$. Take its square root.` }, { value: Math.sqrt(m2), feedback: t`You took $\sqrt{\langle x^2\rangle}$ (the rms value). Subtract $\langle x\rangle^2$ first.` }], s),
           hints: [t`Find $\langle x\rangle$ and $\langle x^2\rangle$ separately.`, t`$\sigma = \sqrt{\langle x^2\rangle - \langle x\rangle^2}$.`],
           teach: t`The variance is the mean of the square minus the square of the mean.`,
           explain: t`$\langle x\rangle = ${nice(m)}$, $\langle x^2\rangle = ${nice(m2)}$, so $\sigma = \sqrt{${nice(m2)} - ${nice(m)}^2} = ${fmt(s, 3)}$. For two outcomes this is always $d\sqrt{p(1-p)}$ with $d = ${d}$.`,
@@ -182,7 +182,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
           hints: [t`Use $\sigma_k = \sqrt{Np(1-p)}$.`],
           teach: 'Variances of independent trials add: N trials of variance p(1 − p) give Np(1 − p).',
           explain: t`$\sigma = \sqrt{${N}(${p})(${nice(1 - p)})} = ${fmt(s, 3)}$ — about $${fmt((100 * s) / (N * p), 2)}\%$ of the mean $${nice(N * p)}$.`,
-          visual: binomBars(N, p, { mean: true, caption: `The exact distribution of the number of up spins for N = ${N}, p = ${p}.` }),
+          visual: binomBars(N, p, { mean: true, xlabel: 'spins up', caption: `The exact distribution of the number of up spins for N = ${N}, p = ${p}.` }),
         };
       },
     }),
@@ -195,7 +195,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
       hints: [t`$\sigma \propto \sqrt N$ and $\langle k\rangle \propto N$.`],
       teach: t`Relative fluctuations scale as $1/\sqrt N$.`,
       explain: t`$\sigma/\langle k\rangle = \sqrt{Np(1-p)}/(Np) \propto 1/\sqrt N$. For a mole, $1/\sqrt{6\times10^{23}} \approx 10^{-12}$: no instrument could ever see it.`,
-      visual: { type: 'graph', params: { x: [0.2, 0.8], y: [0, 42], aspect: 'wide', xlabel: 'fraction of successes', ylabel: 'probability per unit fraction', axesAt: 'edge', curves: [{ fn: '1/sqrt(2*pi*0.25/100)*e^(-(x-0.5)^2/(2*0.25/100))', color: 'accent', label: 'N = 100', labelAt: 0.58, labelDx: 8 }, { fn: '1/sqrt(2*pi*0.25/10000)*e^(-(x-0.5)^2/(2*0.25/10000))', color: 'gold', label: 'N = 10 000', labelAt: 0.505, labelDx: 8 }] }, caption: 'The distribution of the fraction of successes for N = 100 and N = 10 000 (Gaussian approximations, p = ½).' },
+      visual: { type: 'graph', params: { x: [0.2, 0.8], y: [0, 88], aspect: 'wide', xlabel: 'fraction of successes', ylabel: 'probability per unit fraction', axesAt: 'edge', curves: [{ fn: '1/sqrt(2*pi*0.25/100)*e^(-(x-0.5)^2/(2*0.25/100))', color: 'accent', label: 'N = 100', labelAt: 0.58, labelDx: 8 }, { fn: '1/sqrt(2*pi*0.25/10000)*e^(-(x-0.5)^2/(2*0.25/10000))', color: 'gold', label: 'N = 10 000', labelAt: 0.507, labelDx: 8 }] }, caption: 'The distribution of the fraction of successes for N = 100 and N = 10 000 (Gaussian approximations, p = ½).' },
     }),
   ],
   checkpoint: [
@@ -211,7 +211,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
           hints: [t`Each cell is one trial: $\sigma = \sqrt{Np(1-p)}$.`, t`$\sqrt{${N}\times${p}\times${nice(1 - p)}}$.`],
           teach: 'Independent failures follow the binomial distribution.',
           explain: t`$\langle k\rangle = ${nice(N * p)}$ and $\sigma = \sqrt{${N}(${p})(${nice(1 - p)})} = ${fmt(s, 3)}$ — a designer sizing the array for $\langle k\rangle + 2\sigma \approx ${fmt(N * p + 2 * s, 2)}$ failures covers about 97% of missions.`,
-          visual: binomBars(N, p, { xmax: 20, caption: `The binomial distribution of failures for ${N} cells, shown up to 20 failures (the rest are negligible). Real failures are not always independent: one radiation event can take out a string.` }),
+          visual: binomBars(N, p, { xmax: 20, xlabel: 'failed cells', caption: `The binomial distribution of failures for ${N} cells, shown up to 20 failures (the rest are negligible). Real failures are not always independent: one radiation event can take out a string.` }),
         };
       },
     }),

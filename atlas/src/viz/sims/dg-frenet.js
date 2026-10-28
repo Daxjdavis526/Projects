@@ -62,7 +62,7 @@ export function mount(F, P) {
     } });
   }
 
-  const view = new View3D(canvas, { yaw: P.yaw ?? 0.6, pitch: P.pitch ?? 0.35, dist: 8, target: [0, 0, 0], scale: 1.2 });
+  const view = new View3D(canvas, { yaw: P.yaw ?? 0.6, pitch: P.pitch ?? 0.55, dist: 8, target: [0, 0, 0], scale: 1.2 });
   view.onChange = () => draw();
   const hint = document.createElement('div');
   hint.textContent = 'drag to rotate';
@@ -80,7 +80,7 @@ export function mount(F, P) {
     if (P.ghost) { const [gk, gt] = curveFns(P.ghost, E); ghost = M.integrate(gk, gt, num(P.ghost.length ?? P.length, E), 600); }
     const b = M.bounds([...res.p, ...(ghost ? ghost.p : [])]);
     view.target = b.centre;
-    view.dist = Math.max(2, b.size * 2.4);
+    view.dist = Math.max(2, b.size * 1.75);
     cache = { res, ghost, b, k, t, L }; cacheKey = key;
     return cache;
   }
@@ -91,13 +91,13 @@ export function mount(F, P) {
     const q = M.sampleAt(res, s);
     view.begin();
     // a faint floor grid under the curve, for depth
-    const z0 = b.min[2] - 0.05 * b.size, half = 0.6 * b.size, c = b.centre;
+    const z0 = b.min[2] - 0.05 * b.size, half = 0.42 * b.size, c = b.centre;
     const step = niceStep(b.size / 6);
     for (let g = Math.ceil((c[0] - half) / step) * step; g <= c[0] + half; g += step) view.line([[g, c[1] - half, z0], [g, c[1] + half, z0]], { color: 'line2', width: 0.7, bias: -0.4 });
     for (let g = Math.ceil((c[1] - half) / step) * step; g <= c[1] + half; g += step) view.line([[c[0] - half, g, z0], [c[0] + half, g, z0]], { color: 'line2', width: 0.7, bias: -0.4 });
     if (ghost) view.line(ghost.p, { color: 'ink3', width: 1.4, dash: [5, 5], bias: 0 });
     view.line(res.p, { color: 'violet', width: 2.4, bias: 0.02 });
-    const len = 0.16 * b.size + 0.2, marks = [];
+    const len = 0.2 * b.size, marks = [];
     for (const v of SHOW) {
       if (!(P.show || []).includes(v)) continue;
       const tip = q.p.map((x, i) => x + len * q[v][i]);

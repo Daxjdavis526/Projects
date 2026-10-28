@@ -11,9 +11,9 @@ const DAY = 86400;
 const MOONS = [['Io', 0.4217, 1.769], ['Europa', 0.6709, 3.551], ['Ganymede', 1.0704, 7.155], ['Callisto', 1.8827, 16.689]];
 const moonFig = (caption, highlight) => ({
   type: 'graph',
-  params: { x: [0, 7.5], y: [0, 320], aspect: 'wide', xlabel: 'a³ (10¹⁸ km³)', ylabel: 'T² (days²)',
-    curves: [{ fn: '41.74x', color: 'ink4', dash: true, domain: [0, 7.4] }],
-    points: MOONS.map(([n, a, T]) => ({ x: N(a ** 3), y: N(T * T), label: n, color: n === highlight ? 'accent' : 'gold', labelDx: n === 'Io' ? 8 : -8, labelAlign: n === 'Io' ? 'left' : 'right', labelDy: n === 'Io' ? -14 : -12 })) },
+  params: { x: [-1.4, 1.1], y: [0.2, 2.7], xlog: true, ylog: true, aspect: 'wide', xlabel: 'a³ (10¹⁸ km³)', ylabel: 'T² (days²)',
+    curves: [{ fn: `x + ${N(Math.log10(41.74))}`, color: 'ink4', dash: true }],
+    points: MOONS.map(([n, a, T]) => ({ x: N(Math.log10(a ** 3)), y: N(Math.log10(T * T)), label: n, color: n === highlight ? 'accent' : 'gold', labelDx: 10, labelAlign: 'left', labelDy: 10 })) },
   caption,
 });
 
@@ -105,7 +105,7 @@ Divide by $v_e$, then undo the logarithm with its inverse, the exponential. Once
       hints: [t`Multiply both sides by $M$: $M\,T^2 = \dfrac{4\pi^2 a^3}{G}$.`, t`Now divide both sides by $T^2$.`],
       teach: t`When the unknown is in a denominator, multiply it up first, then divide by whatever it is multiplied by.`,
       explain: t`$M T^2 = \dfrac{4\pi^2 a^3}{G}$, so $M = \dfrac{4\pi^2 a^3}{G T^2}$. Measuring one moon’s orbit weighs the planet.`,
-      visual: moonFig(t`Jupiter’s four large moons: $T^2$ against $a^3$ is one straight line, whose slope is $4\pi^2/(GM)$. Data: JPL; nearly circular orbits.`),
+      visual: moonFig(t`Jupiter’s four large moons, on logarithmic axes: they lie on one line of slope 1, so $T^2/a^3$ is the same for all four. That constant is $4\pi^2/(GM)$. Data: JPL; nearly circular orbits.`),
     }),
     num({
       id: 'pendulum-g', difficulty: 2,

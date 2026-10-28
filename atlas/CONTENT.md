@@ -378,7 +378,10 @@ code({ id: 'ke-function', difficulty: 2,
 ```
 
 The program runs in a fresh namespace; each test is a Python expression
-evaluated in it, and passes if truthy. Test names are what a learner sees next
+evaluated in it, and passes if truthy. An expression, not a statement: no
+`assert`, `=`, `for` or `import` (a SyntaxError fails every run) — use
+`all(… for … in …)`, `abs(…) < tol`, `np.allclose(…)` (if the program imported
+`np`), or a helper the reference program defines. Test names are what a learner sees next
 to ✓ or ✗, so make them say what is being checked. Compare floats with a
 tolerance. Programs may import `numpy`, `scipy`, `matplotlib`, `sympy`,
 `mpmath` (loaded on demand — the first NumPy import costs a few seconds).
@@ -548,6 +551,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `qm-slits`, `qm-hydrogen` | electrons through slits arriving one at a time and building fringes; hydrogen's levels and series, the spectrum in true colour, Bohr orbits or probability clouds |
 | `qm-binding`, `qm-decay` | binding energy per nucleon from Atomic Mass Evaluation masses (AME2016; for AME2020 values use `content/phys3710/_nuclear.js`) with the liquid-drop curve; a sample decaying nucleus by nucleus against the exponential law |
 | `nuc-chain` | activities of every member of a decay chain from Bateman's solution: secular and transient equilibrium, the Mo-99 → Tc-99m generator, radon, the U-238 series (NUBASE2020 half-lives) | `chain` (`pair`, `moly`, `radon`, `radium`, `u238`), `ratio` (pair), `logy`, `time`, `peak`, `number`, `controls`, `readout`, `hide` — see the file header |
+| `pde-player` | one initial profile evolved exactly by transport (with decay), variable-speed transport, the wave or the heat equation; the x–t plane with characteristics and a draggable probe showing its domain of dependence | `mode`, `modes`, `profile`, `A`, `w`, `x0`, `c`, `lambda`, `speed`, `init`, `D`, `t`, `tmax`, `x`, `xt`, `chars`, `sheet`, `probe`, `halves`, `flux`, `energy` — see the file header |
+| `pde-walk` | seeded random walkers over the histogram of their positions against the heat-equation Gaussian of spread √(2Dt) | `N`, `dx`, `dt`, `p` (≠ ½ drifts), `steps`, `nmax`, `xr`, `seed`, `curve`, `controls`, `play`, `readout` |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
 | `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
 | `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |

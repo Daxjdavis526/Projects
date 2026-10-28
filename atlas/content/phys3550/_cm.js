@@ -52,3 +52,6 @@ export function polarPic({ r, theta, T, at, show = ['path', 'basis'], x, y, scal
     caption,
   };
 }
+
+/** Drop error values that a variant's numbers make (nearly) equal to the answer. */
+export const distinct = (errors, answer, rel = 0.02) => errors.filter((e) => Math.abs(e.value - answer) > rel * Math.max(Math.abs(answer), 1e-12));

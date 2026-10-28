@@ -65,17 +65,19 @@ def test_adding_zero():
     assert add_velocities(1234.5, 0.0) == 1234.5
 
 def test_order_does_not_matter():
-    assert_allclose(add_velocities(0.3 * C, 0.6 * C), add_velocities(0.6 * C, 0.3 * C), rtol=1e-15)
+    a, b = 0.3 * C, 0.6 * C
+    assert_allclose(add_velocities(a, b), add_velocities(b, a), rtol=1e-15)
 
 def test_light_stays_light():
     assert_allclose(add_velocities(0.5 * C, C), C, rtol=1e-12)
 
 def test_never_faster_than_light():
-    u, v = np.meshgrid(np.linspace(-0.999, 0.999, 41) * C, np.linspace(-0.999, 0.999, 41) * C)
+    s = np.linspace(-0.999, 0.999, 41) * C
+    u, v = np.meshgrid(s, s)                  # every pair from −0.999c to 0.999c
     assert np.all(np.abs(add_velocities(u, v)) < C)
 
 def test_newton_at_orbital_speeds():
-    # the ISS's 7.66 km/s plus a sample thrown forward at 3 km/s: u + v to a part in 10⁹
+    # the ISS's 7.66 km/s plus a sample thrown forward at 3 km/s
     assert_allclose(add_velocities(7.66, 3.0), 10.66, rtol=1e-9)
 
 def test_known_value():
@@ -107,14 +109,14 @@ def isa_density(h):
         raise ValueError(f"isa_density covers 0 to 11000 m, not {h} m")
     T = 288.15 - 0.0065 * h                     # temperature, K
     p = 101325 * (T / 288.15) ** 5.25588        # pressure, Pa
-    return p / (287.053 * T)                    # ideal gas: ρ = p / (R T)
+    return p / (287.053 * T)                    # ideal gas: rho = p / (R T)
 \`\`\``,
     visual: {
       type: 'graph',
       params: { x: [-0.5, 14], y: [0, 1.4], aspect: 'wide', axesAt: 'edge', xlabel: 'altitude (km)', ylabel: 'ρ (kg/m³)',
         curves: [{ fn: '101325*((288.15 - 6.5*x)/288.15)^5.25588/(287.053*(288.15 - 6.5*x))', color: 'accent', domain: [0, 11] }],
         shade: [{ fn: '1.4', from: 11, to: 14, color: 'warn', alpha: 0.12 }],
-        points: [{ x: 0, y: 1.225, color: 'gold', r: 5, label: '1.225 (sea level)', labelDx: 8, labelDy: 4 }, { x: 11, y: 0.3639, color: 'gold', r: 5, label: '0.3639 (11 km)', labelDx: -6, labelDy: -12, labelAlign: 'right' }],
+        points: [{ x: 0, y: 1.225, color: 'gold', r: 5, label: '1.225 (sea level)', labelDx: 8, labelDy: 4 }, { x: 11, y: 0.3639, color: 'gold', r: 5, label: '0.3639 (11 km)', labelDx: -10, labelDy: 18, labelAlign: 'right' }],
         vlines: [{ x: 11, label: 'must raise ValueError', color: 'warn' }] },
       caption: 'The ISA troposphere: the two tabulated values the tests use, and the region above 11 km, where this formula no longer applies (the temperature stops falling), that the function must refuse.',
     },
@@ -152,6 +154,8 @@ def test_refuses_the_stratosphere():
 \`\`\`
 AssertionError:
 Not equal to tolerance rtol=0.0001, atol=0
+Mismatched elements: 1 / 1 (100%)
+Max absolute difference among violations: 0.00022568
 Max relative difference among violations: 0.00018423
  ACTUAL: array(1.225226)
  DESIRED: array(1.225)
@@ -379,7 +383,7 @@ Put the steps of fixing it, test first, in order.`,
 from numpy.testing import assert_allclose
 
 def doppler(beta):
-    """Observed/emitted frequency for a source approaching at beta = v/c (beta < 0: receding)."""
+    """Observed/emitted frequency; beta = v/c, positive when approaching."""
     return np.sqrt((1 - beta) / (1 + beta))
 
 def test_at_rest():
@@ -413,7 +417,7 @@ for name, test in list(globals().items()):
 from numpy.testing import assert_allclose
 
 def doppler(beta):
-    """Observed/emitted frequency for a source approaching at beta = v/c (beta < 0: receding)."""
+    """Observed/emitted frequency; beta = v/c, positive when approaching."""
     if not -1 < beta < 1:
         raise ValueError(f"|beta| must be below 1, not {beta}")
     return np.sqrt((1 + beta) / (1 - beta))

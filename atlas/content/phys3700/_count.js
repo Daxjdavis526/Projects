@@ -64,7 +64,7 @@ export function bars(data, { x, y, width = 0.8, base = 0, color = 'accent', alph
 }
 
 /** The binomial distribution for N trials with chance p, as bars (probabilities, or log₁₀ of them). */
-export function binomBars(N, p, { hi = null, hiColor = 'gold', ylog = false, mean = false, sd = false, ask = null, xmax = null, caption, alt, ylabel } = {}) {
+export function binomBars(N, p, { hi = null, hiColor = 'gold', ylog = false, mean = false, sd = false, ask = null, xmax = null, caption, alt, ylabel, xlabel = 'number of successes' } = {}) {
   const data = [];
   let top = 0;
   for (let k = 0; k <= N; k++) {
@@ -81,7 +81,7 @@ export function binomBars(N, p, { hi = null, hiColor = 'gold', ylog = false, mea
   const lo = ylog ? Math.floor(Math.min(...data.map((d) => d.y))) : 0;
   return bars(data, {
     x: [-0.8, (xmax ?? N) + 0.8], y: ylog ? [lo, Math.ceil(top) + 0.3] : [0, r4(top * 1.18)], base: lo, width: N > 60 ? 0.9 : 0.8,
-    xlabel: 'number of successes', ylabel: ylabel || (ylog ? 'probability (log scale)' : 'probability'), ylog, vlines, arrows, points,
+    xlabel, ylabel: ylabel || (ylog ? 'probability (log scale)' : 'probability'), ylog, vlines, arrows, points,
     caption, alt: alt || `The binomial distribution for ${N} trials`,
   });
 }
