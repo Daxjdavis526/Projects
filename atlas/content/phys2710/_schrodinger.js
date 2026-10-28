@@ -73,4 +73,82 @@ export function density({ fn, x, y, shade = null, xlabel = 'x (nm)', ylabel = '|
 export const boxFn = (n) => `sqrt(2)*sin(${n}*pi*x)`;
 export const boxProbFn = (n) => `2*sin(${n}*pi*x)^2`;
 
+/**
+ * Infinite wells drawn as level ladders (graph): each box has walls, a floor
+ * and its levels as horizontal lines. Energies are in the picture's own units.
+ *   boxes: [{ x0, x1, levels: [E…], names: ['n = 1', …], color, highlight: [index…] }]
+ *   arrows: [{ x, from, to, color, label }] — vertical jumps between levels
+ */
+export function ladder({ boxes, arrows = [], y, x, caption, extraPoints = [] }) {
+  const curves = [], points = [...extraPoints], arr = [];
+  for (const B of boxes) {
+    const top = y[1] * 0.98;
+    curves.push(seg(B.x0, 0, B.x0, top, 'ink2', 2.4), seg(B.x1, 0, B.x1, top, 'ink2', 2.4), seg(B.x0, 0, B.x1, 0, 'ink2', 2.4));
+    B.levels.forEach((E, i) => {
+      const hi = (B.highlight || []).includes(i);
+      curves.push(seg(B.x0, E, B.x1, E, hi ? 'gold' : B.color || 'accent', hi ? 2.8 : 1.8));
+      if (B.names?.[i]) points.push(label(B.x1, E, B.names[i], hi ? 'gold' : 'ink2', 8, 0, 'left'));
+    });
+    if (B.title) points.push(label((B.x0 + B.x1) / 2, top, B.title, 'ink2', 0, -10, 'center'));
+  }
+  for (const A of arrows) {
+    arr.push({ from: [r6(A.x), r6(A.from)], to: [r6(A.x), r6(A.to)], color: A.color || 'bad', width: 2 });
+    if (A.label) points.push(label(A.x, (A.from + A.to) / 2, A.label, A.color || 'bad', A.dx ?? 8, A.dy ?? 0, 'left'));
+  }
+  return {
+    type: 'graph',
+    params: { x, y, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves, points, arrows: arr },
+    caption,
+  };
+}
+
+/**
+ * The graphical solution of a finite well of strength z₀ (graph): the left
+ * sides tan z (even states) and −cot z (odd states) against the right side
+ * √(z₀² − z²)/z; each crossing is a bound state.
+ *   mark: { z, text } — a crossing to label; odd: false leaves out −cot z
+ */
+export function graphical(z0, { mark = null, odd = true, caption } = {}) {
+  const top = 4.2, curves = [], zmax = r6(Math.max(z0 + 0.6, 2));
+  for (let k = 0; k * Math.PI < zmax; k++) {
+    curves.push({ fn: 'tan(x)', domain: [r6(k * Math.PI + 0.001), r6(Math.min(k * Math.PI + 1.5, zmax))], color: 'accent', width: 2, ...(k === 0 ? { label: 'tan z (even states)', labelAt: 1.0, labelDx: 10, labelDy: 8 } : {}) });
+    if (odd) curves.push({ fn: '-1/tan(x)', domain: [r6(k * Math.PI + Math.PI / 2 + 0.07), r6(Math.min((k + 1) * Math.PI - 0.001, zmax))], color: 'violet', width: 2, dash: [6, 4], ...(k === 0 ? { label: '−cot z (odd states)', labelAt: 2.6, labelDx: 8, labelDy: -4 } : {}) });
+  }
+  curves.push({ fn: `sqrt(${r6(z0 * z0)} - x^2)/x`, domain: [0.05, r6(z0)], color: 'gold', width: 2.4, label: `√(z₀² − z²)/z, z₀ = ${r6(z0).toPrecision(3)}`, labelAt: r6(z0 / 1.9), labelDx: 10, labelDy: -12 });
+  const points = mark ? [{ x: r6(mark.z), y: r6(Math.sqrt(z0 * z0 - mark.z * mark.z) / mark.z), r: 5.5, color: 'ink', label: mark.text, labelDx: 10, labelDy: -10 }] : [];
+  return {
+    type: 'graph',
+    params: { x: [0, zmax], y: [0, top], aspect: 'wide', axesAt: 'edge', xlabel: 'z = ka', ylabel: '', vlines: [{ x: r6(z0), label: 'z₀', color: 'gold' }], curves, points },
+    caption: caption ?? 'The graphical solution of a finite well: z = ka, where k is the wavenumber inside and a the half-width. Each crossing of the gold curve with a blue (even) or dashed violet (odd) branch is one bound state; there are none beyond z₀.',
+  };
+}
+
+/**
+ * A Coulomb barrier (graph): V(r) = k·Z₁Z₂e²/r outside the nuclear radius R,
+ * a schematic well inside, the energy Q, and the forbidden stretch R … b shaded.
+ */
+export function coulomb({ Z1Z2, R, Q, unit = 'MeV', xmax, ymax, wellDepth = null, names = {}, caption }) {
+  const b = (Z1Z2 * KE2) / Q, VR = (Z1Z2 * KE2) / R, xm = xmax ?? 1.3 * b, ym = ymax ?? 1.12 * VR, dep = wellDepth ?? 0.18 * ym;
+  return {
+    type: 'graph',
+    params: {
+      x: [0, r6(xm)], y: [r6(-dep * 1.4), r6(ym)], aspect: 'wide', axesAt: 'edge', xlabel: 'distance between the centres r (fm)', ylabel: `energy (${unit})`,
+      shade: [{ fn: `${r6(Z1Z2 * KE2)}/x`, lower: String(r6(Q)), from: r6(R), to: r6(b), color: 'bad', alpha: 0.25 }],
+      curves: [
+        { fn: `${r6(Z1Z2 * KE2)}/x`, domain: [r6(R), r6(xm)], color: 'ink2', width: 2.4 },
+        seg(R, -dep, R, VR, 'ink2', 2.4), seg(0, -dep, R, -dep, 'ink2', 2.4),
+        seg(0, Q, xm, Q, 'gold', 2.4),
+      ],
+      points: [
+        label(R, 0, names.R ?? `R = ${r6(R).toPrecision(3)} fm`, 'ink2', 6, 12, 'left'),
+        label(b, Q, names.b ?? `b = ${r6(b).toPrecision(3)} fm`, 'bad', 0, 14, 'center'),
+        label(xm * 0.98, Q, names.Q ?? `energy ${r6(Q)} ${unit}`, 'gold', 0, -12, 'right'),
+        label(R * 1.1, VR, names.top ?? `barrier top ≈ ${r6(VR).toPrecision(3)} ${unit}`, 'ink2', 8, 0, 'left'),
+        label(R + 0.3 * (b - R), Q + 0.3 * (Math.min(ym, (Z1Z2 * KE2) / (R + 0.3 * (b - R))) - Q), names.tunnel ?? 'tunnels through', 'bad', 0, 0, 'center'),
+      ],
+    },
+    caption,
+  };
+}
+
 export { r6, seg, label };

@@ -341,7 +341,8 @@ export function mount(F, P0) {
     g.lineWidth = 2.4; g.strokeStyle = col; g.fillStyle = filled ? col : plot.col.panel;
     g.beginPath(); g.arc(px, py, 6, 0, Math.PI * 2); g.fill(); g.stroke();
     g.restore();
-    if (label) plot.text(type.name, x, y, { color: eqColor(type), dx: 10, dy: -12, size: 11.5, weight: 650 });
+    // type labels only where there is room for them (not at phone width)
+    if (label && plot.R - plot.L > 420) plot.text(type.name, x, y, { color: eqColor(type), dx: 10, dy: -12, size: 11.5, weight: 650 });
   }
 
   // a place near the frame's edge on an eigenvector line, for its label: the
@@ -404,8 +405,9 @@ export function mount(F, P0) {
   function drawSeries(now) {
     const pts = S.fwd;
     const pend = !!P.pendulum;
-    const H = S2.canvas.clientHeight || 300;
-    sp.o.pad = { l: pend ? Math.round(H * 0.95) + 46 : 46, r: 16, t: 14, b: 34 };
+    const H = S2.canvas.clientHeight || 300, Wc = S2.canvas.clientWidth || 600;
+    const PW = Math.min(H * 0.95, Wc * 0.34);          // the pendulum's square, narrower on a phone
+    sp.o.pad = { l: pend ? Math.round(PW) + 46 : 46, r: 16, t: 14, b: 34 };
     let lo = Infinity, hi = -Infinity;
     for (const p of pts) { lo = Math.min(lo, p.x, p.y); hi = Math.max(hi, p.x, p.y); }
     if (!Number.isFinite(lo)) { lo = -1; hi = 1; }
@@ -421,7 +423,7 @@ export function mount(F, P0) {
     sp.text(names[0], sp.vx1, sp.vy1, { dx: -22 - w1, dy: 10, color: 'accent', weight: 650, align: 'right' });
     if (now && P.play) { sp.line(now.t, sp.vy0, now.t, sp.vy1, { color: 'gold', width: 1.4, dash: [4, 4] }); sp.point(now.t, now.x, { color: 'gold', r: 4 }); }
     if (pend) {
-      const g = sp.ctx, cx = H * 0.5 + 6, cy = H * 0.47, R = H * 0.34, th = now ? now.x : (start ? start.x : 0);
+      const g = sp.ctx, cx = PW * 0.5 + 6, cy = H * 0.47, R = Math.min(H * 0.34, PW * 0.4), th = now ? now.x : (start ? start.x : 0);
       g.save();
       g.strokeStyle = sp.col.line3; g.setLineDash([3, 4]); g.lineWidth = 1;
       g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.stroke();

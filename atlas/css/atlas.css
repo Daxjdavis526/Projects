@@ -90,6 +90,7 @@ hr{border:0;border-top:1px solid var(--line);margin:1.4rem 0}
 
 /* ── app frame ─────────────────────────────────────────────────────────── */
 .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
+.app > *{min-width:0}
 .side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:.25rem;padding:1.1rem .8rem 1rem;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg-2),var(--bg));overflow-y:auto}
 .brand{display:flex;align-items:center;gap:.65rem;padding:.2rem .55rem 1rem;color:var(--ink);text-decoration:none}
 .brand:hover{text-decoration:none}
@@ -116,7 +117,7 @@ hr{border:0;border-top:1px solid var(--line);margin:1.4rem 0}
 .topbar{display:none}
 .tabbar{display:none}
 @media (max-width:860px){
-  .app{grid-template-columns:1fr}
+  .app{grid-template-columns:minmax(0,1fr)}   /* 1fr alone lets one wide equation widen the page */
   .side{display:none}
   .topbar{display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:30;padding:.6rem 1rem;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .topbar .brand{padding:0}

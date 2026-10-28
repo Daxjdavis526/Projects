@@ -45,7 +45,8 @@
 //       controls: null,       // true, false, or a list of: mode well L V0 w hw mass n show window compare classical barrier E Vb d gap tlog
 //       readout: true,
 //       hide: [],             // any of: energy (level energies), labels (level labels), prob (P in the window),
-//                             //         moments (⟨x⟩, Δx), count (how many bound states), T (transmission), axis (ψ's axis numbers)
+//                             //         moments (⟨x⟩, Δx), count (how many bound states), T (transmission), axis (ψ's axis numbers),
+//                             //         scale (the energy axis's numbers)
 //   } }
 
 import { Plot, themeColors } from '../plot.js';
@@ -61,7 +62,7 @@ const BARRIERS = ['rect', 'step', 'double'];
 const CONTROLS = ['mode', 'well', 'L', 'V0', 'w', 'hw', 'mass', 'n', 'show', 'window', 'compare', 'classical', 'barrier', 'E', 'Vb', 'd', 'gap', 'tlog'];
 const BOUND_KEYS = ['well', 'L', 'V0', 'w', 'hw', 'n', 'window', 'compare', 'classical'];
 const SCATTER_KEYS = ['barrier', 'E', 'Vb', 'd', 'gap', 'tlog'];
-const HIDE = ['energy', 'labels', 'prob', 'moments', 'count', 'T', 'axis'];
+const HIDE = ['energy', 'labels', 'prob', 'moments', 'count', 'T', 'axis', 'scale'];
 const PANELS = ['energy', 'wave', 'T'];
 const NMAX = 12;
 
@@ -153,8 +154,11 @@ export function mount(F, P0) {
   ctl('show', () => F.choice({ key: 'show', label: 'Draw', options: [['prob', '|ψ|²'], ['psi', 'ψ'], ['both', 'both']], value: P.show, explain: '$\\psi$ is the amplitude; $|\\psi|^2$ is the probability density, what a detector samples.' }));
   if (wanted.includes('window')) {
     const [a0, b0] = P.window || [0.25 * P.L, 0.75 * P.L];
-    nodes.a = F.slider({ key: 'a', label: 'Window from $a$', min: -2, max: 6, step: 0.01, value: a0, unit: '\\mathrm{nm}', explain: 'The left end of the region whose probability is shaded.' }).node;
-    nodes.b = F.slider({ key: 'b', label: 'to $b$', min: -2, max: 6, step: 0.01, value: b0, unit: '\\mathrm{nm}', explain: 'The right end: $P = \\int_a^b |\\psi|^2\\,dx$.' }).node;
+    // the sliders span the starting well's picture
+    const xr = P.mode === 'bound' ? boundModel({ ...P, topN: Math.max(4, (P.n | 0) + 2) }).xr : [-2, 6];
+    const lo = Math.floor(Math.min(a0, xr[0]) * 20) / 20, hi = Math.ceil(Math.max(b0, xr[1]) * 20) / 20, st = hi - lo > 4 ? 0.01 : 0.005;
+    nodes.a = F.slider({ key: 'a', label: 'Window from $a$', min: lo, max: hi, step: st, value: a0, unit: '\\mathrm{nm}', explain: 'The left end of the region whose probability is shaded.' }).node;
+    nodes.b = F.slider({ key: 'b', label: 'to $b$', min: lo, max: hi, step: st, value: b0, unit: '\\mathrm{nm}', explain: 'The right end: $P = \\int_a^b |\\psi|^2\\,dx$.' }).node;
   } else if (P.window) { F.params.a = P.window[0]; F.params.b = P.window[1]; }
   ctl('compare', () => F.toggle({ key: 'compare', label: 'Compare with the infinite well', value: P.compare, explain: 'Dashed: the levels if the walls were infinitely high.' }));
   ctl('classical', () => F.toggle({ key: 'classical', label: 'Classical probability', value: P.classical, explain: 'How a classical particle with the same energy would share its time between places.' }));
@@ -169,9 +173,9 @@ export function mount(F, P0) {
   const cE = F.canvas({ aspect: 'wide', label: P.alt || 'Energy diagram: the potential energy and the energy levels' });
   const cW = F.canvas({ aspect: 'wide', label: 'The wave function or probability density' });
   const cT = F.canvas({ aspect: 'wide', label: 'Transmission probability against energy' });
-  const pE = new Plot(cE.canvas, { x: [0, 1], y: [0, 1], xlabel: 'x (nm)', ylabel: 'energy (eV)' });
-  const pW = new Plot(cW.canvas, { x: [0, 1], y: [0, 1], xlabel: 'x (nm)', ylabel: '' });
-  const pT = new Plot(cT.canvas, { x: [0, 3], y: [0, 1], xlabel: 'energy E / V₀', ylabel: 'transmission T' });
+  const pE = new Plot(cE.canvas, { x: [0, 1], y: [0, 1], xlabel: 'x (nm)', ylabel: 'energy (eV)', axesAt: 'edge' });
+  const pW = new Plot(cW.canvas, { x: [0, 1], y: [0, 1], xlabel: 'x (nm)', ylabel: '', axesAt: 'edge' });
+  const pT = new Plot(cT.canvas, { x: [0, 3], y: [0, 1], xlabel: 'energy E / V₀', ylabel: 'transmission T', axesAt: 'edge' });
 
   let T = P.t || 0;
   let cache = { key: '', M: null };
@@ -231,6 +235,7 @@ export function mount(F, P0) {
     const [x0, x1] = M.xr;
     // energy diagram
     if (want.includes('energy')) {
+      pE.o.yticks = hide.has('scale') ? 0 : undefined;
       pE.setView([x0, x1], [0, Emax]);
       pE.clear();
       const g = pE.ctx;
@@ -248,7 +253,7 @@ export function mount(F, P0) {
       g.restore();
       // the infinite well for comparison
       if (M.kind === 'finite' && p.compare) {
-        for (let k = 1; k <= 12; k++) { const E = S.boxEnergy(k, M.L, p.mass); if (E > Emax) break; pE.line(0, E, M.L, E, { color: 'ink3', width: 1.2, dash: [5, 4] }); if (k === 1) pE.text('infinite well', M.L, E, { color: 'ink3', size: fs - 1, dx: 6, dy: 0 }); }
+        for (let k = 1; k <= 12; k++) { const E = S.boxEnergy(k, M.L, p.mass); if (E > Emax) break; pE.line(0, E, M.L, E, { color: 'ink3', width: 1.2, dash: [5, 4] }); if (k === 1) pE.text('dashed: infinite well', 0.03 * M.L, E, { color: 'ink3', size: fs - 1.5, dy: -8 }); }
       }
       for (const l of lev) {
         const isSel = sel.includes(l.n);
@@ -358,6 +363,7 @@ export function mount(F, P0) {
     const [x0, x1] = M.xr;
     const Emax = Math.max(M.Vb, E) * 1.3;
     if (want.includes('energy')) {
+      pE.o.yticks = hide.has('scale') ? 0 : undefined;
       pE.setView([x0, x1], [0, Emax]);
       pE.clear();
       for (let j = 0; j < M.pieces.length; j++) {

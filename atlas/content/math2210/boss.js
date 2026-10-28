@@ -91,18 +91,18 @@ function pairField(G, rc) {
 }
 function loopsPic() {
   const [P, Q] = pairField(640, 1.5);
-  const x = [-34, 34], y = [-16, 16];
+  const x = [-25, 33], y = [-18, 18];
   const pent = [[15, 13], [95, 11.5], [165, 12.5], [225, 10], [300, 13.5], [375, 13]].map(([a, r]) => [XV + r * Math.cos(a * DEG), r * Math.sin(a * DEG)]);
   const sq = [[XV - 8, -8], [XV + 8, -8], [XV + 8, 8], [XV - 8, 8], [XV - 8, -8]];
   const head = (pts, k, color) => ({ from: pts[k].map(r4), to: [0, 1].map((i) => r4(pts[k][i] + 0.55 * (pts[k + 1][i] - pts[k][i]))), color, width: 2.4 });
   return picture({
-    x, y,
-    curves: [arc(XV, 0, 5, 0, 2 * PI, 'gold', 2.4), ...poly(sq, 'violet', 2.2), ...poly(pent, 'teal', 2.2), arc(-4, 9, 3.4, 0, 2 * PI, 'ink2', 2, true)],
-    arrows: [...fieldArrows(P, Q, { x, y, n: 19, alpha: 0.7 }),
+    x, y, aspect: '',
+    curves: [arc(XV, 0, 5, 0, 2 * PI, 'gold', 2.4), ...poly(sq, 'violet', 2.2), ...poly(pent, 'teal', 2.2), arc(-3, 9, 3.4, 0, 2 * PI, 'ink2', 2, true)],
+    arrows: [...fieldArrows(P, Q, { x, y, n: 15, alpha: 0.7 }),
       { from: [r4(XV + 5 * Math.cos(-0.5)), r4(5 * Math.sin(-0.5))], to: [r4(XV + 5 * Math.cos(-0.3)), r4(5 * Math.sin(-0.3))], color: 'gold', width: 2.4 },
       head(sq, 0, 'violet'), head(pent, 3, 'teal')],
     points: [dot(XV, 0, 'bad', 4), dot(-XV, 0, 'bad', 4), tag(XV, 0, 'right core', 'bad', -30, 18), tag(-XV, 0, 'left core', 'bad', -26, 18),
-      tag(XV + 5 * Math.cos(2.3), 5 * Math.sin(2.3), 'Γ', 'gold', -4, -6), tag(XV + 8, 8, 'Γ', 'violet', 4, -4), tag(pent[1][0], pent[1][1], 'Γ', 'teal', 4, -6), tag(-4, 12.4, '0', 'ink2', -3, -4)],
+      tag(XV + 5 * Math.cos(2.3), 5 * Math.sin(2.3), 'Γ', 'gold', -4, -6), tag(XV + 8, 8, 'Γ', 'violet', 4, -4), tag(pent[1][0], pent[1][1], 'Γ', 'teal', 4, -6), tag(-3, 12.4, '0', 'ink2', -3, -4)],
     alt: 'The swirling air of two wingtip vortices, with several loops drawn round the right one and one loop away from both',
   }, 'Across the wake, seen from behind the carrier: the air’s velocity (arrows, lengths compressed) round the two vortex centres (red), 37 m apart, and loops walked anticlockwise. Each vortex’s core, where the air spins, is only about 3 m across.');
 }
@@ -158,16 +158,16 @@ function pullupPic(v, a) {
   const V = Math.hypot(...v), A = Math.hypot(...a), u = v.map((c) => c / V), w = a.map((c) => c / A);
   const path = { param: [`${r4(v[0])}*t + ${r4(a[0] / 2)}*t^2`, `${r4(v[1])}*t + ${r4(a[1] / 2)}*t^2`], t: [-6, 6], color: 'teal', width: 2.2 };
   return picture({
-    x: [-1700, 1700], y: [-500, 1100],
+    x: [-1500, 1500], y: [-560, 1300], aspect: '',
     curves: [path, seg([0, 0], [900, 0], 'ink3', 1.1, true), arc(0, 0, 420, 0, Math.atan2(v[1], v[0]), 'ink2', 1.4)],
     arrows: [
       { from: [0, 0], to: [r4(780 * u[0]), r4(780 * u[1])], color: 'accent', width: 2.6, label: 'v', labelDx: 4, labelDy: -2 },
       { from: [0, 0], to: [r4(560 * w[0]), r4(560 * w[1])], color: 'gold', width: 2.6, label: 'a', labelDx: 6, labelDy: 0 },
       { from: [0, 0], to: [0, -400], color: 'bad', width: 2.6, label: 'g', labelDx: 8, labelDy: 6 },
     ],
-    points: [dot(0, 0, 'ink', 5), tag(420, 0, 'γ', 'ink2', 6, -6), tag(-5 * v[0] + 12.5 * a[0], -5 * v[1] + 12.5 * a[1], 'path', 'teal', -14, 22), tag(900, 0, 'horizontal', 'ink3', -60, 16)],
+    points: [dot(0, 0, 'ink', 5), tag(420, 0, 'γ', 'ink2', 6, -6), tag(-5 * v[0] + 12.5 * a[0], -5 * v[1] + 12.5 * a[1], 'path', 'teal', -14, 22)],
     alt: 'A rocket’s path curving upward, with its velocity, acceleration and gravity drawn at one point',
-  }, 'The pull-up, in the vertical plane of flight; the path is traced from the reported v and a for six seconds either side. The arrows show directions only: their lengths are not to scale.');
+  }, 'The pull-up, in the vertical plane of flight; the path is traced from the reported v and a for six seconds either side, and the dashed line is the horizontal. The arrows show directions only: their lengths are not to scale.');
 }
 
 function orbitPic(rv, vv, Pv, Qv, u) {
@@ -282,7 +282,7 @@ export default boss({
                 t`Expand the cube: the odd powers of $\cos\psi$ integrate to $0$, leaving $\pi a^2R^3 + \tfrac34\pi Ra^4$.`,
               ],
               teach: t`A moment of inertia weights each mass element by its squared distance from the axis, $\iiint \rho^2\,dm$ — and in cylindrical coordinates $dm$ carries the Jacobian $\rho$.`,
-              explain: t`About the stage’s axis each element contributes $\rho^2\,dm$ with $dm = 810\,\rho\,d\rho\,d\phi\,dz$. Polar coordinates centred in the tube, $\rho = R + s\cos\psi$ and $z = s\sin\psi$ (Jacobian $s$), turn the cross-section into a rectangle: $$I = 810\cdot2\pi\int_0^{2\pi}\!\!\int_0^{a}(R + s\cos\psi)^3\,s\,ds\,d\psi = 810\cdot2\pi\left(\pi a^2R^3 + \tfrac34\pi Ra^4\right) = M\left(R^2 + \tfrac34a^2\right),$$ where $M = 810\cdot2\pi^2Ra^2 = ${tn(M)}$ kg is the fuel’s mass (the tube’s cross-section times the length of its centre-line). So $I = ${tn(I)}\ \text{kg m}^2$. The $\tfrac34a^2$ beyond a hoop’s $R^2$ is the fuel’s spread across the tube — three times the plain average $\tfrac14a^2$, because the outer half of the tube holds more fuel than the inner half. A real liquid does not turn rigidly with its tank: in a quick roll most of it stays where it is, so this is an upper bound.`,
+              explain: t`About the stage’s axis each element contributes $\rho^2\,dm$ with $dm = 810\,\rho\,d\rho\,d\phi\,dz$. Polar coordinates centred in the tube, $\rho = R + s\cos\psi$ and $z = s\sin\psi$ (Jacobian $s$), turn the cross-section into a rectangle: $$\begin{aligned}I &= 810\cdot2\pi\int_0^{2\pi}\!\!\int_0^{a}(R + s\cos\psi)^3\,s\,ds\,d\psi\\ &= 810\cdot2\pi\left(\pi a^2R^3 + \tfrac34\pi Ra^4\right)\\ &= M\left(R^2 + \tfrac34a^2\right),\end{aligned}$$ where $M = 810\cdot2\pi^2Ra^2 = ${tn(M)}$ kg is the fuel’s mass (the tube’s cross-section times the length of its centre-line). So $I = ${tn(I)}\ \text{kg m}^2$. The $\tfrac34a^2$ beyond a hoop’s $R^2$ is the fuel’s spread across the tube — three times the plain average $\tfrac14a^2$, because the outer half of the tube holds more fuel than the inner half. A real liquid does not turn rigidly with its tank: in a quick roll most of it stays where it is, so this is an upper bound.`,
               visual: torusPic(R, a),
             };
           },
@@ -336,7 +336,7 @@ export default boss({
                 t`In level flight lift equals weight: $mg = \rho V\Gamma\cdot\tfrac{\pi}{4}b$.`,
               ],
               teach: t`Green’s theorem turns a circulation into the integral of vorticity over the region inside — and the right coordinates make that integral easy.`,
-              explain: t`By Green’s theorem $\oint\vec v\cdot d\vec r = \iint\omega\,dA$ over the window. The vorticity is negligible beyond a few core radii, so the square can be swapped for the whole plane, where polar coordinates turn the integral into a Gaussian: $$\Gamma = \int_0^{2\pi}\!\!\int_0^\infty ${w0}\,e^{-r^2/${nice(r4(rc * rc))}}\,r\,dr\,d\theta = \pi(${rc})^2(${w0}) = ${tn(G)}\ \text{m}^2/\text{s}.$$ Then $mg = \rho V\Gamma\cdot\tfrac{\pi}{4}b = (0.31)(${V})(${tn(G)})(${tn(b0)})$ N $= ${tn(W / 1000)}$ kN, so $m = ${tn(m)}$ t. The circulation is the aircraft’s weight written into the air: a heavier or slower aircraft leaves stronger vortices, which is why air-traffic control spaces aircraft by the weight of the one in front. Real wings are not quite elliptically loaded; their vortices end up about 0.75–0.8 of the span apart.`,
+              explain: t`By Green’s theorem $\oint\vec v\cdot d\vec r = \iint\omega\,dA$ over the window. The vorticity is negligible beyond a few core radii, so the square can be swapped for the whole plane, where polar coordinates turn the integral into a Gaussian: $$\begin{aligned}\Gamma &= \int_0^{2\pi}\!\!\int_0^\infty ${w0}\,e^{-r^2/${nice(r4(rc * rc))}}\,r\,dr\,d\theta\\ &= \pi(${rc})^2(${w0}) = ${tn(G)}\ \text{m}^2/\text{s}.\end{aligned}$$ Then $mg = \rho V\Gamma\cdot\tfrac{\pi}{4}b = (0.31)(${V})(${tn(G)})(${tn(b0)})$ N $= ${tn(W / 1000)}$ kN, so $m = ${tn(m)}$ t. The circulation is the aircraft’s weight written into the air: a heavier or slower aircraft leaves stronger vortices, which is why air-traffic control spaces aircraft by the weight of the one in front. Real wings are not quite elliptically loaded; their vortices end up about 0.75–0.8 of the span apart.`,
               visual: wakePic(rc),
             };
           },
@@ -369,7 +369,7 @@ export default boss({
                 t`The cap’s area is $2\pi L^2(1 - \cos\alpha)$, with $L = R_e/\sin\alpha$.`,
               ],
               teach: t`A divergence-free field has the same flux through every surface with the same edge, so choose the surface on which the field is simplest.`,
-              explain: t`Between the flat exit disk and the spherical cap $r = L$ that spans the same lip, $\nabla\cdot(\rho\vec v) = 0$: steady exhaust neither piles up nor drains away. So by the divergence theorem the two surfaces carry the same flux, and on the cap the mass current is uniform and normal: $$\dot m = \rho_e v_e\cdot 2\pi L^2(1 - \cos\alpha),\qquad L = \frac{${Re}}{\sin ${al}^\circ} = ${tn(L)}\ \text{m},$$ which is $${tn(md)}$ kg/s — the propellant the engine burns every second. Integrating over the flat disk directly gives the same, with more work: in polar coordinates on the disk the integrand is $\rho_e v_e L^2z_0/(s^2 + z_0^2)^{3/2}$, with $z_0 = L\cos\alpha$. The answer is ${fmt((100 * (md - flat)) / flat, 2)}% more than $\rho_e v_e\pi R_e^2$, because the cap is bigger than the disk.`,
+              explain: t`Between the flat exit disk and the spherical cap $r = L$ that spans the same lip, $\nabla\cdot(\rho\vec v) = 0$: steady exhaust neither piles up nor drains away. So by the divergence theorem the two surfaces carry the same flux, and on the cap the mass current is uniform and normal: $$\dot m = \rho_e v_e\cdot 2\pi L^2(1 - \cos\alpha),$$ with $L = ${Re}/\sin ${al}^\circ = ${tn(L)}$ m. That is $${tn(md)}$ kg/s — the propellant the engine burns every second. Integrating over the flat disk directly gives the same, with more work: in polar coordinates on the disk the integrand is $\rho_e v_e L^2z_0/(s^2 + z_0^2)^{3/2}$, with $z_0 = L\cos\alpha$. The answer is ${fmt((100 * (md - flat)) / flat, 2)}% more than $\rho_e v_e\pi R_e^2$, because the cap is bigger than the disk.`,
               visual: nozzlePic(al),
             };
           },
@@ -396,7 +396,7 @@ export default boss({
                 t`The ratio of the two is $\tfrac12(1 + \cos\alpha)$, so the shortfall is $\tfrac12(1 - \cos\alpha)\,\dot m v_e$.`,
               ],
               teach: t`Thrust is a flux of axial momentum, so exhaust leaving at an angle θ pushes with only cos θ of its momentum — over a conical nozzle’s exit that averages to (1 + cos α)/2.`,
-              explain: t`On the cap, $$\iint_\text{cap}\rho_e v_e^2\cos\theta\,dS = \rho_e v_e^2L^2\int_0^{2\pi}\!\!\int_0^{\alpha}\cos\theta\sin\theta\,d\theta\,d\phi = \rho_e v_e^2\,\pi L^2\sin^2\alpha = ${tn(Fax)}\ \text{kN},$$ while $\dot m v_e = \rho_e v_e^2\cdot2\pi L^2(1 - \cos\alpha) = ${tn(mv)}$ kN. The shortfall is $${tn(loss)}$ kN, a fraction $\tfrac12(1 - \cos\alpha) = ${fmt(50 * (1 - ca), 2)}\%$. What it means: off-axis exhaust carries sideways momentum too, and the sideways parts from opposite sides of the axis cancel and push nothing. The thrust is $\lambda\,\dot m v_e$ with $\lambda = \tfrac12(1 + \cos\alpha) = ${fmt((1 + ca) / 2, 4)}$, the **divergence factor** of nozzle design; bell-shaped nozzles turn the flow back toward the axis to win most of the loss back.`,
+              explain: t`On the cap, $$\begin{aligned}&\iint_\text{cap}\rho_e v_e^2\cos\theta\,dS\\ &\quad= \rho_e v_e^2L^2\int_0^{2\pi}\!\!\int_0^{\alpha}\cos\theta\sin\theta\,d\theta\,d\phi\\ &\quad= \rho_e v_e^2\,\pi L^2\sin^2\alpha = ${tn(Fax)}\ \text{kN},\end{aligned}$$ while $\dot m v_e = \rho_e v_e^2\cdot2\pi L^2(1 - \cos\alpha) = ${tn(mv)}$ kN. The shortfall is $${tn(loss)}$ kN, a fraction $\tfrac12(1 - \cos\alpha) = ${fmt(50 * (1 - ca), 2)}\%$. What it means: off-axis exhaust carries sideways momentum too, and the sideways parts from opposite sides of the axis cancel and push nothing. The thrust is $\lambda\,\dot m v_e$ with $\lambda = \tfrac12(1 + \cos\alpha) = ${fmt((1 + ca) / 2, 4)}$, the **divergence factor** of nozzle design; bell-shaped nozzles turn the flow back toward the axis to win most of the loss back.`,
               visual: nozzlePic(al, { split: true }),
             };
           },
@@ -429,7 +429,7 @@ export default boss({
                 t`Newton’s second law across the path: $L - mg\cos\gamma = m\,a_N$.`,
               ],
               teach: t`Only the forces across a path bend it: the normal acceleration $a_N = |\vec v\times\vec a|/|\vec v|$ is set by the sideways forces alone.`,
-              explain: t`$|\vec v| = ${tn(V, 4)}$ m/s, and the part of $\vec a$ across the path is $$a_N = \frac{|\vec v\times\vec a|}{|\vec v|} = \frac{(${v[0]})(${a[1]}) - (${v[1]})(${a[0]})}{${tn(V, 4)}} = ${tn(aN)}\ \text{m/s}^2,$$ toward the upper side of the path. (The part along it, $a_T = ${tn(aTr)}$ m/s², is thrust minus drag minus gravity’s share.) Gravity’s part across the path, $g\cos\gamma = 9.81\cdot\frac{${v[0]}}{${tn(V, 4)}} = ${tn(gN)}$ m/s², pulls the other way, so the wing must supply $$L = m(a_N + g\cos\gamma) = (${tn(m * 1000, 5)}\ \text{kg})(${tn(aN + gN)}\ \text{m/s}^2) = ${tn(L)}\ \text{kN},$$ about ${fmt((aN + gN) / G0, 2)} times the rocket’s weight. The path’s radius of curvature is $|\vec v|^2/a_N = ${tn((V * V) / aN / 1000)}$ km. An accelerometer on board reads exactly the non-gravitational part, $\vec a - \vec g$: lift, thrust and drag per unit mass.`,
+              explain: t`$|\vec v| = ${tn(V, 4)}$ m/s, and the part of $\vec a$ across the path is $$\begin{aligned}a_N = \frac{|\vec v\times\vec a|}{|\vec v|} &= \frac{(${v[0]})(${a[1]}) - (${v[1]})(${a[0]})}{${tn(V, 4)}}\\ &= ${tn(aN)}\ \text{m/s}^2,\end{aligned}$$ toward the upper side of the path. (The part along it, $a_T = ${tn(aTr)}$ m/s², is thrust minus drag minus gravity’s share.) Gravity’s part across the path, $g\cos\gamma = 9.81\cdot\frac{${v[0]}}{${tn(V, 4)}} = ${tn(gN)}$ m/s², pulls the other way, so the wing must supply $$\begin{aligned}L &= m(a_N + g\cos\gamma)\\ &= (${tn(m * 1000, 5)}\ \text{kg})(${tn(aN + gN)}\ \text{m/s}^2) = ${tn(L)}\ \text{kN},\end{aligned}$$ about ${fmt((aN + gN) / G0, 2)} times the rocket’s weight. The path’s radius of curvature is $|\vec v|^2/a_N = ${tn((V * V) / aN / 1000)}$ km. An accelerometer on board reads exactly the non-gravitational part, $\vec a - \vec g$: lift, thrust and drag per unit mass.`,
               visual: pullupPic(v, a),
             };
           },
@@ -458,7 +458,7 @@ export default boss({
                 t`The angle between two planes is the angle between their normals — here $\vec h$ and the $z$-axis: $\cos i = h_z/|\vec h|$.`,
               ],
               teach: t`The angular momentum $\vec h = \vec r\times\vec v$ is perpendicular to the orbit’s plane — it points along the path’s binormal — so the orbit’s tilt to the equator is the angle between $\vec h$ and Earth’s axis.`,
-              explain: t`$$\vec h = \vec r\times\vec v = \langle ${tn(hv[0], 4)},\ ${tn(hv[1], 4)},\ ${tn(hv[2], 4)}\rangle\ \text{km}^2/\text{s},\qquad |\vec h| = ${tn(hm, 4)}\ \text{km}^2/\text{s},$$ so $\cos i = h_z/|\vec h| = ${fmt(hv[2] / hm, 4)}$ and $i = ${inc.toFixed(1)}^\circ$${inc > 90 ? ' — more than 90°, so the orbit is retrograde: it carries the stage round against Earth’s spin, as sun-synchronous orbits do' : ''}. Sense check: no point of an orbit inclined at $i$ is farther than $${Math.min(inc, 180 - inc).toFixed(1)}^\circ$ from the equator, and the stage is at latitude $\arcsin(r_z/|\vec r|) = ${lat.toFixed(1)}^\circ$. That is also why a rocket launched from latitude $\ell$ cannot reach an orbit inclined less than $\ell$ without an expensive change of plane — and one reason to launch from an aircraft, which can first fly toward the equator.`,
+              explain: t`$$\vec h = \vec r\times\vec v = \langle ${tn(hv[0], 4)},\ ${tn(hv[1], 4)},\ ${tn(hv[2], 4)}\rangle\ \text{km}^2/\text{s},$$ with $|\vec h| = ${tn(hm, 4)}$ km²/s, so $\cos i = h_z/|\vec h| = ${fmt(hv[2] / hm, 4)}$ and $i = ${inc.toFixed(1)}^\circ$${inc > 90 ? ' — more than 90°, so the orbit is retrograde: it carries the stage round against Earth’s spin, as sun-synchronous orbits do' : ''}. Sense check: no point of an orbit inclined at $i$ is farther than $${Math.min(inc, 180 - inc).toFixed(1)}^\circ$ from the equator, and the stage is at latitude $\arcsin(r_z/|\vec r|) = ${lat.toFixed(1)}^\circ$. That is also why a rocket launched from latitude $\ell$ cannot reach an orbit inclined less than $\ell$ without an expensive change of plane — and one reason to launch from an aircraft, which can first fly toward the equator.`,
               visual: orbitPic(rv, vv, P, Q, u),
             };
           },
@@ -479,7 +479,7 @@ export default boss({
             const ux = a / g, uy = b / g;
             const f = `${Tc} + ${a}*x + ${b}*y - ${c}*(x^2 + y^2)`;
             return {
-              prompt: t`At peak heating the thermal model gives the temperature across the shield’s face as $$T(x, y) = ${Tc} ${sgn(a, 'x')} ${sgn(b, 'y')} - ${c}\,(x^2 + y^2)\ \text{K},$$ with $x$ and $y$ in metres from the centre of the face, which is a disk of radius ${R} m. How hot is the hottest point of the shield? Give 3 significant figures.`,
+              prompt: t`At peak heating the thermal model gives the temperature across the shield’s face, in kelvin, as $$\begin{aligned}T(x, y) = {}&${Tc} ${sgn(a, 'x')} ${sgn(b, 'y')}\\ &- ${c}\,(x^2 + y^2),\end{aligned}$$ with $x$ and $y$ in metres from the centre of the face, which is a disk of radius ${R} m. How hot is the hottest point of the shield? Give 3 significant figures.`,
               answer: Tmax, units: 'K', tol: { rel: 0.003 },
               errors: apart([
                 { value: Tpeak, feedback: t`That is the model’s peak, at $(${fmt(p[0], 3)}, ${fmt(p[1], 3)})$ — ${fmt(dd, 3)} m from the centre, beyond the ${R} m rim. On the shield itself the maximum has to be on the boundary.` },
@@ -492,7 +492,7 @@ export default boss({
                 t`$\nabla T = \lambda\nabla g$ reads $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$. Compare the two rim points that gives.`,
               ],
               teach: t`On a closed region a maximum sits at a critical point inside or on the boundary — and when the critical point lies outside the region, Lagrange multipliers find the boundary’s maximum.`,
-              explain: t`$\nabla T = \langle ${a} - ${2 * c}x,\ ${b} - ${2 * c}y\rangle$ vanishes only at $(${fmt(p[0], 3)}, ${fmt(p[1], 3)})$, which is ${fmt(dd, 3)} m from the centre: off the shield. (The model’s stagnation point, its hottest spot, has moved off the face, beyond the shoulder.) So the maximum over the disk is on the rim $g = x^2 + y^2 = ${nice(r4(R * R))}$. Lagrange’s condition $\nabla T = \lambda\nabla g$ gives $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$: the rim points $\pm${R}\,(${fmt(ux, 2)}, ${fmt(uy, 2)})$. The hotter is $(${fmt(R * ux, 3)}, ${fmt(R * uy, 3)})$, where $$T = ${Tc} + ${R}\sqrt{${Math.abs(a)}^2 + ${Math.abs(b)}^2} - ${c}(${R})^2 = ${tn(Tmax, 4)}\ \text{K};$$ the other, at $${tn(Tmin, 4)}$ K, is the coldest point of the rim. At angle of attack a capsule’s stagnation point moves toward its windward shoulder, which is why a shield’s rim needs as much attention as its middle.`,
+              explain: t`$\nabla T = \langle ${a} - ${2 * c}x,\ ${b} - ${2 * c}y\rangle$ vanishes only at $(${fmt(p[0], 3)}, ${fmt(p[1], 3)})$, which is ${fmt(dd, 3)} m from the centre: off the shield. (The model’s stagnation point, its hottest spot, has moved off the face, beyond the shoulder.) So the maximum over the disk is on the rim $g = x^2 + y^2 = ${nice(r4(R * R))}$. Lagrange’s condition $\nabla T = \lambda\nabla g$ gives $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$: the rim points $\pm${R}\,(${fmt(ux, 2)}, ${fmt(uy, 2)})$. The hotter is $(${fmt(R * ux, 3)}, ${fmt(R * uy, 3)})$, where $$\begin{aligned}T &= ${Tc} + ${R}\sqrt{${Math.abs(a)}^2 + ${Math.abs(b)}^2} - ${c}(${R})^2\\ &= ${tn(Tmax, 4)}\ \text{K};\end{aligned}$$ the other, at $${tn(Tmin, 4)}$ K, is the coldest point of the rim. At angle of attack a capsule’s stagnation point moves toward its windward shoulder, which is why a shield’s rim needs as much attention as its middle.`,
               visual: shieldPic(f, R, p, Tpeak, c),
             };
           },
@@ -505,7 +505,7 @@ export default boss({
             const lap = 2 * A - 4 * B, V = PI * a * a * h, P = k * lap * V;
             const Pin = k * G * PI * a * a, Pback = k * (G - 2 * A * h) * PI * a * a, Pside = 4 * PI * k * B * a * a * h;
             return {
-              prompt: t`In an arc-jet test of the shield’s material, a cylindrical plug is heated on its front face. Thermocouples inside it fit, at one moment, $$T(x, y, z) = 1700 - 4.0\times10^{4}\,z + ${A5.toFixed(1)}\times10^{5}\,z^2 - ${B5.toFixed(1)}\times10^{5}\,(x^2 + y^2)\ \text{K},$$ with $z$ the depth below the heated face and $x$, $y$ across it, all in metres; the plug is the solid $x^2 + y^2 \le ${nice(a)}^2$, $0 \le z \le ${nice(h)}$. Heat flows as $\vec q = -k\nabla T$ (Fourier’s law), with $k = ${k}$ W/(m·K). At what rate is heat building up inside the plug — the net rate at which heat flows in through its whole surface? Give 3 significant figures.`,
+              prompt: t`In an arc-jet test of the shield’s material, a cylindrical plug is heated on its front face. Thermocouples inside it fit, at one moment, $$T = T_0 - Gz + Az^2 - B\,(x^2 + y^2),$$ with $T_0 = 1700$ K, $G = 4.0\times10^{4}$ K/m, $A = ${A5.toFixed(1)}\times10^{5}$ K/m² and $B = ${B5.toFixed(1)}\times10^{5}$ K/m²; $z$ is the depth below the heated face and $x$, $y$ run across it, all in metres; the plug is the solid $x^2 + y^2 \le ${nice(a)}^2$, $0 \le z \le ${nice(h)}$. Heat flows as $\vec q = -k\nabla T$ (Fourier’s law), with $k = ${k}$ W/(m·K). At what rate is heat building up inside the plug — the net rate at which heat flows in through its whole surface? Give 3 significant figures.`,
               answer: P, units: 'W', tol: { rel: 0.005 },
               errors: apart([
                 { value: k * (2 * A - 2 * B) * V, feedback: t`$\nabla^2$ of $-B(x^2 + y^2)$ is $-2B - 2B$: both the $x^2$ and the $y^2$ term contribute.` },
@@ -518,7 +518,7 @@ export default boss({
                 t`So the integral is $k\nabla^2T$ times the plug’s volume, $\pi a^2h$, with $a$ and $h$ in metres.`,
               ],
               teach: t`The divergence theorem turns the net flow through a closed surface into the integral of the divergence inside — and for heat, $-\nabla\cdot\vec q = k\nabla^2T$ is the rate at which heat is stored per unit volume.`,
-              explain: t`Directly, this takes three surface integrals: front, back and curved side. The divergence theorem needs one: the net heat in is $-\oiint\vec q\cdot d\vec S = -\iiint\nabla\cdot\vec q\,dV = \iiint k\nabla^2T\,dV$, and here $\nabla^2T = ${tn(lap)}$ K/m² everywhere, so $$P = k\nabla^2T\cdot\pi a^2h = (${k})(${tn(lap)})\cdot\pi(${nice(a)})^2(${nice(h)}) = ${tn(P)}\ \text{W}.$$ (Face by face: $${tn(Pin)}$ W in through the front, $${tn(Pback)}$ W out through the back, $${tn(Pside)}$ W out through the side.) What it means: the plug is gaining heat at ${fmt(P, 3)} W, so it is warming — on average at $k\nabla^2T/\rho c_p$, about ${fmt((k * lap) / (270 * 1600), 2)} K/s for a light ablator of density 270 kg/m³ and specific heat 1600 J/(kg·K). That is the heat equation, $\partial T/\partial t = (k/\rho c_p)\nabla^2T$, read off the divergence theorem. (A real ablator also soaks up heat as its resin decomposes; this model leaves that out.)`,
+              explain: t`Directly, this takes three surface integrals: front, back and curved side. The divergence theorem needs one: the net heat in is $-\oiint\vec q\cdot d\vec S = -\iiint\nabla\cdot\vec q\,dV = \iiint k\nabla^2T\,dV$, and here $\nabla^2T = ${tn(lap)}$ K/m² everywhere, so $$\begin{aligned}P &= k\nabla^2T\cdot\pi a^2h\\ &= (${k})(${tn(lap)})\cdot\pi(${nice(a)})^2(${nice(h)})\\ &= ${tn(P)}\ \text{W}.\end{aligned}$$ (Face by face: $${tn(Pin)}$ W in through the front, $${tn(Pback)}$ W out through the back, $${tn(Pside)}$ W out through the side.) What it means: the plug is gaining heat at ${fmt(P, 3)} W, so it is warming — on average at $k\nabla^2T/\rho c_p$, about ${fmt((k * lap) / (270 * 1600), 2)} K/s for a light ablator of density 270 kg/m³ and specific heat 1600 J/(kg·K). That is the heat equation, $\partial T/\partial t = (k/\rho c_p)\nabla^2T$, read off the divergence theorem. (A real ablator also soaks up heat as its resin decomposes; this model leaves that out.)`,
               visual: plugPic(acm, hcm, k, A, B),
             };
           },

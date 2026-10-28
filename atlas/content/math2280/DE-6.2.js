@@ -70,7 +70,7 @@ So a linear equation with constant coefficients becomes an **algebraic** equatio
   },
   example: {
     prompt: t`Solve $y'' + 5y' + 6y = 12$ with $y(0) = 1$ and $y'(0) = 0$.`,
-    visual: fpic('2 - 3exp(-2x) + 2exp(-3x)', [0, 4], [-1.4, 2.6], t`The solution (blue) and its three terms (dashed): the constant 2 from the forcing, and the two decaying modes from the roots $-2$ and $-3$.`, {
+    visual: fpic('2 - 3exp(-2x) + 2exp(-3x)', [0, 4], [-3.3, 2.6], t`The solution (blue) and its three terms (dashed): the constant 2 from the forcing, and the two decaying modes from the roots $-2$ and $-3$.`, {
       ylabel: 'y',
       curves: [{ fn: '2', color: 'gold', dash: true, width: 1.6 }, { fn: '-3exp(-2x)', color: 'violet', dash: true, width: 1.6, label: '−3e⁻²ᵗ', labelAt: 0.5, labelDx: 8, labelDy: 12 }, { fn: '2exp(-3x)', color: 'teal', dash: true, width: 1.6, label: '2e⁻³ᵗ', labelAt: 0.45, labelDx: 8, labelDy: -10 }],
     }),
@@ -106,6 +106,7 @@ $A = \dfrac{12}{2\cdot 3} = 2$, $\;B = \dfrac{4 - 10 + 12}{(-2)(1)} = -3$, $\;C 
         const k = r.int(2, 4), q = r.int(1, 3), b = k * q, y0 = r.pick([-2, -1, 0, 4, 5]);
         const d = y0 - q;
         const ans = `${q} + (${d})*e^(-${k}t)`;
+        const numT = y0 === 0 ? `${b}` : `${lead(y0, 's')} + ${b}`;
         return {
           prompt: t`Solve $y' + ${k}y = ${b}$ with $y(0) = ${y0}$, using the Laplace transform.`,
           answer: ans, answerTeX: t`${q}${sg(d, `e^{-${k}t}`)}`, lhs: 'y(t)',
@@ -115,9 +116,9 @@ $A = \dfrac{12}{2\cdot 3} = 2$, $\;B = \dfrac{4 - 10 + 12}{(-2)(1)} = -3$, $\;C 
             ...(y0 !== 0 ? [{ answer: `${q} - ${q}*e^(-${k}t)`, feedback: t`That is the solution from $y(0) = 0$: you dropped the initial value from $\mathcal{L}\{y'\} = sY - y(0)$.` }] : []),
             { answer: `${q} + (${d})*e^(${k}t)`, feedback: t`$\dfrac{1}{s + ${k}}$ is the transform of $e^{-${k}t}$: the sign of the exponent flips.` },
           ],
-          hints: [t`Transform: $sY - ${y0} + ${k}Y = \dfrac{${b}}{s}$, so $Y = \dfrac{${y0}s + ${b}}{s(s + ${k})}$.`, t`Cover-up: $\dfrac{A}{s} + \dfrac{B}{s + ${k}}$ with $A = \dfrac{${b}}{${k}} = ${q}$ and $B = \dfrac{${y0}(-${k}) + ${b}}{-${k}}$.`],
+          hints: [t`Transform: $sY${sg(-y0)} + ${k}Y = \dfrac{${b}}{s}$, so $Y = \dfrac{${numT}}{s(s + ${k})}$.`, t`Cover-up: $\dfrac{A}{s} + \dfrac{B}{s + ${k}}$ with $A = \dfrac{${b}}{${k}} = ${q}$ and $B = \dfrac{${y0 === 0 ? '' : `${y0 < 0 ? `(${y0})` : y0}(-${k}) + `}${b}}{-${k}}$.`],
           teach: t`Transform, solve for $Y$, split into partial fractions, invert — the initial value enters through $\mathcal{L}\{y'\} = sY - y(0)$.`,
-          explain: t`$Y = \dfrac{${y0}s + ${b}}{s(s + ${k})} = \dfrac{${q}}{s}${sg(d, `\\dfrac{1}{s + ${k}}`)}$, so $y = ${q}${sg(d, `e^{-${k}t}`)}$. It starts at $${y0}$ and relaxes to the equilibrium $${b}/${k} = ${q}$ with time constant $1/${k}$ s.`,
+          explain: t`$Y = \dfrac{${numT}}{s(s + ${k})} = \dfrac{${q}}{s}${sg(d, `\\dfrac{1}{s + ${k}}`)}$, so $y = ${q}${sg(d, `e^{-${k}t}`)}$. It starts at $${y0}$ and relaxes to the equilibrium $${b}/${k} = ${q}$ with time constant $1/${k}$ s.`,
           visual: { type: 'de-slopefield', params: { f: `${b} - ${k}*y`, x: [0, 2.5], y: [Math.min(y0, q) - 1.5, Math.max(y0, q) + 1.5], aspect: 'wide', grid: [21, 11], click: false, points: [{ x: 0, y: y0, label: `y(0) = ${lab(y0)}`, color: 'gold', labelDx: 10 }] }, caption: t`The slope field of $y' = ${b} - ${k}y$ and the starting point. The solution is the curve through the gold point that follows the field.` },
         };
       },
@@ -270,13 +271,13 @@ print(sp.simplify(theta))`,
         const ts = Math.log(q / p) / (q - p);
         const xmax = (v0 / (q - p)) * (Math.exp(-p * ts) - Math.exp(-q * ts));
         return {
-          prompt: t`A lunar lander touches down at $${v0}$ m/s. Model each leg’s strut, per unit mass, as $x'' + ${p + q}x' + ${p * q}x = 0$ ($x$ the compression in m, $t$ in s), starting with $x(0) = 0$ and $x'(0) = ${v0}$. Solve with the Laplace transform and find the **largest compression**.`,
+          prompt: t`A lunar lander touches down at $${v0}$ m/s. Model each leg’s strut, per unit mass, as $x'' + ${p + q}x' + ${p * q}x = 0$ ($x$ the compression in m, $t$ in s), starting with $x(0) = 0$ and $x'(0) = ${v0}$ m/s. Solve with the Laplace transform and find the **largest compression**.`,
           answer: xmax, units: 'm', tol: { rel: 0.01 },
           errors: [{ value: v0 / (q - p), feedback: 'That is the size of each exponential term; the compression is their difference, which is much smaller.' }, { value: v0 * ts, feedback: 'That assumes the strut keeps compressing at the touchdown speed. It slows from the first instant.' }],
           hints: [t`$X(s) = \dfrac{${v0}}{(s + ${p})(s + ${q})}$, so $x(t) = \dfrac{${v0}}{${q - p}}\left(e^{-${p}t} - e^{-${q}t}\right)$.`, t`The compression is largest when $x' = 0$: $${p}e^{-${p}t} = ${q}e^{-${q}t}$, so $t^* = \dfrac{\ln(${q}/${p})}{${q - p}}$.`],
           teach: 'Solve, then find the extreme where the derivative vanishes: the transform gives x(t), calculus gives its peak.',
-          explain: t`$x(t) = ${n2(v0 / (q - p))}\left(e^{-${p}t} - e^{-${q}t}\right)$ peaks at $t^* = \ln(${q}/${p})/${q - p} = ${fmt(ts, 3)}$ s, where $x = ${fmt(xmax, 3)}$ m. A linear model: real lander struts crush aluminium honeycomb, which absorbs the energy and does not spring back.`,
-          visual: fpic(null, [0, 2], [0, 1.1 * v0 / (q - p)], t`The two terms of $x(t)$ (dashed): $\frac{${v0}}{${q - p}}e^{-${p}t}$ and $\frac{${v0}}{${q - p}}e^{-${q}t}$. The compression is the gap between them.`, {
+          explain: t`$x(t) = ${v0 === q - p ? '' : n2(v0 / (q - p))}\left(e^{-${p}t} - e^{-${q}t}\right)$ peaks at $t^* = \ln(${q}/${p})/${q - p} = ${fmt(ts, 3)}$ s, where $x = ${fmt(xmax, 3)}$ m. A linear model: real lander struts crush aluminium honeycomb, which absorbs the energy and does not spring back.`,
+          visual: fpic(null, [0, 2], [0, 1.1 * v0 / (q - p)], t`The two terms of $x(t)$ (dashed): $${n2(v0 / (q - p))}\,e^{-${p}t}$ and $${n2(v0 / (q - p))}\,e^{-${q}t}$. The compression is the gap between them.`, {
             ylabel: 'm',
             curves: [{ fn: `${v0 / (q - p)}*exp(-${p}x)`, color: 'violet', dash: true, width: 1.8 }, { fn: `${v0 / (q - p)}*exp(-${q}x)`, color: 'teal', dash: true, width: 1.8 }],
           }),

@@ -115,7 +115,7 @@ export function mount(F, P0) {
       L('stable', X0 * nx, ny, { color: 'good' }); L('nodes', X0 * nx, ny, { color: 'good', dy: 14 });
       L('unstable', X1 * nx, ny, { color: 'bad' }); L('nodes', X1 * nx, ny, { color: 'bad', dy: 14 });
       pm.text('centres', 0, Y1 * 0.55, { size: 11.5, weight: 650, color: 'gold', dx: 7, align: 'left' });
-      const px = Math.min(X1 * 0.92, 2 * Math.sqrt(Math.max(0, Y1 * 0.92)));
+      const px = Math.min(X1 * 0.92, 2 * Math.sqrt(Math.max(0, Y1 * 0.55)));
       pm.text('τ² = 4Δ', px, para(px), { size: 11.5, weight: 650, color: 'ink2', dx: -8, dy: -2, align: 'right' });
     }
     for (const p of P.paths || []) {

@@ -19,6 +19,7 @@
 //       ghost: null,                    // a faint dashed pair [[x, y], [x, y]] to compare with (numbers or expressions)
 //       ghostNames: null,               // their labels, plain text (default none)
 //       arc: true,                      // the turning arrow from a₁ to a₂
+//       tint: true,                     // colour by sign (false: a neutral gold fill and no arrow — a question about the sign)
 //       proof: false,                   // the box (a + b) × (c + d) and the six pieces cut from it (columns in the first quadrant, det > 0)
 //       b: null, cramer: 0,             // Cramer: a target b ([x, y]); cramer 1 or 2 draws the parallelogram with column k replaced by b and its shear onto xₖaₖ
 //       label: false,                   // write the signed area inside the parallelogram
@@ -33,7 +34,7 @@ import * as D from '../model/la-det.js';
 
 export const defaults = {
   cols: [[3, 1], [1, 2]], drag: false, snap: 0.5, sliders: [], constants: {}, names: ['a₁', 'a₂'], ghost: null, ghostNames: null,
-  arc: true, proof: false, b: null, cramer: 0, label: false, view: null, center: null, readout: true,
+  arc: true, tint: true, proof: false, b: null, cramer: 0, label: false, view: null, center: null, readout: true,
 };
 
 const SUB = ['', '₁', '₂'];
@@ -80,7 +81,7 @@ export function mount(F, P) {
     const a1 = vec(own[0], E), a2 = vec(own[1], E);
     const det = D.det(a1, a2), scale = Math.max(Math.hypot(...a1), Math.hypot(...a2), 1e-9);
     const flat = Math.abs(det) < 1e-9 * scale * scale;
-    const tint = flat ? 'ink3' : det > 0 ? 'accent' : 'bad';
+    const tint = flat ? 'ink3' : !P.tint ? 'gold' : det > 0 ? 'accent' : 'bad';
     const g = plot.ctx;
 
     g.save(); plot._clip();
@@ -121,7 +122,7 @@ export function mount(F, P) {
       }
     }
     // the turning arrow from a₁ to a₂
-    if (P.arc && !flat) {
+    if (P.arc && P.tint && !flat) {
       const o = D.orientArc(a1, a2);
       if (o) {
         const rho = 0.32 * Math.min(Math.hypot(...a1), Math.hypot(...a2), 2 * half);

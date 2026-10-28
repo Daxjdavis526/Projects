@@ -7,7 +7,7 @@
 import { lesson, mcq, num, code } from '../../src/core/content.js';
 import { fmt, tex } from '../../src/core/format.js';
 import { HBAR } from './_constants.js';
-import { U_KG, erf, samples, well, density, boxProbFn, r6 } from './_schrodinger.js';
+import { U_KG, erf, samples, well, density, boxProbFn, r6, label } from './_schrodinger.js';
 import * as S from '../../src/viz/model/mp-schrodinger.js';
 
 const t = String.raw;
@@ -19,7 +19,7 @@ const hits = (() => {
   return {
     type: 'graph',
     params: {
-      x: [-0.05, 1.05], y: [-0.35, 2.3], aspect: 'wide', xlabel: 'x / L', ylabel: '|ψ|² (units of 1/L)', axesAt: 'edge',
+      x: [-0.05, 1.05], y: [-0.52, 2.3], aspect: 'wide', xlabel: 'x / L', ylabel: '|ψ|² (units of 1/L)', axesAt: 'edge',
       curves: [{ fn: boxProbFn(2), domain: [0, 1], color: 'accent', width: 2.4 }],
       shade: [{ fn: boxProbFn(2), from: 0, to: 1, color: 'accent', alpha: 0.14 }],
       points: xs.map((x, i) => ({ x: r6(x), y: r6(-0.12 - 0.13 * (i % 3)), r: 2.6, color: 'gold' })),
@@ -34,9 +34,10 @@ const standing = {
   params: {
     x: [0, 1], y: [-1.6, 2.2], aspect: 'wide', xlabel: 'x / L', ylabel: '', yticks: 0, axesAt: 'edge',
     curves: [
-      ...[1, 0.5, -0.3, -0.85].map((c, i) => ({ fn: `${c}*sqrt(2)*sin(pi*x)`, color: 'violet', width: 1.3, dash: i % 2 ? [4, 4] : undefined, ...(i === 0 ? { label: 'Re Ψ at four moments', labelAt: 0.83, labelDx: 6, labelDy: -6 } : {}) })),
-      { fn: boxProbFn(1), color: 'accent', width: 2.6, label: '|Ψ|², the same at every moment', labelAt: 0.24, labelDx: -8, labelDy: -14, labelAlign: 'right' },
+      ...[1, 0.5, -0.3, -0.85].map((c, i) => ({ fn: `${c}*sqrt(2)*sin(pi*x)`, color: 'violet', width: 1.3, ...(i % 2 ? { dash: [4, 4] } : {}) })),
+      { fn: boxProbFn(1), color: 'accent', width: 2.6 },
     ],
+    points: [label(0.5, 2, '|Ψ|², the same at every moment', 'accent', 0, -12, 'center'), label(0.5, -1.2, 'Re Ψ at four moments', 'violet', 0, -14, 'center')],
   },
   caption: t`A stationary state: the real part of $\Psi = \psi(x)e^{-iEt/\hbar}$ swings up and down in place (violet, four moments), while its probability density (blue) stays fixed. Scales are arbitrary.`,
 };
@@ -120,7 +121,7 @@ The second condition — **normalisation** — says the particle is certainly so
       type: 'graph',
       params: {
         x: [-0.04, 1.04], y: [0, 2.2], aspect: 'wide', xlabel: 'x / L', ylabel: '|ψ|² (units of 1/L)', axesAt: 'edge',
-        curves: [{ fn: '30*x^2*(1-x)^2', domain: [0, 1], color: 'accent', width: 2.4, label: '30x²(1 − x)²', labelAt: 0.62, labelDx: 8, labelDy: -8 }, { fn: boxProbFn(1), domain: [0, 1], color: 'ink3', width: 1.4, dash: [5, 4], label: 'the exact ground state, 2 sin²πx', labelAt: 0.86, labelDx: 6, labelDy: 6 }],
+        curves: [{ fn: '30*x^2*(1-x)^2', domain: [0, 1], color: 'accent', width: 2.4, label: '30x²(1 − x)²', labelAt: 0.62, labelDx: 8, labelDy: -8 }, { fn: boxProbFn(1), domain: [0, 1], color: 'ink3', width: 1.4, dash: [5, 4], label: 'dashed: the exact ground state, 2 sin²πx', labelAt: 0.3, labelDx: -12, labelDy: -10, labelAlign: 'right' }],
         shade: [{ fn: '30*x^2*(1-x)^2', from: 0, to: 0.25, color: 'gold', alpha: 0.5 }],
       },
       caption: 'The model’s |ψ|² (blue) beside the exact ground state of a box (dashed), with the left quarter shaded. Lengths in units of L.',
@@ -224,7 +225,7 @@ The second condition — **normalisation** — says the particle is certainly so
           hints: [t`Expected count $= N\times P$, with $P = \displaystyle\int_{${a}}^{${b}} \frac2L\sin^2\frac{${n === 1 ? '' : n}\pi x}{L}\,dx$.`, t`$\int \frac2L\sin^2\frac{n\pi x}{L}dx = \frac xL - \frac{1}{2n\pi}\sin\frac{2n\pi x}{L}$.`],
           teach: 'Born’s rule predicts frequencies: N repeated measurements put about N·P in each region.',
           explain: t`$P = ${fmt(P, 3)}$, so about $${fmt(count, 3)}$ of the 20 000 measurements land there (give or take $\sqrt{${Math.round(count)}} \approx ${Math.round(Math.sqrt(count))}$ from run to run).${n === 2 && a === 0.45 ? ' Very few: the state has a node at the centre.' : ''}`,
-          visual: well({ well: 'infinite', L: 1, n, show: 'prob', window: [a, b], hide: ['prob', 'energy'] }, t`The electron’s energy levels (top) and the chosen state’s $|\psi|^2$ (bottom), with the region asked about shaded gold.`),
+          visual: well({ well: 'infinite', L: 1, n, show: 'prob', window: [a, b], panels: ['wave'], hide: ['prob'] }, t`The state’s $|\psi|^2$ across the box (walls shaded grey), with the region asked about shaded gold.`),
         };
       },
     }),
@@ -310,7 +311,7 @@ print("P(x > 0):", probability(x, phi, 0, 6))`,
           hints: [t`$\displaystyle\int_0^{L/4}\frac2L\sin^2\frac{${n === 1 ? '' : n}\pi x}{L}\,dx = \left[\frac xL - \frac{1}{${2 * n}\pi}\sin\frac{${2 * n}\pi x}{L}\right]_0^{L/4}$.`],
           teach: 'P is the area under |ψ|², which is not spread evenly across a box.',
           explain: t`$P = \tfrac14 - \dfrac{\sin(${n === 1 ? '' : n}\pi/2)}{${2 * n}\pi} = ${fmt(P, 3)}$.${n === 2 ? ' Exactly a quarter: for n = 2 the first quarter holds exactly half of the first hump.' : ''}`,
-          visual: well({ well: 'infinite', L: 1, n, show: 'prob', window: [0, 0.25], hide: ['prob', 'energy'] }, t`A box 1 nm wide: the levels (top) and the state’s $|\psi|^2$ (bottom), with the left quarter shaded.`),
+          visual: well({ well: 'infinite', L: 1, n, show: 'prob', window: [0, 0.25], panels: ['wave'], hide: ['prob'] }, t`The state’s $|\psi|^2$ in a box 1 nm wide (walls shaded grey), with the left quarter shaded gold.`),
         };
       },
     }),

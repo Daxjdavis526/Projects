@@ -246,6 +246,8 @@ for (const c of CATALOG.courses) {
       for (const v of seeds) {
         const item = instantiate({ id: `${c.id}.boss`, skills: [def.skill || `${c.id}.boss`] }, def, v);
         const p = validateItem(item, tex);
+        const calc = calculusProblem(item);
+        if (calc) p.push(calc);
         if (p.length) { check(`${c.id} boss round ${k + 1}/${def.id}`, false, `variant ${v}: ${p.join('; ')}`); break; }
         if (v === 0) {
           check(`${c.id} boss round ${k + 1}/${def.id}`, true);
