@@ -315,3 +315,18 @@ export function weightedMean(x, s) {
   const dof = x.length - 1;
   return { mean, sigma, chi2, dof, birge: dof > 0 ? Math.sqrt(chi2 / dof) : NaN, p: dof > 0 ? chi2Sf(chi2, dof) : NaN, weights: s.map((si) => 1 / (si * si) / W) };
 }
+
+/**
+ * Readings of one instrument: truth + bias + sd·z, rounded to the display
+ * resolution `res` (0: not rounded). The same seed always gives the same list.
+ */
+export function instrumentReadings({ truth, bias = 0, sd, res = 0, n, seed = 1 }) {
+  const rng = makeRng(seed);
+  return Array.from({ length: n }, () => {
+    const x = truth + bias + sd * gauss(rng);
+    return res > 0 ? +(Math.round(x / res) * res).toFixed(Math.max(0, Math.ceil(-Math.log10(res) - 1e-9))) : x;
+  });
+}
+
+/** An accuracy specification's half-width: p % of reading + d digits (of resolution res) + q % of full scale. */
+export const specLimit = (reading, { pct = 0, digits = 0, res = 0, fsPct = 0, fullScale = 0 } = {}) => (pct / 100) * Math.abs(reading) + digits * res + (fsPct / 100) * fullScale;

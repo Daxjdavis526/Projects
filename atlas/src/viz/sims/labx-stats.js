@@ -170,8 +170,7 @@ export function mount(F, P0) {
     function specHalf(reading) { return (P.specPct / 100) * Math.abs(reading) + P.specDigits * (P.res || 0) + (P.specFS / 100) * P.fullScale; }
     function draw() {
       const res = F.params.res ?? res0, bias = F.params.bias, sd = F.params.sd;
-      const rng = makeRng(seed);
-      const xs = Array.from({ length: P.n }, () => roundTo(P.truth + bias + sd * M.gauss(rng), res));
+      const xs = M.instrumentReadings({ truth: P.truth, bias, sd, res, n: P.n, seed });
       const st = M.stats(xs);
       const fs = narrowOf(a.canvas) ? 10.5 : 12;
       pl.clear();
