@@ -25,13 +25,13 @@ function wirePic(caption, { b = 0, u = 0.5, live = false, n = 9 } = {}) {
   const curves = [];
   const g = '(1/sqrt(1 - b^2))', up = '((u - b)/(1 - u*b))';
   for (let k = -n; k <= n; k++) {
-    curves.push({ param: [`${k}*sqrt(1 - b^2) - b*t`, 't'], t: [0, 4], color: 'warn', width: 1.6 });
-    curves.push({ param: [`${k}/(${g}*(1 - b*u)) + ${up}*t`, 't'], t: [0, 4], color: 'accent', width: 1.6, dash: [5, 4] });
+    curves.push({ param: [`${k}*sqrt(1 - b^2) - b*t`, 't'], t: [0, 3.5], color: 'warn', width: 1.6 });
+    curves.push({ param: [`${k}/(${g}*(1 - b*u)) + ${up}*t`, 't'], t: [0, 3.5], color: 'accent', width: 1.6, dash: [5, 4] });
   }
   return {
     type: 'graph',
     params: {
-      x: [-4, 4], y: [0, 4], aspect: 'wide', axesAt: 'edge', xlabel: 'x′ along the wire (spacing in the wire’s frame = 1)', ylabel: 'ct′', yticks: 4, grid: false,
+      x: [-4, 4], y: [0, 4.5], aspect: 'wide', axesAt: 'edge', xlabel: 'x′ along the wire (spacing in the wire’s frame = 1)', ylabel: 'ct′', yticks: 4, grid: false,
       ...(live ? {
         sliders: [{ key: 'b', label: t`Observer’s speed along the wire, $\beta$`, min: -0.8, max: 0.8, step: 0.01, value: b, explain: 'The frame you watch the wire from, moving along it at this fraction of c.' }],
         constants: { u },
@@ -43,7 +43,7 @@ function wirePic(caption, { b = 0, u = 0.5, live = false, n = 9 } = {}) {
       } : { constants: { b, u } }),
       curves,
       hlines: [{ y: 3, color: 'ink3', label: 'one instant, t′ = 3' }],
-      legend: [{ label: 'positive ions', color: 'warn' }, { label: 'electrons', color: 'accent', dash: [5, 4] }], legendAt: 'tr',
+      legend: [{ label: 'positive ions', color: 'warn' }, { label: 'electrons', color: 'accent', dash: [5, 4] }], legendAt: 'tl',
     },
     caption,
   };
