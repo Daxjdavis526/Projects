@@ -64,7 +64,7 @@ export function mount(F, P0) {
     const NT = 40, NP = 80;
     const V = Array.from({ length: NT + 1 }, (_, i) => Array.from({ length: NP + 1 }, (_, j) => f((PI * i) / NT, (2 * PI * j) / NP)));
     const mx = Math.max(1e-12, ...V.flat().map(Math.abs));
-    const R = 1.6;
+    const R = 2.0;
     const pos = (i, j, r) => { const th = (PI * i) / NT, ph = (2 * PI * j) / NP; return [r * Math.sin(th) * Math.cos(ph), r * Math.sin(th) * Math.sin(ph), r * Math.cos(th)]; };
     const rad = (i, j) => (lobes ? (R * 1.25 * Math.abs(V[i][j])) / mx : R);
     for (let i = 0; i < NT; i++) for (let j = 0; j < NP; j++) {
@@ -77,8 +77,8 @@ export function mount(F, P0) {
       for (const [a, b] of contourSegments(grid, 0)) view.line([pos(a[0], a[1], R * 1.004), pos(b[0], b[1], R * 1.004)], { color: 'ink', width: 2.4, bias: 0.01 });
     }
     if (P.axes !== false) {
-      view.line([[0, 0, -2.3], [0, 0, 2.3]], { color: 'ink3', width: 1.2, dash: [4, 4], bias: -0.5 });
-      view.label([0, 0, 2.5], 'θ = 0', { color: 'ink3', size: 11 });
+      view.line([[0, 0, -2.75], [0, 0, 2.75]], { color: 'ink3', width: 1.2, dash: [4, 4], bias: -0.5 });
+      view.label([0, 0, 2.95], 'θ = 0', { color: 'ink3', size: 11 });
     }
     view.end();
     if (P.readout !== false) {
