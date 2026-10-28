@@ -166,7 +166,7 @@ $$n \to p + e^- + \bar\nu_e \qquad\text{that is}\qquad d \to u + W^- \to u + e^-
         return {
           prompt: t`A force carried by a particle of mass $M$ reaches about $R = \hbar c/Mc^2$, with $\hbar c = 197.3$ MeV fm. What is the range of a force carried by ${what}? Answer in ${unit === 'fm' ? 'fm' : 'attometres (1 am = 0.001 fm)'}.`,
           answer: R * scale, units: unit, tol: { rel: 0.005 },
-          errors: [{ value: (R * scale) / (2 * Math.PI), feedback: t`Use $\hbar c = 197.3$ MeV fm, not $hc$… or rather: $R = \hbar c/Mc^2$ with no extra $2\pi$.` }].filter(() => false),
+          errors: [{ value: (R * scale) * 2 * Math.PI, feedback: t`That used $hc$; the range uses $\hbar c = hc/2\pi = 197.3$ MeV fm.` }],
           hints: [t`$R = \dfrac{\hbar c}{Mc^2} = \dfrac{197.3\ \text{MeV fm}}{Mc^2}$.`, unit === 'fm' ? 'With Mc² in MeV the answer comes out in fm.' : 'With Mc² in MeV the answer is in fm; multiply by 1000 for am.'],
           teach: 'A heavy carrier makes a short-ranged force, R = ħc/Mc²: the massless photon gives electromagnetism its infinite reach.',
           explain: t`$R = 197.3/${fmt(m, 5)} = ${fmt(R, 3)}$ fm${unit === 'am' ? t` $= ${fmt(R * 1000, 3)}$ am, a thousandth of a proton’s size: that is why the weak force is weak at everyday energies` : ' — about the size of a nucleus, which is why nuclear forces stop at its edge (Yukawa’s 1935 argument)'}. A virtual carrier of energy $Mc^2$ can exist for about $\hbar/Mc^2$ and travel at most $c$ times that.`,

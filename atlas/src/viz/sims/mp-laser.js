@@ -183,7 +183,7 @@ export function mount(F, P0) {
     cplot.path(C.ws.map((W, i) => [lw(W), Math.max(-5, C.by[S.scheme][i].inversion / dth)]), { color: 'gold', width: 2.4 });
     if (!hide.has('output')) cplot.path(C.ws.map((W, i) => [lw(W), C.by[S.scheme][i].output / C.top]), { color: 'bad', width: 2.6 });
     const th = L.thresholdPump(S.scheme, S.R);
-    if (!hide.has('threshold') && th < WMAX) { cplot.line(lw(th), cplot.vy0, lw(th), cplot.vy1, { color: 'ink3', width: 1.2, dash: [5, 5] }); cplot.text('threshold', lw(th), cplot.vy1, { color: 'ink3', dx: 4, dy: 10 }); }
+    if (!hide.has('threshold') && th < WMAX) { cplot.line(lw(th), cplot.vy0, lw(th), cplot.vy1, { color: 'ink3', width: 1.2, dash: [5, 5] }); cplot.text('threshold', lw(th), cplot.vy0, { color: 'ink3', dx: 4, dy: -10 }); }
     const ss = L.steady(S.scheme, S.W, S.R);
     cplot.point(lw(S.W), Math.max(cplot.vy0, ss.inversion / dth), { color: 'gold', r: 5 });
     if (!hide.has('output')) cplot.point(lw(S.W), ss.output / C.top, { color: 'bad', r: 5 });
@@ -202,7 +202,7 @@ export function mount(F, P0) {
     F.readout([
       ['steady upper / lower laser level', `${ss.N[sch.upper].toFixed(1)}\\ /\\ ${ss.N[sch.lower].toFixed(1)}\\text{ of ${L.NA} atoms}`],
       hide.has('threshold') ? null : ['threshold pump', th === Infinity ? '\\text{none: never inverts}' : `${th.toFixed(th < 0.1 ? 3 : 2)}/\\tau_{21}`],
-      hide.has('output') ? null : ['photons in the mode', ss.q < 1 ? '\\text{fewer than 1}' : `${Math.round(ss.q)}`],
+      hide.has('output') ? null : ['steady photons in the mode', ss.q < 1 ? '\\text{fewer than 1}' : `${Math.round(ss.q)}`],
     ]);
   }
 

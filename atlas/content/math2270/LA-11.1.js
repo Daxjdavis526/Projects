@@ -41,7 +41,7 @@ export default lesson({
 
 $$A = Q\Lambda Q${T} = \lambda_1\mathbf q_1\mathbf q_1${T} + \lambda_2\mathbf q_2\mathbf q_2${T} + \dots + \lambda_n\mathbf q_n\mathbf q_n${T}$$
 
-Diagonalizing needs no inverse — $Q^{-1} = Q${T}$ — and $A$ is a sum of projections onto perpendicular lines, each stretched by its eigenvalue. For an inertia tensor the $\mathbf q_i$ are the body's **principal axes** and the $\lambda_i$ its principal moments; for a stress tensor they are the principal directions, where the shear vanishes, and the principal stresses.`,
+This is LA-9.3's $PDP^{-1}$ with no inverse to compute — $Q^{-1} = Q${T}$ — and $A$ is a sum of projections onto perpendicular lines, each stretched by its eigenvalue. For an inertia tensor the $\mathbf q_i$ are the body's **principal axes** and the $\lambda_i$ its principal moments; for a stress tensor they are the principal directions, where the shear vanishes, and the principal stresses.`,
   symbols: [
     { tex: t`A = A${T}`, text: t`a real symmetric $n\times n$ matrix: $a_{ij} = a_{ji}$` },
     { tex: t`\lambda_1, \dots, \lambda_n`, text: t`its eigenvalues — all real, listed with repeats` },
