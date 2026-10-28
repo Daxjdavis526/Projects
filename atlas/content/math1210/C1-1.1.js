@@ -195,7 +195,6 @@ A rocket’s altimeter gives altitude against time; the difference quotient of t
         const t0 = r.int(3, 8), d = r.pick([0.5, 1]);
         const [hA, hB, hC] = [t0 - d, t0, t0 + d].map((x) => Math.round(burn(x)));
         const ans = (hC - hA) / (2 * d), fwd = (hC - hB) / d, bwd = (hB - hA) / d;
-        const top = burn(10) * 1.08;
         return {
           prompt: t`An altimeter logs a rocket’s altitude every $${d}$ s:
 
@@ -207,7 +206,7 @@ Estimate the vertical velocity at $t = ${t0}$ s with the **symmetric** interval 
           hints: [t`Use the first and last readings: they straddle $t = ${t0}$ s.`, t`The interval is $${2 * d}$ s long, so divide $${hC} - ${hA}$ by $${2 * d}$.`],
           teach: t`A symmetric difference quotient $\frac{f(a+h) - f(a-h)}{2h}$ is centred on $a$ and usually far more accurate than a one-sided one.`,
           explain: t`$\dfrac{${hC} - ${hA}}{${2 * d}} = ${nice(ans)}$ m/s. The one-sided quotients give $${nice(bwd)}$ and $${nice(fwd)}$ m/s; a speeding-up rocket makes the backward one too small and the forward one too big, and the centred one splits the difference.`,
-          visual: { type: 'graph', params: { x: [-0.4, 10.5], y: [-0.06 * top, top], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (m)', curves: [{ fn: BURN, color: 'accent', domain: [0, 10], dash: true, width: 1.4 }, { fn: chord(t0 - d, hA, t0 + d, hC), color: 'violet', dash: true, domain: [t0 - 2, t0 + 2] }], points: [{ x: t0 - d, y: hA, color: 'gold' }, { x: t0, y: hB, color: 'gold' }, { x: t0 + d, y: hC, color: 'gold' }] }, caption: t`The three readings (gold) and the symmetric secant through the outer two. The dashed curve is the altitude between samples, which the altimeter does not record.` },
+          visual: { type: 'graph', params: { x: [t0 - 3, t0 + 3], y: [burn(t0 - 3) * 0.8, burn(t0 + 3) * 1.05], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (m)', curves: [{ fn: BURN, color: 'accent', domain: [t0 - 3, t0 + 3], dash: true, width: 1.4 }, { fn: chord(t0 - d, hA, t0 + d, hC), color: 'violet', dash: true, domain: [t0 - 2, t0 + 2] }], points: [{ x: t0 - d, y: hA, color: 'gold' }, { x: t0, y: hB, color: 'gold' }, { x: t0 + d, y: hC, color: 'gold' }] }, caption: t`The three readings (gold) and the symmetric secant through the outer two. The dashed curve is the altitude between samples, which the altimeter does not record.` },
         };
       },
     }),
