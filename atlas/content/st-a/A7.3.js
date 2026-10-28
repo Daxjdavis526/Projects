@@ -279,7 +279,7 @@ print(invariant(F_low))`,
           visual: plane({
             x: [-3.4, 3.4], y: [-2.1, 2.1],
             curves: [{ param: ['1.2*cos(t)', '1.2*sin(t)'], t: [0, 6.2832], color: 'accent', width: 2 }, { param: ['2.1*cos(t)', '2.1*sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: [5, 4] }],
-            arrows: [{ from: [1.6062, 1.3528], to: [1.1473, 0.9663], color: 'gold', width: 2.4, label: 'tether', labelDx: 8, labelDy: 10 }, { from: [1.6062, 1.3528], to: [0.9621, 2.1176], color: 'ink', width: 2, label: 'v' }],
+            arrows: [{ from: [1.6062, 1.3528], to: [1.1473, 0.9663], color: 'gold', width: 2.4, label: 'tether', labelDx: 8, labelDy: 10 }, { from: [1.6062, 1.3528], to: [1.1555, 1.8899], color: 'ink', width: 2, label: 'v' }],
             points: [{ x: 0, y: 0, r: 0.01, color: 'accent', label: 'Earth', labelDx: 0, labelDy: 0, labelAlign: 'center' }, { x: 1.6062, y: 1.3528, r: 5, color: 'ink' }],
             caption: 'Schematic, not to scale: a satellite in low orbit trailing a tether toward Earth, crossing the geomagnetic field (out of the page here).',
           }),

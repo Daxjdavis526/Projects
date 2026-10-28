@@ -205,7 +205,7 @@ export function xrfSpectrum(peaks, { x = [0, 10], ask = null, caption, numbers =
  * An energy-level diagram (a graph): levels as horizontal lines with labels
  * at the right, and vertical arrows between them. Energies are in whatever
  * unit the caller chooses; the picture is drawn to that scale.
- *   list:   [{ E, label, color, x0, x1 }]  (x0, x1: the line’s ends; default 0 and 4)
+ *   list:   [{ E, label, color, x0, x1, labelLeft, dy }]  (x0, x1: the line’s ends; default 0 and 4)
  *   arrows: [{ from, to, x, x2, color, label, dash, left, dy }] — vertical unless x2 is given; the label sits beside the arrow’s middle
  */
 export function levels(list, { arrows = [], caption, x = [-1.5, 9], pad = 0.12, aspect = 'wide' } = {}) {
@@ -214,7 +214,7 @@ export function levels(list, { arrows = [], caption, x = [-1.5, 9], pad = 0.12, 
   for (const l of list) {
     const x0 = l.x0 ?? 0, x1 = l.x1 ?? 4;
     curves.push(seg(x0, l.E, x1, l.E, l.color || 'ink2', l.width || 2.4, !!l.dash));
-    if (l.label) points.push(label(x1, l.E, l.label, l.color || 'ink2', 8, l.dy ?? 0, 'left'));
+    if (l.label) points.push(l.labelLeft ? label(x0, l.E, l.label, l.color || 'ink2', -8, l.dy ?? 0, 'right') : label(x1, l.E, l.label, l.color || 'ink2', 8, l.dy ?? 0, 'left'));
   }
   for (const a of arrows) {
     const x2 = a.x2 ?? a.x;

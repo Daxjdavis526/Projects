@@ -281,7 +281,7 @@ function mountChart(F, P) {
     const [x0, y0] = toPlot(chart, a0, b0), [x1, y1] = toPlot(chart, a1, b1);
     chartPlot.setView([Math.min(x0, x1), Math.max(x0, x1)], [Math.min(y0, y1), Math.max(y0, y1)]);
     chartPlot.o.yfmt = chart === 'sphere' ? (t) => tickLabel(Math.abs(t) < 1e-12 ? 0 : -t) : null;
-    chartPlot.o.xlabel = C.names[0] + (chart === 'sphere' || chart === 'polar' ? ' (rad)' : '');
+    chartPlot.o.xlabel = C.names[0] + (chart === 'sphere' ? ' (rad)' : '');
     chartPlot.o.ylabel = '';
     if (both && small) { spacePlot.o.pad = { l: 6, r: 6, t: 6, b: H * 0.5 + 4 }; chartPlot.o.pad = { l: 36, r: 10, t: H * 0.5 + 18, b: 32 }; }
     else if (both) { spacePlot.o.pad = { l: 6, r: W / 2 + 6, t: 6, b: 6 }; chartPlot.o.pad = { l: W / 2 + 40, r: 10, t: 14, b: 34 }; }

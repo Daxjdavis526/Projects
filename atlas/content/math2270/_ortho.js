@@ -154,7 +154,7 @@ export function fitPic(xs, ys, { fn = null, at = null, sy = null, residuals = !!
 }
 
 /** A quadratic form q(x, y) = a x² + 2b xy + c y² as a contour map, optionally with its eigenvector axes. */
-export function formPic(A, { axes = true, levels, x = [-3.2, 3.2], y = [-2, 2], caption, highlight = null, labels = true, view = '2d', toggle3d = false, arrowNames = ['q₁', 'q₂'] } = {}) {
+export function formPic(A, { axes = true, levels, x = [-4, 4], y = [-2, 2], caption, highlight = null, labels = true, view = '2d', toggle3d = false, arrowNames = ['q₁', 'q₂'] } = {}) {
   const [[a, b], [, c]] = A;
   const f = `${a}*x^2 + ${2 * b}*x*y + ${c}*y^2`;
   const { q } = eigSym2(A);

@@ -20,9 +20,9 @@ const element = (sx, sy, txy, caption) => ({
     x: [-2.6, 2.6], y: [-1.45, 1.45], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [['-0.7 + 1.4*t', '-0.7'], ['0.7', '-0.7 + 1.4*t'], ['0.7 - 1.4*t', '0.7'], ['-0.7', '0.7 - 1.4*t']].map((param) => ({ param, t: [0, 1], color: 'ink2', width: 2 })),
     arrows: [
-      { from: [0.75, 0], to: [sx >= 0 ? 1.5 : 0.95, 0], ...(sx < 0 ? { from: [1.5, 0], to: [0.8, 0] } : {}), color: 'accent', label: `σx = ${sx} MPa`, labelDx: 6, labelDy: -12 },
+      { from: [0.75, 0], to: [sx >= 0 ? 1.5 : 0.95, 0], ...(sx < 0 ? { from: [1.5, 0], to: [0.8, 0] } : {}), color: 'accent', label: `σx = ${String(sx).replace('-', '−')} MPa`, labelDx: 6, labelDy: -12 },
       { from: [-0.75, 0], to: [sx >= 0 ? -1.5 : -0.95, 0], ...(sx < 0 ? { from: [-1.5, 0], to: [-0.8, 0] } : {}), color: 'accent' },
-      { from: [0, 0.75], to: [0, sy >= 0 ? 1.4 : 0.95], ...(sy < 0 ? { from: [0, 1.4], to: [0, 0.8] } : {}), color: 'warn', label: `σy = ${sy} MPa`, labelDx: 8, labelDy: 4 },
+      { from: [0, 0.75], to: [0, sy >= 0 ? 1.4 : 0.95], ...(sy < 0 ? { from: [0, 1.4], to: [0, 0.8] } : {}), color: 'warn', label: `σy = ${String(sy).replace('-', '−')} MPa`, labelDx: 8, labelDy: 4 },
       { from: [0, -0.75], to: [0, sy >= 0 ? -1.4 : -0.95], ...(sy < 0 ? { from: [0, -1.4], to: [0, -0.8] } : {}), color: 'warn' },
       { from: [0.85, txy >= 0 ? -0.5 : 0.5], to: [0.85, txy >= 0 ? 0.5 : -0.5], color: 'good', label: `τ = ${Math.abs(txy)} MPa`, labelDx: 6, labelDy: 14 },
       { from: [-0.85, txy >= 0 ? 0.5 : -0.5], to: [-0.85, txy >= 0 ? -0.5 : 0.5], color: 'good' },
@@ -65,7 +65,7 @@ This is LA-9.3's $PDP^{-1}$ with no inverse to compute — $Q^{-1} = Q${T}$ — 
       sliders: [
         { key: 'a', label: t`$a$ (top left)`, min: -2, max: 3, step: 0.25, value: 2, explain: 'The top-left entry.' },
         { key: 'b', label: t`$b$ (both off-diagonal entries)`, min: -2, max: 2, step: 0.25, value: 1, explain: 'One number in two places: that is what makes A symmetric.' },
-        { key: 'c', label: t`$c$ (bottom right)`, min: -2, max: 3, step: 0.25, value: 1, explain: 'The bottom-right entry.' },
+        { key: 'c', label: t`$c$ (bottom right)`, min: -2, max: 3, step: 0.25, value: 2, explain: 'The bottom-right entry.' },
       ],
     },
     caption: 'Faint: the plane before the map. Bold: after it. Violet dashed: the directions A only stretches, with the stretch factor λ. For a symmetric A they always cross at a right angle.',

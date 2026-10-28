@@ -45,18 +45,18 @@ const cavity = (Lcm, R2, caption) => ({
 
 /** The helium–neon levels near 20 eV, to scale (the two ground states lie about 20 eV below). */
 const heneLevels = (ask) => levels([
-  { E: HE_2S, label: 'helium 2s, metastable: 20.62 eV', x0: 0, x1: 3, color: 'good' },
+  { E: HE_2S, label: 'helium 2s (metastable): 20.62 eV', x0: 0, x1: 3, color: 'good', labelLeft: true },
   { E: NE_UP, label: 'neon 5s (upper laser level): 20.66 eV', x0: 4.6, x1: 8, color: 'ink' },
   { E: NE_LO, label: 'neon 3p (lower laser level): 18.70 eV', x0: 4.6, x1: 8, color: 'ink' },
   { E: NE_LO - 0.32, label: 'neon 3s levels, then the ground state', x0: 4.6, x1: 8, color: 'ink3', dash: true },
 ], {
   arrows: [
-    { from: HE_2S - 0.55, to: HE_2S, x: 1.5, color: 'violet', label: 'electron impact', left: true },
+    { from: HE_2S - 0.55, to: HE_2S, x: 1.5, color: 'violet', label: 'electron impact' },
     { from: HE_2S, to: NE_UP, x: 3, x2: 4.6, color: 'good', label: 'collision', dy: -12, dash: true },
     { from: NE_UP, to: NE_LO, x: 6.3, color: 'bad', label: ask ? 'λ = ?' : '632.8 nm' },
     { from: NE_LO, to: NE_LO - 0.32, x: 7.4, color: 'ink3', dash: true },
   ],
-  x: [-2.4, 15], pad: 0.18,
+  x: [-7.5, 15], pad: 0.18,
   caption: 'The helium–neon laser’s levels near 20 eV, to scale (NIST). A discharge excites helium to its metastable 2s level; collisions hand the energy to neon’s nearly equal 5s level; the laser line runs down to neon’s 3p level, which empties fast. Both ground states lie about 20 eV below.',
 });
 

@@ -24,15 +24,15 @@ const P = [
 ];
 const GEN = { 1: 'accent', 2: 'teal', 3: 'violet', 0: 'gold' };
 function ladder({ show = 'show', caption } = {}) {
-  const on = (k) => (typeof show === 'number' ? (show >= k ? 1 : 0) : `step(${show} - ${k - 0.5})`);
+  const on = (k) => (typeof show === 'number' ? (show >= k ? '1' : '0') : `step(${show} - ${k - 0.5})`);   // a string: a bare 0 would read as “no condition”
   return {
     type: 'graph',
     params: {
       x: [-1.6, 12.4], y: [0.3, 4.1], xlog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'mass (eV, log scale)', ylabel: '', yticks: 0, grid: true,
       points: [
-        ...P.map(([n, m, row, g]) => ({ x: r6(Math.log10(m)), y: row, r: 6, color: GEN[g], label: n, labelDx: 0, labelDy: -13, labelAlign: 'center' })),
+        ...P.map(([n, m, row, g]) => ({ x: r6(Math.log10(m)), y: row, r: 6, color: GEN[g], label: n, ...({ W: { labelDx: -8, labelDy: -12, labelAlign: 'right' }, Z: { labelDx: 0, labelDy: 16, labelAlign: 'center' }, Higgs: { labelDx: 8, labelDy: -12, labelAlign: 'left' }, u: { labelDx: -4, labelDy: -13, labelAlign: 'right' }, d: { labelDx: 4, labelDy: -13, labelAlign: 'left' } }[n] || { labelDx: 0, labelDy: -13, labelAlign: 'center' }) })),
         label(-1.5, 3, 'quarks', 'ink', 0, 14, 'left'), label(-1.5, 2, 'leptons', 'ink', 0, 14, 'left'), label(-1.5, 1, 'bosons', 'ink', 0, 14, 'left'),
-        label(-1.45, 1, 'photon, gluon: massless', 'gold', 0, -12, 'left'),
+        label(-1.45, 1.35, 'photon, gluon: massless', 'gold', 0, 0, 'left'),
         { x: r6(Math.log10(MPC2 * 1e6)), y: 3.65, r: 7, color: 'warn', label: 'proton, 938 MeV', labelDx: 10, labelDy: -10, when: on(1) },
         { x: r6(Math.log10((2 * M_UQ + M_DQ) * 1e6)), y: 3.65, r: 4, color: 'warn', label: 'its three quarks, 9 MeV', labelDx: -10, labelDy: -10, labelAlign: 'right', when: on(1) },
         { ...label(-0.35, 2, 'neutrinos: below 0.45 eV', 'bad', 6, -12, 'left'), when: on(2) },
