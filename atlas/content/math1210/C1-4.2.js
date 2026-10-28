@@ -36,13 +36,13 @@ The same statement in the language of **differentials**: a small change $dx$ in 
     title: 'Gravity, linearized',
     lead: t`The blue curve is the gravitational acceleration $g(h) = g_0\left(\frac{R}{R + h}\right)^2$ against altitude. The gold line is its linearization at the point you drag. The slider moves a probe a distance $d$ away from that point: the shaded sliver is the error, and the dashed curve adds the error estimate $\tfrac12 g''\,d^2$ to the line.`,
     tasks: [
-      t`With the tangent at the ground, set $d = 400$ km (the space station’s altitude): the line is off by about $0.12\ \text{m/s}^2$, and the estimate is close to that.`,
+      t`With the tangent at the ground, set $d = 420$ km (the space station’s altitude): the line is off by about $0.12\ \text{m/s}^2$, and the estimate is close to that.`,
       t`Double $d$: the error roughly quadruples. Halve it: the error drops to about a quarter.`,
-      t`Push $d$ past $3000$ km: the line has gone badly wrong, and only the dashed curve follows the truth for a while.`,
+      t`Push $d$ toward $2000$ km: the line is badly wrong, and even the error estimate has drifted off — it is trustworthy only while $d$ is small compared with $R = 6371$ km.`,
     ],
     params: {
       x: [-150, 4200], y: [0, 10.8], aspect: 'wide', xlabel: 'h (km)', ylabel: 'g (m/s²)',
-      sliders: [{ key: 'd', label: t`Probe distance $d$`, min: 0, max: 3500, step: 10, value: 400, unit: t`\text{km}`, explain: t`How far from the tangent point the linearization is being tested.` }],
+      sliders: [{ key: 'd', label: t`Probe distance $d$`, min: 0, max: 3500, step: 10, value: 200, unit: t`\text{km}`, explain: t`How far from the tangent point the linearization is being tested.` }],
       curves: [
         { fn: G, color: 'accent', domain: [0, 4200] },
         { fn: `${Lat('x')} + 0.5*${F2}*(x - x0)^2`, color: 'violet', dash: true, width: 1.4, domain: ['x0', 'x0 + 3500'] },
