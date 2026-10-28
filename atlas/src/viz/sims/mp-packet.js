@@ -105,7 +105,7 @@ export function mount(F, P0) {
     dplot.text(`chord: ω/k = v(phase) = ${hide.has('speeds') ? '?' : f3(S.vp).replace('\\infty', '∞')}`, 0.4, 0.93 * top, { color: 'violet', size: fs });
     dplot.text(`tangent: dω/dk = v(group) = ${hide.has('speeds') ? '?' : f3(S.vg).replace('\\infty', '∞')}`, 0.4, 0.82 * top, { color: 'gold', size: fs });
     dplot.text(D.label, 11.8, 0.3 * top, { color: 'ink2', align: 'right', size: fs });
-    dplot.text('amplitudes of the waves added', K0, 0.24 * top, { color: 'accent', align: 'center', dy: -6, size: fs - 1 });
+    dplot.text('bars: amplitudes of the waves added', K0 + 2.6, 0.16 * top, { color: 'accent', size: fs - 1 });
   }
 
   let lastRead = '';

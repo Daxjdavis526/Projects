@@ -25,10 +25,12 @@
 //       nullclines: false,                // x′ = 0 and y′ = 0, dashed
 //       equilibria: false,                // true marks them; 'label' adds each one's type in words
 //       eigen: false,                     // matrix: the real eigenvector lines (straight-line solutions), labelled λ
+//       origin: true,                     // matrix: mark the origin in its type's colour (false: a question asks for the type)
 //       levels: { fn: 'y^2/2 - cos(x)', values: [-0.5, 0, 0.5], highlight: [1] },   // or n: 9, or { from, to, step }
 //       seeds: [[1, 0], { x: 0, y: 2, color: 'gold', dir: 'forward' }],   // trajectories (both ways unless dir)
 //       seedColor: null,                  // one colour for every seed (a family), instead of a palette
 //       T: 30,                            // how long each seed is traced each way
+//       heads: true,                      // arrowheads on trajectories (false: a question asks which way they run)
 //       start: [1, 0],                    // a draggable start point; its forward trajectory is drawn bold (a point item's answer)
 //       play: false,                      // a Play button: a dot runs along the start trajectory
 //       series: false, tmax: 20,          // a second panel with x(t) and y(t) from the start point, 0 ≤ t ≤ tmax
@@ -53,8 +55,8 @@ import { sampleGrid, contourSegments, joinSegments, levelsFrom, range } from '..
 
 export const defaults = {
   fx: 'y', fy: '-x', matrix: null, x: [-3, 3], y: [-3, 3], xlabel: 'x', ylabel: 'y', equal: true, aspect: 'square',
-  field: true, grid: 17, nullclines: false, equilibria: false, eigen: false, levels: null,
-  seeds: [], seedColor: null, T: 30, start: null, play: false, rate: 1, series: false, tmax: 20, seriesY: null, seriesNames: null,
+  field: true, grid: 17, nullclines: false, equilibria: false, eigen: false, origin: true, levels: null,
+  seeds: [], seedColor: null, T: 30, heads: true, start: null, play: false, rate: 1, series: false, tmax: 20, seriesY: null, seriesNames: null,
   pendulum: false, flow: null, zoom: null, curves: [], points: [], click: true, readout: true, readouts: null,
 };
 
@@ -228,7 +230,7 @@ export function mount(F, P0) {
     for (const s of cache.seeds) {
       const pts = s.pts.map((p) => [p.x, p.y]);
       framed(plot, pts, { color: s.color, width: 2 });
-      heads(pts, s.color, s.i0);
+      if (P.heads !== false) heads(pts, s.color, s.i0);
       plot.point(s.x0, s.y0, { color: s.color, r: 3.2, label: s.label, ldx: s.labelDx, ldy: s.labelDy });
     }
 
@@ -237,11 +239,11 @@ export function mount(F, P0) {
       S.fwd = trajectory(f, start.x, start.y, { T: P.series ? P.tmax : P.T, box, dtMax: P.series ? Math.min(0.05, P.tmax / 600) : 0.05, maxSteps: 8000 });
       const pts = S.fwd.map((p) => [p.x, p.y]);
       framed(plot, pts, { color: 'accent', width: 3 });
-      heads(pts, 'accent');
+      if (P.heads !== false) heads(pts, 'accent');
     }
 
     // equilibria
-    if (A && type && type.kind !== 'line' && type.kind !== 'zero') marker(0, 0, type, P.equilibria === 'label');
+    if (A && type && type.kind !== 'line' && type.kind !== 'zero' && P.origin !== false) marker(0, 0, type, P.equilibria === 'label');
     for (const e of cache.eq) marker(e.x, e.y, e.type, P.equilibria === 'label');
 
     for (const p of P.points || []) {

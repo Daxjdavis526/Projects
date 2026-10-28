@@ -100,3 +100,20 @@ export function jExpr(n, arg, amax) {
   }
   return `(${parts.join('')})`;
 }
+
+/** Y₀(arg), the Bessel function of the second kind of order 0, as an Atlas expression (valid for 0 < arg ≤ amax). */
+export function y0Expr(arg, amax) {
+  const GAMMA_E = 0.5772156649015329;
+  const h = amax / 2;
+  let M = 1;
+  for (let m = 1, term = 1; m < 120; m++) { term *= (h * h) / (m * m); M = m; if (term * Math.log(m + 1) < 1e-11 && m > h) break; }
+  const z = `(${arg})`;
+  const parts = [];
+  let H = 0;
+  for (let m = 1; m <= M; m++) {
+    H += 1 / m;
+    const c = (2 / Math.PI) * (m % 2 ? 1 : -1) * H / (fact(m) ** 2 * 4 ** m);
+    parts.push(`${c < 0 ? ' - ' : ' + '}${Math.abs(c).toPrecision(15)}*${z}^${2 * m}`);
+  }
+  return `(${(2 / Math.PI).toPrecision(15)}*(ln(${z}/2) + ${GAMMA_E})*${jExpr(0, arg, amax)}${parts.join('')})`;
+}

@@ -29,4 +29,6 @@ export function cleanTraceback(message) {
 
 /** Packages a program needs loaded before it runs. */
 export const SCIENTIFIC = ['numpy', 'scipy', 'matplotlib'];
-export const imports = (code, mod) => new RegExp(`^\\s*(import|from)\\s+${mod}\\b`, 'm').test(code);
+// does the code import a module — `import numpy`, `import sys, numpy as np`,
+// `from numpy.linalg import solve`, `import scipy.integrate`?
+export const imports = (code, mod) => new RegExp(`^\\s*(from\\s+${mod}\\b|import\\s+(?:[\\w.]+(?:\\s+as\\s+\\w+)?\\s*,\\s*)*${mod}\\b)`, 'm').test(code);

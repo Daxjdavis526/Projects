@@ -45,12 +45,12 @@ Substitute it, shift the summation indices so that every sum runs over the same 
     lead: t`Airy’s equation $y'' = xy$ is a spring whose stiffness grows steadily: for $x < 0$ it pulls back, harder and harder; for $x > 0$ it pushes away. Its series solutions, $y_1$ (blue, from $y(0) = 1$, $y'(0) = 0$) and $y_2$ (violet, from $y(0) = 0$, $y'(0) = 1$), are drawn summed to $N + 1$ terms; the dashed curves are the same series summed far enough to be exact on this picture.`,
     tasks: [
       t`At $N = 1$ the partial sums $1 + \tfrac{x^3}{6}$ and $x + \tfrac{x^4}{12}$ follow the true curves only near $x = 0$. Add terms: the agreement spreads outward.`,
-      t`Airy’s equation has no singular points at all, so the series converge for every $x$ — but at $x = -8$ it takes about 15 terms, because the terms grow before they shrink.`,
+      t`Airy’s equation has no singular points at all, so the series converge for every $x$ — but at $x = -6$ it takes about 13 terms and at $x = -8$ about 20, because the terms grow before they shrink.`,
       t`Left of 0 the solutions oscillate ever faster with shrinking swings; right of 0 they grow. One equation, two behaviours — it describes light near a rainbow’s edge and a quantum particle at a turning point.`,
     ],
     params: {
       x: [-9, 2.4], y: [-1.6, 3.6], aspect: 'wide', xlabel: 'x', ylabel: 'y',
-      sliders: [{ key: 'N', label: 'Highest term index $N$', min: 0, max: 16, step: 1, value: 1, explain: 'Each series is summed over its first $N + 1$ nonzero terms ($x^0, x^3, \\dots$ for $y_1$).' }],
+      sliders: [{ key: 'N', label: 'Highest term index $N$', min: 0, max: 22, step: 1, value: 1, explain: 'Each series is summed over its first $N + 1$ nonzero terms ($x^0, x^3, \\dots$ for $y_1$).' }],
       curves: [
         { sum: Y1, k: [0, 40], color: 'ink3', width: 1.4, dash: true },
         { sum: Y2, k: [0, 40], color: 'ink3', width: 1.4, dash: true },
@@ -92,7 +92,7 @@ Substitute it, shift the summation indices so that every sum runs over the same 
         const ans = which === 4 ? k ** 4 / 24 : -(k ** 6) / 720;
         const kk = k * k === 1 ? '' : k * k;
         return {
-          prompt: t`The series solution of $y'' + ${kk}y = 0$ with $y(0) = 1$ and $y'(0) = 0$ obeys the recurrence $a_{n+2} = -\dfrac{${k * k}\,a_n}{(n + 2)(n + 1)}$. Find $a_{${which}}$.`,
+          prompt: t`The series solution of $y'' + ${kk}y = 0$ with $y(0) = 1$ and $y'(0) = 0$ obeys the recurrence $a_{n+2} = -\dfrac{${k * k === 1 ? '' : `${k * k}\,`}a_n}{(n + 2)(n + 1)}$. Find $a_{${which}}$.`,
           answer: ans, tol: { rel: 1e-6 },
           errors: [{ value: which === 4 ? k ** 4 / 8 : -(k ** 6) / 48, feedback: t`Each step divides by $(n + 2)(n + 1)$ — both factors: $a_2 = -\tfrac{${k * k}}{2\cdot1}$, $a_4 = -\tfrac{${k * k}\,a_2}{4\cdot3}$${which === 6 ? t`, $a_6 = -\tfrac{${k * k}\,a_4}{6\cdot5}$` : ''}.` }],
           hints: [t`Start from $a_0 = 1$: $a_2 = -\dfrac{${k * k}}{2\cdot1}$.`, t`Then $a_4 = -\dfrac{${k * k}\,a_2}{4\cdot3}${which === 6 ? t`$ and $a_6 = -\dfrac{${k * k}\,a_4}{6\cdot5}` : ''}$.`],
@@ -215,7 +215,7 @@ Substitute it, shift the summation indices so that every sum runs over the same 
             params: {
               x: [-4.2, 4.2], y: [-3, 4], aspect: 'wide', xlabel: 'x', ylabel: 'ψ',
               curves: [
-                { fn: 'x^2/2', color: 'ink4', width: 1.4, dash: true, label: 'potential', labelAt: 2.6, labelDx: 6, labelDy: 0 },
+                { fn: 'x^2/2', color: 'ink4', width: 1.4, dash: true, label: 'potential', labelAt: -2.55, labelDx: -66, labelDy: 0 },
                 { fn: '(1 - 2x^2)*exp(-x^2/2)', color: 'good', width: 2.2, label: 'ν = 2: series stops', labelAt: -3.3, labelDx: -10, labelDy: 16 },
                 { sum: '4^k*gamma(k - 1.1)/(gamma(-1.1)*gamma(2k + 1))*x^(2k)*exp(-x^2/2)', k: [0, 70], color: 'bad', width: 2.2, label: undefined },
               ],

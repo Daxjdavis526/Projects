@@ -106,7 +106,7 @@ for (const [k, S0] of Object.entries(R.SCENARIOS)) {
   const S = R.situation(S0);
   check(`${k}: invariant mass is the mass of the total`, near(S.M, R.mass(S.total), 1e-12));
   check(`${k}: the range contains the default K`, S0.K >= S0.range[0] && S0.K <= S0.range[1]);
-  for (const s of [...R.FRAME_RANGE, 1]) {
+  for (const s of [...R.frameRange(S.mode), 1]) {
     const y = R.frameRapidity(S, s);
     check(`${k}: frame s = ${s} keeps the invariant mass`, near(R.invariantMass(S.parts.map((q) => R.boost(q.P, y))), S.M, 1e-6));
   }

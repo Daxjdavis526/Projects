@@ -81,6 +81,7 @@ export default [
   { id: 'linear-map', title: 'A matrix as a map of the plane', track: 'math', blurb: 'A 2×2 matrix as a map of the plane: drag its columns, compose maps in either order, undo it.', lesson: 'math2270.LA-3.1' },
   { id: 'slope-field', title: 'Slope fields and phase lines', track: 'math', blurb: 'Slope fields with isoclines, phase lines and solution curves you draw by clicking.', lesson: 'math2280.DE-1.2' },
   { id: 'ode-steppers', title: 'Euler and Runge–Kutta, step by step', track: 'math', blurb: 'Euler, improved Euler and RK4 taken apart stage by stage, with their error orders on a log–log plot.', lesson: 'math2280.DE-2.8' },
+  { id: 'sorting', title: 'Sorting and searching, step by step', track: 'math', blurb: 'Insertion sort, merge sort and binary search, one comparison at a time, with a counter that shows why n log n beats n².', spec: { type: 'py-sort', params: { mode: 'merge', values: [38, 27, 43, 3, 9, 82, 10, 61, 55, 17] } } },
   { id: 'ibp', title: 'Integration by parts as areas', track: 'math', blurb: 'Two areas that always add up to uv.', spec: { type: 'ibp-area', params: {} } },
   { id: 'series', title: 'Series: converge or refuse to', track: 'math', blurb: 'Partial sums, error bands and convergence tests: watch a series converge — or refuse to.', lesson: 'math1220.C2-4.9' },
   { id: 'alternating', title: 'The alternating-series error band', track: 'math', blurb: 'Each partial sum overshoots and the next pulls back; the sum is trapped in the band.', lesson: 'math1220.C2-4.7' },

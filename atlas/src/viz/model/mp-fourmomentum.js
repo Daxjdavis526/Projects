@@ -151,3 +151,5 @@ export function frameRapidity(S, s) {
   return s * S.ycm;
 }
 export const FRAME_RANGE = [-0.5, 2];
+/** Head-on, the lab is already the CM frame: a symmetric range, |β| up to 0.5. */
+export const frameRange = (mode) => (mode === 'collider' ? [-1, 1] : FRAME_RANGE);

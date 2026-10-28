@@ -363,7 +363,11 @@ evaluated in it, and passes if truthy. Test names are what a learner sees next
 to ✓ or ✗, so make them say what is being checked. Compare floats with a
 tolerance. Programs may import `numpy`, `scipy`, `matplotlib`, `sympy`,
 `mpmath` (loaded on demand — the first NumPy import costs a few seconds).
-Write code with `` t`…` `` so `\n` inside Python strings survives. Run
+The versions are Pyodide's: Python 3.14, NumPy 2.4, SciPy 1.18, Matplotlib
+3.10 — check an API exists there (the research notes quote newer releases).
+Timings in the browser vary from run to run: warm up once and report the best
+of three before printing a speed-up. Write code with `` t`…` `` so `\n`
+inside Python strings survives. Run
 `node atlas/test/code.test.mjs <lesson-id>` after `content.test.mjs`.
 
 ### Generators
@@ -441,7 +445,7 @@ The library (read the header comment of a sim's file for its full options):
 | `worldlines` | proper time along two worldlines between the same events (twin paradox) | `T`, `tx`, `tt` |
 | `orbit` | Newtonian vs Schwarzschild orbits, effective potential, ISCO, plunge | `mode`, `r0`, `L`, `turns`, `compare` |
 | `ibp-area` | integration by parts as two areas | `pair: 'xcos' \| 'ln'` |
-| `code-runner` | an editable, runnable Python snippet with its output and figures (atlas.plot or Matplotlib) — the Explore step of a programming lesson | `code`, `rows` |
+| `code-runner` | an editable, runnable Python snippet with its output and figures (atlas.plot or Matplotlib) — the Explore step of a programming lesson | `code`, `rows` (the editor shows at most 20 rows unless set) |
 
 Simulations written for particular courses — reuse them anywhere they fit
 (their header comments list every option):
@@ -460,6 +464,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
 | `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
+| `py-memory`, `py-sort` | Python's memory as names pointing at objects (frames, lists, dicts, NumPy views into a buffer), stepped line by line from authored steps; insertion sort, merge sort and binary search one comparison at a time |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
 | `mech-frames` | Newton's first law seen from the ground and from an accelerating train car |

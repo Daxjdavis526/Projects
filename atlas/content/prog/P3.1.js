@@ -171,7 +171,7 @@ print(counts)
       visual: {
         type: 'graph',
         params: { x: [0, 3000], y: [-0.03, 1.15], aspect: 'wide', axesAt: 'edge', xlabel: 'wavelength (nm)', ylabel: 'B / max',
-          curves: [5772, 4500, 3000].map((T, i) => ({ fn: `${1 / planck(WIEN / T, T)}*${2 * H * C * C}/(x*1e-9)^5/(exp(${(H * C) / (KB * T)}/(x*1e-9)) - 1)`, domain: [60, 3000], color: ['gold', 'warn', 'bad'][i], label: `${T} K`, labelAt: 2150, labelDx: 4, labelDy: -10 })) },
+          curves: [5772, 4500, 3000].map((T, i) => ({ fn: `${1 / planck(WIEN / T, T)}*${2 * H * C * C}/(x*1e-9)^5/(exp(${(H * C) / (KB * T)}/(x*1e-9)) - 1)`, domain: [60, 3000], color: ['gold', 'warn', 'bad'][i], label: `${T} K`, labelAt: WIEN / T * 1e9, labelDx: [-6, 6, 6][i], labelDy: -12, labelAlign: ['right', 'left', 'left'][i] })) },
         caption: 'Blackbody spectra at three temperatures, each scaled to its own peak so the shapes compare. Cooler bodies peak at longer wavelengths.',
       },
       starter: t`import numpy as np

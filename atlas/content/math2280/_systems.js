@@ -38,17 +38,17 @@ export function lead(c, body = '') {
  * A static phase portrait of x′ = Ax for a problem: direction arrows,
  * trajectories from `seeds`, no readout (it would print the type).
  */
-export function portrait(A, { x = [-3, 3], y = [-3, 3], seeds = [[2, 1], [-2, -1], [1, -2], [-1, 2]], eigen = false, points = [], curves = [], caption, xlabel = 'x₁', ylabel = 'x₂', aspect = 'wide', equal = true, grid = 17 } = {}) {
+export function portrait(A, { x = [-3, 3], y = [-3, 3], seeds = [[2, 1], [-2, -1], [1, -2], [-1, 2]], eigen = false, points = [], curves = [], caption, xlabel = 'x₁', ylabel = 'x₂', aspect = 'wide', equal = true, grid = 17, field = true, heads = true, T = 30, ...more } = {}) {
   return {
     type: 'de-plane',
-    params: { matrix: A, x, y, seeds, eigen, points, curves, xlabel, ylabel, aspect, equal, grid, readout: false, click: false },
+    params: { matrix: A, x, y, seeds, eigen, points, curves, xlabel, ylabel, aspect, equal, grid, field, heads, T, readout: false, click: false, ...more },
     caption: caption || 'The phase portrait: arrows show direction only; trajectories are traced numerically, arrowheads forward in time.',
   };
 }
 
 /** A static phase portrait of a nonlinear system for a problem. */
-export function plane(fx, fy, { x = [-3, 3], y = [-3, 3], seeds = [], points = [], curves = [], nullclines = false, equilibria = false, levels = null, caption, xlabel = 'x', ylabel = 'y', aspect = 'wide', equal = true, grid = 17, T = 30, constants } = {}) {
-  const params = { fx, fy, x, y, seeds, points, curves, nullclines, equilibria, xlabel, ylabel, aspect, equal, grid, T, readout: false, click: false };
+export function plane(fx, fy, { x = [-3, 3], y = [-3, 3], seeds = [], points = [], curves = [], nullclines = false, equilibria = false, levels = null, caption, xlabel = 'x', ylabel = 'y', aspect = 'wide', equal = true, grid = 17, T = 30, constants, field = true, heads = true, ...more } = {}) {
+  const params = { fx, fy, x, y, seeds, points, curves, nullclines, equilibria, xlabel, ylabel, aspect, equal, grid, T, field, heads, readout: false, click: false, ...more };
   if (levels) params.levels = levels;
   if (constants) params.constants = constants;
   return { type: 'de-plane', params, caption: caption || 'Arrows show direction only; trajectories are traced numerically, arrowheads forward in time.' };

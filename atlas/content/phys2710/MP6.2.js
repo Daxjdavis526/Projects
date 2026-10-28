@@ -26,16 +26,16 @@ function hyperbola(beta, { ask = true } = {}) {
   return {
     type: 'graph',
     params: {
-      x: [0, 2.6], y: [0, 2.6], aspect: 'wide', equal: true, xlabel: 'k (units of mc/ħ)', ylabel: 'ω (units of mc²/ħ)',
+      x: [-0.2, 5], y: [0, 2.6], aspect: 'wide', equal: true, xlabel: 'k (units of mc/ħ)', ylabel: 'ω (units of mc²/ħ)',
       curves: [
-        { fn: 'sqrt(1 + x^2)', domain: [0, 2.6], color: 'accent', width: 2.4, label: 'matter wave: ħω = √((pc)² + (mc²)²)', labelAt: 1.9, labelDx: 10, labelDy: 10 },
-        { fn: 'x', domain: [0, 2.6], color: 'ink4', width: 1.2, dash: true, label: 'light: ω = ck', labelAt: 2.3, labelDx: -10, labelDy: -12, labelAlign: 'right' },
+        { fn: 'sqrt(1 + x^2)', domain: [0, 5], color: 'accent', width: 2.4 },
+        { fn: 'x', domain: [0, 2.6], color: 'ink4', width: 1.2, dash: true },
         { fn: `${r6(w / k)}*x`, domain: [0, r6(Math.min(2.6, 2.6 * k / w))], color: 'violet', width: 1.6, dash: true },
         { fn: `${r6(w)} + ${r6(beta)}*(x - ${r6(k)})`, domain: [r6(Math.max(0, k - 0.9)), r6(k + 0.9)], color: 'gold', width: 1.8 },
       ],
-      points: [{ x: r6(k), y: r6(w), r: 5, color: 'ink', label: ask ? 'chord slope = ?' : 'chord: phase velocity', labelDx: -10, labelDy: -14, labelAlign: 'right' }],
+      points: [{ x: r6(k), y: r6(w), r: 5, color: 'ink', label: ask ? 'chord slope = ?' : 'chord: phase velocity', labelDx: 12, labelDy: 14 }],
     },
-    caption: `A matter wave’s frequency against its wavenumber. At the particle’s k (here for v = ${beta}c) the chord from the origin (violet) has slope ω/k, the phase velocity; the tangent (gold) has slope dω/dk, the group velocity. The light line ω = ck lies between them.`,
+    caption: `A matter wave’s frequency against its wavenumber (blue), ħω = √((pc)² + (mc²)²), beside light’s ω = ck (grey dashes). At the particle’s k (here for v = ${beta}c) the chord from the origin (violet) has slope ω/k, the phase velocity; the tangent (gold) has slope dω/dk, the group velocity. The light line ω = ck lies between them.`,
   };
 }
 

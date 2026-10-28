@@ -107,7 +107,7 @@ const BARE_COMMAND = /(?<![\\A-Za-z])(frac|dfrac|tfrac|sqrt|int|iint|oint|sum|pr
 export function escapeDamage(text, { prose = true } = {}) {
   const s = String(text);
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
-  if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(s) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
+  if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(withoutCode(s)) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
   for (const m of mathIn(s)) {
     const sci = /(?<![\w.\\])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(m.tex);
     if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;

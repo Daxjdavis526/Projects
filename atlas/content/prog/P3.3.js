@@ -82,7 +82,7 @@ With 16-digit floats, expect to lose about $\log_{10}\kappa$ of them.`,
     lead: t`Press **Run**. Part 1 solves a 400 × 400 system two ways. Part 2 finds a satellite's principal moments with \`eigh\`. Part 3 solves Hilbert-matrix systems whose exact answer is all ones, and plots how the error grows with the condition number.`,
     tasks: ['In part 3, compare each printed error with 10⁻¹⁶ × cond: the bound holds, roughly.', 'In part 2, swap `eigh` for `eig` and compare what comes back.', 'In part 1, make n = 800: how do the two times scale?'],
     params: {
-      rows: 28,
+      rows: 30,
       code: t`import time
 import numpy as np
 import atlas.plot as plt
@@ -93,12 +93,15 @@ rng = np.random.default_rng(0)
 n = 400
 A = rng.standard_normal((n, n))
 b = rng.standard_normal(n)
-np.linalg.solve(A[:5, :5], b[:5])                         # warm up
-t0 = time.perf_counter(); x1 = np.linalg.solve(A, b)
-t1 = time.perf_counter(); x2 = np.linalg.inv(A) @ b
-t2 = time.perf_counter()
-print(f"solve: {t1 - t0:.4f} s, residual {np.abs(A @ x1 - b).max():.1e}")
-print(f"inv:   {t2 - t1:.4f} s, residual {np.abs(A @ x2 - b).max():.1e}")
+def best_of_3(f):                       # the fastest of three runs
+    times = []
+    for _ in range(3):
+        t0 = time.perf_counter(); f(); times.append(time.perf_counter() - t0)
+    return min(times)
+
+x1, x2 = np.linalg.solve(A, b), np.linalg.inv(A) @ b
+print(f"solve: {1000 * best_of_3(lambda: np.linalg.solve(A, b)):.0f} ms, residual {np.abs(A @ x1 - b).max():.1e}")
+print(f"inv:   {1000 * best_of_3(lambda: np.linalg.inv(A) @ b):.0f} ms, residual {np.abs(A @ x2 - b).max():.1e}")
 
 # 2. principal moments of a satellite's inertia tensor (kg m²)
 J = np.array([[ 900.,  -45.,  -20.],
@@ -126,16 +129,16 @@ plt.show()`,
     caption: 'Real LAPACK in your browser. The error bound is a worst case: actual errors are usually smaller than 10⁻¹⁶ × κ, but they grow at the same rate. By n = 13 the answer has no correct digits at all.',
   },
   example: {
-    prompt: t`A slender satellite is modelled as five point masses (positions in m, body axes). Find its principal moments of inertia and the axis of the smallest one, from $I = \sum_k m_k\left(r_k^2\,\mathbb 1 - \vec r_k\,\vec r_k^{\,T}\right)$. Then use the major-axis rule: a spinning body that dissipates energy ends up spinning about its axis of **largest** moment.`,
+    prompt: t`A slender satellite is modelled as five point masses (positions in m, body axes). Find its principal moments of inertia and the axis of the smallest one, from $I = \sum_k m_k\left(r_k^2\,\mathbf 1 - \vec r_k\,\vec r_k^{\,T}\right)$, where $\mathbf 1$ is the 3 × 3 identity matrix. Then use the major-axis rule: a spinning body that dissipates energy ends up spinning about its axis of **largest** moment.`,
     visual: {
       type: 'calc-vectors3d',
       params: { range: 1.1, points: satPoints(SAT),
-        vectors: [{ to: minorAxis.map((x) => +(1.05 * x).toFixed(4)), color: 'accent', label: t`\hat e_{\min}` }],
+        vectors: [{ to: minorAxis.map((x) => +(0.55 * x).toFixed(4)), color: 'accent', label: t`\hat e_{\min}` }],
         segments: [{ from: [0, 0, -0.9], to: [0, 0, 0.9], color: 'ink3', dash: true }] },
       caption: 'The five masses (drag to turn) and the computed axis of smallest moment, nearly along the body’s length. Point masses are a teaching model of a real structure.',
     },
     steps: [
-      { label: 'Build the tensor', text: t`Each mass adds $m(r^2\mathbb 1 - \vec r\vec r^{\,T})$: \`np.eye(3)\` is $\mathbb 1$ and \`np.outer(r, r)\` is $\vec r\vec r^{\,T}$.
+      { label: 'Build the tensor', text: t`Each mass adds $m(r^2\mathbf 1 - \vec r\vec r^{\,T})$: \`np.eye(3)\` is $\mathbf 1$ and \`np.outer(r, r)\` is $\vec r\vec r^{\,T}$.
 
 \`\`\`python
 import numpy as np
@@ -305,7 +308,7 @@ w, V = np.linalg.eigh(J)       # w ascending
   checkpoint: [
     code({
       id: 'cp-spin', difficulty: 3, transfer: true,
-      prompt: t`A spacecraft is modelled as point masses \`m\` (kg) at positions \`pos\` (m): two solar panels, an antenna and a propellant tank. Build its inertia tensor \`J\` $= \sum_k m_k\left(r_k^2\,\mathbb 1 - \vec r_k\vec r_k^{\,T}\right)$, then set \`major\` to the unit vector of its axis of **largest** moment — the axis it will end up spinning about once flexible parts have dissipated energy.`,
+      prompt: t`A spacecraft is modelled as point masses \`m\` (kg) at positions \`pos\` (m): two solar panels, an antenna and a propellant tank. Build its inertia tensor \`J\` $= \sum_k m_k\left(r_k^2\,\mathbf 1 - \vec r_k\vec r_k^{\,T}\right)$ ($\mathbf 1$: the identity matrix), then set \`major\` to the unit vector of its axis of **largest** moment — the axis it will end up spinning about once flexible parts have dissipated energy.`,
       visual: {
         type: 'calc-vectors3d',
         params: { range: 1.7, points: satPoints(PANEL), segments: [{ from: [-1.5, 0.2, 0], to: [1.5, 0.2, 0], color: 'ink3', dash: true }] },

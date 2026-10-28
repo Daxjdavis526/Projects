@@ -1,5 +1,6 @@
 // The page-side handle on the Python worker: start it lazily, run code,
 // stream output, stop runaway code by terminating and respawning the worker.
+import { imports } from './harness.js';
 
 let worker = null;
 let ready = null;
@@ -42,7 +43,8 @@ export function start() {
 export async function run(code, { onOutput, check, tests, fresh = false, timeoutMs = 20000, theme } = {}) {
   await start();
   const id = nextId++;
-  const heavy = /^\s*(import|from)\s+(numpy|scipy|matplotlib)\b/m.test(code + '\n' + (tests || []).map((t) => t.code).join('\n'));
+  const all = code + '\n' + (tests || []).map((t) => t.code).join('\n');
+  const heavy = ['numpy', 'scipy', 'matplotlib'].some((m) => imports(all, m));
   return new Promise((resolve) => {
     const limit = heavy ? timeoutMs + 90000 : timeoutMs;
     const timer = setTimeout(() => { stop(); resolve({ ok: false, error: `Stopped after ${Math.round(limit / 1000)} s — is there an infinite loop?`, figures: [], images: [] }); }, limit);

@@ -18,6 +18,9 @@ function build(P, l1, l2) {
   const A = [[PD[0][0] * Pi[0][0] + PD[0][1] * Pi[1][0], PD[0][0] * Pi[0][1] + PD[0][1] * Pi[1][1]], [PD[1][0] * Pi[0][0] + PD[1][1] * Pi[1][0], PD[1][0] * Pi[0][1] + PD[1][1] * Pi[1][1]]].map((row) => row.map((v) => Math.round(v)));
   return { A, v1: [p, r], v2: [q, s] };
 }
+// e^{λt} exponents and coefficients written tidily: ex(-1) → '-t', co(1) → '', co(-1) → '-'
+const ex = (l) => (l === 1 ? 't' : l === -1 ? '-t' : `${l}t`);
+const co = (c) => (c === 1 ? '' : c === -1 ? '-' : String(c));
 const PS = [[[1, 1], [1, 2]], [[1, 1], [2, 1]], [[1, 1], [0, 1]], [[1, 1], [-1, 0]], [[1, 1], [2, 3]], [[1, 1], [-2, -1]]];
 
 // the characteristic polynomial as a picture: its roots are the eigenvalues
@@ -149,7 +152,7 @@ Solve it, and say what each eigenvalue means.`,
           choices, answer: kind, why,
           hints: [t`Find the eigenvalues from $\lambda^2 - \tau\lambda + \Delta = 0$; here $\tau = ${tr}$ and $\Delta = ${det}$.`, t`The eigenvalues are $${l1}$ and $${l2}$. What does each sign do to $e^{\lambda t}$?`],
           teach: 'Real eigenvalues of opposite signs make a saddle; both negative, a stable node; both positive, an unstable node.',
-          explain: t`The eigenvalues are $${l1}$ and $${l2}$. ${kind === 0 ? t`Opposite signs: along one eigenvector solutions shrink like $e^{${Math.min(l1, l2)}t}$, along the other they grow like $e^{${Math.max(l1, l2)}t}$ — a saddle. Every solution not exactly on the stable line eventually grows.` : kind === 1 ? t`Both negative: both terms of $c_1\mathbf v_1e^{${l1}t} + c_2\mathbf v_2e^{${l2}t}$ decay, so every solution falls into the origin — a stable node.` : t`Both positive: both terms grow, so every solution except $\mathbf x = \mathbf 0$ runs away — an unstable node.`}`,
+          explain: t`The eigenvalues are $${l1}$ and $${l2}$. ${kind === 0 ? t`Opposite signs: along one eigenvector solutions shrink like $e^{${ex(Math.min(l1, l2))}}$, along the other they grow like $e^{${ex(Math.max(l1, l2))}}$ — a saddle. Every solution not exactly on the stable line eventually grows.` : kind === 1 ? t`Both negative: both terms of $c_1\mathbf v_1e^{${ex(l1)}} + c_2\mathbf v_2e^{${ex(l2)}}$ decay, so every solution falls into the origin — a stable node.` : t`Both positive: both terms grow, so every solution except $\mathbf x = \mathbf 0$ runs away — an unstable node.`}`,
           visual: charPoly(tr, det, l1, l2),
         };
       },
@@ -172,9 +175,9 @@ Solve it, and say what each eigenvalue means.`,
           prompt: t`Solve $\mathbf x' = ${M(A)}\,\mathbf x$ with $\mathbf x(0) = ${V(x0)}$, and give $x_1$ at $t = 0.5$ to 3 significant figures. (The eigenvalues are $${l1}$ and $${l2}$.)`,
           answer: ans, tol: { rel: 0.005, abs: 1e-3 },
           errors,
-          hints: [t`Eigenvectors: for $\lambda = ${l1}$, $\mathbf v_1 = ${V(v1)}$; for $\lambda = ${l2}$, $\mathbf v_2 = ${V(v2)}$ (check that $A\mathbf v = \lambda\mathbf v$).`, t`Solve $c_1${V(v1)} + c_2${V(v2)} = ${V(x0)}$, then evaluate $x_1 = ${v1[0]}c_1e^{${l1}t} + ${v2[0]}c_2e^{${l2}t}$ at $t = 0.5$.`],
+          hints: [t`Eigenvectors: for $\lambda = ${l1}$, $\mathbf v_1 = ${V(v1)}$; for $\lambda = ${l2}$, $\mathbf v_2 = ${V(v2)}$ (check that $A\mathbf v = \lambda\mathbf v$).`, t`Solve $c_1${V(v1)} + c_2${V(v2)} = ${V(x0)}$, then evaluate $x_1 = c_1e^{${ex(l1)}} + c_2e^{${ex(l2)}}$ at $t = 0.5$.`],
           teach: t`Find the eigenpairs, write $\mathbf x = c_1\mathbf v_1e^{\lambda_1t} + c_2\mathbf v_2e^{\lambda_2t}$, and fix $c_1$, $c_2$ from $\mathbf x(0)$ — two linear equations.`,
-          explain: t`$c_1 = ${c1}$, $c_2 = ${c2}$, so $\mathbf x = ${c1}${V(v1)}e^{${l1}t} + (${c2})${V(v2)}e^{${l2}t}$ and $x_1(0.5) = ${fmt(ans, 4)}$.`,
+          explain: t`$c_1 = ${c1}$, $c_2 = ${c2}$, so $\mathbf x = ${co(c1)}${V(v1)}e^{${ex(l1)}} ${c2 < 0 ? '-' : '+'} ${co(Math.abs(c2))}${V(v2)}e^{${ex(l2)}}$ and $x_1(0.5) = ${fmt(ans, 4)}$.`,
           visual: portrait(A, { x: [-ext, ext].map(r6), y: [-ext, ext].map(r6), seeds: [{ x: x0[0], y: x0[1], dir: 'forward', color: 'accent2', T: 0.5 }], points: [{ x: x0[0], y: x0[1], label: 'x(0)', color: 'gold' }], caption: 'The solution from x(0), traced forward to t = 0.5 (its end is where you are heading).' }),
         };
       },

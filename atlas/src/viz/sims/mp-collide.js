@@ -57,22 +57,24 @@ export function mount(F, P0) {
       fmt: (v) => texE(v), explain: log ? 'The slider is logarithmic: each notch multiplies the energy.' : 'The kinetic energy, in the lab.',
     });
   } else F.params.K = P.K ?? S0.K;
+  // with a choice of situation the slider must serve every mode; otherwise it fits this one
+  const [frameLo, frameHi] = wanted.includes('scenario') ? R.FRAME_RANGE : R.frameRange(S0.mode);
   if (wanted.includes('frame')) {
     F.slider({
-      key: 'frame', label: 'Observer’s frame', min: R.FRAME_RANGE[0], max: R.FRAME_RANGE[1], step: 0.01, value: P.frame,
+      key: 'frame', label: 'Observer’s frame', min: frameLo, max: frameHi, step: 0.01, value: P.frame,
       fmt: (v) => {
         const mode = scn().mode;
         const names = mode === 'collider' ? { 0: 'lab' } : mode === 'decay' ? { 0: 'lab', 1: 'parent at rest' } : { 0: 'lab', 1: 'CM', 2: 'beam at rest' };
         return names[v] ? `\\text{${names[v]}}` : String(v.toFixed(2));
       },
       explain: scn().mode === 'collider'
-        ? 'Watch the collision from a frame moving along the beams: 1 is a frame at 0.5c, 2 at 0.8c.'
+        ? 'Watch the collision from a frame moving along the beams: ±1 is a frame moving at 0.5c.'
         : scn().mode === 'decay' ? '0 is the lab; 1 rides along with the decaying particle.' : '0 is the lab (target at rest), 1 the centre-of-momentum frame, 2 rides with the beam particle.',
     });
   } else F.params.frame = P.frame;
 
   const { canvas, box } = F.canvas({ aspect: 'wide', label: P.alt || 'Four-momentum arrows on an energy–momentum diagram' });
-  const plot = new Plot(canvas, { x: [-1, 1], y: [0, 1], pad: { l: 52, r: 16, t: 14, b: 36 } });
+  const plot = new Plot(canvas, { x: [-1, 1], y: [0, 1], axesAt: 'edge', pad: { l: 52, r: 16, t: 14, b: 36 } });
 
   F.onChange((key) => {
     if (key === 'scenario') { F.set('K', R.SCENARIOS[F.params.scenario].K); F.set('frame', 0); return; }
@@ -92,7 +94,7 @@ export function mount(F, P0) {
 
     // a view that holds every arrow at both ends of the frame slider, so sliding never rescales
     let xmin = 0, xmax = 0, ymax = 0;
-    for (const ss of [R.FRAME_RANGE[0], 0, R.FRAME_RANGE[1]]) {
+    for (const ss of [frameLo, 0, frameHi]) {
       const yy = R.frameRapidity(S, ss);
       for (const V of [...S.parts.map((q) => q.P), S.total]) {
         const [E, p] = R.boost(V, yy);
@@ -157,7 +159,7 @@ export function mount(F, P0) {
     else plot.text(Tlabel, T[0], T[1], { color: 'gold', dx: -10, dy: -14, align: 'right', size: fs, weight: 700 });
     if (!hide.has('mass')) {
       const apex = S.M / uf;
-      if (apex < top * 0.98) plot.text(`√s = ${sig(S.M / uf, 4)} ${un}`, 0, apex, { color: 'gold', dx: 8, dy: 0, align: 'left', size: fs - 1, baseline: 'top' });
+      if (apex < top * 0.98) plot.text(`√s = ${sig(S.M / uf, 4)} ${un}`, 0, apex, { color: 'gold', dx: 12, dy: 4, align: 'left', size: fs - 1, baseline: 'top' });
     }
 
     if (P.readout !== false) {
@@ -185,7 +187,8 @@ export function validate(P) {
   const S = R.SCENARIOS[P.scenario];
   if (!S) p.push(`mp-collide: unknown scenario “${P.scenario}”`);
   if (P.K != null && !(P.K >= 0 && P.K <= 1e8)) p.push('mp-collide: K must lie in 0–10⁸ MeV');
-  if (!(P.frame >= R.FRAME_RANGE[0] && P.frame <= R.FRAME_RANGE[1])) p.push(`mp-collide: frame must lie in ${R.FRAME_RANGE.join('…')}`);
+  const fr = S ? R.frameRange(S.mode) : R.FRAME_RANGE;
+  if (!(P.frame >= fr[0] && P.frame <= fr[1])) p.push(`mp-collide: frame must lie in ${fr.join('…')} for this scenario`);
   for (const k of P.products || []) if (!(k in R.PARTICLES)) p.push(`mp-collide: unknown particle “${k}”`);
   if (P.range && !(Array.isArray(P.range) && P.range.length === 2 && P.range[0] >= 0 && P.range[1] > P.range[0])) p.push('mp-collide: range must be [Kmin, Kmax]');
   for (const h of P.hide || []) if (!HIDE.includes(h)) p.push(`mp-collide: unknown hide “${h}”`);
