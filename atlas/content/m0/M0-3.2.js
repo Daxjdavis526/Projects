@@ -1,7 +1,7 @@
 // Systems of linear equations — two lines, one crossing.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { nice, sig, frac } from '../../src/core/format.js';
-import { N, sgn, thou } from './_m0kit.js';
+import { nice, sig } from '../../src/core/format.js';
+import { N, sgn } from './_m0kit.js';
 
 const t = String.raw;
 
@@ -16,7 +16,7 @@ function linesFig(L1, L2, cx, cy, span, caption, { ticks = false, labels = ['fir
   };
 }
 // a x + b y = c as TeX
-const eqTeX = ([a, b, c], x = 'x', y = 'y') => `${a === 1 ? '' : a === -1 ? '-' : a}${x} ${b === 1 ? '+' : b === -1 ? '-' : sgn(b)}${Math.abs(b) === 1 ? '' : ''} ${y} = ${c}`;
+const eqTeX = ([a, b, c], x = 'x', y = 'y') => `${a === 1 ? '' : a === -1 ? '-' : a}${x} ${sgn(b, y)} = ${c}`;
 
 export default lesson({
   id: 'm0.M0-3.2',
@@ -98,7 +98,7 @@ Solve by **substitution** (solve one equation for a variable, put it in the othe
           hints: [t`$v + w = ${g1}$ and $v - w = ${g2}$.`, t`Subtract the second from the first: $v$ cancels.`],
           teach: t`When two equations differ only in the sign of one unknown, adding and subtracting them separates the unknowns.`,
           explain: t`Subtracting: $2w = ${g1 - g2}$, so $w = ${w}$ km/h; adding: $2v = ${g1 + g2}$, so $v = ${v}$ km/h.`,
-          visual: linesFig([1, 1, g1], [1, -1, g2], v, w, 260, t`The two equations as lines in the plane of airspeed $v$ and wind $w$; scales hidden. Real jet streams vary along the route — this treats the wind as steady.`, { labels: ['v + w = with the wind', 'v − w = against it'], xlabel: 'v', ylabel: 'w' }),
+          visual: linesFig([1, 1, g1], [1, -1, g2], v, w, 260, t`The two equations as lines in the plane of airspeed $v$ and wind $w$; scales hidden. Real jet streams vary along the route — this treats the wind as steady.`, { labels: ['with the wind: v + w', 'against it: v − w'], xlabel: 'v', ylabel: 'w' }),
         };
       },
     }),

@@ -42,7 +42,7 @@ function sphere(caption) {
   return {
     type: 'graph',
     params: { x: [-1.9, 1.9], y: [-1.2, 1.2], equal: true, aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves,
-      arrows: [{ from: [0, 0], to: [0.7071, 0.7071], color: 'gold', width: 2, label: 'a', labelDx: -14, labelDy: 6 }] },
+      arrows: [{ from: [0, 0], to: [0.7071, 0.7071], color: 'gold', width: 2 }], points: [{ x: 0.35, y: 0.35, r: 0.01, color: 'gold', label: 'a', labelDx: -14, labelDy: 2 }] },
     caption: caption ?? t`A sphere of radius $a$. Its curvature is a fact about the shape; the sign of the number a book prints for it depends on that book’s $S_2$ and $S_3$.`,
   };
 }

@@ -69,7 +69,7 @@ export default lesson({
           visual: { type: 'c3-flux', params: { F: [`${al}*x`, `${be}*y`, `${ga}*z`], surfaces: [boxSurface([-0.5, 0.5], [-0.5, 0.5], [-0.5, 0.5], 'Box')], readouts: [], flipToggle: false, normals: false, range: 1.2, arrowLen: 0.2 }, caption: 'A small box in the field, tinted where the field leaves (blue) or enters (red). Arrows show direction only. Drag to rotate.' },
           answer: ans, units: 'nC/m^3', tol: { rel: 0.01 },
           errors: [
-            { value: (EPS0 * k * al) / 1e-9, feedback: t`That is $\varepsilon_0\,\partial_xE_x$ alone. The divergence adds all three: $\partial_xE_x + \partial_yE_y + \partial_zE_z$.` },
+            ...(be + ga !== 0 ? [{ value: (EPS0 * k * al) / 1e-9, feedback: t`That is $\varepsilon_0\,\partial_xE_x$ alone. The divergence adds all three: $\partial_xE_x + \partial_yE_y + \partial_zE_z$.` }] : []),
             { value: (k * (al + be + ga)) / EPS0 / 1e-9, feedback: t`Gauss’s law is $\nabla\cdot\vec E = \rho/\varepsilon_0$, so $\rho = \varepsilon_0\nabla\cdot\vec E$ — multiply by $\varepsilon_0$, do not divide.` },
           ],
           hints: [t`$\rho = \varepsilon_0\,\nabla\cdot\vec E$.`, t`$\nabla\cdot\vec E = k(${al} + ${be} + ${ga}) = ${k * (al + be + ga)}\ \text{V/m}^2$.`],
@@ -150,7 +150,7 @@ export default lesson({
         const ans = k * (p * q * q + q * s * s);
         return {
           prompt: t`The static field $\vec E = k\langle y^2,\ 2xy + z^2,\ 2yz\rangle$ with $k = ${k}\ \text{V/m}^3$ (coordinates in metres). Find $\int\vec E\cdot d\vec l$ along the wandering path drawn, from the origin to $(${p}, ${q}, ${s})$ m.`,
-          visual: scene3({ range: 3, curves: [{ param: [`${p}*t + 0.8*sin(3*t)`, `${q}*t^2 + 0.6*sin(2*pi*t)`, `${s}*t^3`], t: [0, 1], color: 'gold' }], points: [{ at: [0, 0, 0], color: 'accent', label: 'O' }, { at: [p, q, s], color: 'accent', label: `(${p}, ${q}, ${s})` }] }, t`A wandering path from the origin to the end point. Drag to rotate.`),
+          visual: scene3({ range: 3, curves: [{ param: [`${p}*t + 0.8*sin(3*pi*t)`, `${q}*t^2 + 0.6*sin(2*pi*t)`, `${s}*t^3`], t: [0, 1], color: 'gold' }], points: [{ at: [0, 0, 0], color: 'accent', label: 'O' }, { at: [p, q, s], color: 'accent', label: `(${p}, ${q}, ${s})` }] }, t`A wandering path from the origin to the end point. Drag to rotate.`),
           answer: ans, units: 'V', tol: { rel: 0, abs: 1e-6 },
           errors: [
             { value: k * p * q * q, feedback: t`You have the $xy^2$ part of the potential function; $2yz$ and $z^2$ add a $yz^2$ part.` },
@@ -185,7 +185,7 @@ export default lesson({
         const ans = (EPS0 * c * (n + 2) * rr ** (n - 1)) / 1e-9;
         const pw = n === 1 ? 'r' : `r^{${n}}`;
         return {
-          prompt: t`Inside a ball of radius ${a * 100} cm, the field is $\vec E = c\,${pw}\,\hat r$ with $c = ${c}$ in SI units (V/m${n === 1 ? '²' : `^${n + 1}`}). Find the charge density at $r = ${rr * 100}$ cm.`,
+          prompt: t`Inside a ball of radius ${a * 100} cm, the field is $\vec E = c\,${pw}\,\hat r$ with $c = ${c}\ \text{V/m}^{${n + 1}}$. Find the charge density at $r = ${rr * 100}$ cm.`,
           visual: ballPic('A ball of charge and its field lines. Inside, the field grows outward from the centre; how fast tells you the charge density.'),
           answer: ans, units: 'nC/m^3', tol: { rel: 0.01 },
           errors: [
@@ -205,7 +205,7 @@ export default lesson({
         const ans = rho / 1e-12;
         return {
           prompt: t`In fair weather Earth’s atmosphere carries a downward electric field of about ${E0} V/m at the ground, weakening with height. Model it as $E_z = -${E0}\,e^{-z/H}$ V/m with $H = ${H}$ km ($z$ up). What charge density does this imply at an altitude of ${z} m?`,
-          visual: { type: 'graph', params: { x: [0, 3000], y: [-E0 * 1.1, 10], aspect: 'wide', xlabel: 'altitude z (m)', ylabel: 'E_z (V/m)', curves: [{ fn: `-${E0}*e^(-x/${H * 1000})`, color: 'accent', width: 2.4 }], vlines: [{ x: z || 1, label: `${z} m`, color: 'gold' }] }, caption: t`The model field: pointing down (negative $E_z$) and weakening with height. The real profile varies with weather, aerosols and latitude; the exponential is a simplification.` },
+          visual: { type: 'graph', params: { x: [0, 3000], y: [-E0 * 1.1, 10], aspect: 'wide', xlabel: 'altitude z (m)', ylabel: 'vertical field (V/m)', curves: [{ fn: `-${E0}*e^(-x/${H * 1000})`, color: 'accent', width: 2.4 }], vlines: [{ x: z || 1, label: `${z} m`, color: 'gold' }] }, caption: t`The model field: pointing down (negative $E_z$) and weakening with height. The real profile varies with weather, aerosols and latitude; the exponential is a simplification.` },
           answer: ans, units: 'pC/m^3', tol: { rel: 0.01 },
           errors: [
             { value: (E0 / (H * 1000)) * Math.exp(-z / (H * 1000)) / EPS0 / 1e-12, feedback: t`$\rho = \varepsilon_0\nabla\cdot\vec E$: multiply by $\varepsilon_0$, do not divide.` },

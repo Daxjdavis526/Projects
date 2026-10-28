@@ -43,7 +43,7 @@ Then a small coordinate rectangle $du\,dv$ maps to a genuine little parallelogra
       t`At the equator, $\theta_0 = \pi/2$, the area factor is largest, 4: equal steps of $\theta$ and $\varphi$ cover the most area there.`,
     ],
     params: {
-      surface: SPH('u', 'v'), domain: [[0, PI], [0, TAU]], alpha: 0.8,
+      surface: SPH('u', 'v'), domain: [[0, PI], [0, TAU]], alpha: 0.8, yaw: 0.5, pitch: 0.45, dist: 7,
       sliders: [
         { key: 'a', label: t`$\theta_0$`, min: 0, max: 3.14, step: 0.01, value: 1, explain: 'Angle from the north pole, in radians.' },
         { key: 'b', label: t`$\varphi_0$`, min: 0, max: 6.28, step: 0.01, value: 0.8, explain: 'Angle round the axis, in radians.' },
