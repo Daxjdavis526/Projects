@@ -16,7 +16,7 @@
 //       range: null,           // [Kmin, Kmax] for the K slider (MeV)
 //       controls: null,        // true, false, or a list of: scenario K frame
 //       readout: true,
-//       hide: [],              // any of: K, mass (√s), threshold
+//       hide: [],              // any of: K, mass (√s), threshold (its K and the verdict; the line stays)
 //   } }
 
 import { Plot } from '../plot.js';
@@ -131,7 +131,7 @@ export function mount(F, P0) {
       seen.add(q.m);
       hyper(q.m, { color: 'ink3', width: 1, dash: [2, 4] });
     }
-    const showTh = S.Mth > 0 && !hide.has('threshold');
+    const showTh = S.Mth > 0;   // hide: ['threshold'] keeps the line but hides the number and the verdict
     if (showTh) {
       hyper(S.Mth, { color: 'bad', width: 1.6, dash: [6, 4] });
       plot.text(`products at rest: Σmc² = ${sig(S.Mth / uf, 4)} ${un}`, 0, S.Mth / uf, { color: 'bad', dx: -8, dy: 0, align: 'right', size: fs - 1, baseline: 'bottom' });
@@ -172,7 +172,7 @@ export function mount(F, P0) {
         ['$p_{\\rm total}c$', Math.abs(total[1]) < 1e-9 * total[0] ? '0' : texE(total[1], 4)],
         ['$\\sqrt{s}$', hide.has('mass') ? '?' : texE(S.M, 5)],
         showTh ? ['threshold', `K = ${hide.has('threshold') ? '?' : texE(S.Kth, 4)}`] : null,
-        showTh ? ['', ok ? '\\text{allowed}' : '\\text{too little energy}'] : null,
+        showTh && !hide.has('threshold') ? ['', ok ? '\\text{allowed}' : '\\text{too little energy}'] : null,
       ]);
     }
   }

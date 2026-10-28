@@ -22,7 +22,7 @@ function drumPic(m, n, { kind = 'membrane', caption } = {}) {
     type: 'surface3d',
     params: {
       aspect: 'wide', surface: ['u*cos(v)', 'u*sin(v)', `${amp}*${jExpr(m, `${r6(j)}*u`, j + 0.3)}*cos(${m}*v)`],
-      domain: [[0, 1], [0, TAU]], n: 40, axes: false, dist: 3.6, pitch: 0.55, yaw: -0.7, alpha: 0.92,
+      domain: [[0, 1], [0, TAU]], n: 40, axes: false, dist: 3.6, pitch: 0.42, yaw: -0.7, alpha: 0.92,
       curves: [{ param: ['cos(t)', 'sin(t)', '0'], t: [0, TAU], color: 'ink2', width: 2 }],
     },
     caption,
@@ -115,7 +115,7 @@ Its indicial roots are $r = \pm\nu$, and the root $r = \nu$ gives the Bessel fun
             { value: r2, feedback: t`That is the smaller root. Both roots of $r(r - 1) + p(0)r + q(0) = 0$ matter; the question asks for the larger.` },
             ...(Number.isFinite(wrong) && Math.abs(wrong - r1) > 1e-6 && Math.abs(wrong - r2) > 1e-6 ? [{ value: wrong, feedback: t`The indicial equation is $r(r - 1) + p(0)\,r + q(0) = 0$ — the $r(r - 1)$ comes from $x^2y''$; it is not $r^2 + p(0)r + q(0)$.` }] : []),
           ],
-          hints: [t`Divide by ${A}: $x^2y'' + ${frac(p0)}\,x\,y' + \tfrac{${coefY}}{${A}}\,y = 0$, so $p(0) = ${frac(p0)}$ and $q(0) = ${frac(q0)}$.`, t`Solve $r(r - 1) + ${frac(p0)}\,r ${q0 < 0 ? '-' : '+'} ${frac(Math.abs(q0))} = 0$, that is $${A}r^2${term(B - A, 'r')}${term(C, '')} = 0$.`],
+          hints: [t`Divide by ${A}: $x^2y''${p0 === 0 ? '' : ` + ${p0 === 1 ? '' : `${frac(p0)}\,`}x\,y'`} + \tfrac{${coefY}}{${A}}\,y = 0$, so $p(0) = ${frac(p0)}$ and $q(0) = ${frac(q0)}$.`, t`Solve $r(r - 1) + ${frac(p0)}\,r ${q0 < 0 ? '-' : '+'} ${frac(Math.abs(q0))} = 0$, that is $${A}r^2${term(B - A, 'r')}${term(C, '')} = 0$.`],
           teach: 'The indicial equation r(r − 1) + p(0)r + q(0) = 0 comes from the lowest power of x when y = xʳ(a₀ + …) is substituted.',
           explain: t`$${A}r(r - 1) + ${B}r ${C < 0 ? '-' : '+'} ${Math.abs(C)} = ${A}r^2${term(B - A, 'r')}${term(C, '')} = 0$ has roots $r = ${frac(r1)}$ and $r = ${frac(r2)}$. Their difference, $${frac(r1 - r2)}$, ${Number.isInteger(r1 - r2) ? 'is an integer, so the second solution may need a logarithm' : 'is not an integer, so both give Frobenius series'}.`,
           visual: {
@@ -158,7 +158,7 @@ Its indicial roots are $r = \pm\nu$, and the root $r = \nu$ gives the Bessel fun
         const nu = r.pick([0, 1, 2]);
         const a2 = -1 / (2 * (2 + 2 * nu)), a4 = -a2 / (4 * (4 + 2 * nu));
         return {
-          prompt: t`For Bessel’s equation of order $\nu = ${nu}$, the Frobenius series $y = x^{${nu}}\sum a_nx^n$ (with $r = \nu$) obeys $a_n = -\dfrac{a_{n-2}}{n(n + 2\nu)}$. Starting from $a_0 = 1$, find $a_4$.`,
+          prompt: t`For Bessel’s equation of order $\nu = ${nu}$, the Frobenius series $y = ${nu ? `x^{${nu}}` : ''}\sum a_nx^n$ (with $r = \nu$) obeys $a_n = -\dfrac{a_{n-2}}{n(n + 2\nu)}$. Starting from $a_0 = 1$, find $a_4$.`,
           answer: a4, tol: { rel: 1e-6 },
           errors: nu > 0 ? [{ value: 1 / 64, feedback: t`That is the order-0 value. Here the denominators are $n(n + ${2 * nu})$: $a_2 = -\tfrac{1}{2\cdot${2 + 2 * nu}}$ and $a_4 = -\tfrac{a_2}{4\cdot${4 + 2 * nu}}$.` }] : [{ value: 1 / 16, feedback: t`Each step divides by $n(n + 2\nu) = n^2$ here: $a_2 = -\tfrac14$, then $a_4 = -\tfrac{a_2}{16}$.` }],
           hints: [t`$a_2 = -\dfrac{a_0}{2(2 + ${2 * nu})}$.`, t`$a_4 = -\dfrac{a_2}{4(4 + ${2 * nu})}$.`],
@@ -210,7 +210,7 @@ Its indicial roots are $r = \pm\nu$, and the root $r = \nu$ gives the Bessel fun
         2: t`The $\ln x$ makes it independent of $J_0$: their Wronskian is $2/(\pi x) \neq 0$.`,
         3: t`$Y_0$ has infinitely many zeros, like $J_0$; it is ruled out by the centre, not by the rim.`,
       },
-      hints: ['What does ln x do as x → 0?', 'A physical drumhead has a finite displacement at its centre.'],
+      hints: [t`What does $\ln x$ do as $x \to 0$?`, 'A physical drumhead has a finite displacement at its centre.'],
       teach: 'The logarithm of a repeated indicial root makes the second solution singular at the centre — a boundedness condition throws it out.',
       explain: t`Near 0, $Y_0 \approx \tfrac2\pi\ln x \to -\infty$. Finiteness at the centre forces the coefficient of $Y_0$ to vanish, leaving $J_0$; the rim then picks the allowed $k$. In a ring-shaped region (a washer, a coaxial cable) the centre is excluded and $Y_0$ comes back.`,
       visual: {
