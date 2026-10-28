@@ -18,15 +18,15 @@ const CU = C / 1e6;                              // m per μs
 const LHC_G = 6.8e6 / MPC2, IP = 26659 / Math.PI; // ATLAS and CMS sit across the ring's diameter, m
 
 /** A Lorentz grid: the lines of constant x′ and t′ of a frame moving at b, over your axes (c = 1). */
-function grid(b, events = [], caption, { span = [-3, 7], top = 8, ks = [-2, -1, 0, 1, 2, 3, 4, 5, 6] } = {}) {
+function grid(b, events = [], caption, { span = b < 0 ? [-7, 3] : [-3, 7], top = 8, ks = [-2, -1, 0, 1, 2, 3, 4, 5, 6], names = ['t′ axis', 'x′ axis'], axes = ['x (light-seconds)', 't (s)'] } = {}) {
   const G = g(b), curves = [];
   for (const k of ks) {
     curves.push({ param: [`t`, `${r6(b)}*t + ${r6(k / G)}`], t: [span[0] - 2, span[1] + 2], color: 'gold', width: k === 0 ? 2 : 0.9, dash: k !== 0 });
     curves.push({ param: [`${r6(b)}*t + ${r6(k / G)}`, `t`], t: [-2, top + 2], color: 'gold', width: k === 0 ? 2 : 0.9, dash: k !== 0 });
   }
   return minkowski({
-    x: span, t: [-1, top], xlabel: 'x (light-seconds)', ylabel: 't (s)', cones: [[0, 0, 'future']],
-    events, extra: { curves, points: [label(b * (top - 0.6), top - 0.6, 't′ axis', 'gold', 8, 0), label(span[1] - 0.5, b * (span[1] - 0.5), 'x′ axis', 'gold', -4, -12, 'right')] },
+    x: span, t: [-1, top], xlabel: axes[0], ylabel: axes[1], cones: [[0, 0, 'future']],
+    events, extra: { curves, points: [label(b * (top - 0.6), top - 0.6, names[0], 'gold', b < 0 ? -8 : 8, 0, b < 0 ? 'right' : undefined), b < 0 ? label(span[0] + 0.5, b * (span[0] + 0.5), names[1], 'gold', 4, -12, 'left') : label(span[1] - 0.5, b * (span[1] - 0.5), names[1], 'gold', -4, -12, 'right')] },
     caption: caption ?? `Your frame S with c = 1 (seconds up, light-seconds across); light runs along the dashed 45° lines. Gold: the grid of a frame S′ moving at ${b}c — lines of constant t′ (shallow) and constant x′ (steep), one unit apart.`,
   });
 }
@@ -212,7 +212,7 @@ The inverse is the same rule with the primes swapped and $v \to -v$. You can bui
     mcq({
       id: 'inverse-form', difficulty: 2,
       prompt: t`Given $x' = \gamma(x - vt)$ and $t' = \gamma(t - vx/c^2)$, which expression gives $x$ in terms of the primed coordinates?`,
-      visual: grid(-0.6, [], 'Seen from S′, your frame S moves at −0.6c: drawn in S′’s coordinates (c = 1), your grid is the gold one, leaning the other way.'),
+      visual: grid(-0.6, [], 'Seen from S′, your frame S moves at −0.6c: drawn in S′’s coordinates (c = 1), your grid is the gold one, leaning the other way.', { names: ['your t axis', 'your x axis'], axes: ['x′ (light-seconds)', 't′ (s)'] }),
       choices: [t`$x = \gamma(x' + vt')$`, t`$x = \gamma(x' - vt')$`, t`$x = x'/\gamma + vt'$`, t`$x = (x' + vt')/\gamma$`],
       answer: 0,
       why: {

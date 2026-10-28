@@ -7,6 +7,8 @@ import { arrows2 } from './_spaces.js';
 
 const t = String.raw;
 const comb = (a, b, u = t`\mathbf u`, v = t`\mathbf v`) => `${a === 1 ? '' : a === -1 ? '-' : a}${u} ${b < 0 ? '-' : '+'} ${Math.abs(b) === 1 ? '' : Math.abs(b)}${v}`;
+const TU = t`T(\mathbf u)`, TV = t`T(\mathbf v)`;
+const dec = (v) => `(${v.map((x) => nice(x)).join(',\\ ')})`;
 const cosd = (d) => Math.cos((d * Math.PI) / 180), sind = (d) => Math.sin((d * Math.PI) / 180);
 const r3 = (x) => +x.toFixed(3);
 
@@ -128,9 +130,9 @@ So once you know where $T$ sends two vectors that point different ways, you know
           return {
             prompt: t`A linear map $T$ sends $\mathbf u = ${tupleTeX(u)}$ to $T(\mathbf u) = ${tupleTeX(Tu)}$ and $\mathbf v = ${tupleTeX(v)}$ to $T(\mathbf v) = ${tupleTeX(Tv)}$. What is the ${c ? 'second' : 'first'} component of $T(${comb(a, b)})$?`,
             answer: ans, tol: { rel: 0, abs: 0.01 }, errors: errs,
-            hints: [t`Superposition: $T(${comb(a, b)}) = ${a}\,T(\mathbf u) + (${b})\,T(\mathbf v)$.`, t`Only the ${c ? 'second' : 'first'} components matter: $${a}\cdot(${Tu[c]}) + (${b})\cdot(${Tv[c]})$.`],
+            hints: [t`Superposition: $T(${comb(a, b)}) = ${comb(a, b, TU, TV)}$.`, t`Only the ${c ? 'second' : 'first'} components matter: $(${a})(${Tu[c]}) + (${b})(${Tv[c]})$.`],
             teach: 'A linear map sends a combination of vectors to the same combination of their images.',
-            explain: t`$T(${comb(a, b)}) = ${a}${tupleTeX(Tu)} + (${b})${tupleTeX(Tv)} = ${tupleTeX([a * Tu[0] + b * Tv[0], a * Tu[1] + b * Tv[1]])}$. The vectors $\mathbf u$ and $\mathbf v$ themselves were not needed — only their images and the weights.`,
+            explain: t`$T(${comb(a, b)}) = ${comb(a, b, tupleTeX(Tu), tupleTeX(Tv))} = ${tupleTeX([a * Tu[0] + b * Tv[0], a * Tu[1] + b * Tv[1]])}$. The vectors $\mathbf u$ and $\mathbf v$ themselves were not needed — only their images and the weights.`,
             visual: arrows2([
               { to: u, color: 'accent', label: 'u', labelDx: 6, labelDy: -8 }, { to: v, color: 'accent', label: 'v', labelDx: 6, labelDy: -8 },
               ...(Tu.some((z) => z) ? [{ to: Tu, color: 'warn', label: 'T(u)', labelDx: 6, labelDy: -8 }] : []),
@@ -179,7 +181,7 @@ So once you know where $T$ sends two vectors that point different ways, you know
         3: 'Linearity is a property of the whole map: superposition must hold for every pair of vectors and every pair of weights.',
       },
       hints: [t`Apply $T$ to $\mathbf 0$.`, t`Compare $T(\mathbf u + \mathbf v)$ with $T(\mathbf u) + T(\mathbf v)$ for $\mathbf u = (1, 0)$ and $\mathbf v = (0, 1)$ — the picture does it.`],
-      teach: 'A translation keeps lines straight but moves the origin, so it is not linear; maps of the form Ax + b are called affine.',
+      teach: t`A translation keeps lines straight but moves the origin, so it is not linear; maps of the form $A\mathbf x + \mathbf b$ are called affine.`,
       explain: t`$T(1, 0) + T(0, 1) = (3, -1) + (2, 0) = (5, -1)$, but $T(1, 1) = (3, 0)$: superposition fails, because the shift is added once on one side and twice on the other. A map $\mathbf x \mapsto A\mathbf x + \mathbf b$ is called **affine**; it is linear only when $\mathbf b = \mathbf 0$. (Computer graphics and robotics turn shifts into linear maps one dimension up, with homogeneous coordinates.)`,
       visual: arrows2([
         { to: [3, -1], color: 'accent', label: 'T(u)', labelDx: 6, labelDy: 12 },
@@ -228,7 +230,7 @@ So once you know where $T$ sends two vectors that point different ways, you know
       hints: [t`Is each output a fixed combination of $t$ and $x$?`, t`Apply $G$ to the worldline $x = x_0 + ut$ of a body moving at constant speed $u$.`],
       teach: 'A change of inertial frame is a linear map of spacetime: Galileo’s is a shear; Einstein’s Lorentz boost is linear too, but it is not a shear.',
       explain: t`$G$ has matrix $\begin{bmatrix} 1 & 0 \\ -v & 1 \end{bmatrix}$ acting on $(t, x)$: a shear that leaves $t$ alone. A worldline $x = x_0 + ut$ maps to $x' = x_0 + (u - v)t$ — straight, with speed $u - v$. Galileo’s rule is only the low-speed limit: special relativity replaces it with the Lorentz boost, which is also linear but changes $t$ as well (the Road to Einstein, step 2).`,
-      visual: map2d([[1, 0], [-1, 1]], { view: 2.2, shape: 'square', colNames: ['G(1, 0)', 'G(0, 1)'], caption: 'Galileo’s map with v = 1, time t along the horizontal axis and position x up. The faint square is before, the gold one after.' }),
+      visual: map2d([[1, 0], [-1, 1]], { view: 2.2, shape: 'square', colNames: ['G(1, 0)', 'G(0, 1)'], caption: 'Galileo’s map with v = 1, time t along the horizontal axis and position x up. The faint square is before, the blue one after.' }),
     }),
   ],
   checkpoint: [
@@ -247,7 +249,7 @@ So once you know where $T$ sends two vectors that point different ways, you know
             errors: naive !== ans ? [{ value: naive, feedback: t`That treats $\mathbf u$ and $\mathbf v$ as if they were $\mathbf e_1$ and $\mathbf e_2$. First write $\mathbf w = c\mathbf u + d\mathbf v$.` }] : [],
             hints: [t`Solve $c\mathbf u + d\mathbf v = \mathbf w$ for the weights first.`, t`Then $T(\mathbf w) = c\,T(\mathbf u) + d\,T(\mathbf v)$.`],
             teach: 'To transform any vector, write it as a combination of vectors whose images you know, then combine the images with the same weights.',
-            explain: t`$\mathbf w = ${comb(a, b)}$, so $T(\mathbf w) = ${a}${tupleTeX(Tu)} + (${b})${tupleTeX(Tv)} = ${tupleTeX([a * Tu[0] + b * Tv[0], a * Tu[1] + b * Tv[1]])}$.`,
+            explain: t`$\mathbf w = ${comb(a, b)}$, so $T(\mathbf w) = ${comb(a, b, tupleTeX(Tu), tupleTeX(Tv))} = ${tupleTeX([a * Tu[0] + b * Tv[0], a * Tu[1] + b * Tv[1]])}$.`,
             visual: arrows2([
               { to: u, color: 'accent', label: 'u', labelDx: 6, labelDy: -8 }, { to: v, color: 'accent', label: 'v', labelDx: 6, labelDy: 10 },
               { to: w, color: 'ink2', width: 2.6, label: 'w', labelDx: 6, labelDy: -8 },
@@ -288,7 +290,7 @@ So once you know where $T$ sends two vectors that point different ways, you know
           const ans = c1 * p[ch] + c2 * q[ch], naive = (Fx / 10) * p[ch] + (Fy / 10) * q[ch];
           if (Math.abs(ans) < 0.15 || Math.abs(naive - ans) < 0.05) continue;
           return {
-            prompt: t`A two-axis force sensor on a thrust stand produces two voltages, linear in the in-plane load. Calibrating it, the load $\mathbf F_1 = (10, 10)$ N gives readings $${tupleTeX(p)}$ mV and $\mathbf F_2 = (10, -10)$ N gives $${tupleTeX(q)}$ mV. What does channel ${ch + 1} read under the load $\mathbf F = (${Fx}, ${Fy})$ N, in mV?`,
+            prompt: t`A two-axis force sensor on a thrust stand produces two voltages, linear in the in-plane load. Calibrating it, the load $\mathbf F_1 = (10, 10)$ N gives readings $${dec(p)}$ mV and $\mathbf F_2 = (10, -10)$ N gives $${dec(q)}$ mV. What does channel ${ch + 1} read under the load $\mathbf F = (${Fx}, ${Fy})$ N, in mV?`,
             answer: ans, units: 'mV', tol: { rel: 0.005, abs: 0.005 },
             errors: [{ value: naive, feedback: t`The calibration loads are not along the axes. Write $\mathbf F = c_1\mathbf F_1 + c_2\mathbf F_2$ first.` }],
             hints: [t`Write $\mathbf F = c_1\mathbf F_1 + c_2\mathbf F_2$: $10c_1 + 10c_2 = ${Fx}$ and $10c_1 - 10c_2 = ${Fy}$.`, t`So $c_1 = ${nice(c1)}$ and $c_2 = ${nice(c2)}$; the reading is $c_1$ times the first calibration reading plus $c_2$ times the second.`],

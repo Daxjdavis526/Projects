@@ -151,7 +151,7 @@ $$\omega(\mathbf V) = \omega(V^i\mathbf e_i) = V^i\,\omega(\mathbf e_i) = \omega
         const V2 = (-w[0] * V1) / w[1];
         return {
           prompt: t`A covector has components $\omega_i = (${w.join(',\\ ')})$. A vector has $V^1 = ${V1}$. What must $V^2$ be for the vector to run along the stack’s lines, $\omega(\mathbf V) = 0$?`,
-          visual: stackPic(SKEW, w.map((x) => x / 2), [0.01, 0.01], t`The stack of $\tfrac12\omega$ in the basis drawn; a vector with $\omega(\mathbf V) = 0$ lies along its lines.`),
+          visual: stackPic(SKEW, w.map((x) => x / 2), [0.01, 0.01], t`The stack of $\tfrac12\omega$ in the basis drawn; a vector with $\omega(\mathbf V) = 0$ lies along its lines.`, { showVector: false }),
           answer: V2, tol: { rel: 0.005, abs: 0.002 },
           errors: [{ value: (w[0] * V1) / w[1], feedback: 'Sign: you need ω₁V¹ + ω₂V² = 0, so V² = −ω₁V¹/ω₂.' }].filter((e) => Math.abs(e.value - V2) > 1e-9),
           hints: [t`Solve $\omega_1V^1 + \omega_2V^2 = 0$ for $V^2$.`],

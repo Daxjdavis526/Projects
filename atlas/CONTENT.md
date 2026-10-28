@@ -514,9 +514,12 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `qm-slits`, `qm-hydrogen` | electrons through slits arriving one at a time and building fringes; hydrogen's levels and series, the spectrum in true colour, Bohr orbits or probability clouds |
 | `qm-binding`, `qm-decay` | binding energy per nucleon from AME2020 masses with the liquid-drop curve; a sample decaying nucleus by nucleus against the exponential law |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
+| `mp-collide` | collisions and decays on the energy–momentum diagram: four-momentum arrows, mass hyperbolas, √s and thresholds, any frame |
 | `mp-rutherford`, `mp-franck-hertz`, `mp-packet` | alpha particles on exact Coulomb hyperbolas past a nucleus (against Thomson's atom) with angle and count-rate panels; a mercury or neon Franck–Hertz tube with its current dips; a packet built from plane waves under four dispersion laws, and the x–k trade-off |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
+A slider's range is fixed when it is made: to explore a different range,
+give a different visual (or a choice that switches scale).
 Choices take `{ key, label, options: [[value, text], …], value, explain }`;
 option text is markup like `label`, so `$T_H$` renders.
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;

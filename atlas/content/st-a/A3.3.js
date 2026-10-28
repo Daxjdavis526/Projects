@@ -151,7 +151,7 @@ It has to: $\omega(\mathbf V)$ is the number of the stack’s lines the arrow cr
         const which = r.pick([1, 2]);
         return {
           prompt: t`The new basis is $\mathbf e'_j = A^i{}_j\mathbf e_i$ with $A = ${matTeX(A)}$. A covector has old components $\omega_i = ${vecTeX(w)}$. What is its new component $\omega'_${which} = \omega(\mathbf e'_${which})$?`,
-          visual: still({ mode: 'covector', basis: [[A[0][0], A[1][0]], [A[0][1], A[1][1]]], ghost: SQ, covector: wn.map((x) => x * 0.5), vector: [0.01, 0.01], crossings: false, construction: false, grid: 'none', levelLabels: true }, t`The stack of $\tfrac12\omega$ with the new basis (bold) and the old (faint): count the lines each new arrow crosses, and double.`),
+          visual: still({ mode: 'covector', basis: [[A[0][0], A[1][0]], [A[0][1], A[1][1]]], ghost: SQ, covector: wn.map((x) => x * 0.5), vector: [0.01, 0.01], showVector: false, crossings: false, construction: false, grid: 'none', levelLabels: true }, t`The stack of $\tfrac12\omega$ with the new basis (bold) and the old (faint): count the lines each new arrow crosses, and double.`),
           answer: wn[which - 1], tol: { rel: 0, abs: 0.01 },
           errors: [{ value: A[which - 1][0] * w[0] + A[which - 1][1] * w[1], feedback: t`That uses row ${which} of $A$. The new arrow $\mathbf e'_${which}$ is column ${which}: $\omega'_${which} = A^i{}_${which}\,\omega_i$.` }].filter((e) => e.value !== wn[which - 1]),
           hints: [t`A covector’s components are its values on the basis arrows: $\omega'_${which} = \omega(\mathbf e'_${which})$.`, t`$\omega'_${which} = \omega(A^i{}_${which}\mathbf e_i) = A^i{}_${which}\,\omega_i$ — column ${which} of $A$.`],

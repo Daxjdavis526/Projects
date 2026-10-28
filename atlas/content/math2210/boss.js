@@ -59,23 +59,25 @@ function tankPic(R, c) {
     ],
     curves: [arc(0, 0, R, 0, 2 * PI, 'ink2', 2.4), seg([-w, c], [w, c], 'accent', 2.2), seg([0, -1.22 * R], [0, 1.22 * R], 'ink3', 1.1, true)],
     arrows: [{ from: [0, 0], to: [r4(R * Math.cos(s)), r4(R * Math.sin(s))], color: 'ink2', width: 1.6, label: `R = ${nice(R)} m`, labelDx: 8, labelDy: 10 }],
-    points: [dot(0, 0, 'ink2', 3), tag(w, c, `liquid surface, z = ${nice(c)} m`, 'accent', 10, -4), tag(0, (c + R) / 2, 'ullage (gas)', 'ink3', -36, 5),
-      tag(-0.55 * R, -0.42 * R, 'liquid oxygen', 'accent', -40, 4), tag(0, 1.22 * R, 'z, up', 'ink3', 6, 8)],
+    points: [dot(0, 0, 'ink2', 3), tag(w, c, `liquid surface, z = ${nice(c)} m`, 'accent', 10, -4), tag(0.06 * R, (c + R) / 2, 'ullage (gas)', 'ink2', 2, 5),
+      tag(-0.5 * R, -0.5 * R, 'liquid oxygen', 'ink', -6, 4), tag(0, 1.22 * R, 'z, up', 'ink3', 6, 8)],
     alt: 'A circle cut by a horizontal line, the region below the line shaded as liquid',
   }, 'A cut through the tank’s centre. The liquid oxygen (shaded) fills the sphere below the horizontal plane; the gas above it is the ullage.');
 }
 
 function torusPic(R, a) {
-  const torus = { x: `(${R} + ${a}*cos(u))*cos(v)`, y: `(${R} + ${a}*cos(u))*sin(v)`, z: `${a}*sin(u)`, u: [0, '2*pi'], v: [0, '2*pi'] };
+  // three quarters of the torus, cut open toward the viewer, with its two cut faces: the tube's cross-section
+  const torus = { x: `(${R} + ${a}*cos(u))*cos(v)`, y: `(${R} + ${a}*cos(u))*sin(v)`, z: `${a}*sin(u)`, u: [0, '2*pi'], v: ['pi/2', '2*pi'] };
+  const cut = (v0) => ({ x: `(${R} + u*cos(v))*cos(${v0})`, y: `(${R} + u*cos(v))*sin(${v0})`, z: 'u*sin(v)', u: [0, a], v: [0, '2*pi'] });
   const bell = { x: '(0.07 + 0.3*u^1.5)*cos(v)', y: '(0.07 + 0.3*u^1.5)*sin(v)', z: '0.3 - u', u: [0, 1], v: [0, '2*pi'] };
   return {
     type: 'c3-flux',
     params: {
-      F: null, integrand: 'none', surfaces: [{ label: 'Tank and engine', pieces: [torus, bell] }],
+      F: null, integrand: 'none', surfaces: [{ label: 'Tank and engine', pieces: [torus, cut(0), cut('pi/2'), bell] }],
       readouts: [], normals: false, arrows: false, flipToggle: false, range: 1, n: 24, yaw: 0.55, pitch: 0.42,
-      points: [{ at: [0, r4(-(R + a)), 0], label: 'fuel', color: 'gold' }, { at: [0, 0, -0.72], label: 'engine', color: 'gold' }],
+      points: [{ at: [R, 0, 0], label: 'fuel', color: 'gold' }, { at: [0, 0, -0.72], label: 'engine', color: 'gold' }],
     },
-    caption: t`The fuel torus round the engine’s nozzle (drawn schematically), with the stage’s axis along $z$. Drag to rotate.`,
+    caption: t`The fuel torus, cut open to show its tube’s circular cross-section, round the engine’s nozzle (drawn schematically). The stage’s axis is $z$. Drag to rotate.`,
   };
 }
 
@@ -102,21 +104,19 @@ function loopsPic() {
     points: [dot(XV, 0, 'bad', 4), dot(-XV, 0, 'bad', 4), tag(XV, 0, 'right core', 'bad', -30, 18), tag(-XV, 0, 'left core', 'bad', -26, 18),
       tag(XV + 5 * Math.cos(2.3), 5 * Math.sin(2.3), 'Γ', 'gold', -4, -6), tag(XV + 8, 8, 'Γ', 'violet', 4, -4), tag(pent[1][0], pent[1][1], 'Γ', 'teal', 4, -6), tag(-4, 12.4, '0', 'ink2', -3, -4)],
     alt: 'The swirling air of two wingtip vortices, with several loops drawn round the right one and one loop away from both',
-  }, 'Across the wake, seen from behind the carrier: the air’s velocity (arrows, lengths compressed) round the two vortex cores, 37 m apart, with loops walked anticlockwise. The cores are drawn to scale, about 3 m across.');
+  }, 'Across the wake, seen from behind the carrier: the air’s velocity (arrows, lengths compressed) round the two vortex centres (red), 37 m apart, and loops walked anticlockwise. Each vortex’s core, where the air spins, is only about 3 m across.');
 }
 function wakePic(rc) {
   const rc2 = r4(rc * rc), h = 15;
   const sq = [[XV - h, -h], [XV + h, -h], [XV + h, h], [XV - h, h], [XV - h, -h]];
   return {
-    type: 'c3-contour',
+    type: 'surface3d',
     params: {
-      f: `exp(-((x - ${r4(XV)})^2 + y^2)/${rc2}) - exp(-((x + ${r4(XV)})^2 + y^2)/${rc2})`,
-      x: [-40, 40], y: [-19, 19], levels: [-0.7, -0.35, -0.08, 0.08, 0.35, 0.7], labels: false, fill: true, aspect: 'wide', n: 160,
-      curves: sq.slice(1).map((p, k) => ({ param: [`${r4(sq[k][0])} + t*${r4(p[0] - sq[k][0])}`, `${r4(sq[k][1])} + t*${r4(p[1] - sq[k][1])}`], t: [0, 1], color: 'violet', width: 2.4 })),
-      points: [{ x: r4(XV), y: 0, label: 'right vortex', color: 'ink' }, { x: r4(-XV), y: 0, label: 'left vortex', color: 'ink' }],
-      xlabel: 'x (m)', ylabel: 'y (m)',
+      z: `20*(exp(-((x - ${r4(XV)})^2 + y^2)/${rc2}) - exp(-((x + ${r4(XV)})^2 + y^2)/${rc2}))`,
+      domain: [[-40, 40], [-20, 20]], n: 110, axisLen: 30, axisLabels: ['x', 'y', 'ω'], target: [0, 0, 2], dist: 88, yaw: -1.25, pitch: 0.5,
+      curves: sq.slice(1).map((p, k) => ({ param: [`${r4(sq[k][0])} + t*${r4(p[0] - sq[k][0])}`, `${r4(sq[k][1])} + t*${r4(p[1] - sq[k][1])}`, '0'], t: [0, 1], color: 'violet', width: 3 })),
     },
-    caption: 'The vorticity across the wake, as the survey fit has it: gold where the air spins anticlockwise, blue where it spins clockwise, to scale. The violet square is the survey window, 30 m on a side, round the right vortex.',
+    caption: t`The vorticity $\omega$ across the wake as the survey fit has it, drawn as a height over the plane: up for the right vortex, which spins anticlockwise, down for the left. Horizontal distances to scale (80 m × 40 m); heights not. The violet square on the floor is the survey window. Drag to rotate.`,
   };
 }
 
@@ -139,17 +139,18 @@ function nozzlePic(al, { split = false } = {}) {
   const points = [dot(0, 0, 'ink2', 4), tag(0, 0, 'apex', 'ink2', -34, 16), tag(lip[0], -lip[1], 'exit plane', 'accent', -40, 18), tag(L, 0, 'cap, r = L', 'violet', 8, 4),
     tag(1.7 * Math.cos(a / 2), 1.7 * Math.sin(a / 2), 'α', 'ink2', 4, 2), tag(5.6 * ca, 5.6 * sa, 'L', 'ink2', -6, -10), tag(-0.7, 0, 'chamber', 'ink3', -28, -30)];
   if (split) {
-    const th = 0.62 * a, P0 = [L * Math.cos(th), L * Math.sin(th)], s = 2.4;
+    // a streamline at θ, and its velocity at the cap split tip to tail into axial and sideways parts
+    const th = 0.8 * a, P0 = [L * Math.cos(th), L * Math.sin(th)], s = 3.4, Q = [P0[0] + s * Math.cos(th), P0[1]], T = [P0[0] + s * Math.cos(th), P0[1] + s * Math.sin(th)];
     curves.push(seg([0, 0], P0, 'gold', 2.2), arc(0, 0, 4.2, 0, th, 'gold', 1.4));
-    arrows.push({ from: P0.map(r4), to: [r4(P0[0] + s * Math.cos(th)), r4(P0[1] + s * Math.sin(th))], color: 'gold', width: 2.6, label: 'v', labelDx: 4, labelDy: -4 },
-      { from: P0.map(r4), to: [r4(P0[0] + s * Math.cos(th)), r4(P0[1])], color: 'good', width: 2.2, label: 'v cos θ', labelDx: 6, labelDy: 12 },
-      { from: P0.map(r4), to: [r4(P0[0]), r4(P0[1] + s * Math.sin(th))], color: 'warn', width: 2.2, label: 'v sin θ', labelDx: -60, labelDy: -6 });
+    arrows.push({ from: P0.map(r4), to: T.map(r4), color: 'gold', width: 2.6, label: 'v', labelDx: -2, labelDy: -8 },
+      { from: P0.map(r4), to: Q.map(r4), color: 'good', width: 2.4, label: 'v cos θ', labelDx: -62, labelDy: 16 },
+      { from: Q.map(r4), to: T.map(r4), color: 'warn', width: 2.4, label: 'v sin θ', labelDx: 8, labelDy: 10 });
     points.push(tag(4.2 * Math.cos(th / 2), 4.2 * Math.sin(th / 2), 'θ', 'gold', 4, 4));
   }
-  return picture({ x: [-2.8, 12.6], y: [-3.7, 3.7], curves, arrows, points, alt: 'A cut through a conical rocket nozzle, with exhaust streamlines fanning out from the cone’s apex' },
+  return picture({ x: [-2.8, 15.6], y: [-4.4, 4.4], curves, arrows, points, alt: 'A cut through a conical rocket nozzle, with exhaust streamlines fanning out from the cone’s apex' },
     split
-      ? 'A cut through the nozzle’s axis, to scale. A streamline at angle θ from the axis carries momentum with an axial part (green), which pushes, and a sideways part (orange), which is cancelled by the streamline opposite.'
-      : 'A cut through the nozzle’s axis, to scale. The exhaust streams along rays from the cone’s apex (gold); the flat exit plane (blue) and the spherical cap r = L (violet) share the lip as their edge.');
+      ? 'A cut through the nozzle’s axis: the cone to scale, the chamber a sketch. A streamline at angle θ from the axis carries momentum with an axial part (green), which pushes, and a sideways part (orange), which the streamline opposite cancels.'
+      : 'A cut through the nozzle’s axis: the cone to scale, the chamber a sketch. The exhaust streams along rays from the cone’s apex (gold); the flat exit plane (blue) and the spherical cap r = L (violet) share the lip as their edge.');
 }
 
 // ── round 4 pictures: the climb ──────────────────────────────────────────────
@@ -164,13 +165,13 @@ function pullupPic(v, a) {
       { from: [0, 0], to: [r4(560 * w[0]), r4(560 * w[1])], color: 'gold', width: 2.6, label: 'a', labelDx: 6, labelDy: 0 },
       { from: [0, 0], to: [0, -400], color: 'bad', width: 2.6, label: 'g', labelDx: 8, labelDy: 6 },
     ],
-    points: [dot(0, 0, 'ink', 5), tag(420, 0, 'γ', 'ink2', 6, -6), tag(-1350, -0.8 * 1350 * u[1] / u[0], 'path', 'teal', -10, 22), tag(900, 0, 'horizontal', 'ink3', -60, 16)],
+    points: [dot(0, 0, 'ink', 5), tag(420, 0, 'γ', 'ink2', 6, -6), tag(-5 * v[0] + 12.5 * a[0], -5 * v[1] + 12.5 * a[1], 'path', 'teal', -14, 22), tag(900, 0, 'horizontal', 'ink3', -60, 16)],
     alt: 'A rocket’s path curving upward, with its velocity, acceleration and gravity drawn at one point',
   }, 'The pull-up, in the vertical plane of flight; the path is traced from the reported v and a for six seconds either side. The arrows show directions only: their lengths are not to scale.');
 }
 
 function orbitPic(rv, vv, Pv, Qv, u) {
-  const k = 1e-3, s = 0.38, R = rv.map((c) => r4(c * k));
+  const k = 1e-3, s = 0.5, R = rv.map((c) => r4(c * k));
   const tip = R.map((c, i) => r4(c + s * vv[i]));
   const rm = Math.hypot(...rv) * k;
   const along = (c) => `${r4(rm)}*(cos(${r4(u)} + t)*(${r4(Pv[c])}) + sin(${r4(u)} + t)*(${r4(Qv[c])}))`;
@@ -189,17 +190,20 @@ function orbitPic(rv, vv, Pv, Qv, u) {
 }
 
 // ── round 5 pictures: the heat shield ────────────────────────────────────────
-function shieldPic(f, R, p) {
+function shieldPic(f, R, p, Tpeak, c) {
   const x0 = Math.min(-R, p[0]) - 0.22, x1 = Math.max(R, p[0]) + 0.22, y0 = Math.min(-R, p[1]) - 0.22, y1 = Math.max(R, p[1]) + 0.22;
+  // contours every 100 K from the coolest corner of the window up to just below the peak, so the colour ramp spans what is shown
+  const T = (x, y) => Tpeak - c * ((x - p[0]) ** 2 + (y - p[1]) ** 2);
+  const lo = Math.min(T(x0, y0), T(x0, y1), T(x1, y0), T(x1, y1));
   return {
     type: 'c3-contour',
     params: {
-      f, x: [r4(x0), r4(x1)], y: [r4(y0), r4(y1)], levels: { from: 600, to: 2600, step: 100 }, labels: false, fill: true, n: 120,
+      f, x: [r4(x0), r4(x1)], y: [r4(y0), r4(y1)], levels: { from: 100 * Math.ceil(lo / 100), to: 100 * Math.floor(Tpeak / 100), step: 100 }, labels: false, fill: true, n: 120,
       curves: [{ param: [`${R}*cos(t)`, `${R}*sin(t)`], t: [0, 6.2832], color: 'ink', width: 2.6 }],
       points: [{ x: 0, y: 0, label: 'centre', color: 'ink' }],
       xlabel: 'x (m)', ylabel: 'y (m)',
     },
-    caption: 'The thermal model across the face, contours 100 K apart, gold where it is hottest. The black circle is the shield’s rim: the model’s formula runs on beyond it, but only the disk inside is shield.',
+    caption: 'The thermal model across the face, contours 100 K apart, gold where it is hottest. The circle is the shield’s rim: the model’s formula runs on beyond it, but only the disk inside is shield.',
   };
 }
 
@@ -293,10 +297,10 @@ export default boss({
           id: 'r2-meaning', skill: 'math2210.C3-5.4', difficulty: 2,
           prompt: t`Seen from behind the carrier, the vortex from its right wingtip turns anticlockwise. In the plane across the wake the team measures the circulation $\oint_C\vec v\cdot d\vec r$ of the air’s velocity $\vec v$ round several loops $C$, each walked anticlockwise. Every loop that goes round the right vortex’s core — a circle, a square, a lopsided pentagon — gives the same value, $\Gamma = 640$ m²/s; a loop that goes round neither core gives $0$. What does $\Gamma$ measure?`,
           choices: [
-            t`The total vorticity in the core: by Green’s theorem $\Gamma$ is the integral of the curl $\omega = \partial v_y/\partial x - \partial v_x/\partial y$ over the region inside the loop, and outside the core $\omega = 0$, so every loop round the core holds all of it`,
-            t`The air’s speed round the loop, the same $640$ on every loop`,
-            t`The volume of air that crosses the loop each second, per metre along the wake`,
-            t`That the air’s velocity is a conservative field round the core, since the circulation does not depend on the loop`,
+            t`The total vorticity of the core: the curl integrated over the region inside the loop, which is zero outside the core`,
+            t`The air’s speed round the loop, which must therefore be 640 m/s at every point of every loop round the core`,
+            t`The volume of air that crosses the loop each second, per metre along the wake, the same for every loop`,
+            t`That the air’s velocity is a conservative field round the core, since the circulation is the same whatever the loop`,
           ],
           answer: 0,
           why: {
@@ -425,7 +429,7 @@ export default boss({
                 t`Newton’s second law across the path: $L - mg\cos\gamma = m\,a_N$.`,
               ],
               teach: t`Only the forces across a path bend it: the normal acceleration $a_N = |\vec v\times\vec a|/|\vec v|$ is set by the sideways forces alone.`,
-              explain: t`$|\vec v| = ${tn(V, 4)}$ m/s, and the part of $\vec a$ across the path is $$a_N = \frac{|\vec v\times\vec a|}{|\vec v|} = \frac{(${v[0]})(${a[1]}) - (${v[1]})(${a[0]})}{${tn(V, 4)}} = ${tn(aN)}\ \text{m/s}^2,$$ toward the upper side of the path. (The part along it, $a_T = ${tn(aTr)}$ m/s², is thrust minus drag minus gravity’s share.) Gravity’s part across the path, $g\cos\gamma = 9.81\cdot\frac{${v[0]}}{${tn(V, 4)}} = ${tn(gN)}$ m/s², pulls the other way, so the wing must supply $$L = m(a_N + g\cos\gamma) = (${m * 1000}\ \text{kg})(${tn(aN + gN)}\ \text{m/s}^2) = ${tn(L)}\ \text{kN},$$ about ${fmt((aN + gN) / G0, 2)} times the rocket’s weight. The path’s radius of curvature is $|\vec v|^2/a_N = ${tn((V * V) / aN / 1000)}$ km. An accelerometer on board reads exactly the non-gravitational part, $\vec a - \vec g$: lift, thrust and drag per unit mass.`,
+              explain: t`$|\vec v| = ${tn(V, 4)}$ m/s, and the part of $\vec a$ across the path is $$a_N = \frac{|\vec v\times\vec a|}{|\vec v|} = \frac{(${v[0]})(${a[1]}) - (${v[1]})(${a[0]})}{${tn(V, 4)}} = ${tn(aN)}\ \text{m/s}^2,$$ toward the upper side of the path. (The part along it, $a_T = ${tn(aTr)}$ m/s², is thrust minus drag minus gravity’s share.) Gravity’s part across the path, $g\cos\gamma = 9.81\cdot\frac{${v[0]}}{${tn(V, 4)}} = ${tn(gN)}$ m/s², pulls the other way, so the wing must supply $$L = m(a_N + g\cos\gamma) = (${tn(m * 1000, 5)}\ \text{kg})(${tn(aN + gN)}\ \text{m/s}^2) = ${tn(L)}\ \text{kN},$$ about ${fmt((aN + gN) / G0, 2)} times the rocket’s weight. The path’s radius of curvature is $|\vec v|^2/a_N = ${tn((V * V) / aN / 1000)}$ km. An accelerometer on board reads exactly the non-gravitational part, $\vec a - \vec g$: lift, thrust and drag per unit mass.`,
               visual: pullupPic(v, a),
             };
           },
@@ -468,7 +472,7 @@ export default boss({
         num({
           id: 'r5-hot', skill: 'math2210.C3-3.8', difficulty: 4,
           gen(r) {
-            const R = 0.63, c = r.pick([800, 1000, 1200]), d = r.pick([0.85, 0.95, 1.05]), [dx, dy] = r.pick(DIRS), Tc = r.pick([1150, 1200, 1250]);
+            const R = 0.63, c = r.pick([200, 250, 300]), d = r.pick([1.1, 1.2, 1.3]), [dx, dy] = r.pick(DIRS), Tc = r.pick([1550, 1600, 1650]);
             const a = Math.round((2 * c * d * dx) / 5), b = Math.round((2 * c * d * dy) / 5), g = Math.hypot(a, b);
             const p = [a / (2 * c), b / (2 * c)], dd = Math.hypot(...p);
             const Tmax = Tc + R * g - c * R * R, Tmin = Tc - R * g - c * R * R, Tpeak = Tc + (g * g) / (4 * c);
@@ -488,8 +492,8 @@ export default boss({
                 t`$\nabla T = \lambda\nabla g$ reads $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$. Compare the two rim points that gives.`,
               ],
               teach: t`On a closed region a maximum sits at a critical point inside or on the boundary — and when the critical point lies outside the region, Lagrange multipliers find the boundary’s maximum.`,
-              explain: t`$\nabla T = \langle ${a} - ${2 * c}x,\ ${b} - ${2 * c}y\rangle$ vanishes only at $(${fmt(p[0], 3)}, ${fmt(p[1], 3)})$, which is ${fmt(dd, 3)} m from the centre: off the shield. (The model’s stagnation point, its hottest spot, has moved off the face, beyond the shoulder.) So the maximum over the disk is on the rim $g = x^2 + y^2 = ${nice(r4(R * R))}$. Lagrange’s condition $\nabla T = \lambda\nabla g$ gives $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$: the rim points $\pm${R}\,(${fmt(ux, 2)}, ${fmt(uy, 2)})$. The hotter is $(${fmt(R * ux, 3)}, ${fmt(R * uy, 3)})$, where $$T = ${Tc} + ${R}\sqrt{${a}^2 + ${b}^2} - ${c}(${R})^2 = ${tn(Tmax, 4)}\ \text{K};$$ the other, at $${tn(Tmin, 4)}$ K, is the coldest point of the rim. At angle of attack a capsule’s stagnation point moves toward its windward shoulder, which is why a shield’s rim needs as much attention as its middle.`,
-              visual: shieldPic(f, R, p),
+              explain: t`$\nabla T = \langle ${a} - ${2 * c}x,\ ${b} - ${2 * c}y\rangle$ vanishes only at $(${fmt(p[0], 3)}, ${fmt(p[1], 3)})$, which is ${fmt(dd, 3)} m from the centre: off the shield. (The model’s stagnation point, its hottest spot, has moved off the face, beyond the shoulder.) So the maximum over the disk is on the rim $g = x^2 + y^2 = ${nice(r4(R * R))}$. Lagrange’s condition $\nabla T = \lambda\nabla g$ gives $${a} - ${2 * c}x = 2\lambda x$ and $${b} - ${2 * c}y = 2\lambda y$, so $(x, y)$ is parallel to $(${a}, ${b})$: the rim points $\pm${R}\,(${fmt(ux, 2)}, ${fmt(uy, 2)})$. The hotter is $(${fmt(R * ux, 3)}, ${fmt(R * uy, 3)})$, where $$T = ${Tc} + ${R}\sqrt{${Math.abs(a)}^2 + ${Math.abs(b)}^2} - ${c}(${R})^2 = ${tn(Tmax, 4)}\ \text{K};$$ the other, at $${tn(Tmin, 4)}$ K, is the coldest point of the rim. At angle of attack a capsule’s stagnation point moves toward its windward shoulder, which is why a shield’s rim needs as much attention as its middle.`,
+              visual: shieldPic(f, R, p, Tpeak, c),
             };
           },
         }),
@@ -523,10 +527,10 @@ export default boss({
           id: 'r5-theorems', skill: 'math2210.C3-5.10', difficulty: 2,
           prompt: t`The review’s last page lists four integrals still to be done. Match each with the theorem that makes it easy.`,
           left: [
-            t`$\displaystyle\int_C\vec F_g\cdot d\vec r$: the work Earth’s gravity does on the upper stage along its whole curving climb to orbit`,
-            t`$\displaystyle\oint_C\vec w\cdot d\vec r$: the circulation of the wind round the carrier’s holding pattern, a flat racetrack at one altitude, from a map of the wind’s vorticity`,
-            t`$\displaystyle\oint_C\vec E\cdot d\vec r$: the emf round a bent wire loop on the stage, from the changing magnetic field through it`,
-            t`$\displaystyle\oiint_S\vec g\cdot d\vec S$: the flux of gravity out through a lumpy closed surface drawn round the Moon`,
+            t`$\int_C\vec F_g\cdot d\vec r$: the work Earth’s gravity does on the upper stage along its whole curving climb to orbit`,
+            t`$\oint_C\vec w\cdot d\vec r$: the circulation of the wind round the carrier’s holding pattern, a flat racetrack at one altitude, from a map of the wind’s vorticity`,
+            t`$\oint_C\vec E\cdot d\vec r$: the emf round a bent wire loop on the stage, from the changing magnetic field through it`,
+            t`$\oiint_S\vec g\cdot d\vec S$: the flux of gravity out through a lumpy closed surface drawn round the Moon`,
           ],
           right: ['Green’s theorem', 'Stokes’ theorem', 'the divergence theorem', 'the fundamental theorem for line integrals', 'none of them: parametrize it and integrate directly'],
           answer: [3, 0, 1, 2],

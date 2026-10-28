@@ -17,8 +17,9 @@
 //       sliders, constants,              // for matrix (as in graph)
 //       map: { tau: [-4, 4], Delta: [-2.5, 5] },   // the map's window
 //       view: 3,                         // the portrait's half-width
+//       xlabel: 'x', ylabel: 'x′',       // the portrait's axis titles (plain text; default y in matrix mode)
 //       panels: 'both',                  // or 'map' or 'portrait'
-//       labels: true,                    // the names of the regions on the map (false: a question asks for them)
+//       labels: true,                    // the names of the regions on the map (false: a question asks for them — the point is then drawn in a neutral colour)
 //       eigen: true,                     // the eigenvector lines in the portrait
 //       points: [{ tau, Delta, label, color }],      // fixed marks on the map (plain-text labels)
 //       paths: [{ tau: '-c', Delta: '4', t: [0, 5], color, label }],   // parametric paths on the map (expressions of t)
@@ -41,8 +42,9 @@ export function mount(F, P0) {
   const P = { ...defaults, ...P0, map: { ...defaults.map, ...(P0.map || {}) } };
   const showMap = P.panels !== 'portrait', showPortrait = P.panels !== 'map';
   const both = showMap && showPortrait;
-  const cm = showMap ? F.canvas({ aspect: 'square', label: 'The trace–determinant map with a draggable point' }) : null;
-  const cp = showPortrait ? F.canvas({ aspect: 'square', label: 'The phase portrait of a system with that trace and determinant' }) : null;
+  // side by side, each square; a single panel is drawn wide
+  const cm = showMap ? F.canvas({ aspect: both ? 'square' : 'wide', label: 'The trace–determinant map with a draggable point' }) : null;
+  const cp = showPortrait ? F.canvas({ aspect: both ? 'square' : 'wide', label: 'The phase portrait of a system with that trace and determinant' }) : null;
   if (both) {
     // side by side when there is room, one above the other on a phone
     const stage = cm.box.parentElement;
@@ -54,7 +56,7 @@ export function mount(F, P0) {
   const env = () => { const e = { ...(P.constants || {}) }; for (const s of P.sliders || []) e[s.key] = +F.params[s.key]; return e; };
   const ev = (src, E, extra = []) => (typeof src === 'number' ? src : fn(src, [...keys, ...extra])(E));
   const pm = cm && new Plot(cm.canvas, { x: P.map.tau, y: P.map.Delta, xlabel: 'τ (trace)', ylabel: 'Δ (det)', pad: { l: 40, r: 12, t: 12, b: 34 } });
-  const pp = cp && new Plot(cp.canvas, { x: [-P.view, P.view], y: [-P.view, P.view], equal: true, xlabel: P.matrix ? 'x' : 'x', ylabel: P.matrix ? 'y' : 'x′', pad: { l: 34, r: 12, t: 12, b: 34 } });
+  const pp = cp && new Plot(cp.canvas, { x: [-P.view, P.view], y: [-P.view, P.view], equal: true, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? (P.matrix ? 'y' : 'x′'), pad: { l: 34, r: 12, t: 12, b: 34 } });
 
   const pt = { tau: P.tau, Delta: P.Delta };
   if (pm && P.drag && !P.matrix) {
@@ -64,7 +66,7 @@ export function mount(F, P0) {
       // onto the parabola (degenerate nodes) when close to it
       if (Math.abs(Delta - (tau * tau) / 4) < 0.06) Delta = (tau * tau) / 4;
       pt.tau = +tau.toFixed(6); pt.Delta = +Delta.toFixed(6);
-    });
+    }, { hollow: true });
     pm.onDrag = () => { draw(); F.notify('point'); };
   }
   F.onChange(() => draw());
@@ -123,9 +125,9 @@ export function mount(F, P0) {
     }
     for (const p of P.points || []) pm.point(ev(p.tau, E), ev(p.Delta, E), { color: p.color || 'violet', r: 4.5, label: p.label, ldx: p.labelDx, ldy: p.labelDy });
     if (P.marker === false) { /* fixed marks only */ } else if (!(P.drag && !P.matrix) || P.panels === 'portrait') {
-      pm.point(pt.tau, pt.Delta, { color: eqColor(type), r: 6, ring: 'ink' });
+      pm.point(pt.tau, pt.Delta, { color: P.labels === false ? 'accent2' : eqColor(type), r: 6, ring: 'ink' });
     } else {
-      pm.point(pt.tau, pt.Delta, { color: eqColor(type), r: 5 });
+      pm.point(pt.tau, pt.Delta, { color: P.labels === false ? 'accent2' : eqColor(type), r: 5 });
       pm.drawHandles();
     }
   }

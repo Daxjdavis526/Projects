@@ -7,6 +7,7 @@
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { nice, fmt } from '../../src/core/format.js';
 import { co } from './_second.js';
+import { fpic, splane } from './_laplace.js';
 
 const t = String.raw;
 
@@ -15,27 +16,6 @@ const PICK = (k) => `step(0.5 - abs(c - ${k}))`;
 const FT = `(${PICK(0)} + ${PICK(1)}*x + ${PICK(2)}*exp(-x) + ${PICK(3)}*sin(2x))`;
 const PROD = `${FT}*exp(-s*x)`;
 const TABLE = `${PICK(0)}/s + ${PICK(1)}/s^2 + ${PICK(2)}/(s + 1) + ${PICK(3)}*2/(s^2 + 4)`;
-
-/** A function of t as a small static picture (with an optional dashed envelope). */
-function fpic(fn, x, y, caption, extra = {}) {
-  return {
-    type: 'graph',
-    params: { x, y, xlabel: 't (s)', ylabel: extra.ylabel ?? 'f', aspect: 'wide', curves: [...(extra.curves || []), { fn, color: 'accent', width: 2.6, domain: [0, x[1]] }], shade: extra.shade, points: extra.points, hlines: extra.hlines },
-    caption,
-  };
-}
-
-/** The s-plane with poles drawn as dots (a static picture). */
-function splane(poles, caption, win = { x: [-5, 2], y: [-4.5, 4.5] }) {
-  return {
-    type: 'graph',
-    params: {
-      x: win.x, y: win.y, equal: true, xlabel: 'Re s', ylabel: 'Im s', aspect: 'wide',
-      points: poles.map(([re, im, label]) => ({ x: re, y: im, color: 'bad', r: 5.5, label, labelDx: 9, labelDy: -10 })),
-    },
-    caption,
-  };
-}
 
 export default lesson({
   id: 'math2280.DE-6.1',

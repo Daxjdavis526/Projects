@@ -91,7 +91,7 @@ export function mount(F, P) {
     // curves
     (P.curves || []).forEach((c, k) => {
       const color = c.color || PALETTE[k % PALETTE.length];
-      const style = { color, width: c.width || 2.4, dash: c.dash ? [6, 5] : [] };
+      const style = { color, width: c.width || 2.4, dash: dashOf(c.dash) };
       if (c.when && !ev(c.when, E, vars)) return;
       if (c.fn) { const f = fn(c.fn, vars); plot.fn((x) => f({ ...E, x }), { ...style, domain: c.domain ? [ev(c.domain[0], E, vars), ev(c.domain[1], E, vars)] : undefined }); }
       else if (c.param) {
@@ -139,7 +139,7 @@ export function mount(F, P) {
       if (p.when && !ev(p.when, E, vars)) continue;
       plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
     }
-    for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: a.dash, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
+    for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: dashOf(a.dash), label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
     if (P.legend?.length) drawLegend(plot, P.legend, P.legendAt || 'tr');
     if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
@@ -185,6 +185,9 @@ export function validate(P) {
   return problems;
 }
 
+// dash: true (the house dash), a pattern [on, off], or nothing
+const dashOf = (d) => (Array.isArray(d) ? d : d ? [6, 5] : []);
+
 // a legend box in a corner of the plotting area: [{ label, color, dash, point }]
 function drawLegend(plot, items, at) {
   const g = plot.ctx, c = plot.col;
@@ -196,7 +199,7 @@ function drawLegend(plot, items, at) {
   g.strokeStyle = c.line2; g.lineWidth = 1; g.strokeRect(x0 + 0.5, y0 + 0.5, w, hgt);
   items.forEach((it, k) => {
     const y = y0 + 5 + lh * k + lh / 2, col = plot.color(it.color || PALETTE[k % PALETTE.length]);
-    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 2.2; g.setLineDash(it.dash || []);
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 2.2; g.setLineDash(dashOf(it.dash));
     if (it.point) { g.beginPath(); g.arc(x0 + 17, y, 4.5, 0, Math.PI * 2); g.fill(); }
     else { g.beginPath(); g.moveTo(x0 + 8, y); g.lineTo(x0 + 26, y); g.stroke(); }
     g.setLineDash([]); g.fillStyle = c.ink2; g.textAlign = 'left'; g.textBaseline = 'middle';

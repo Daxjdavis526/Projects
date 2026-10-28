@@ -12,7 +12,7 @@ const matTeX = (A) => `\\begin{pmatrix} ${A.map((row) => row.join(' & ')).join('
 const fr = (x) => (Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : frac(x));
 const inv2 = (A) => { const d = A[0][0] * A[1][1] - A[0][1] * A[1][0]; return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]]; };
 const cols = (E) => [[E[0][0], E[1][0]], [E[0][1], E[1][1]]];   // the basis arrows from the matrix with them as columns
-const dualPic = (B, V, caption, o = {}) => still({ mode: 'vector', basis: B, vector: V.map(r6), dual: true, construction: false, grid: 'none', ...o }, caption);
+const dualPic = (B, V, caption, o = {}) => still({ mode: 'vector', basis: B, vector: V.map(r6), showVector: Math.hypot(...V) > 0.05, dual: true, construction: false, grid: 'none', ...o }, caption);
 
 const CASES = [[[2, 1], [0, 1]], [[1, 1], [0, 2]], [[2, 0], [1, 1]], [[1, -1], [1, 1]], [[1, 1], [-1, 1]], [[3, 1], [1, 1]], [[2, 1], [1, 1]]];
 
@@ -35,11 +35,11 @@ Each $\mathbf e^j$ gives 1 on its own partner and 0 on all the others. So $\math
   visual: {
     type: 'ten-basis',
     title: 'Each dual covector reads one component',
-    lead: t`The dashed stacks are the dual basis: blue $\mathbf e^1$, violet $\mathbf e^2$, each labelled. The tip of the gold arrow sits on the $\mathbf e^1$ line labelled $V^1$ and the $\mathbf e^2$ line labelled $V^2$. Drag the basis arrows and watch the dual stacks follow.`,
+    lead: t`The dashed stacks are the dual basis: blue $\mathbf e^1$, violet $\mathbf e^2$, each labelled. Read the gold arrow’s tip against them: its level among the $\mathbf e^1$ lines is $V^1$, among the $\mathbf e^2$ lines $V^2$. Drag the basis arrows and watch the dual stacks follow.`,
     tasks: [
       t`Drag $\mathbf e_2$ only: the lines of $\mathbf e^1$ turn to stay parallel to it. The dual of $\mathbf e_1$ depends on $\mathbf e_2$ too.`,
       t`Double the length of $\mathbf e_1$: the $\mathbf e^1$ lines pack twice as tight — $\mathbf e_1$ must still cross exactly one gap.`,
-      t`Make the basis perpendicular and one grid square long: now each dual stack runs perpendicular to its partner arrow. Only then does “dual” look like “the same direction”.`,
+      t`Make the two basis arrows perpendicular and equally long: now each dual stack runs perpendicular to its partner arrow. Only then does “dual” look like “the same direction”.`,
     ],
     params: { mode: 'vector', basis: SKEW60, dragBasis: true, vector: [2.1, 1.3], dual: true, construction: false, readout: ['V'], view: 2.3 },
     caption: t`Dashed blue: lines where $\mathbf e^1 = 0, \pm1, \pm2, \dots$; dashed violet: the same for $\mathbf e^2$. Together they are the skewed coordinate grid of the basis — each line of it is a level line of one dual covector.`,
@@ -110,7 +110,7 @@ Each $\mathbf e^j$ gives 1 on its own partner and 0 on all the others. So $\math
     mcq({
       id: 'both', difficulty: 2,
       prompt: t`You keep $\mathbf e_1$ but swap $\mathbf e_2$ for a different arrow. What happens to the dual covector $\mathbf e^1$?`,
-      visual: still({ mode: 'vector', basis: [[1, 0], [-0.4, 1]], ghost: [[1, 0], [0.6, 1]], ghostNames: ['', 'old e₂'], names: ['e₁', 'new e₂'], vector: [0.01, 0.01], dual: true, construction: false, grid: 'none' }, t`The same $\mathbf e_1$ with a new $\mathbf e_2$ (bold; the old one faint). The dashed stacks are the dual of the new basis.`),
+      visual: still({ mode: 'vector', basis: [[1, 0], [-0.4, 1]], ghost: [[1, 0], [0.6, 1]], ghostNames: ['', 'old e₂'], names: ['e₁', 'new e₂'], vector: [0.01, 0.01], showVector: false, dual: true, construction: false, grid: 'none' }, t`The same $\mathbf e_1$ with a new $\mathbf e_2$ (bold; the old one faint). The dashed stacks are the dual of the new basis.`),
       choices: [t`It changes: its lines must turn to run along the new $\mathbf e_2$`, t`Nothing: $\mathbf e^1$ depends only on $\mathbf e_1$`, t`Only $\mathbf e^2$ changes`, t`It changes only if the new $\mathbf e_2$ is longer`],
       answer: 0,
       why: {
@@ -184,7 +184,7 @@ print(D, components)`,
         const wrong = row[j - 1];
         return {
           prompt: t`A covector acts on reference components as $\omega(x, y) = ${row[0]}x ${row[1] < 0 ? '-' : '+'} ${Math.abs(row[1])}y$. The basis arrows are the columns of $E = ${matTeX(E)}$. In the expansion $\omega = \omega_1\mathbf e^1 + \omega_2\mathbf e^2$, what is $\omega_${j}$?`,
-          visual: still({ mode: 'covector', basis: cols(E), covector: w.map((x) => x * 0.5), vector: [0.01, 0.01], crossings: false, construction: false, grid: 'none' }, t`The stack of $\tfrac12\omega$ (teal) and the basis: $\omega_j$ is twice the number of lines $\mathbf e_j$ crosses.`),
+          visual: still({ mode: 'covector', basis: cols(E), covector: w.map((x) => x * 0.5), vector: [0.01, 0.01], showVector: false, crossings: false, construction: false, grid: 'none' }, t`The stack of $\tfrac12\omega$ (teal) and the basis: $\omega_j$ is twice the number of lines $\mathbf e_j$ crosses.`),
           answer: w[j - 1], tol: { rel: 0, abs: 0.01 },
           errors: wrong !== w[j - 1] ? [{ value: wrong, feedback: t`That is a reference component of $\omega$. Its component in this basis is $\omega_${j} = \omega(\mathbf e_${j})$.` }] : [],
           hints: [t`$\omega_j = \omega(\mathbf e_j)$: feed $\omega$ the basis arrow.`, t`$\mathbf e_${j} = (${E[0][j - 1]}, ${E[1][j - 1]})$.`],
@@ -219,7 +219,7 @@ print(D, components)`,
         const d = (a * S3) / 2;
         return {
           prompt: t`In ${name}, the lattice is spanned by $\mathbf a_1 = a\,(1, 0)$ and $\mathbf a_2 = a\,(\tfrac12, \tfrac{\sqrt3}{2})$ with $a = ${a}$ nm. Crystallographers call the dual basis, $\mathbf b^j(\mathbf a_i) = \delta^j_i$, the reciprocal lattice (physicists often add a factor $2\pi$). The lines of $\mathbf b^1$ are a family of lattice planes. Using an ordinary ruler on the page, how far apart are they, in nm?`,
-          visual: still({ mode: 'vector', basis: [[1, 0], [0.5, r6(S3 / 2)]], names: ['a₁', 'a₂'], vector: [0.01, 0.01], dual: true, construction: false, grid: 'none' }, t`The lattice vectors (in units of $a$) and the dual stacks $\mathbf b^1$ (blue) and $\mathbf b^2$ (violet). Their lines pass through rows of atoms.`),
+          visual: still({ mode: 'vector', basis: [[1, 0], [0.5, r6(S3 / 2)]], names: ['a₁', 'a₂'], dualNames: ['b¹', 'b²'], vector: [0.01, 0.01], showVector: false, dual: true, construction: false, grid: 'none' }, t`The lattice vectors (in units of $a$) and the dual stacks $\mathbf b^1$ (blue) and $\mathbf b^2$ (violet). Their lines pass through rows of atoms.`),
           answer: d, units: 'nm', tol: { rel: 0.005 },
           errors: [{ value: a, feedback: t`That is the lattice spacing along $\mathbf a_1$. The $\mathbf b^1$ lines run parallel to $\mathbf a_2$, so their perpendicular spacing is shorter: $a\sin60^\circ$.` }, { value: 1 / a, feedback: t`$1/a$ is not a length. The spacing is $1/|\mathbf b^1|$, measured with the ruler.` }],
           hints: [t`$\mathbf b^1$ is row 1 of $E^{-1}$ with $E = a\begin{pmatrix} 1 & \tfrac12 \\ 0 & \tfrac{\sqrt3}{2} \end{pmatrix}$: $\mathbf b^1 = \tfrac1a(1, -\tfrac1{\sqrt3})$.`, t`Lines $\mathbf b^1(x, y) = k$ are $1/|\mathbf b^1|$ apart when measured perpendicular to them with an ordinary ruler — the ruler is the metric here.`],

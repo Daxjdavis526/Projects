@@ -31,6 +31,8 @@
 //       covector: [1, 0.5],             // mode 'covector': ω's components in the starting basis
 //       covSliders: true, wname: 'ω', wtex: '\\omega', levelLabels: true, crossings: true,
 //       dual: false,                    // the dual basis as two stacks
+//       dualNames: ['e¹', 'e²'],        // their canvas labels (e.g. ['b¹', 'b²'])
+//       showVector: true,               // false: no arrow at all (a picture of a basis and its dual alone)
 //       arrows: [],                     // extra fixed arrows [{ from, to, color, label }] (paper coordinates)
 //       readout: true,                  // false hides every number; or a list of 'V', 'Vold', 'w', 'wold', 'pair', 'A', 'len'
 //       view: 'auto', center: 'auto',   // the window's half-height and centre; 'auto' frames what is drawn at the start
@@ -46,7 +48,7 @@ export const defaults = {
   mode: 'vector', basis: [[1, 0], [0, 1]], dragBasis: false, rotate: false, rotateRange: [-90, 90], presets: null,
   vector: [2, 1], dragVector: true, tail: [0, 0], vname: 'V', vtex: 'V', construction: true, grid: 'basis', ghost: false, names: null,
   covector: [1, 0.5], covSliders: true, wname: 'ω', wtex: '\\omega', levelLabels: true, crossings: true, dual: false,
-  ghostNames: ['e₁', 'e₂'], arrows: [], readout: true, view: 'auto', center: 'auto', snap: 0.1, aspect: '',
+  ghostNames: ['e₁', 'e₂'], dualNames: ['e¹', 'e²'], showVector: true, arrows: [], readout: true, view: 'auto', center: 'auto', snap: 0.1, aspect: '',
 };
 
 const DEG = Math.PI / 180;
@@ -104,7 +106,7 @@ export function mount(F, P) {
       basis = next; basisMoved();
     }, { hollow: true, label: `the tip of ${names[i]}` }));
   }
-  if (P.dragVector) plot.handle(() => [tip.x, tip.y], (x, y) => { [tip.x, tip.y] = inside(snap(x), snap(y)); }, { hollow: true, label: `the tip of ${P.vname}` });
+  if (P.dragVector && P.showVector) plot.handle(() => [tip.x, tip.y], (x, y) => { [tip.x, tip.y] = inside(snap(x), snap(y)); }, { hollow: true, label: `the tip of ${P.vname}` });
   plot.onDrag = () => { draw(); F.notify('point'); };
 
   F.onChange((key) => {
@@ -168,8 +170,8 @@ export function mount(F, P) {
       for (let y = Math.ceil(wy[0]); y <= wy[1]; y++) plot.line(wx[0], y, wx[1], y, { color: 'ink4', width: 1, alpha: 0.35 });
     }
     if (P.dual) {
-      stack(dual[0], { color: 'accent', width: 1.2, dash: [6, 4], labels: true, name: 'e¹' });
-      stack(dual[1], { color: 'violet', width: 1.2, dash: [6, 4], labels: true, name: 'e²' });
+      stack(dual[0], { color: 'accent', width: 1.2, dash: [6, 4], labels: true, name: P.dualNames[0] });
+      stack(dual[1], { color: 'violet', width: 1.2, dash: [6, 4], labels: true, name: P.dualNames[1] });
     } else if (P.grid === 'basis') {
       stack(dual[0], { color: 'accent', width: 1, alpha: 0.3 });
       stack(dual[1], { color: 'violet', width: 1, alpha: 0.3 });
@@ -177,13 +179,13 @@ export function mount(F, P) {
     let w = null;
     if (cov) {
       w = M.covComps(basis, row);
-      const bold = P.crossings ? M.crossed(row, tail, [tip.x, tip.y]) : [];
+      const bold = P.crossings && P.showVector ? M.crossed(row, tail, [tip.x, tip.y]) : [];
       stack(row, { color: 'teal', width: 1.5, labels: P.levelLabels, bold });
     }
     // the starting basis, kept faint for comparison
     if (ghost) old.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 1.8, alpha: 0.45, dash: [5, 4] }); tipLabel(e, P.ghostNames[i], 'ink3'); });
     // the parallelogram of components
-    if (P.construction && Number.isFinite(c[0])) {
+    if (P.construction && P.showVector && Number.isFinite(c[0])) {
       const a = M.combine(basis, [c[0], 0]), b = M.combine(basis, [0, c[1]]);
       const T = (p) => [tail[0] + p[0], tail[1] + p[1]];
       const [A, B] = [T(a), T(b)];
@@ -202,7 +204,7 @@ export function mount(F, P) {
     }
     for (const a of P.arrows || []) plot.arrow(a.from[0], a.from[1], a.to[0], a.to[1], { color: a.color || 'ink2', width: 2.2, label: a.label });
     basis.forEach((e, i) => { plot.arrow(0, 0, e[0], e[1], { color: i ? 'violet' : 'accent', width: 3 }); sideLabel([0, 0], e, names[i], i ? 'violet' : 'accent', [tip.x, tip.y], false, 0.9); });
-    plot.arrow(tail[0], tail[1], tip.x, tip.y, { color: 'gold', width: 3.2, label: P.vname, ldx: 8, ldy: -10 });
+    if (P.showVector) plot.arrow(tail[0], tail[1], tip.x, tip.y, { color: 'gold', width: 3.2, label: P.vname, ldx: 8, ldy: -10 });
     plot.point(0, 0, { color: 'ink2', r: 3 });
     g.restore();
     plot.drawHandles();
@@ -245,6 +247,6 @@ export function validate(P) {
   if (!(P.center === 'auto' || isVec(P.center))) p.push('ten-basis: center must be auto or [x, y]');
   if (!(P.readout === true || P.readout === false || (Array.isArray(P.readout) && P.readout.every((k) => ['V', 'Vold', 'w', 'wold', 'pair', 'A', 'len'].includes(k))))) p.push('ten-basis: readout must be true, false or a list of V, Vold, w, wold, pair, A, len');
   for (const a of P.arrows || []) if (!isVec(a.from) || !isVec(a.to)) p.push('ten-basis: arrows need from: [x, y] and to: [x, y]');
-  for (const s of [P.vname, P.wname, ...(P.names || []), ...(P.ghostNames || []), ...(P.arrows || []).map((a) => a.label).filter(Boolean)]) if (typeof s === 'string' && /\$|\\[A-Za-z]|_[{A-Za-z0-9]|\^[{A-Za-z0-9]/.test(s)) p.push(`ten-basis: canvas label “${s}” must be plain text (Unicode), not TeX`);
+  for (const s of [P.vname, P.wname, ...(P.names || []), ...(P.ghostNames || []), ...(P.dualNames || []), ...(P.arrows || []).map((a) => a.label).filter(Boolean)]) if (typeof s === 'string' && /\$|\\[A-Za-z]|_[{A-Za-z0-9]|\^[{A-Za-z0-9]/.test(s)) p.push(`ten-basis: canvas label “${s}” must be plain text (Unicode), not TeX`);
   return p;
 }
