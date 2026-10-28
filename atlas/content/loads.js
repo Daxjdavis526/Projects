@@ -954,6 +954,7 @@ export const LESSONS = {
   'st-e.E3.3': () => import('./st-e/E3.3.js'),
   'st-e.E4.1': () => import('./st-e/E4.1.js'),
   'st-e.E5.1': () => import('./st-e/E5.1.js'),
+  'st-e.E5.2': () => import('./st-e/E5.2.js'),
   'st-f.F1.1': () => import('./st-f/F1.1.js'),
   'st-f.F1.2': () => import('./st-f/F1.2.js'),
   'st-f.F10.1': () => import('./st-f/F10.1.js'),

@@ -375,6 +375,7 @@ which cannot show TeX — write them as plain text (Unicode is fine: x², √x,
 It grades by position, so every right-hand option must be distinct (the test
 fails identical options): two identical options would make one correct pick read
 as wrong. If two left items share an answer, reword one or use `mcq` instead.
+A `match` item takes a `visual` like any other.
 
 ### Slider and point (answer *in* the picture)
 
@@ -627,6 +628,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `cm2-noether` | a puck over potential contours beside its conserved quantities in time, with a slider that breaks a rotation, translation or time symmetry | `kind`, `kinds`, `eps`, `sliders`, `show`, `panels`, `play`, `labels`, `readout` |
 | `cm3-orbit` | an orbit beside its effective-potential curve: a draggable energy line, turning points matched to dashed circles, Play at the true rate; inverse-square, power-law or Newton + GR forces; apsidal angle and advance per orbit | see the file header |
 | `num-float` | the bits of a float64 or float32 coloured by field: flip a bit, step to the neighbouring floats, read the exact stored decimal and the gap; presets such as 0.1 and 2⁵³ + 1 mark the true value | see the file header |
+| `num3-stability` | a method's stability region shaded in the complex hλ-plane (Euler, RK2–4, Dormand–Prince, backward Euler, Crank–Nicolson) with a draggable z, a system's eigenvalues scaled by h, or the heat equation's grid modes scaled by r; |yₙ| against the exact decay; `get('point')`, `get('h')`, `get('r')` answer items | see the file header |
 | `qm4-sg` | an oven or a prepared state feeding up to three Stern–Gerlach analysers (z, x, y or a tilted n̂(θ)), each passing its + beam, its − beam, or both recombined unobserved; atoms one at a time or by thousands against \|⟨±n\|ψ⟩\|² | see the file header |
 | `m0-unitcircle` | drag a point round the unit circle: cosine and sine as projections, radian ticks, quadrant signs and the reference angle; `unroll` beside the sine/cosine graph; `inverse` with the principal branch bold and other solutions hollow; `get('theta')` answers slider items | see the file header |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
