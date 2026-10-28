@@ -3,6 +3,7 @@
 // the other travels out and back through a turnaround event you can drag.
 // Tick marks show each clock's own time: the straight worldline always
 // accumulates the most — free motion maximizes proper time.
+// readout: false hides the clock readings (a question's picture must not print its answer).
 
 import { Plot } from '../plot.js';
 
@@ -62,7 +63,7 @@ export function mount(F, params) {
     plot.point(0, T, { color: 'ink', label: 'B: reunion' });
     plot.drawHandles();
     const v1 = Math.abs(turn.x) / turn.t, v2 = Math.abs(turn.x) / (T - turn.t);
-    F.readout([
+    if (params.readout !== false) F.readout([
       ['home clock $\\tau_\\text{home}$', `${home.total.toFixed(2)}\\,\\mathrm{yr}`],
       ['travelling clock $\\tau_\\text{trav}$', `${total.toFixed(2)}\\,\\mathrm{yr}`],
       ['speeds out / back', `${v1.toFixed(2)}c\\;/\\;${v2.toFixed(2)}c`],

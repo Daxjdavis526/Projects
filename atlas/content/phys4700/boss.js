@@ -166,7 +166,7 @@ function dotsPic(l, caption) {
   for (let ml = -l; ml <= l; ml++) for (const ms of [0.5, -0.5]) pts.push({ x: ml + ms, y: ms > 0 ? 1.4 : 0.6, r: 6, color: ms > 0 ? 'gold' : 'accent' });
   return {
     type: 'graph',
-    params: { x: [r6(-l - 1.2), r6(l + 1.2)], y: [0, 2.1], aspect: 'wide', xlabel: 'total m = mₗ + mₛ', ylabel: '', axesAt: 'edge', xticks: 2 * l + 2, yticks: 0, points: pts, legend: [{ label: 'spin up', color: 'gold', point: true }, { label: 'spin down', color: 'accent', point: true }], legendAt: 'tr' },
+    params: { x: [r6(-l - 1.2), r6(l + 1.2)], y: [0, 2.8], aspect: 'wide', xlabel: 'total m = mₗ + mₛ', ylabel: '', axesAt: 'edge', xticks: 2 * l + 2, yticks: 0, points: pts, legend: [{ label: 'spin up', color: 'gold', point: true }, { label: 'spin down', color: 'accent', point: true }], legendAt: 'tr' },
     caption,
   };
 }
@@ -185,13 +185,13 @@ const starkPic = (F, caption) => {
   return { type: 'graph', params: { x: [0, 100], y: [-2000, 2000], aspect: 'wide', xlabel: 'electric field (kV/cm)', ylabel: 'n = 2 shift', axesAt: 'edge', xticks: 5, yticks: 0, curves: [{ fn: `${k}*x`, color: 'warn', width: 2.2 }, { fn: '0', color: 'accent', width: 2.6 }, { fn: `-${k}*x`, color: 'good', width: 2.2 }], vlines: [{ x: F, color: 'ink3' }] }, caption };
 };
 function zeemanPic(B, caption) {
-  const b = (MUB * 1e6 * 1e-3);                     // μeV per mT
+  const b = 10 * (MUB * 1e6 * 1e-3);                // μeV per mT, the fans drawn ten times steeper than life
   const E12 = fsShift(2, 0.5) * 1e6, E32 = fsShift(2, 1.5) * 1e6;
   const lines = [[E32, 2, 'gold'], [E32, 2 / 3, 'gold'], [E32, -2 / 3, 'gold'], [E32, -2, 'gold'], [E12, 1 / 3, 'accent'], [E12, -1 / 3, 'accent']];
   return {
     type: 'graph',
     params: {
-      x: [0, 60], y: [-80, 10], aspect: 'wide', xlabel: 'B (mT)', ylabel: 'energy (μeV)', axesAt: 'edge', xticks: 6, yticks: 0,
+      x: [0, 20], y: [-80, 20], aspect: 'wide', xlabel: 'B (mT)', ylabel: 'energy (μeV)', axesAt: 'edge', xticks: 6, yticks: 0,
       curves: lines.map(([e, g, c]) => ({ fn: `${r6(e)} + ${r6(g * b)}*x`, color: c, width: 2 })),
       vlines: [{ x: B, color: 'ink3' }],
       points: [label(1, E32, '2P3/2', 'gold', 2, -12), label(1, E12, '2P1/2', 'accent', 2, 14)],
@@ -443,7 +443,7 @@ def P2(t):
             const { l, m2, m, key } = C;
             const jt = `${2 * l - 1}/2`;
             return {
-              prompt: t`An electron with $l = ${l}$ and spin ½ is in the total-angular-momentum state $|j = ${jt},\ m_j = ${m2}/2\rangle$, the lower of the two $j$ values. Its Clebsch–Gordan expansion is $$|l - \tfrac12,\ m\rangle = -\sqrt{\frac{l - m + \frac12}{2l + 1}}\,|m - \tfrac12\rangle|{\uparrow}\rangle + \sqrt{\frac{l + m + \frac12}{2l + 1}}\,|m + \tfrac12\rangle|{\downarrow}\rangle.$$ What is the probability that a measurement of $\hat L_z$ gives $m_l\hbar$ with $m_l = ${fmt(m - 0.5, 2)}$?`,
+              prompt: t`An electron with $l = ${l}$ and spin ½ is in the total-angular-momentum state $|j = ${jt},\ m_j = ${m2}/2\rangle$, the lower of the two $j$ values. Its Clebsch–Gordan expansion is $$\begin{gathered} |l - \tfrac12,\ m\rangle = -\sqrt{\frac{l - m + \frac12}{2l + 1}}\,|m - \tfrac12\rangle|{\uparrow}\rangle \\ + \sqrt{\frac{l + m + \frac12}{2l + 1}}\,|m + \tfrac12\rangle|{\downarrow}\rangle \end{gathered}$$ What is the probability that a measurement of $\hat L_z$ gives $m_l\hbar$ with $m_l = ${fmt(m - 0.5, 2)}$?`,
               visual: dotsPic(l, t`The $2(2l + 1) = ${2 * (2 * l + 1)}$ product states $|m_l\rangle|m_s\rangle$ for $l = ${l}$, placed by total $m$; each $j$ state of given $m$ mixes the two dots in its column.`),
               answer: key, tol: { rel: 0, abs: 0.003 },
               errors: apart([
@@ -510,7 +510,7 @@ def P2(t):
             const { B, nu0, shift, mix, key } = C;
             return {
               prompt: t`At zero field, first-order fine structure puts hydrogen’s $2P_{3/2}$ level $${nu0}$ GHz above $2P_{1/2}$. In a weak field of $${B}$ mT, what is the frequency (GHz) of the magnetic-dipole transition from $2P_{1/2},\ m_j = +\tfrac12$ up to $2P_{3/2},\ m_j = +\tfrac32$? Use Landé’s $g_J$ for each level and $\mu_B/h = ${fmt(MUB * QE / H / 1e9, 6)}$ GHz/T.`,
-              visual: zeemanPic(B, t`Weak-field Zeeman fans of $2P_{3/2}$ (gold, four sublevels) and $2P_{1/2}$ (blue, two) against $B$; grey line at ${B} mT. Energies unlabelled; the gap is not to scale with the fans.`),
+              visual: zeemanPic(B, t`Weak-field Zeeman fans of $2P_{3/2}$ (gold, four sublevels) and $2P_{1/2}$ (blue, two) against $B$; grey line at ${B} mT. Energies unlabelled; the fans are drawn ten times steeper than they are, so they can be seen against the 45 μeV gap.`),
               answer: key, units: 'GHz', tol: { rel: 0, abs: 0.003 },
               errors: apart([
                 { value: nu0 + ((1.5 - 0.5) * MUB * B * 1e-3 * QE) / H / 1e9, feedback: t`Each level shifts by $g_J\mu_BBm_j$: $g = \tfrac43$ for $2P_{3/2}$ and $\tfrac23$ for $2P_{1/2}$, not 1.` },

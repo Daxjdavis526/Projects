@@ -18,6 +18,7 @@ const t = String.raw;
 const PAIRS = [];
 for (let a = 1; a <= 4; a++) for (let b = 1; b <= 4; b++) PAIRS.push([a, b]);
 const sq2 = (E) => { const out = []; for (let a = 1; a * a < E; a++) { const b = Math.round(Math.sqrt(E - a * a)); if (b >= 1 && a * a + b * b === E) out.push([a, b]); } return out; };
+const triples = (E) => { const out = []; for (let a = 1; a * a < E; a++) for (let b = a; a * a + b * b < E; b++) { const r = E - a * a - b * b, z = Math.round(Math.sqrt(r)); if (z >= b && z * z === r) out.push([a, b, z]); } return out; };
 const cube3 = (E) => { let c = 0; for (let a = 1; a * a < E; a++) for (let b = 1; a * a + b * b < E; b++) { const r = E - a * a - b * b, z = Math.round(Math.sqrt(r)); if (z >= 1 && z * z === r) c++; } return c; };
 const NA_D2 = 589.158326;     // nm, sodium D2 in vacuum (Steck, Sodium D Line Data)
 
@@ -44,7 +45,7 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
     tasks: [
       'At r = 1 (a square) the curves meet in pairs: (1, 2) with (2, 1), (1, 3) with (3, 1)… The square’s x ↔ y symmetry swaps them, so they must share an energy.',
       'Move away from r = 1: every pair splits. Stretching the box breaks the swap symmetry, and the degeneracy goes with it.',
-      'Look at r = 2: (1, 2) meets (1, 4)’s neighbour (2, 2)… crossings at special ratios are “accidental”: no symmetry forces them, and a slight change of shape separates them.',
+      'At r = 2 the curves of (1, 4) and (2, 2) cross: both give 5E₀. No symmetry of a 1 × 2 rectangle turns one state into the other — the crossing is accidental, and r = 1.98 separates them.',
     ],
     params: {
       x: [0.6, 2.2], y: [0, 22], aspect: 'wide', xlabel: 'aspect ratio r = Ly/Lx', ylabel: 'E / E₀', xticks: 8, yticks: 4, axesAt: 'edge',
@@ -52,7 +53,7 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
       curves: PAIRS.map(([a, b]) => ({ fn: `${a * a} + ${b * b}/x^2`, color: a === b ? 'ink3' : a < b ? 'accent' : 'gold', width: a === b ? 1.6 : 2.2, ...(a === b ? { dash: [5, 4] } : {}) })),
       vlines: [{ x: 'rr', color: 'ink3' }],
       readouts: [{ label: t`$E(1,2) - E(2,1)$ in units of $E_0$`, expr: '1 + 4/rr^2 - 4 - 1/rr^2', digits: 3 }],
-      legend: [{ label: 'nₓ < n_y'.replace('n_y', 'ny'), color: 'accent' }, { label: 'nₓ > n_y'.replace('n_y', 'ny'), color: 'gold' }, { label: 'nₓ = n_y'.replace('n_y', 'ny'), color: 'ink3', dash: [5, 4] }],
+      legend: [{ label: 'nₓ < ny', color: 'accent' }, { label: 'nₓ > ny', color: 'gold' }, { label: 'nₓ = ny', color: 'ink3', dash: [5, 4] }],
       legendAt: 'tr',
     },
     caption: 'Exact levels of an infinite rectangular well, E₀ = π²ħ²/2mL²; states with nₓ, ny from 1 to 4.',
@@ -79,7 +80,7 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
           prompt: t`The 3D isotropic harmonic oscillator has levels $E = (n + \tfrac32)\hbar\omega$ with $n = n_x + n_y + n_z$. Ignoring spin, how many states share the level $n = ${n}$?`,
           visual: levelPic(Array.from({ length: 7 }, (_, k) => ({ E: k + 1.5, x0: 0.6, x1: 2.4, color: k === n ? 'gold' : 'ink3', label: `n = ${k}`, dx: 8 })), { y: [0, 8.5], x: [0, 3.4], ylabel: 'E / ħω', caption: 'The oscillator’s ladder; the gold level is the one asked about.' }),
           answer: ans, tol: { rel: 0, abs: 0.5 },
-          errors: [{ value: 3 * n, feedback: 'Count all ways to write n as nₓ + n_y + n_z with each ≥ 0, not only those with one nonzero entry.'.replace('n_y + n_z', 'ny + nz') }, { value: n + 1, feedback: 'That counts two dimensions. In 3D there is one more quantum number to distribute.' }, { value: (n + 1) ** 2, feedback: 'That is hydrogen-like counting. Count the triples (nₓ, ny, nz) summing to n.' }].filter((e) => e.value !== ans),
+          errors: [{ value: 3 * n, feedback: 'Count all ways to write n as nₓ + ny + nz with each ≥ 0, not only those with one nonzero entry.' }, { value: n + 1, feedback: 'That counts two dimensions. In 3D there is one more quantum number to distribute.' }, { value: (n + 1) ** 2, feedback: 'That is hydrogen-like counting. Count the triples (nₓ, ny, nz) summing to n.' }].filter((e) => e.value !== ans),
           hints: [t`Count the triples $(n_x, n_y, n_z)$ of non-negative integers with $n_x + n_y + n_z = ${n}$.`, t`For each $n_x = 0, \dots, ${n}$ there are $${n} - n_x + 1$ choices of $n_y$; add them up.`],
           teach: 'The isotropic oscillator’s level n holds (n + 1)(n + 2)/2 states — more than rotations explain, the sign of a hidden SU(3) symmetry.',
           explain: t`$\sum_{n_x=0}^{${n}}(${n} - n_x + 1) = ${ans}$. Rotations alone give multiplets of $2l + 1$; the level holds $l = ${n}, ${n - 2}, \dots$ together, which needs a larger symmetry (SU(3)). Nuclear shell structure starts from this degeneracy: magic numbers 2, 8, 20 are the filled oscillator shells.`,
@@ -99,6 +100,22 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
           hints: [t`List the ways to write ${E} as a sum of two squares of positive integers, order mattering.`, 'Count the lattice points lying exactly on the arc.'],
           teach: 'In a square box the x ↔ y swap pairs states; extra coincidences of sums of squares give accidental degeneracies.',
           explain: t`${sq2(E).map(([a, b]) => `$(${a}, ${b})$`).join(', ')}: $${ans}$ states. ${ans > 2 ? 'Pairs related by the swap are symmetry-required; the extra pairs are accidental — number theory, not geometry.' : 'Just the pair related by the x ↔ y swap.'}`,
+        };
+      },
+    }),
+    num({
+      id: 'split-pair', difficulty: 2,
+      gen(r) {
+        const rr = r.pick([1.02, 1.05, 1.1, 1.2]);
+        const ans = 3 - 3 / (rr * rr);
+        return {
+          prompt: t`Stretch the square box so that $L_y = ${rr}L_x$; the levels become $E = E_0\big(n_x^2 + n_y^2/${rr}^2\big)$. By how much, in units of $E_0$, does the state $(2, 1)$ now lie above $(1, 2)$?`,
+          visual: { type: 'graph', params: { x: [0.9, 1.3], y: [3, 6], aspect: 'wide', xlabel: 'aspect ratio r', ylabel: 'E / E₀', xticks: 4, yticks: 3, axesAt: 'edge', curves: [{ fn: '1 + 4/x^2', color: 'accent', width: 2.4, label: '(1, 2)', labelAt: 0.93, labelDy: -10 }, { fn: '4 + 1/x^2', color: 'gold', width: 2.4, label: '(2, 1)', labelAt: 1.25, labelDy: -10 }], vlines: [{ x: rr, color: 'ink3' }] }, caption: 'The two formerly degenerate states against the aspect ratio; the grey line marks this box.' },
+          answer: ans, tol: { rel: 0.005 },
+          errors: [{ value: -ans, feedback: t`$(2, 1)$ has the larger $n_x$, which the stretch does not soften: it ends up higher.` }],
+          hints: [t`$E(2, 1) - E(1, 2) = \big(4 + 1/r^2\big) - \big(1 + 4/r^2\big)$.`, t`$= 3 - 3/r^2$ with $r = ${rr}$.`],
+          teach: 'A small symmetry-breaking distortion splits a degenerate pair by an amount proportional to the distortion.',
+          explain: t`$3 - 3/${rr}^2 = ${fmt(ans, 4)}E_0$. For a small stretch $r = 1 + \epsilon$ this is about $6\epsilon E_0$: linear in the distortion, the hallmark of degenerate perturbation theory.`,
         };
       },
     }),
@@ -166,7 +183,7 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
           errors: [{ value: 3, feedback: 'Count every distinct ordering of each triple, and every triple: there may be more than one way to write the sum.' }].filter((e) => e.value !== ans),
           hints: [t`Find all triples of positive integers whose squares sum to ${E}; then count their distinct orderings.`, t`A triple with all entries different has 6 orderings, with two equal 3, with all equal 1.`],
           teach: 'The cube’s permutation symmetry gives degeneracies of 1, 3 or 6; extra ones are accidental.',
-          explain: t`$${ans}$ states. Permutations of $(n_x, n_y, n_z)$ — the cube’s symmetry — give the 3s and 6s; ${E === 27 || E === 41 ? 'here two different triples share the sum, an accidental degeneracy on top.' : 'here there is a single triple.'}`,
+          explain: t`$${ans}$ states. Permutations of $(n_x, n_y, n_z)$ — the cube’s symmetry — give the 3s and 6s; ${triples(E).length > 1 ? `here two different triples, ${triples(E).map((q) => `(${q.join(', ')})`).join(' and ')}, share the sum — an accidental degeneracy on top.` : `here there is a single triple, (${triples(E)[0].join(', ')}).`}`,
         };
       },
     }),
@@ -186,7 +203,7 @@ If a level of $\hat H$ held only one state, that state would have to be an eigen
         2: t`The frequencies scale as $\sqrt{m^2/a^2 + n^2/b^2}$: changing $a$ and $b$ differently moves the two modes differently.`,
         3: 'Both modes still exist; they just no longer share a frequency.',
       },
-      hints: ['The same mathematics as the box of the Explore step: what symmetry made the pair equal?'],
+      hints: ['The same mathematics as the box of the Explore step: what symmetry made the pair equal?', t`For a rectangle with sides $a$ and $b$, mode $(m, n)$ has $f \propto \sqrt{m^2/a^2 + n^2/b^2}$. Compare $(1, 2)$ and $(2, 1)$ when $a \neq b$.`],
       teach: 'Degeneracy is protected by symmetry; break the symmetry and the degenerate partners split — in drums as in atoms.',
       explain: t`With sides $a \neq b$ the modes have $f \propto \sqrt{1/a^2 + 4/b^2}$ and $\sqrt{4/a^2 + 1/b^2}$: different. Engineers see the split pairs in modal tests and use them to diagnose asymmetries — the same logic as reading a molecule’s symmetry from its split spectral lines.`,
     }),

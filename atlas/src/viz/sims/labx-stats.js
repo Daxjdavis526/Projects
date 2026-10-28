@@ -234,8 +234,9 @@ export function mount(F, P0) {
       const xs = M.samples(dist, par, n, seed, m);
       const st = M.stats(xs);
       const discrete = dist === 'poisson' && m === 1;
-      const xr = P.xr || (discrete ? [Math.max(-0.5, Math.floor(mo.mean - 4.5 * mo.sd) - 0.5), Math.ceil(mo.mean + 4.5 * mo.sd) + 0.5] : [mo.mean - 4.5 * sdm, mo.mean + 4.5 * sdm]);
-      let nb = P.bins || (discrete ? 0 : Math.max(8, Math.min(60, Math.round(2.2 * Math.sqrt(n)))));
+      const flat = m === 1 && (dist === 'uniform' || dist === 'triangular');   // bin edges on ±a
+      const xr = P.xr || (discrete ? [Math.max(-0.5, Math.floor(mo.mean - 4.5 * mo.sd) - 0.5), Math.ceil(mo.mean + 4.5 * mo.sd) + 0.5] : flat ? [P.mu - 1.5 * par.a, P.mu + 1.5 * par.a] : [mo.mean - 4.5 * sdm, mo.mean + 4.5 * sdm]);
+      let nb = P.bins || (discrete ? 0 : flat && !P.xr ? (n < 300 ? 12 : 36) : Math.max(8, Math.min(60, Math.round(2.2 * Math.sqrt(n)))));
       let w, h;
       if (discrete) {
         const step = Math.max(1, Math.ceil((xr[1] - xr[0]) / 60));
