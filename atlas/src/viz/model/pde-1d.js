@@ -49,7 +49,12 @@ function roughP(s) {
   if (u <= 0) return 0;
   if (u >= n) return T[n];
   const i = Math.floor(u);
-  return T[i] + (u - i) * (T[i + 1] - T[i]);
+  return hermite(T[i], T[i + 1], PROFILES.rough.p(a + i * h), PROFILES.rough.p(a + (i + 1) * h), u - i, h);
+}
+// cubic Hermite interpolation between values y0, y1 with slopes d0, d1 over a cell of width h, at fraction q
+function hermite(y0, y1, d0, d1, q, h) {
+  const q2 = q * q, q3 = q2 * q;
+  return (2 * q3 - 3 * q2 + 1) * y0 + (q3 - 2 * q2 + q) * h * d0 + (-2 * q3 + 3 * q2) * y1 + (q3 - q2) * h * d1;
 }
 
 export const PROFILES = {
@@ -98,7 +103,7 @@ function tauTable(o) {
     const x0 = a + (i - 1) * h;
     T[i] = T[i - 1] + (h / 6) * (1 / speed(o, x0) + 4 / speed(o, x0 + h / 2) + 1 / speed(o, x0 + h));
   }
-  const tab = { a, b, h, n, T };
+  const tab = { a, b, h, n, T, o: { speed: 'river', c: o.c, slow: o.slow } };
   if (tauCache.size > 20) tauCache.clear();
   tauCache.set(key, tab);
   return tab;
@@ -107,8 +112,8 @@ function tauOf(tab, x) {
   const u = (x - tab.a) / tab.h;
   if (u <= 0) return tab.T[0] + (x - tab.a);           // (never reached in the window)
   if (u >= tab.n) return tab.T[tab.n] + (x - tab.b);
-  const i = Math.floor(u);
-  return tab.T[i] + (u - i) * (tab.T[i + 1] - tab.T[i]);
+  const i = Math.floor(u), xa = tab.a + i * tab.h;
+  return hermite(tab.T[i], tab.T[i + 1], 1 / speed(tab.o, xa), 1 / speed(tab.o, xa + tab.h), u - i, tab.h);
 }
 function tauInv(tab, tau) {
   const T = tab.T;
@@ -116,7 +121,9 @@ function tauInv(tab, tau) {
   if (tau >= T[tab.n]) return tab.b;
   let lo = 0, hi = tab.n;
   while (hi - lo > 1) { const m = (lo + hi) >> 1; if (T[m] <= tau) lo = m; else hi = m; }
-  return tab.a + (lo + (tau - T[lo]) / (T[hi] - T[lo])) * tab.h;
+  let x = tab.a + (lo + (tau - T[lo]) / (T[hi] - T[lo])) * tab.h;
+  for (let k = 0; k < 3; k++) x += (tau - tauOf(tab, x)) * speed(tab.o, x);   // Newton: dτ/dx = 1/c
+  return x;
 }
 
 /** Where the characteristic through (x, t) started at t = 0 (its foot). */
@@ -170,15 +177,22 @@ export function waveEnergy(o, t, n = 6000) {
   const pr = PROFILES[o.profile] || PROFILES.gauss, w = o.w ?? 1, x0 = o.x0 ?? 0, c = o.c ?? 1;
   if (o.init !== 'strike' && !pr.dp) return { K: Infinity, V: Infinity, E: Infinity };
   const half = pr.support * w + 0.5 * w;
-  // the pieces live near x0 ± ct; integrate over each piece's support (they may overlap)
-  const lo = x0 - c * t - half, hi = x0 + c * t + half;
-  const segs = c * t > half ? [[lo, x0 - c * t + half], [x0 + c * t - half, hi]] : [[lo, hi]];
+  // the pieces live near x0 ± ct; integrate each smooth stretch between the
+  // pieces' edges and kinks (where p jumps or bends) by Simpson's rule
+  const cuts = new Set();
+  for (const ctr of [x0 - c * t, x0 + c * t]) for (const k of [-half, -w, 0, w, half]) cuts.add(ctr + k);
+  const pts = [...cuts].sort((a, b) => a - b);
+  const m = Math.max(40, Math.round(n / pts.length)) & ~1;
   let K = 0, V = 0;
-  for (const [a, b] of segs) {
-    const m = Math.max(400, Math.round(n * (b - a) / (hi - lo))), h = (b - a) / m;
-    for (let i = 0; i < m; i++) {
-      const x = a + (i + 0.5) * h, d = waveGrad(o, x, t);
-      K += 0.5 * d.ut * d.ut * h; V += 0.5 * c * c * d.ux * d.ux * h;
+  for (let j = 0; j + 1 < pts.length; j++) {
+    const a = pts[j], b = pts[j + 1];
+    if (b - a < 1e-12) continue;
+    const h = (b - a) / m;
+    for (let i = 0; i <= m; i++) {
+      const wt = (i === 0 || i === m ? 1 : i % 2 ? 4 : 2) * h / 3;
+      // at a stretch's ends, sample just inside it, so a kink is read from the correct side
+      const x = i === 0 ? a + 1e-9 * (b - a) : i === m ? b - 1e-9 * (b - a) : a + i * h, d = waveGrad(o, x, t);
+      K += 0.5 * d.ut * d.ut * wt; V += 0.5 * c * c * d.ux * d.ux * wt;
     }
   }
   return { K, V, E: K + V };

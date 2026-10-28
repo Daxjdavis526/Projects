@@ -198,8 +198,8 @@ for (const k of PROF) {
   const mo = M.moments(W.pos);
   check('20 000 walkers after 100 hops: variance ≈ 100', Math.abs(mo.variance - 100) < 4, `${mo.variance}`);
   check('20 000 walkers after 100 hops: mean ≈ 0', Math.abs(mo.mean) < 0.25, `${mo.mean}`);
-  const W2 = M.walkers(50, 7); for (let i = 0; i < 100; i++) M.hop(W2);
-  check('a seed gives the same walk', W2.pos.every((x, i) => x === W.pos[i]));
+  const W2 = M.walkers(50, 7), W3 = M.walkers(50, 7); for (let i = 0; i < 100; i++) { M.hop(W2); M.hop(W3); }
+  check('a seed gives the same walk', W2.pos.every((x, i) => x === W3.pos[i]));
   const B = M.walkers(20000, 3); for (let i = 0; i < 100; i++) M.hop(B, 0.6);
   check('a biased walk drifts (2p − 1) per hop and has variance 4p(1 − p) per hop', Math.abs(M.moments(B.pos).mean - 20) < 0.5 && Math.abs(M.moments(B.pos).variance - 96) < 4);
 }

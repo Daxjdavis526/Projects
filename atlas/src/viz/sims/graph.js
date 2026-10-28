@@ -220,6 +220,7 @@ function ev(src, env, vars) {
 function fmtVal(v, r) {
   if (!Number.isFinite(v)) return '\\text{—}';
   const d = r.digits ?? 4;
+  if (Math.abs(v) < 1e-12) v = 0;          // round-off, not a value: show 0, not 3.3×10⁻¹⁶
   const a = Math.abs(v);
   const s = a !== 0 && (a >= 1e5 || a < 1e-3) ? `${v.toExponential(d - 1).replace(/e([+-]\d+)/, (m, e) => `\\times10^{${+e}}`)}` : String(+v.toPrecision(d));
   return r.unit ? `${s}\\,${r.unit}` : s;

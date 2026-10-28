@@ -10,7 +10,7 @@ const t = String.raw;
 
 // the Explore curve: a cubic with a hump and a dip
 const CUB = '0.15*x^3 - 1.35*x^2 + 3.3*x + 1';
-const cub = (s) => CUB.replace(/x/g, `(${s})`);
+const cub = (s) => `(${CUB.replace(/x/g, `(${s})`)})`;
 
 // the worked example: a car between two average-speed cameras 12 km apart,
 // position in km, time in minutes
@@ -202,14 +202,14 @@ Read with $f$ as position and $x$ as time: if your average speed over a trip was
             params: {
               x: [a - 0.5, b + 0.8], y: [fa - 2, fa + hi * (b - a) + 2], aspect: 'wide',
               curves: [
-                { fn: `${fa} + ${hi}*(x - ${a})`, color: 'ink3', dash: true, width: 1.4, domain: [a, b] },
-                { fn: `${fa} + ${lo}*(x - ${a})`, color: 'ink3', dash: true, width: 1.4, domain: [a, b] },
+                { fn: `${fa} + ${hi}*(x - ${a})`, color: 'ink3', dash: true, width: 1.4, domain: [a, a + 1.5], label: `slope ${hi}`, labelAt: a + 1.5 },
+                { fn: `${fa} + ${lo}*(x - ${a})`, color: 'ink3', dash: true, width: 1.4, domain: [a, a + 1.5], label: `slope ${lo}`, labelAt: a + 1.5, labelDy: 10 },
               ],
-              shade: [{ fn: `${fa} + ${hi}*(x - ${a})`, lower: `${fa} + ${lo}*(x - ${a})`, from: a, to: b, color: 'accent', alpha: 0.15 }],
-              points: [{ x: a, y: fa, color: 'gold', label: `(${a}, ${fa})` }],
+              shade: [{ fn: `${fa} + ${hi}*(x - ${a})`, lower: `${fa} + ${lo}*(x - ${a})`, from: a, to: a + 1.5, color: 'accent', alpha: 0.15 }],
+              points: [{ x: a, y: fa, color: 'gold', label: `(${a}, ${fa})`, labelDx: -8, labelDy: 14, labelAlign: 'right' }],
               vlines: [{ x: b, label: `x = ${b}` }],
             },
-            caption: t`Starting from the gold point with slopes between $${lo}$ and $${hi}$, the graph cannot leave the shaded wedge.`,
+            caption: t`Starting from the gold point with slopes between $${lo}$ and $${hi}$, the graph cannot leave the wedge between the two dashed lines (drawn here for the first $1.5$ units).`,
           },
         };
       },

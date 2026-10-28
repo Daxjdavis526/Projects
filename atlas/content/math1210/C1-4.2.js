@@ -61,7 +61,7 @@ The same statement in the language of **differentials**: a small change $dx$ in 
   },
   example: {
     prompt: t`The International Space Station orbits about $420$ km up. Estimate the gravitational acceleration there with the linearization of $g(h) = g_0\left(\dfrac{R}{R+h}\right)^2$ at $h = 0$, estimate the error, and compare with the exact value. Use $g_0 = 9.81\ \text{m/s}^2$ and $R = 6371$ km.`,
-    visual: curveFig({ fn: G, x: [-60, 1100], y: [6.8, 10.3], xlabel: 'h (km)', ylabel: 'g (m/s²)', at: 0, f: g, df: (h) => -2 * 9.81 / 6371 * (6371 / (6371 + h)) ** 3, span: 1050, points: [{ x: 420, y: g(420), color: 'accent', label: 'ISS: 8.63', labelDx: 8, labelDy: 10 }], caption: t`Near the ground the curve and its tangent agree; by $420$ km they have parted by about $0.12\ \text{m/s}^2$.` }),
+    visual: curveFig({ fn: G, x: [-60, 1100], y: [6.8, 10.3], xlabel: 'h (km)', ylabel: 'g (m/s²)', at: 0, f: g, df: (h) => -2 * 9.81 / 6371 * (6371 / (6371 + h)) ** 3, span: 1050, points: [{ x: 420, y: g(420), color: 'accent', label: 'ISS: 8.63', labelDx: 4, labelDy: -6 }], caption: t`Near the ground the curve and its tangent agree; by $420$ km they have parted by about $0.12\ \text{m/s}^2$.` }),
     steps: [
       { label: 'Value and slope at a', text: t`$g(0) = g_0 = 9.81\ \text{m/s}^2$. $g'(h) = -\dfrac{2g_0R^2}{(R+h)^3}$, so $g'(0) = -\dfrac{2g_0}{R} = -0.00308\ \text{m/s}^2$ per km.` },
       { label: 'Linearize', text: t`$L(h) = g_0\left(1 - \dfrac{2h}{R}\right)$ — the standard “gravity falls by $2h/R$” rule. At $420$ km: $9.81\times\left(1 - \dfrac{840}{6371}\right) = 8.52\ \text{m/s}^2$.` },
@@ -147,14 +147,14 @@ The same statement in the language of **differentials**: a small change $dx$ in 
           hints: [t`With $x = \Delta m/m_0$, $\Delta v \approx v_e\,x$.`],
           teach: t`For small $x$, $\ln(1 - x) \approx -x$: a small burn gives a speed change proportional to the propellant used.`,
           explain: t`$\Delta v \approx ${ve}\times\dfrac{${dm}}{${m0}} = ${nice(L, 4)}$ m/s. The exact value is $${nice(ve * Math.log(m0 / (m0 - dm)), 5)}$ m/s; the error, about $\tfrac12 v_e x^2 = ${nice(0.5 * ve * (dm / m0) ** 2, 3)}$ m/s, is tiny because $x = ${nice(dm / m0)}$ is small.`,
-          visual: { type: 'graph', params: { x: [0, 0.5], y: [-0.03, 0.72], aspect: 'wide', xlabel: 'x = Δm / m₀', ylabel: 'Δv / vₑ', curves: [{ fn: '-ln(1 - x)', color: 'accent', label: '−ln(1 − x)', labelAt: 0.43, labelDx: -84 }, { fn: 'x', color: 'gold', dash: true, width: 1.8, label: 'x', labelAt: 0.47 }], points: [{ x: dm / m0, y: -Math.log(1 - dm / m0), color: 'accent' }] }, caption: t`The exact $\Delta v/v_e$ and its linearization: indistinguishable for burns of a few percent of the mass, apart by 19% at $x = 0.4$.` },
+          visual: { type: 'graph', params: { x: [0, 0.5], y: [-0.03, 0.72], aspect: 'wide', xlabel: 'x = Δm / m₀', ylabel: 'Δv / vₑ', curves: [{ fn: '-ln(1 - x)', color: 'accent', label: '−ln(1 − x)', labelAt: 0.43, labelDx: -84 }, { fn: 'x', color: 'gold', dash: true, width: 1.8, label: 'x', labelAt: 0.47 }], points: [{ x: dm / m0, y: -Math.log(1 - dm / m0), color: 'accent' }] }, caption: t`The exact $\Delta v/v_e$ and its linearization: indistinguishable for burns of a few percent of the mass; at $x = 0.4$ the line falls 22% short.` },
         };
       },
     }),
     mcq({
       id: 'find-error-geo', difficulty: 3, kind: 'error',
       prompt: t`A student uses $g \approx g_0\left(1 - \dfrac{2h}{R}\right)$ to find the gravitational acceleration at geostationary altitude, $h = 35\,786$ km, with $R = 6371$ km, and gets $-100\ \text{m/s}^2$. What went wrong?`,
-      visual: { type: 'graph', params: { x: [-1500, 40000], y: [-14, 11], aspect: 'wide', xlabel: 'h (km)', ylabel: 'g (m/s²)', curves: [{ fn: G, color: 'accent', domain: [0, 40000], label: 'true g', labelAt: 30000, labelDy: -12 }, { fn: '9.81*(1 - 2*x/6371)', color: 'gold', dash: true, width: 1.8, domain: [0, 12000], label: 'linear', labelAt: 9000, labelDx: 8 }], hlines: [{ y: 0 }] }, caption: t`The true $g$ (blue) and the linearization at the ground (dashed), which crosses zero at only $h = R/2$.` },
+      visual: { type: 'graph', params: { x: [-1.5, 40], y: [-14, 11], aspect: 'wide', xlabel: 'h (thousand km)', ylabel: 'g (m/s²)', curves: [{ fn: '9.81*(6371/(6371 + 1000*x))^2', color: 'accent', domain: [0, 40], label: 'true g', labelAt: 30, labelDy: -12 }, { fn: '9.81*(1 - 2000*x/6371)', color: 'gold', dash: true, width: 1.8, domain: [0, 12], label: 'linear', labelAt: 4.5, labelDx: 8 }], hlines: [{ y: 0 }], points: [{ x: 35.786, y: 0.224, color: 'accent', label: 'GEO', labelDy: -12 }] }, caption: t`The true $g$ (blue) and the linearization at the ground (dashed), which crosses zero at only $h = R/2$.` },
       choices: [
         t`The linearization holds only for $h \ll R$, and $35\,786$ km is $5.6R$`,
         t`The slope should be $+2g_0/R$: gravity grows with height`,
