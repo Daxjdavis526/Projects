@@ -190,7 +190,7 @@ $$m = \frac{\sum (f_i - \bar f)(V_i - \bar V)}{\sum (f_i - \bar f)^2} = \frac{${
         params: {
           x: [0, 13], y: [-3, 3], aspect: 'wide', xlabel: 'frequency f (10¹⁴ Hz)', ylabel: 'V₀ (V)',
           sliders: [
-            { key: 's', label: 'Slope $h/e$', min: 2, max: 6, step: 0.01, value: 3, unit: '10^{-15}\\,\\mathrm{V\\,s}', explain: 'The stopping potential gained per hertz, in units of $10^{-15}$ V s.' },
+            { key: 's', label: 'Slope $h/e$', min: 2, max: 6, step: 0.01, value: 3, unit: '\\times10^{-15}\\,\\mathrm{V\\,s}', explain: 'The stopping potential gained per hertz, in units of $10^{-15}$ V s.' },
             { key: 'b', label: 'Intercept at $f = 0$', min: -4, max: 0, step: 0.01, value: -1, unit: '\\mathrm{V}', explain: 'Where the line would cross zero frequency: $-\\varphi/e$.' },
           ],
           curves: [{ fn: '0.1*s*x + b', color: 'accent', width: 2.4 }],
@@ -376,8 +376,8 @@ $$m = \frac{\sum (f_i - \bar f)(V_i - \bar V)}{\sum (f_i - \bar f)^2} = \frac{${
         params: {
           x: [0, 16], y: [-5, 3.2], aspect: 'wide', xlabel: 'frequency f (10¹⁴ Hz)', ylabel: 'V₀ (V)',
           curves: ['cesium', 'sodium', 'zinc'].flatMap((k, i) => {
-            const f0 = PHI(k) / (H_EVS * F14), col = ['accent', 'gold', 'violet'][i];
-            return [{ fn: `${r6(H_EVS * F14)}*x - ${PHI(k)}`, domain: [r6(f0), 16], color: col, width: 2.4, label: METALS[k].label, labelAt: r6(Math.min(15, f0 + 4.5)), labelDx: 8, labelDy: 10 },
+            const f0 = PHI(k) / (H_EVS * F14), col = ['accent', 'gold', 'violet'][i], [at, dy] = [[8.5, -14], [12, 16], [14.5, 16]][i];
+            return [{ fn: `${r6(H_EVS * F14)}*x - ${PHI(k)}`, domain: [r6(f0), 16], color: col, width: 2.4, label: METALS[k].label, labelAt: at, labelDx: 4, labelDy: dy },
               { fn: `${r6(H_EVS * F14)}*x - ${PHI(k)}`, domain: [0, r6(f0)], color: col, width: 1.2, dash: true }];
           }),
         },

@@ -96,7 +96,8 @@ export const reference = (f, t0, y0, T, n = 4096) => endValue('rk4', f, t0, y0, 
  * (measured in window-scaled units) stays about 1/res of the window, so steep
  * stretches stay smooth. A branch stops at the window's left or right edge,
  * when it leaves the window vertically by more than `margin` of its height,
- * when f becomes undefined, or after maxSteps steps. Returns [[t, y], …] in
+ * when f becomes undefined or the curve turns vertical (where the solution
+ * itself ends), or after maxSteps steps. Returns [[t, y], …] in
  * increasing t.
  */
 export function traceCurve(f, t0, y0, [ta, tb], [ya, yb], { res = 360, margin = 0.6, maxSteps = 5000 } = {}) {
@@ -108,13 +109,18 @@ export function traceCurve(f, t0, y0, [ta, tb], [ya, yb], { res = 360, margin = 
     for (let i = 0; i < maxSteps; i++) {
       if (dir > 0 ? t >= tb : t <= ta) break;
       const m = f(t, y);
-      if (!Number.isFinite(m)) break;
+      // undefined, or vertical to within a hair: the solution ends here (y′ → ∞ at a
+      // singular line such as y = 0 in y′ = t/y); stepping on would jump across it
+      if (!Number.isFinite(m) || Math.abs((m * sx) / sy) > 2e3) break;
       let h = (dir * base) / Math.hypot(1, (m * sx) / sy);
       if (dir > 0 && t + h > tb) h = tb - t;
       if (dir < 0 && t + h < ta) h = ta - t;
       if (!(Math.abs(h) > 1e-14 * sx)) break;
       const y1 = step('rk4', f, t, y, h);
       if (!Number.isFinite(y1)) break;
+      // a steep slope that flips sign in one step has jumped across a singular line
+      const m1 = f(t + h, y1), steep = 20 * sy / sx;
+      if (!Number.isFinite(m1) || (m1 * m < 0 && Math.abs(m) > steep && Math.abs(m1) > steep)) break;
       t += h; y = y1;
       pts.push([t, y]);
       if (y > yb + margin * sy || y < ya - margin * sy) break;

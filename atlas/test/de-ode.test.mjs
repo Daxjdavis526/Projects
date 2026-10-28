@@ -74,6 +74,8 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
   const b = traceCurve((t, y) => y * y, 0, 1, [-2, 2], [-4, 4]);
   const end = b[b.length - 1];
   check('traceCurve y′ = y²: stops short of the blow-up at t = 1, above the window', end[0] < 1 && end[1] > 4, JSON.stringify(end));
+  const e = traceCurve((t, y) => -t / y, 0, 2, [-3, 3], [-3, 3]);
+  check('traceCurve y′ = −t/y: the half-circle ends where it turns vertical, never crossing y = 0', e.every((p) => p[1] > 0) && near(e[0][0], -2, 0.01) && near(e[e.length - 1][0], 2, 0.01), JSON.stringify([e[0], e[e.length - 1]]));
   const r = traceCurve((t, y) => 3 * Math.cbrt(y) ** 2, 0, 1, [-3, 3], [-3, 3]);
   const at = r.find((p) => p[0] >= 0.5);
   check('traceCurve y′ = 3y^(2/3) through (0, 1): the cubic (t + 1)³', near(at[1], (at[0] + 1) ** 3, 1e-5), JSON.stringify(at));

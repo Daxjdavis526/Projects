@@ -55,7 +55,7 @@ If $\vec r_u\times\vec r_v$ points to the wrong side, flip its sign. A **scalar*
         { label: 'Cylinder', x: 'cos(u)', y: 'sin(u)', z: 'v', u: [0, '2*pi'], v: [-0.8, 0.8] },
       ],
       surfaceExplain: t`Each with its normal $\vec r_u\times\vec r_v$: the disk’s points up (at zero tilt), the hemisphere’s, bowl’s and cylinder’s point away from the axis or up.`,
-      readouts: ['flux', 'area'], range: 1.3,
+      readouts: ['flux', 'area'], range: 1.3, yaw: -1.0, pitch: 0.5,
     },
     caption: t`Drag to rotate. Gold arrows show the field, lengths compressed; white arrows the chosen normals. The tint is $\vec F\cdot\hat n$ (blue along the normal, red against it). The flux is computed numerically.`,
   },
@@ -209,7 +209,7 @@ The right answer is $4\pi$. What went wrong?`,
     mcq({
       id: 'cp-mobius', difficulty: 2,
       prompt: t`Why can no flux be defined through a Möbius strip?`,
-      visual: { type: 'c3-flux', params: { F: null, surfaces: [{ label: 'Möbius strip', x: '(1 + (v/2)*cos(u/2))*cos(u)', y: '(1 + (v/2)*cos(u/2))*sin(u)', z: '(v/2)*sin(u/2)', u: [0, '2*pi'], v: [-0.5, 0.5] }], integrand: 'none', arrows: false, normalGrid: [9, 1], readouts: [], flipToggle: false, n: 24, range: 1.3, pitch: 0.7 }, caption: t`A Möbius strip with the normal $\vec r_u\times\vec r_v$ at nine points along its middle. Follow them round: they come back pointing the opposite way. Drag to rotate.` },
+      visual: { type: 'c3-flux', params: { F: null, surfaces: [{ label: 'Möbius strip', x: '(1 + (v/2)*cos(u/2))*cos(u)', y: '(1 + (v/2)*cos(u/2))*sin(u)', z: '(v/2)*sin(u/2)', u: [0, '2*pi'], v: [-0.7, 0.7] }], integrand: 'none', arrows: false, normalGrid: [9, 1], readouts: [], flipToggle: false, n: 24, range: 1.3, pitch: 0.45 }, caption: t`A Möbius strip with the normal $\vec r_u\times\vec r_v$ at nine points along its middle. Follow them round: they come back pointing the opposite way. Drag to rotate.` },
       choices: [
         'It has only one side: carry a normal once round the strip and it returns pointing the other way, so no consistent “through” exists',
         t`Its $\vec r_u\times\vec r_v$ is zero at some point`,

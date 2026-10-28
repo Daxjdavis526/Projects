@@ -140,6 +140,7 @@ export function mount(F, P) {
     }
     for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: a.dash, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
+    if (P.legend?.length) drawLegend(plot, P.legend, P.legendAt || 'tr');
     if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
   }
   F.draw(draw);
@@ -150,6 +151,8 @@ export function mount(F, P) {
 /** Node-side check used by the content tests: every expression must parse with the names it may use. */
 export function validate(P) {
   const problems = [];
+  if (P.legend && !(Array.isArray(P.legend) && P.legend.every((it) => typeof it.label === 'string'))) problems.push('graph: legend must be [{ label, color, dash, point }]');
+  if (P.legendAt && !['tl', 'tr', 'bl', 'br'].includes(P.legendAt)) problems.push('graph: legendAt must be tl, tr, bl or br');
   const keys = [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
   const drag = (P.drag || []).flatMap((d) => [d.key + 'x', d.key + 'y']);
   const base = ['x', 'x0', ...keys, ...drag];
@@ -179,6 +182,26 @@ export function validate(P) {
   for (const c of P.curves || []) { if (c.when) tryParse(c.when, [], 'curve when'); (c.domain || []).forEach((v) => tryParse(v, [], 'curve domain')); if (c.labelAt !== undefined) tryParse(c.labelAt, [], 'curve labelAt'); }
   for (const r of P.readouts || []) tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
   return problems;
+}
+
+// a legend box in a corner of the plotting area: [{ label, color, dash, point }]
+function drawLegend(plot, items, at) {
+  const g = plot.ctx, c = plot.col;
+  g.save();
+  g.font = '12px Inter, system-ui, sans-serif';
+  const w = 34 + Math.max(...items.map((it) => g.measureText(it.label).width)), lh = 18, hgt = items.length * lh + 10;
+  const x0 = at.includes('l') ? plot.L + 10 : plot.R - w - 10, y0 = at.includes('b') ? plot.B - hgt - 10 : plot.T + 10;
+  g.globalAlpha = 0.88; g.fillStyle = c.panel; g.fillRect(x0, y0, w, hgt); g.globalAlpha = 1;
+  g.strokeStyle = c.line2; g.lineWidth = 1; g.strokeRect(x0 + 0.5, y0 + 0.5, w, hgt);
+  items.forEach((it, k) => {
+    const y = y0 + 5 + lh * k + lh / 2, col = plot.color(it.color || PALETTE[k % PALETTE.length]);
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 2.2; g.setLineDash(it.dash || []);
+    if (it.point) { g.beginPath(); g.arc(x0 + 17, y, 4.5, 0, Math.PI * 2); g.fill(); }
+    else { g.beginPath(); g.moveTo(x0 + 8, y); g.lineTo(x0 + 26, y); g.stroke(); }
+    g.setLineDash([]); g.fillStyle = c.ink2; g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.fillText(it.label, x0 + 32, y);
+  });
+  g.restore();
 }
 
 function pick(obj, keys) { const o = {}; for (const k of keys) if (obj[k] !== undefined) o[k] = obj[k]; return o; }

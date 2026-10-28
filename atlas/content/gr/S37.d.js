@@ -106,15 +106,15 @@ const lightPic = {
 const fallPic = (caption) => ({
   type: 'graph',
   params: {
-    x: [0, 3.5], y: [0, 1.1], xlabel: 'proper time after crossing the horizon (units of GM/c³)', ylabel: 'r / rₛ', axesAt: 'edge',
+    x: [0, 4.1], y: [0, 1.1], xlabel: 'proper time after crossing the horizon (units of GM/c³)', ylabel: 'r / rₛ', axesAt: 'edge',
     curves: [
       { param: ['t + sin(t)', '(1 + cos(t))/2'], t: [0, 3.14159], color: 'gold', width: 2.6 },
       { param: ['(4/3)*(1 - (1 - t)^(3/2))', '1 - t'], t: [0, 1], color: 'accent', width: 2, dash: true },
     ],
     vlines: [{ x: round(Math.PI, 5), color: 'bad', label: 'π: the longest possible' }],
     points: [
-      { x: 1.05, y: 1.0, r: 0.01, color: 'gold', label: 'gold: released at rest at the horizon (E = 0)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
-      { x: 1.05, y: 0.9, r: 0.01, color: 'accent', label: 'dashed: fallen from rest far away (E = 1)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 1.45, y: 0.26, r: 0.01, color: 'gold', label: 'gold: at rest at the horizon (E = 0)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 1.45, y: 0.16, r: 0.01, color: 'accent', label: 'dashed: from rest far away (E = 1)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
     ],
   },
   caption,
@@ -124,7 +124,7 @@ const fallPic = (caption) => ({
 const pagePic = {
   type: 'graph',
   params: {
-    x: [0, 1], y: [0, 1.12], xlabel: 'time ÷ lifetime', ylabel: 'fraction of the starting value', axesAt: 'edge',
+    x: [0, 1], y: [0, 1.5], xlabel: 'time ÷ lifetime', ylabel: 'fraction of the starting value', axesAt: 'edge',
     curves: [
       { fn: '(1 - x)^(1/3)', domain: [0, 1], color: 'accent', width: 2 },
       { fn: '(1 - x)^(2/3)', domain: [0, 1], color: 'gold', width: 2.6 },
@@ -133,10 +133,10 @@ const pagePic = {
     ],
     vlines: [{ x: round(1 - 2 ** -1.5, 5), color: 'violet', label: 'Page time' }],
     points: [
-      { x: 0.02, y: 1.07, r: 0.01, color: 'accent', label: 'blue: mass', labelAlign: 'left', labelDx: 0, labelDy: 0 },
-      { x: 0.02, y: 0.97, r: 0.01, color: 'gold', label: 'gold: black hole entropy', labelAlign: 'left', labelDx: 0, labelDy: 0 },
-      { x: 0.02, y: 0.87, r: 0.01, color: 'ink3', label: 'dashed: radiation entropy, Hawking', labelAlign: 'left', labelDx: 0, labelDy: 0 },
-      { x: 0.02, y: 0.77, r: 0.01, color: 'violet', label: 'violet: radiation entropy, if information escapes', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 0.02, y: 1.43, r: 0.01, color: 'accent', label: 'blue: mass', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 0.02, y: 1.34, r: 0.01, color: 'gold', label: 'gold: black-hole entropy', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 0.02, y: 1.25, r: 0.01, color: 'ink3', label: 'dashed: radiation entropy (Hawking)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: 0.02, y: 1.16, r: 0.01, color: 'violet', label: 'violet: radiation entropy (information escapes)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
     ],
   },
   caption: t`An evaporating black hole in the simplest model: mass $\propto (1 - t/t_{\text{ev}})^{1/3}$, entropy $\propto M^2$. If Hawking's calculation were the whole story, the radiation's entropy would rise to the full starting value (dashed); if information escapes, it can never exceed what the hole still holds, and must turn over at the Page time (violet, schematic). Which happens in real black holes is open.`,
@@ -169,8 +169,8 @@ const crossPic = {
       { x: round((LC - LS) / 2, 5), y: round((LC + LS) / 2, 5), color: 'bad', r: 5, label: 'both matter here', labelDx: 10, labelDy: 18 },
       { x: -30.04, y: round(LC + 30.04, 4), color: 'accent', r: 4, label: 'electron', labelDx: 8, labelDy: 14 },
       { x: 30.3, y: round(LS + 30.3, 4), color: 'gold', r: 4, label: 'Sun', labelDx: -8, labelDy: -10, labelAlign: 'right' },
-      { x: -29, y: -50, r: 0.01, color: 'accent', label: 'blue: quantum size, ħ/(mc)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
-      { x: -29, y: -55, r: 0.01, color: 'gold', label: 'gold: gravitational size, 2Gm/c²', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: -27, y: 4.5, r: 0.01, color: 'accent', label: 'blue: quantum size, ħ/(mc)', labelAlign: 'left', labelDx: 0, labelDy: 0 },
+      { x: -27, y: -0.5, r: 0.01, color: 'gold', label: 'gold: gravitational size, 2Gm/c²', labelAlign: 'left', labelDx: 0, labelDy: 0 },
     ],
   },
   caption: t`Two sizes of an object of mass $m$: its Compton wavelength, below which quantum effects rule, and its Schwarzschild radius, the scale of its gravity. For everything ever measured one of them is utterly negligible; they meet only near $10^{-8}$ kg packed into $10^{-35}$ m — where no tested theory applies.`,

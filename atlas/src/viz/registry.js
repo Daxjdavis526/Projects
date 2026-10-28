@@ -87,7 +87,8 @@ function makeFrame(el, spec, opts) {
     },
     choice({ key, label, options, value, explain = '' }) {
       params[key] = value;
-      const btns = options.map(([v, text]) => h('button', { type: 'button', 'aria-pressed': String(v === value), onclick: () => { params[key] = v; paint(); changed(key); } }, text));
+      // option text is markup, so an option can carry math ($T_H$)
+      const btns = options.map(([v, text]) => h('button', { type: 'button', 'aria-pressed': String(v === value), onclick: () => { params[key] = v; paint(); changed(key); } }, mdi(String(text))));
       const paint = () => btns.forEach((b, i) => b.setAttribute('aria-pressed', String(options[i][0] === params[key])));
       const node = h('div.ctl', h('label', h('span', { html: renderLabel(label) })), h('div.seg', btns), explain ? h('small', mdi(explain)) : null);
       controls.append(node);

@@ -173,7 +173,7 @@ export function mount(F, P) {
     for (const { q, val } of C.quads) {
       let rgb = [70, 170, 160];
       if (tint) {
-        const t = Math.max(-1, Math.min(1, val / C.maxI)), k = Math.abs(t) ** 0.8, end = t >= 0 ? POS : NEG;
+        const t = Math.max(-1, Math.min(1, val / C.maxI)), k = Math.abs(t), end = t >= 0 ? POS : NEG;
         rgb = NEUTRAL.map((v, i) => v + (end[i] - v) * k);
       }
       view.surface(q, { color: `rgb(${rgb.map(Math.round).join(',')})`, alpha: P.alpha ?? 0.82 });
@@ -200,7 +200,7 @@ export function mount(F, P) {
           for (let i = 0; i < a; i++) for (let j = 0; j < b; j++) pts.push(pc.S(u0 + ((u1 - u0) * (i + 0.5)) / a, v0 + ((v1 - v0) * (j + 0.5)) / b));
         }
       }
-      arrowsOf(C.G, pts, (P.arrowLen ?? 0.42) * R);
+      arrowsOf(C.G, pts, (P.arrowLen ?? 0.3) * R);
     }
     // normals at a few points
     if (P.normals !== false) {

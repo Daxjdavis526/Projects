@@ -42,9 +42,9 @@ The result is often only **implicit** — a relation $H(y) = G(t) + C$ that you 
       params: {
         x: [0, 24], y: [0, 62], xlabel: 't (s)', ylabel: 'v (m/s)',
         curves: [
-          { fn: '9.8x', domain: [0, 6.3], color: 'ink3', dash: true, width: 1.6, label: 'free fall, v = gt', labelAt: 3.4, labelDx: 10, labelDy: 2 },
-          { fn: '55.2*(1 - exp(-9.8x/55.2))', color: 'violet', width: 1.8, label: 'linear drag', labelAt: 15, labelDy: 14 },
-          { fn: '55.2*tanh(9.8x/55.2)', color: 'accent', label: 'quadratic drag', labelAt: 4.3, labelDx: 12, labelDy: 12 },
+          { fn: '9.8x', domain: [0, 6.3], color: 'ink3', dash: true, width: 1.6, label: 'free fall, v = gt', labelAt: 5.6, labelDx: -112, labelDy: 0 },
+          { fn: '55.2*(1 - exp(-9.8x/55.2))', color: 'violet', width: 1.8, label: 'linear drag', labelAt: 12, labelDx: 4, labelDy: 18 },
+          { fn: '55.2*tanh(9.8x/55.2)', color: 'accent', label: 'quadratic drag', labelAt: 6.5, labelDx: 10, labelDy: 16 },
         ],
         hlines: [{ y: 55.2, label: 'vₜ = 55.2 m/s', color: 'good' }, { y: 49.7, label: '90%', color: 'ink3' }],
       },
@@ -226,11 +226,12 @@ with $C_D A/m = 0.009\ \text{m}^2/\text{kg}$ and $GM = 3.986\times10^{14}\ \text
             type: 'graph',
             params: {
               x: [-1.6, 1.6], y: [-1.25, 1.25], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
-              curves: [{ param: ['1.15*cos(t)', '1.15*sin(t)'], t: [0, 6.2832], color: 'ink3', dash: true, width: 1.4 }],
-              points: [{ x: 0, y: 0, r: 46, color: 'accent' }, { x: 0.813, y: 0.813, r: 5, color: 'gold', label: 'station', labelDx: 10, labelDy: -10 }],
-              arrows: [{ from: [0.813, 0.813], to: [0.413, 1.213], color: 'good', width: 2.2, label: 'v', labelDx: -14, labelDy: -6 }, { from: [0.813, 0.813], to: [1.013, 0.613], color: 'bad', width: 2.2, label: 'drag', labelDx: 6, labelDy: 8 }],
+              shade: [{ fn: 'sqrt(max(0, 1 - x^2))', lower: '-sqrt(max(0, 1 - x^2))', from: -1, to: 1, color: 'accent', alpha: 0.35 }],
+              curves: [{ param: ['1.066*cos(t)', '1.066*sin(t)'], t: [0, 6.2832], color: 'ink3', dash: true, width: 1.4 }],
+              points: [{ x: 0, y: 0, r: 0.01, color: 'accent', label: 'Earth', labelDx: -18, labelDy: 0 }, { x: 0.754, y: 0.754, r: 5, color: 'gold', label: 'station', labelDx: 12, labelDy: -2 }],
+              arrows: [{ from: [0.754, 0.754], to: [0.454, 1.054], color: 'good', width: 2.2, label: 'v', labelDx: -14, labelDy: -6 }, { from: [0.754, 0.754], to: [0.904, 0.604], color: 'bad', width: 2.2, label: 'drag', labelDx: 6, labelDy: 10 }],
             },
-            caption: 'A station on a nearly circular orbit, slowed by a thin drag force opposite its velocity. Drag lowers the orbit — and the station then moves faster. Not to scale: the orbit is only 6% wider than Earth.',
+            caption: 'Earth and the station’s orbit drawn to scale: about 400 km is only 6% of Earth’s radius. Drag (red, length exaggerated) acts opposite the velocity; it lowers the orbit — and the station then moves faster.',
           },
         };
       },

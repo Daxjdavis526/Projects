@@ -48,10 +48,15 @@ async function checkVisual(where, spec) {
   (function walk(v) { if (typeof v === 'string') strings.push(v); else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x); })(spec.params || {});
   const damaged = strings.find((x) => /[\t\f\v\b\r]/.test(x));
   if (damaged !== undefined) check(`${where}: visual text has no control characters`, false, `“${damaged.slice(0, 40).replace(/[\t\f\v\b\r]/g, '�')}” — a backslash was eaten by a JS string escape; use String.raw`);
+  // choice options (in any sim taking params.choices) are markup
+  for (const c of (spec.params || {}).choices || []) for (const o of c.options || []) {
+    const dmg = typeof o?.[1] === 'string' && escapeDamage(o[1]);
+    if (dmg) check(`${where}: choice option text`, false, `“${o[1]}” ${dmg}`);
+  }
   // a graph's canvas labels are plain text: TeX in them prints literally
   if (spec.type === 'graph') {
     const P = spec.params || {};
-    for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || []), ...(P.vlines || []), ...(P.hlines || []), { label: P.xlabel }, { label: P.ylabel }]) {
+    for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || []), ...(P.vlines || []), ...(P.hlines || []), ...(P.legend || []), { label: P.xlabel }, { label: P.ylabel }]) {
       const L = o && o.label;
       if (typeof L !== 'string') continue;
       // (calculator-style powers such as e^(−x/3) read well enough, and Unicode has no better form)
