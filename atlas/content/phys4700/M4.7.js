@@ -122,7 +122,7 @@ Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\lan
         const ans = Math.sin(Math.PI * nu * tps / 1000) ** 2;
         return {
           prompt: t`A two-state system — the nitrogen in an ammonia-like molecule — has $\hat H = -A\big(|L\rangle\langle R| + |R\rangle\langle L|\big)$, with $2A/h = ${nu}$ GHz and no bias. It starts in $|L\rangle$. Then $|\Psi(t)\rangle = \cos(At/\hbar)|L\rangle + i\sin(At/\hbar)|R\rangle$. What is the probability of finding it in $|R\rangle$ after $${tps}$ ps?`,
-          visual: { type: 'mp-schrodinger', params: { mode: 'bound', well: 'double', L: 2, V0: 0.6, w: 0.3, n: 1, show: 'psi', controls: false, readout: false, top: 2, panels: ['energy'], hide: ['energy'] }, caption: 'A symmetric double well with its two lowest levels, split by tunnelling. A schematic stand-in for ammonia’s inversion potential, not its true shape or scale.' },
+          visual: { type: 'mp-schrodinger', params: { mode: 'bound', well: 'double', L: 2, V0: 2, w: 0.3, n: 1, show: 'psi', controls: false, readout: false, top: 2, panels: ['energy'], hide: ['energy'] }, caption: 'A symmetric double well with its two lowest levels, split by tunnelling. A schematic stand-in for ammonia’s inversion potential, not its true shape or scale.' },
           answer: ans, tol: { rel: 0.01, abs: 0.002 },
           errors: [{ value: Math.sin(2 * Math.PI * nu * tps / 1000) ** 2, feedback: t`$A/\hbar = \pi\nu_0$, not $2\pi\nu_0$: the splitting $2A$ corresponds to $\nu_0$.` }, { value: Math.sin(Math.PI * nu * tps / 1000), feedback: 'Square the amplitude.' }].filter((e) => Math.abs(e.value - ans) > 0.02),
           hints: [t`$A/\hbar = \tfrac12\cdot2\pi\nu_0 = \pi\nu_0$.`, t`$P_R = \sin^2(\pi\nu_0t)$ with $\nu_0$ in GHz and $t$ in ns.`],
@@ -250,7 +250,7 @@ print(abs(evolve(H2, L, 0.01)[1])**2)`,
     num({
       id: 'cp-ammonia-clock', difficulty: 2, transfer: true,
       prompt: t`The first atomic clock, built at the US National Bureau of Standards in 1949, was locked to ammonia’s inversion line at $\nu_0 = 23.870$ GHz — the frequency at which the nitrogen tunnels through the plane of hydrogens. Modelling the two inversion states as $\hat H = -A\big(|L\rangle\langle R| + |R\rangle\langle L|\big)$, what is the tunnelling energy $A$, in μeV?`,
-      visual: { type: 'mp-schrodinger', params: { mode: 'bound', well: 'double', L: 2, V0: 0.6, w: 0.3, n: 2, show: 'psi', controls: false, readout: false, top: 2, panels: ['energy', 'wave'], hide: ['energy', 'axis'] }, caption: 'A schematic double well: the two lowest levels and the upper one’s wave function, odd across the barrier. Not ammonia’s real potential or scale.' },
+      visual: { type: 'mp-schrodinger', params: { mode: 'bound', well: 'double', L: 2, V0: 2, w: 0.3, n: 2, show: 'psi', controls: false, readout: false, top: 2, panels: ['energy', 'wave'], hide: ['energy', 'axis'] }, caption: 'A schematic double well: the two lowest levels and the upper one’s wave function, odd across the barrier. Not ammonia’s real potential or scale.' },
       answer: (H * NU_NH3) / 2 / QE * 1e6, units: 'μeV', tol: { rel: 0.005 },
       errors: [{ value: (H * NU_NH3) / QE * 1e6, feedback: t`The splitting $2A$ equals $h\nu_0$, so $A$ is half of $h\nu_0$.` }],
       hints: [t`The energy eigenvalues are $\mp A$: their difference is $2A = h\nu_0$.`, t`$h = ${tex(H / QE, 6)}$ eV s.`],

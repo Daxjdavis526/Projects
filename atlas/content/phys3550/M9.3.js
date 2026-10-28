@@ -87,7 +87,7 @@ export default lesson({
       hints: [t`$\{y, g\} = \partial g/\partial p_y$ for any $g$ (only the $y$ term of the sum survives).`],
       teach: t`$\{q_i, g\} = \partial g/\partial p_i$: the bracket of a coordinate with $G$ is how fast $G$ pushes that coordinate.`,
       explain: t`$\{y, L_z\} = x$ (and $\{x, L_z\} = -y$): $L_z$ pushes $(x, y)$ in the direction $(-y, x)$ — anticlockwise round the origin. Angular momentum generates rotations.`,
-      visual: { type: 'field2d', params: { P: '-y', Q: 'x', x: [-2, 2], y: [-2, 2], probe: false, readout: false }, caption: t`The velocity field $(\{x, L_z\}, \{y, L_z\}) = (-y, x)$: rotation about the origin.` },
+      visual: { type: 'field2d', params: { P: '-y', Q: 'x', x: [-2, 2], y: [-2, 2], probe: false, readout: false }, caption: t`The motion that $L_z$ generates in the $(x, y)$ plane, drawn as a flow (arrows show direction and relative size).` },
     }),
     expr({
       id: 'gravity', difficulty: 1,
@@ -141,7 +141,7 @@ export default lesson({
   checkpoint: [
     mcq({
       id: 'cp-lrl', difficulty: 3, transfer: true,
-      prompt: t`For the Kepler Hamiltonian $H = \frac{p^2}{2m} - \frac{k}{r}$ the Laplace–Runge–Lenz vector $\vec A = \vec p\times\vec L - mk\,\hat r$ (it points to periapsis) has $\{\vec A, H\} = 0$. General relativity adds a small term $\propto -1/r^3$ to the effective potential. What happens?`,
+      prompt: t`For the Kepler Hamiltonian $H = \frac{p^2}{2m} - \frac{k}{r}$, the Laplace–Runge–Lenz vector $\vec A = \vec p\times\vec L - mk\,\hat r$ (it points to periapsis) has $\{\vec A, H\} = 0$. General relativity adds a small term $\propto -1/r^3$ to the effective potential. What happens?`,
       visual: { type: 'cm3-orbit', params: { force: 'gr', delta: 0.004, L: 1, E: -0.38, turns: 6, view: 2.6, r: [0, 2.6], y: [-0.6, 0.1], panels: ['orbit'], apsides: false, sliders: [], play: false, dragE: false, readouts: [] }, caption: t`An orbit with GR's $1/r^3$ term, enormously exaggerated (units with $GM = 1$): its periapsis advances each turn.` },
       choices: [t`$\{\vec A, H\} \ne 0$: $\vec A$ is no longer conserved, so the periapsis direction turns — the perihelion precession of Mercury`, t`Nothing changes: any central force conserves $\vec A$`, t`$\vec L$ stops being conserved, so the orbit plane tilts`, t`The energy stops being conserved, so the orbit decays`],
       answer: 0,
