@@ -46,12 +46,13 @@ const conePic = ({ slider = false, chis = [0.25, 0.5, 0.75, 1, 1.25, 1.75], sphe
     curves: [
       ...chis.map((ch) => ({ fn: `${ch}*x^(2/3)`, domain: [0, 1.08], color: 'ink4', width: 1.2 })),
       { fn: '3*x^(2/3)*(1 - x^(1/3))', domain: [0, 1], color: 'gold', width: 2.8, label: 'our past light cone', labelAt: 0.62, labelDx: 8, labelDy: -12 },
-      ...(sphere ? [{ fn: '1.5*x', domain: [0, 0.83], color: 'violet', width: 1.6, dash: true, label: 'Hubble sphere c/H', labelAt: 0.16, labelDx: -10, labelDy: -10, labelAlign: 'right' }] : []),
+      ...(sphere ? [{ fn: '1.5*x', domain: [0, 0.83], color: 'violet', width: 1.6, dash: true }] : []),
       ...(slider ? [{ fn: 'X*x^(2/3)', domain: [0, 1.08], color: 'accent', width: 2.2 }] : []),
     ],
     points: [
-      { x: 1, y: 0, color: 'gold', r: 6, label: 'us, now', labelDx: -54, labelDy: -12 },
-      ...(slider ? [{ x: '(1 - X/3)^3', y: 'X*(1 - X/3)^2', color: 'accent', r: 6, label: 'light leaves', labelDx: 10, labelDy: 14 }] : []),
+      { x: 1, y: 0, color: 'gold', r: 6, label: 'us, now', labelDx: 8, labelDy: -14 },
+      ...(sphere ? [{ x: 0.03, y: 1.13, r: 0.01, color: 'violet', label: 'violet dashed: the Hubble sphere, c/H', labelDx: 0, labelDy: 0 }] : []),
+      ...(slider ? [{ x: '(1 - X/3)^3', y: 'X*(1 - X/3)^2', color: 'accent', r: 6 }] : []),
     ],
   },
   caption: caption ?? `Einstein–de Sitter model — flat, matter only, a = (t/t₀)^(2/3) — chosen because everything has a closed form; time in units of the age t₀, distance in units of ct₀. Grey: galaxies at fixed comoving distance. In our universe (Planck 2018) the light cone peaks at z ≈ ${LCDM_PEAK.z.toFixed(1)}, ${LCDM_PEAK.gly.toFixed(2)} billion light-years.`,
@@ -82,16 +83,17 @@ const closedPic = {
       { param: [`${RC}*sin(t)`, `${RC}*cos(t)`], t: [0, ALPHA], color: 'gold', width: 3.2 },
       { param: [`${round(RC * Math.sin(ALPHA), 5)}*t`, `${round(RC * Math.cos(ALPHA), 5)}`], t: [0, 1], color: 'accent', width: 2.6 },
       { param: ['0', 't'], t: [-1.75, 1.95], color: 'ink4', width: 1, dash: true },
+      { param: ['-1.131*t', '-1.131*t'], t: [0, 1], color: 'ink3', width: 1.2, dash: true },
     ],
     points: [
       { x: 0, y: RC, color: 'gold', r: 5, label: 'us', labelDx: -24, labelDy: -6 },
       { x: round(RC * Math.sin(ALPHA), 4), y: round(RC * Math.cos(ALPHA), 4), color: 'accent', r: 5 },
-      { x: 1.0, y: 1.75, r: 0.01, color: 'gold', label: 'χ: distance measured within space', labelDx: 0, labelDy: 0 },
-      { x: -2.5, y: round(RC * Math.cos(ALPHA) - 0.32, 4), r: 0.01, color: 'accent', label: 'r: circumference ÷ 2π', labelDx: 0, labelDy: 0 },
-      { x: -0.9, y: -0.35, r: 0.01, color: 'ink3', label: 'curvature radius 1/√k', labelDx: 0, labelDy: 0 },
+      { x: 1.18, y: 1.45, r: 0.01, color: 'gold', label: 'χ', labelDx: 0, labelDy: 0 },
+      { x: 0.62, y: round(RC * Math.cos(ALPHA) - 0.2, 4), r: 0.01, color: 'accent', label: 'r', labelDx: 0, labelDy: 0 },
+      { x: -2.55, y: -0.75, r: 0.01, color: 'ink3', label: 'radius 1/√k', labelDx: 0, labelDy: 0 },
     ],
   },
-  caption: 'Closed space with one dimension dropped: a circle of radius 1/√k (the real thing is a 3-sphere). A galaxy a distance χ from us along the space lies on a sphere whose circumference is 2πr — and r is smaller than χ.',
+  caption: 'Closed space with one dimension dropped: a circle of radius 1/√k (the real thing is a 3-sphere). Gold: the distance χ from us to a galaxy, measured within space. Blue: r, the circumference of the sphere through that galaxy divided by 2π — shorter than χ.',
 };
 
 // momentum against scale factor
@@ -108,7 +110,7 @@ const decay = (caption) => ({
 // a(t) for Einstein–de Sitter
 const edsCurve = (caption) => ({
   type: 'gr-friedmann',
-  params: { sliders: false, readout: false, models: [[1, 0, 'Einstein–de Sitter (matter only)', 'accent']], t: [-12, 10], a: [0, 1.8] },
+  params: { sliders: false, readout: false, models: [[1, 0, 'matter only', 'accent']], t: [-12, 10], a: [0, 1.8] },
   caption,
 });
 

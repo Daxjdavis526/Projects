@@ -47,18 +47,19 @@ means $f(x, y)$ stays as close to $L$ as you like whenever $(x, y) \ne (a, b)$ i
     tasks: [
       t`Start at $\varphi = 0^\circ$: along the $x$-axis, $f$ is $0$ all the way in.`,
       t`Turn to $45^\circ$, then to $135^\circ$: along $y = x$ the height is $1$, along $y = -x$ it is $-1$. Different paths, different limits — so $f$ has no limit at the origin.`,
-      'Turn the picture to look straight down on it: the height depends only on the direction you come from, never on how far away you are.',
+      'Look at the pale level curves on the floor: every one is a ray through the origin, so every height between −1 and 1 crowds into that one point.',
     ],
     params: {
-      surface: ['u*cos(v)', 'u*sin(v)', 'sin(2v)'], domain: [[0.06, 2], [0, 6.2832]], n: 40, pitch: 0.55, dist: 8.5,
+      z: '2x*y/(x^2 + y^2)', domain: [[-2, 2], [-2, 2]], n: 41, levels: 10, pitch: 1.0, dist: 9.5, alpha: 0.8,
       sliders: [{ key: 'phi', label: t`Direction of approach $\varphi$`, min: 0, max: 180, step: 5, value: 20, unit: '^\\circ', explain: t`The path is the line through the origin at angle $\varphi$: $y = x\tan\varphi$.` }],
       curves: [
         { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [0.06, 2.1], color: 'gold', width: 3 },
         { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', 'sin(2*phi*pi/180)'], t: [-2.1, -0.06], color: 'gold', width: 3 },
+        { param: ['t*cos(phi*pi/180)', 't*sin(phi*pi/180)', '-1.7'], t: [-2.1, 2.1], color: 'gold', width: 1.2 },
       ],
       readouts: [{ label: 'height along this line', expr: 'sin(2*phi*pi/180)', digits: 3 }],
     },
-    caption: t`The graph of $f = 2xy/(x^2 + y^2)$ over a disc of radius 2, with a pinhole at the origin, where $f$ is undefined. Each gold ray stops just short of the origin. Drag to rotate.`,
+    caption: t`The graph of $f = 2xy/(x^2 + y^2)$, undefined at the origin. The thin gold line on the floor is the path’s shadow; the pale floor lines are level curves of $f$. In polar coordinates $f = \sin 2\theta$. Drag to rotate.`,
   },
   example: {
     prompt: t`Does $\displaystyle\lim_{(x,y)\to(0,0)} \frac{x^2 y}{x^4 + y^2}$ exist?`,

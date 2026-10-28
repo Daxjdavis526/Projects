@@ -219,7 +219,7 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
     }),
     num({
       id: 'ion-engine', difficulty: 3,
-      prompt: t`An ion thruster on a deep-space probe expels xenon ions at 30 km/s. Expanding $\gamma = (1 - \beta^2)^{-1/2}$ one term further than usual, $\gamma - 1 \approx \tfrac12\beta^2 + \tfrac38\beta^4$, where $\beta = v/c$. By what fraction does Newton’s $\tfrac12 mv^2$ *underestimate* the ions’ true kinetic energy? (Give a pure number, such as 3e-9.)`,
+      prompt: t`An ion thruster on a deep-space probe expels xenon ions at 30 km/s. Expanding $\gamma = (1 - \beta^2)^{-1/2}$ one term further than usual, $\gamma - 1 \approx \tfrac12\beta^2 + \tfrac38\beta^4$, where $\beta = v/c$. By what fraction does Newton’s $\tfrac12 mv^2$ *underestimate* the ions’ true kinetic energy? (A pure number: type, for example, \`3e-9\`.)`,
       answer: 0.75 * (30e3 / C) ** 2, tol: { rel: 0.02 },
       errors: [{ value: 0.5 * (30e3 / C) ** 2, feedback: t`Divide the extra term by Newton’s: $\dfrac{\tfrac38\beta^4}{\tfrac12\beta^2} = \tfrac34\beta^2$.` }, { value: (30e3 / C), feedback: t`The correction is second order: $\tfrac34\beta^2$, not $\beta$.` }],
       hints: [t`$K = (\gamma - 1)mc^2 \approx \tfrac12 mv^2\left(1 + \tfrac34\beta^2\right)$.`, t`So the fractional correction is $\tfrac34\beta^2$, with $\beta = 3.0\times10^{4}/(2.998\times10^{8})$.`],
@@ -278,12 +278,15 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
         params: {
           x: [-4.6, 4.6], y: [-1.7, 1.7], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           shade: [
-            { fn: 'sqrt(1.1^2 - (x + 2.4)^2)', lower: '-sqrt(1.1^2 - (x + 2.4)^2)', from: -3.5, to: -1.3, color: 'violet', alpha: 0.55 },
-            { fn: 'sqrt(0.85^2 - (x - 2.6)^2)', lower: '-sqrt(0.85^2 - (x - 2.6)^2)', from: 1.75, to: 3.45, color: 'accent', alpha: 0.5 },
-            { fn: 'sqrt(0.7^2 - (x - 1.4)^2) - 0.15', lower: '-sqrt(0.7^2 - (x - 1.4)^2) - 0.15', from: 0.7, to: 2.1, color: 'teal', alpha: 0.5 },
+            { fn: 'sqrt(1.1^2 - (x + 2.6)^2)', lower: '-sqrt(1.1^2 - (x + 2.6)^2)', from: -3.7, to: -1.5, color: 'violet', alpha: 0.55 },
+            { fn: 'sqrt(0.7^2 - (x - 1)^2)', lower: '-sqrt(0.7^2 - (x - 1)^2)', from: 0.3, to: 1.7, color: 'teal', alpha: 0.5 },
+            { fn: 'sqrt(0.85^2 - (x - 2.8)^2)', lower: '-sqrt(0.85^2 - (x - 2.8)^2)', from: 1.95, to: 3.65, color: 'accent', alpha: 0.5 },
           ],
-          points: [label(-2.4, -1.1, 'uranium-235 (+ a neutron)', 'violet', -80, 16), label(2.2, -1.0, 'two lighter nuclei + 2 or 3 neutrons', 'accent', -100, 18)],
-          arrows: [{ from: [-1.1, 0], to: [0.4, 0], color: 'gold', label: '≈ 200 MeV', labelDx: -60, labelDy: -16 }],
+          points: [
+            { x: -4.3, y: 0.5, r: 4, color: 'ink2' }, { x: 0.5, y: 1.15, r: 4, color: 'ink2' }, { x: 1.9, y: 1.3, r: 4, color: 'ink2' }, { x: 3.9, y: 1.05, r: 4, color: 'ink2' },
+            label(-2.6, -1.1, 'uranium-235 + neutron', 'violet', 0, 16, 'center'), label(1.9, -1.0, 'two lighter nuclei + neutrons', 'accent', 0, 18, 'center'),
+          ],
+          arrows: [{ from: [-1.3, 0], to: [-0.1, 0], color: 'gold', label: '≈ 200 MeV', labelDx: -66, labelDy: -16 }],
         },
         caption: 'Fission of uranium-235, schematic: a neutron splits the nucleus into two lighter ones plus a few neutrons. Not to scale.',
       },
