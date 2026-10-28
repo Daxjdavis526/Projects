@@ -61,13 +61,13 @@ Weak solutions are not unique, though. The physical one obeys the **entropy cond
     num({
       id: 'rh-speed', difficulty: 1,
       gen(r) {
-        const uL = r.pick([1, 2, 3, 1.5]), uR = r.pick([-1, 0, 0.5]);
+        const uL = r.pick([1, 2, 3, 1.5]), uR = r.pick([-0.5, 0, 0.5]);
         const s = (uL + uR) / 2;
         return {
           prompt: t`A Burgers shock has $u_L = ${uL}$ m/s behind it and $u_R = ${uR}$ m/s ahead. How fast does it move?`,
           visual: burg({ profile: 'step', uL: Math.min(2, uL), uR, t: 1, tmax: 3, x: [-3, 5], fold: false, tstar: false }, 'A jump from the left value to the right one, and the shock it makes (drawn with the left value capped at 2).'),
           answer: s, units: 'm/s', tol: { rel: 0.005, abs: 0.005 },
-          errors: [{ value: uL - uR, feedback: 'That is the jump [u]; the speed is [f]/[u] = (u_L² − u_R²)/(2(u_L − u_R)).' }, { value: (uL * uL - uR * uR) / 2, feedback: t`That is the flux jump $[f]$; divide by the jump $[u]$ too.` }].filter((e) => Math.abs(e.value - s) > 0.01),
+          errors: [{ value: uL - uR, feedback: t`That is the jump $[u]$; the speed is $[f]/[u] = (u_L^2 - u_R^2)/\big(2(u_L - u_R)\big)$.` }, { value: (uL * uL - uR * uR) / 2, feedback: t`That is the flux jump $[f]$; divide by the jump $[u]$ too.` }].filter((e) => Math.abs(e.value - s) > 0.01),
           hints: [t`$s = \dfrac{f(u_L) - f(u_R)}{u_L - u_R}$ with $f = \tfrac12u^2$, which simplifies to $\tfrac12(u_L + u_R)$.`],
           teach: 'For Burgers’ equation a shock moves at the average of the values on its two sides.',
           explain: t`$s = \tfrac12(${uL} + ${uR}) = ${s}$ m/s. Check the entropy condition: $${uL} > ${s} > ${uR}$ ✓ — characteristics from both sides run into it.`,
@@ -102,7 +102,7 @@ Weak solutions are not unique, though. The physical one obeys the **entropy cond
         3: t`$u_L < u_R$ again: the faster values are ahead, so nothing catches up.`,
       },
       hints: ['A shock needs the faster values behind the slower ones.'],
-      teach: 'For Burgers, a jump down (u_L > u_R) makes a shock; a jump up makes a rarefaction fan.',
+      teach: t`For Burgers, a jump down ($u_L > u_R$) makes a shock; a jump up makes a rarefaction fan.`,
       explain: t`With $u_L = 2 > u_R = -1$ the characteristics run into each other: a shock at speed $\tfrac12(2 - 1) = \tfrac12$ m/s, satisfying $2 > \tfrac12 > -1$. The other three rise from left to right and spread out.`,
     }),
     num({
@@ -250,7 +250,7 @@ print(xc, xn)`,
       id: 'cp-entropy', difficulty: 2,
       prompt: t`For the jump $u_L = 0$, $u_R = 1$, both a jump moving at speed $\tfrac12$ and the fan $u = x/t$ are weak solutions of Burgers’ equation. Why is the fan the physical one?`,
       visual: burg({ profile: 'step', uL: 0, uR: 1, t: 2, tmax: 3, x: [-3, 4], fold: false, tstar: false }, 'The fan solution of the jump from 0 to 1: characteristics (teal) spread out from the origin.'),
-      choices: ['A jump there would have characteristics leaving it on both sides (uL < s < uR), violating the entropy condition; the fan is what a small viscosity gives as it goes to zero', 'The jump violates the Rankine–Hugoniot condition', 'The fan conserves ∫u dx and the jump does not', 'Both are physical; experiments decide case by case'],
+      choices: [t`A jump there would have characteristics leaving it on both sides ($u_L < s < u_R$), violating the entropy condition; the fan is what a small viscosity gives as it goes to zero`, 'The jump violates the Rankine–Hugoniot condition', 'The fan conserves ∫u dx and the jump does not', 'Both are physical; experiments decide case by case'],
       answer: 0,
       why: {
         1: t`The jump at speed $\tfrac12$ satisfies Rankine–Hugoniot exactly: $\tfrac12(0 + 1) = \tfrac12$.`,
@@ -258,7 +258,7 @@ print(xc, xn)`,
         3: 'The mathematics picks one: the entropy condition, which is the vanishing-viscosity limit, selects exactly one weak solution.',
       },
       hints: ['Draw the characteristics on each side of the would-be shock: do they run into it or away from it?'],
-      teach: 'Weak solutions need an extra rule, the entropy condition (u_L > s > u_R for Burgers), to be unique and physical.',
+      teach: t`Weak solutions need an extra rule, the entropy condition ($u_L > s > u_R$ for Burgers), to be unique and physical.`,
       explain: t`An “expansion shock” would create information out of nothing — characteristics would emerge from it rather than end on it. Adding a tiny viscosity, $u_t + uu_x = \nu u_{xx}$, and letting $\nu \to 0$ always gives the fan. In gas dynamics the same rule says entropy can only rise across a shock: compression shocks exist, expansion shocks do not.`,
     }),
   ],
