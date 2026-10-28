@@ -86,7 +86,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
         const lam = r.pick([633, 589]), N = r.pick([150, 400, 1200, 2500]);
         const key = (N * lam) / 2 / 1000;
         return {
-          prompt: t`Using ${lam} nm light, you count ${N.toLocaleString('en-US').replace(',', ' ')} fringes passing as a mirror on a machine part moves. How far did it move, in micrometres?`,
+          prompt: t`Using ${lam} nm light, you count ${N} fringes passing as a mirror on a machine part moves. How far did it move, in micrometres?`,
           answer: key, units: 'µm', tol: { rel: 0.005 },
           errors: [{ value: key * 2, feedback: t`Divide by 2: each fringe is half a wavelength of mirror motion, $\Delta L = N\lambda/2$.` }],
           hints: [t`$\Delta L = N\lambda/2$.`],
@@ -107,7 +107,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
           prompt: t`To measure the wavelength of ${src}, you move a Michelson interferometer's mirror ${dL} mm with a calibrated screw and count ${N} fringes. What is the wavelength, in nm?`,
           answer: key, units: 'nm', tol: { rel: 0.005 },
           errors: [{ value: key / 2, feedback: t`The path changes by $2\Delta L$: $\lambda = 2\Delta L/N$.` }],
-          hints: [t`$\lambda = 2\Delta L/N$.`, 'Convert 0.1 mm to metres (10⁻⁴ m) before dividing, then express in nm.'],
+          hints: [t`$\lambda = 2\Delta L/N$.`, t`Convert ${dL} mm to metres, $${dL}\times10^{-3}$ m, before dividing; then express the answer in nm.`],
           teach: 'Run the fringe count backwards to measure a wavelength: λ = 2ΔL/N.',
           explain: t`$\lambda = \dfrac{2(${dL}\times10^{-3}\ \text{m})}{${N}} = ${tn(key)}$ nm.`,
           visual: michelsonPic({ lambda: Math.round(lam0), dL: 600 }, 'The interferometer, its rings and the detector’s brightness against mirror movement.'),
@@ -117,7 +117,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
     num({
       id: 'gas-cell', difficulty: 3,
       gen(r) {
-        const Lc = r.pick([4, 5, 10]), N = r.pick([37, 46, 92]);
+        const [Lc, N] = r.pick([[4, 37], [5, 46], [10, 92]]);
         const lam = 633e-9;
         const key = (N * lam) / (2 * Lc * 1e-2);
         return {
@@ -197,7 +197,7 @@ Michelson used it to measure the metre in wavelengths of light, and with Morley 
       hints: ['How much does the output brightness change for a tiny fraction of a fringe, near a dark fringe?', 'More photons make a small change in brightness easier to measure.'],
       teach: 'An interferometer can measure a tiny fraction of a fringe by measuring brightness precisely, rather than counting whole fringes.',
       explain: 'Near a dark fringe, the output power changes in proportion to the arm-length difference, so a billionth of a fringe gives a billionth-scale change in power. With hundreds of kilowatts circulating in the arms, enough photons arrive to measure that above the photon counting noise; cavities multiply the signal and the mirrors are isolated from vibrations. That is how GW150914’s 4×10⁻¹⁸ m stretch was seen.',
-      visual: michelsonPic({ lambda: 633, dL: 316 }, 'An interferometer near a dark fringe at its centre: there the output brightness is most sensitive to tiny shifts (a laboratory Michelson, not LIGO’s scale).'),
+      visual: michelsonPic({ lambda: 633, dL: 150 }, 'An interferometer near a dark fringe at its centre: there the output brightness is most sensitive to tiny shifts (a laboratory Michelson, not LIGO’s scale).'),
     }),
   ],
   sources: [

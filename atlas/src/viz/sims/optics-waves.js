@@ -29,7 +29,8 @@
 //       // film:      t 300 (nm), nFilm 1.33, nTop 1, nSub 1 (1: a free film in air), angle 0 (°), design null (nm: mark a
 //       //            design wavelength), strip true (Newton's scale); hide: colour, spectrum, flips
 //       // michelson: dL 0 (nm, the mirror's displacement), lambda 633 (nm), d0 400 (µm, the arms' starting difference,
-//       //            which sets how fine the rings are), maxL 2000 (nm, the slider's range), play true
+//       //            which sets how fine the rings are), maxL 2000 (nm, the slider's range);
+//       //            Play drives the mirror (never on its own)
 //       // airy:      preset 'hubble' | 'jwst' | 'eye' | 'eht' | 'custom', D (m), lambda (m), sep (rad: the stars' separation),
 //       //            zoom 1 (magnify the picture 1, 4 or 16 times), single false (one star only)
 //       // polar:     n 2 (polarizers), angles [0, 45, 90] (° from vertical), input 'unpolarized' or an angle (°)
@@ -43,7 +44,7 @@ export const defaults = { mode: 'slits', controls: true, readout: true, labels: 
 const MODE_DEFAULTS = {
   slits: { N: 2, a: 20, d: 100, lambda: 633, L: 1, axis: 'y', range: null, light: 'laser', phasors: true, envelope: true, marks: null, probe: null },
   film: { t: 300, nFilm: 1.33, nTop: 1, nSub: 1, angle: 0, design: null, strip: true },
-  michelson: { dL: 0, lambda: 633, d0: 400, maxL: 2000, play: true },
+  michelson: { dL: 0, lambda: 633, d0: 400, maxL: 2000 },
   airy: { preset: 'hubble', D: null, lambda: null, sep: null, zoom: 1, single: false },
   polar: { n: 2, angles: [0, 45, 90], input: 'unpolarized' },
 };
@@ -100,8 +101,6 @@ export async function mount(F, P0) {
   if (mode === 'slits' && P0.axis === undefined && P.N >= 5) P.axis = 'angle';
   const hide = new Set(P.hide || []);
   Object.assign(F.params, P);
-  let reduced = false;
-  try { reduced = (await import('../../ui/state.js')).reducedMotion(); } catch { reduced = true; }
   const shown = (k) => P.controls === true || (Array.isArray(P.controls) && P.controls.includes(k));
   const slider = (o) => (shown(o.key) ? F.slider(o) : ((F.params[o.key] = o.value), null));
   const choice = (o) => (shown(o.key) ? F.choice(o) : ((F.params[o.key] = o.value), null));
@@ -159,7 +158,6 @@ export async function mount(F, P0) {
       S.running = !S.running; playBtn.textContent = S.running ? 'Pause' : 'Play';
       if (S.running) anim.start();
     } });
-    if (P.play && !reduced && mode === 'michelson' && false) { S.running = true; playBtn.textContent = 'Pause'; }
   }
   F.onChange((k) => {
     if (mode === 'airy' && k === 'preset') {

@@ -125,7 +125,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
         3: t`At the origin $f_{xx} = f_{yy} = 0$ and the twist $f_{xy} = -3$ makes $D = -9$, a saddle; $(1, 1)$ has $D = 27 > 0$.`,
       },
       hints: [t`$f_{xx} = 6x$, $f_{yy} = 6y$ and $f_{xy} = -3$.`, t`At $(0, 0)$: $D = 0 - 9$. At $(1, 1)$: $D = 36 - 9$, with $f_{xx} = 6$.`],
-      teach: 'Classify each critical point separately with D = f_xx f_yy − f_xy² evaluated there.',
+      teach: t`Classify each critical point separately, with $D = f_{xx}f_{yy} - f_{xy}^2$ evaluated there.`,
       explain: t`At $(0, 0)$: $D = -9 < 0$, a saddle. At $(1, 1)$: $D = 27 > 0$ and $f_{xx} = 6 > 0$, a local minimum with $f(1, 1) = -1$. One line through a point can never settle what it is: the diagonal makes the saddle look like a maximum.`,
     }),
     mcq({
@@ -145,7 +145,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
         3: t`A nonzero twist is no problem: the test is inconclusive only when $D = 0$.`,
       },
       hints: ['Compute D, not just the two curvatures along the axes.', t`Try the diagonal $y = -x$.`],
-      teach: 'A big enough twist f_xy turns a would-be bowl into a saddle: always check the full D.',
+      teach: t`A big enough twist $f_{xy}$ turns a would-be bowl into a saddle: always check the full $D$.`,
       explain: t`$D = f_{xx}f_{yy} - f_{xy}^2 = 4 - 9 = -5 < 0$: a saddle. Along $y = -x$, $f = x^2 - 3x^2 + x^2 = -x^2$, so the surface falls that way. The twist matters as much as the curvatures along the axes.`,
     }),
     num({
@@ -158,7 +158,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
           prompt: t`Find the $x$-coordinate of the critical point of $f(x, y) = x^2 + xy + y^2 - ${a}x ${b < 0 ? '+' : '-'} ${Math.abs(b)}y$. (It turns out to be a minimum.)`,
           visual: { type: 'c3-contour', params: { f: `x^2 + x*y + y^2 - ${a}*x - ${b}*y`, x: [-3, 5], y: [-3.5, 3.5], levels: 10, labels: false }, caption: t`Level curves of $f$ (unlabelled): nested tilted ellipses around one point.` },
           answer: x0, tol: { rel: 1e-3, abs: 1e-6 },
-          errors: [{ value: y0, feedback: t`That is the $y$-coordinate. Solve $2x + y = ${a}$ and $x + 2y = ${b}$ for $x$.` }],
+          errors: x0 === y0 ? [] : [{ value: y0, feedback: t`That is the $y$-coordinate. Solve $2x + y = ${a}$ and $x + 2y = ${b}$ for $x$.` }],
           hints: [t`Set both partials to zero: $f_x = 2x + y - ${a} = 0$ and $f_y = x + 2y ${b < 0 ? '+' : '-'} ${Math.abs(b)} = 0$.`, t`Double the first equation and subtract the second: $3x = ${2 * a - b}$.`],
           teach: 'Critical points solve ∇f = 0: one equation per variable.',
           explain: t`From $2x + y = ${a}$ and $x + 2y = ${b}$: $x = \tfrac{2(${a}) - (${b})}{3} = ${nice(x0)}$ and $y = \tfrac{2(${b}) - ${a}}{3} = ${nice(y0)}$. With $f_{xx} = f_{yy} = 2$ and $f_{xy} = 1$, $D = 3 > 0$: a minimum.`,
@@ -199,7 +199,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
         3: t`$D = f_{xx}f_{yy} - f_{xy}^2$: the twist is subtracted.`,
       },
       hints: ['Which number does the second-derivative test look at first?', t`Compute $D = f_{xx}f_{yy} - f_{xy}^2$.`],
-      teach: 'Check the sign of D first: if D < 0 it is a saddle, and f_xx is not consulted.',
+      teach: t`Check the sign of $D$ first: if $D < 0$ it is a saddle, and $f_{xx}$ is not consulted.`,
       explain: t`$D = 4 - 9 = -5 < 0$, so the point is a saddle: upward along $x$, but downward along some other direction. Only when $D > 0$ does the sign of $f_{xx}$ pick minimum or maximum.`,
     }),
     mcq({
@@ -262,7 +262,7 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
       },
       hints: [t`Multiply $\Phi_{xx}$ and $\Phi_{yy}$: what sign does $D$ have?`, 'Along which direction does a small displacement run downhill?'],
       teach: 'A saddle of the effective potential is an unstable equilibrium along its falling direction: L1, L2 and L3 need station-keeping.',
-      explain: t`$D < 0$: L2 is a saddle. Along the Sun–Earth line $\Phi$ falls away on both sides, so a small drift grows over a few weeks; Webb follows a halo orbit around L2 and makes small station-keeping burns about every three weeks. The same is true at Sun–Earth L1, where the solar observatory SOHO works.`,
+      explain: t`$D < 0$: L2 is a saddle. Along the Sun–Earth line $\Phi$ falls away on both sides, so a small drift grows over a few weeks; Webb follows a looping halo orbit around L2 and makes small station-keeping burns every few weeks. The same is true at Sun–Earth L1, where the solar observatory SOHO works.`,
     }),
     mcq({
       id: 'cp-trojans', difficulty: 3, transfer: true,
@@ -287,6 +287,6 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
   ],
   sources: [
     { label: 'OpenStax Calculus Vol. 3, §4.7 Maxima/minima problems', url: 'https://openstax.org/books/calculus-volume-3/pages/4-7-maxima-minima-problems' },
-    { label: 'NASA: What is a Lagrange point?', url: 'https://science.nasa.gov/resource/what-is-a-lagrange-point/' },
+    { label: 'Lagrange point (overview, with the stability of L4 and L5)', url: 'https://en.wikipedia.org/wiki/Lagrange_point' },
   ],
 });
