@@ -18,7 +18,7 @@ function probePic(sig, wd, w, caption) {
   return {
     type: 'graph',
     params: {
-      x: [-sig - 2.5, 2.5], y: [-ymax, ymax], equal: true, xlabel: 'Re s', ylabel: 'Im s', aspect: 'wide',
+      x: [-sig - 2.5, 2.5], y: [-ymax, ymax], equal: true, xlabel: 'Re s', ylabel: 'Im s',
       curves: [
         { param: [`${-sig}*t`, `${w} + (${wd - w})*t`], t: [0, 1], color: 'gold', dash: true, width: 1.6 },
         { param: [`${-sig}*t`, `${w} - (${wd + w})*t`], t: [0, 1], color: 'gold', dash: true, width: 1.6 },
@@ -68,7 +68,7 @@ Read the input as a stream of small kicks $f(\tau)\,d\tau$; each is answered by 
         { label: 'A pole and a pair', poles: [{ re: -1.5 }, { re: -0.3, im: 1.6 }] },
       ],
       responses: ['impulse', 'step'], terms: 'toggle', w: 1, wmax: 5, T: 12,
-      window: { re: [-4, 1], im: [-3, 3] },
+      window: { re: [-7.5, 2.5], im: [-3, 3] },
     },
     caption: t`$H(s) = K/\big((s - p_1)\cdots(s - p_n)\big)$ with $K$ chosen so that $H(0) = 1$: a constant input passes unchanged, like a spring’s static deflection in units of $F/k$. Responses are exact; the system is ideal, linear and time-invariant.`,
   },
@@ -123,7 +123,7 @@ Read the input as a stream of small kicks $f(\tau)\,d\tau$; each is answered by 
       hints: [t`A pair $\sigma \pm i\omega$ gives terms $e^{\sigma t}\cos\omega t$ and $e^{\sigma t}\sin\omega t$.`, t`Here $\sigma = -0.1$ s⁻¹ and $\omega = 3$ rad/s: how long does $e^{-0.1t}$ take to halve?`],
       teach: 'The imaginary part of a pole is the angular frequency of its term, the real part its growth or decay rate.',
       explain: t`$h \propto e^{-0.1t}\sin 3t$: a 2.1 s period inside an envelope that halves every $\ln 2/0.1 \approx 6.9$ s — about three cycles per halving. Poles this close to the imaginary axis mean light damping: $\zeta = 0.1/\sqrt{0.01 + 9} \approx 0.033$.`,
-      visual: polePic([{ re: -0.1, im: 3 }], t`The two poles of $H(s)$, at $-0.1 \pm 3i$.`, { window: { re: [-3, 1], im: [-3.8, 3.8] } }),
+      visual: polePic([{ re: -0.1, im: 3 }], t`The two poles of $H(s)$, at $-0.1 \pm 3i$.`),
     }),
     expr({
       id: 'convolve', difficulty: 2,
@@ -140,11 +140,11 @@ Read the input as a stream of small kicks $f(\tau)\,d\tau$; each is answered by 
           hints: [t`Pull out what does not depend on $\tau$: $e^{-${b}t}\displaystyle\int_0^t e^{(${b} - ${a})\tau}\,d\tau$.`, t`Or use the convolution theorem: $\dfrac{1}{s + ${a}}\cdot\dfrac{1}{s + ${b}}$, then partial fractions.`],
           teach: t`Convolve by integrating over $\tau$ with $t$ held fixed — or multiply the transforms and invert.`,
           explain: t`$e^{-${b}t}\cdot\dfrac{e^{${b - a}t} - 1}{${b - a}} = \dfrac{e^{-${co(a)}t} - e^{-${b}t}}{${b - a}}$. Check: $\dfrac{1}{(s + ${a})(s + ${b})} = \dfrac{1}{${b - a}}\left(\dfrac{1}{s + ${a}} - \dfrac{1}{s + ${b}}\right)$ ✓. Physically, two first-order stages in series — a thermocouple behind a filter.`,
-          visual: fpic(`exp(-${a}x)*exp(-${b}*(1.5 - x))`, [0, 2.5], [0, 1.15], t`The convolution at $t = 1.5$, as a picture: $e^{-${co(a)}\tau}$ (dashed), the flipped and slid $e^{-${b}(1.5 - \tau)}$ (gold), and their product (blue), whose shaded area is the value at $t = 1.5$.`, {
-            xlabel: 'τ', ylabel: '', domain: [0, 1.5],
-            curves: [{ fn: `exp(-${a}x)`, color: 'ink3', dash: true, width: 1.6 }, { fn: `exp(-${b}*(1.5 - x))`, color: 'gold', width: 1.8, domain: [0, 1.5] }],
-            shade: [{ fn: `exp(-${a}x)*exp(-${b}*(1.5 - x))`, from: 0, to: 1.5, color: 'accent', alpha: 0.25 }],
-            vlines: [{ x: 1.5, label: 'τ = t', color: 'gold' }],
+          visual: fpic(`exp(-${a}x)*exp(-${b}*(0.6 - x))`, [0, 1.5], [0, 1.08], t`The convolution at $t = 0.6$, as a picture: $e^{-${co(a)}\tau}$ (dashed), the flipped and slid $e^{-${b}(0.6 - \tau)}$ (gold), and their product (blue), whose shaded area is the value at $t = 0.6$.`, {
+            xlabel: 'τ', ylabel: '', domain: [0, 0.6],
+            curves: [{ fn: `exp(-${a}x)`, color: 'ink3', dash: true, width: 1.6 }, { fn: `exp(-${b}*(0.6 - x))`, color: 'gold', width: 1.8, domain: [0, 0.6] }],
+            shade: [{ fn: `exp(-${a}x)*exp(-${b}*(0.6 - x))`, from: 0, to: 0.6, color: 'accent', alpha: 0.25 }],
+            vlines: [{ x: 0.6, label: 'τ = t', color: 'gold' }],
           }),
         };
       },

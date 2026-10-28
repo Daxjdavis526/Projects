@@ -74,7 +74,7 @@ A subspace has many bases, but every one of them has the same number of vectors 
         { key: 'c3', label: t`Weight $c_3$ on $\mathbf b_3$`, min: -3, max: 3, step: 0.5, value: 0, explain: t`How much of $\mathbf b_3$ (used only when all three are in use).` },
       ],
       constants: {},
-      planes: [{ normal: [1, 1, 1], d: 0, size: 2.8, color: 'violet', alpha: 0.16 }],
+      planes: [{ normal: [1, 1, 1], d: 0, size: 3.8, color: 'violet', alpha: 0.16 }],
       vectors: [
         { to: [1, -1, 0], color: 'accent', label: t`\mathbf b_1` },
         { to: [1, 0, -1], color: 'warn', label: t`\mathbf b_2`, when: 'step(set - 1.5)' },

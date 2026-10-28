@@ -18,6 +18,7 @@ function sph3(r, thDeg, phDeg, { k = 0.5, caption, extra = [], basis = true } = 
     type: 'calc-vectors3d',
     params: {
       range: Math.max(2, Math.ceil(r + 0.6)),
+      yaw: r6((phDeg + 45) * DEG), pitch: 0.42,    // look at P obliquely, so ∂r and ∂φ point opposite ways on screen
       spheres: [{ centre: [0, 0, 0], radius: r6(r), color: 'ink4' }],
       curves: [
         { param: [`${r6(r * st)}*cos(t)`, `${r6(r * st)}*sin(t)`, `${r6(r * ct)}`], t: [0, 6.2832], color: 'teal' },
@@ -64,11 +65,11 @@ $\partial_r$ is one unit long and points outward; $\partial_\theta$ points down 
       t`Change $\phi$ alone: all three arrows turn about the $z$ axis, though none of their lengths changes.`,
     ],
     params: {
-      range: 3,
+      range: 3, yaw: r6(125 * DEG), pitch: 0.42,
       sliders: [
         { key: 'rr', label: '$r$', min: 0.5, max: 2.5, step: 0.1, value: 2, explain: 'Distance from the origin.' },
         { key: 'th', label: t`$\theta$ (from $+z$)`, min: 0, max: 180, step: 5, value: 60, unit: '^\\circ', explain: t`The polar angle: $0^\circ$ is the north pole, $90^\circ$ the equator.` },
-        { key: 'ph', label: t`$\phi$ (azimuth)`, min: 0, max: 360, step: 5, value: 40, unit: '^\\circ', explain: t`Around the $z$ axis, from the $+x$ axis.` },
+        { key: 'ph', label: t`$\phi$ (azimuth)`, min: 0, max: 360, step: 5, value: 80, unit: '^\\circ', explain: t`Around the $z$ axis, from the $+x$ axis.` },
       ],
       spheres: [{ centre: [0, 0, 0], radius: 'rr', color: 'ink4' }],
       curves: [

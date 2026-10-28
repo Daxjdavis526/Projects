@@ -133,7 +133,7 @@ export function tableDots({ marks = {}, symbols = [], rows = [], caption } = {})
     const { row, col } = position(Z), y = row === 8 ? -7.7 : -row;
     const m = marks[Z];
     points.push(m ? { x: col, y, r: 7.5, color: m } : { x: col, y, r: 2.6, color: 'ink4' });
-    if (m || symbols.includes(Z)) points.push(label(col, y, symbol(Z), m || 'ink2', 0, -13, 'center'));
+    if (m || symbols.includes(Z)) points.push(label(col, y, symbol(Z), m || 'ink2', 8, -11, 'left'));
   }
   for (const p of rows) curves.push(seg(0.5, -p - 0.42, 18.5, -p - 0.42, 'gold', 1.6, true));
   return {

@@ -44,9 +44,9 @@ const herm = (n) => {
 /** Four energy ladders side by side; one is the oscillator’s. */
 const ladders = (() => {
   const cols = [
-    { x: 0.2, E: [0.5, 1.5, 2.5, 3.5, 4.5], name: 'P' },
+    { x: 0.2, E: [0.3, 1.2, 2.7, 4.8], name: 'P' },
     { x: 1.4, E: [0, 1, 2, 3, 4], name: 'Q' },
-    { x: 2.6, E: [0.3, 1.2, 2.7, 4.8], name: 'R' },
+    { x: 2.6, E: [0.5, 1.5, 2.5, 3.5, 4.5], name: 'R' },
     { x: 3.8, E: [1, 2, 3, 4, 5], name: 'S' },
   ];
   const curves = [seg(0, 0, 4.8, 0, 'ink2', 2.2)], points = [];
@@ -233,7 +233,7 @@ and the lowest sits half a quantum above the bottom: the **zero-point energy** $
           errors: [{ value: M.mu * U_KG * (C * 100 * fund) ** 2, feedback: t`$\omega = 2\pi c\tilde\nu$ — the $2\pi$ turns the wavenumber’s frequency into an angular frequency.` }],
           hints: [t`$\omega = 2\pi c\tilde\nu$, with $c = 3.00\times10^{10}$ cm/s.`, t`$k = \mu\omega^2$, with $\mu$ in kg.`],
           teach: 'An infrared line gives ω directly, and k = μω² follows.',
-          explain: t`$\omega = 2\pi(3.00\times10^{10})(${fmt(fund, 6)}) = ${tex(om, 3)}$ rad/s and $k = \mu\omega^2 = ${fmt(k, 3)}$ N/m. (Using the observed line, which anharmonicity lowers by about 3%, gives a slightly softer spring than the true curvature.)`,
+          explain: t`$\omega = 2\pi(3.00\times10^{10})(${fmt(fund, 6)}) = ${tex(om, 3)}$ rad/s and $k = \mu\omega^2 = ${fmt(k, 3)}$ N/m. (Anharmonicity puts the observed line 3–4% below the harmonic value, so this spring is slightly softer than the bond’s true curvature at the bottom.)`,
           visual: well({ well: 'harmonic', hw: 0.36, n: 1, panels: ['energy'], hide: ['energy', 'scale'] }, 'The vibrational levels; the absorbed photon lifts the molecule from the lowest level to the next (gold).'),
         };
       },
@@ -242,21 +242,21 @@ and the lowest sits half a quantum above the bottom: the **zero-point energy** $
       id: 'cp-ladders', difficulty: 2,
       prompt: t`Which ladder of energy levels belongs to a quantum harmonic oscillator?`,
       choices: ['P', 'Q', 'R', 'S'],
-      answer: 0,
+      answer: 2,
       fixedOrder: true,
       why: {
+        0: 'Steps that widen with n belong to a box-like well, not a parabola.',
         1: 'Equal steps, but starting at the bottom: that leaves out the zero-point energy ½ħω.',
-        2: 'Steps that widen with n belong to a box-like well, not a parabola.',
         3: 'Equal steps, but the first is a whole quantum up. The ground state is only half a step above the bottom.',
       },
       hints: ['Two things to check: equal spacing, and where the lowest level sits.'],
       teach: 'An oscillator’s ladder has equal steps ħω, starting ½ħω above the bottom.',
-      explain: t`P: equally spaced levels with the lowest at half a step, $E_n = (n + \tfrac12)\hbar\omega$. R’s widening steps are an infinite-well pattern ($\propto n^2$).`,
+      explain: t`R: equally spaced levels with the lowest at half a step, $E_n = (n + \tfrac12)\hbar\omega$. P’s widening steps are an infinite-well pattern ($\propto n^2$).`,
       visual: ladders,
     }),
     num({
       id: 'cp-ligo', difficulty: 3, transfer: true,
-      prompt: t`In 2021 LIGO physicists cooled the motion of the Hanford detector’s 40 kg mirrors — the differential mode of the four, which acts like a single oscillator of mass 10 kg swinging at 77.6 Hz — almost to its quantum ground state. In the ground state, what is the spread (standard deviation) of that oscillator’s position, $\Delta x = \sqrt{\hbar/2m\omega}$, in metres?`,
+      prompt: t`In 2021 LIGO physicists cooled the motion of one detector’s four 40 kg mirrors — their differential mode, which acts like a single oscillator of mass 10 kg swinging at 77.6 Hz — almost to its quantum ground state. In the ground state, what is the spread (standard deviation) of that oscillator’s position, $\Delta x = \sqrt{\hbar/2m\omega}$, in metres?`,
       answer: Math.sqrt(HBAR / (2 * 10 * 2 * Math.PI * 77.6)), units: 'm', tol: { rel: 0.01 },
       errors: [{ value: Math.sqrt(HBAR / (2 * 10 * 77.6)), feedback: t`Use the angular frequency $\omega = 2\pi f$, not $f$.` }],
       hints: [t`$\omega = 2\pi(77.6\ \text{Hz}) = 488$ rad/s.`, t`$\Delta x = \sqrt{1.055\times10^{-34}/(2\times10\times488)}$ m.`],

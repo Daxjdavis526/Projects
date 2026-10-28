@@ -90,7 +90,7 @@ with $M$ the diagonal matrix of masses and $K$ the **stiffness matrix**. Look fo
       },
       hints: ['In which mode is the spring stretched or squeezed?', 'More restoring force for the same displacement means a stiffer oscillator and a higher frequency.'],
       teach: 'A coupling spring raises only the frequency of the modes that stretch it; a mode in which it keeps its length runs at the uncoupled frequency.',
-      explain: t`In the in-phase mode the spring keeps its length, so the frequency is the single pendulum’s $\sqrt{g/L}$. In the anti-phase mode the spring adds a restoring force, so $\omega^2 = g/L + 2k_c/m$ — higher. This pair is the classic demonstration of beats: start one pendulum alone and the swing passes back and forth between them.`,
+      explain: t`In the in-phase mode the spring keeps its length, so the frequency is the single pendulum’s $\sqrt{g/L}$. In the anti-phase mode the spring adds a restoring force, so $\omega^2$ exceeds $g/L$ (by $2k_c/m$ if the spring joins the bobs themselves) — a higher frequency. This pair is the classic demonstration of beats: start one pendulum alone and the swing passes back and forth between them.`,
       visual: {
         type: 'graph',
         params: {

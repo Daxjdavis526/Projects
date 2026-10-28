@@ -123,6 +123,11 @@ export function gradeNumeric(item, input) {
     } else if (!sameDims(q.unit.dims, expectedUnit.dims)) {
       return no(`That unit measures ${describeDims(q.unit.dims)}, but the answer is ${describeDims(expectedUnit.dims)}.`, { unitError: true });
     } else {
+      // Hz and rad/s share a dimension but differ by 2π: cycles are not radians
+      const cyc = (u) => /Hz/.test(u || ''), ang = (u) => /rad|rpm/.test(u || '');
+      if ((cyc(q.unitText) && ang(item.units)) || (ang(q.unitText) && cyc(item.units))) {
+        return no('Hz counts cycles per second and rad/s counts radians: they differ by a factor of 2π (ω = 2πf). Give the answer in the unit asked for.', { unitError: true });
+      }
       value = q.si / expectedUnit.factor;
       // a temperature, not a difference: °C and K differ by an offset as well as a name
       // (an item marked difference: true asks for a change, where they are the same number)

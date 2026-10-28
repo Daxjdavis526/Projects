@@ -269,7 +269,7 @@ export function mount(F, P0) {
       }
       if (M.kind === 'finite') pE.text(`V₀ = ${f3(M.V0)} eV`, x0 + 0.02 * (x1 - x0), M.V0, { color: 'ink2', size: fs - 1, dy: -10 });
       if (M.kind === 'double' && M.V0 < Emax) pE.text(`barrier ${f3(M.V0)} eV`, M.L / 2, M.V0, { color: 'ink2', size: fs - 1, align: 'center', dy: -10 });
-      if (M.kind === 'harmonic') pE.text('V = ½mω²x²', x1 - 0.02 * (x1 - x0), Emax * 0.94, { color: 'ink2', size: fs - 1, align: 'right' });
+      if (M.kind === 'harmonic') pE.text('V = ½mω²x²', x0 + 0.02 * (x1 - x0), Emax * 0.94, { color: 'ink2', size: fs - 1 });
     }
     // the wave
     if (want.includes('wave')) {
@@ -335,7 +335,8 @@ export function mount(F, P0) {
         const E = Esel(n);
         if (M.kind === 'harmonic') { const A = M.b * Math.sqrt((2 * E) / M.hw); pW.fn((x) => S.oscClassical(x, A), { color: 'gold', width: 1.8, dash: [6, 4], domain: [-A * 0.9995, A * 0.9995], samples: 900 }); }
         else pW.line(0, 1 / M.L, M.L, 1 / M.L, { color: 'gold', width: 1.8, dash: [6, 4] });
-        pW.text('classical', M.kind === 'harmonic' ? 0 : M.L / 2, M.kind === 'harmonic' ? Math.min(yr[1] * 0.9, 1.6 / (Math.PI * M.b * Math.sqrt((2 * E) / M.hw))) : 1 / M.L, { color: 'gold', size: fs - 1, align: 'center', dy: -10 });
+        if (M.kind === 'harmonic') { const A = M.b * Math.sqrt((2 * E) / M.hw), xl = 0.8 * A; pW.text('classical', xl, Math.min(yr[1] * 0.92, S.oscClassical(xl, A)), { color: 'gold', size: fs - 1, dx: 8 }); }
+        else pW.text('classical', M.L / 2, 1 / M.L, { color: 'gold', size: fs - 1, align: 'center', dy: -10 });
       }
       // ⟨x⟩ of the superposition
       let mom = null;
@@ -450,7 +451,7 @@ export function mount(F, P0) {
       [`$E_{${n}}$`, q('energy', `${texNum(E)}\\ \\text{eV}`)],
       M.kind === 'finite' ? ['bound states', q('count', String(M.levels.length))] : null,
       Pwin !== null ? ['$P(a<x<b)$', q('prob', Pwin.toFixed(3))] : null,
-      mom ? ['$\\langle x\\rangle$', q('moments', `${texNum(mom.mean)}\\ \\text{nm}`)] : null,
+      mom ? ['$\\langle x\\rangle$', q('moments', `${texNum(Math.abs(mom.mean) < 1e-6 * mom.sd ? 0 : mom.mean)}\\ \\text{nm}`)] : null,
       mom ? ['$\\Delta x$', q('moments', `${texNum(mom.sd)}\\ \\text{nm}`)] : null,
     ]);
   }

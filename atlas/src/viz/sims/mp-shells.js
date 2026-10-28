@@ -47,7 +47,8 @@ export function mount(F, P0) {
   } else F.params.Z = P.Z;
 
   const right = panels.includes('numbers') ? 'numbers' : panels.includes('table') ? 'table' : null;
-  const top = panels.includes('boxes') || right ? F.canvas({ aspect: right ? '' : 'wide', label: P.alt || 'The subshells of an atom filled with electrons, two to an orbital with opposite spins' }) : null;
+  const both = panels.includes('boxes') && right;
+  const top = panels.includes('boxes') || right ? F.canvas({ aspect: both ? '' : 'wide', label: P.alt || 'The subshells of an atom filled with electrons, two to an orbital with opposite spins' }) : null;
   const plot = top ? new Plot(top.canvas, { x: [0, 100], y: [0, 50], grid: false, axes: false, pad: { l: 0, r: 0, t: 0, b: 0 } }) : null;
   const iec = panels.includes('ie') && !hide.has('ie') ? F.canvas({ aspect: 'wide', label: 'First ionization energy against atomic number' }) : null;
   const iep = iec ? new Plot(iec.canvas, { x: [0.5, P.maxZ + 0.5], y: [0, 26], xlabel: 'atomic number Z', ylabel: 'first ionization energy (eV)', yticks: 6 }) : null;
@@ -101,7 +102,7 @@ export function mount(F, P0) {
 
   // ---- the periodic table, built up to Z
   function drawTable(x0, x1, y0, y1, Z, fs) {
-    const c = Math.min((x1 - x0) / 18, (y1 - y0) / 8.6);
+    const c = Math.min((x1 - x0) / 18, (y1 - y0) / 13.4);       // the table is 8.6 cells tall; the legend and title take 4.8 more
     const W = 18 * c, left = x0 + (x1 - x0 - W) / 2, topY = y0 + 8.6 * c;
     const px = (col) => left + (col - 1) * c, py = (row) => topY - (row === 8 ? 7.5 : row) * c;
     const cellPx = plot.X(c) - plot.X(0);
@@ -121,7 +122,7 @@ export function mount(F, P0) {
     });
     // the present element, large
     const el = S.element(Z);
-    const ty = Math.min(y1 - 2, legendY + 3.2 * c);
+    const ty = legendY + 3.6 * c;
     const title = hide.has('name') ? `Z = ${Z}: which element?` : `${Z} ${el.sym}: ${el.name}`;
     plot.text(title, left, ty, { color: 'ink', size: fs + 3, weight: 700 });
     if (!hide.has('config')) plot.text(S.configText(Z), left, ty - 1.9 * c, { color: 'ink2', size: fs + 1 });
@@ -156,7 +157,7 @@ export function mount(F, P0) {
     plot.setView([0, 100], [0, H]);
     plot.clear();
     const fs = w < 520 ? 9.5 : 11.5;
-    const split = right ? (right === 'numbers' ? 52 : 46) : 100;
+    const split = !right ? 100 : !panels.includes('boxes') ? 0 : right === 'numbers' ? 52 : 46;
     if (panels.includes('boxes')) drawBoxes(1, split - 1, 1.5, H - 1.5, Z, fs);
     if (right === 'table') drawTable(split + 1, 99, 1.5, H - 1.5, Z, fs);
     if (right === 'numbers') drawNumbers(split + 1, 99, 1.5, H - 1.5, Z, fs);
@@ -170,7 +171,7 @@ export function mount(F, P0) {
     iep.path(zs.map((z) => [z, S.ionization(z)]), { color: 'ink4', width: 1.2 });
     for (const z of zs) iep.point(z, S.ionization(z), { color: BLOCK[S.blockOf(z)], r: z <= Z ? 3.4 : 2 });
     const narrow = (iec.canvas.clientWidth || 600) < 520;
-    for (const z of [...S.NOBLE, 3, 11, 19, 37, 55]) if (z <= P.maxZ && (!narrow || S.NOBLE.includes(z))) iep.text(S.symbol(z), z, S.ionization(z), { color: 'ink2', dx: 0, dy: S.NOBLE.includes(z) ? -11 : 11, align: 'center', size: narrow ? 9.5 : 11 });
+    for (const z of [...S.NOBLE, 3, 11, 19, 37, 55]) if (z <= P.maxZ && (!narrow || S.NOBLE.includes(z))) iep.text(S.symbol(z), z, S.ionization(z), { color: 'ink2', dx: z === Z ? 12 : 0, dy: S.NOBLE.includes(z) ? -12 : 13, align: z === Z ? 'left' : 'center', size: narrow ? 9.5 : 11 });
     iep.line(Z, 0, Z, 26, { color: 'gold', width: 1.2, dash: [4, 4] });
     iep.point(Z, S.ionization(Z), { color: 'gold', r: 6, ring: 'ink' });
   }

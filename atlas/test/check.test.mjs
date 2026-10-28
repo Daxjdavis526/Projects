@@ -206,6 +206,7 @@ check('a specific heat in J/(kg °C) equals one in J/(kg K)', grade({ type: 'num
 check('a temperature change in °C needs no offset', grade({ type: 'numeric', answer: 15, units: 'K', tol: { rel: 0.001 } }, '15').correct);
 check('a temperature change typed in °C, for a change in K', grade({ type: 'numeric', answer: 15, units: 'K', difference: true, tol: { rel: 0.001 } }, '15 °C').correct);
 check('…but a change is not offset into an absolute temperature', !grade({ type: 'numeric', answer: 15, units: 'K', difference: true, tol: { rel: 0.001 } }, '288.15 °C').correct);
+check('Hz is not rad/s', !grade({ type: 'numeric', answer: 6.283, units: 'rad/s', tol: { rel: 0.01 } }, '6.283 Hz').correct && grade({ type: 'numeric', answer: 6.283, units: 'rad/s', tol: { rel: 0.01 } }, '6.283 rad/s').correct && grade({ type: 'numeric', answer: 60, units: 'rpm', tol: { rel: 0.01 } }, '6.283 rad/s').correct);
 check('a sound level carries its decibels', grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '85 dB').correct && grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '85').correct);
 check('a decibel is not a deci-anything', !grade({ type: 'numeric', answer: 85, units: 'dB', tol: { rel: 0.001 } }, '8.5 B').correct);
 

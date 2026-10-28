@@ -93,7 +93,9 @@ export function initPic(y0, v0, caption, { name = 'y', T = 2, span = null } = {}
 /** A de-poles picture of the s-plane alone (no dragging, no readout): poles in the sim's format. */
 export function polePic(poles, caption, { window = null, labels = true } = {}) {
   const re = poles.map((p) => p.re), im = poles.map((p) => p.im ?? 0);
-  const win = window || { re: [Math.min(-1, ...re) - 1, Math.max(0.6, ...re) + 0.8], im: [-Math.max(1.5, ...im) - 0.8, Math.max(1.5, ...im) + 0.8] };
+  // a window with about the canvas's proportions (16:10), so equal scales do not pad it with empty half-plane
+  const H = Math.max(1.5, ...im.map(Math.abs)) + 0.8, right = Math.max(1, ...re.map((x) => x + 1)), left = Math.min(right - 3.4 * H, Math.min(...re) - 1);
+  const win = window || { re: [left, right], im: [-H, H] };
   return { type: 'de-poles', params: { poles, drag: false, readout: false, panels: ['s'], window: win, labels }, caption };
 }
 

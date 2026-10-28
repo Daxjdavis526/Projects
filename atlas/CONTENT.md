@@ -343,7 +343,9 @@ The drag point's coordinates are available to the graph's other expressions
 as `px` and `py` (for `key: 'p'`), so a readout can show them — but a readout
 that shows the answer gives it away, so think before adding one. A slider
 item's `answer` range must contain values the slider can actually reach (its
-`min`, `max` and `step` grid), or the problem cannot be solved.
+`min`, `max` and `step` grid), or the problem cannot be solved. A point item
+works with any sim whose `get('point')` returns `{ x, y }` (graph, field2d,
+de-plane …), and both kinds may use `gen` like any other item.
 
 ### Coding exercise — `code`
 
@@ -472,6 +474,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
 | `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
+| `de-plane`, `de-tracedet`, `de-modes` | phase planes of any 2D system (nullclines, typed equilibria, eigenvector lines, conserved-quantity contours and separatrices, launchable trajectories, e^{At} carrying a shape); the trace–determinant map beside the phase portrait; coupled masses and CO₂ with normal modes, beats and energy bars |
 | `py-memory`, `py-sort` | Python's memory as names pointing at objects (frames, lists, dicts, NumPy views into a buffer), stepped line by line from authored steps; insertion sort, merge sort and binary search one comparison at a time |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
