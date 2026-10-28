@@ -206,7 +206,7 @@ An exact solution is a gift to a numerical analyst: it lets you measure a codeâ€
     num({
       id: 'horizon-event', difficulty: 3,
       gen(r) {
-        const R = r.pick([8, 10, 12, 16]), h = r.pick([1, 2]);
+        const [R, h] = r.pick([[8, 1], [8, 2], [10, 1], [10, 2], [12, 1], [16, 1], [16, 2]]);   // (12, 2) is left out: its next step lands near r = 0
         const n = Math.ceil((1.08 * tauCrunch(R)) / h);
         const path = fall('rk4', R, n * h, n, { path: true }).path;
         const k = path.findIndex(([, rr]) => rr <= 2) - 1;
@@ -390,7 +390,7 @@ print(e40, e80, order)`,
       choices: [
         t`$t$ is a coordinate that runs to infinity at the horizon, so a $t$-stepper needs infinitely many steps to get there; the faller crosses in finite proper time. Integrate in $\tau$ (or use horizon-penetrating coordinates such as Eddingtonâ€“Finkelstein)`,
         'The body really never crosses the horizon; the proper-time code is wrong',
-        'The step in t is too large: with small enough steps it would cross',
+        t`The step in $t$ is too large: with small enough steps it would cross`,
         t`$E$ is not conserved near the horizon, so $dt/d\tau$ is wrong there`,
       ],
       answer: 0,

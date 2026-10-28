@@ -37,7 +37,7 @@ export default lesson({
   minutes: 13, difficulty: 3,
   intro: t`A **norm** measures the size of a vector. Any rule $\lVert v\rVert$ qualifies if it obeys three axioms: $\lVert v\rVert \ge 0$ with equality only for $v = 0$; $\lVert cv\rVert = |c|\,\lVert v\rVert$; and the triangle inequality $\lVert u + v\rVert \le \lVert u\rVert + \lVert v\rVert$. The plane alone carries a whole family, the $\ell^p$ norms:
 
-$$\lVert x\rVert_p = \bigl(|x_1|^p + |x_2|^p + \dots + |x_n|^p\bigr)^{1/p}, \qquad \lVert x\rVert_\infty = \max_i |x_i|$$
+$$\begin{gathered}\lVert x\rVert_p = \bigl(|x_1|^p + |x_2|^p + \dots + |x_n|^p\bigr)^{1/p} \\ \lVert x\rVert_\infty = \max_i |x_i|\end{gathered}$$
 
 An **inner product** $\langle u, v\rangle$ gives angles as well as lengths, with $\lVert v\rVert = \sqrt{\langle v, v\rangle}$ — that is $\ell^2$, the familiar dot product of [inner products and orthogonality](#/lesson/math2270.LA-10.1). The same definitions apply to **functions**, where they stop being interchangeable: a sequence can shrink to $0$ in one norm and stay put in another.`,
   symbols: [

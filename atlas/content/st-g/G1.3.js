@@ -36,7 +36,7 @@ export default lesson({
   minutes: 13, difficulty: 3,
   intro: t`Two more ways to prove $P$. **Contradiction:** assume $\neg P$ and derive something false; since true premises cannot lead to a falsehood, $\neg P$ was false. It is the natural tool for “there is no …” and “… is impossible”. **Induction** proves a statement $P(n)$ for every whole number $n \ge 1$ in two moves — a base case and a step that carries truth from each $n$ to the next:
 
-$$\Bigl[\,P(1)\ \wedge\ \forall n \ge 1:\ \bigl(P(n) \Rightarrow P(n + 1)\bigr)\Bigr] \;\Rightarrow\; \forall n \ge 1:\ P(n)$$
+$$\begin{gathered}\Bigl[\,P(1)\ \wedge\ \forall n \ge 1:\ \bigl(P(n) \Rightarrow P(n + 1)\bigr)\Bigr] \\ \Rightarrow\; \forall n \ge 1:\ P(n)\end{gathered}$$
 
 The gentle versions are [proof by contradiction](#/lesson/m0.M0-14.3) and [proof by induction](#/lesson/m0.M0-14.4). Here they prove irrationality, bound recursions and make a perturbation series converge.`,
   symbols: [

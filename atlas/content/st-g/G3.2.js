@@ -17,7 +17,7 @@ export default lesson({
   minutes: 15, difficulty: 4,
   intro: t`A **Hilbert space** is an inner-product space that is **complete**: every Cauchy sequence, measured in its own norm, converges to an element of the space. The model is $L^2[a, b]$, the square-integrable functions with
 
-$$\langle f, g\rangle = \int_a^b \overline{f(x)}\,g(x)\,dx, \qquad \lVert f\rVert^2 = \sum_n |\langle e_n, f\rangle|^2$$
+$$\begin{gathered}\langle f, g\rangle = \int_a^b \overline{f(x)}\,g(x)\,dx \\ \lVert f\rVert^2 = \sum_n |\langle e_n, f\rangle|^2\end{gathered}$$
 
 The second equation is **Parseval’s identity**: in an orthonormal basis $e_n$, the squared length is the sum of the squared components, exactly as in $\mathbb R^3$. Completeness is not automatic — the continuous functions with this norm have holes, as $\mathbb Q$ did — and filling them forces a subtlety: an element of $L^2$ is a function **up to changes on a set of zero length**, so it has no well-defined value at a single point. The physicist’s view of the same space is [Hilbert space](#/lesson/phys4700.M4.1) in quantum mechanics.`,
   symbols: [

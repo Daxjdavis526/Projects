@@ -23,7 +23,7 @@ export default lesson({
   minutes: 13, difficulty: 3,
   intro: t`A function is **continuous on** an interval $I$ when it is continuous at each point: for every $a$ and every $\varepsilon$ there is a $\delta$ — and that $\delta$ may depend on $a$. Move one quantifier, so that $\delta$ is chosen **before** the point, and you get a stronger property:
 
-$$\forall\varepsilon > 0\ \ \exists\delta > 0\ \ \forall a, x \in I:\ \ |x - a| < \delta \;\Rightarrow\; |f(x) - f(a)| < \varepsilon$$
+$$\begin{gathered}\forall\varepsilon > 0\ \ \exists\delta > 0\ \ \forall a, x \in I: \\ |x - a| < \delta \;\Rightarrow\; |f(x) - f(a)| < \varepsilon\end{gathered}$$
 
 This is **uniform continuity**: one input tolerance serves the whole interval. $1/x$ on $(0, 1)$ is continuous but not uniformly so; on a **closed, bounded** interval every continuous function is uniformly continuous (the Heine–Cantor theorem). The handiest sufficient condition is a **Lipschitz** bound $|f(x) - f(a)| \le K|x - a|$, which gives $\delta = \varepsilon/K$ at once.`,
   symbols: [

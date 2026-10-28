@@ -38,7 +38,7 @@ export default lesson({
   minutes: 14, difficulty: 3,
   intro: t`The definition of a limit is a game with three moves: the challenger names a tolerance $\varepsilon$, you answer with a $\delta$, and then **every** $x$ in your window must pass. Written out, quantifiers and all:
 
-$$\lim_{x\to a} f(x) = L \iff \forall\varepsilon > 0\ \exists\delta > 0\ \forall x:\ 0 < |x - a| < \delta \Rightarrow |f(x) - L| < \varepsilon$$
+$$\begin{gathered}\lim_{x\to a} f(x) = L \iff \\ \forall\varepsilon > 0\ \exists\delta > 0\ \forall x: \\ 0 < |x - a| < \delta \Rightarrow |f(x) - L| < \varepsilon\end{gathered}$$
 
 [The ε–δ definition](#/lesson/math1210.C1-2.6) met it with polynomials. A proof needs a few techniques beyond those: **bound the troublesome factor** by first promising $\delta \le 1$, **split $\varepsilon$** when two things must be small at once, and, to show a limit fails, play the **negation** $\exists\varepsilon\ \forall\delta\ \exists x$.`,
   symbols: [

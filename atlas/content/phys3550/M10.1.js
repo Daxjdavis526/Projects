@@ -66,16 +66,16 @@ export default lesson({
   },
   example: {
     prompt: t`Taylor's pendulum ($\omega = 2\pi$ rad/s, $\omega_0 = 3\pi$ rad/s, $\beta = 3\pi/4\ \text{s}^{-1}$) starts from rest at $\phi = 0$. Predict the steady amplitude from the linear (small-angle) theory for $\gamma = ${EX.g1}$, $${EX.g2}$, $${EX.g3}$ and $${EX.g4}$, and compare with a numerical solution of the full equation. When does the linear picture fail?`,
-    visual: pendPic({ gamma: EX.g4, start: [0, 0], skip: 20, periods: 4, panels: ['time'], marks: true }, t`$\phi(t)$ for $\gamma = ${EX.g4}$ after 20 drive periods (RK4): a steady swing of $${sci(EX.n[3], 3)}$ rad — far larger than the linear theory's $${sci(EX.l[3], 3)}$ rad, and visibly not a sine wave (flattened tops).`),
+    visual: pendPic({ gamma: EX.g4, start: [0, 0], skip: 20, periods: 4, panels: ['time'], marks: true }, t`$\phi(t)$ for $\gamma = ${EX.g4}$ after 20 drive periods (RK4): a steady swing of $${sci(EX.n[3], 3)}$ rad — far larger than the linear theory's $${sci(EX.l[3], 3)}$ rad.`),
     steps: [
       { label: 'Linearize', text: t`For small $\phi$, $\sin\phi \approx \phi$ and the equation is $\ddot\phi + 2\beta\dot\phi + \omega_0^2\phi = \gamma\omega_0^2\cos\omega t$ — [M2.3](#/lesson/phys3550.M2.3)'s driven oscillator with $f_0 = \gamma\omega_0^2$.` },
       { label: 'Linear amplitude', text: t`$A = \dfrac{\gamma\omega_0^2}{\sqrt{(\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2}} = \dfrac{9\pi^2\gamma}{\sqrt{(5\pi^2)^2 + (3\pi^2)^2}} = \dfrac{9\gamma}{\sqrt{34}} = ${sci(TAY.gain, 4)}\,\gamma$ rad.` },
       { label: 'Predict', text: t`For $\gamma = ${EX.g1}, ${EX.g2}, ${EX.g3}, ${EX.g4}$: $A = ${EX.l.map((x) => sci(x, 3)).join(',\\ ')}$ rad.` },
       { label: 'Compute', text: t`Integrating the full equation (RK4, 60 drive periods) and measuring the final swing: $${EX.n.map((x) => sci(x, 3)).join(',\\ ')}$ rad.` },
       { label: 'Compare', text: t`At $\gamma = ${EX.g1}$ the two agree to $${sci((100 * (EX.n[0] - EX.l[0])) / EX.l[0], 2)}\%$; at $${EX.g3}$ the true swing is $${sci((100 * (EX.n[2] - EX.l[2])) / EX.l[2], 2)}\%$ bigger; at $${EX.g4}$ it is $${sci(EX.n[3] / EX.l[3], 3)}$ times the prediction. Doubling $\gamma$ from $${EX.g1}$ to $${EX.g2}$ multiplies the swing by $${sci(EX.n[1] / EX.n[0], 3)}$; from $${EX.g3}$ to $${EX.g4}$, by $${sci(EX.n[3] / EX.n[2], 3)}$. Response no longer scales with drive: **superposition has failed**.` },
-      { label: 'Why bigger', text: t`A pendulum's own frequency falls as its swing grows (its period lengthens: [M2.1](#/lesson/phys3550.M2.1)). Here $\omega_0 = 1.5\omega$, so a bigger swing tunes the pendulum *toward* the drive, nearer resonance — which makes the swing bigger still.` },
+      { label: 'Why bigger', text: t`A pendulum's own frequency falls as its swing grows: $\sin\phi < \phi$, so at large angles gravity pulls back less than the linear spring it imitates, and a big swing takes longer. Here $\omega_0 = 1.5\omega$, so a bigger swing tunes the pendulum *toward* the drive, nearer resonance — which makes the swing bigger still.` },
     ],
-    answer: t`Linear theory gives $A = ${sci(TAY.gain, 4)}\gamma$ rad, which is good to a fraction of a per cent at $\gamma = ${EX.g1}$ but gives only $${sci(EX.l[3], 3)}$ rad at $\gamma = ${EX.g4}$, where the true swing is $${sci(EX.n[3], 3)}$ rad (about $${Math.round((EX.n[3] * 180) / PI)}^\circ$). The linear picture fails once $\phi$ reaches about half a radian.`,
+    answer: t`Linear theory gives $A = ${sci(TAY.gain, 4)}\gamma$ rad, which is good to a fraction of a per cent at $\gamma = ${EX.g1}$ but gives only $${sci(EX.l[3], 3)}$ rad at $\gamma = ${EX.g4}$, where the true swing is $${sci(EX.n[3], 3)}$ rad (about $${Math.round((EX.n[3] * 180) / PI)}^\circ$). The linear picture holds to a few per cent while the swing stays below about half a radian, and fails badly beyond.`,
   },
   practice: [
     mcq({
@@ -102,7 +102,7 @@ export default lesson({
           hints: [t`Small swings: $\sin\phi \approx \phi$, a linear driven oscillator with $f_0 = \gamma\omega_0^2$.`, t`$A = \gamma\omega_0^2/\sqrt{(\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2}$; everything can be written in units of $\omega$, so the period drops out.`],
           teach: t`For small swings the driven pendulum is the linear driven oscillator, with amplitude $\gamma\omega_0^2/\sqrt{(\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2}$.`,
           explain: t`In units of $\omega$: $\omega_0^2 = ${sci(k * k, 3)}\omega^2$ and $2\beta\omega = ${sci(k / 2, 3)}\omega^2$, so $A = \dfrac{${g}\times${sci(k * k, 3)}}{\sqrt{${sci((k * k - 1) ** 2, 4)} + ${sci((k / 2) ** 2, 4)}}} = ${sci(A, 3)}$ rad. The drive period does not matter: only the ratios $\omega_0/\omega$ and $\beta/\omega$ do.`,
-          visual: pendPic({ gamma: g, w: r6x(w), w0: r6x(w0), beta: r6x(beta), start: [0, 0], skip: 20, periods: 1, panels: ['swing'], gRange: [0, 1.2] }, t`The pendulum mid-swing (drawn at its true angle; the swing is small).`),
+          visual: pendPic({ gamma: g, w: r6x(w), w0: r6x(w0), beta: r6x(beta), start: [0, 0], skip: 20, periods: 1, panels: ['swing'], gRange: [0, 1.2] }, t`The pendulum at one moment of its steady swing, drawn at its true angle. The gold arrow shows only the drive's phase.`),
         };
       },
     }),
@@ -160,11 +160,11 @@ export default lesson({
     order({
       id: 'route', difficulty: 2,
       prompt: t`Put the long-term motions of Taylor's pendulum (released from rest at $\phi = -\pi/2$) in order of **increasing** drive strength $\gamma$.`,
-      visual: pendPic({ gamma: 1.07, panels: ['bif'], bif: [1.06, 1.11], bifN: 200, marks: false }, t`The bifurcation diagram for $1.06 \le \gamma \le 1.11$: $\phi$ once per drive period after a long transient. Read it from left to right.`),
-      items: [t`A small swing that is almost a sine wave, period 1`, t`A large swing with flattened tops, still period 1`, t`Period 2: alternately big and small swings`, t`Period 4`, t`Chaos: no repeat`],
+      visual: pendPic({ gamma: 1.07, panels: ['bif'], bif: [1.06, 1.088], bifN: 200, marks: false }, t`The bifurcation diagram for $1.06 \le \gamma \le 1.088$: $\phi$ once per drive period after a long transient. Read it from left to right.`),
+      items: [t`A small swing that is almost a sine wave, period 1`, t`A large swing, over two radians, still period 1`, t`Period 2: alternately big and small swings`, t`Period 4`, t`Chaos: no repeat`],
       hints: [t`Small $\gamma$ is nearly linear. Each doubling needs a stronger drive than the last.`],
       teach: t`As the drive strengthens, the pendulum goes from nearly linear swings through a cascade of period doublings into chaos.`,
-      explain: t`Below $\gamma \approx 0.3$ the swing is nearly sinusoidal; by $\gamma = 0.9$ it is large and anharmonic but still period 1. The period doubles at $\gamma = ${D[0].toFixed(4)}$, again at $${D[1].toFixed(4)}$ and $${D[2].toFixed(4)}$, ever closer together, and chaos follows (by $1.105$). Beyond the window drawn there are also periodic windows inside the chaos.`,
+      explain: t`Below $\gamma \approx 0.3$ the swing is nearly sinusoidal; by $\gamma = 0.9$ it swings $${sci(EX.n[3], 2)}$ rad, far beyond linear theory, but still period 1. The period doubles at $\gamma = ${D[0].toFixed(4)}$, again at $${D[1].toFixed(4)}$ and $${D[2].toFixed(4)}$, ever closer together, and chaos follows (by $1.105$). Beyond the window drawn there are also periodic windows inside the chaos.`,
     }),
     multi({
       id: 'chaos-true', difficulty: 3,
@@ -197,7 +197,7 @@ export default lesson({
           hints: [t`Divide the equation by $\hbar C/2e$: the $\sin\phi$ term becomes $(2eI_c/\hbar C)\sin\phi$, so $\omega_0^2 = 2eI_c/\hbar C$.`, t`$\omega_0 = \sqrt{2(1.602\times10^{-19})(${Ic}\times10^{-6})/\bigl((1.055\times10^{-34})(${Cp}\times10^{-12})\bigr)}$; then divide by $2\pi$.`],
           teach: t`Any system whose equation has the form $\ddot\phi + 2\beta\dot\phi + \omega_0^2\sin\phi = \gamma\omega_0^2\cos\omega t$ is a driven pendulum, with all of its chaos.`,
           explain: t`$\omega_0 = \sqrt{2eI_c/\hbar C} = ${sci(wp, 3)}$ rad/s, so $\omega_0/2\pi = ${sci(f, 3)}$ GHz: a "pendulum" swinging tens of billions of times a second. Microwave-driven junctions show period doubling and chaos, which is why voltage-standard chips are designed to stay well inside the periodic regime.`,
-          visual: gpic({ x: [-3.2, 3.2], y: [-1.6, 2.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves: [seg([-3, 0], [-0.25, 0], 'ink2', 2.4), seg([0.25, 0], [3, 0], 'ink2', 2.4), seg([-0.25, -1.2], [-0.25, 1.2], 'accent', 6), seg([0.25, -1.2], [0.25, 1.2], 'accent', 6)], shade: [{ fn: '1.2', lower: '-1.2', from: -0.18, to: 0.18, color: 'ink4', alpha: 0.6 }], points: [lab(-1.6, 1.5, 'superconductor', 'accent', 0, 0), lab(1.6, 1.5, 'superconductor', 'accent', 0, 0), lab(0, -1.5, 'thin barrier', 'ink3', 0, 0), lab(-2.9, 0.35, 'I', 'ink2', 0, 0)], arrows: [{ from: [-2.6, 0], to: [-1.6, 0], color: 'warn', width: 2.2 }] }, t`A Josephson junction, schematic and not to scale: the barrier is a few nanometres thick. The phase difference $\phi$ across it plays the pendulum's angle.`, 'Two superconducting electrodes separated by a thin barrier, with a current flowing through'),
+          visual: gpic({ x: [-3.2, 3.2], y: [-1.6, 2.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves: [seg([-3, 0], [-0.25, 0], 'ink2', 2.4), seg([0.25, 0], [3, 0], 'ink2', 2.4), seg([-0.25, -1.2], [-0.25, 1.2], 'accent', 6), seg([0.25, -1.2], [0.25, 1.2], 'accent', 6)], shade: [{ fn: '1.2', lower: '-1.2', from: -0.18, to: 0.18, color: 'ink4', alpha: 0.6 }], points: [lab(-1.6, 1.5, 'superconductor', 'accent', 0, 0), lab(1.6, 1.5, 'superconductor', 'accent', 0, 0), lab(0, -1.5, 'thin barrier', 'ink3', 0, 0), lab(-2.1, 0.35, 'I', 'warn', 0, 0)], arrows: [{ from: [-2.6, 0], to: [-1.6, 0], color: 'warn', width: 2.2 }] }, t`A Josephson junction, schematic and not to scale: the barrier is a few nanometres thick. The phase difference $\phi$ across it plays the pendulum's angle.`, 'Two superconducting electrodes separated by a thin barrier, with a current flowing through'),
         };
       },
     }),
@@ -219,7 +219,7 @@ export default lesson({
       },
     }),
     num({
-      id: 'cp-torque', difficulty: 2, transfer: true,
+      id: 'cp-torque', difficulty: 2,
       gen(r) {
         const m = r.pick([0.2, 0.5, 1.2]), L = r.pick([0.25, 0.4, 0.8]), g = r.pick([1.073, 1.081, 1.105]);
         const tau = g * m * 9.8 * L;

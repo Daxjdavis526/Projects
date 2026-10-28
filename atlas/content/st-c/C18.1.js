@@ -39,8 +39,8 @@ function gapScene() {
     curves.push({ param: flowY(k, p1[0], p1[1], 'h*t'), t: [0, 1], color: 'accent', width: 2.4, ...W(k) });
     curves.push({ param: flowY(k, 'px', 'py', 'h*t'), t: [0, 1], color: 'violet', width: 2.4, ...W(k) });
     curves.push({ param: rot(q1[0], q1[1], 'h*t'), t: [0, 1], color: 'violet', width: 2.4, ...W(k) });
-    pts.push({ x: p2[0], y: p2[1], r: 4, color: 'accent', label: 'X then Y', labelDx: 8, labelDy: -10, ...W(k) });
-    pts.push({ x: q2[0], y: q2[1], r: 4, color: 'violet', label: 'Y then X', labelDx: 8, labelDy: 14, ...W(k) });
+    pts.push({ x: p2[0], y: p2[1], r: 4, color: 'accent', label: 'X then Y', labelAlign: 'right', labelDx: -10, labelDy: 0, ...W(k) });
+    pts.push({ x: q2[0], y: q2[1], r: 4, color: 'violet', label: 'Y then X', labelDx: 10, labelDy: 0, ...W(k) });
     arrows.push({ from: q2, to: p2, color: 'warn', width: 2.2, ...W(k) });
     arrows.push(...quiver(Yfield[k][0], Yfield[k][1], [-2, -1, 0, 1, 2], [-1, 0, 1], 0.22, 'violet', 1).map((a) => ({ ...a, ...W(k) })));
     readX.push(`step(0.5 - abs(n - ${k}))*((${p2[0]}) - (${q2[0]}))`);
@@ -128,7 +128,7 @@ No Christoffel symbols appear: the flow itself says how to carry things, so the 
         const key = -1 / (r0 * r0);
         return {
           prompt: t`On the plane in polar coordinates, the coordinate fields commute, $[\partial_r, \partial_\theta] = 0$. The *unit* vectors are $\hat e_r = \partial_r$ and $\hat e_\theta = \tfrac1r\partial_\theta$. Their bracket is $[\hat e_r, \hat e_\theta] = c\,\partial_\theta$. Find $c$ at $r = ${r0}$.`,
-          visual: { type: 'graph', params: { x: [-3, 3], y: [-2, 2], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'y', curves: [1, 2].map((k) => ({ param: [`${k}*cos(t)`, `${k}*sin(t)`], t: [0, 2 * Math.PI], color: 'ink4', width: 1 })), arrows: [0.5, 1.6, 2.7].flatMap((th) => [1, 2].flatMap((rr) => [{ from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4((rr + 0.4) * Math.cos(th)), r4((rr + 0.4) * Math.sin(th))], color: 'accent', width: 1.8 }, { from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4(rr * Math.cos(th) - 0.4 * Math.sin(th)), r4(rr * Math.sin(th) + 0.4 * Math.cos(th))], color: 'violet', width: 1.8 }])) }, caption: 'The unit vectors ê_r (blue) and ê_θ (violet) at a few points: the same length everywhere, while the coordinate field ∂_θ grows with r.' },
+          visual: { type: 'graph', params: { x: [-3.5, 3.5], y: [-2.7, 2.7], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'y', curves: [1, 2].map((k) => ({ param: [`${k}*cos(t)`, `${k}*sin(t)`], t: [0, 2 * Math.PI], color: 'ink4', width: 1 })), arrows: [0.5, 1.6, 2.7].flatMap((th) => [1, 2].flatMap((rr) => [{ from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4((rr + 0.4) * Math.cos(th)), r4((rr + 0.4) * Math.sin(th))], color: 'accent', width: 1.8 }, { from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4(rr * Math.cos(th) - 0.4 * Math.sin(th)), r4(rr * Math.sin(th) + 0.4 * Math.cos(th))], color: 'violet', width: 1.8 }])) }, caption: 'The unit vectors ê_r (blue) and ê_θ (violet) at a few points: the same length everywhere, while the coordinate field ∂_θ grows with r.' },
           answer: key, tol: { rel: 0.005 },
           errors: [
             { value: 1 / (r0 * r0), feedback: t`Sign: $\hat e_r$ differentiating $\tfrac1r$ gives $-\tfrac1{r^2}$.` },
@@ -218,7 +218,7 @@ No Christoffel symbols appear: the flow itself says how to carry things, so the 
         const approx = (e * e) / DEG;
         return {
           prompt: t`A spacecraft turns ${nice(e / DEG)}° about its x axis, then ${nice(e / DEG)}° about its y axis, then ${nice(e / DEG)}° back about x, then ${nice(e / DEG)}° back about y (all axes fixed in space). It does not return to its starting attitude. By what angle, in degrees, is it left turned? (The rotation generators’ bracket predicts about $\varepsilon^2$ radians about the z axis.)`,
-          visual: { type: 'calc-vectors3d', params: { range: 1.6, vectors: [{ to: [1.3, 0, 0], color: 'accent', label: 'x' }, { to: [0, 1.3, 0], color: 'teal', label: 'y' }, { to: [0, 0, 1.3], color: 'gold', label: 'z' }], curves: [{ param: ['0.9', '0.5*cos(t)', '0.5*sin(t)'], t: [0, 1.4], color: 'accent' }, { param: ['0.5*sin(t)', '0.9', '0.5*cos(t)'], t: [0, 1.4], color: 'teal' }, { param: ['0.5*cos(t)', '0.5*sin(t)', '0.9'], t: [0, 1.2], color: 'gold' }] }, caption: 'Rotations about x (blue) and y (teal) applied in turn and undone leave a small net turn about z (gold). Arcs are schematic.' },
+          visual: { type: 'calc-vectors3d', params: { range: 1.6, vectors: [{ to: [1.3, 0, 0], color: 'accent' }, { to: [0, 1.3, 0], color: 'teal' }, { to: [0, 0, 1.3], color: 'gold' }], curves: [{ param: ['0.9', '0.5*cos(t)', '0.5*sin(t)'], t: [0, 1.4], color: 'accent' }, { param: ['0.5*sin(t)', '0.9', '0.5*cos(t)'], t: [0, 1.4], color: 'teal' }, { param: ['0.5*cos(t)', '0.5*sin(t)', '0.9'], t: [0, 1.2], color: 'gold' }] }, caption: 'Rotations about x (blue) and y (teal) applied in turn and undone leave a small net turn about z (gold). Arcs are schematic.' },
           answer: ang, units: 'deg', tol: { rel: 0.03 },
           errors: [
             { value: 0, feedback: 'Rotations about different axes do not commute: undoing them in the same order as you did them does not cancel them.' },

@@ -14,10 +14,9 @@
 // are exported so a script can recompute every key another way.
 import { boss, mcq, num, expr } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
-import { KB, HBAR, CL, G, MSUN, T_CMB, SIGMA, YEAR, MOON, LN2, hawkingT, bhS, bhC, bhLife, rs, chandra, M_CROSS, hawkingPic, entropyPic, r4, texNum, apart } from './_th4.js';
+import { KB, HBAR, CL, G, MSUN, T_CMB, SIGMA, YEAR, LN2, hawkingT, bhS, bhC, bhLife, rs, chandra, M_CROSS, hawkingPic, entropyPic, r4, texNum, apart } from './_th4.js';
 
 const t = String.raw;
-const NB = ' ';
 const S_N2 = 6.84e3;          // J/K for 1 kg of nitrogen at 298 K and 1 bar (191.6 J/(mol K) ÷ 0.028 kg/mol, CODATA key values)
 
 // ── round 1 ──────────────────────────────────────────────────────────────────
@@ -67,16 +66,16 @@ function freePic() {
     type: 'graph',
     params: {
       x: [-0.2, 3.2], y: [0, 1.2], aspect: 'wide', axesAt: 'edge', xlabel: '', ylabel: 'energy (units of Mc²)', xticks: 0, yticks: 0,
-      shade: [B(0.5, 1, 'accent'), B(1.5, 0.5, 'warn'), B(2.5, 0.5, 'gold')].map((s, k) => (k ? { ...s, fn: '0.6' } : s)),
-      points: [{ x: 0.5, y: 1.05, r: 0.01, color: 'accent', label: 'U = Mc²', labelDx: 0, labelAlign: 'center' }, { x: 1.5, y: 0.65, r: 0.01, color: 'warn', label: 'T(H)·S = ?', labelDx: 0, labelAlign: 'center' }, { x: 2.5, y: 0.65, r: 0.01, color: 'gold', label: 'F = U − T(H)S = ?', labelDx: 0, labelAlign: 'center' }],
+      shade: [B(0.5, 1, 'accent'), { ...B(1.5, 0.8, 'warn'), alpha: 0.2 }, { ...B(2.5, 0.8, 'gold'), alpha: 0.2 }],
+      points: [{ x: 0.5, y: 1.05, r: 0.01, color: 'accent', label: 'U = Mc²', labelDx: 0, labelAlign: 'center' }, { x: 1.5, y: 0.85, r: 0.01, color: 'warn', label: 'TS = ?', labelDx: 0, labelAlign: 'center' }, { x: 2.5, y: 0.85, r: 0.01, color: 'gold', label: 'F = ?', labelDx: 0, labelAlign: 'center' }],
     },
-    caption: 'Sketch of the bookkeeping: the hole’s energy U, the product of its temperature and entropy, and the free energy F = U − TS. The heights of the last two are left for you to find.',
+    caption: 'Sketch of the bookkeeping: the hole’s energy U = Mc², the product TS of its temperature and entropy, and the free energy F = U − TS. The faint bars are placeholders: their real heights are what you are asked to find.',
   };
 }
 
 export default boss({
   title: 'The Black-Hole Engine',
-  intro: t`A thought experiment, built from theory that has **never been observed**: Hawking radiation is a firm prediction of quantum field theory near a horizon, but no telescope has seen it. In the far future an engineer finds **Ember**, a small black hole left over from the Big Bang, drifting through empty space with only the cosmic microwave background, at $2.725$ K, around it. The plan: run a heat engine between Ember’s Hawking radiation and the CMB. Before anyone builds anything, the thermodynamics has to be checked — counting states, temperature from entropy, heat capacities, engines, free energy, information, stars and blackbody radiation, all at once. Five rounds, thirteen problems, no hints, one try each.`,
+  intro: t`A thought experiment, built from theory that has **never been observed**: Hawking radiation is a firm prediction of quantum field theory near a horizon, but no telescope has seen it. In the far future an engineer finds **Ember**, a small black hole left over from the Big Bang (such primordial holes are allowed by theory, but none has ever been found), drifting through empty space with only the cosmic microwave background, at $2.725$ K, around it. The plan: run a heat engine between Ember’s Hawking radiation and the CMB. Before anyone builds anything, the thermodynamics has to be checked — counting states, temperature from entropy, heat capacities, engines, free energy, information, stars and blackbody radiation, all at once. Five rounds, thirteen problems, no hints, one try each.`,
   pass: 0.7,
   rounds: [
     // ── round 1 ──
@@ -174,7 +173,7 @@ export default boss({
           why: { 1: 'Equal temperatures give no net flow, but stability needs a positive heat capacity: a fluctuation must push the temperature back, and here it pushes it further away.', 2: 'The reservoir’s size does not help: in the canonical ensemble σ(E)² = kT²C, which cannot be negative.', 3: 'They absorb everything that falls in and (in theory) radiate: they exchange heat freely.' },
           hints: ['Suppose Ember absorbs a little extra from the reservoir. What happens to its temperature, and so to the next exchange?', t`In the canonical ensemble $\sigma_E^2 = kT^2C$. What if $C < 0$?`],
           teach: 'A system with negative heat capacity cannot sit in stable equilibrium with a heat bath.',
-          explain: t`Gaining energy lowers $T_H$ below the reservoir, so Ember absorbs more and keeps cooling; losing energy raises $T_H$, so it radiates more and keeps heating. The equilibrium exists but is unstable — the canonical formula $\sigma_E^2 = kT^2C$ would need a negative variance. A black hole can only be described microcanonically (Hawking, 1976; Gibbons and Perry).`,
+          explain: t`Gaining energy lowers $T_H$ below the reservoir, so Ember absorbs more and keeps cooling; losing energy raises $T_H$, so it radiates more and keeps heating. The equilibrium exists but is unstable — the canonical formula $\sigma_E^2 = kT^2C$ would need a negative variance. A black hole can be in stable equilibrium only inside a box small enough, with its total energy fixed — the microcanonical ensemble (Hawking, 1976).`,
           visual: { type: 'graph', params: { x: [0, 4], y: [0, 4], aspect: 'wide', axesAt: 'edge', xlabel: 'energy U', ylabel: 'temperature T', xticks: 0, yticks: 0, curves: [{ fn: '0.6 + 0.8*x', domain: [0, 4], color: 'accent', label: 'ordinary body, C > 0', labelAt: 2.6, labelDy: -12, labelDx: -40 }, { fn: '4/(x + 0.6)', domain: [0.4, 4], color: 'violet', label: 'black hole, C < 0', labelAt: 3.1, labelDy: 14 }], hlines: [{ y: 1.6, color: 'ink3', label: 'reservoir' }] }, caption: 'Sketch: an ordinary body (blue) is pushed back to the reservoir’s temperature by heat flow; a black hole (violet) is pushed away from it.' },
         }),
       ],
@@ -191,8 +190,8 @@ export default boss({
             const choices = ['Net energy flows out of the hole: it shrinks, and so heats up further', 'Net energy flows into the hole: it grows, and so cools further', 'Net energy flows into the hole: it grows, and so warms up', 'Net energy flows out of the hole: it shrinks, and so cools down'];
             const answer = out ? 0 : 1;
             const why = out
-              ? { 1: `Its predicted T(H) = ${texNum(T, 3).replace(/\\times 10\^\{(-?\d+)\}/, ' × 10^$1')} K is above the CMB’s 2.725 K, so it emits more than it absorbs.`, 2: 'It is hotter than the CMB, so energy leaves; and gaining mass would cool it, not warm it.', 3: 'Losing mass raises T(H) ∝ 1/M: it heats as it shrinks.' }
-              : { 0: 'Its predicted T(H) is below the CMB’s 2.725 K, so it absorbs more than it emits.', 2: 'Gaining mass lowers T(H) ∝ 1/M: it cools as it grows.', 3: 'It is colder than the CMB, so energy flows in, not out.' };
+              ? { 1: t`Its predicted $T_H = ${texNum(T, 3)}$ K is above the CMB’s $2.725$ K, so it emits more than it absorbs.`, 2: 'It is hotter than the CMB, so energy leaves; and gaining mass would cool it, not warm it.', 3: 'Losing mass raises T(H) ∝ 1/M: it heats as it shrinks.' }
+              : { 0: t`Its predicted $T_H = ${texNum(T, 3)}$ K is below the CMB’s $2.725$ K, so it absorbs more than it emits.`, 2: 'Gaining mass lowers T(H) ∝ 1/M: it cools as it grows.', 3: 'It is colder than the CMB, so energy flows in, not out.' };
             return {
               prompt: t`A black hole of ${what} sits in today’s CMB at $2.725$ K. Treating both as blackbodies, which way does net energy flow, and what happens to the hole’s temperature as a result?`,
               choices, answer, why,
@@ -214,7 +213,7 @@ export default boss({
               hints: ['The Carnot limit: e = 1 − T(c)/T(h), with absolute temperatures.', t`$T_h = ${fmt(T, 4)}$ K, $T_c = 2.725$ K.`],
               teach: 'No engine beats the Carnot efficiency 1 − T(c)/T(h) — even one burning a black hole’s radiation.',
               explain: t`$e_\text{max} = 1 - 2.725/${fmt(T, 4)} = ${fmt(eff, 3)}$. The second law does not care what the hot reservoir is made of. (And with $C < 0$, every joule taken from Ember makes it hotter, so the efficiency would creep up as it ran.)`,
-              visual: { type: 'therm-pv', params: { mode: 'flow', device: 'engine', Qh: 4, Qc: 1, W: 3, labels: { Qh: 'Q(h) from Ember’s radiation', Qc: 'Q(c) = ?', W: 'W = ?', hot: 'Ember at T(H)', cold: 'CMB at 2.725 K', device: 'Carnot engine' } }, caption: 'Energy flow through an engine between Ember and the CMB. Arrow widths are illustrative, not this engine’s numbers.' },
+              visual: { type: 'therm-pv', params: { mode: 'flow', device: 'engine', Qh: 4, Qc: 1, W: 3, labels: { Qh: 'Q(h)', Qc: 'Q(c) = ?', W: 'W = ?', hot: 'Ember at T(H)', cold: 'CMB at 2.725 K', device: 'Carnot engine' } }, caption: 'Energy flow through an engine taking heat Q(h) from Ember’s radiation and rejecting Q(c) to the CMB. Arrow widths are illustrative, not this engine’s numbers.' },
             };
           },
         }),
@@ -284,7 +283,7 @@ export default boss({
             return {
               prompt: t`A stellar core made of ${what} has $\mu_e = ${frac}$ nucleons per electron. Its ideal Chandrasekhar mass is $M_\text{Ch} = 3.098\left(\dfrac{\hbar c}{G}\right)^{3/2}\dfrac{1}{(\mu_e m_p)^2}$, which is $${fmt(M2, 4)}\,M_\odot$ for $\mu_e = 2$. What is it for this core, in solar masses?`,
               answer: M, units: 'Msun', tol: { rel: 0.005 },
-              errors: apart([{ value: M2 * (2 / mue), feedback: 'M(Ch) ∝ 1/μₑ²: square the ratio 2/μₑ.' }, { value: M2 * (mue / 2) ** 2, feedback: 'More nucleons per electron means fewer electrons for the same mass: the limit falls.' }, { value: M2 * 4 / (mue * mue) * 2, feedback: 'Start from the μₑ = 2 value and multiply by (2/μₑ)².' }], M),
+              errors: apart([{ value: M2 * (2 / mue), feedback: 'M(Ch) ∝ 1/μₑ²: square the ratio 2/μₑ.' }, { value: M2 * (mue / 2) ** 2, feedback: 'More nucleons per electron means fewer electrons for the same mass: the limit falls.' }], M),
               hints: [t`$M_\text{Ch} \propto 1/\mu_e^2$, so $M_\text{Ch} = ${fmt(M2, 4)}\,(2/\mu_e)^2\,M_\odot$.`, t`$\mu_e = ${fmt(mue, 4)}$.`],
               teach: 'Electron degeneracy can hold up at most about 1.4 solar masses: above it, a core collapses.',
               explain: t`$M_\text{Ch} = ${fmt(M2, 4)}\times(2/${fmt(mue, 4)})^2 = ${fmt(M, 3)}\,M_\odot$. ${mue === 2 ? 'This is the white-dwarf limit.' : 'An iron-group core that outgrows this collapses in under a second;'} if what is left is heavy enough, not even neutron pressure stops it, and a stellar black hole forms — a hole of several solar masses, tens of millions of times colder than the CMB.`,
@@ -299,7 +298,7 @@ export default boss({
             return {
               prompt: t`In the far future the CMB will have cooled far below Ember’s temperature, and Ember will evaporate unopposed. Counting photons only, a hole evaporates in $t = \dfrac{5120\pi G^2M^3}{\hbar c^4}$. For $M = ${texNum(M, 2)}$ kg, how long is that, in years?`,
               answer: life, units: 'yr', tol: { rel: 0.01 },
-              errors: apart([{ value: life * YEAR, feedback: 'That is in seconds: divide by 3.156 × 10⁷ s per year.' }, { value: life / (M / 1), feedback: 'The mass is cubed.' }], life),
+              errors: apart([{ value: life * YEAR, feedback: 'That is in seconds: divide by 3.156 × 10⁷ s per year.' }, { value: (5120 * Math.PI * G * G * M * M) / (HBAR * CL ** 4) / YEAR, feedback: 'The mass is cubed: M³, not M².' }], life),
               hints: [t`$\dfrac{5120\pi G^2}{\hbar c^4} = ${texNum((5120 * Math.PI * G * G) / (HBAR * CL ** 4), 4)}$ s kg⁻³.`, t`Multiply by $M^3$, then divide by $3.156\times10^7$ s/yr.`],
               teach: 'Evaporation time grows as M³: holes much heavier than a mountain outlive the present universe by unimaginable factors.',
               explain: t`$t = ${texNum(life, 3)}$ yr — some $10^{${Math.floor(Math.log10(life / 1.38e10))}}$ times the present age of the universe. Its last moments would be the fastest: with $C < 0$ it heats as it shrinks, ending (in theory) in a burst of radiation. Real emission includes other particles, which shortens this somewhat; and all of it remains unobserved.`,
@@ -312,4 +311,3 @@ export default boss({
   ],
 });
 
-export { MOON, NB };

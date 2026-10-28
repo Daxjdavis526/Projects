@@ -35,25 +35,25 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
   visual: {
     type: 'graph',
     title: 'Moments of a Gaussian',
-    lead: t`The curve is $x^{2n}e^{-ax^2}$; the shaded area is computed numerically and compared with the closed form $\Gamma(n + \frac12)/a^{n + 1/2}$.`,
+    lead: t`The curve is $x^{2n}e^{-ax^2}$, drawn scaled to peak 1 so every case fits; the readouts give its true area, computed numerically, beside the closed form $\Gamma(n + \frac12)/a^{n + 1/2}$.`,
     tasks: [
       'n = 0: the area is √(π/a). Quadruple a and the area halves — the Gaussian is half as wide.',
       'Raise n: the two humps sit at x = ±√(n/a), where the power and the exponential balance.',
       'Compare the readouts for any n and a: they agree to every digit shown.',
     ],
     params: {
-      x: [-5, 5], y: [0, 1.6], xlabel: 'x', ylabel: '', aspect: 'wide', axesAt: 'edge',
+      x: [-6, 6], y: [0, 1.15], xlabel: 'x', ylabel: '', aspect: 'wide', axesAt: 'edge',
       sliders: [
         { key: 'n', label: 'Moment $n$ (power $x^{2n}$)', min: 0, max: 4, step: 1, value: 1, unit: '', explain: 'The power of $x$ is $2n$.' },
         { key: 'a', label: 'Sharpness $a$', min: 0.3, max: 3, step: 0.1, value: 1, unit: '', explain: 'Larger $a$: a narrower Gaussian.' },
       ],
-      curves: [{ fn: 'x^(2n)*e^(-a*x^2)', color: 'accent', width: 2.3 }, { fn: 'e^(-a*x^2)', color: 'ink4', width: 1.2, dash: [4, 4] }],
-      shade: [{ fn: 'x^(2n)*e^(-a*x^2)', from: -5, to: 5, alpha: 0.18 }],
+      curves: [{ fn: 'x^(2n)*e^(-a*x^2)/((n/a)^n*e^(-n))', color: 'accent', width: 2.3 }, { fn: 'e^(-a*x^2)', color: 'ink4', width: 1.2, dash: [4, 4] }],
+      shade: [{ fn: 'x^(2n)*e^(-a*x^2)/((n/a)^n*e^(-n))', from: -6, to: 6, alpha: 0.18 }],
       vlines: [{ x: 'sqrt(n/a)', color: 'gold', when: 'step(n - 0.5)' }, { x: '-sqrt(n/a)', color: 'gold', when: 'step(n - 0.5)' }],
       integral: { fn: 'x^(2n)*e^(-a*x^2)', from: -12, to: 12 },
       readouts: [{ label: 'area (numerical) =', expr: 'integral', digits: 5 }, { label: '$\\Gamma(n + \\frac12)/a^{n + 1/2} =$', expr: 'gamma(n + 0.5)/a^(n + 0.5)', digits: 5 }],
     },
-    caption: 'Numerical area by Simpson’s rule over −12 < x < 12, where the tails are negligible; dotted: the bare Gaussian. Gold lines: the peaks at ±√(n/a).',
+    caption: 'Curves scaled to peak height 1; the area readout is for the unscaled integrand, by Simpson’s rule over −12 < x < 12, where the tails are negligible. Dotted: the bare Gaussian. Gold lines: the peaks at ±√(n/a).',
   },
   example: {
     prompt: t`Prove $\int_{-\infty}^\infty e^{-ax^2}dx = \sqrt{\pi/a}$, then get $\int x^2e^{-ax^2}dx$ and $\int x^4e^{-ax^2}dx$ without integrating by parts.`,

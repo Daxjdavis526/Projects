@@ -104,7 +104,7 @@ The integrator knows none of this — so these three numbers become **independen
     title: 'Drift against wobble',
     lead: t`The orbit $(r_p, r_a) = (7, 16)M$ for $10^5M$ of proper time — about ${Math.round(TX / TR)} radial periods — at a deliberately coarse step $h = 8M$, so that long-time behaviour shows in a short run. Each dot is the largest error in a window of time, on log–log axes. First RK4 on the six equations: all three monitors. Then the same orbit in **Hamiltonian form**, $H = \tfrac12 g^{\mu\nu}p_\mu p_\nu$ with $E = -p_t$ and $L = p_\varphi$, where only $u\cdot u = 2H$ can drift.`,
     tasks: [
-      'RK4 on the geodesic equation: after the first few orbits every monitor climbs along a slope-1 line — errors growing in proportion to the time run.',
+      'RK4 on the geodesic equation: after the first few orbits every monitor climbs roughly along the slope-1 line — errors growing about in proportion to the time run.',
       'RK4 in Hamiltonian form: E and L cannot drift (they are the momenta of coordinates H does not contain), but u·u still climbs at slope 1.',
       `Implicit midpoint, a symplectic method, in the same form: u·u wobbles at a fixed level and never grows. It starts worse — it is only second order — and RK4 overtakes it ${CROSS ? `near τ = ${(CROSS / 1e4).toFixed(1)}×10⁴M` : 'late in the run'}.`,
     ],

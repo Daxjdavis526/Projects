@@ -161,10 +161,10 @@ export async function mount(F, P0) {
 
   const plot = {};
   if (cv.swing) plot.swing = new Plot(cv.swing.canvas, { x: [-1.4, 1.4], y: [-1.3, 1.3], equal: true, grid: false, axes: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
-  if (cv.time) plot.time = new Plot(cv.time.canvas, { x: [0, 1], y: [-1, 1], xlabel: 't (s)', ylabel: 'φ (rad)', pad: { l: 52, r: 14, t: 14, b: 36 } });
-  if (cv.phase) plot.phase = new Plot(cv.phase.canvas, { x: [-PI, PI], y: [-1, 1], xlabel: 'φ (rad, wrapped)', ylabel: 'φ̇ (rad/s)', pad: { l: 52, r: 14, t: 14, b: 36 } });
-  if (cv.sep) plot.sep = new Plot(cv.sep.canvas, { x: [0, 1], y: [-1, 1], xlabel: 't (s)', ylabel: 'ln |Δφ|', pad: { l: 52, r: 14, t: 14, b: 36 } });
-  if (cv.bif) plot.bif = new Plot(cv.bif.canvas, { x: P.bif, y: [-1, 1], xlabel: 'drive strength γ', ylabel: 'φ once per period (rad)', pad: { l: 56, r: 14, t: 14, b: 36 }, xticks: 6 });
+  if (cv.time) plot.time = new Plot(cv.time.canvas, { x: [0, 1], y: [-1, 1], axesAt: 'edge', xlabel: 't (s)', ylabel: 'φ (rad)', pad: { l: 52, r: 14, t: 14, b: 36 } });
+  if (cv.phase) plot.phase = new Plot(cv.phase.canvas, { x: [-PI, PI], y: [-1, 1], axesAt: 'edge', xlabel: 'φ (rad, wrapped)', ylabel: 'dφ/dt (rad/s)', pad: { l: 52, r: 14, t: 14, b: 36 } });
+  if (cv.sep) plot.sep = new Plot(cv.sep.canvas, { x: [0, 1], y: [-1, 1], axesAt: 'edge', xlabel: 't (s)', ylabel: 'ln |Δφ|', pad: { l: 52, r: 14, t: 14, b: 36 } });
+  if (cv.bif) plot.bif = new Plot(cv.bif.canvas, { x: P.bif, y: [-1, 1], axesAt: 'edge', xlabel: 'drive strength γ', ylabel: 'φ once per period (rad)', pad: { l: 56, r: 14, t: 14, b: 36 }, xticks: 6 });
 
   const upto = (R) => { let n = R.t.length; if (Number.isFinite(S.cur)) { n = 0; while (n < R.t.length && R.t[n] <= S.cur) n++; } return Math.max(1, n); };
 
@@ -183,7 +183,7 @@ export async function mount(F, P0) {
     bob(R.phi[n], 'accent');
     // the drive torque's phase: an arrow whose length is γ cos ωt
     const tt = R.t[n], drv = Math.cos(P.w * tt);
-    p.arrow(0, 1.12, 0.9 * drv * Math.min(1, +F.params.gamma), 1.12, { color: 'gold', width: 2.2, head: 8 });
+    p.arrow(0, 1.12, 0.9 * drv, 1.12, { color: 'gold', width: 2.2, head: 8 });
     p.text('drive', -1.38, 1.12, { color: 'gold', size: 11 });
     p.text(`t = ${tt.toFixed(2)} s`, 1.38, -1.2, { color: 'ink3', size: 11, align: 'right' });
   }
