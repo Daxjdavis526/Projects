@@ -63,7 +63,12 @@ export function mount(F, P) {
   const start = [vec(own[0], E0), vec(own[1], E0)];
   const pts = [...start, [start[0][0] + start[1][0], start[0][1] + start[1][1]]];
   if (P.ghost) { const g = P.ghost.map((c) => vec(c, E0)); pts.push(...g, [g[0][0] + g[1][0], g[0][1] + g[1][1]]); }
-  if (P.b) pts.push(vec(P.b, E0));
+  if (P.b) {
+    const b = vec(P.b, E0);
+    pts.push(b);
+    // Cramer's picture: the parallelogram with column k replaced by b reaches b + (the other column)
+    if (P.cramer) { const o = start[2 - P.cramer]; pts.push([b[0] + o[0], b[1] + o[1]]); }
+  }
   const fr = D.frame(pts, across);
   const half = P.view || fr.half, centre = P.center || fr.centre;
   const plot = new Plot(canvas, { x: [centre[0] - across * half, centre[0] + across * half], y: [centre[1] - half, centre[1] + half], equal: true, xlabel: '', ylabel: '', axes: true, grid: true });

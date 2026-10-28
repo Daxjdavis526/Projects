@@ -242,7 +242,7 @@ print(r, len(N), len(LN))
       id: 'cp-truss', difficulty: 3, transfer: true,
       gen(r) {
         for (let k = 0; k < 200; k++) {
-          const d = r.pick([4, 6, 8]), b = r.int(3, 9), rk = r.int(Math.max(2, Math.min(d, b) - 2), Math.min(d, b)), ask = r.pick(['left', 'null']);
+          const d = r.pick([4, 6, 8]), b = r.int(Math.max(3, d - 2), Math.min(9, d + 3)), rk = r.int(Math.max(2, Math.min(d, b) - 2), Math.min(d, b)), ask = r.pick(['left', 'null']);
           const mech = d - rk, self = b - rk, ans = ask === 'left' ? mech : self;
           if (ans === 0) continue;
           return {

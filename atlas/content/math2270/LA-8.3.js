@@ -57,15 +57,15 @@ where $A_i$ is $A$ with its column $i$ replaced by $\mathbf b$. The reason is on
     title: 'A solution as a ratio of areas',
     lead: t`The columns $\mathbf a_1 = (3, 1)$ and $\mathbf a_2 = (1, 2)$ of $A$ span the blue parallelogram (area $\det A = 5$). The gold arrow is $\mathbf b$, set by the sliders. The orange parallelogram is $(\mathbf b, \mathbf a_2)$ — the columns of $A_1$; slide its corner $\mathbf b$ along $\mathbf a_2$ (dotted) and it becomes the dashed $(x_1\mathbf a_1, \mathbf a_2)$ without changing area. So $x_1 = \det A_1/\det A$.`,
     tasks: [
-      'Start: b = (5, 5). The orange area is 5, so x₁ = 5/5 = 1 — and indeed b = 1·a₁ + 2·a₂.',
+      'Start: b = (7, 4). The orange area is 10, twice the blue, so x₁ = 2 — and indeed b = 2a₁ + a₂.',
       'Move b by a₂ (b₁ up 1, b₂ up 2): the orange parallelogram shears but keeps its area; x₁ does not change.',
       'Put b on the line of a₂, at (2, 4): the orange parallelogram is flat, so x₁ = 0.',
     ],
     params: {
-      cols: [[3, 1], [1, 2]], b: ['b1', 'b2'], cramer: 1, view: 3.6, center: [2.2, 2.6],
+      cols: [[3, 1], [1, 2]], b: ['b1', 'b2'], cramer: 1,
       sliders: [
-        { key: 'b1', label: t`$b_1$`, min: -2, max: 7, step: 0.5, value: 5, explain: t`First component of the right-hand side $\mathbf b$.` },
-        { key: 'b2', label: t`$b_2$`, min: -2, max: 7, step: 0.5, value: 5, explain: t`Second component of $\mathbf b$.` },
+        { key: 'b1', label: t`$b_1$`, min: -2, max: 8, step: 0.5, value: 7, explain: t`First component of the right-hand side $\mathbf b$.` },
+        { key: 'b2', label: t`$b_2$`, min: -2, max: 7, step: 0.5, value: 4, explain: t`Second component of $\mathbf b$.` },
       ],
       readout: ['det', 'cramer'],
     },
@@ -73,7 +73,7 @@ where $A_i$ is $A$ with its column $i$ replaced by $\mathbf b$. The reason is on
   },
   example: {
     prompt: t`Solve $3x + 2y = 7$, $x + 4y = 9$ by Cramer's rule.`,
-    visual: detPic([[3, 1], [2, 4]], { b: [7, 9], cramer: 2, view: 5.2, center: [3.5, 4.5], names: ['a₁', 'a₂'], caption: 'Column 2 replaced by b (orange) has twice the area of A’s own parallelogram (blue): y = 2. Sliding b along a₁ onto 2a₂ (dashed) shows why.' }),
+    visual: detPic([[3, 1], [2, 4]], { b: [7, 9], cramer: 2, names: ['a₁', 'a₂'], caption: 'Column 2 replaced by b (orange) has twice the area of A’s own parallelogram (blue): y = 2. Sliding b along a₁ onto 2a₂ (dashed) shows why.' }),
     steps: [
       { label: 'Determinant', text: t`$A = ${matTeX([[3, 2], [1, 4]])}$, $\det A = 12 - 2 = 10 \ne 0$: one solution.` },
       { label: 'First unknown', text: t`Replace column 1 by $\mathbf b = (7, 9)$: $\det A_1 = \det${matTeX([[7, 2], [9, 4]])} = 28 - 18 = 10$, so $x = 10/10 = 1$.` },
@@ -220,7 +220,7 @@ $$${R1 + R3}I_1 - ${R3}I_2 = ${E1}, \qquad -${R3}I_1 + ${R2 + R3}I_2 = -${E2}$$
           hints: [t`$A = \begin{bmatrix} 1 & 0 \\ \cos ${phi}^\circ & \sin ${phi}^\circ \end{bmatrix}$, so $\det A = \sin ${phi}^\circ$.`, t`$\Delta x = \det A_1/\det A = 0$ and $\Delta y = \det A_2/\det A = ${d}/\sin ${phi}^\circ$.`],
           teach: 'A small determinant divides into every unknown: nearly parallel lines of sight turn a small range error into a large position error.',
           explain: t`$\det A = \sin ${phi}^\circ = ${nice(s)}$. $\Delta x = 0$ and $\Delta y = \det\begin{bmatrix} 1 & 0 \\ \cos ${phi}^\circ & ${d} \end{bmatrix}/\sin ${phi}^\circ = ${d}/${nice(s)} = ${nice(ans)}$ m. With beacons at right angles the error stays ${d} m; as the two directions close up, $\det A \to 0$ and the error grows without bound. Satellite navigation calls this **dilution of precision**: GPS geometry with the satellites bunched in one part of the sky gives poor fixes, which is why receivers prefer satellites spread across the sky.`,
-          visual: detPic([[1, 0], [Math.cos(phi * DEG), s]], { names: ['u₁', 'u₂'], tint: false, arc: false, view: 1.2, center: [0.6, 0.45], caption: 'The two unit directions to the beacons and the parallelogram they span: its area is det A = sin φ. A thin parallelogram means a poor fix.' }),
+          visual: detPic([[1, 0], [Math.cos(phi * DEG), s]], { names: ['u₁', 'u₂'], tint: false, arc: false, caption: 'The two unit directions to the beacons and the parallelogram they span: its area is det A = sin φ. A thin parallelogram means a poor fix.' }),
         };
       },
     }),

@@ -399,8 +399,14 @@ Inside `t\`…\`` a `${…}` is always an interpolation; write `\${` only if you
 want the characters `${` themselves (they will not be substituted).
 
 Interpolating right after a `$`: `$${x}$` is math holding x, but a lone
-`${x}` is only the interpolation — so `t\`T = ${R3} = 0$\`` opens no math
-and leaves a stray `$`. Write `$${R3} = 0$` (the test catches the odd `$`).
+`${x}` is only the interpolation. So a template reading `T = ${R3} = 0$`
+opens no math and leaves a stray `$` at the end; write `T = $${R3} = 0$`
+(the test catches the odd `$`).
+
+If you edit lesson files with a script, keep the TeX raw there too: in an
+ordinary Python string `\v`, `\t`, `\r`, `\f`, `\b` and `\n` become control
+characters (`\vec` → vertical tab + "ec"). Use raw strings (`r'''…'''`); the
+content test catches the damage.
 
 When a generator builds an expression or TeX from pieces, bracket each
 piece: with `HX = '1 + x'`, `${HX}^2` reads as `1 + x^2`, so write
@@ -475,6 +481,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
 | `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
 | `de-plane`, `de-tracedet`, `de-modes` | phase planes of any 2D system (nullclines, typed equilibria, eigenvector lines, conserved-quantity contours and separatrices, launchable trajectories, e^{At} carrying a shape); the trace–determinant map beside the phase portrait; coupled masses and CO₂ with normal modes, beats and energy bars |
+| `de-poles` | the poles of a transfer function H(s), draggable in the s-plane, beside the exact impulse or step response, each pole's term, and the gain |H(iω)| with the probe iω |
 | `py-memory`, `py-sort` | Python's memory as names pointing at objects (frames, lists, dicts, NumPy views into a buffer), stepped line by line from authored steps; insertion sort, merge sort and binary search one comparison at a time |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |

@@ -1,6 +1,6 @@
 // Hydrogen's orbitals, ψₙₗₘ = Rₙₗ(r) Yₗₘ(θ, φ), in three views. Left: the
 // probability cloud as a slice through the nucleus in a vertical plane
-// containing the z-axis (brightness ∝ |ψ|, so faint outer shells stay
+// containing the z-axis (brightness ∝ |ψ|^½, so faint outer shells stay
 // visible; real orbitals coloured by the sign of ψ). Middle: the angular
 // factor alone as a polar plot — the distance from the centre in each
 // direction is |Yₗₘ|² (for a real orbital, its square, coloured by sign).
@@ -116,7 +116,7 @@ export function mount(F, P0) {
             vals[j * res + i] = v; vmax = Math.max(vmax, Math.abs(v));
           }
           for (let k = 0; k < vals.length; k++) {
-            const v = vals[k], I = Math.min(1, Math.abs(v) / vmax);
+            const v = vals[k], I = Math.min(1, Math.sqrt(Math.abs(v) / vmax));     // brightness ∝ |ψ|^½ = (|ψ|²)^¼
             const c = real && P.sign && v < 0 ? neg : pos;
             img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = Math.round(255 * Math.min(1, I * 1.08));
           }
@@ -151,10 +151,13 @@ export function mount(F, P0) {
           const flush = () => {
             if (seg.length < 2) { seg = []; return; }
             const neg2 = real && P.sign && seg[Math.floor(seg.length / 2)].sg < 0;
+            const pt = (p) => [cxp + (s ? -1 : 1) * p.r * Math.sin(p.th) * sc, cyp - p.r * Math.cos(p.th) * sc];
             ctx.save(); ctx.beginPath(); ctx.moveTo(cxp, cyp);
-            for (const p of seg) { const u = (s ? -1 : 1) * p.r * Math.sin(p.th), z = p.r * Math.cos(p.th); ctx.lineTo(cxp + u * sc, cyp - z * sc); }
+            for (const p of seg) ctx.lineTo(...pt(p));
             ctx.closePath();
             ctx.fillStyle = neg2 ? C.warn : C.accent; ctx.globalAlpha = 0.28; ctx.fill();
+            // outline only the curve itself, not the closing spokes
+            ctx.beginPath(); seg.forEach((p, i) => (i ? ctx.lineTo(...pt(p)) : ctx.moveTo(...pt(p))));
             ctx.globalAlpha = 1; ctx.strokeStyle = neg2 ? C.warn : C.accent; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
             seg = [];
           };
@@ -186,11 +189,12 @@ export function mount(F, P0) {
     const mark = (r, color, label, row) => {
       if (r > rmax) return;
       pr.line(r, 0, r, yT, { color, width: 1.6, dash: [5, 4] });
-      pr.text(label, r, yT * (row ? 0.8 : 0.92), { color, size: fs - 0.5, dx: 5 });
+      // the most probable radius is labelled to the left of its line, ⟨r⟩ (always further out) to the right
+      pr.text(label, r, yT * (row ? 0.8 : 0.92), { color, size: fs - 0.5, dx: row ? 5 : -5, align: row ? 'left' : 'right' });
     };
     if (marks.has('peak')) mark(O.peakR(n, l), 'gold', `most probable: ${O.peakR(n, l).toFixed(2)} a₀`, 0);
     if (marks.has('mean')) mark(O.meanR(n, l), 'violet', `⟨r⟩ = ${O.meanR(n, l).toFixed(2)} a₀`, 1);
-    if (marks.has('bohr')) { pr.line(n * n, 0, n * n, yT, { color: 'ink3', width: 1.4, dash: [2, 3] }); pr.text(`Bohr orbit n²a₀ = ${n * n} a₀`, n * n, yT * 0.68, { color: 'ink3', size: fs - 1, dx: 5 }); }
+    if (marks.has('bohr')) { pr.line(n * n, 0, n * n, yT, { color: 'ink3', width: 1.4, dash: [2, 3] }); pr.text(`Bohr orbit: n²a₀ = ${n * n} a₀`, n * n, yT * 0.5, { color: 'ink3', size: fs - 1, dx: 5 }); }
     if (marks.has('nodes')) {
       let prev = O.radial(n, l, 1e-6);
       for (let i = 1; i <= 4000; i++) { const r = (rmax * i) / 4000, v = O.radial(n, l, r); if (v * prev < 0) { pr.point(r, 0, { color: 'bad', r: 4.5 }); pr.text('node', r, 0, { color: 'bad', size: fs - 1, dy: -12, align: 'center' }); } if (v !== 0) prev = v; }
@@ -217,7 +221,7 @@ export function mount(F, P0) {
     readout(S, real);
   }
   F.draw(draw);
-  F.caption(P.caption || 'Hydrogen’s exact wave functions (no spin, fine structure or reduced-mass correction). The cloud is a slice through the nucleus; its brightness shows |ψ|, the square root of the probability density, so faint outer shells stay visible. The angular plot is the direction-dependence alone; P(r) is the chance per unit radius of finding the electron at distance r. Distances in Bohr radii, a₀ = 0.0529 nm.');
+  F.caption(P.caption || 'Hydrogen’s exact wave functions (no spin, fine structure or reduced-mass correction). The cloud is a slice through the nucleus; its brightness grows as the fourth root of the probability density, so faint outer shells stay visible. The angular plot is the direction-dependence alone; P(r) is the chance per unit radius of finding the electron at distance r. Distances in Bohr radii, a₀ = 0.0529 nm.');
   return { get: (k) => F.params[k] };
 }
 

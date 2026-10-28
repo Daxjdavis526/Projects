@@ -90,6 +90,7 @@ export default [
   { id: 'phase-plane', title: 'Phase planes of nonlinear systems', track: 'math', blurb: 'A nonlinear system’s whole story: equilibria, nullclines, separatrices, and trajectories you launch.', lesson: 'math2280.DE-5.4' },
   { id: 'trace-det', title: 'The trace–determinant map', track: 'math', blurb: 'Every 2×2 linear system on one map — drag the point, watch the phase portrait change type.', lesson: 'math2280.DE-5.2' },
   { id: 'normal-modes', title: 'Normal modes and beats', track: 'math', blurb: 'Energy sloshing between coupled masses, and CO₂’s stretching modes.', lesson: 'math2280.DE-4.5' },
+  { id: 'laplace-poles', title: 'Poles and responses', track: 'math', blurb: 'Drag the poles of a transfer function and watch the impulse response, the step response and the frequency response change with them.', lesson: 'math2280.DE-6.5' },
   { id: 'ibp', title: 'Integration by parts as areas', track: 'math', blurb: 'Two areas that always add up to uv.', spec: { type: 'ibp-area', params: {} } },
   { id: 'series', title: 'Series: converge or refuse to', track: 'math', blurb: 'Partial sums, error bands and convergence tests: watch a series converge — or refuse to.', lesson: 'math1220.C2-4.9' },
   { id: 'alternating', title: 'The alternating-series error band', track: 'math', blurb: 'Each partial sum overshoots and the next pulls back; the sum is trapped in the band.', lesson: 'math1220.C2-4.7' },

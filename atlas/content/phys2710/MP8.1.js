@@ -28,7 +28,7 @@ const CUBE = (() => { const out = []; for (let s = 3; s <= 30; s++) { const g = 
 /** A slice through a cubic box state: |X(x)Y(y)|² over the square face (surface3d). */
 const slice = (nx, ny, caption) => ({
   type: 'surface3d',
-  params: { z: `1.6*(sin(${nx}*pi*x)*sin(${ny}*pi*y))^2`, domain: [[0, 1], [0, 1]], n: 40, yaw: 0.6, pitch: 0.55, dist: 4.2, target: [0.5, 0.5, 0.5] },
+  params: { z: `1.6*(sin(${nx}*pi*x)*sin(${ny}*pi*y))^2`, domain: [[0, 1], [0, 1]], n: 40, yaw: 0.6, pitch: 0.55, dist: 2.9, target: [0.5, 0.5, 0.6] },
   caption,
 });
 
@@ -51,13 +51,14 @@ const singleValued = {
   params: {
     x: [-3.4, 3.4], y: [-1.55, 1.55], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [
-      { polar: '1', theta: [0, 6.2832], color: 'ink4', width: 1, dash: [3, 4] },
+      { param: ['-1.8 + cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: [3, 4] },
+      { param: ['1.8 + cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: [3, 4] },
       { param: ['-1.8 + (1 + 0.35*cos(2*t))*cos(t)', '(1 + 0.35*cos(2*t))*sin(t)'], t: [0, 6.2832], color: 'accent', width: 2.4 },
       { param: ['1.8 + (1 + 0.35*cos(1.5*t))*cos(t)', '(1 + 0.35*cos(1.5*t))*sin(t)'], t: [0, 6.2832], color: 'bad', width: 2.4 },
     ],
-    points: [label(-1.8, -1.45, 'm = 2: joins itself after 2π', 'accent', 0, 0, 'center'), label(1.8, -1.45, 'm = 1.5: a jump where φ = 0 meets 2π', 'bad', 0, 0, 'center'), { x: 3.15, y: 0, r: 4, color: 'bad' }, { x: 2.15, y: 0, r: 4, color: 'bad' }],
+    points: [label(-1.8, -1.45, 'm = 2: joins itself after 2π', 'accent', 0, 0, 'center'), label(1.8, -1.45, 'm = 1.5: a jump where φ = 0 meets 2π', 'bad', 0, 0, 'center'), { x: 3.15, y: 0, r: 4, color: 'bad' }, { x: 2.45, y: 0, r: 4, color: 'bad' }],
   },
-  caption: 'The real part of Φ = e^(imφ), drawn as a ripple around a circle (radius 1 + 0.35 cos mφ). Going once around, φ returns to the same place: Φ must return to the same value.',
+  caption: 'The real part of Φ = e^(imφ), drawn as a ripple around a circle (radius 1 + 0.35 cos mφ, dashed: radius 1). Going once around, φ returns to the same place: Φ must return to the same value.',
 };
 
 /** The radial effective potential −27.2/r + 13.6·l(l+1)/r² (eV, r in a₀). */

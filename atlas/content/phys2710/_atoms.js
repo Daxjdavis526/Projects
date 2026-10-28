@@ -200,3 +200,50 @@ export function xrfSpectrum(peaks, { x = [0, 10], ask = null, caption, numbers =
     caption: caption ?? 'An X-ray fluorescence spectrum, schematic: peak heights illustrative, widths those of a good silicon drift detector.',
   };
 }
+
+/**
+ * An energy-level diagram (a graph): levels as horizontal lines with labels
+ * at the right, and vertical arrows between them. Energies are in whatever
+ * unit the caller chooses; the picture is drawn to that scale.
+ *   list:   [{ E, label, color, x0, x1 }]  (x0, x1: the line’s ends; default 0 and 4)
+ *   arrows: [{ from, to, x, color, label, dash }] — the label sits beside the arrow’s middle
+ */
+export function levels(list, { arrows = [], caption, x = [-1.5, 9], pad = 0.12, aspect = 'wide' } = {}) {
+  const Es = list.map((l) => l.E), lo = Math.min(...Es), hi = Math.max(...Es), span = hi - lo || 1;
+  const curves = [], points = [], arr = [];
+  for (const l of list) {
+    const x0 = l.x0 ?? 0, x1 = l.x1 ?? 4;
+    curves.push(seg(x0, l.E, x1, l.E, l.color || 'ink2', l.width || 2.4, !!l.dash));
+    if (l.label) points.push(label(x1, l.E, l.label, l.color || 'ink2', 8, l.dy ?? 0, 'left'));
+  }
+  for (const a of arrows) {
+    arr.push({ from: [a.x, r6(a.from)], to: [a.x, r6(a.to)], color: a.color || 'gold', width: a.width || 2.4, ...(a.dash ? { dash: [5, 4] } : {}) });
+    if (a.label) points.push(label(a.x, (a.from + a.to) / 2, a.label, a.color || 'gold', a.left ? -7 : 7, 0, a.left ? 'right' : 'left'));
+  }
+  return {
+    type: 'graph',
+    params: frame(x, [r6(lo - pad * span), r6(hi + pad * span)], { aspect, equal: false, curves, points, arrows: arr }),
+    caption,
+  };
+}
+
+/**
+ * The Maxwell–Boltzmann energy distribution against E/kT (a graph): the
+ * density of states ∝ √E and the Boltzmann factor e^(−E/kT) (dashed), and
+ * their product, normalized (solid). marks: any of 'peak', 'mean'.
+ */
+export function mbEnergy({ marks = ['peak', 'mean'], caption, parts = true } = {}) {
+  const curves = [{ fn: '1.1284*sqrt(x)*exp(-x)', color: 'accent', width: 2.8 }];
+  const points = [];
+  if (parts) {
+    curves.push({ fn: '0.42*sqrt(x)', color: 'violet', width: 1.6, dash: true }, { fn: 'exp(-x)', color: 'warn', width: 1.6, dash: true });
+    points.push(label(5.4, 0.42 * Math.sqrt(5.4), 'states: ∝ √E', 'violet', 0, -12, 'right'), label(0.9, Math.exp(-0.9), 'Boltzmann factor', 'warn', 8, -4, 'left'), label(2.6, 1.1284 * Math.sqrt(2.6) * Math.exp(-2.6), 'their product', 'accent', 8, -8, 'left'));
+  }
+  if (marks.includes('peak')) points.push({ x: 0.5, y: r6(1.1284 * Math.sqrt(0.5) * Math.exp(-0.5)), r: 5, color: 'gold', label: 'most probable: kT/2', labelDx: 8, labelDy: -12 });
+  if (marks.includes('mean')) points.push({ x: 1.5, y: r6(1.1284 * Math.sqrt(1.5) * Math.exp(-1.5)), r: 5, color: 'good', label: 'mean: 3kT/2', labelDx: 8, labelDy: -8 });
+  return {
+    type: 'graph',
+    params: { x: [0, 6], y: [0, 1.1], aspect: 'wide', xlabel: 'kinetic energy E / kT', ylabel: 'share per unit of E/kT', axesAt: 'edge', curves, points },
+    caption: caption ?? 'The Maxwell–Boltzmann distribution of kinetic energies, the same for every ideal gas at a given temperature: the number of states rises as √E, the Boltzmann factor falls as e^(−E/kT), and their product peaks at kT/2.',
+  };
+}

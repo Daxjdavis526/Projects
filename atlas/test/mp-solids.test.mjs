@@ -50,6 +50,7 @@ check('one sun gives an ideal silicon cell about 39 mA/cm²; a wider gap fewer',
 check('model cells: GaAs beats silicon, which beats germanium (an optimum near 1.4 eV)', (() => { const p = (k) => { const j = S.junction(k, 0, 1); return S.mpp(j.I0, j.IL).P; }; return p('gaas') > p('si') && p('si') > p('ge') && p('gaas') > p('ingan'); })());
 check('silicon’s gap absorbs light shorter than 1107 nm; GaAs emits at 873 nm', near(S.ledNm(1.12), 1107, 1e-3) && near(S.ledNm(1.42), 873.1, 1e-3));
 check('the model diodes turn on near E_g − 0.5 V (10 mA): Si 0.60 V, GaAs 0.90 V', near(S.kT() * Math.log(1e-2 / S.junction('si', 0).I0), 0.595, 3e-3) && near(S.kT() * Math.log(1e-2 / S.junction('gaas', 0).I0), 0.895, 3e-3));
+check('the model silicon junction has the textbook V_bi = 0.714 V and W = 0.43 μm', near(S.junction('si', 0).Vbi, 0.714, 1e-9) && near(S.junction('si', 0).W, 4.298e-7, 2e-3));
 check('forward bias shrinks the depletion region, reverse bias widens it', S.junction('si', 0.5).W < S.junction('si', 0).W && S.junction('si', -2).W > S.junction('si', 0).W);
 
 // ---- superconductors

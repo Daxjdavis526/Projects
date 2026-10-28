@@ -145,11 +145,12 @@ export const ledNm = (E) => HC_EVNM / E;
 
 /**
  * The p–n junction of the mp-junction simulation: NA = ND = 10¹⁶ cm⁻³, 1 cm²,
- * 300 K. Each side’s Fermi level sits 0.19 eV inside its band (kT ln(N_c/N_D) with
- * N_c ≈ 1.5 × 10¹⁹ cm⁻³), so V_bi = E_g − 0.38 V; I₀ ∝ n_i² ∝ e^(−E_g/kT), scaled to
- * 1 pA for silicon — a teaching model, not any particular device.
+ * 300 K. Each side’s Fermi level sits 0.203 eV inside its band (about kT ln(N_c/N_D)),
+ * chosen so that silicon’s V_bi is the textbook 0.714 V (n_i = 10¹⁰ cm⁻³); every
+ * material gets V_bi = E_g − 0.406 V. I₀ ∝ n_i² ∝ e^(−E_g/kT), scaled to 1 pA for
+ * silicon — a teaching model, not any particular device.
  */
-export const JUNCTION = { N: 1e22, delta: 0.19, I0si: 1e-12, T: 300 };
+export const JUNCTION = { N: 1e22, delta: 0.203, I0si: 1e-12, T: 300 };
 export function junction(key, V, light = 0) {
   const m = SEMIS[key], J = JUNCTION;
   const Vbi = m.Eg - 2 * J.delta, Vj = Math.max(0.02, Vbi - V);

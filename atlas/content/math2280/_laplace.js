@@ -42,7 +42,7 @@ export function fpic(fn, x, y, caption, extra = {}) {
   return {
     type: 'graph',
     params: {
-      x, y, xlabel: extra.xlabel ?? 't (s)', ylabel: extra.ylabel ?? 'f', aspect: 'wide',
+      x, y, xlabel: extra.xlabel ?? 't (s)', ylabel: extra.ylabel ?? 'f', aspect: extra.aspect ?? 'wide', xticks: extra.xticks, yticks: extra.yticks,
       curves: [...(extra.curves || []), ...(fn ? [{ fn, color: 'accent', width: 2.6, domain: extra.domain || [Math.max(0, x[0]), x[1]] }] : [])],
       shade: extra.shade, points: extra.points, hlines: extra.hlines, vlines: extra.vlines, arrows: extra.arrows, legend: extra.legend, legendAt: extra.legendAt,
     },

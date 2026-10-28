@@ -143,23 +143,14 @@ export function mount(F, P0) {
     // the bands
     plot.fn(Ec, { color: 'accent', width: 3 });
     plot.fn(Ev, { color: 'warn', width: 3 });
-    plot.text('conduction band', -1, m.Eg, { color: 'accent', dx: 4, dy: -12, size: fs });
-    plot.text('valence band', -1, 0, { color: 'warn', dx: 4, dy: 13, size: fs });
     // Fermi levels: one in equilibrium, split by eV under bias
     const EFp = S.JUNCTION.delta, EFn = m.Eg - Vj - S.JUNCTION.delta, split = Math.abs(St.V) > 0.005;
     plot.line(-1.05, EFp, split ? 0 : 1.05, EFp, { color: 'gold', width: 1.6, dash: [6, 4] });
     if (split) plot.line(0, EFn, 1.05, EFn, { color: 'gold', width: 1.6, dash: [6, 4] });
-    plot.text(split ? 'Fermi level (p)' : 'Fermi level', -0.62, EFp, { color: 'gold', dy: St.V > 0 ? 11 : -10, size: fs - 1 });
-    if (split) {
-      plot.text('Fermi level (n)', 0.62, EFn, { color: 'gold', dy: St.V > 0 ? -10 : 11, size: fs - 1 });
-      plot.arrow(0.03, EFp, 0.03, EFn, { color: 'gold', width: 1.4, head: 6 });
-      plot.text(`eV = ${f2(St.V)} eV`, 0.06, (EFp + EFn) / 2, { color: 'gold', size: fs - 1 });
-    }
     // the barrier an electron on the n side must climb
-    const xb = Math.min(0.95, xn + 0.18);
+    const xb = Math.min(0.9, xn + 0.1);
     plot.line(xb - 0.12, m.Eg, xb + 0.06, m.Eg, { color: 'violet', width: 1, dash: [3, 3] });
     plot.arrow(xb, Ec(1.05), xb, m.Eg, { color: 'violet', width: 1.6, head: 7 });
-    plot.text(hide.has('barrier') ? 'barrier: ?' : `barrier ${f2(Vj)} eV`, xb + 0.03, (Ec(1.05) + m.Eg) / 2, { color: 'violet', size: fs - 0.5 });
     // carriers: pixel offsets above the conduction band (electrons) or below the valence band (holes)
     const Cc = plot.col;
     const dot = (x, E, d, kind, alpha = 1) => {
@@ -173,6 +164,16 @@ export function mount(F, P0) {
       dot(x, c.kind === 'e' ? Ec(x) : Ev(x), c.d, c.kind, c.minority ? 0.85 : 1);
     }
     for (const c of moving) if (!(c.delay > 0)) dot(c.x, c.kind === 'e' ? Ec(c.x) : Ev(c.x), c.d, c.kind);
+    // labels last, on top of the carriers
+    plot.text('conduction band', -1, m.Eg, { color: 'accent', dx: 4, dy: -24, size: fs });
+    plot.text('valence band', -1, 0, { color: 'warn', dx: 4, dy: 26, size: fs });
+    plot.text(split ? 'Fermi level (p)' : 'Fermi level', -0.62, EFp, { color: 'gold', dy: -10, size: fs - 1 });
+    if (split) {
+      plot.text('Fermi level (n)', 0.62, EFn, { color: 'gold', dy: 11, size: fs - 1 });
+      plot.arrow(0.03, EFp, 0.03, EFn, { color: 'gold', width: 1.4, head: 6 });
+      plot.text(`eV = ${f2(St.V)} eV`, 0.06, (EFp + EFn) / 2, { color: 'gold', size: fs - 1 });
+    }
+    plot.text(hide.has('barrier') ? 'barrier: ?' : `barrier ${f2(Vj)} eV`, xb + 0.03, m.Eg, { color: 'violet', dy: -10, size: fs - 0.5 });
     // flashes: a pair made by a photon, or a recombination giving light (direct gap) or heat (indirect)
     const nm = S.ledNm(m.Eg), [r, gg, b] = wavelengthToRGB(nm), light = `rgb(${r}, ${gg}, ${b})`;
     for (const f of flashes) {
@@ -204,7 +205,7 @@ export function mount(F, P0) {
         gplot.rect(0, M.I * 1e3, M.V, -M.I * 1e3, { color: 'good', alpha: 0.18, width: 1 });
         gplot.text('maximum power', M.V / 2, (M.I * 1e3) / 2, { color: 'good', align: 'center', size: 11 });
       }
-      gplot.point(voc, 0, { color: 'ink2', r: 3.5, label: 'open circuit', ldx: 6, ldy: 10 });
+      gplot.point(voc, 0, { color: 'ink2', r: 3.5, label: 'open circuit', ldx: -8, ldy: -11, lalign: 'right' });
     }
     gplot.fn(I, { color: 'accent', width: 2.6 });
     gplot.point(St.V, Math.max(-1e9, Math.min(1e9, St.I * 1e3)), { color: 'gold', r: 5.5 });
@@ -241,7 +242,7 @@ export function mount(F, P0) {
   }
   F.onChange((k) => { if (k === 'material') showSlider(); if (!running) warm(); drawAll(); });
   F.draw(drawAll);
-  F.caption(P.caption || 'A teaching model of an ideal junction, 1 cm² across, doped 10¹⁶ cm⁻³ on each side, at 300 K. Positions are to scale; carriers are a sprinkling, not their real numbers (about 10¹⁶ per cm³ of each majority). The current is the ideal-diode law with I₀ ∝ e^(−E_g/kT), scaled to a typical silicon diode; real diodes and LEDs need a few tenths of a volt more (series resistance, recombination in the junction). Sunlight is a 5772 K blackbody of 1000 W/m², every photon above the gap giving one electron.');
+  F.caption(P.caption || 'A teaching model of an ideal junction, 1 cm² across, doped 10¹⁶ cm⁻³ on each side, at 300 K. Positions are to scale; carriers are a sprinkling, not their real numbers (about 10¹⁶ per cm³ of each majority). The current is the ideal-diode law with $I_0 \\propto e^{-E_g/kT}$, scaled to a typical silicon diode; real diodes and LEDs need a few tenths of a volt more (series resistance, recombination in the junction). Sunlight is a 5772 K blackbody of 1000 W/m², every photon above the gap giving one electron.');
   return { get: (k) => (k === 'V' ? now().V : F.params[k]) };
 }
 

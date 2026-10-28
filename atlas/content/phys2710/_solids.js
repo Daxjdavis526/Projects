@@ -116,3 +116,29 @@ export function gapPicture(Eg, { name = '', arrow = null, arrowColor = 'gold', g
     extra: { ...extra, points: [...pts, ...(extra.points || [])], arrows: [...(arrow ? [{ from: [0.5, 0], to: [0.5, Eg], color: arrowColor, width: 2.4 }] : []), ...(extra.arrows || [])] },
   });
 }
+
+/**
+ * A static band diagram of a p–n junction (a sketch, not to scale): the bands step down
+ * by the barrier Vb (eV) across a depletion region, with one flat Fermi level.
+ */
+export function junctionSketch({ Vb = 0.714, Eg = 1.12, barrierLabel = 'barrier', caption, extra = {} } = {}) {
+  const Ec = `${Eg} - ${r6(Vb)}*(0.5 + 0.5*tanh(x/0.2))`, d = (Eg - Vb) / 2;
+  return {
+    type: 'graph',
+    params: {
+      x: [-1, 1], y: [r6(-Vb - 0.55), r6(Eg + 0.6)], aspect: 'wide', axesAt: 'edge', xlabel: 'position', xticks: 0, yticks: 0, ylabel: 'electron energy',
+      shade: [{ fn: String(r6(Eg + 0.6)), lower: String(r6(-Vb - 0.55)), from: -0.35, to: 0.35, color: 'gold', alpha: 0.08 }],
+      curves: [{ fn: Ec, color: 'accent', width: 2.8 }, { fn: `${Ec} - ${Eg}`, color: 'warn', width: 2.8 }, { fn: String(r6(d)), color: 'gold', width: 1.6, dash: true }],
+      arrows: [{ from: [0.7, r6(Eg - Vb)], to: [0.7, Eg], color: 'violet', width: 1.8 }],
+      points: [
+        label(-0.98, Eg, 'conduction band', 'accent', 0, -11, 'left'), label(-0.98, 0, 'valence band', 'warn', 0, 12, 'left'),
+        label(-0.6, Eg + 0.6, 'p-type', 'warn', 0, 10, 'center'), label(0.6, Eg + 0.6, 'n-type', 'accent', 0, 10, 'center'),
+        label(0, Eg + 0.6, 'depletion region', 'gold', 0, 24, 'center'), label(0.98, d, 'Fermi level', 'gold', 0, 11, 'right'),
+        label(0.74, Eg - Vb / 2, barrierLabel, 'violet', 0, 0, 'left'),
+        ...(extra.points || []),
+      ],
+      ...Object.fromEntries(Object.entries(extra).filter(([k]) => k !== 'points')),
+    },
+    caption: caption ?? 'A sketch of a p–n junction’s bands in equilibrium: they step down from the p side to the n side across the depletion region (shaded), while the Fermi level stays flat. Not to scale.',
+  };
+}

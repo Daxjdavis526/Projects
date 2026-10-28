@@ -81,6 +81,12 @@ export function intDir(v) {
   return f < 0 ? w.map((x) => -x) : w;
 }
 
+/** A matrix of TeX strings (symbolic entries such as '2 - \\lambda') as a bmatrix; numbers pass through. */
+export const symTeX = (M) => `\\begin{bmatrix} ${M.map((row) => row.map((v) => (typeof v === 'number' ? String(v) : v)).join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+
+/** A numeric matrix as TeX with decimals (never fractions): for measured or rounded entries. */
+export const decTeX = (M) => `\\begin{bmatrix} ${M.map((row) => row.map((v) => String(+v.toFixed(4))).join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+
 // ── pictures ──
 /** An arrow and a basis on ten-basis: numbers hidden, nothing draggable unless asked. */
 export const basisPic = (basis, vector, { caption, names = ['b₁', 'b₂'], vname = 'x', readout = false, construction = false, grid = 'basis', drag = false, ...rest } = {}) => ({
