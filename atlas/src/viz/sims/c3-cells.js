@@ -15,6 +15,7 @@
 //       P: '-y', Q: 'x', x: [-2.6, 2.6], y: [-1.8, 1.8],    // the field; the window (equal scales)
 //       region: { kind: 'rect', x: [-1.5, 1.5], y: [-1, 1] }   // or { kind: 'disk', c: [0, 0], r: 1.5 }
 //                                                           //    { kind: 'annulus', c: [0, 0], r: [0.6, 1.8] }
+//       regions: null,                 // or [{ label: 'Disk', kind: 'disk', … }, …]: a choice of regions
 //       n: 3, nSlider: true, nMax: 10, // cells across (a rectangle: n columns; a disk or annulus: n rings × 4n sectors)
 //       probe: [0.4, 0.3],             // a draggable point (null: none): its cell is outlined and read out
 //       edges: true,                   // little arrows round every cell (shown while there are few cells)
@@ -48,12 +49,14 @@ export function mount(F, P) {
   const modes = (P.modes || []).filter((m) => MODES.includes(m));
   if (modes.length > 1) F.choice({ key: '__mode', label: 'Picture', options: modes.map((m) => [m, NAMES[m]]), value: modes.includes(P.mode) ? P.mode : modes[0], explain: 'The same idea in each: cut into pieces, and the inside boundaries cancel.' });
   else F.params.__mode = MODES.includes(P.mode) ? P.mode : 'circ';
+  const regions = (P.regions || []).filter((R) => R && R.kind);
+  if (regions.length > 1) F.choice({ key: '__region', label: 'Region', options: regions.map((R, k) => [k, R.label || R.kind]), value: 0, explain: 'A region with a hole has two boundary curves: the outer one walked anticlockwise, the inner one clockwise — the region always on your left.' });
   if (P.nSlider !== false && !F.compact) F.slider({ key: '__n', label: 'Cells across', min: 1, max: P.nMax || 10, step: 1, value: P.n ?? 3, explain: 'Cut finer: the cells always add up to the boundary, and each cell’s value per unit size settles on the derivative at its centre.' });
   else F.params.__n = P.n ?? 3;
 
   const plot = new Plot(canvas, { x: P.x, y: P.y, equal: true, xlabel: 'x', ylabel: 'y' });
-  const probe = P.probe ? { x: P.probe[0], y: P.probe[1] } : null;
-  if (probe && !F.compact) { plot.handle(() => [probe.x, probe.y], (x, y) => { probe.x = x; probe.y = y; }, { hollow: true }); plot.onDrag = () => draw(); }
+  const probe = P.probe && !F.compact ? { x: P.probe[0], y: P.probe[1] } : null;
+  if (probe) { plot.handle(() => [probe.x, probe.y], (x, y) => { probe.x = x; probe.y = y; }, { hollow: true }); plot.onDrag = () => draw(); }
 
   const env = () => { const e = { ...(P.constants || {}) }; for (const k of keys) if (F.params[k] !== undefined) e[k] = +F.params[k]; return e; };
   let cache = null;
@@ -69,7 +72,7 @@ export function mount(F, P) {
     }
     const p = fn(P.P ?? 0, vars), q = fn(P.Q ?? 0, vars);
     const field = (x, y) => [p({ ...E, x, y }), q({ ...E, x, y })];
-    const R0 = P.region || defaults.region;
+    const R0 = regions.length ? regions[regions.length > 1 ? +F.params.__region || 0 : 0] : P.region || defaults.region;
     let R;
     if (R0.kind === 'rect') {
       const w = R0.x[1] - R0.x[0], hgt = R0.y[1] - R0.y[0];
@@ -210,11 +213,13 @@ export function validate(P) {
   for (const m of modes) if (!MODES.includes(m)) out.push(`c3-cells mode “${m}” is not one of ${MODES.join(', ')}`);
   if (modes.some((m) => m !== 'interval')) {
     tryParse(P.P, ['x', 'y'], 'P'); tryParse(P.Q, ['x', 'y'], 'Q');
-    const R = P.region || {};
-    if (R.kind === 'rect') { if (!(R.x?.[0] < R.x?.[1] && R.y?.[0] < R.y?.[1])) out.push('c3-cells rect region needs x: [lo, hi] and y: [lo, hi]'); }
-    else if (R.kind === 'disk') { if (!(R.r > 0)) out.push('c3-cells disk region needs r > 0'); }
-    else if (R.kind === 'annulus') { if (!(Array.isArray(R.r) && R.r[0] > 0 && R.r[0] < R.r[1])) out.push('c3-cells annulus region needs r: [inner, outer] with 0 < inner < outer'); }
-    else out.push(`c3-cells region kind “${R.kind}” must be rect, disk or annulus`);
+    for (const R of P.regions?.length ? P.regions : [P.region || {}]) {
+      if (R.label !== undefined && /\$|\\/.test(R.label)) out.push(`c3-cells region label “${R.label}” is plain text (a button): no TeX`);
+      if (R.kind === 'rect') { if (!(R.x?.[0] < R.x?.[1] && R.y?.[0] < R.y?.[1])) out.push('c3-cells rect region needs x: [lo, hi] and y: [lo, hi]'); }
+      else if (R.kind === 'disk') { if (!(R.r > 0)) out.push('c3-cells disk region needs r > 0'); }
+      else if (R.kind === 'annulus') { if (!(Array.isArray(R.r) && R.r[0] > 0 && R.r[0] < R.r[1])) out.push('c3-cells annulus region needs r: [inner, outer] with 0 < inner < outer'); }
+      else out.push(`c3-cells region kind “${R.kind}” must be rect, disk or annulus`);
+    }
   }
   if (modes.includes('interval')) { tryParse(P.f, ['x'], 'f'); if (!(+P.a < +P.b)) out.push('c3-cells interval mode needs a < b'); }
   if (!(Number.isInteger(P.n) && P.n >= 1 && P.n <= (P.nMax || 10))) out.push('c3-cells n must be a whole number from 1 to nMax');

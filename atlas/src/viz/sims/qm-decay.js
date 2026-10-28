@@ -121,18 +121,20 @@ export function mount(F, P0) {
     ]);
   }
 
+  // the clock runs only while playing; a paused or still picture is redrawn only when something changes
   const reduced = () => document.documentElement.getAttribute('data-motion') === 'reduce' || !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  let running = (P.play ?? !F.compact) && !reduced() && t < P.tmax;
-  let loop = F.animate((dt) => {
-    if (running) { t = Math.min(P.tmax, t + F.params.speed * dt); if (t >= P.tmax) { running = false; if (btn) btn.textContent = 'Play'; } }
+  let running = false, loop = null, btn = null;
+  const tick = (dt) => {
+    if (running) { t = Math.min(P.tmax, t + F.params.speed * dt); if (t >= P.tmax) stop(); }
     draw(); readout();
-  });
-  let btn = null;
+  };
+  function start(force) { running = true; if (btn) btn.textContent = 'Pause'; loop?.stop(); loop = F.animate(tick, { force }); }
+  function stop() { running = false; if (btn) btn.textContent = 'Play'; loop?.stop(); loop = null; }
+  if ((P.play ?? !F.compact) && !reduced() && t < P.tmax) start(false);
   if (!F.compact) {
     btn = F.button({ label: running ? 'Pause' : 'Play', primary: true, onClick: () => {
-      if (t >= P.tmax) t = 0;
-      running = !running; btn.textContent = running ? 'Pause' : 'Play';
-      loop.stop(); loop = F.animate((dt) => { if (running) { t = Math.min(P.tmax, t + F.params.speed * dt); if (t >= P.tmax) { running = false; btn.textContent = 'Play'; } } draw(); readout(); }, { force: running });
+      if (running) stop();
+      else { if (t >= P.tmax) t = 0; start(true); }      // Play is a request for motion, so it runs even under reduced motion
       draw(); readout();
     } });
     F.button({ label: 'New sample', onClick: () => { seed++; t = 0; newSample(); draw(); readout(); } });
