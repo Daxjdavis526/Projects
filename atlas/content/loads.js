@@ -679,6 +679,7 @@ export const LESSONS = {
   'phys3750.W1.2': () => import('./phys3750/W1.2.js'),
   'phys3750.W10.1': () => import('./phys3750/W10.1.js'),
   'phys3750.W10.2': () => import('./phys3750/W10.2.js'),
+  'phys3750.W11.1': () => import('./phys3750/W11.1.js'),
   'phys3750.W2.1': () => import('./phys3750/W2.1.js'),
   'phys3750.W2.2': () => import('./phys3750/W2.2.js'),
   'phys3750.W3.1': () => import('./phys3750/W3.1.js'),

@@ -90,8 +90,8 @@ export function mount(F, P0) {
       plot.text('rising branch', (-0.35 * Hr) / sc, L.B(m, -0.35 * Hr, 'up'), { dx: -6, dy: 14, size: fs, color: 'violet', align: 'right' });
     }
     // remanence and coercivity marks
-    plot.point(0, br, { r: 4, color: 'accent', label: 'Bᵣ', ldx: 8, ldy: -10 });
-    plot.point(-hc / sc, 0, { r: 4, color: 'accent', label: 'H꜀', ldx: -6, ldy: -12, lalign: 'right' });
+    plot.point(0, br, { r: 4, color: 'accent', label: 'Br', ldx: 8, ldy: -10 });
+    plot.point(-hc / sc, 0, { r: 4, color: 'accent', label: 'Hc', ldx: -6, ldy: -12, lalign: 'right' });
     let rows = [];
     const q = (k, v) => (hide.has(k) ? '?' : v);
     if (magnet) {
