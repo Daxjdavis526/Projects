@@ -135,7 +135,7 @@ export default lesson({
         const E = m * G * L * (1 - Math.cos(deg * DEG)), w0 = Math.sqrt(G / L), P = (w0 * E) / Q;
         return {
           prompt: t`A pendulum clock's ${m} kg bob on a ${L} m rod swings ${deg}° each side, and its quality factor is $Q = ${sci(Q, 2)}$. How much power must the escapement feed in to keep the amplitude steady? Give it in µW.`,
-          answer: P * 1e6, units: 'uW', tol: { rel: 0.01 },
+          answer: P * 1e6, units: 'µW', tol: { rel: 0.01 },
           errors: [{ value: ((w0 * E) / Q) * 1e6 * 2, feedback: t`$Q = \omega_0/2\beta$ means $2\beta = \omega_0/Q$: the loss rate is $2\beta E = \omega_0E/Q$, not $2\omega_0E/Q$.` }, { value: (E / Q) * 1e6, feedback: t`$E/Q$ has units of energy; the power is $\omega_0E/Q$.` }],
           hints: [t`The energy is $E = mgL(1 - \cos\theta_0)$; it is lost at $P = 2\beta E$.`, t`$2\beta = \omega_0/Q$ with $\omega_0 = \sqrt{g/L}$.`],
           teach: t`A driven steady state replaces exactly the energy damping removes: $P = 2\beta E = \omega_0E/Q$.`,

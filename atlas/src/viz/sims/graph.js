@@ -186,6 +186,7 @@ export function validate(P) {
   for (const r of P.readouts || []) {
     tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
     if (r.digits !== undefined && !(Number.isInteger(r.digits) && r.digits >= 1 && r.digits <= 15)) problems.push(`graph: readout digits are significant figures, a whole number from 1 to 15 (got ${r.digits})`);
+    if (r.zero !== undefined && !(r.zero >= 0)) problems.push(`graph: readout zero is a threshold, a number ≥ 0 (got ${r.zero})`);
   }
   return problems;
 }
@@ -222,7 +223,7 @@ function ev(src, env, vars) {
 function fmtVal(v, r) {
   if (!Number.isFinite(v)) return '\\text{—}';
   const d = r.digits ?? 4;
-  if (Math.abs(v) < 1e-12) v = 0;          // round-off, not a value: show 0, not 3.3×10⁻¹⁶
+  if (Math.abs(v) < (r.zero ?? 1e-12)) v = 0;   // round-off, not a value: show 0, not 3.3×10⁻¹⁶ (zero: 0 for truly tiny quantities)
   const a = Math.abs(v);
   const s = a !== 0 && (a >= 1e5 || a < 1e-3) ? `${v.toExponential(d - 1).replace(/e([+-]\d+)/, (m, e) => `\\times10^{${+e}}`)}` : String(+v.toPrecision(d));
   return r.unit ? `${s}\\,${r.unit}` : s;
