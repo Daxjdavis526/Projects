@@ -16,7 +16,7 @@
 // Physics: model/cm4-rigid.js (test/cm4-rigid.test.mjs).
 //
 //   { type: 'cm4-rigid', params: {
-//       I: [1, 2, 3],            // principal moments (kg m²), in the order of axes 1, 2, 3
+//       I: [1, 2, 2.6],            // principal moments (kg m²), in the order of axes 1, 2, 3
 //       axis: 2,                 // the axis the spin starts near (1, 2, 3)
 //       tilt: 3,                 // how far ω starts from that axis (deg), toward the next axis
 //       w: 2,                    // |ω| at the start (rad/s)
@@ -45,7 +45,7 @@ import { Plot, themeColors } from '../plot.js';
 import * as M from '../model/cm4-rigid.js';
 
 export const defaults = {
-  I: [1, 2, 3], axis: 2, tilt: 3, w: 2, damp: 0, T: 40, controls: ['axis', 'tilt', 'damp'], panels: ['body', 'sphere', 'omega'],
+  I: [1, 2, 2.6], axis: 2, tilt: 3, w: 2, damp: 0, T: 40, controls: ['axis', 'tilt', 'damp'], panels: ['body', 'sphere', 'omega'],
   dims: null, family: true, ellipsoid: false, vectors: ['L', 'w'], trail: true, play: true, at: null, rate: 2, readout: true, hide: [],
   yaw: 0.65, pitch: 0.32, syaw: 0.75, spitch: 0.38,
 };
@@ -102,7 +102,7 @@ export function mount(F, P0) {
   // cameras: two View3D's drawn into one canvas (left/right, or top/bottom on a phone)
   const dummy = () => document.createElement('canvas');
   const V = {
-    body: new View3D(dummy(), { yaw: P.yaw, pitch: P.pitch, dist: 9, scale: 1 }),
+    body: new View3D(dummy(), { yaw: P.yaw, pitch: P.pitch, dist: 9, scale: 1, target: [0, 0, 0.6] }),
     sphere: new View3D(dummy(), { yaw: P.syaw, pitch: P.spitch, dist: 9, scale: 1 }),
   };
   let regions = [];
@@ -161,7 +161,7 @@ export function mount(F, P0) {
     const I = Inow();
     let d = P.dims ? P.dims.slice() : M.boxFromMoments(I, 1);
     const big = Math.max(...d) || 1;
-    d = d.map((x) => (2.3 * x) / big);
+    d = d.map((x) => (3.0 * x) / big);
     const q = M.displayQuat(r, n), rot = (p) => M.qrot(q, p);
     // faces
     const h = d.map((x) => x / 2);
@@ -198,6 +198,18 @@ export function mount(F, P0) {
     }
   }
 
+  // a curve on the sphere of radius R: the part facing the camera solid, the far side faint and dashed
+  function onSphere(v, pts, R, o) {
+    const eye = v._B.eye, front = (p) => p[0] * eye[0] + p[1] * eye[1] + p[2] * eye[2] > R * R * 1.0001;
+    let run = [pts[0]], f = front(pts[0]);
+    const flush = () => { if (run.length > 1) v.line(run, f ? o : { ...o, color: o.back || 'ink4', width: Math.max(0.8, (o.width || 1) * 0.6), dash: [3, 4], bias: -0.5 }); };
+    for (let k = 1; k < pts.length; k++) {
+      const g = front(pts[k]);
+      if (g !== f) { run.push(pts[k]); flush(); run = [pts[k]]; f = g; } else run.push(pts[k]);
+    }
+    flush();
+  }
+
   // ── L seen from the body: the sphere and its polhodes ──
   function drawSphere(v, r, n) {
     const I = Inow(), R = 2.0;
@@ -208,9 +220,9 @@ export function mount(F, P0) {
       for (let b = 0; b <= 32; b++) { const ph = (2 * Math.PI * b) / 32; row.push([R * Math.sin(th) * Math.cos(ph), R * Math.sin(th) * Math.sin(ph), R * Math.cos(th)]); }
       grid.push(row);
     }
-    v.surface(grid, { color: 'ink3', alpha: 0.1, wire: false });
+    v.surface(grid, { color: 'ink3', alpha: 0.16, wire: false });
     for (let k = 0; k < 3; k++) {
-      const e = [0, 0, 0]; e[k] = R + 0.6;
+      const e = [0, 0, 0]; e[k] = R + 0.45;
       v.line([e.map((x) => -x), e], { color: AXC[k], width: 1.4, dash: [4, 4] });
       v.label(e.map((x) => x * 1.12), String(k + 1), { color: AXC[k], size: 13 });
     }
@@ -224,7 +236,7 @@ export function mount(F, P0) {
         for (const bdeg of [15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165]) {
           const b = (bdeg * Math.PI) / 180, pts = [];
           for (let m = 0; m <= 120; m++) { const p = [0, 0, 0], f = (2 * Math.PI * m) / 120; p[ax] = R * Math.cos(b); p[o1] = R * Math.sin(b) * Math.cos(f); p[o2] = R * Math.sin(b) * Math.sin(f); pts.push(p); }
-          v.line(pts, { color: 'ink3', width: 1 });
+          onSphere(v, pts, R, { color: 'ink3', width: 1 });
         }
       } else {
         const hs = [];
@@ -232,8 +244,8 @@ export function mount(F, P0) {
           const b = (bdeg * Math.PI) / 180, c2 = Math.cos(b) ** 2, s2 = Math.sin(b) ** 2;
           hs.push(c2 / I[s[0]] + s2 / I[s[1]], c2 / I[s[2]] + s2 / I[s[1]]);
         }
-        for (const hh of hs) for (const c of M.polhode(I, hh, R, 120)) v.line(c, { color: 'ink3', width: 1 });
-        for (const c of M.polhode(I, 1 / I[s[1]], R, 160)) v.line(c, { color: 'violet', width: 2 });
+        for (const hh of hs) for (const c of M.polhode(I, hh, R, 120)) onSphere(v, c, R, { color: 'ink3', width: 1.1 });
+        for (const c of M.polhode(I, 1 / I[s[1]], R, 160)) onSphere(v, c, R, { color: 'violet', width: 2, back: 'violet' });
       }
     }
     if (P.ellipsoid) {
@@ -250,7 +262,7 @@ export function mount(F, P0) {
       const pts = [];
       for (let m = 0; m <= n; m += 2) pts.push(unit(m));
       pts.push(unit(n));
-      v.line(pts, { color: 'gold', width: 2.2, bias: 0.06 });
+      onSphere(v, pts, R, { color: 'gold', width: 2.4, back: 'gold', bias: 0.06 });
     }
     const L = unit(n);
     v.arrow([0, 0, 0], L, { color: 'gold', width: 2.4 });
@@ -276,7 +288,7 @@ export function mount(F, P0) {
       for (const g of regions) {
         const v = V[g.key];
         v.ctx = ctx; v.w = g.w; v.h = g.h; v.col = col; v._B = v.basis(); v.items = [];
-        v.scale = g.key === 'sphere' ? 0.95 : 1.0;
+        v.scale = g.key === 'sphere' ? 1.12 : 1.15;
         ctx.save();
         ctx.translate(g.x, g.y);
         ctx.beginPath(); ctx.rect(0, 0, g.w, g.h); ctx.clip();
@@ -295,7 +307,7 @@ export function mount(F, P0) {
     if (gp) {
       let mx = 0.1;
       for (const w of r.w) for (const x of w) mx = Math.max(mx, Math.abs(x));
-      gp.setView([0, P.T], [-1.12 * mx, 1.12 * mx]);
+      gp.setView([0, P.T], [-1.12 * mx, 1.32 * mx]);
       gp.clear();
       for (let k = 0; k < 3; k++) {
         const pts = [];

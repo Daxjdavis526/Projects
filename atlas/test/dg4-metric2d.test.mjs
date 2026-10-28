@@ -206,6 +206,34 @@ check('Eddington–Finkelstein chart gives the same K, also inside 2M', close(K(
   for (const al of [-0.15, 0.15]) check(`Schwarzschild: varied path (α = ${al}) ages less`, D.pathLength(M.schwarzschild, D.varied(M.schwarzschild, g, al, 1), 1) < t0);
 }
 
+// ─── other connections on the same metrics ────────────────────────────────
+{
+  const th = 1.1, T = D.torsion(M.compass, 0.3, th);
+  check('compass connection: torsion T^φ_θφ = cot θ', close(T[0][1][0], 1 / tan(th), 1e-12) && close(T[0][0][1], -1 / tan(th), 1e-12));
+  const N = D.nablaG(M.compass, 0.3, th);
+  check('compass connection is metric-compatible', N.flat(2).every((x) => Math.abs(x) < 1e-12));
+  const C = D.curvature(M.compass, 0.3, th);
+  check('compass connection is flat (Riemann = 0)', [0, 1].every((r) => [0, 1].every((s2) => [0, 1].every((m) => [0, 1].every((n) => Math.abs(C.R4(r, s2, m, n)) < 1e-6)))));
+  const L = D.leviCivita(M.compass, 0.3, th), S = D.christoffel(M.sphere, 0.3, th);
+  check('leviCivita() of the compass sphere is the sphere’s own', [0, 1].every((l) => [0, 1].every((m) => [0, 1].every((n) => close(L[l][m][n], S[l][m][n], 1e-12)))));
+  // autoparallels keep their bearing: rhumb lines (θ̇ and sin θ φ̇ constant)
+  const u = D.launch(M.compass, 0, 1.2, 1, { heading: 0.6 });
+  const g = D.geodesic(M.compass, { a: 0, b: 1.2, u, length: 1.5, steps: 1500 });
+  const bear = g.vel.map(([up, ut], i) => Math.atan2(ut, Math.sin(g.pts[i][1]) * up));
+  check('compass autoparallels keep a constant bearing (rhumb lines)', Math.max(...bear.map((x) => Math.abs(x - bear[0]))) < 1e-9);
+  const R = D.routes(0.4, 0.7, 1.3, 1.5, 120);
+  const T1 = D.transport(M.compass, R.first, [0, 1]), T2 = D.transport(M.compass, R.second, [0, 1]);
+  check('compass connection: both routes agree (flat)', Math.abs(T1.at(-1)[0] - T2.at(-1)[0]) + Math.abs(T1.at(-1)[1] - T2.at(-1)[1]) < 1e-9);
+}
+{
+  const N = D.nablaG(M.stretch, 0.2, 0.1, 0.4), T = D.torsion(M.stretch, 0.2, 0.1, 0.4);
+  check('stretch connection: torsion-free', T.flat(2).every((x) => x === 0));
+  check('stretch connection: ∇_x g_xx = −2κ', close(N[0][0][0], -0.8, 1e-12));
+  const path = Array.from({ length: 201 }, (_, i) => [(1.5 * i) / 200, 0]);
+  const V = D.transport(M.stretch, path, [1, 0], 0.4);
+  check('stretch connection: transport along x shrinks V^x by e^{−κΔx}', close(V.at(-1)[0], Math.exp(-0.6), 1e-9));
+}
+
 // ─── the sim's validate() ─────────────────────────────────────────────────
 check('dg4-chart validates its defaults', validate({}).length === 0, validate({}).join('; '));
 check('dg4-chart rejects an unknown metric', validate({ metric: 'klein' }).length > 0);

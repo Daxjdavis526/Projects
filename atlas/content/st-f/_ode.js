@@ -61,7 +61,7 @@ export const DP5 = {
  */
 export function dopri(f, t0, y0, T, { rtol = 1e-6, atol = 1e-9, h0 = null, hmax = Infinity } = {}) {
   let t = t0, y = y0, h = h0 ?? T / 100;
-  const ts = [t], ys = [y], hs = [], rej = [];
+  const ts = [t], ys = [y], hs = [], rej = [], tries = [];
   let k1 = f(t, y), nfev = 1;
   while (t < t0 + T - 1e-14 * Math.abs(T)) {
     h = Math.min(h, hmax, t0 + T - t);
@@ -76,14 +76,34 @@ export function dopri(f, t0, y0, T, { rtol = 1e-6, atol = 1e-9, h0 = null, hmax 
     const y4 = y.map((v, n) => v + h * DP5.bh.reduce((s, bi, i) => s + bi * k[i][n], 0));
     const err = Math.sqrt(y5.reduce((s, v, n) => s + ((v - y4[n]) / (atol + rtol * Math.max(Math.abs(v), Math.abs(y[n])))) ** 2, 0) / y.length);
     const fac = Math.min(5, Math.max(0.2, 0.9 * Math.max(err, 1e-300) ** -0.2));
+    tries.push({ t, h, err, ok: err <= 1, next: h * (err <= 1 ? fac : Math.min(1, fac)) });
     if (err <= 1) { t += h; y = y5; k1 = k[6]; ts.push(t); ys.push(y); hs.push(h); }
     else rej.push([t, h]);
     h *= err <= 1 ? fac : Math.min(1, fac);
   }
-  return { ts, ys, hs, rejected: rej, nfev };
+  return { ts, ys, hs, rejected: rej, tries, nfev };
 }
 
 // ── implicit and symplectic steppers ────────────────────────────────────
+/**
+ * Adaptive Heun–Euler 2(1): Euler and Heun share the stage k₁, the error
+ * estimate is |y_H − y_E| = (h/2)|k₂ − k₁| (max norm), a step is accepted when
+ * it is ≤ tol, and h_new = 0.9 h (tol/err)^(1/2), clamped to [0.2, 5]×h. Keeps
+ * the Heun (second-order) result.
+ */
+export function heunEuler(f, t0, y0, T, tol, h0 = T / 100) {
+  let t = t0, y = y0, h = h0, steps = 0, rejects = 0;
+  while (t < t0 + T - 1e-14 * Math.abs(T)) {
+    h = Math.min(h, t0 + T - t);
+    const k1 = f(t, y), yE = axpy(y, h, k1), k2 = f(t + h, yE);
+    const err = Math.max(...k1.map((v, i) => (h / 2) * Math.abs(k2[i] - v)));
+    const fac = Math.min(5, Math.max(0.2, 0.9 * Math.sqrt(tol / Math.max(err, 1e-300))));
+    if (err <= tol) { y = y.map((v, i) => v + (h / 2) * (k1[i] + k2[i])); t += h; steps++; h *= fac; }
+    else { rejects++; h *= Math.min(1, fac); }
+  }
+  return { y, steps, rejects };
+}
+
 /** Velocity Verlet (kick–drift–kick) for x″ = a(x), x and v arrays. */
 export function verlet(a, x, v, h) {
   const a0 = a(x), vh = v.map((q, i) => q + (h / 2) * a0[i]);

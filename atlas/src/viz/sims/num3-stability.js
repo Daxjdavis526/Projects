@@ -109,12 +109,15 @@ export function mount(F, P0) {
     g.save();
     pA._clip();
     if (shade) {
+      // one path of cells filled once, so neighbouring cells do not double the alpha at their seams
       g.fillStyle = pA.color('accent');
       g.globalAlpha = 0.2;
+      g.beginPath();
       for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
         const c = (v[j * nx + i] + v[j * nx + i + 1] + v[(j + 1) * nx + i] + v[(j + 1) * nx + i + 1]) / 4;
-        if (c <= 0) g.fillRect(pA.L + i * cell, pA.T + j * cell, cell + 0.5, cell + 0.5);
+        if (c <= 0) g.rect(pA.L + i * cell, pA.T + j * cell, cell, cell);
       }
+      g.fill();
       g.globalAlpha = 1;
     }
     // the boundary |R| = 1 by marching squares
@@ -177,8 +180,9 @@ export function mount(F, P0) {
     const [lo, hi] = [-6.4, 6.4];
     pB.fn((n) => (n * W.z[0]) / Math.LN10, { color: 'ink3', width: 2, domain: [0, P.n] });
     for (let n = 0; n <= P.n; n++) {
-      const v = M.logGrowth(m, W.z, n).num, out = v > hi || v < lo;
-      pB.point(n, Math.max(lo, Math.min(hi, v)), { color: out ? 'bad' : W.a > 1 + 1e-12 ? 'bad' : 'accent', r: P.n > 60 ? 2 : 3.2 });
+      // values beyond the top are pinned there in red; below the bottom (decayed away) in grey
+      const v = M.logGrowth(m, W.z, n).num;
+      pB.point(n, Math.max(lo, Math.min(hi, v)), { color: v > hi ? 'bad' : v < lo ? 'ink3' : W.a > 1 + 1e-12 ? 'bad' : 'accent', r: P.n > 60 ? 2 : 3.2 });
     }
     const who = mode === 'point' ? 'z' : mode === 'mol' ? 'the worst grid mode' : 'the worst eigenvalue';
     pB.text(`dots: ${M.NAME[m]}, ${who} · line: exact e^(nz)`, pB.L + 6, pB.T + 10, { screen: true, size: fs, color: 'ink2' });

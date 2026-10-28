@@ -114,6 +114,7 @@ check('Lax–Wendroff converges at second order', oL > 1.85 && oL < 2.15, oL.toF
   const S = [50, 100].map((N) => K.runMaxwell({ N, scheme: 'staggered', tmax: 10 }));
   check('staggered Maxwell keeps Gauss’s law to round-off', S.every((R) => Math.max(...R.hist.map((h) => h[1])) < 1e-12));
   const C = [100, 200, 400].map((N) => K.runMaxwell({ N, scheme: 'collocated', tmax: 5 }));
+  check('collocated Maxwell starts with Gauss’s law satisfied to round-off', C.every((R) => R.hist[0][1] < 1e-12));
   const end = C.map((R) => R.hist[R.hist.length - 1][1]);
   check('collocated Maxwell drifts far above round-off', end[0] > 1e-2, end[0].toExponential(2));
   check('the collocated drift halves as Δx halves (first order)', end.slice(1).every((e, i) => Math.abs(Math.log2(end[i] / e) - 1) < 0.25), end.map((e) => e.toExponential(3)).join(' '));

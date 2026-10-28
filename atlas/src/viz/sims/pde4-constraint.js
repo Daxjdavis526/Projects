@@ -89,8 +89,9 @@ export function mount(F, P0) {
       tp.text('φ', narrow ? 0.65 : 0.5, 1.15, { color: 'gold', size: fs });
       tp.text('uₓ (dashed)', narrow ? 1.1 : 0.85, 1.15, { color: 'ink2', size: fs });
     }
-    tp.path(R.x.map((x, j) => [x, -0.8 + cs * S.C[j]]), { color: 'bad', width: 2 });
-    tp.text(`violation C, scaled to its largest value, ${texPlain(Cmax)}`, XR, -1.18, { align: 'right', dx: -4, size: fs, color: 'bad' });
+    const tiny = Cmax < 1e-12;
+    tp.path(R.x.map((x, j) => [x, -0.8 + (tiny ? 0 : cs * S.C[j])]), { color: 'bad', width: 2 });
+    tp.text(tiny ? `violation C: round-off only (largest ${texPlain(Cmax)})` : `violation C, scaled to its largest value, ${texPlain(Cmax)}`, XR, -1.18, { align: 'right', dx: -4, size: fs, color: 'bad' });
     tp.text(`t = ${S.t.toFixed(2)} s`, XR, 1.15, { align: 'right', dx: -4, size: fs, color: 'ink2' });
   }
 
@@ -120,7 +121,7 @@ export function mount(F, P0) {
       ['$t$', `${S.t.toFixed(2)}\\,\\text{s}`],
       ['$\\Delta x$', `${texNum(R.dx)}\\,\\text{m}`],
       ['$\\max|C|$', q('C', texNum(Cm))],
-      ['$\\max|C|$ now ÷ at $t = 0$', q('ratio', texNum(Cm / C0))],
+      mx ? null : ['$\\max|C|$ now ÷ at $t = 0$', q('ratio', texNum(Cm / C0))],
     ]);
   }
 
@@ -159,8 +160,8 @@ export function validate(P) {
   if (!['maxwell', 'wave'].includes(P.mode)) p.push('pde4-constraint: mode is maxwell or wave');
   if (!['staggered', 'collocated'].includes(P.scheme)) p.push('pde4-constraint: scheme is staggered or collocated');
   if (P.schemes != null && !(Array.isArray(P.schemes) && P.schemes.every((s) => ['staggered', 'collocated'].includes(s)) && P.schemes.includes(P.scheme))) p.push('pde4-constraint: schemes lists staggered/collocated and includes scheme');
-  if (!(Number.isInteger(P.N) && P.N >= 20 && P.N <= 400)) p.push('pde4-constraint: N is a whole number from 20 to 400');
-  if (P.Ns != null && !(Array.isArray(P.Ns) && P.Ns.includes(P.N) && P.Ns.every((n) => Number.isInteger(n) && n >= 20 && n <= 400))) p.push('pde4-constraint: Ns lists grid sizes (20–400) and includes N');
+  if (!(Number.isInteger(P.N) && P.N >= 20 && P.N <= 400 && P.N % 2 === 0)) p.push('pde4-constraint: N is an even whole number from 20 to 400');
+  if (P.Ns != null && !(Array.isArray(P.Ns) && P.Ns.includes(P.N) && P.Ns.every((n) => Number.isInteger(n) && n >= 20 && n <= 400 && n % 2 === 0))) p.push('pde4-constraint: Ns lists grid sizes (20–400) and includes N');
   if (!(P.gmin <= P.gamma && P.gamma <= P.gmax && P.gmin >= -2 && P.gmax <= 10)) p.push('pde4-constraint: gmin ≤ gamma ≤ gmax, within [−2, 10]');
   if (!(P.eps >= 0 && P.eps <= 0.3)) p.push('pde4-constraint: eps lies in [0, 0.3]');
   if (!(P.t >= 0 && P.t <= P.tmax && P.tmax > 0 && P.tmax <= 40)) p.push('pde4-constraint: 0 ≤ t ≤ tmax ≤ 40');

@@ -88,6 +88,21 @@ export const METRICS = {
     g: (a, b, k) => { const f = 1 - (2 * k) / a; return [1 / f, 0, -f]; },
     dg: (a, b, k) => { const f = 1 - (2 * k) / a, f1 = (2 * k) / (a * a); return [[-f1 / (f * f), 0, -f1], [0, 0, 0]]; },
   },
+  compass: {
+    // the sphere's metric with a different connection: the unit south and east vectors are declared constant
+    // (∇ê_θ = ∇ê_φ = 0). Metric-compatible and flat, but with torsion; its straightest lines are rhumb lines.
+    label: 'Sphere, compass connection', lorentz: false, a: ['\\phi', 'φ'], b: ['\\theta', 'θ'], view: { a: [0, TAU], b: [0, PI] }, flipB: true,
+    kName: 'radius', k: 1, valid: (a, b) => b > 0.02 && b < PI - 0.02, cyclic: ['a'], periodic: { a: TAU },
+    g: (a, b, k) => [k * k * sin(b) ** 2, 0, k * k], dg: (a, b, k) => [[0, 0, 0], [2 * k * k * sin(b) * cos(b), 0, 0]],
+    gamma: (a, b) => [[[0, 0], [cos(b) / sin(b), 0]], [[0, 0], [0, 0]]],     // only Γ^φ_θφ = cot θ (derivative index first)
+  },
+  stretch: {
+    // the flat plane's metric with a connection that is torsion-free but not metric-compatible: Γ^x_xx = κ
+    label: 'Plane, a non-metric connection', lorentz: false, a: ['x', 'x'], b: ['y', 'y'], view: { a: [-3, 3], b: [-2, 2] },
+    kName: 'κ', k: 0.4, valid: () => true, cyclic: ['a', 'b'],
+    g: () => [1, 0, 1], dg: () => [[0, 0, 0], [0, 0, 0]],
+    gamma: (a, b, k) => [[[k, 0], [0, 0]], [[0, 0], [0, 0]]],
+  },
   ef: {
     // ingoing Eddington–Finkelstein, with t̃ = v − r so that ingoing light runs at 45°
     label: 'Schwarzschild, Eddington–Finkelstein (r, t̃)', lorentz: true, a: ['r', 'r'], b: ['\\tilde t', 't̃'], view: { a: [0, 8], b: [-1, 7] },
@@ -125,7 +140,29 @@ function gammaFrom(gi, D) {
 
 /** Γ^l_mn at (a, b), index 0 = a, 1 = b, from the exact derivatives of the metric. */
 export function christoffel(M, a, b, k) {
+  if (M.gamma) return M.gamma(a, b, kOf(M, k));
   return gammaFrom(gInv(M, a, b, k), dgMat(M, a, b, k));
+}
+
+/** The Levi-Civita connection of M's metric, whatever connection M itself carries. */
+export function leviCivita(M, a, b, k) {
+  return gammaFrom(gInv(M, a, b, k), dgMat(M, a, b, k));
+}
+
+/** Torsion T^l_mn = Γ^l_mn − Γ^l_nm. */
+export function torsion(M, a, b, k) {
+  const G = christoffel(M, a, b, k);
+  return [0, 1].map((l) => [0, 1].map((m) => [0, 1].map((n) => G[l][m][n] - G[l][n][m])));
+}
+
+/** The covariant derivative of the metric, (∇_σ g)_μν = ∂_σ g_μν − Γ^λ_σμ g_λν − Γ^λ_σν g_μλ, as D[σ][μ][ν]. */
+export function nablaG(M, a, b, k) {
+  const G = christoffel(M, a, b, k), g = gMat(M, a, b, k), D = dgMat(M, a, b, k);
+  return [0, 1].map((sg) => [0, 1].map((m) => [0, 1].map((n) => {
+    let x = D[sg][m][n];
+    for (let l = 0; l < 2; l++) x -= G[l][sg][m] * g[l][n] + G[l][sg][n] * g[m][l];
+    return x;
+  })));
 }
 
 /** The same, from central differences of the metric alone (a check that needs no hand-derived derivative). */
@@ -195,7 +232,7 @@ export function launch(M, a, b, k, { heading = 0, speed = 0 } = {}) {
 
 const accel = (M, k, s) => {
   const G = christoffel(M, s[0], s[1], k), u = [s[2], s[3]];
-  const f = (l) => -(G[l][0][0] * u[0] * u[0] + 2 * G[l][0][1] * u[0] * u[1] + G[l][1][1] * u[1] * u[1]);
+  const f = (l) => -(G[l][0][0] * u[0] * u[0] + (G[l][0][1] + G[l][1][0]) * u[0] * u[1] + G[l][1][1] * u[1] * u[1]);
   return [s[2], s[3], f(0), f(1)];
 };
 
@@ -203,13 +240,14 @@ const accel = (M, k, s) => {
  * Integrate ẍ^l + Γ^l_mn ẋ^m ẋ^n = 0 by RK4 from (a, b) with velocity u for
  * an affine length `length` (proper time, arc length, or the null parameter).
  * Stops early where the chart ends or the path leaves `box` ({a, b} ranges,
- * optional). Returns pts [a, b, λ], vel [ua, ub], the conserved momenta
+ * optional). With `dmax`, steps shrink so no coordinate moves more than dmax
+ * in one step (up to maxSteps steps). Returns pts [a, b, λ], vel [ua, ub], the conserved momenta
  * p_a = g_aμ u^μ and p_b = g_bμ u^μ and g(u, u) along the way, and `stopped`.
  */
-export function geodesic(M, { a, b, k, u, length, steps = 800, box = null }) {
+export function geodesic(M, { a, b, k, u, length, steps = 800, box = null, dmax = null, maxSteps = 20000 }) {
   const kk = kOf(M, k);
-  const h = length / steps;
-  let s = [a, b, u[0], u[1]];
+  const h0 = length / steps;
+  let s = [a, b, u[0], u[1]], lam = 0;
   const pts = [[a, b, 0]], vel = [[u[0], u[1]]], pa = [], pb = [], norm = [];
   const rec = () => {
     const [[p, q], [, r]] = gMat(M, s[0], s[1], kk);
@@ -219,8 +257,11 @@ export function geodesic(M, { a, b, k, u, length, steps = 800, box = null }) {
   rec();
   let stopped = null;
   const inside = (x) => M.valid(x[0], x[1], kk) && x.every(Number.isFinite) && (!box || (x[0] >= box.a[0] && x[0] <= box.a[1] && x[1] >= box.b[0] && x[1] <= box.b[1]));
-  for (let i = 0; i < steps; i++) {
+  // with dmax, a step is shortened so that no coordinate moves more than dmax (where the chart is stretched)
+  for (let i = 0; i < (dmax ? maxSteps : steps) && lam < length - 1e-12; i++) {
     const add = (x, d, f) => x.map((v, j) => v + f * d[j]);
+    let h = Math.min(h0, length - lam);
+    if (dmax) { const v = Math.max(Math.abs(s[2]), Math.abs(s[3])); if (v * h > dmax) h = dmax / v; }
     const k1 = accel(M, kk, s);
     const s2 = add(s, k1, h / 2); if (!M.valid(s2[0], s2[1], kk)) { stopped = 'chart'; break; }
     const k2 = accel(M, kk, s2);
@@ -230,8 +271,8 @@ export function geodesic(M, { a, b, k, u, length, steps = 800, box = null }) {
     const k4 = accel(M, kk, s4);
     const n = s.map((v, j) => v + (h / 6) * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]));
     if (!inside(n)) { stopped = M.valid(n[0], n[1], kk) ? 'box' : 'chart'; break; }
-    s = n;
-    pts.push([s[0], s[1], (i + 1) * h]); vel.push([s[2], s[3]]);
+    s = n; lam += h;
+    pts.push([s[0], s[1], lam]); vel.push([s[2], s[3]]);
     rec();
   }
   return { pts, vel, pa, pb, norm, stopped };

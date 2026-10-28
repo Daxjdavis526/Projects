@@ -45,19 +45,20 @@ The magnitudes do **not** add: $|\vec A + \vec B|$ is anything from $\big||\vec 
       t`Turn $\vec B$ to $180^\circ$: $|\vec R| = 1$. Every angle in between gives a length between $1$ and $7$.`,
     ],
     params: {
-      x: [-21, 21], y: [-10.5, 10.5], equal: true, aspect: 'wide',
+      x: [-16.4, 16.4], y: [-8.2, 8.2], equal: true, aspect: 'wide',
       sliders: [
-        { key: 'a', label: t`$|\vec A|$`, min: 0, max: 5, step: 0.1, value: 4, explain: 'The length of the blue vector.' },
+        { key: 'a', label: t`$|\vec A|$`, min: 0, max: 4, step: 0.1, value: 4, explain: 'The length of the blue vector.' },
         { key: 'p', label: t`direction of $\vec A$`, min: 0, max: 360, step: 1, value: 20, unit: '^\\circ', explain: 'Anticlockwise from the positive x-axis.' },
-        { key: 'b', label: t`$|\vec B|$`, min: 0, max: 5, step: 0.1, value: 3, explain: 'The length of the orange vector.' },
+        { key: 'b', label: t`$|\vec B|$`, min: 0, max: 4, step: 0.1, value: 3, explain: 'The length of the orange vector.' },
         { key: 'q', label: t`direction of $\vec B$`, min: 0, max: 360, step: 1, value: 110, unit: '^\\circ', explain: 'Anticlockwise from the positive x-axis.' },
       ],
       curves: [{ param: ['a*cos(p*pi/180) + b*cos(t)', 'a*sin(p*pi/180) + b*sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: true }],
       arrows: [
         { from: [0, 0], to: ['a*cos(p*pi/180)', 'a*sin(p*pi/180)'], color: 'accent', width: 2.8, label: 'A' },
         { from: ['a*cos(p*pi/180)', 'a*sin(p*pi/180)'], to: ['a*cos(p*pi/180) + b*cos(q*pi/180)', 'a*sin(p*pi/180) + b*sin(q*pi/180)'], color: 'warn', width: 2.8, label: 'B' },
-        { from: [0, 0], to: ['a*cos(p*pi/180) + b*cos(q*pi/180)', 'a*sin(p*pi/180) + b*sin(q*pi/180)'], color: 'gold', width: 3.2, label: 'R', labelDx: 8, labelDy: 14 },
+        { from: [0, 0], to: ['a*cos(p*pi/180) + b*cos(q*pi/180)', 'a*sin(p*pi/180) + b*sin(q*pi/180)'], color: 'gold', width: 3.2 },
       ],
+      points: [{ x: '(a*cos(p*pi/180) + b*cos(q*pi/180))/2', y: '(a*sin(p*pi/180) + b*sin(q*pi/180))/2', r: 0, label: 'R', color: 'gold', labelDx: -14, labelDy: -8 }],
       readouts: [
         { label: t`$R_x = A_x + B_x$`, expr: 'a*cos(p*pi/180) + b*cos(q*pi/180)', digits: 3 },
         { label: t`$R_y = A_y + B_y$`, expr: 'a*sin(p*pi/180) + b*sin(q*pi/180)', digits: 3 },
@@ -76,9 +77,10 @@ The magnitudes do **not** add: $|\vec A + \vec B|$ is anything from $\big||\vec 
         curves: [seg([-10, -3], [160, -3], { color: 'ink4', width: 1 }), seg([-10, 3], [160, 3], { color: 'ink4', width: 1 })],
         arrows: [
           { from: [0, 0], to: [N(air[0]), N(air[1])], color: 'accent', width: 2.6, label: 'airspeed 140', labelDx: -60, labelDy: 16 },
-          { from: [N(air[0]), N(air[1])], to: [N(g[0]), 0], color: 'warn', width: 2.6, label: 'wind 25', labelDx: -20, labelDy: -12 },
-          { from: [0, 0], to: [N(g[0]), 0], color: 'gold', width: 3, label: 'ground', labelDx: -40, labelDy: -12 },
+          { from: [N(air[0]), N(air[1])], to: [N(g[0]), 0], color: 'warn', width: 2.6 },
+          { from: [0, 0], to: [N(g[0]), 0], color: 'gold', width: 3 },
         ],
+        points: [note([(air[0] + g[0]) / 2 + 14, air[1] / 2], 'wind 25', { color: 'warn' }), note([60, 6], 'ground', { color: 'gold' })],
         caption: t`To scale: the aircraft’s velocity through the air (blue, crabbed into the wind) plus the wind (orange) gives its velocity over the ground (gold), straight along the runway (grey lines).`,
       });
     })(),
@@ -87,7 +89,7 @@ The magnitudes do **not** add: $|\vec A + \vec B|$ is anything from $\big||\vec 
       { label: 'Cancel the drift', text: t`To stay on the centreline the across-runway parts must add to zero: the aircraft’s own velocity through the air needs $-${sig(25 * Math.sin(130 * D2R), 4)}$ kn across. With the nose turned by $\delta$: $140\sin\delta = ${sig(25 * Math.sin(130 * D2R), 4)}$.` },
       { label: 'Crab angle', text: t`$\delta = \sin^{-1}\dfrac{${sig(25 * Math.sin(130 * D2R), 4)}}{140} = ${sig(deg(Math.asin((25 * Math.sin(130 * D2R)) / 140)), 3)}^\circ$, nose turned toward the side the wind comes from.` },
       { label: 'Add along', text: t`Along the runway: $140\cos ${sig(deg(Math.asin((25 * Math.sin(130 * D2R)) / 140)), 3)}^\circ + (${sig(25 * Math.cos(130 * D2R), 4)}) = ${sig(140 * Math.cos(Math.asin((25 * Math.sin(130 * D2R)) / 140)), 4)} - ${sig(-25 * Math.cos(130 * D2R), 4)} = ${sig(140 * Math.cos(Math.asin((25 * Math.sin(130 * D2R)) / 140)) + 25 * Math.cos(130 * D2R), 4)}$ kn over the ground.` },
-      { label: 'Sense check', text: t`Ground speed is less than airspeed (a headwind helps a landing: less runway used), and $|$airspeed$| - |$wind$| = 115 < ${sig(140 * Math.cos(Math.asin((25 * Math.sin(130 * D2R)) / 140)) + 25 * Math.cos(130 * D2R), 3)} < 165$ ✓.` },
+      { label: 'Sense check', text: t`Ground speed is less than airspeed (a headwind helps a landing: less runway used), and it lies between $140 - 25 = 115$ and $140 + 25 = 165$ kn, as any sum of a $140$ and a $25$ must ✓.` },
     ],
     answer: t`Headwind $${sig(-25 * Math.cos(130 * D2R), 3)}$ kn, crosswind $${sig(25 * Math.sin(130 * D2R), 3)}$ kn; crab angle $${sig(deg(Math.asin((25 * Math.sin(130 * D2R)) / 140)), 3)}^\circ$; ground speed $${sig(140 * Math.cos(Math.asin((25 * Math.sin(130 * D2R)) / 140)) + 25 * Math.cos(130 * D2R), 3)}$ kn.`,
   },
@@ -165,17 +167,20 @@ The magnitudes do **not** add: $|\vec A + \vec B|$ is anything from $\big||\vec 
           hints: [t`Choose axes along the slope and perpendicular to it. The weight points straight down.`, t`The angle between “straight down” and “into the slope” equals the slope’s tilt, $${al}^\circ$.`],
           teach: t`On a slope of angle $\alpha$, weight resolves into $W\sin\alpha$ along it and $W\cos\alpha$ into it.`,
           explain: t`${along ? t`$W\sin ${al}^\circ = 3\,803 \times ${sig(s, 4)} = ${thou(ans)}$ N` : t`$W\cos ${al}^\circ = 3\,803 \times ${sig(c, 4)} = ${thou(ans)}$ N`}. Check: the two parts, $${thou(W * s)}$ and $${thou(W * c)}$ N, combine by Pythagoras to $3\,803$ N.`,
-          visual: plane({
-            x: [-5.4, 5.4], y: [-2.6, 2.8], ticks: false, grid: false, extra: { axes: false },
-            curves: [seg([-5, -2.4 + 0], [5, -2.4 + 10 * Math.tan(al * D2R)].map((v, i) => (i ? Math.min(v, 2.6) : v)), { color: 'ink3', width: 2 }), seg([-5, -2.4], [5, -2.4], { color: 'ink4', width: 1 })],
-            arrows: [
-              { from: [0, N(-2.4 + 5 * Math.tan(al * D2R) + 0.3)], to: [0, N(-2.4 + 5 * Math.tan(al * D2R) + 0.3 - Lg)], color: 'gold', width: 2.8, label: 'W' },
-              { from: [0, N(-2.4 + 5 * Math.tan(al * D2R) + 0.3)], to: [N(-Lg * s * c), N(-2.4 + 5 * Math.tan(al * D2R) + 0.3 - Lg * s * s)], color: 'accent', width: 2.2, dash: true, label: 'along' },
-              { from: [0, N(-2.4 + 5 * Math.tan(al * D2R) + 0.3)], to: [N(Lg * c * s), N(-2.4 + 5 * Math.tan(al * D2R) + 0.3 - Lg * c * c)], color: 'warn', width: 2.2, dash: true, label: 'into' },
-            ],
-            points: [note([-3.2, -2.1], `${al}°`, { color: 'ink2' })],
-            caption: t`The weight (gold) and its two parts along and into the slope (dashed). The slope angle is drawn true; the arrows are not to the slope’s scale.`,
-          }),
+          visual: (() => {
+            const tn = Math.tan(al * D2R), yL = -5.5 * tn;
+            return plane({
+              x: [-6, 6], y: [-4.6, 2.4], ticks: false, grid: false, extra: { axes: false },
+              curves: [seg([-5.5, yL], [5.5, -yL], { color: 'ink3', width: 2.2 }), seg([-5.5, yL], [-2.5, yL], { color: 'ink4', width: 1 })],
+              arrows: [
+                { from: [0, 0], to: [0, -Lg], color: 'gold', width: 2.8, label: 'W', labelDx: 8, labelDy: 0 },
+                { from: [0, 0], to: [N(-Lg * s * c), N(-Lg * s * s)], color: 'accent', width: 2.2, dash: true, label: 'along', labelDx: -40, labelDy: -10 },
+                { from: [0, 0], to: [N(Lg * c * s), N(-Lg * c * c)], color: 'warn', width: 2.2, dash: true, label: 'into', labelDx: 8, labelDy: 0 },
+              ],
+              points: [dot([0, 0], 'rover', { color: 'ink2', labelDx: -10, labelDy: -14 }), note([-4.3, yL + 0.3], `${al}°`, { color: 'ink2' })],
+              caption: t`The weight (gold) and its two parts along and into the slope (dashed), drawn from the rover. The slope angle is drawn true.`,
+            });
+          })(),
         };
       },
     }),
@@ -201,8 +206,8 @@ The magnitudes do **not** add: $|\vec A + \vec B|$ is anything from $\big||\vec 
       gen(r) {
         const w = r.pick([18, 22, 28, 35]), phi = r.pick([25, 40, 55, 70]), ans = w * Math.sin(phi * D2R);
         return {
-          prompt: t`A light aircraft is cleared to land. The wind is $${w}$ kn, blowing at $${phi}^\circ$ to the runway’s direction. Its maximum demonstrated crosswind is $15$ kn. What is the crosswind component — the part of the wind across the runway?`,
-          answer: ans, units: 'kn', tol: { rel: 0.005 },
+          prompt: t`A light aircraft is cleared to land. The wind is $${w}$ kn, blowing at $${phi}^\circ$ to the runway’s direction. Its maximum demonstrated crosswind is $15$ kn. What is the crosswind component — the part of the wind across the runway — in knots?`,
+          answer: ans, tol: { rel: 0.005 },
           errors: [{ value: w * Math.cos(phi * D2R), feedback: t`That is the part **along** the runway (head- or tailwind). The part across is opposite the angle: $w\sin\varphi$.` }, { value: w * Math.sin(phi), feedback: t`Radian mode: $${phi}$ rad is not $${phi}^\circ$.` }].filter((e) => Math.abs(e.value - ans) > 0.01 * ans),
           hints: [t`Resolve the wind along and across the runway; the angle is measured from the runway.`],
           teach: t`Across a direction: $w\sin\varphi$; along it: $w\cos\varphi$, with $\varphi$ the angle between the vector and that direction.`,

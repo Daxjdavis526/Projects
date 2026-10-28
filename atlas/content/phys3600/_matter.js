@@ -5,7 +5,7 @@
 // names start with "_" are helpers, not lessons.
 
 export { centreN } from '../../src/viz/model/em3h-magnet.js';
-export { spheroidN, MATERIALS } from '../../src/viz/model/em3h-loop.js';
+export { spheroidN, MATERIALS, B as loopB } from '../../src/viz/model/em3h-loop.js';
 
 /**
  * Volume susceptibilities χ_m (SI, dimensionless) at room temperature and 1 atm

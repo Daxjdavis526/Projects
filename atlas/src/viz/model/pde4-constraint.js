@@ -37,8 +37,18 @@ export function runMaxwell(o) {
   let Eh = new Float64Array(N); let acc = 0;
   for (let j = 0; j < N; j++) { acc += dx * r0[j]; Eh[j] = acc; }
   const mh = Eh.reduce((s, e) => s + e, 0) / N; Eh = Eh.map((e) => e - mh);
-  // collocated E: the average of its two neighbours at half points
-  let E = scheme === 'staggered' ? Eh : Float64Array.from({ length: N }, (_, j) => 0.5 * (Eh[j] + Eh[(j - 1 + N) % N]));
+  // collocated E (N even): solve the centred Gauss law E_{j+1} − E_{j−1} = 2Δx ρ_j exactly, so the run starts with C = 0
+  // (two decoupled chains, even and odd points; each made to have zero mean)
+  let E = Eh;
+  if (scheme !== 'staggered') {
+    E = new Float64Array(N);
+    for (const start of [0, 1]) {
+      let s = 0, cnt = 0;
+      for (let j = start; j + 2 < N; j += 2) { E[j + 2] = E[j] + 2 * dx * r0[j + 1]; }
+      for (let j = start; j < N; j += 2) { s += E[j]; cnt++; }
+      for (let j = start; j < N; j += 2) E[j] -= s / cnt;
+    }
+  }
   const gauss = () => {
     const R = rho(), C = new Array(N);
     for (let j = 0; j < N; j++) {

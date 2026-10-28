@@ -40,7 +40,8 @@
 //       readout: true,               // false, or a list of: P g gamma check K conserved norm length end turn area F
 //       curves: [],                  // extra curves: [{ pts: [[a, b], …], color, width, dash, label }]
 //       points: [], lines: [],       // [{ a, b, label, color }]; lines: [{ a } or { b }, label, color, dash]
-//       labels: true, equal: true, aspect: '' } }
+//       labels: true, equal: true, aspect: '',
+//       probe: true } }                // chart mode: false hides P (and its drag handle)
 //
 // A picture must not show its answer: readout: false (or a shorter list) when
 // a question asks for a number the readout would print.
@@ -52,23 +53,24 @@ export const defaults = {
   metric: 'sphere', metrics: null, k: null, mode: 'chart', view: null, P: null, Q: null, drag: true,
   heading: 30, speed: 0, length: 4, fan: 0, spread: 15, angle: 90, alpha: 0, alphaMax: 0.3,
   sliders: null, field: true, cells: 8, eps: null, panel: false, readout: true,
-  curves: [], points: [], lines: [], labels: true, equal: true, aspect: '', lengthMax: null,
+  curves: [], points: [], lines: [], labels: true, equal: true, aspect: '', lengthMax: null, probe: true,
 };
 
 const MODES = ['chart', 'geodesic', 'transport', 'vary'];
 const SLIDERS = ['heading', 'speed', 'length', 'alpha', 'angle', 'k'];
-const READS = ['P', 'g', 'gamma', 'check', 'K', 'conserved', 'norm', 'length', 'end', 'turn', 'area', 'F'];
+const READS = ['P', 'g', 'gamma', 'check', 'K', 'torsion', 'conserved', 'norm', 'length', 'end', 'turn', 'area', 'F'];
 const PI = Math.PI, DEG = PI / 180;
 const P0 = {
   plane: [0, 0], polar: [1.5, 0.3], sphere: [1.2, 1.0], stereo: [0.5, 0.3], halfplane: [0, 1], cylinder: [1, 0], torus: [1, 0],
-  arm: [0, 1], minkowski: [0, -1], ring: [1, 0.4], rindler: [1, 0], desitter: [0, 0], schwarzschild: [6, 0], ef: [5, 0],
+  arm: [0, 1], minkowski: [0, -1], ring: [1, 0.4], rindler: [1, 0], desitter: [0, 0], schwarzschild: [6, 0], ef: [5, 0], compass: [1.2, 1.0], stretch: [-1, -0.5],
 };
-const Q0 = { plane: [1.5, 1], polar: [2.5, 1.2], sphere: [2.4, 1.7], stereo: [1.2, 1], halfplane: [1.2, 1.8], cylinder: [3, 1], torus: [2.5, 1.2], arm: [1, 2], minkowski: [1, 1], ring: [2, 1.5], rindler: [2, 1], desitter: [1, 1], schwarzschild: [9, 3], ef: [7, 3] };
-const K_RANGE = { sphere: [0.5, 2], stereo: [0.5, 2], cylinder: [0.5, 2], ring: [0, 0.95], desitter: [0.2, 2], schwarzschild: [0.5, 3], ef: [0.5, 2] };
+const Q0 = { plane: [1.5, 1], polar: [2.5, 1.2], sphere: [2.4, 1.7], stereo: [1.2, 1], halfplane: [1.2, 1.8], cylinder: [3, 1], torus: [2.5, 1.2], arm: [1, 2], minkowski: [1, 1], ring: [2, 1.5], rindler: [2, 1], desitter: [1, 1], schwarzschild: [9, 3], ef: [7, 3], compass: [2.4, 1.7], stretch: [1.5, 1] };
+const K_RANGE = { sphere: [0.5, 2], stereo: [0.5, 2], cylinder: [0.5, 2], compass: [0.5, 2], stretch: [-1, 1], ring: [0, 0.95], desitter: [0.2, 2], schwarzschild: [0.5, 3], ef: [0.5, 2] };
 // where a chart ends inside the default view: a line, and which side is outside it
 const EDGE = {
   polar: () => [{ a: 0, side: -1, label: 'r = 0' }],
   sphere: () => [{ b: 0, side: -1, label: 'north pole' }, { b: PI, side: 1, label: 'south pole' }],
+  compass: () => [{ b: 0, side: -1, label: 'north pole' }, { b: PI, side: 1, label: 'south pole' }],
   halfplane: () => [{ b: 0, side: -1, label: 'y = 0 (infinitely far)' }],
   rindler: () => [{ a: 0, side: -1, label: 'ρ = 0 (horizon)' }],
   schwarzschild: (k) => [{ a: 2 * k, side: -1, label: 'r = 2M' }],
@@ -136,7 +138,7 @@ export function mount(F, P) {
   mk('alpha', { label: 'Push sideways by $\\alpha$', min: -P.alphaMax, max: P.alphaMax, step: P.alphaMax / 100, value: P.alpha, explain: 'The varied path is the geodesic moved by $\\alpha\\sin(\\pi\\lambda/\\Lambda)$ along its unit normal: zero at both ends.' });
   if (sl.includes('k') && K_RANGE[P.metric]) {
     const M0 = D.METRICS[P.metric], [lo, hi] = K_RANGE[P.metric];
-    ctl.k = F.slider({ key: 'k', label: `Parameter ${M0.kName}`, min: lo, max: hi, step: (hi - lo) / 100, value: D.kOf(M0, P.k), explain: { radius: 'The radius.', H: 'The expansion rate $H$ (c = 1): the scale factor is $e^{Ht}$.', M: 'The mass $M$ in geometric units ($G = c = 1$): the horizon sits at $r = 2M$.', 'ω': 'The ring’s rotation rate (radius 1, c = 1): its rim moves at $\\omega$.' }[M0.kName] || '' });
+    ctl.k = F.slider({ key: 'k', label: `Parameter ${M0.kName}`, min: lo, max: hi, step: (hi - lo) / 100, value: D.kOf(M0, P.k), explain: { radius: 'The radius.', 'κ': 'The connection coefficient $\\Gamma^x{}_{xx} = \\kappa$: how fast a carried vector’s x-part shrinks per unit of x.', H: 'The expansion rate $H$ (c = 1): the scale factor is $e^{Ht}$.', M: 'The mass $M$ in geometric units ($G = c = 1$): the horizon sits at $r = 2M$.', 'ω': 'The ring’s rotation rate (radius 1, c = 1): its rim moves at $\\omega$.' }[M0.kName] || '' });
   } else F.params.k = P.k;
 
   const cur = () => D.METRICS[F.params.metric];
@@ -160,7 +162,7 @@ export function mount(F, P) {
     const x = Math.min(V.a[1], Math.max(V.a[0], a)), y = Math.min(V.b[1], Math.max(V.b[0], b));
     return M.valid(x, y, kk()) ? [x, y] : prev;
   };
-  if (P.drag !== false) {
+  if (P.drag !== false && !(P.mode === 'chart' && P.probe === false)) {
     plot.handle(() => [Pp[0], toY(Pp[1])], (x, y) => { Pp = clampIn(x, fromY(y), Pp); }, { hollow: true, label: 'the point P' });
     if (P.mode === 'transport') plot.handle(() => [Qq[0], toY(Qq[1])], (x, y) => { Qq = clampIn(x, fromY(y), Qq); }, { hollow: true, label: 'the point Q' });
     plot.onDrag = () => { draw(); F.notify('point'); };
@@ -214,10 +216,12 @@ export function mount(F, P) {
 
     // the field of ellipses or light cones
     if (P.field !== false) {
+      // cells about square on the screen, whatever the two axes' scales
+      const sx = (plot.R - plot.L) / (vx1 - vx0), sy = (plot.B - plot.T) / (vy1 - vy0);
       const n = Math.max(3, P.cells || 8), cw = (vx1 - vx0) / n;
-      const rows = Math.max(2, Math.round((vy1 - vy0) / cw));
+      const rows = Math.max(2, Math.round(((vy1 - vy0) * sy) / (cw * sx)));
       const ch = (vy1 - vy0) / rows;
-      const cap = 0.46 * Math.min(cw, ch);
+      const cap = 0.46 * Math.min(cw, ch), capPx = 0.46 * Math.min(cw * sx, ch * sy);
       // ε: the given step length, or one that makes the typical ellipse about a third of a cell
       let eps = P.eps;
       if (!eps) {
@@ -241,10 +245,12 @@ export function mount(F, P) {
           }
           plot.path(pts, { color: 'teal', width: 1.2, fill: 'teal', fillAlpha: 0.1 });
         } else {
-          const dirs = D.nullDirections(M, a, b, k).map((A) => { const m = Math.hypot(A, 1); return [A / m, 1 / m]; });
-          const L = cap * 0.95;
-          plot.path([[x - L * dirs[0][0], y - L * dirs[0][1]], [x, y], [x + L * dirs[1][0], y + L * dirs[1][1]]], { color: 'gold', width: 1, alpha: 0.5 });
-          plot.path([[x - L * dirs[1][0], y - L * dirs[1][1]], [x, y], [x + L * dirs[0][0], y + L * dirs[0][1]]], { color: 'gold', width: 1.3, fill: 'gold', fillAlpha: 0.22, close: true });
+          // each edge drawn the same length on the screen
+          const dirs = D.nullDirections(M, a, b, k).map((A) => { const m = Math.hypot(A * sx, sy) / (0.95 * capPx); return [A / m, 1 / m]; });
+          const L = 1;
+          // the past half faint, the future half bold and shaded
+          plot.path([[x - L * dirs[0][0], y - L * dirs[0][1]], [x, y], [x - L * dirs[1][0], y - L * dirs[1][1]]], { color: 'gold', width: 1, alpha: 0.45 });
+          plot.path([[x + L * dirs[0][0], y + L * dirs[0][1]], [x, y], [x + L * dirs[1][0], y + L * dirs[1][1]]], { color: 'gold', width: 1.4, fill: 'gold', fillAlpha: 0.22 });
         }
       }
     }
@@ -270,16 +276,16 @@ export function mount(F, P) {
       const launchAt = (h, s) => D.launch(M, a0, b0, k, L ? { speed: Math.max(-1, Math.min(1, s)) } : { heading: h * DEG });
       const len = +F.params.length;
       const steps = Math.min(4000, Math.max(400, Math.round(len * 160)));
-      const box = { a: [V.a[0] - 50, V.a[1] + 50], b: [V.b[0] - 50, V.b[1] + 50] };
+      const box = { a: [V.a[0] - 50, V.a[1] + 50], b: [V.b[0] - 50, V.b[1] + 50] }, dmax = Math.hypot(V.a[1] - V.a[0], V.b[1] - V.b[0]) / 400;
       if (M.periodic?.a) box.a = [-1e9, 1e9];
       if (M.periodic?.b) box.b = [-1e9, 1e9];
       const h0 = +F.params.heading, s0 = +F.params.speed;
       for (let f = 1; P.mode === 'geodesic' && f <= P.fan; f++) {
         const off = (f % 2 ? 1 : -1) * Math.ceil(f / 2) * P.spread * (L ? 0.01 : 1);
-        const g = D.geodesic(M, { a: a0, b: b0, k, u: launchAt(h0 + off, s0 + off), length: len, steps, box });
+        const g = D.geodesic(M, { a: a0, b: b0, k, u: launchAt(h0 + off, s0 + off), length: len, steps, box, dmax });
         plot.path(wrap(g.pts), { color: 'gold', width: 1.4, alpha: 0.55 });
       }
-      const geo = D.geodesic(M, { a: a0, b: b0, k, u: launchAt(h0, s0), length: len, steps, box });
+      const geo = D.geodesic(M, { a: a0, b: b0, k, u: launchAt(h0, s0), length: len, steps, box, dmax });
       if (P.mode === 'vary') {
         const al = +F.params.alpha;
         for (const f of [-1, -0.5, 0.5, 1]) plot.path(wrap(D.varied(M, geo, f * P.alphaMax, k)), { color: 'ink4', width: 1, alpha: 0.7 });
@@ -358,7 +364,7 @@ export function mount(F, P) {
         }
         rows.push(['enclosed area', num(A, 3)], [L ? '$\\iint K\\,dA$ ($K = R/2$)' : '$\\iint K\\,dA$ (radians)', num(KA, 3)]);
       }
-    } else {
+    } else if (P.probe !== false) {
       plot.point(a0, toY(b0), { color: 'ink', r: 4.5, label: Pname, ldx: -14, ldy: 12 });
     }
 
@@ -374,14 +380,19 @@ export function mount(F, P) {
     if (want('gamma') || want('check')) {
       const G = D.christoffel(M, a0, b0, k), H = D.christoffelFD(M, a0, b0, k);
       let any = false;
-      for (let l = 0; l < 2; l++) for (let m = 0; m < 2; m++) for (let n = m; n < 2; n++) {
+      for (let l = 0; l < 2; l++) for (let m = 0; m < 2; m++) for (let n = M.gamma ? 0 : m; n < 2; n++) {
         if (Math.abs(G[l][m][n]) < 1e-10) continue;
         any = true;
         rows.push([`$${gammaName(M, l, m, n)}$${want('check') ? ' (by differences)' : ''}`, want('check') ? `${num(G[l][m][n], 4)}\\ \\ (${num(H[l][m][n], 4)})` : num(G[l][m][n], 4)]);
       }
       if (!any) rows.push(['every $\\Gamma$', '0']);
     }
-    if (want('K') && P.mode !== 'transport') rows.push([M.lorentz ? '$K = R/2$ at P' : '$K$ at P', num(D.curvature(M, a0, b0, k).K, 4)]);
+    if (want('K') && P.mode !== 'transport') rows.push([M.lorentz ? '$K = R/2$ at P' : M.gamma ? 'curvature of this connection at P' : '$K$ at P', num(D.curvature(M, a0, b0, k).K, 4)]);
+    if (want('torsion')) {
+      const T = D.torsion(M, a0, b0, k), nm = [M.a[0], M.b[0]];
+      const tw = [0, 1].map((l) => T[l][0][1]);
+      rows.push(...(tw.every((x) => Math.abs(x) < 1e-12) ? [['torsion', '0']] : tw.map((x, l) => [`$T^{${nm[l]}}{}_{${nm[0]}${nm[1]}}$`, num(x, 4)]).filter((r) => r[1] !== '0')));
+    }
     if (P.readout !== false) F.readout(rows);
     plot.drawHandles();
   }
