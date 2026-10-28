@@ -77,6 +77,7 @@ if (jobs.length || snippets.length) {
   }
   async function runWith(src, item) {
     const ns = py.globals.get('dict')();
+    ns.set('__name__', '__main__');
     printed = '';
     try {
       await prepare(src + '\n' + item.tests.map((t) => t.code).join('\n'));
@@ -94,6 +95,7 @@ if (jobs.length || snippets.length) {
   let styled = false;
   for (const { where, code } of snippets) {
     const ns = py.globals.get('dict')();
+    ns.set('__name__', '__main__');
     errText = '';
     let error = '';
     try {

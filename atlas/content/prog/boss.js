@@ -170,7 +170,7 @@ print(f"amplitude {amp_ns:.3f} ns; offset after one orbit {offset_ns[-1]:.2e} ns
           gen(r) {
             const p = r.pick([2, 4]), C = r.float(1.5, 4.5, 0.1), wob = r.float(0.97, 1.03, 0.005);
             const hs = [120, 60, 30];
-            const e = hs.map((h, i) => +(C * (h / 120) ** p * (i === 2 ? wob : 1) * (p === 2 ? 1 : 0.05)).toPrecision(3));
+            const es = hs.map((h, i) => (C * (h / 120) ** p * (i === 2 ? wob : 1) * (p === 2 ? 1 : 0.05)).toPrecision(3)), e = es.map(Number);
             const key = Math.log2(e[1] / e[2]);
             return {
               prompt: t`Tempo's clock offset after one orbit should return to zero; with fixed steps $h$ your integrator leaves this much (in ns):
@@ -178,9 +178,9 @@ print(f"amplitude {amp_ns:.3f} ns; offset after one orbit {offset_ns[-1]:.2e} ns
 \`\`\`python
 for h, err in zip([120, 60, 30], errors):
     print(h, err)
-# 120 ${e[0]}
-#  60 ${e[1]}
-#  30 ${e[2]}
+# 120 ${es[0]}
+#  60 ${es[1]}
+#  30 ${es[2]}
 \`\`\`
 
 What order $p$ does the step from $h = 60$ s to $h = 30$ s show (error $\propto h^p$)? Give it to two decimals.`,
@@ -188,13 +188,12 @@ What order $p$ does the step from $h = 60$ s to $h = 30$ s show (error $\propto 
               errors: apart([{ value: e[1] / e[2], feedback: t`That is the ratio of the errors, $2^p$. The order is its base-2 logarithm.` }], key),
               hints: [t`Halving $h$ divides the error by $2^p$.`, t`$p = \log_2(e_{60}/e_{30})$.`],
               teach: 'The order of a method is measured, not assumed: p = log₂ of the error ratio when the step halves.',
-              explain: t`$\log_2(${e[1]}/${e[2]}) = ${key.toFixed(2)}$ — ${p === 4 ? 'fourth order, as RK4 should be' : 'second order, like leapfrog — or an RK4 with a bug in a stage'}. If the errors keep falling at this rate as $h$ halves, the integration is converging; if the ratio wanders, round-off or a discontinuity has taken over.`,
+              explain: t`$\log_2(${es[1]}/${es[2]}) = ${key.toFixed(2)}$ — ${p === 4 ? 'fourth order, as RK4 should be' : 'second order, like leapfrog — or an RK4 with a bug in a stage'}. If the errors keep falling at this rate as $h$ halves, the integration is converging; if the ratio wanders, round-off or a discontinuity has taken over.`,
               visual: {
                 type: 'graph',
                 params: { x: [1.3, 2.3], y: [lg(e[2]) - 0.5, lg(e[0]) + 0.5], xlog: true, ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'step h (s)', ylabel: 'error after one orbit (ns)',
-                  points: [120, 60, 30].map((h, i) => ({ x: lg(h), y: lg(e[i]), r: 5, color: 'gold' })),
-                  curves: [{ fn: `${lg(e[0])} + ${p}*(x - ${lg(120)})`, color: 'ink4', dash: true, domain: [lg(25), lg(130)] }] },
-                caption: 'The three errors on log–log axes; the dashed guide line has the slope of the method’s nominal order.',
+                  points: [120, 60, 30].map((h, i) => ({ x: lg(h), y: lg(e[i]), r: 5, color: 'gold' })) },
+                caption: 'The three errors on log–log axes: the slope of the line through them is the order.',
               },
             };
           },
@@ -213,9 +212,9 @@ What order $p$ does the step from $h = 60$ s to $h = 30$ s show (error $\propto 
               explain: t`$\lvert\Delta a\rvert = 27\,977\ \text{km}\times${N_YEAR.toFixed(1)}\times${tex(eps, 1)} = ${da.toFixed(1)}$ m. The clock amplitude scales as $\sqrt a$, so it moves by only $\tfrac12\Delta a/a \approx ${tex(0.5 * N_YEAR * eps, 1)}$ of itself — far below anything measurable. The along-track position is another matter: a period error that grows every orbit puts the simulated satellite kilometres away from the real one, which is why orbit determination refits real tracking data instead of trusting a year-long integration.`,
               visual: {
                 type: 'graph',
-                params: { x: [0, 700], y: [0, 1.1 * da], aspect: 'wide', axesAt: 'edge', xlabel: 'orbits', ylabel: '|Δa| (m)',
-                  curves: [{ fn: `${da / N_YEAR}*x`, color: 'warn', domain: [0, 700] }], vlines: [{ x: N_YEAR, label: 'one year', color: 'ink3' }] },
-                caption: 'A secular drift: the same small error every orbit, growing in a straight line.',
+                params: { x: [0, 820], y: [0, 1.1 * da], aspect: 'wide', axesAt: 'edge', xlabel: 'orbits', ylabel: '|Δa|', yticks: 0,
+                  curves: [{ fn: `${da / N_YEAR}*x`, color: 'warn', domain: [0, 820] }], vlines: [{ x: N_YEAR, label: 'one year', color: 'ink3' }] },
+                caption: 'A secular drift: the same small error every orbit, growing in a straight line (vertical scale left unlabelled: it is the question).',
               },
             };
           },

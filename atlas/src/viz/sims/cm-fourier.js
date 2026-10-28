@@ -25,6 +25,7 @@
 //       units: { t: 's', x: 'm' },
 //       readouts: ['w', 'near', 'share'],   // any of w near share xrms; [] for none
 //       values: true,             // numbers on the spectrum bars
+//       response: true,           // false: the spectrum shows the force alone (no gain curve, no response bars)
 //   } }
 
 import { Plot } from '../plot.js';
@@ -32,7 +33,7 @@ import * as O from '../model/cm-osc.js';
 
 export const defaults = {
   wave: 'pulse', h: 1, d: 0.5, tau: 2, w0: 9.42, beta: 0.1, N: 9, panels: ['force', 'spectrum', 'response'],
-  sliders: ['tau', 'N', 'd'], ranges: null, nmax: 9, readouts: ['w', 'near', 'share'], values: true,
+  sliders: ['tau', 'N', 'd'], ranges: null, nmax: 9, readouts: ['w', 'near', 'share'], values: true, response: true,
 };
 const PANELS = ['force', 'spectrum', 'response'], READS = ['w', 'near', 'share', 'xrms'];
 const NRESP = 60;
@@ -78,26 +79,31 @@ export function mount(F, P0) {
     const harm = R.harm.slice(0, nmax);
     const best = R.harm.slice(0, NRESP).reduce((b, x) => (x.A > b.A ? x : b), { A: -1 });
     if (plots.spectrum) {
-      const ps = plots.spectrum, wtop = Math.max((nmax + 0.6) * w, w0 * 1.25);
+      const ps = plots.spectrum, wtop = P.response === false ? (nmax + 0.6) * w : Math.max((nmax + 0.6) * w, w0 * 1.25);
       ps.setView([0, wtop], [0, 1.18]);
       ps.clear();
       const fmax = Math.max(1e-12, Math.abs(C.c0), ...harm.map((x) => x.f));
       const Amax = Math.max(1e-12, ...harm.map((x) => x.A));
       const gmax = O.amp(O.wPeak(w0, beta) || w0, w0, beta);
-      ps.fn((x) => O.amp(x, w0, beta) / gmax, { color: 'violet', width: 1.6, dash: [6, 4], domain: [0, wtop] });
-      ps.line(w0, 0, w0, 1.18, { color: 'ink3', width: 1, dash: [2, 4] });
-      ps.text('ω₀', w0, 1.12, { color: 'violet', size: 11.5, dx: 4 });
+      const resp = P.response !== false;
+      if (resp) {
+        ps.fn((x) => O.amp(x, w0, beta) / gmax, { color: 'violet', width: 1.6, dash: [6, 4], domain: [0, wtop] });
+        ps.line(w0, 0, w0, 1.18, { color: 'ink3', width: 1, dash: [2, 4] });
+        ps.text('ω₀', w0, 1.12, { color: 'violet', size: 11.5, dx: 4 });
+      }
       const bw = Math.min(w * 0.18, wtop * 0.012);
       harm.forEach((x, i) => {
         if (i + 1 > N) return;
         const yf = x.f / fmax, yx = x.A / Amax;
         if (yf > 1e-9) ps.rect(x.w - bw * 1.05, 0, bw, yf, { color: 'accent', alpha: 0.55, width: 1 });
-        if (yx > 1e-9) ps.rect(x.w + bw * 0.05, 0, bw, yx, { color: 'gold', alpha: 0.75, width: 1 });
-        if (P.values !== false && N <= 12 && (yf > 1e-9 || yx > 1e-9)) ps.text(`${x.n}ω`, x.w, 0, { color: 'ink3', size: 10, align: 'center', dy: -8 });
+        if (resp && yx > 1e-9) ps.rect(x.w + bw * 0.05, 0, bw, yx, { color: 'gold', alpha: 0.75, width: 1 });
+        if (P.values !== false && N <= 12 && (yf > 1e-9 || yx > 1e-9)) ps.text(`${x.n}ω`, x.w, Math.max(yf, yx), { color: 'ink3', size: 10, align: 'center', dy: -9 });
       });
       ps.text('force harmonics', 6, 14, { screen: true, color: 'accent', size: 11.5, weight: 650, dx: ps.L });
-      ps.text('response harmonics', 6, 30, { screen: true, color: 'gold', size: 11.5, weight: 650, dx: ps.L });
-      ps.text('gain curve', 6, 46, { screen: true, color: 'violet', size: 11.5, weight: 650, dx: ps.L });
+      if (resp) {
+        ps.text('response harmonics', 6, 30, { screen: true, color: 'gold', size: 11.5, weight: 650, dx: ps.L });
+        ps.text('gain curve', 6, 46, { screen: true, color: 'violet', size: 11.5, weight: 650, dx: ps.L });
+      }
     }
     if (plots.response) {
       const pr = plots.response;

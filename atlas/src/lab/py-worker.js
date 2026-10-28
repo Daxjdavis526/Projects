@@ -83,6 +83,7 @@ self.onmessage = async (e) => {
     // an exercise (m.fresh) runs in its own namespace, so nothing from an
     // earlier attempt can make it pass
     const ns = m.fresh ? py.globals.get('dict')() : null;
+    ns?.set('__name__', '__main__');   // a program is run, not imported: its __main__ guard runs, as on a real machine
     const opts = ns ? { globals: ns } : {};
     try {
       await ensurePackages(m.code + '\n' + (m.tests || []).map((t) => t.code).join('\n'), m.theme);

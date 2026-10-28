@@ -445,7 +445,7 @@ if __name__ == "__main__":
       },
       hints: ['When a file is run directly, Python sets its __name__ to "__main__"; when it is imported, __name__ is the module’s name.'],
       teach: 'The __main__ guard lets one file be both a script and an importable module: tests can import its functions without starting a run.',
-      explain: t`Run directly, the module's \`__name__\` is \`"__main__"\` and \`main()\` runs. Imported by \`tests/test_physics.py\`, its \`__name__\` is \`"run_flight"\`, so only the definitions load and the tests do not start a simulation. (This browser runs programs differently, which is why the lessons simply call \`main()\`.)`,
+      explain: t`Run directly, the module's \`__name__\` is \`"__main__"\` and \`main()\` runs. Imported by \`tests/test_physics.py\`, its \`__name__\` is \`"run_flight"\`, so only the definitions load and the tests do not start a simulation. (The Atlas runs your program as \`__main__\` too, so a guarded \`main()\` runs here just as it would from a terminal.)`,
     }),
     mcq({
       id: 'cp-plot-mutates', difficulty: 3, transfer: true,

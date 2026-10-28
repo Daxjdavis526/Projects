@@ -279,7 +279,8 @@ export function mount(F, P) {
     // fixed points
     for (const p of P.points || []) {
       const z = [ev(p.x, E), ev(p.y, E)], w = val(z), color = p.color || 'violet';
-      zp.point(z[0], z[1], { color, r: 4.5, label: p.label });
+      if (split) zp.point(z[0], z[1], { color, r: 4.5, label: p.label });
+      else { zp.point(z[0], z[1], { color: 'ink3', r: 2.5, label: p.label }); g.save(); zp._clip(); zp.line(z[0], z[1], w[0], w[1], { color: 'ink4', width: 1, dash: [2, 3] }); g.restore(); }
       if (Number.isFinite(w[0]) && Number.isFinite(w[1])) wp.point(w[0], w[1], { color, r: 4.5, label: p.wlabel });
     }
 
