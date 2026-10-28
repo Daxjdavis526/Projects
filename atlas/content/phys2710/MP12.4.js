@@ -56,7 +56,7 @@ function phase(sc, { B = null, T = null, numbers = true, extra = {}, caption } =
       vlines: T !== null ? [{ x: T, color: 'gold' }] : [],
       ...Object.fromEntries(Object.entries(extra).filter(([k]) => k !== 'points')),
     },
-    caption: caption ?? `The phase diagram of ${sc.label}: superconducting below the critical-field curve B_c(T) = B_c(0)[1 − (T/T_c)²], an empirical law that fits type-I elements to a few per cent.`,
+    caption: caption ?? t`The phase diagram of ${sc.label}: superconducting below the critical-field curve $B_c(T) = B_c(0)[1 - (T/T_c)^2]$, an empirical law that fits type-I elements to a few per cent.`,
   };
 }
 
@@ -171,11 +171,11 @@ The explanation (Bardeen, Cooper and Schrieffer, 1957): lattice vibrations bind 
           answer: f, units: 'GHz', tol: { rel: 0.01 },
           errors: [{ value: f / 2, feedback: t`The pair gap is $2\Delta = 3.53\,kT_c$; you used half of it.` }],
           hints: [t`$2\Delta = 3.53\times(8.617\times10^{-5}\ \text{eV/K})\times${Tc}$ K.`, t`$f = 2\Delta/h$ with $h = 4.136\times10^{-15}$ eV s.`],
-          teach: 'A superconductor’s pair gap, 2Δ ≈ 3.5kT_c, is a few meV: photons below about a terahertz pass without breaking pairs.',
+          teach: t`A superconductor’s pair gap, $2\Delta \approx 3.5\,kT_c$, is a few meV: photons below about a terahertz pass without breaking pairs.`,
           explain: t`$2\Delta = ${fmt(gap * 1000, 3)}$ meV, so $f = ${fmt(f, 3)}$ GHz — microwaves to far infrared. Measured, ${name}’s gap is about ${meas} meV: BCS’s simple ratio is close for weakly coupled metals and a little low for niobium. Niobium detectors on radio telescopes such as ALMA work up to about 700 GHz for exactly this reason.`,
           visual: { type: 'graph', params: { x: [0, 10], y: [-1.2, 1.2], aspect: 'wide', axesAt: 'edge', xlabel: 'temperature (K)', ylabel: 'energy (meV)', yticks: 0,
             shade: [{ fn: `0.5*${r6(gap * 1000)}*sqrt(max(0, 1 - (x/${Tc})^4))`, lower: `-0.5*${r6(gap * 1000)}*sqrt(max(0, 1 - (x/${Tc})^4))`, from: 0, to: Tc, color: 'violet', alpha: 0.3 }],
-            vlines: [{ x: Tc, label: 'T_c'.replace('_c', 'c'), color: 'violet' }],
+            vlines: [{ x: Tc, label: 'critical temperature', color: 'violet' }],
             points: [label(0.2, 0, 'the gap: no states for single electrons', 'violet', 0, 0, 'left')] },
             caption: `Schematic: the energy gap of ${name} opening below its critical temperature and reaching its full width 2Δ at absolute zero (the curve’s shape is approximate).` },
         };
@@ -190,12 +190,12 @@ The explanation (Bardeen, Cooper and Schrieffer, 1957): lattice vibrations bind 
           answer: T2, units: 'K', tol: { rel: 2e-4 },
           errors: [{ value: 4.185 * (199.5 / M2), feedback: t`$T_c$ goes as $M^{-1/2}$: take the square root of the mass ratio.` }, { value: 4.185 * Math.sqrt(M2 / 199.5), feedback: 'Heavier isotopes have the lower critical temperature: the ratio is √(199.5/M), not √(M/199.5).' }],
           hints: [t`$\dfrac{T_{c2}}{T_{c1}} = \left(\dfrac{M_1}{M_2}\right)^{1/2}$.`, t`$T_{c2} = 4.185\sqrt{199.5/${M2}}$ K.`],
-          teach: 'The isotope effect, T_c ∝ M^(−1/2), was the clue that lattice vibrations — whose frequencies go as M^(−1/2) — bind the Cooper pairs.',
+          teach: t`The isotope effect, $T_c \propto M^{-1/2}$, was the clue that lattice vibrations — whose frequencies go as $M^{-1/2}$ — bind the Cooper pairs.`,
           explain: t`$T_c = 4.185\times\sqrt{199.5/${M2}} = ${fmt(T2, 4)}$ K. A lattice of heavier ions vibrates more slowly (as $M^{-1/2}$, like a mass on a spring), and the critical temperature follows: the electrons’ pairing glue is the lattice’s vibrations. This clue guided Bardeen, Cooper and Schrieffer to their theory.`,
           visual: { type: 'graph', params: { x: [197, 206], y: [4.12, 4.22], aspect: 'wide', axesAt: 'edge', xlabel: 'average isotopic mass (u)', ylabel: 'critical temperature (K)',
             curves: [{ fn: '4.185*sqrt(199.5/x)', color: 'violet', width: 2.4 }],
             points: [{ x: 199.5, y: 4.185, r: 5, color: 'gold', label: 'natural mercury, 4.185 K', labelDx: 8, labelDy: -10 }], vlines: [{ x: M2, label: `${M2} u: ?`, color: 'gold' }] },
-            caption: 'The isotope effect in mercury: T_c ∝ M^(−1/2). The curve is the law; the measured points (Maxwell; Reynolds and co-workers, 1950) lie on it within their scatter.' },
+            caption: t`The isotope effect in mercury: $T_c \propto M^{-1/2}$. The curve is the law; the measurements of 1950 (Maxwell; Reynolds and co-workers) lie on it within their scatter.` },
         };
       },
     }),
@@ -268,7 +268,7 @@ The explanation (Bardeen, Cooper and Schrieffer, 1957): lattice vibrations bind 
           answer: B * 1e9, units: 'nT', tol: { rel: 0.005 },
           errors: [{ value: (B * 1e9) / (2 * Math.PI), feedback: t`$\omega$ is the angular speed: $\omega = 2\pi f$.` }, { value: (B * 1e9) / 2, feedback: t`The London moment is $2m_e\omega/e$ — keep the 2.` }],
           hints: [t`$\omega = 2\pi f = 2\pi\times${f}$ rad/s.`, t`$B = 2(9.109\times10^{-31}\ \text{kg})\,\omega/(1.602\times10^{-19}\ \text{C})$.`],
-          teach: 'A rotating superconductor carries the London field B = 2mₑω/e along its axis — a direct readout of its spin direction.',
+          teach: t`A rotating superconductor carries the London field $B = 2m_e\omega/e$ along its axis — a direct readout of its spin direction.`,
           explain: t`$B = \dfrac{2(9.109\times10^{-31})(2\pi\times${f})}{1.602\times10^{-19}} = ${fmt(B * 1e9, 3)}$ nT — about a ten-thousandth of Earth’s field, so the rotors sat inside superconducting shields. Tracking it, Gravity Probe B measured the geodetic precession of its gyroscopes to 0.3% and the frame dragging by Earth’s rotation to about 20%, both as Einstein’s theory predicts.`,
           visual: { type: 'graph', params: { x: [-2.4, 2.4], y: [-1.4, 1.4], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
             shade: [disc(0, 0, 1, 'violet', 0.3)],
@@ -281,7 +281,7 @@ The explanation (Bardeen, Cooper and Schrieffer, 1957): lattice vibrations bind 
     }),
     mcq({
       id: 'cp-mri', difficulty: 2, transfer: true,
-      prompt: 'A 3 T MRI magnet is wound from niobium–titanium wire and cooled with liquid helium. Why not use lead, which superconducts at a higher temperature (7.2 K against niobium–titanium’s 9.5 K… or nearly the same)?',
+      prompt: 'A 3 T MRI magnet is wound from niobium–titanium wire and cooled with liquid helium. Why not use lead, which superconducts below 7.2 K — not far below niobium–titanium’s 9 K or so?',
       choices: [
         'Lead is type I: a field above about 0.05 T at 4.2 K destroys its superconductivity, while type-II NbTi lets the field in as vortices and stays superconducting to about 10 T',
         'Lead’s resistance in the superconducting state is small but not zero, so the magnet would heat up',
@@ -309,7 +309,7 @@ The explanation (Bardeen, Cooper and Schrieffer, 1957): lattice vibrations bind 
           answer: I, units: 'A', tol: { rel: 0.01 },
           errors: [{ value: (2 * Math.PI * rmm * 1e-3 * sc.Bc0) / MU0, feedback: t`Use the critical field at ${T} K: $B_c(T) = B_c(0)[1 - (T/T_c)^2]$.` }],
           hints: [t`First $B_c(${T}\ \text{K}) = ${sc.Bc0}\,[1 - (${T}/${sc.Tc})^2]$.`, t`Then $I = 2\pi rB_c/\mu_0$ with $r = ${rmm}\times10^{-3}$ m and $\mu_0 = 4\pi\times10^{-7}$ T m/A.`],
-          teach: 'A superconducting wire’s current is limited by its own field: I_max = 2πrB_c(T)/μ₀.',
+          teach: t`A superconducting wire’s current is limited by its own field: $I_{\max} = 2\pi rB_c(T)/\mu_0$.`,
           explain: t`$B_c = ${fmt(Bc, 3)}$ T, so $I = 2\pi(${rmm}\times10^{-3})(${fmt(Bc, 3)})/(4\pi\times10^{-7}) = ${fmt(I, 3)}$ A.`,
           visual: phase(sc, { T, caption: `The phase diagram of ${sc.label}; the gold line is ${T} K.` }),
         };
