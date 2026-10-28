@@ -90,17 +90,15 @@ Now nothing is promised. The general solution still has two constants, but they 
         const [L, LT] = r.pick(LS), B = r.pick([0, 1, 3]);
         const s2 = Math.sin(2 * L), zero = Math.abs(s2) < 1e-9;
         const ans = !zero ? 0 : B === 0 ? 2 : 1;
-        const why = {
-          0: t`That needs $\sin 2L \ne 0$, so that $c_2 = B/\sin 2L$ can be solved for. Here $\sin(2\cdot${LT}) = 0$.`,
-          1: t`$y = c_2\sin 2x$ reaches $c_2\sin 2L$ at $x = L$, and here $\sin(2\cdot${LT}) = ${n(s2)} \ne 0$, so $c_2 = ${B}/${n(s2)}$ works.`,
-          2: B === 0 && !zero ? t`Only $c_2 = 0$ satisfies $c_2\sin 2L = 0$ when $\sin 2L \ne 0$: one solution, $y = 0$.` : B === 0 ? '' : t`With $B = ${B} \ne 0$, every solution through the origin misses or hits — but they cannot all hit.`,
-          3: 'A linear problem never has exactly two solutions: if two differ, every combination of them on the line through both works too, giving infinitely many.',
+        const WHY = {
+          0: { 1: t`$\sin(2\cdot${LT}) = ${n(s2)} \ne 0$, so $c_2 = ${B}/${n(s2)}$ fits the far end.`, 2: t`Since $\sin 2L \ne 0$, only one value of $c_2$ satisfies $c_2\sin 2L = ${B}$.` },
+          1: { 0: t`Solving $c_2\sin 2L = ${B}$ needs $\sin 2L \ne 0$, and here $\sin(2\cdot${LT}) = 0$.`, 2: t`$c_2\cdot 0 = ${B}$ holds for no $c_2$, let alone all of them.` },
+          2: { 0: t`$\sin(2\cdot${LT}) = 0$, so $c_2\cdot 0 = 0$ holds for **every** $c_2$, not just one.`, 1: t`$c_2\cdot 0 = 0$ is true for every $c_2$: each $c_2\sin 2x$ is a solution.` },
         };
-        delete why[ans];
-        if (why[2] === '') delete why[2];
+        const why = { ...WHY[ans], 3: 'A linear problem never has exactly two solutions: the difference of two solves the homogeneous problem, and so does every multiple of it.' };
         return {
           prompt: t`How many solutions does $y'' + 4y = 0$, $\;y(0) = 0$, $\;y(${LT}) = ${B}$ have?`,
-          choices: ['Exactly one', 'None', 'Infinitely many', 'Exactly two'], fixedOrder: true,
+          choices: ['Exactly one', 'None', 'Infinitely many', 'Exactly two'],
           answer: ans, why,
           hints: [t`Every solution with $y(0) = 0$ is $c\sin 2x$.`, t`Evaluate $\sin 2L$ at $L = ${LT}$: can $c\sin 2L$ equal ${B}?`],
           teach: t`Fit the general solution to both boundary conditions: the count depends on whether the homogeneous problem has a nonzero solution.`,
@@ -129,7 +127,7 @@ Now nothing is promised. The general solution still has two constants, but they 
     expr({
       id: 'unique', difficulty: 2,
       gen(r) {
-        const k = r.int(1, 3), a = r.intExcept(-4, 4, [0]), b = r.intExcept(-4, 4, [0]);
+        const k = r.int(1, 3), a = r.intExcept(-4, 4, [0]), b = r.intExcept(-4, 4, [0, a]);
         const LT = k === 1 ? t`\tfrac{\pi}{2}` : t`\tfrac{\pi}{${2 * k}}`;
         return {
           prompt: t`Solve $y'' + ${co(k * k)}y = 0$ with $y(0) = ${a}$ and $y(${LT}) = ${b}$.`,
@@ -248,6 +246,5 @@ Now nothing is promised. The general solution still has two constants, but they 
   sources: [
     { label: 'J. Lebl, Notes on Diffy Qs, §4.1 Boundary value problems', url: 'https://www.jirka.org/diffyqs/' },
     { label: 'P. Dawkins, Paul’s Online Notes: Boundary value problems', url: 'https://tutorial.math.lamar.edu/Classes/DE/BoundaryValueProblem.aspx' },
-    { label: 'NASA SP-8007, Buckling of thin-walled circular cylinders (column buckling background)', url: 'https://ntrs.nasa.gov/citations/19690013955' },
   ],
 });
