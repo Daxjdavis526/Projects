@@ -182,13 +182,16 @@ export function mount(F, P0) {
       pl.line(P.truth, 0, P.truth, 8.6, { color: 'good', width: 2, dash: [6, 4] });
       pl.text('true value', P.truth, 0.5, { size: fs, color: 'good', dx: 6 });
       // stacked dots
-      const stack = new Map(), dotH = 0.62;
+      const keyOf = (x) => (res > 0 ? Math.round(x / res) : Math.round(x / ((xr[1] - xr[0]) / 120)));
+      const tall = new Map();
+      for (const x of xs) tall.set(keyOf(x), (tall.get(keyOf(x)) || 0) + 1);
+      const stack = new Map(), dotH = Math.min(0.62, 6.6 / Math.max(1, ...tall.values()));
       const g = pl.ctx;
       g.save(); g.fillStyle = pl.color('accent');
       for (const x of xs) {
-        const key = res > 0 ? Math.round(x / res) : Math.round(x / ((xr[1] - xr[0]) / 120));
+        const key = keyOf(x);
         const k = stack.get(key) || 0; stack.set(key, k + 1);
-        g.beginPath(); g.arc(pl.X(x), pl.Y(1.3 + k * dotH), fs > 11 ? 4.4 : 3.6, 0, 2 * Math.PI); g.fill();
+        g.beginPath(); g.arc(pl.X(x), pl.Y(1.3 + k * dotH), Math.min(fs > 11 ? 4.4 : 3.6, Math.max(2, 0.45 * (pl.Y(0) - pl.Y(dotH)))), 0, 2 * Math.PI); g.fill();
       }
       g.restore();
       if (P.stats !== false) {

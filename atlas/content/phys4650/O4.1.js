@@ -135,11 +135,11 @@ A lens is two such surfaces. The first surface’s image is the second surface�
         const xi = (f * f) / xo;
         return {
           prompt: t`A camera lens of focal length ${f} mm is focused at infinity: its detector sits at the back focal point. To photograph a target ${xo} mm in front of the **front focal point**, how far must the detector move back? Use Newton’s form of the lens equation.`,
-          visual: thinPic(f, f + xo > 6 * f ? 6 * f : f + xo, t`A thin lens with its focal points; the object’s rays converge beyond $F′$. Distances ${f + xo > 6 * f ? 'shortened; ' : ''}heights exaggerated.`, { marks: ['F', 'F2'] }),
+          visual: thinPic(f, f + xo > 6 * f ? 6 * f : f + xo, t`A thin lens with its focal points; the object’s rays converge beyond $F'$. Distances ${f + xo > 6 * f ? 'shortened; ' : ''}heights exaggerated.`, { marks: ['F', 'F2'] }),
           answer: xi, units: 'mm', tol: { rel: 0.005 },
           errors: [{ value: 1 / (1 / f - 1 / xo), feedback: t`You put $x_o$ in as $s_o$. Newton’s distances are measured from the focal points: $x_ox_i = f^2$.` }, { value: 1 / (1 / f - 1 / (xo + f)) , feedback: t`That is $s_i$, measured from the lens. The detector moves by $x_i = s_i - f$.` }],
-          hints: [t`Newton: $x_ox_i = f^2$, with $x_o$ measured from $F$ and $x_i$ from $F′$.`],
-          teach: t`Measured from the focal points, the lens equation becomes $x_ox_i = f^2$: the image moves past $F′$ by $f^2/x_o$.`,
+          hints: [t`Newton: $x_ox_i = f^2$, with $x_o$ measured from $F$ and $x_i$ from $F'$.`],
+          teach: t`Measured from the focal points, the lens equation becomes $x_ox_i = f^2$: the image moves past $F'$ by $f^2/x_o$.`,
           explain: t`$x_i = ${f}^2/${xo} = ${sf(xi, 3)}$ mm. Newton’s form is the one focusing mechanisms use: the shift is tiny for distant objects and grows fast as the object nears $F$.`,
         };
       },
@@ -152,7 +152,7 @@ A lens is two such surfaces. The first surface’s image is the second surface�
         const fw = (fa * (n - 1)) / (n / nw - 1);
         return {
           prompt: t`A thin lens of ${MATS[mat].name} ($n = ${sf(n, 4)}$) has $f = ${fa}$ mm in air. What is its focal length when it is submerged in water ($n = ${sf(nw, 4)}$), in mm?`,
-          visual: bench({ elements: [{ kind: 'surf', z: 0, R: 2 * fa * (n - 1), n, ap: 10 }, { kind: 'surf', z: 3, R: -2 * fa * (n - 1), n: 1, ap: 10 }], source: 'inf', rays: 7, fill: [-0.9, 0.9], x: [-0.6 * fa, 1.4 * fa], y: [-14, 14], marks: ['F2'], readout: false }, t`The lens in air, focusing parallel light at $F′$. In water the surfaces bend light less. Heights exaggerated.`),
+          visual: bench({ elements: [{ kind: 'surf', z: 0, R: 2 * fa * (n - 1), n, ap: 10 }, { kind: 'surf', z: 3, R: -2 * fa * (n - 1), n: 1, ap: 10 }], source: 'inf', rays: 7, fill: [-0.9, 0.9], x: [-0.6 * fa, 1.4 * fa], y: [-14, 14], marks: ['F2'], readout: false }, t`The lens in air, focusing parallel light at $F'$. In water the surfaces bend light less. Heights exaggerated.`),
           answer: fw, units: 'mm', tol: { rel: 0.005 },
           errors: [{ value: fa * nw, feedback: 'The index ratio enters through (n − 1) and (n/n_w − 1), not as a simple factor.' }, { value: fa, feedback: 'The surrounding medium changes the power: each surface’s power is proportional to the index difference across it.' }],
           hints: [t`In a medium of index $n_m$: $\dfrac{1}{f} = \dfrac{n - n_m}{n_m}\left(\dfrac{1}{R_1} - \dfrac{1}{R_2}\right)$.`, t`The bracket is the same in air and in water, so $f_w/f_a = (n - 1)/(n/n_w - 1)$.`],
@@ -183,12 +183,12 @@ A lens is two such surfaces. The first surface’s image is the second surface�
       prompt: t`A star tracker’s 50 mm lens is tested in the lab with a point source closer than infinity. The detector is fixed 52.0 mm behind the lens. Move the point source until its image lands on the detector.`,
       visual: bench({ elements: [{ kind: 'thin', z: 0, f: 50, ap: 12, label: 'f = 50 mm' }, { kind: 'screen', z: 52, ap: 9, label: 'detector' }], source: 'point', obj: [-600, 0], rays: 7, fill: [-0.9, 0.9], x: [-45, 75], y: [-16, 16], marks: ['F2'], readouts: ['image'], clip: false,
         controls: [{ key: 'so', label: 'Source distance $s_o$', min: 200, max: 1400, step: 10, value: 600, unit: '\\mathrm{mm}', explain: 'How far in front of the lens the point source is.', set: [['obj', 0, -1, 0]] }] },
-      t`The lens, its back focal point $F′$ and the detector 52 mm behind the lens. The source is far off to the left; heights exaggerated. The readout says how far beyond the detector the image forms.`),
+      t`The lens, its back focal point $F'$ and the detector 52 mm behind the lens. The source is far off to the left; heights exaggerated. The readout says how far beyond the detector the image forms.`),
       param: 'so', answer: [1270, 1330],
       instruction: 'Set the source distance so the rays cross at the detector, then check.',
       hints: [t`$1/s_o = 1/f - 1/s_i$ with $s_i = 52$ mm.`, t`$1/s_o = 1/50 - 1/52 = 0.000769\ \text{mm}^{-1}$.`],
       teach: 'Moving an object closer pushes its image farther behind the lens.',
-      explain: t`$s_o = 1/(1/50 - 1/52) = 1300$ mm. In Newton’s form: $x_i = 2$ mm beyond $F′$ needs $x_o = 50^2/2 = 1250$ mm beyond $F$.`,
+      explain: t`$s_o = 1/(1/50 - 1/52) = 1300$ mm. In Newton’s form: $x_i = 2$ mm beyond $F'$ needs $x_o = 50^2/2 = 1250$ mm beyond $F$.`,
     },
   ],
   checkpoint: [
@@ -199,7 +199,7 @@ A lens is two such surfaces. The first surface’s image is the second surface�
         const n = nOf(mat, 587.56), R = 2 * f * (n - 1);
         return {
           prompt: t`A small star tracker needs a thin equiconvex singlet ($R_2 = -R_1$) of ${MATS[mat].name} ($n = ${sf(n, 5)}$ at 587.6 nm) with $f = ${f}$ mm. What radius $R_1$ must the surfaces have, in mm?`,
-          visual: bench({ elements: [{ kind: 'surf', z: 0, R, n, ap: f / 5 }, { kind: 'surf', z: f / 25, R: -R, n: 1, ap: f / 5 }], source: 'inf', rays: 7, fill: [-0.9, 0.9], x: [-0.5 * f, 1.3 * f], y: [-f / 3.5, f / 3.5], marks: ['F2'], readout: false }, t`An equiconvex lens focusing starlight at $F′$; heights exaggerated.`),
+          visual: bench({ elements: [{ kind: 'surf', z: 0, R, n, ap: f / 5 }, { kind: 'surf', z: f / 25, R: -R, n: 1, ap: f / 5 }], source: 'inf', rays: 7, fill: [-0.9, 0.9], x: [-0.5 * f, 1.3 * f], y: [-f / 3.5, f / 3.5], marks: ['F2'], readout: false }, t`An equiconvex lens focusing starlight at $F'$; heights exaggerated.`),
           answer: R, units: 'mm', tol: { rel: 0.005 },
           errors: [{ value: f * (n - 1), feedback: t`With $R_2 = -R_1$ the bracket is $2/R_1$: $R_1 = 2f(n - 1)$.` }, { value: 2 * f, feedback: t`The glass enters through $(n - 1)$.` }],
           hints: [t`Lensmaker: $1/f = (n - 1)(1/R_1 - 1/R_2)$ with $R_2 = -R_1$.`],
@@ -226,7 +226,7 @@ A lens is two such surfaces. The first surface’s image is the second surface�
         const xi = (f * f) / (h * 1000 - f);
         return {
           prompt: t`An Earth-observation camera with focal length $f = ${f}$ m was focused at infinity on the ground. In orbit it photographs the ground ${h} km below. How far behind the back focal point does the ground’s image actually form, in nm? (Treat the optics as one thin lens.)`,
-          visual: thinPic(50, 600, t`A thin lens with the object far to the left; the image forms just beyond $F′$. Not to scale: the real shift is far too small to see.`, { marks: ['F2'], x: [-620, 120] }),
+          visual: thinPic(50, 600, t`A thin lens with the object far to the left; the image forms just beyond $F'$. Not to scale: the real shift is far too small to see.`, { marks: ['F2'], x: [-620, 120] }),
           answer: xi * 1e9, units: 'nm', tol: { rel: 0.01 },
           errors: [{ value: (f * f) / (h * 1000) * 1e6, feedback: 'Check the units: the answer is asked for in nanometres.' }],
           hints: [t`Newton: $x_i = f^2/x_o$, and $x_o \approx ${h}$ km.`, t`$x_i = (${f}\ \text{m})^2/(${h}\times 10^{3}\ \text{m})$.`],

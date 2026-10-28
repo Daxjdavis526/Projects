@@ -155,3 +155,18 @@ export function levelPic(levels, { y, x = [0, 4], ylabel = 'energy (eV)', xlabel
     caption,
   };
 }
+
+/**
+ * Hydrogen's levels (Bohr energies, eV) in columns by l (s, p, d, f), with
+ * optional arrows [[n₁, l₁, n₂, l₂, color]] from (n₁, l₁) to (n₂, l₂).
+ */
+export function hLevelsPic({ nmax = 4, arrows = [], caption, lmax = 3, extra = {} } = {}) {
+  const E = (n) => -RYD / (n * n);
+  const curves = [], points = [];
+  const cols = ['accent', 'violet', 'gold', 'teal'];
+  for (let n = 1; n <= nmax; n++) for (let l = 0; l < n && l <= lmax; l++) curves.push(seg(l + 0.18, E(n), l + 0.82, E(n), cols[l], 2.4));
+  ['s', 'p', 'd', 'f'].slice(0, lmax + 1).forEach((s, l) => points.push(label(l + 0.5, 1.4, `l = ${l} (${s})`, 'ink2', 0, 0, 'center')));
+  for (let n = 1; n <= nmax; n++) points.push(label(lmax + 1.02, E(n), `n = ${n}`, 'ink3', 2, 0));
+  const ar = arrows.map(([n1, l1, n2, l2, color]) => ({ from: [r6(l1 + 0.5), r6(E(n1))], to: [r6(l2 + 0.5), r6(E(n2))], color: color || 'warn', width: 2.2 }));
+  return { type: 'graph', params: { x: [0, lmax + 1.6], y: [-14.5, 2.4], aspect: 'wide', xlabel: '', ylabel: 'energy (eV)', xticks: 0, yticks: 4, axesAt: 'edge', curves, points, arrows: ar, ...extra }, caption };
+}

@@ -91,7 +91,9 @@ export function mount(F, P0) {
       if (c.set === 'objz') { P.obj = [v, P.obj[1]]; continue; }
       if (c.set === 'objy') { P.obj = [P.obj[0], v]; continue; }
       for (const [i, prop, sc = 1, off = 0] of c.set || []) {
-        if (i === 'obj') { P.obj = P.obj.slice(); P.obj[prop] = sc * v + off; } else els[i][prop] = sc * v + off;
+        let x = sc * v + off;
+        if ((prop === 'f' || prop === 'R') && x === 0) x = Infinity;        // a slider passing 0: no lens, a flat surface
+        if (i === 'obj') { P.obj = P.obj.slice(); P.obj[prop] = x; } else els[i][prop] = x;
       }
     }
   }

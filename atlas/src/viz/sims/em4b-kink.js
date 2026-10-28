@@ -57,7 +57,7 @@ export function validate(P0) {
   const P = { ...defaults, ...P0 }, out = [];
   if (!MODES.includes(P.mode)) out.push(`em4b-kink: mode must be one of ${MODES.join(', ')}`);
   for (const m of P.modes || []) if (!MODES.includes(m)) out.push(`em4b-kink: unknown mode ${m}`);
-  if (!(typeof P.beta === 'number' && Math.abs(P.beta) < 0.99)) out.push('em4b-kink: beta must be a number with |beta| < 0.99');
+  if (!(typeof P.beta === 'number' && Math.abs(P.beta) < 0.995)) out.push('em4b-kink: beta must be a number with |beta| < 0.995');
   if (!(typeof P.tau === 'number' && P.tau > 0)) out.push('em4b-kink: tau must be positive');
   if (typeof P.time !== 'number') out.push('em4b-kink: time must be a number');
   if (!(Number.isInteger(P.lines) && P.lines >= 4 && P.lines <= 40)) out.push('em4b-kink: lines must be a whole number from 4 to 40');
@@ -178,7 +178,7 @@ export async function mount(F, P0) {
     const rows = {
       time: ['Time $t$', trim(T, 3)],
       tr: ['Retarded time $t_r$', E ? trim(E.tr, 3) : '\\text{—}'],
-      delay: ['Light delay $t - t_r = \\mathscr{r}/c$', E ? trim(T - E.tr, 3) : '\\text{—}'],
+      delay: ['Light delay $t - t_r = R/c$', E ? trim(T - E.tr, 3) : '\\text{—}'],
       xr: ['Retarded position $x(t_r)$', E ? trim(E.xr, 3) : '\\text{—}'],
       xnow: ['Present position $x(t)$', trim(W.x(T), 3)],
       beta: ['Speed now $v/c$', trim(W.v(T), 3)],

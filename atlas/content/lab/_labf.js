@@ -120,3 +120,38 @@ export function table(rows) {
   const body = rows.map((r, i) => r.join(' & ') + (i === 0 ? t` \\ \hline` : t` \\`)).join(' ');
   return t`$$\begin{array}{${'c'.repeat(cols).split('').join('|')}} ${body} \end{array}$$`;
 }
+
+// ─── the χ² distribution ──────────────────────────────────────────────────
+/** ln Γ(z) for z > 0 (Lanczos, g = 7). */
+export function lnGamma(z) {
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+  z -= 1;
+  let x = c[0];
+  for (let i = 1; i < 9; i++) x += c[i] / (z + i);
+  const tt = z + 7.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(tt) - tt + Math.log(x);
+}
+/** The upper regularized incomplete gamma function Q(a, x). */
+export function gammaQ(a, x) {
+  if (x <= 0) return 1;
+  const gln = lnGamma(a);
+  if (x < a + 1) {
+    let ap = a, sum = 1 / a, del = sum;
+    for (let n = 0; n < 500; n++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    return 1 - sum * Math.exp(-x + a * Math.log(x) - gln);
+  }
+  let b = x + 1 - a, c = 1e300, d = 1 / b, h = d;
+  for (let i = 1; i < 500; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+    c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1 / d; const del = d * c; h *= del;
+    if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.exp(-x + a * Math.log(x) - gln) * h;
+}
+/** P(χ² ≥ x) for ν degrees of freedom. */
+export const chi2sf = (x, nu) => gammaQ(nu / 2, x / 2);
+/** The χ² probability density as a graph expression of x, for ν given as a number or a slider key. */
+export const chi2pdfExpr = (nu) => `x^(${nu}/2 - 1)*exp(-x/2)/(2^(${nu}/2)*gamma(${nu}/2))`;

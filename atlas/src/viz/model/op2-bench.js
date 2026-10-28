@@ -251,7 +251,7 @@ export function axisCrossing(p, d) {
  */
 export function longitudinal(elements, h, opts = {}) {
   const lambda = opts.lambda ?? 587.56;
-  const z0 = elements[0].z - 1;
+  const R0 = elements[0].R, z0 = elements[0].z - (Number.isFinite(R0) ? Math.abs(R0) : 0) - 1 - Math.abs(h);
   const r = exactRay(elements, [z0, h], [1, 0], { ...opts, clip: false });
   if (!r.ok) return NaN;
   const cp = cardinal(elements, { ...opts, lambda });
