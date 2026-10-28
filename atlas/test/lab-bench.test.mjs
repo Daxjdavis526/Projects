@@ -249,5 +249,25 @@ const bad = [
 ];
 for (const [P, why] of bad) check(`validate rejects ${why}`, validate(P).length > 0);
 
+// ─── PHYS 2225: the lab strand of PHYS 2220 ───────────────────────────────
+{
+  // L.1 — field mapping on conductive paper
+  const r = exact('fieldmap'), c = exact('fieldmap', { sys: 'contact' });
+  check('fieldmap: between full-width bars, E = −slope = V₀/d = 100 V/m and V(0) = V₀', near(r.results[0].value, 100, 1e-9) && near(r.series[0].fit.a, 10, 1e-9));
+  check('fieldmap: 3 % lost at each contact leaves the paper from 9.70 V to 0.30 V (E = 94 V/m)', near(c.series[0].fit.a, 9.7, 1e-9) && near(c.results[0].value, 94, 1e-9) && near(c.series[0].fit.a + c.series[0].fit.b * 0.1, 0.3, 1e-9));
+  const P = B.EXPERIMENTS['fieldmap-dots'].defaults, g = B.dotsGeom(P);
+  check('fieldmap-dots: each dot’s rim is at its electrode’s potential', near(B.dotsV(P.a, P), 10, 1e-12) && Math.abs(B.dotsV(P.D - P.a, P)) < 1e-12);
+  check('fieldmap-dots: the Apollonius points sit 0.04 mm inside the dots’ centres', Math.abs(g.f1 - 4.0e-5) < 1e-6);
+  let line = 0; const n = 2000, x1 = 0.01, x2 = 0.09;
+  for (let i = 0; i < n; i++) line += B.dotsE(x1 + ((i + 0.5) * (x2 - x1)) / n, P) * ((x2 - x1) / n);
+  check('fieldmap-dots: ∫E dx between two points is the potential difference (E = −dV/dx)', near(line, B.dotsV(x1, P) - B.dotsV(x2, P), 1e-6), `${line} vs ${B.dotsV(x1, P) - B.dotsV(x2, P)}`);
+  check('fieldmap-dots: the midpoint field is 2K/c, within 0.1 % of 4K/D, and far weaker than next to a dot', near(B.dotsE(0.05, P), (2 * g.K) / g.c, 1e-12) && Math.abs(B.dotsE(0.05, P) / ((4 * g.K) / 0.1) - 1) < 1e-3 && B.dotsE(0.01, P) > 2.5 * B.dotsE(0.05, P));
+  const d = exact('fieldmap-dots'), dc = exact('fieldmap-dots', { sys: 'contact' });
+  check('fieldmap-dots: V against ln(r₂/r₁) is straight with slope K and intercept V₀/2', near(d.results[0].value, g.K, 1e-9) && near(d.series[0].fit.a, 5, 1e-9) && d.series[0].fit.chi2 < 1e-12);
+  check('fieldmap-dots: contact loss scales K by 1 − 2f and keeps the midpoint at 5.0 V', near(dc.results[0].value, 0.94 * g.K, 1e-9) && near(dc.series[0].fit.a, 5, 1e-9));
+  for (const Q of [{ exp: ['fieldmap', 'fieldmap-dots'] }, { exp: 'fieldmap-dots', view: 'plot', axes: 'raw', fit: false }, { exp: 'fieldmap', sys: true, view: 'apparatus' }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+  check('validate rejects bars plotted on the dots’ log axes', validate({ exp: 'fieldmap', axes: 'log' }).length > 0);
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

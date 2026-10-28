@@ -904,19 +904,81 @@ const APPARATUS = {
     }
     pl.text(`+${P.V0.toFixed(1)} V`, X0, py1 + 0.32, { color: 'bad', size: 11, weight: 650, align: 'center' });
     pl.text('0 V', X1, py1 + 0.32, { color: 'ink2', size: 11, weight: 650, align: 'center' });
-    // the probe at the knob's setting, wired to the voltmeter
-    const s = st.setting ?? E.setting.value, xp = X0 + s;
-    pl.line(xp, Y0, 15.0, 6.6, { color: 'ink3', width: 1.1, dash: [3, 3] });
-    pl.circle(xp, Y0, 0.2, { fill: 'gold', color: 'gold', width: 1.4 });
+    // the probe at the knob's setting, wired to the voltmeter (a still picture with no reading leaves them out)
+    const s = st.setting ?? E.setting.value, xp = X0 + s, probe = !HIDE_EMPTY;
+    if (probe) {
+      pl.line(xp, Y0, 15.0, 6.6, { color: 'ink3', width: 1.1, dash: [3, 3] });
+      pl.circle(xp, Y0, 0.2, { fill: 'gold', color: 'gold', width: 1.4 });
+    }
     if (st.labels) {
       const V = st.row?.R?.[0];
-      display(pl, 15.0, 6.6, [`x = ${s.toFixed(1)} cm`, `V = ${Number.isFinite(V) ? V.toFixed(2) : '—'} V`], { compact: o.compact, title: 'probe and voltmeter' });
+      if (probe) display(pl, 15.0, 6.6, [`x = ${s.toFixed(1)} cm`, `V = ${Number.isFinite(V) ? V.toFixed(2) : '—'} V`], { compact: o.compact, title: 'probe and voltmeter' });
       pl.text('field lines', 15.0, 3.9, { color: 'accent', size: 11, weight: 600 });
       pl.text('equipotentials', 15.0, 3.1, { color: 'violet', size: 11, weight: 600 });
       if (contact) sysTag(pl, 15.0, 2.0, '0.30 V lost at each contact', { size: 10.5 });
     }
   },
+
+  // a copper wire: on a frame with an ammeter and a voltmeter (V–I), or along a metre rule with a four-wire meter (R–L)
+  ohm(pl, E, P, st, o) {
+    const sys = st.sys;
+    const meter = (x, y, ch, col = 'ink2') => { pl.circle(x, y, 0.55, { fill: 'panel', color: col, width: 1.8 }); pl.text(ch, x, y, { color: col, size: 13, weight: 700, align: 'center' }); };
+    if (E === B.EXPERIMENTS.resistivity) {
+      const k = 8.6, x0 = 1.4, yw = 4.6, L = st.setting ?? E.setting.value, xc = x0 + k * L;
+      pl.rect(x0 - 0.3, 3.0, 2 * k + 0.6, 0.75, { fill: 'gold', alpha: 0.22, stroke: 'gold', width: 1 });
+      for (let j = 0; j <= 20; j++) pl.line(x0 + (k * j) / 10, 3.75, x0 + (k * j) / 10, 3.75 - (j % 5 ? 0.22 : 0.45), { color: 'gold', width: 1 });
+      if (st.labels) for (const m of [0, 0.5, 1, 1.5, 2]) pl.text(`${m.toFixed(1)} m`, x0 + k * m, 2.55, { color: 'ink3', size: 10.5, align: 'center' });
+      pl.line(x0 - 0.6, yw, x0 + 2 * k + 0.4, yw, { color: 'gold', width: 2 });
+      const clip = (x, col) => pl.path([[x - 0.25, yw + 0.55], [x, yw], [x + 0.25, yw + 0.55]], { color: col, width: 3 });
+      const two = sys === 'wiring', col = two ? 'warn' : 'ink2';
+      clip(x0, col); clip(xc, col);
+      block(pl, 6.6, 7.2, 4.6, 2.0, 'ink4', 0.35);
+      const leads = two ? [[x0, 7.6], [xc, 8.4]] : [[x0, 7.5], [x0 + 0.25, 7.9], [xc, 8.3], [xc - 0.25, 8.7]];
+      leads.forEach(([x, y], i) => { const mx = i < leads.length / 2 ? 6.6 : 11.2; pl.path([[x, yw + 0.55], [x, y], [mx, y]], { color: two ? 'warn' : i % 2 ? 'violet' : 'ink2', width: 1.2 }); });
+      if (st.labels) {
+        const R = st.row?.R?.[0];
+        display(pl, 7.0, 8.2, [`R = ${Number.isFinite(R) ? R.toFixed(3) : '—'} Ω`], { compact: o.compact, title: two ? 'ohmmeter, two-wire' : 'ohmmeter, four-wire' });
+        dim(pl, x0, 5.9, xc, 5.9, `L = ${L.toFixed(2)} m`, { dy: 0.45, dx: -0.8 });
+        pl.text('copper wire, 0.200 mm', x0 + 2 * k - 0.2, yw + 0.45, { color: 'gold', size: 10.5, align: 'right' });
+        if (two) sysTag(pl, 12.2, 8.6, 'leads + clips add 0.250 Ω', { size: 10.5 });
+        else pl.text('current leads (grey), voltage leads (violet)', 12.0, 7.6, { color: 'ink3', size: 10.5 });
+      }
+      return;
+    }
+    // V against I: supply → ammeter → wire → back, voltmeter across the wire
+    const I = st.setting ?? E.setting.value, hot = sys === 'heating';
+    block(pl, 0.6, 5.2, 3.2, 3.2, 'ink4', 0.35);
+    pl.text('supply', 2.2, 8.85, { color: 'ink3', size: 11, align: 'center' });
+    if (st.labels) pl.text(`${I.toFixed(2)} A`, 2.2, 6.8, { color: 'good', size: 12.5, weight: 650, align: 'center', font: 'ui-monospace, SFMono-Regular, Menlo, monospace' });
+    const T1 = [8.4, 4.4], T2 = [14.6, 4.4];
+    pl.path([[3.8, 7.6], [6.05, 7.6]], { color: 'ink2', width: 1.4 }); meter(6.6, 7.6, 'A');
+    pl.path([[7.15, 7.6], [T1[0], 7.6], T1], { color: 'ink2', width: 1.4 });
+    pl.path([T2, [T2[0], 2.0], [2.2, 2.0], [2.2, 5.2]], { color: 'ink2', width: 1.4 });
+    zigzag2(pl, T1, T2, 26, 0.55, hot ? 'warn' : 'gold');
+    pl.circle(T1[0], T1[1], 0.13, { fill: 'ink', stroke: false }); pl.circle(T2[0], T2[1], 0.13, { fill: 'ink', stroke: false });
+    const bad = sys === 'wiring', vx = 11.5, vy = 8.4;
+    meter(vx, vy, 'V', bad ? 'warn' : 'ink2');
+    pl.path([[vx - 0.55, vy], [bad ? 5.4 : T1[0] + 0.5, vy], [bad ? 5.4 : T1[0] + 0.5, bad ? 7.6 : T1[1]]], { color: bad ? 'warn' : 'violet', width: 1.2 });
+    if (!bad) pl.line(T1[0] + 0.5, T1[1], T1[0], T1[1], { color: 'violet', width: 1.2 });
+    pl.path([[vx + 0.55, vy], [T2[0] - 0.5, vy], [T2[0] - 0.5, T2[1]], T2], { color: 'violet', width: 1.2 });
+    if (st.labels) {
+      const R = st.row?.R;
+      display(pl, 16.2, 8.6, [`I = ${R ? R[0].toFixed(3) : '—'} A`, `V = ${R ? R[1].toFixed(3) : '—'} V`], { compact: o.compact, title: 'ammeter and voltmeter' });
+      pl.text('copper wire: 2.000 m, 0.200 mm', (T1[0] + T2[0]) / 2, 3.15, { color: hot ? 'warn' : 'gold', size: 10.5, align: 'center' });
+      if (bad) sysTag(pl, 3.0, 9.55, 'voltmeter clipped outside the ammeter (0.100 Ω)', { size: 10.5 });
+      if (hot) sysTag(pl, (T1[0] + T2[0]) / 2, 1.2, `left on: the wire warms ${(P.heat * I * I).toFixed(1)} K`, { size: 10.5, align: 'center' });
+    }
+  },
 };
+
+/** A zigzag (a wound resistor wire) between two world points, `n` half-turns of half-width w. */
+function zigzag2(pl, a, b, n, w, col) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L], nn = [-u[1], u[0]];
+  const pts = [a];
+  for (let k = 1; k < n; k++) { const s = (L * k) / n, side = k % 2 ? w : -w; pts.push([a[0] + u[0] * s + nn[0] * side, a[1] + u[1] * s + nn[1] * side]); }
+  pts.push(b);
+  pl.path(pts, { color: col, width: 1.6 });
+}
 
 /** Node-side check used by the content tests. */
 export function validate(P0) {

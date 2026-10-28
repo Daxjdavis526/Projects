@@ -6,6 +6,7 @@
 //   node atlas/test/optics-rays.test.mjs
 
 import * as O from '../src/viz/model/optics-rays.js';
+import { validate } from '../src/viz/sims/optics-rays.js';
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {
@@ -186,6 +187,13 @@ check('refraction works with the normal on either side', near(O.refractDir([0.6,
   check('…overall angular magnification (L/f_o)(250 mm/f_e) = 400', near(Math.abs(r.slope) / (h / 250), 400, 1e-9), (Math.abs(r.slope) / (h / 250)).toFixed(3));
   check('a two-lens chain multiplies magnifications', (() => { const s = O.twoLens(10, 10, 50, 15); return near(s.m, s.i1.m * s.i2.m) && near(s.i2.dI, O.thinLens(10, 50 - O.thinLens(10, 15).dI).dI); })());
 }
+
+// ─── the simulation’s parameter check ──────────────────────────────────────
+for (const mode of ['interface', 'prism', 'fibre', 'surface', 'lens', 'mirror', 'system']) check(`optics-rays validate accepts ${mode} defaults`, validate({ mode }).length === 0, validate({ mode }).join('; '));
+check('optics-rays validate accepts a plane mirror and a convex one', validate({ mode: 'mirror', f: Infinity }).length === 0 && validate({ mode: 'mirror', f: -12 }).length === 0);
+check('optics-rays validate accepts a microscope and a fish bowl', validate({ mode: 'system', kind: 'microscope' }).length === 0 && validate({ mode: 'surface', R: -15, dO: 10 }).length === 0);
+check('optics-rays validate rejects an unknown mode, a lens with f = 0.5 and gold prisms', validate({ mode: 'nope' }).length > 0 && validate({ mode: 'lens', f: 0.5 }).length > 0 && validate({ mode: 'prism', mat: 'gold' }).length > 0);
+check('optics-rays validate rejects a microscope object inside the focal length', validate({ mode: 'system', kind: 'microscope', f1: 4, dO: 3 }).length > 0);
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

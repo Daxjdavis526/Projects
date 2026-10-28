@@ -68,7 +68,7 @@ const SHRINK = Math.round(R_SUN / rDark(GM_SUN) / 1000) * 1000;                /
 const escapeGraph = (extra = {}) => ({
   type: 'graph',
   params: {
-    x: [0, 10], y: [0, 1.6], xlabel: 'R / (2GM/c²)', ylabel: 'v_esc / c',
+    x: [0, 10], y: [0, 1.6], xlabel: 'R / (2GM/c²)', ylabel: 'escape speed / c',
     curves: [{ fn: 'sqrt(1/x)', color: 'accent', domain: [0.39, 10] }],
     hlines: [{ y: 1, label: 'speed of light', color: 'warn' }],
     vlines: [{ x: 1, label: 'R = 2GM/c²', color: 'ink3' }],
@@ -168,7 +168,7 @@ Add two more cracks — Newton’s force acts **instantly** across any distance,
           explain: t`$v_\text{esc} = \sqrt{2\times${tex(B.GM, 4)}/${tex(B.R, 5)}} = ${fmt(v / 1000, 3)}$ km/s. A circular orbit at the same radius needs $1/\sqrt2$ of that, ${fmt(v / 1000 / Math.SQRT2, 3)} km/s.`,
           visual: {
             type: 'graph',
-            params: { x: [0, 6], y: [0, v / 1000 * 1.25], xlabel: 'launch distance from the centre, r / R', ylabel: 'v_esc (km/s)', constants: { ve: v / 1000 }, curves: [{ fn: 've*sqrt(1/x)', color: 'accent', domain: [1, 6] }], points: [{ x: 1, y: 've', color: 'gold', label: 'surface' }] },
+            params: { x: [0, 6], y: [0, v / 1000 * 1.25], xlabel: 'launch distance from the centre, r / R', ylabel: 'escape speed (km/s)', constants: { ve: v / 1000 }, curves: [{ fn: 've*sqrt(1/x)', color: 'accent', domain: [1, 6] }], points: [{ x: 1, y: 've', color: 'gold', label: 'surface' }] },
             caption: t`Escape speed $\sqrt{2GM/r}$ falls slowly with distance: launching from four radii out needs half the surface value.`,
           },
         };

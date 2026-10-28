@@ -27,7 +27,7 @@ const TIDES = [
 const kretschGraph = {
   type: 'graph',
   params: {
-    x: [0, 4], y: [0, 3.2], xlabel: 'r / r_s', ylabel: 'K / K(horizon)',
+    x: [0, 4], y: [0, 3.2], xlabel: 'r / rₛ', ylabel: 'K / K(horizon)',
     curves: [{ fn: '1/x^6', domain: [0.62, 4], color: 'bad' }],
     vlines: [{ x: 1, label: 'horizon' }],
     hlines: [{ y: 1 }],

@@ -80,8 +80,8 @@ const halvesPic = {
   params: {
     x: [0, 40], y: [0.6, 1.45], xlabel: 'r / M', ylabel: '',
     curves: [
-      { fn: '1 - 2/x', domain: [4, 40], color: 'gold', label: '−g_tt = 1 − 2M/r  (time)', labelAt: 22, labelDy: 16 },
-      { fn: '1 + 2/x', domain: [4, 40], color: 'accent', label: 'g_rr ≈ 1 + 2M/r  (space)', labelAt: 22 },
+      { fn: '1 - 2/x', domain: [4, 40], color: 'gold', label: '−gₜₜ = 1 − 2M/r  (time)', labelAt: 22, labelDy: 16 },
+      { fn: '1 + 2/x', domain: [4, 40], color: 'accent', label: 'gᵣᵣ ≈ 1 + 2M/r  (space)', labelAt: 22 },
     ],
     hlines: [{ y: 1, label: 'flat' }],
   },

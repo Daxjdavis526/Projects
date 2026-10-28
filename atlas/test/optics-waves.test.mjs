@@ -8,6 +8,7 @@
 //   node atlas/test/optics-waves.test.mjs
 
 import * as W from '../src/viz/model/optics-waves.js';
+import { validate } from '../src/viz/sims/optics-waves.js';
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {
@@ -228,6 +229,12 @@ function zeros(f, lo, hi, n = 4000, floor = 1e-6) {
   check('polarized light at 60° to the axis: cos² 60° = 1/4', near(W.polarizerChain([0], 60 * d)[0], 0.25, 1e-12));
   check('many polarizers in small steps rotate the light with little loss', W.polarizerChain(Array.from({ length: 30 }, (_, i) => ((i + 1) * 3 * d)), 0)[29] > 0.9);
 }
+
+// ─── the simulation’s parameter check ──────────────────────────────────────
+for (const mode of ['slits', 'film', 'michelson', 'airy', 'polar']) check(`optics-waves validate accepts ${mode} defaults`, validate({ mode }).length === 0, validate({ mode }).join('; '));
+check('optics-waves validate accepts a grating, a single slit and the EHT', validate({ mode: 'slits', N: 12, a: 0, d: 1.667 }).length === 0 && validate({ mode: 'slits', N: 1, a: 40 }).length === 0 && validate({ mode: 'airy', preset: 'eht' }).length === 0);
+check('optics-waves validate rejects a single slit of no width, slits wider than their spacing, 25 slits', validate({ mode: 'slits', N: 1, a: 0 }).length > 0 && validate({ mode: 'slits', a: 200, d: 100 }).length > 0 && validate({ mode: 'slits', N: 25 }).length > 0);
+check('optics-waves validate rejects a zoom of 3 and a fourth polarizer', validate({ mode: 'airy', zoom: 3 }).length > 0 && validate({ mode: 'polar', n: 4 }).length > 0);
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

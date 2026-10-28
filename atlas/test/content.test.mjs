@@ -48,6 +48,16 @@ async function checkVisual(where, spec) {
   (function walk(v) { if (typeof v === 'string') strings.push(v); else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x); })(spec.params || {});
   const damaged = strings.find((x) => /[\t\f\v\b\r]/.test(x));
   if (damaged !== undefined) check(`${where}: visual text has no control characters`, false, `“${damaged.slice(0, 40).replace(/[\t\f\v\b\r]/g, '�')}” — a backslash was eaten by a JS string escape; use String.raw`);
+  // a graph's canvas labels are plain text: TeX in them prints literally
+  if (spec.type === 'graph') {
+    const P = spec.params || {};
+    for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || []), ...(P.vlines || []), ...(P.hlines || []), { label: P.xlabel }, { label: P.ylabel }]) {
+      const L = o && o.label;
+      if (typeof L !== 'string') continue;
+      const bad = /\$|\\[A-Za-z]|(?<![\w])[A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{|[A-Za-z0-9α-ωΑ-Ω])/.exec(L);
+      if (bad) check(`${where}: graph label “${L}” is plain text`, false, `“${bad[0]}” would print literally on the canvas — use Unicode (², ₀, θ) and plain words`);
+    }
+  }
   if (mod.validate) {
     let p;
     try { p = mod.validate({ ...(mod.defaults || {}), ...(spec.params || {}) }); } catch (e) { p = [`validate threw: ${e.message}`]; }

@@ -68,7 +68,9 @@ const FUNCS = {
   cbrt: { f: Math.cbrt, tex: 'cbrt' },
   abs: { f: Math.abs, tex: 'abs' },
   sgn: { f: Math.sign, tex: '\\operatorname{sgn}' },
-  step: { f: (x) => (x >= 0 ? 1 : 0), tex: '\\Theta' },          // Heaviside: step(a − b) is 1 when a ≥ b
+  // Heaviside: step(a − b) is 1 when a > b and 0 when a < b; ½ at the jump itself, so
+  // f·step(x) + g·step(−x) is never doubled there
+  step: { f: (x) => (x > 0 ? 1 : x < 0 ? 0 : 0.5), tex: '\\Theta' },
   floor: { f: Math.floor, tex: 'floor' },
   round: { f: Math.round, tex: 'round' },
   ceil: { f: Math.ceil, tex: 'ceil' },

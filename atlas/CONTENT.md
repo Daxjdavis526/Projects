@@ -104,9 +104,10 @@ labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it.
 Formatting helpers that return TeX (`tex(x)`, `frac(x)`, `polyTeX`, a
 `×10ⁿ` number) must land inside `$…$` (`t\`about $${tex(x)}$ m\``); labels that
-a simulation draws on its canvas — graph point, curve and arrow labels among
-them — are plain text, not TeX, and the test does not read them: give them
-plain numbers and Unicode symbols (eᵣ, rₛ, η, θ, ², ⁻¹). Unicode has subscript
+a simulation draws on its canvas — graph point, curve and arrow labels and
+axis titles among them — are plain text, not TeX: give them plain numbers and
+Unicode symbols (eᵣ, rₛ, gₜₜ, uʳ, η, θ, ², ⁻¹). The test rejects `$`, `\cmd`,
+`x_y` and `x^y` in a `graph`'s labels; other sims' labels it cannot read. Unicode has subscript
 digits and only some letters (ₐ ₑ ₒ ₓ ₕ ₖ ₗ ₘ ₙ ₚ ₛ ₜ), so write "v (drift)", not v_d.
 Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
 as typed — put every symbol, subscript and thin space inside math, and the
@@ -210,7 +211,8 @@ num({ id: 'f-over-m', difficulty: 1,
 
 - `answer` is a number **in `units`** (an SI or common unit string: `'m/s^2'`,
   `'kN'`, `'J/(kg K)'`, `'eV'`, `'ly'`, `'arcsec'`, `'mas'`, `'uas'`, `'N^-1'`, `'yr'`, `'Msun'`…;
-  the full table is `UNITS` in `src/core/units.js`). Temperatures may be in
+  the full table is `UNITS` in `src/core/units.js`; a space multiplies, as in
+  `'N m'`). Temperatures may be in
   `'K'` or `'°C'`: a learner may type either, and a bare temperature is
   converted with the 273.15 offset. A temperature *change* is the same number
   in K and °C: mark such an item `difference: true` so no offset is applied.
@@ -368,6 +370,9 @@ disagree. Never type a computed answer by hand. `r` is a seeded RNG:
 | `r.sign()`, `r.bool(p)` | ±1; true with probability p |
 | `r.shuffle(array)`, `r.perm(n)` | a shuffled copy; a permutation of 0…n−1 |
 
+A generator always returns an object — never `null` or `undefined` to mean
+"try another seed"; pick parameters that cannot fail instead.
+
 Pick parameters so every variant is clean and sensible: avoid answers of 0,
 degenerate cases, and huge or ugly numbers unless the lesson is about them.
 For multiple-choice generators, make sure the four choices stay **distinct**
@@ -398,7 +403,7 @@ The library (read the header comment of a sim's file for its full options):
 
 | type | what it draws | key params |
 |---|---|---|
-| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, labelDx, labelDy, color, r, when }]`, `arrows: [{ from: [x, y], to: [x, y], label, labelDx, labelDy, labelAlign }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` (on curves, points, shade, lines and arrows — drawn while nonzero; use `step(a - b)` for a ≥ b) may be expressions; `axesAt: 'edge'` keeps the axes on the frame; point labels sit about 9 px right of and above the point (`labelDx`, `labelDy`, `labelAlign` move them — screen pixels, with `labelDy` positive *downward*); an arrow's label sits at its tip; `equal: true` keeps one unit the same length on both axes by widening one range, so labels near a nominal edge move; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
+| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, labelDx, labelDy, color, r, when }]`, `arrows: [{ from: [x, y], to: [x, y], label, labelDx, labelDy, labelAlign }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` (on curves, points, shade, lines and arrows — drawn while nonzero; use `step(a - b)` for a ≥ b — `step` is 0 below its jump, 1 above and ½ at it; `min`/`max` clamp) may be expressions; `axesAt: 'edge'` keeps the axes on the frame; point labels sit about 9 px right of and above the point (`labelDx`, `labelDy`, `labelAlign` move them — screen pixels, with `labelDy` positive *downward*); an arrow's label sits at its tip; `equal: true` keeps one unit the same length on both axes by widening one range, so labels near a nominal edge move; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
 | `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b] }]`, `colorBy`, `zscale`, `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` |
 | `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }` |
 | `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h`, `hRange: [min, max]` (the Euler-step slider; default [0.05, 1]) |

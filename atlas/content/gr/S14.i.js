@@ -24,7 +24,7 @@ const yH = (B) => round(log(B.horizon / g0), 5);
 const spaghettiGraph = {
   type: 'graph',
   params: {
-    x: [-2.2, 3.2], y: [-8, 9], xlabel: 'log₁₀(r / r_s)', ylabel: 'log₁₀(stretch on 2 m, in g)',
+    x: [-2.2, 3.2], y: [-8, 9], xlabel: 'log₁₀(r / rₛ)', ylabel: 'log₁₀(stretch on 2 m, in g)',
     curves: [
       { fn: `${yH(BH)} - 3x`, domain: [round((yH(BH) - 9) / 3, 4), 3.2], color: 'bad', label: '10 M☉', labelAt: 1.25, labelDx: 8, labelDy: -10 },
       { fn: `${yH(SG)} - 3x`, domain: [-2.2, round((yH(SG) + 8) / 3, 4)], color: 'accent', label: 'Sgr A*', labelAt: -1.1, labelDx: 8, labelDy: 10 },
@@ -32,8 +32,8 @@ const spaghettiGraph = {
     hlines: [{ y: 1, label: '10 g', color: 'warn' }],
     vlines: [{ x: 0, label: 'horizon', color: 'ink3' }],
     points: [
-      { x: round(log(BH.r10 / BH.rs), 4), y: 1, color: 'bad', label: `${Math.round(BH.r10 / BH.rs)} r_s` },
-      { x: round(log(SG.r10 / SG.rs), 4), y: 1, color: 'accent', label: `${round(SG.r10 / SG.rs, 2)} r_s` },
+      { x: round(log(BH.r10 / BH.rs), 4), y: 1, color: 'bad', label: `${Math.round(BH.r10 / BH.rs)} rₛ` },
+      { x: round(log(SG.r10 / SG.rs), 4), y: 1, color: 'accent', label: `${round(SG.r10 / SG.rs, 2)} rₛ` },
     ],
   },
   caption: 'The head-to-foot stretch on a 2 m body against distance, both in powers of ten, with distance in horizon radii. Each line falls as 1/r³; the stretch reaches 10 g far outside the small hole’s horizon and far inside the giant’s.',

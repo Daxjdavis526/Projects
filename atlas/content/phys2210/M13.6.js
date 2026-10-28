@@ -221,7 +221,7 @@ $$\varepsilon = \frac{GM}{rc^2}$$
       visual: {
         type: 'graph',
         params: {
-          x: [0, 10], y: [0, 1.6], xlabel: 'R / (2GM/c²)', ylabel: 'v_esc / c', aspect: 'wide',
+          x: [0, 10], y: [0, 1.6], xlabel: 'R / (2GM/c²)', ylabel: 'escape speed / c', aspect: 'wide',
           curves: [{ fn: 'sqrt(1/x)', color: 'accent', domain: [0.39, 10] }],
           hlines: [{ y: 1, label: 'speed of light', color: 'warn' }],
         },

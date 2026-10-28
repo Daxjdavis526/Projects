@@ -192,7 +192,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
           visual: {
             type: 'graph',
             params: {
-              x: [0, 10.5], y: [70, 100], xlabel: 'log₁₀(mass in solar masses)', ylabel: 'log₁₀(entropy ÷ k_B)',
+              x: [0, 10.5], y: [70, 100], xlabel: 'log₁₀(mass in solar masses)', ylabel: 'log₁₀(entropy ÷ k)',
               curves: [{ fn: `${round(Math.log10(entropy(M_SUN)), 5)} + 2x`, color: 'violet' }],
             },
             caption: 'Bekenstein–Hawking entropy against mass, in powers of ten: it grows as M² (slope 2).',

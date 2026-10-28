@@ -3,7 +3,7 @@
 // "two stories, one answer" bookkeeping between frames. Particle lifetimes
 // from the PDG (π±: 26.033 ns; K±: 12.380 ns). Every number is computed here.
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
-import { fmt, nice } from '../../src/core/format.js';
+import { fmt, nice, tex } from '../../src/core/format.js';
 import { gamma } from '../../src/viz/model/relativity.js';
 import { C, seg, label, shipCurves, r6 } from './_modern.js';
 
@@ -12,8 +12,8 @@ const t = String.raw;
 const TAU_PI = 2.6033e-8;          // s, charged pion mean life at rest (PDG)
 const TAU_K = 1.2380e-8;           // s, charged kaon mean life at rest (PDG)
 const g = gamma;
-/** γ − 1 without cancellation at small speeds. */
-const gm1 = (b) => (b * b) / (Math.sqrt(1 - b * b) * (1 + Math.sqrt(1 - b * b)));
+/** 1 − 1/γ = 1 − √(1 − β²), without cancellation at small speeds: the fraction a moving clock falls behind. */
+const lagFraction = (b) => (b * b) / (1 + Math.sqrt(1 - b * b));
 
 // the worked example: pions at 0.99c
 const EXB = 0.99;
@@ -157,7 +157,7 @@ Both follow from the two postulates: the light clock below shows the first, and 
       id: 'slow-clock', difficulty: 2,
       gen(r) {
         const v = r.pick([230, 250, 270]), hrs = r.pick([6, 8, 10, 12]);
-        const lag = gm1(v / C) * hrs * 3600 / g(v / C) * 1e9;     // Δt − Δτ = Δτ(γ − 1)… per the airline’s clock; equal to 3 s.f.
+        const lag = lagFraction(v / C) * hrs * 3600 * 1e9;      // Δt − Δτ = Δt(1 − 1/γ) ≈ Δt·v²/2c²
         return {
           prompt: t`An airliner cruises at ${v} m/s for ${hrs} hours. Counting only its speed (not gravity), by how many nanoseconds does a clock on board fall behind a clock on the ground? For speeds far below $c$, $\gamma - 1 \approx \dfrac{v^2}{2c^2}$.`,
           answer: lag, units: 'ns', tol: { rel: 0.01 },
@@ -235,7 +235,7 @@ Both follow from the two postulates: the light clock below shows the first, and 
       gen(r) {
         const ratio = r.pick([0.5, 0.6, 0.8, 0.25, 0.1]);
         const b = Math.sqrt(1 - ratio * ratio);
-        const [ab, ar] = ratio === 0.8 ? [0.8, 0.6] : [0.6, 0.8];
+        const [ab, ar] = ratio === 0.6 || ratio === 0.8 ? [0.866, 0.5] : [0.6, 0.8];
         return {
           prompt: t`How fast must a ship move for a station to measure it at ${Math.round(ratio * 100)}% of its proper length? Give $v/c$.`,
           answer: b, tol: { rel: 0.002 },
@@ -248,7 +248,7 @@ Both follow from the two postulates: the light clock below shows the first, and 
             params: {
               x: [0, 1.05], y: [0, 1.08], equal: true, xlabel: 'speed v / c', ylabel: 'L / L₀',
               curves: [{ fn: 'sqrt(1 - x^2)', color: 'accent', domain: [0, 1] }],
-              points: [{ x: ab, y: ar, color: 'ink3', label: `for example ${ab}c → ${Math.round(ar * 100)}%`, labelDx: -150, labelDy: -12 }],
+              points: [{ x: ab, y: ar, color: 'ink3', label: `for example ${ab}c → ${Math.round(ar * 100)}%`, labelDx: 10, labelDy: -12 }],
             },
             caption: 'Measured length as a fraction of proper length, against speed: a quarter circle.',
           },
@@ -260,17 +260,17 @@ Both follow from the two postulates: the light clock below shows the first, and 
     num({
       id: 'cp-parker', difficulty: 3, transfer: true,
       prompt: t`At its closest to the Sun, NASA’s Parker Solar Probe moves at about 190 km/s, the fastest any spacecraft has flown. If it kept that speed for a whole day, by how many milliseconds would its clock fall behind one at rest, counting the speed effect only? Use $\gamma - 1 \approx v^2/2c^2$.`,
-      answer: gm1(190e3 / C) * 86400 / g(190e3 / C) * 1e3, units: 'ms', tol: { rel: 0.01 },
+      answer: lagFraction(190e3 / C) * 86400 * 1e3, units: 'ms', tol: { rel: 0.01 },
       errors: [{ value: (190e3 / C) * 86400 * 1e3, feedback: t`Square the ratio: the fraction is $v^2/(2c^2)$.` }],
       hints: [t`$v/c = 1.90\times10^5/(2.998\times10^8)$; square it and halve it.`, t`Multiply that fraction by the 86 400 s in a day, then convert to milliseconds.`],
       teach: 'Even the fastest spacecraft move slowly enough that v²/2c² gives time dilation to high accuracy.',
-      explain: t`$v^2/2c^2 = ${fmt(gm1(190e3 / C), 3)}$, and $86\,400\ \text{s} \times ${fmt(gm1(190e3 / C), 3)} = ${fmt(gm1(190e3 / C) * 86400 * 1e3, 3)}$ ms. In reality the probe holds its top speed only for hours around each close pass, and the Sun’s gravity slows its clock further — a general-relativity effect of similar size.`,
+      explain: t`$v^2/2c^2 = ${tex(lagFraction(190e3 / C), 3)}$, and $86\,400\ \text{s} \times ${tex(lagFraction(190e3 / C), 3)} = ${fmt(lagFraction(190e3 / C) * 86400 * 1e3, 3)}$ ms. In reality the probe holds its top speed only for hours around each close pass, and the Sun’s gravity slows its clock further — a general-relativity effect of similar size.`,
       visual: {
         type: 'graph',
         params: {
-          x: [-0.86, 0.2], y: [-0.42, 0.42], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+          x: [-0.8, 0.8], y: [-0.78, 0.78], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           curves: [{ polar: '0.388*(1 - 0.882^2)/(1 + 0.882*cos(theta))', theta: [0, 6.2832], color: 'gold', width: 2 }, { polar: '0.723', theta: [0, 6.2832], color: 'ink3', width: 1.2, dash: true }],
-          points: [{ x: 0, y: 0, r: 7, color: 'warn', label: 'Sun', labelDx: -12, labelDy: -16 }, { x: 0.0459, y: 0, r: 4, color: 'gold', label: 'closest pass: about 190 km/s', labelDx: -60, labelDy: 18 }, label(-0.5, 0.52, 'Venus’s orbit', 'ink3', -20, 0)],
+          points: [{ x: 0, y: 0, r: 7, color: 'warn', label: 'Sun', labelDx: -12, labelDy: -16 }, { x: 0.0459, y: 0, r: 4, color: 'gold', label: 'closest pass: about 190 km/s', labelDx: -60, labelDy: 18 }, label(-0.511, 0.511, 'Venus’s orbit', 'ink3', -96, -10)],
         },
         caption: 'Parker Solar Probe’s final orbit around the Sun, roughly to scale: it dips to about 6 million km above the Sun’s surface and swings out to near Venus’s orbit (dashed).',
       },

@@ -19,8 +19,8 @@ const metricCurves = (caption) => ({
   params: {
     x: [0, 12], y: [-1.3, 3.3], xlabel: 'r / M', ylabel: 'metric component',
     curves: [
-      { fn: '-(1 - 2/x)', domain: [0.6, 12], color: 'gold', label: 'g_tt = −(1 − 2M/r)', labelAt: 7, labelDy: 16 },
-      { fn: '1/(1 - 2/x)', domain: [2.45, 12], color: 'accent', label: 'g_rr = 1/(1 − 2M/r)', labelAt: 6.5 },
+      { fn: '-(1 - 2/x)', domain: [0.6, 12], color: 'gold', label: 'gₜₜ = −(1 − 2M/r)', labelAt: 7, labelDy: 16 },
+      { fn: '1/(1 - 2/x)', domain: [2.45, 12], color: 'accent', label: 'gᵣᵣ = 1/(1 − 2M/r)', labelAt: 6.5 },
     ],
     vlines: [{ x: 2, label: 'r = 2M' }],
     hlines: [{ y: 0 }],
@@ -38,7 +38,7 @@ const ansatzTable = (caption, cross = false) => metricTable(
 const rescale = {
   type: 'graph',
   params: {
-    x: [0, 30], y: [0, 1.55], xlabel: 'r / M', ylabel: '−g_tt',
+    x: [0, 30], y: [0, 1.55], xlabel: 'r / M', ylabel: '−gₜₜ',
     curves: [
       { fn: '1 - 2/x', domain: [2, 30], color: 'gold', label: 'k = 0', labelAt: 22, labelDy: 16 },
       { fn: 'exp(0.3)*(1 - 2/x)', domain: [2, 30], color: 'accent', label: 'k = 0.15', labelAt: 22 },

@@ -75,8 +75,8 @@ Currents in the **same** direction **attract**; currents in **opposite** directi
     prompt: t`Two long parallel wires $5.0$ cm apart carry $8.0$ A and $3.0$ A in the same direction. Find the force on each metre of each wire, and whether they attract or repel. ($\mu_0 = 4\pi\times10^{-7}$ T·m/A)`,
     visual: page({
       x: [-4.3, 4.3], y: [-2.2, 2.2],
-      curves: [...exG.curves, circ2(-2.5, 0, 5, { color: COL.B, width: 1.4, dash: true, a0: -0.42, a1: 0.42 }), seg2([-2.5, -1.75], [2.5, -1.75], { color: 'ink3', width: 1.2 }), seg2([-2.5, -1.6], [-2.5, -1.9], { color: 'ink3', width: 1.2 }), seg2([2.5, -1.6], [2.5, -1.9], { color: 'ink3', width: 1.2 })],
-      points: [...exG.points, lab(-2.5, 0.55, 'wire 1: 8.0 A', 'ink2'), lab(2.5, -0.55, 'wire 2: 3.0 A', 'ink2'), lab(0, -1.5, 'd = 5.0 cm', 'ink3'), lab(3.75, 1.75, 'wire 1’s field', COL.B)],
+      curves: [...exG.curves, circ2(-2.5, 0, 5, { color: COL.B, width: 1.4, dash: true, a0: -0.3, a1: 0.3 }), seg2([-2.5, -1.75], [2.5, -1.75], { color: 'ink3', width: 1.2 }), seg2([-2.5, -1.6], [-2.5, -1.9], { color: 'ink3', width: 1.2 }), seg2([2.5, -1.6], [2.5, -1.9], { color: 'ink3', width: 1.2 })],
+      points: [...exG.points, lab(-2.5, 0.55, 'wire 1: 8.0 A', 'ink2'), lab(2.85, -0.5, 'wire 2: 3.0 A', 'ink2', 0, 0, 'left'), lab(0, -1.5, 'd = 5.0 cm', 'ink3'), lab(2.05, 1.62, 'wire 1’s field', COL.B, 0, 0, 'right')],
       arrows: [
         { from: [2.5, 0.32], to: [2.5, 1.62], color: COL.B, label: 'B₁', labelDx: 8, labelDy: 0, labelAlign: 'left' },
         { from: [-2.5, -0.32], to: [-2.5, -0.81], color: COL.B, label: 'B₂', labelDx: 8, labelDy: 0, labelAlign: 'left' },
@@ -179,7 +179,7 @@ Currents in the **same** direction **attract**; currents in **opposite** directi
           visual: {
             type: 'em-bfield',
             params: {
-              unit: 'cm', x: [-4.6, 4.6], y: [-2.6, 2.6],
+              unit: 'cm', x: [-5.2, 5.2], y: [-2.9, 2.9],
               sliders: [{ key: 'd', label: 'Separation $d$', min: 1, max: 8, step: 0.1, value: dc > 4 ? 1.5 : 7.5, unit: '\\mathrm{cm}', explain: 'The distance between the wires.' }],
               wires: [{ x: '-d/2', y: 0, I: I1, label: '1' }, { x: 'd/2', y: 0, I: I2, label: '2' }],
               forces: true, readouts: [],
@@ -201,8 +201,8 @@ Currents in the **same** direction **attract**; currents in **opposite** directi
         ],
         points: [lab(-3.05, 0, 'supply', 'ink3', 0, 0, 'left'), lab(2.6, -1.25, 'projectile', 'warn'), lab(-0.5, 1.3, 'rail', 'ink2'), lab(-0.5, -1.3, 'rail', 'ink2')],
         arrows: [
-          { from: [-1.6, 0.8], to: [0.6, 0.8], color: COL.I, label: 'I', labelDx: 0, labelDy: 12 },
-          { from: [0.6, -0.8], to: [-1.6, -0.8], color: COL.I, label: 'I', labelDx: 0, labelDy: -12 },
+          { from: [-1.8, 0.52], to: [0.8, 0.52], color: COL.I, label: 'I', labelDx: 0, labelDy: -14 },
+          { from: [0.8, -0.52], to: [-1.8, -0.52], color: COL.I, label: 'I', labelDx: 0, labelDy: 14 },
           { from: [2.95, 0.45], to: [2.95, -0.45], color: COL.I, label: 'I', labelDx: 9, labelDy: 0, labelAlign: 'left' },
         ],
         caption: 'A railgun seen from above: the current (blue) runs out along the top rail, down through the projectile (amber), and back along the bottom rail. Schematic.',

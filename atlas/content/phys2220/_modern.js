@@ -28,7 +28,7 @@ export const seg = (x0, y0, x1, y1, color = 'ink2', width = 2, dash = false) => 
   param: [`${r6(x0)} + t*(${r6(x1 - x0)})`, `${r6(y0)} + t*(${r6(y1 - y0)})`], t: [0, 1], color, width, dash,
 });
 /** A text label at (x, y): a point too small to see. */
-export const label = (x, y, text, color = 'ink2', dx = 0, dy = 0) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: dx, labelDy: dy });
+export const label = (x, y, text, color = 'ink2', dx = 0, dy = 0, align) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: dx, labelDy: dy, ...(align ? { labelAlign: align } : {}) });
 
 /**
  * A static spacetime diagram drawn with `graph`: time up the page, space
@@ -63,12 +63,14 @@ export function st({ events = [], lines = [], range = 5, xr, top, bottom, cone =
  * A spaceship seen side-on, drawn with `graph`: a body of length `len` (world
  * units) from x0, a nose cone, an optional velocity arrow and labels.
  */
-export function shipCurves(x0, len, y = 0, h = 0.5, color = 'accent', dash = false) {
+export function shipCurves(x0, len, y = 0, h = 0.5, color = 'accent', dash = false, dir = 1) {
   const nose = Math.min(0.35 * len, 0.6 * h + 0.2);
+  // dir = 1: the nose points right (toward +x); dir = −1: it points left
+  const X = (x) => (dir > 0 ? x : 2 * x0 + len - x);
   const x1 = x0 + len - nose;
   return [
-    seg(x0, y - h / 2, x1, y - h / 2, color, 2.2, dash), seg(x0, y + h / 2, x1, y + h / 2, color, 2.2, dash),
-    seg(x0, y - h / 2, x0, y + h / 2, color, 2.2, dash),
-    seg(x1, y - h / 2, x0 + len, y, color, 2.2, dash), seg(x1, y + h / 2, x0 + len, y, color, 2.2, dash),
+    seg(X(x0), y - h / 2, X(x1), y - h / 2, color, 2.2, dash), seg(X(x0), y + h / 2, X(x1), y + h / 2, color, 2.2, dash),
+    seg(X(x0), y - h / 2, X(x0), y + h / 2, color, 2.2, dash),
+    seg(X(x1), y - h / 2, X(x0 + len), y, color, 2.2, dash), seg(X(x1), y + h / 2, X(x0 + len), y, color, 2.2, dash),
   ];
 }

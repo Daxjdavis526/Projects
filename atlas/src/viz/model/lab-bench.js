@@ -637,6 +637,68 @@ export const EXPERIMENTS = {
     systematics: { contact: { label: 'Contact resistance: 3% of the supply voltage is lost where each electrode’s paint meets the paper', short: 'contact resistance', explain: 'The silver paint does not bond perfectly to the paper, so 0.30 V of the 10.0 V is dropped across each contact before the current reaches the paper.' } },
     defaultSys: 'contact',
   },
+
+  // 2225 L.2 — Ohm’s law: voltage against current for a copper wire …
+  ohm: {
+    title: 'Voltage against current for a copper wire', method: 'V against I (one length)',
+    apparatus: 'ohm',
+    note: 'A copper wire 2.000 m long and 0.200 mm across (±0.002 mm by micrometer), wound on an open frame. The current is switched on only while the meters are read, so the wire stays at 20 °C. Each meter scatters by ±0.002 (A or V) and reads to 0.001.',
+    defaults: { L: 2.000, d: 0.200e-3, sd: 0.002e-3, rho: 1.68e-8, alpha: 0.0039, heat: 12, RA: 0.100, sI: 0.002, sV: 0.002, sL: 0.001, sR: 0.003, Rlead: 0.250 },
+    setting: { key: 'I', sym: 'supply', label: 'Current set on the supply $I$', unit: 'A', min: 0.05, max: 1.0, step: 0.05, value: 0.5, series: [0.10, 0.25, 0.40, 0.55, 0.70, 0.85, 1.00], explain: 'The supply holds this current; the ammeter measures what actually flows.' },
+    nz: 2,
+    read: (I, P, sys, z) => {
+      const R = wireR(P) * (1 + (sys === 'heating' ? P.alpha * P.heat * I * I : 0));
+      return [I + P.sI * z[0], I * R + (sys === 'wiring' ? I * P.RA : 0) + P.sV * z[1]];
+    },
+    series: [
+      { key: 'I', sym: 'I', label: 'current', unit: 'A', res: 0.001, sigma: (I, P) => Math.hypot(P.sI, resolutionU(0.001)) },
+      { key: 'V', sym: 'V', label: 'voltage', unit: 'V', res: 0.001, sigma: (I, P) => Math.hypot(P.sV, resolutionU(0.001)) },
+    ],
+    axes: {
+      VI: {
+        label: 'V against I', slopeUnit: 'Ω', expectLabel: 'V = IR with R = ρL/A',
+        x: { sym: 'I', unit: 'A', of: (I, R) => R[0], sigma: (I, R, P) => Math.hypot(P.sI, resolutionU(0.001)) },
+        ys: [{ sym: 'V', unit: 'V', of: (I, R) => R[1], sigma: (I, R, P) => Math.hypot(P.sV, resolutionU(0.001)) }],
+        expect: (P) => ({ a: 0, b: wireR(P) }),
+        results: [{ sym: 'R', name: 'resistance', unit: 'Ω', of: (f) => f.b, sigma: (f) => f.sb, accepted: (P) => wireR(P), acceptedLabel: 'ρL/A' }],
+        intercept: { sym: 'V₀', name: 'intercept', unit: 'V' },
+      },
+    },
+    defaultAxes: 'VI',
+    systematics: {
+      wiring: { label: 'The voltage is sensed across more than the wire: outside the ammeter (V against I) or through the current leads (R against L)', short: 'voltmeter placement', explain: 'In V against I the voltmeter is clipped outside the ammeter, so it also reads the 0.100 Ω ammeter’s drop; in R against L the meter senses through the same two leads that carry the current, adding 0.250 Ω of leads and clips.' },
+      heating: { label: 'Current left on: the wire heats up, by 12 K at 1.0 A', short: 'Joule heating', explain: 'Left switched on, the thin wire warms in proportion to I²R, and copper’s resistance rises by 0.39% per kelvin.' },
+    },
+    defaultSys: 'wiring',
+  },
+
+  // … and resistivity: resistance against length
+  resistivity: {
+    title: 'Resistance against length for the copper wire', method: 'R against L (resistivity)',
+    apparatus: 'ohm',
+    note: 'The same wire, 0.200 mm across (±0.002 mm by micrometer), stretched along a metre rule; a sliding clip sets the length to ±1 mm. A four-wire meter reads R to 0.001 Ω and scatters by ±0.003 Ω as the clip’s contact varies. Copper at 20 °C: ρ = 1.68×10⁻⁸ Ω·m.',
+    defaults: { L: 2.000, d: 0.200e-3, sd: 0.002e-3, rho: 1.68e-8, alpha: 0.0039, heat: 12, RA: 0.100, sI: 0.002, sV: 0.002, sL: 0.001, sR: 0.003, Rlead: 0.250 },
+    setting: { key: 'L', sym: 'L', label: 'Length between the clips $L$', unit: 'm', min: 0.1, max: 2.0, step: 0.05, value: 1.0, series: [0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75], explain: 'Read off the metre rule at the sliding clip.' },
+    nz: 2,
+    read: (L, P, sys, z) => [(P.rho * (L + P.sL * z[0])) / wireA(P) + (sys === 'wiring' ? P.Rlead : 0) + P.sR * z[1]],
+    series: [{ key: 'R', sym: 'R', label: 'resistance', unit: 'Ω', res: 0.001, sigma: (L, P) => Math.hypot(P.sR, (P.rho / wireA(P)) * P.sL, resolutionU(0.001)) }],
+    axes: {
+      RL: {
+        label: 'R against L', slopeUnit: 'Ω/m', expectLabel: 'R = ρL/A',
+        x: { sym: 'L', unit: 'm', of: (L) => L },
+        ys: [{ sym: 'R', unit: 'Ω', of: (L, R) => R[0], sigma: (L, R, P) => Math.hypot(P.sR, (P.rho / wireA(P)) * P.sL, resolutionU(0.001)) }],
+        expect: (P) => ({ a: 0, b: P.rho / wireA(P) }),
+        results: [{
+          sym: 'ρ', name: 'resistivity', unit: 'nΩ·m', of: (f, P) => 1e9 * f.b * wireA(P), sigma: (f, P) => 1e9 * f.sb * wireA(P), accepted: (P) => 1e9 * P.rho, acceptedLabel: 'copper at 20 °C',
+          typeB: (P) => [{ label: 'diameter', rel: (2 * P.sd) / P.d }],
+        }],
+        intercept: { sym: 'R₀', name: 'resistance at zero length', unit: 'Ω' },
+      },
+    },
+    defaultAxes: 'RL',
+    systematics: { wiring: { label: 'The voltage is sensed across more than the wire: outside the ammeter (V against I) or through the current leads (R against L)', short: 'voltmeter placement', explain: 'In V against I the voltmeter is clipped outside the ammeter, so it also reads the 0.100 Ω ammeter’s drop; in R against L the meter senses through the same two leads that carry the current, adding 0.250 Ω of leads and clips.' } },
+    defaultSys: 'wiring',
+  },
 };
 
 export function inertiaRotary(P) {
@@ -762,3 +824,7 @@ export function dotsE(x, P, contact = false) {
   const g = dotsGeom(P, contact);
   return g.K * (1 / (x - g.f1) + 1 / (g.f2 - x));
 }
+
+// L.2 — a round wire of diameter d: cross-section and resistance at 20 °C
+export const wireA = (P) => (Math.PI * P.d * P.d) / 4;
+export const wireR = (P) => (P.rho * P.L) / wireA(P);

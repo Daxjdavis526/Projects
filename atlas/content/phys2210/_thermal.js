@@ -576,7 +576,7 @@ export function dofBars({ trans = 3, rot = 0, vib = 0, frozen = {}, title = '', 
     points.push(tag((x0 + x) / 2, -0.16, nf && !n ? `${name} (frozen)` : name, color, 0, 0, true));
     x += 0.4;
   }
-  points.push(tag(-0.15, 1, '½ k_B T', 'ink2', -48, 0));
+  points.push(tag(-0.15, 1, '½ kT', 'ink2', -48, 0));
   if (title) points.push(tag(x / 2, 1.42, title, 'ink', 0, 0, true));
   return {
     type: 'graph',
@@ -623,7 +623,7 @@ export function h2Graph({ caption } = {}) {
   return {
     type: 'graph',
     params: {
-      x: [0.9, 4.25], y: [-0.25, 4], aspect: 'wide', xticks: 0.001, xlabel: 'temperature (logarithmic)', ylabel: 'C_V / R',
+      x: [0.9, 4.25], y: [-0.25, 4], aspect: 'wide', xticks: 0.001, xlabel: 'temperature (logarithmic)', ylabel: 'Cᵥ / R',
       alt: 'The molar heat capacity of hydrogen rising in steps as rotation and then vibration switch on',
       curves: [{ fn: cv, color: 'accent', width: 2.8 }],
       hlines: [{ y: 1.5, label: '3/2: translation only', color: 'ink3' }, { y: 2.5, label: '5/2: + rotation', color: 'ink3' }, { y: 3.5, label: '7/2: + vibration', color: 'ink3' }],

@@ -224,7 +224,7 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
           explain: t`$d\tau/dt = \sqrt{1 - ${nice(1 / x)}} = ${fmt(rate, 4)}$. The hovering clock runs slow compared with clocks far away; at the horizon the factor would reach zero. This metric (Schwarzschild’s) is the subject of step 20.`,
           visual: {
             type: 'graph',
-            params: { x: [1, 6], y: [0, 1.1], xlabel: 'r / r_s', ylabel: 'clock rate dτ/dt', curves: [{ fn: 'sqrt(1 - 1/x)', color: 'accent', domain: [1, 6] }], hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 1, label: 'horizon', color: 'warn' }] },
+            params: { x: [1, 6], y: [0, 1.1], xlabel: 'r / rₛ', ylabel: 'clock rate dτ/dt', curves: [{ fn: 'sqrt(1 - 1/x)', color: 'accent', domain: [1, 6] }], hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 1, label: 'horizon', color: 'warn' }] },
             caption: t`How fast a clock held at rest at radius $r$ ticks, compared with clocks far away: $\sqrt{1 - r_s/r}$.`,
           },
         };

@@ -83,8 +83,8 @@ const conservedPic = {
   params: {
     x: [2, 20], y: [0, 3.2], xlabel: 'r / M (along the photon’s path)', ylabel: 'in units of E',
     curves: [
-      { fn: '1/(1 - 2/x)', domain: [2.6, 20], color: 'accent', label: 'p^t = dt/dλ', labelAt: 4.5 },
-      { fn: '1', domain: [2.6, 20], color: 'gold', width: 3, label: '−p_t', labelAt: 15, labelDy: -12 },
+      { fn: '1/(1 - 2/x)', domain: [2.6, 20], color: 'accent', label: 'pᵗ = dt/dλ', labelAt: 4.5 },
+      { fn: '1', domain: [2.6, 20], color: 'gold', width: 3, label: '−pₜ', labelAt: 15, labelDy: -12 },
     ],
   },
   caption: t`Two components of a photon's four-momentum along a radial path ($G = c = 1$): the upper one, $p^t$, changes from place to place; the lower one, $p_t$, does not.`,
@@ -202,8 +202,8 @@ with $g = M/r^2$ the surface gravity. Restoring $c$: a fractional shift $gh/c^2$
       visual: {
         type: 'graph',
         params: {
-          x: [0, 12], y: [-1.3, 0.25], xlabel: 'r / M', ylabel: 'g_tt',
-          curves: [{ fn: '-(1 - 2/x)', domain: [2, 12], color: 'gold', label: 'g_tt = −(1 − 2M/r)', labelAt: 7, labelDy: 16 }],
+          x: [0, 12], y: [-1.3, 0.25], xlabel: 'r / M', ylabel: 'gₜₜ',
+          curves: [{ fn: '-(1 - 2/x)', domain: [2, 12], color: 'gold', label: 'gₜₜ = −(1 − 2M/r)', labelAt: 7, labelDy: 16 }],
           vlines: [{ x: 2, label: 'horizon' }],
           hlines: [{ y: -1, label: 'flat space' }],
         },
@@ -365,7 +365,7 @@ def frequency(u, p):
       visual: {
         type: 'graph',
         params: {
-          x: [0, 20], y: [0, 1.1], xlabel: 'r / M', ylabel: 'u^r (falling observer)',
+          x: [0, 20], y: [0, 1.1], xlabel: 'r / M', ylabel: 'uʳ (falling observer)',
           curves: [{ fn: 'sqrt(2/x)', domain: [2, 20], color: 'gold', label: '|uʳ| = √(2M/r)', labelAt: 8 }],
           vlines: [{ x: 2, label: 'horizon' }],
         },
