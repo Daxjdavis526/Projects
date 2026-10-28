@@ -186,6 +186,7 @@ export const LESSONS = {
   'math2270.LA-1.2': () => import('./math2270/LA-1.2.js'),
   'math2270.LA-2.1': () => import('./math2270/LA-2.1.js'),
   'math2270.LA-2.2': () => import('./math2270/LA-2.2.js'),
+  'math2270.LA-2.3': () => import('./math2270/LA-2.3.js'),
   'math2280.DE-1.1': () => import('./math2280/DE-1.1.js'),
   'math2280.DE-1.2': () => import('./math2280/DE-1.2.js'),
   'math2280.DE-1.3': () => import('./math2280/DE-1.3.js'),
@@ -407,6 +408,7 @@ export const LESSONS = {
   'prog.P1.2': () => import('./prog/P1.2.js'),
   'prog.P1.3': () => import('./prog/P1.3.js'),
   'prog.P1.4': () => import('./prog/P1.4.js'),
+  'prog.P1.5': () => import('./prog/P1.5.js'),
   'st-a.A1.1': () => import('./st-a/A1.1.js'),
 };
 

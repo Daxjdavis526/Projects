@@ -169,7 +169,7 @@ $$\left[\begin{array}{rrr|r} ${R1.join(' & ')} \\ ${R2.join(' & ')} \\ ${C.join(
             hints: ['The coefficients of row 3 are a combination of rows 1 and 2. Find it.', t`Row 3's coefficients are $${al}\,R_1 + (${be})\,R_2$.`, t`Then elimination turns row 3 into $(0, 0, 0 \mid h - (${al}\cdot${R1[3]} + (${be})\cdot${R2[3]}))$: it must read $0 = 0$.`],
             teach: 'When a row’s coefficients are a combination of other rows, its right-hand side must be the same combination, or the system has no solution.',
             explain: t`Row 3's coefficients are $${al}R_1 + (${be})R_2$, so elimination leaves $(0, 0, 0 \mid h - ${h})$. For $h = ${h}$ that row is $0 = 0$, rows 1 and 2 leave one free variable, and the solutions fill a line. For any other $h$ the row says $0 = $ something nonzero: no solution at all — never exactly one.`,
-            visual: planes3([R1, R2], { range: 4, size: 2.6, centre: P, line: [P, n], caption: 'Planes 1 and 2 and the gold line where they meet. The third plane must contain that whole line. Drag to rotate.' }),
+            visual: planes3([R1, R2], { range: 4, size: 2.6, centre: P, line: [P, n.map((v) => v / Math.sqrt(nn))], caption: 'Planes 1 and 2 and the gold line where they meet. The third plane must contain that whole line. Drag to rotate.' }),
           };
         }
         return { prompt: t`For which number $h$ does $\left[\begin{array}{rr|r} 1 & 2 & 3 \\ 2 & 4 & h \end{array}\right]$ have infinitely many solutions?`, answer: 6, tol: { rel: 0, abs: 0.01 }, hints: ['Row 2 is twice row 1.', 'So h must be twice 3.'], teach: 'A dependent row needs a matching right-hand side.', explain: t`$h = 6$.` };
@@ -196,17 +196,16 @@ $$\left[\begin{array}{rrr|r} ${R1.join(' & ')} \\ ${R2.join(' & ')} \\ ${C.join(
       id: 'cp-param', difficulty: 2,
       gen(r) {
         const a = r.intExcept(-3, 3, [0]), b = r.intExcept(-3, 3, [0]), p = r.int(-4, 4), q = r.int(-4, 4), s0 = r.intExcept(-2, 3, [0]);
-        // y is the free variable: x + a y = p, z + b y = q
+        // y is the free variable (the middle column has no pivot): x + a y = p, z = q
         const M = [[1, a, 0, p], [0, 0, 1, q], [0, 0, 0, 0]];
-        const z = q - b * s0;
-        M[1][1] = b;
+        const x = p - a * s0;
         return {
-          prompt: t`A system in $x, y, z$ reduces to the RREF below. Find $z$ for the solution with $y = ${s0}$.
+          prompt: t`A system in $x, y, z$ reduces to the RREF below. Find $x$ for the solution with $y = ${s0}$.
 $$${augTeX(M)}$$`,
-          answer: z, tol: { rel: 0, abs: 0.01 },
-          hints: [t`Column 2 has no pivot, so $y$ is free; row 2 reads $${b}y + z = ${q}$.`],
-          teach: 'Solve each RREF row for its pivot variable in terms of the free ones.',
-          explain: t`Row 2: $z = ${q} - (${b})y = ${q} - (${b})(${s0}) = ${z}$.`,
+          answer: x, tol: { rel: 0, abs: 0.01 },
+          hints: [t`Column 2 has no pivot, so $y$ is free (a free variable need not be the last one); row 1 reads $x + (${a})y = ${p}$.`],
+          teach: 'Solve each RREF row for its pivot variable in terms of the free ones — whichever columns those are.',
+          explain: t`Row 1: $x = ${p} - (${a})y = ${p} - (${a})(${s0}) = ${x}$, and row 2 fixes $z = ${q}$ whatever $y$ is. The solutions are $(${p}, 0, ${q}) + t(${-a}, 1, 0)$.`,
           visual: rr(M, { solution: true, view: 4, caption: 'The planes of the two nonzero rows and their gold line of common points. Drag the picture to rotate.' }),
         };
       },
