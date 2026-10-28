@@ -61,7 +61,7 @@ turns the plane through $\theta$ and stretches it by $r = |\lambda|$. Every real
       'Set θ = 45°: the eighth point is back on the positive x-axis — eight steps per turn.',
     ],
     params: {
-      x: [-3.4, 3.4], y: [-1.9, 1.9], aspect: 'wide', equal: true, xlabel: '', ylabel: '',
+      x: [-2.5, 2.5], y: [-1.3, 1.3], aspect: 'wide', equal: true, xlabel: '', ylabel: '',
       sliders: [
         { key: 'r', label: t`Scale $r = |\lambda|$`, min: 0.8, max: 1.15, step: 0.01, value: 0.95, explain: t`How much each step stretches (or shrinks) lengths.` },
         { key: 'th', label: t`Turn $\theta$ per step`, min: 5, max: 90, step: 5, value: 30, unit: t`^\circ`, explain: t`The angle of the eigenvalue $\lambda$ in the complex plane.` },
@@ -236,7 +236,7 @@ turns the plane through $\theta$ and stretches it by $r = |\lambda|$. Every real
           hints: [t`$|\lambda| = 1$, so the matrix is a pure rotation; the angle of $\lambda$ is the turn per sample: $\theta = \operatorname{atan2}(${s}, ${c})$.`, t`Turn per second $= \theta/${dt}\ \text{s}$; and $1$ rpm $= 6^\circ/\text{s}$.`],
           teach: 'The angle of a unit-modulus eigenvalue is the rotation per step; dividing by the step time gives the angular velocity.',
           explain: t`$\theta = \operatorname{atan2}(${s}, ${c}) = ${th}^\circ$ per sample, so $${nice(th / dt)}^\circ$/s $= ${nice(rpm)}$ rpm. (Sampling must be fast enough: if the satellite turned more than $180^\circ$ between samples, the eigenvalue angle could not tell a fast spin from a slow one going the other way — aliasing.)`,
-          visual: { type: 'graph', params: { x: [-2.2, 2.2], y: [-1.25, 1.25], aspect: 'wide', equal: true, xlabel: 'Re', ylabel: 'Im', curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'ink3', width: 1, dash: [3, 4] }], points: [{ x: c, y: s, color: 'gold', r: 5.5, label: 'λ' }, { x: c, y: -s, color: 'gold', r: 5.5, label: 'λ̄', labelDy: 14 }] }, caption: 'The two eigenvalues in the complex plane, on the unit circle (dashed): a pure rotation.' },
+          visual: { type: 'graph', params: { x: [-2.2, 2.2], y: [-1.25, 1.25], aspect: 'wide', equal: true, xlabel: 'Re', ylabel: 'Im', curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'ink3', width: 1, dash: [3, 4] }], points: [{ x: c, y: s, color: 'gold', r: 5.5, label: 'λ' }, { x: c, y: -s, color: 'gold', r: 5.5, label: 'conjugate', labelDy: 14 }] }, caption: 'The two eigenvalues in the complex plane, on the unit circle (dashed): a pure rotation.' },
         };
       },
     }),

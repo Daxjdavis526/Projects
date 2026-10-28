@@ -25,16 +25,16 @@ const I_PB = (2 * Math.PI * 1e-3 * BC42) / MU0;          // A, a lead wire 1 mm 
  */
 function fieldLines(s, { extra = {}, caption, sample = true } = {}) {
   const curves = [];
-  for (const c of [0.35, 0.75, 1.15, 1.55, 1.95]) for (const [a, b] of [[0.002, 3.1396], [3.1436, 6.281]]) {
+  for (const c of [0.2, 0.6, 1.0, 1.4, 1.8, 2.2]) for (const [a, b] of [[0.002, 3.1396], [3.1436, 6.281]]) {
     curves.push({ polar: `(${c} + sqrt(${c}^2 + 4*(${s})*sin(theta)^2))/(2*abs(sin(theta)))`, theta: [a, b], color: 'accent', width: 1.8 });
   }
   return {
     type: 'graph',
     params: {
-      x: [-3.4, 3.4], y: [-2.3, 2.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
+      x: [-3.4, 3.4], y: [-2.75, 2.75], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
       shade: sample ? [{ ...disc(0, 0, 1, 'ink4', 0.35) }, { ...disc(0, 0, 1, 'violet', 0.35), when: `step((${s}) - 0.5)` }] : [],
       curves,
-      arrows: [{ from: [-3.3, 2.1], to: [-2.5, 2.1], color: 'accent', label: 'applied field', labelDx: 8, labelDy: 0 }],
+      arrows: [{ from: [-3.3, 2.6], to: [-2.5, 2.6], color: 'accent', label: 'applied field', labelDx: 8, labelDy: 0 }],
       ...extra,
     },
     caption: caption ?? 'Field lines around a long cylinder (seen end-on) in a sideways magnetic field: the exact pattern for complete expulsion, which crowds the lines at the sides to twice the applied field. The field actually leaks about 50 nm into the surface (the penetration depth) — far too thin to draw.',

@@ -143,7 +143,7 @@ function mountForm(F, P) {
     for (let x = Math.ceil(wx[0]); x <= wx[1]; x++) plot.line(x, wy[0], x, wy[1], { color: 'ink4', width: 1, alpha: x === 0 ? 0.8 : 0.28 });
     for (let y = Math.ceil(wy[0]); y <= wy[1]; y++) plot.line(wx[0], y, wx[1], y, { color: 'ink4', width: 1, alpha: y === 0 ? 0.8 : 0.28 });
     plot.text(P.axes[0], wx[1], 0, { color: 'ink3', dx: -8, dy: 11, align: 'right', size: 12 });
-    plot.text(P.axes[1], 0, wy[1], { color: 'ink3', dx: 8, dy: 10, size: 12 });
+    plot.text(P.axes[1], 0, wy[1] - 0.12 * (wy[1] - wy[0]), { color: 'ink3', dx: -7, dy: 0, align: 'right', size: 12 });
     const rmax = 3 * Math.hypot(wx[1] - wx[0], wy[1] - wy[0]);
     if (P.indicatrix) {
       const S = M.sym(Tm);

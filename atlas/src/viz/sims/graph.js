@@ -181,7 +181,10 @@ export function validate(P) {
   for (const l of P.hlines || []) tryParse(l.y, [], 'hline');
   for (const a of P.arrows || []) [...a.from, ...a.to].forEach((v) => tryParse(v, [], 'arrow'));
   for (const c of P.curves || []) { if (c.when) tryParse(c.when, [], 'curve when'); (c.domain || []).forEach((v) => tryParse(v, [], 'curve domain')); if (c.labelAt !== undefined) tryParse(c.labelAt, [], 'curve labelAt'); }
-  for (const r of P.readouts || []) tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
+  for (const r of P.readouts || []) {
+    tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
+    if (r.digits !== undefined && !(Number.isInteger(r.digits) && r.digits >= 1 && r.digits <= 15)) problems.push(`graph: readout digits are significant figures, a whole number from 1 to 15 (got ${r.digits})`);
+  }
   return problems;
 }
 

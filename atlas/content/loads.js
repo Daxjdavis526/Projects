@@ -187,6 +187,7 @@ export const LESSONS = {
   'math2270.LA-1.2': () => import('./math2270/LA-1.2.js'),
   'math2270.LA-10.1': () => import('./math2270/LA-10.1.js'),
   'math2270.LA-10.2': () => import('./math2270/LA-10.2.js'),
+  'math2270.LA-10.3': () => import('./math2270/LA-10.3.js'),
   'math2270.LA-2.1': () => import('./math2270/LA-2.1.js'),
   'math2270.LA-2.2': () => import('./math2270/LA-2.2.js'),
   'math2270.LA-2.3': () => import('./math2270/LA-2.3.js'),
@@ -214,6 +215,7 @@ export const LESSONS = {
   'math2270.LA-9.2': () => import('./math2270/LA-9.2.js'),
   'math2270.LA-9.3': () => import('./math2270/LA-9.3.js'),
   'math2270.LA-9.4': () => import('./math2270/LA-9.4.js'),
+  'math2270.LA-9.5': () => import('./math2270/LA-9.5.js'),
   'math2280.DE-1.1': () => import('./math2280/DE-1.1.js'),
   'math2280.DE-1.2': () => import('./math2280/DE-1.2.js'),
   'math2280.DE-1.3': () => import('./math2280/DE-1.3.js'),
@@ -528,6 +530,7 @@ export const LESSONS = {
   'st-a.A5.2': () => import('./st-a/A5.2.js'),
   'st-a.A5.3': () => import('./st-a/A5.3.js'),
   'st-a.A7.1': () => import('./st-a/A7.1.js'),
+  'st-a.A7.2': () => import('./st-a/A7.2.js'),
 };
 
 export const BOSSES = {

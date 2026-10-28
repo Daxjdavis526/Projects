@@ -13,7 +13,8 @@ const ratio = (th) => (2 / Math.PI) * ellipK(Math.sin(th / 2) ** 2);
 const ratioWrongK = (th) => (2 / Math.PI) * ellipK(Math.sin(th / 2));
 const R90 = ratio(Math.PI / 2);
 // what quad printed for the 90° integral in this Pyodide build (checked by running it)
-const QUAD90 = { I: 1.6690465006787624, err: 2.820915501189347e-9 };
+const QUAD90 = { I: 2.6220575542920246, err: 2.820915501189347e-9 };
+const pser = (th) => 1 + th ** 2 / 16 + (11 * th ** 4) / 3072;
 const SER90 = 1 + (Math.PI / 2) ** 2 / 16 + (11 * (Math.PI / 2) ** 4) / 3072;
 
 // Stefan–Boltzmann from SI constants (exact since 2019)
@@ -24,8 +25,8 @@ const SIGMA = (2 * Math.PI ** 5 * KB ** 4) / (15 * H ** 3 * C ** 2);
 const GM_SUN = 1.32712440018e20, AU = 1.495978707e11, R_SUN = 6.957e8;
 const T_FALL = (Math.PI / 2) * Math.sqrt(AU ** 3 / (2 * GM_SUN));
 // time left when the Sun's surface is reached: t(r) = √(R³/2GM) [√(x(1−x)) + acos √x], x = r/R
-const tLeft = (r) => { const x = r / AU; return Math.sqrt(AU ** 3 / (2 * GM_SUN)) * (Math.sqrt(x * (1 - x)) + Math.acos(Math.sqrt(x)) - 0) - 0; };
-const SURFACE_EARLY = tLeft(R_SUN) - 0;   // seconds still to go at the surface (to reach the centre)
+const tReach = (r) => { const x = r / AU; return Math.sqrt(AU ** 3 / (2 * GM_SUN)) * (Math.sqrt(x * (1 - x)) + Math.acos(Math.sqrt(x))); };
+const SURFACE_EARLY = T_FALL - tReach(R_SUN);   // s: the surface is reached this much before the centre
 
 export default lesson({
   id: 'prog.P8.2',
@@ -50,7 +51,7 @@ The integrand blows up at $\theta = \theta_0$, where the bob momentarily stops �
     lead: t`Press **Run**. Three integrals print as \`(value, error estimate)\`: a smooth one, one with a singularity at 0, and the Stefan–Boltzmann integral to infinity. Then \`quad\` computes the pendulum's period for release angles up to 175°, against the elliptic-integral formula and the series from lesson P5.2.`,
     tasks: [
       'Compare each error estimate with the true error: the third value differs from π⁴/15 by about 10⁻¹⁵, far less than its estimate of 3 × 10⁻⁹. The estimate is cautious.',
-      'Read where the θ₀⁴ series leaves the exact curve: fine to about 60°, 4% low at 120°.',
+      `Read where the θ₀⁴ series leaves the exact curve: within 0.1% up to 60°, ${(100 * (1 - pser(2 * Math.PI / 3) / ratio(2 * Math.PI / 3))).toFixed(0)}% low at 120°, ${(100 * (1 - pser(5 * Math.PI / 6) / ratio(5 * Math.PI / 6))).toFixed(0)}% low at 150°.`,
       'Try `print(quad(lambda x: np.sin(x) / x, 0, np.inf))`: a warning, and an error estimate larger than the value.',
     ],
     params: {
@@ -89,7 +90,7 @@ plt.show()`,
     prompt: t`A pendulum is released from horizontal, $\theta_0 = 90°$. How much longer than the small-angle $T_0$ is its period? Use \`quad\` on the singular integral above and check the result two independent ways.`,
     visual: {
       type: 'graph',
-      params: { x: [0, 1.65], y: [0, 6], aspect: 'wide', axesAt: 'edge', xlabel: 'θ (rad)', ylabel: '1/√(cos θ − cos θ₀)',
+      params: { x: [0, 1.85], y: [0, 6], aspect: 'wide', axesAt: 'edge', xlabel: 'θ (rad)', ylabel: '1/√(cos θ − cos θ₀)',
         curves: [{ fn: '1/sqrt(cos(x))', color: 'accent', domain: [0, 1.5636] }],
         shade: [{ fn: 'min(1/sqrt(cos(x)), 6)', from: 0, to: 1.5636, color: 'accent', alpha: 0.18 }],
         vlines: [{ x: Math.PI / 2, label: 'θ₀ = π/2', color: 'gold' }] },
@@ -137,7 +138,7 @@ print(2 * I)
       },
       hints: ['What type does `quad` return?', 'What does `2 * (a, b)` give for a Python tuple?'],
       teach: '`quad` returns (value, abserr): always unpack, `I, err = quad(f, a, b)`, and look at err.',
-      explain: t\`quad\` returns \`(0.5, 5.55e-15)\`; doubling a tuple concatenates it with itself. Unpacking, \`I, err = quad(...)\`, avoids the trap and keeps the error estimate in view, where it belongs.`,
+      explain: t`\`quad\` returns \`(0.5, 5.55e-15)\`; doubling a tuple concatenates it with itself. Unpacking, \`I, err = quad(...)\`, avoids the trap and keeps the error estimate in view, where it belongs.`,
     }),
     code({
       id: 'stefan-boltzmann', difficulty: 2,
@@ -188,7 +189,7 @@ print(quad(f, 0, 1e10))
       },
       hints: ['The first 21 samples are spread across [0, 10¹⁰]. How likely is one to fall within a few units of 5 × 10⁶?', 'An error estimate is built from the samples: what can it say about a feature no sample saw?'],
       teach: 'An error estimate only covers what the samples saw: tell quad where the action is — sensible limits, or `points=` for known features — and never trust a zero error estimate blindly.',
-      explain: t\`quad\` returns \`(0.0, 0.0)\`. Integrating over \`(5e6 - 50, 5e6 + 50)\` gives 2.5066282746310002 at once. The error estimate is a statement about the samples, not about your function: features narrower than the first sampling — spectral lines, resonances, a transit in a long light curve — can be missed silently.`,
+      explain: t`\`quad\` returns \`(0.0, 0.0)\`. Integrating over \`(5e6 - 50, 5e6 + 50)\` gives 2.50662827465, the right area to 11 digits, at once. The error estimate is a statement about the samples, not about your function: features narrower than the first sampling — spectral lines, resonances, a transit in a long light curve — can be missed silently.`,
     }),
     mcq({
       id: 'ellipk-m', difficulty: 2,
@@ -203,10 +204,10 @@ b = 2 / np.pi * ellipk(np.sin(th0 / 2)**2)     # (b)
       visual: {
         type: 'graph',
         params: { x: [0, 100], y: [0.99, 1.4], aspect: 'wide', axesAt: 'edge', xlabel: 'release angle θ₀ (degrees)', ylabel: 'T / T₀',
-          curves: [{ fn: '1 + (x*pi/180)^2/16 + 11*(x*pi/180)^4/3072', color: 'ink3', dash: true, domain: [0, 95], label: 'small-angle series', labelAt: 85, labelDx: -40, labelDy: 18 }],
+          curves: [{ fn: '1 + (x*pi/180)^2/16 + 11*(x*pi/180)^4/3072', color: 'ink3', dash: true, domain: [0, 95], label: 'small-angle series', labelAt: 62, labelDx: 4, labelDy: 20 }],
           points: [10, 20, 30, 40, 50, 60, 70, 80, 90].flatMap((d) => [{ x: d, y: ratio((d * Math.PI) / 180), color: 'accent', r: 3.5 }, { x: d, y: ratioWrongK((d * Math.PI) / 180), color: 'bad', r: 3.5 }]),
-          legend: [{ label: 'line (b)', color: 'accent', point: true }, { label: 'line (a)', color: 'bad', point: true }], legendAt: 'tl' },
-        caption: 'Both lines’ results against the release angle, beside the series from lesson P5.2. One of them is wrong even at 10°.',
+          legend: [{ label: 'one of the two lines', color: 'accent', point: true }, { label: 'the other line', color: 'bad', point: true }], legendAt: 'tl' },
+        caption: 'What the two lines give at each release angle, beside the series from lesson P5.2. Which colour is which line is for you to work out.',
       },
       choices: ['(b): SciPy’s `ellipk` takes the parameter m = k² = sin²(θ₀/2)', '(a): K takes the modulus k = sin(θ₀/2)', 'Both: `ellipk` detects which convention you mean', 'Neither: K needs θ₀ in degrees'],
       answer: 0,
@@ -275,7 +276,7 @@ print(quad(f, -1, 1))                 # (inf, inf), with a warning
       },
       hints: ['The Gauss–Kronrod rule on [−1, 1] includes the midpoint x = 0. What is f(0)?', 'quad never samples the endpoints of an interval.'],
       teach: 'Put trouble at an endpoint: split the integral, or pass `points=[…]` with the locations of singularities and kinks, so quad treats each piece separately.',
-      explain: t\`quad(f, -1, 1, points=[0])\` returns \`(3.9999999999999813, 5.7e-14)\`. With the singularity at the ends of two subintervals it is never sampled, and the endpoint behaviour is handled as in \`quad(lambda x: 1/np.sqrt(x), 0, 1)\`. Use \`points\` for kinks and jumps too, such as a thrust curve at burnout.`,
+      explain: t`\`quad(f, -1, 1, points=[0])\` returns \`(3.9999999999999813, 5.7e-14)\`. With the singularity at the ends of two subintervals it is never sampled, and the endpoint behaviour is handled as in \`quad(lambda x: 1/np.sqrt(x), 0, 1)\`. Use \`points\` for kinks and jumps too, such as a thrust curve at burnout.`,
     }),
   ],
   checkpoint: [
