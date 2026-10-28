@@ -136,7 +136,7 @@ ax.legend()
       prompt: t`Eight thermocouples along a nozzle wall are logged by channel number, so the positions \`x\` (m) are not in order. The plot comes out as a scribble. Why?
 
 \`\`\`python
-x = np.array([${TC_X.join(', ')}])          # m
+x = np.array([${TC_X.map((x) => x.toFixed(2)).join(', ')}])   # m
 T = np.array([${TC.map(([, y]) => y.toFixed(0)).join(', ')}])     # K
 ax.plot(x, T)
 \`\`\``,
@@ -211,7 +211,7 @@ ax.xlabel("orbit radius (km)")
         const npts = r.pick([8, 10, 13, 16, 21, 31]);
         const h = (2 * Math.PI) / (npts - 1), gap = (h * h) / 8;
         return {
-          prompt: t`A sine wave is drawn with \`x = np.linspace(0, 2*np.pi, ${npts})\` and \`ax.plot(x, np.sin(x))\`. Each straight segment cuts a corner of the curve; between two points a distance $h$ apart, a chord strays from a curve by at most $\frac{h^2}{8}\max\lvert f''\rvert$. How far, at most, can the drawn line stray from $\sin x$?`,
+          prompt: t`A sine wave is drawn with \`x = np.linspace(0, 2*np.pi, ${npts})\` and \`ax.plot(x, np.sin(x))\`. Each straight segment cuts a corner of the curve; between two points a distance $h$ apart, a chord strays from a curve by at most $(h^2/8)\max\lvert f''\rvert$. How far, at most, can the drawn line stray from $\sin x$?`,
           visual: {
             type: 'graph',
             params: { x: [-0.1, 6.4], y: [-1.25, 1.25], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: '',

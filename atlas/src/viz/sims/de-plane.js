@@ -26,7 +26,7 @@
 //       equilibria: false,                // true marks them; 'label' adds each one's type in words
 //       eigen: false,                     // matrix: the real eigenvector lines (straight-line solutions), labelled λ
 //       origin: true,                     // matrix: mark the origin in its type's colour (false: a question asks for the type)
-//       levels: { fn: 'y^2/2 - cos(x)', values: [-0.5, 0, 0.5], highlight: [1] },   // or n: 9, or { from, to, step }
+//       levels: { fn: 'y^2/2 - cos(x)', values: [-0.5, 0, 0.5], highlight: [1] },   // values (numbers or expressions of the keys) or n: 9
 //       seeds: [[1, 0], { x: 0, y: 2, color: 'gold', dir: 'forward' }],   // trajectories (both ways unless dir)
 //       seedColor: null,                  // one colour for every seed (a family), instead of a palette
 //       T: 30,                            // how long each seed is traced each way
@@ -360,7 +360,7 @@ export function mount(F, P0) {
     const h = fn(spec.fn, ['x', 'y', ...keys]), e = { ...E };
     const grid = sampleGrid((x, y) => { e.x = x; e.y = y; return h(e); }, [plot.vx0, plot.vx1], [plot.vy0, plot.vy1], 170, 170);
     const [lo, hi] = range(grid);
-    const vals = levelsFrom(spec.values ?? spec.n ?? spec, lo, hi);
+    const vals = Array.isArray(spec.values) ? spec.values.map((v) => ev(v, E)) : levelsFrom(spec.step ? { from: spec.from, to: spec.to, step: spec.step } : (spec.n ?? 8), lo, hi);
     const his = (spec.highlight || []).map((v) => ev(v, E));
     const out = [];
     for (const c of vals) for (const pts of joinSegments(contourSegments(grid, c))) out.push({ pts, hi: false });
@@ -463,7 +463,7 @@ export function validate(P) {
   if (P.levels) {
     if (!P.levels.fn) problems.push('de-plane: levels needs fn');
     tryParse(P.levels.fn, ['x', 'y'], 'levels fn');
-    for (const v of P.levels.highlight || []) tryParse(v, [], 'levels highlight');
+    for (const v of [...(P.levels.highlight || []), ...(Array.isArray(P.levels.values) ? P.levels.values : [])]) tryParse(v, [], 'levels value');
   }
   for (const s of P.seeds || []) {
     const [x, y] = Array.isArray(s) ? s : [s.x, s.y];
