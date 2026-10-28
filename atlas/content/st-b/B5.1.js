@@ -259,8 +259,8 @@ print(sweeps, centre)`,
     mcq({
       id: 'cp-relax-meaning', difficulty: 2,
       prompt: t`Jacobi relaxation updates a grid sweep after sweep, which looks like stepping forward in time. What does the converged grid represent?`,
-      visual: { type: 'graph', params: { x: [0, 720], y: [-6.5, 0.3], aspect: 'wide', xlabel: 'sweeps', ylabel: 'log₁₀ of largest change', points: JAC.pts, hlines: [{ y: -6, color: 'ink3', label: 'stop: 10⁻⁶' }] }, caption: `The largest change per sweep as Jacobi relaxation runs on a 21 × 21 grid (computed): it falls steadily and the run stops after ${JAC.sweeps} sweeps.` },
-      choices: ['The steady state, the solution of Laplace’s equation — the sweeps are only an algorithm for finding it', 'The temperature after 688 seconds', 'The temperature after one sweep per time step of the heat equation, at the final time', 'An average over all the intermediate grids'],
+      visual: { type: 'graph', params: { x: [0, 720], y: [-6.5, 0.3], aspect: 'wide', xlabel: 'sweeps', ylabel: 'log₁₀ of largest change', axesAt: 'edge', points: JAC.pts, hlines: [{ y: -6, color: 'ink3' }] }, caption: `The largest change per sweep as Jacobi relaxation runs on a 21 × 21 grid (computed): it falls steadily and the run stops at the dashed threshold, a change of 10⁻⁶, after ${JAC.sweeps} sweeps.` },
+      choices: ['The steady state, the solution of Laplace’s equation — the sweeps are only an algorithm for finding it', 'The temperature after 688 seconds', 'The temperature at one definite moment, taking each sweep as one time step of the heat equation', 'An average over all the intermediate grids'],
       answer: 0,
       why: {
         1: 'A sweep has no time attached to it. Laplace’s equation has no time in it at all: it describes the end state.',

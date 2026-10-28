@@ -252,7 +252,7 @@ and the curve is **regular** if $\alpha'(t) \ne 0$ for every $t$. Where the velo
         const th = r.pick([60, 90, 120, 150, 45]);
         const v = 4.2, sp = 2 * v * Math.sin((th * DEG) / 2);
         return {
-          prompt: t`Perseverance’s wheels are 52.5 cm across, and on flat ground it drives at about $${v}$ cm/s. A pebble jammed in a tread rides the cycloid traced by a point on the rim. What is the pebble’s speed when the wheel has turned $${th}^\circ$ since the pebble left the ground?`,
+          prompt: t`Perseverance’s wheels are 52.5 cm across, and on flat ground it drives at about $${v}\ \text{cm/s}$. A pebble jammed in a tread rides the cycloid traced by a point on the rim. What is the pebble’s speed when the wheel has turned $${th}^\circ$ since the pebble left the ground?`,
           visual: trace('t - sin(t)', '1 - cos(t)', [0, '2*pi'], [-0.6, 7], [-0.4, 2.6], {
             extra: [{ param: [`${r6(th * DEG)} + cos(t)`, '1 + sin(t)'], t: [0, '2*pi'], color: 'ink3', width: 1.2, dash: true }],
             points: [{ x: r6(th * DEG - Math.sin(th * DEG)), y: r6(1 - Math.cos(th * DEG)), color: 'gold', label: 'pebble' }, { x: r6(th * DEG), y: 1, color: 'ink3', label: 'hub', labelDx: 6 }],
@@ -260,7 +260,7 @@ and the curve is **regular** if $\alpha'(t) \ne 0$ for every $t$. Where the velo
           }),
           answer: sp, units: 'cm/s', tol: { rel: 0.01 },
           errors: [{ value: v, feedback: 'That is the hub’s speed. A point on the rim also turns about the hub; add the two velocities, or use the cycloid’s speed formula.' }, { value: v * Math.sin((th * DEG) / 2), feedback: t`You dropped the factor 2: $|\alpha'(t)| = 2R|\sin\tfrac t2|$, and the hub moves at $R$ per radian.` }].filter((e) => Math.abs(e.value - sp) > 0.02 * sp),
-          hints: [t`With $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$, the speed is $|\alpha'(t)| = 2R|\sin\tfrac t2|$ per radian of turn.`, t`The hub moves $R$ per radian, at $${v}$ cm/s; so the pebble’s speed is $${v}\times 2|\sin\tfrac t2|$ cm/s.`],
+          hints: [t`With $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$, the speed is $|\alpha'(t)| = 2R|\sin\tfrac t2|$ per radian of turn.`, t`The hub moves $R$ per radian, at $${v}\ \text{cm/s}$; so the pebble’s speed is $${v}\times 2|\sin\tfrac t2|$ cm/s.`],
           teach: t`A rolling point’s speed is $2|\sin\tfrac t2|$ times the hub’s: zero at the ground, double at the top.`,
           explain: t`$|\dot\alpha| = 2 \times ${v} \times \sin ${th / 2}^\circ = ${nice(sp, 3)}$ cm/s. The wheel size cancels: it sets how much time a radian takes, not the ratio of speeds.`,
         };

@@ -709,5 +709,6 @@ export const BOSSES = {
   'phys2210': () => import('./phys2210/boss.js'),
   'phys2220': () => import('./phys2220/boss.js'),
   'phys2710': () => import('./phys2710/boss.js'),
+  'prog': () => import('./prog/boss.js'),
   'st-a': () => import('./st-a/boss.js'),
 };

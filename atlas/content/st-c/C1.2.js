@@ -202,7 +202,7 @@ Because $ds/dt = |\alpha'(t)| > 0$ on a regular curve, $s$ can be inverted, and 
       gen(r) {
         const R = r.pick([0.25, 0.3, 0.35, 0.5, 0.4]);
         return {
-          prompt: t`A wheel of radius $${R}$ m rolls one full turn. How far does a point on its rim travel along its cycloid, $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$, $0 \le t \le 2\pi$?`,
+          prompt: t`A wheel of radius $${R}\ \text{m}$ rolls one full turn. How far does a point on its rim travel along its cycloid, $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$, $0 \le t \le 2\pi$?`,
           visual: plane([{ param: ['t - sin(t)', '1 - cos(t)'], t: [0, '2*pi'], color: 'accent', width: 2.4 }, { param: ['pi + cos(t)', '1 + sin(t)'], t: [0, '2*pi'], color: 'ink3', width: 1.2, dash: true }], [-0.5, 6.8], [-0.4, 2.5], { caption: t`One arch of the cycloid, in units of the wheel’s radius; the wheel is drawn half-way through its turn.` }),
           answer: 8 * R, units: 'm', tol: { rel: 0.005 },
           errors: [{ value: 2 * Math.PI * R, feedback: t`$2\pi R$ is how far the hub travels in one turn. The rim point also swings up and over: integrate its speed $2R|\sin\tfrac t2|$.` }, { value: 4 * R, feedback: t`Check the integral: $\int_0^{2\pi} 2R\sin\tfrac t2\,dt = 2R\big[-2\cos\tfrac t2\big]_0^{2\pi} = 8R$.` }],
@@ -231,7 +231,7 @@ Because $ds/dt = |\alpha'(t)| > 0$ on a regular curve, $s$ can be inverted, and 
           errors: [{ value: Math.sqrt(T * T + X * X), feedback: t`That is the Euclidean length $\int\sqrt{dt^2 + dx^2}$. Spacetime’s arc length carries a minus sign: $d\tau^2 = dt^2 - dx^2$.` }, { value: T, feedback: 'That is the Earth clock. The moving clock’s proper time is shorter.' }],
           hints: [t`$\dot x = \dfrac{t}{\sqrt{1/g^2 + t^2}}$, so $1 - \dot x^2 = \dfrac{1/g^2}{1/g^2 + t^2}$.`, t`$\tau = \displaystyle\int_0^{${T}}\frac{dt}{\sqrt{1 + g^2t^2}} = \frac1g\operatorname{arsinh}(g\cdot${T})$.`],
           teach: 'Proper time is the arc length of a worldline, with the Minkowski minus sign under the square root.',
-          explain: t`$\tau = \dfrac{\operatorname{arsinh}(${nice(g * T, 5)})}{1.0327} = ${nice(tau, 3)}$ yr, while $${T}$ yr pass on Earth and the rocket gets $${nice(X, 3)}$ light-years out. Every arc-length formula of this lesson goes through for spacetime once the sign is flipped.`,
+          explain: t`$\tau = \dfrac{\operatorname{arsinh}(${nice(g * T, 5)})}{1.0327} = ${nice(tau, 3)}$ yr, while $${T}\ \text{yr}$ pass on Earth and the rocket gets $${nice(X, 3)}$ light-years out. Every arc-length formula of this lesson goes through for spacetime once the sign is flipped.`,
         };
       },
     }),

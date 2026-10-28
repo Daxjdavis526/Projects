@@ -70,7 +70,7 @@ These are the **Frenet–Serret equations**. The matrix is antisymmetric — and
           errors: [{ value: (p + q) * sc, feedback: t`Add the components in quadrature: $\kappa = |\mathbf T'| = \sqrt{T_y'^2 + T_z'^2}$.` }],
           hints: [t`$\kappa = |\mathbf T'|$.`],
           teach: t`The curvature is the length of $\mathbf T'$, and $\mathbf N$ is its direction.`,
-          explain: t`$\kappa = \sqrt{${nice(p * sc)}^2 + ${nice(q * sc)}^2} = ${nice(k * sc)}\ \text{m}^{-1}$, so the radius of curvature is $${nice(1 / (k * sc), 3)}$ m and $\mathbf N = \mathbf T'/\kappa = (0,\ ${nice(p / k)},\ ${nice(q / k)})$.`,
+          explain: t`$\kappa = \sqrt{${nice(p * sc)}^2 + ${nice(q * sc)}^2} = ${nice(k * sc)}\ \text{m}^{-1}$, so the radius of curvature is $${nice(1 / (k * sc), 3)}\ \text{m}$ and $\mathbf N = \mathbf T'/\kappa = (0,\ ${nice(p / k)},\ ${nice(q / k)})$.`,
         };
       },
     }),
@@ -208,10 +208,10 @@ Where is the mistake?`,
         const [k, ta, w] = r.pick([[0.08, 0.06, 0.1], [0.05, 0.12, 0.13], [0.12, 0.05, 0.13], [0.06, 0.08, 0.1]]);
         const v = r.pick([15, 20, 25]);
         return {
-          prompt: t`A roller-coaster corkscrew is a helix with curvature $\kappa = ${k}\ \text{m}^{-1}$ and torsion $\tau = ${ta}\ \text{m}^{-1}$. A car runs through it at $${v}$ m/s. If the riders’ seats followed the Frenet frame, at what angular speed would the riders turn, in rad/s?`,
+          prompt: t`A roller-coaster corkscrew is a helix with curvature $\kappa = ${k}\ \text{m}^{-1}$ and torsion $\tau = ${ta}\ \text{m}^{-1}$. A car runs through it at $${v}\ \text{m/s}$. If the riders’ seats followed the Frenet frame, at what angular speed would the riders turn, in rad/s?`,
           visual: (() => {
             const a = k / (w * w), b = ta / (w * w), sc = 2.2 / Math.max(a, b * Math.PI);
-            return { type: 'c3-curve', params: { curve: { param: [`${r6(a * sc)}*cos(t)`, `${r6(a * sc)}*sin(t)`, `${r6(b * sc)}*t`], t: [r6(-Math.PI), r6(Math.PI)] }, at: 0.8, fixed: true, show: ['T', 'N', 'B'], readouts: [], range: 2.6, scale: { frame: 0.8 } }, caption: t`One turn of the corkscrew (radius $${nice(a, 3)}$ m, rising $${nice(2 * Math.PI * b, 3)}$ m per turn), scaled down, with the Frenet frame at the car. Real tracks are banked to suit the riders, so a seat’s frame is not exactly Frenet.` };
+            return { type: 'c3-curve', params: { curve: { param: [`${r6(a * sc)}*cos(t)`, `${r6(a * sc)}*sin(t)`, `${r6(b * sc)}*t`], t: [r6(-Math.PI), r6(Math.PI)] }, at: 0.8, fixed: true, show: ['T', 'N', 'B'], readouts: [], range: 2.6, scale: { frame: 0.8 } }, caption: t`One turn of the corkscrew (radius $${nice(a, 3)}\ \text{m}$, rising $${nice(2 * Math.PI * b, 3)}\ \text{m}$ per turn), scaled down, with the Frenet frame at the car. Real tracks are banked to suit the riders, so a seat’s frame is not exactly Frenet.` };
           })(),
           answer: v * w, units: 'rad/s', tol: { rel: 0.01 },
           errors: [{ value: v * k, feedback: t`That counts only the bending, about $\mathbf B$. The frame also twists about $\mathbf T$ at rate $\tau$: the angular velocity per metre is the Darboux vector $\tau\mathbf T + \kappa\mathbf B$.` }, { value: v * (k + ta), feedback: t`The two rates are perpendicular components of one angular velocity: add them in quadrature, not directly.` }],
@@ -226,13 +226,13 @@ Where is the mistake?`,
       gen(r) {
         const v = r.pick([3, 4, 5, 8]), rate = r.pick([0.6, 1.2, 2, 2.4]);
         return {
-          prompt: t`A particle moves along a curve (lengths in metres) at speed $${v}$ m/s. Its unit tangent changes at the rate $|d\mathbf T/dt| = ${rate}$ rad/s. What is the curvature of its path?`,
+          prompt: t`A particle moves along a curve (lengths in metres) at speed $${v}\ \text{m/s}$. Its unit tangent changes at the rate $|d\mathbf T/dt| = ${rate}$ rad/s. What is the curvature of its path?`,
           visual: vivFixed(1.5, ['T', 'N'], 'A curve with its unit tangent and principal normal at one point.'),
           answer: rate / v, units: 'm^-1', tol: { rel: 0.005 },
           errors: [{ value: rate * v, feedback: t`Convert a rate per second into a rate per metre by dividing by the speed: $\kappa = |d\mathbf T/ds| = |d\mathbf T/dt|/v$.` }],
           hints: [t`$\dfrac{d\mathbf T}{dt} = \dfrac{d\mathbf T}{ds}\dfrac{ds}{dt} = v\kappa\,\mathbf N$.`, t`So $\kappa = \dfrac{|d\mathbf T/dt|}{v}$.`],
           teach: 'Curvature is a rate per unit length; a rate per unit time must be divided by the speed.',
-          explain: t`$\kappa = ${rate}/${v} = ${nice(rate / v, 3)}\ \text{m}^{-1}$, a radius of curvature of $${nice(v / rate, 3)}$ m. In a general parameter all three equations pick up the speed: $\dot{\mathbf T} = v\kappa\mathbf N$, $\dot{\mathbf N} = v(-\kappa\mathbf T + \tau\mathbf B)$, $\dot{\mathbf B} = -v\tau\mathbf N$.`,
+          explain: t`$\kappa = ${rate}/${v} = ${nice(rate / v, 3)}\ \text{m}^{-1}$, a radius of curvature of $${nice(v / rate, 3)}\ \text{m}$. In a general parameter all three equations pick up the speed: $\dot{\mathbf T} = v\kappa\mathbf N$, $\dot{\mathbf N} = v(-\kappa\mathbf T + \tau\mathbf B)$, $\dot{\mathbf B} = -v\tau\mathbf N$.`,
         };
       },
     }),

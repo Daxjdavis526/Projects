@@ -83,7 +83,7 @@ export default lesson({
     num({
       id: 'q-width', difficulty: 2,
       gen(r) {
-        const [what, f0, df] = r.pick([['A quartz crystal', 10e6, 50], ['A guitar body’s main air resonance', 98, 6.5], ['A satellite reaction-wheel mount', 140, 3.5], ['A 440 Hz tuning fork', 440, 0.06]]);
+        const [what, f0, df] = r.pick([['A quartz crystal', 10e6, 50], ['A guitar body’s main air resonance', 98, 6.5], ['A satellite reaction-wheel mount', 140, 3.5], ['A tuning fork', 440, 0.06]]);
         const Q = f0 / df;
         return {
           prompt: t`${what} resonates at $${sci(f0, 3)}$ Hz. A slow sweep finds that $A^2$ is above half its peak over a band $${sci(df, 2)}$ Hz wide. What is its $Q$?`,

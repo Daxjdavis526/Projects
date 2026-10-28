@@ -146,7 +146,7 @@ The **signed curvature** $\kappa_s$ is positive where the curve turns left, nega
         const R = r.pick([0.3, 0.5, 2, 1.5, 0.25]);
         const k = kappaSigned(2 * R, 0, 0, -R);
         return {
-          prompt: t`A wheel of radius $${R}$ m rolls left to right; a point on its rim traces $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$. What is the signed curvature of its path at the top of an arch, $t = \pi$, in $\text{m}^{-1}$?`,
+          prompt: t`A wheel of radius $${R}\ \text{m}$ rolls left to right; a point on its rim traces $\alpha(t) = R(t - \sin t,\ 1 - \cos t)$. What is the signed curvature of its path at the top of an arch, $t = \pi$, in $\text{m}^{-1}$?`,
           visual: pic([{ param: ['t - sin(t)', '1 - cos(t)'], t: [0, '2*pi'], color: 'accent', width: 2.4 }, { param: ['pi + cos(t)', '1 + sin(t)'], t: [0, '2*pi'], color: 'ink3', width: 1.2, dash: true }], [-0.5, 6.8], [-0.4, 2.6], { points: [{ x: r6(Math.PI), y: 2, color: 'gold', label: 't = π' }], caption: t`One arch, in units of $R$, with the wheel at $t = \pi$. Is the path’s radius of curvature at the top equal to the wheel’s?` }),
           answer: k, units: 'm^-1', tol: { rel: 0.005 },
           errors: [{ value: -1 / R, feedback: t`The path is not the wheel: the rim point moves with the hub as well as round it. Compute $\kappa_s = (x'y'' - y'x'')/(x'^2 + y'^2)^{3/2}$ at $t = \pi$.` }, { value: -1 / (2 * R), feedback: t`Check the denominator: the speed at the top is $2R$, so $(x'^2 + y'^2)^{3/2} = 8R^3$.` }],
@@ -204,7 +204,7 @@ The **signed curvature** $\kappa_s$ is positive where the curve turns left, nega
         const v = r.pick([60, 90, 120, 150, 200]);
         const om = 3 * DEG, R = v / om / 1000;
         return {
-          prompt: t`An aircraft flies a standard-rate turn: its heading changes at $3^\circ$ per second. At a true airspeed of $${v}$ m/s in still air, what is the radius of its turn, in km? (Use $\kappa = d\theta/ds$.)`,
+          prompt: t`An aircraft flies a standard-rate turn: its heading changes at $3^\circ$ per second. At a true airspeed of $${v}\ \text{m/s}$ in still air, what is the radius of its turn, in km? (Use $\kappa = d\theta/ds$.)`,
           visual: pic([{ param: ['cos(t)', 'sin(t)'], t: [0, 2.4], color: 'accent', width: 2.4 }], [-1.3, 1.6], [-0.4, 1.3], { arrows: [{ from: [r6(Math.cos(1.2)), r6(Math.sin(1.2))], to: [r6(Math.cos(1.2) - 0.45 * Math.sin(1.2)), r6(Math.sin(1.2) + 0.45 * Math.cos(1.2))], color: 'gold', label: 'heading' }, { from: [0, 0], to: [r6(0.97 * Math.cos(0.5)), r6(0.97 * Math.sin(0.5))], color: 'ink3', label: 'R' }], caption: 'Part of the turn seen from above (not to scale). Heading turns by 3° each second, so a full circle takes 2 minutes.' }),
           answer: R, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: (v / 3) / 1000, feedback: t`Convert the turn rate to radians per second first: $3^\circ/\text{s} = ${nice(om, 4)}$ rad/s.` }, { value: om / v * 1000, feedback: t`That is the curvature $\kappa$ (per km). The radius is $1/\kappa$.` }],

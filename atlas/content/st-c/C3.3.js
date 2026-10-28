@@ -175,7 +175,7 @@ Near a point $p$, a sphere bends away from its tangent plane in every direction 
         const a = r.pick([0.5, 0.75, 1.2, 1.6]), h = r.pick([2, 3, 5]);
         const L = Math.hypot(2 * Math.PI * a, h);
         return {
-          prompt: t`A cable is routed once round a cylindrical propellant tank of radius $${a}$ m, climbing $${h}$ m as it goes round, lying flat on the tank wall. What is the shortest length of cable that does this?`,
+          prompt: t`A cable is routed once round a cylindrical propellant tank of radius $${a}\ \text{m}$, climbing $${h}\ \text{m}$ as it goes round, lying flat on the tank wall. What is the shortest length of cable that does this?`,
           visual: one(3, { curves: [{ param: [`1.2*cos(2*pi*t)`, `1.2*sin(2*pi*t)`, `-1.6 + 3.2*t`], t: [0, 1], color: 'gold', width: 2.8 }], pitch: 0.35 }, 'A cylinder with a helix that goes once round while climbing (not to scale).'),
           answer: L, units: 'm', tol: { rel: 0.005 },
           errors: [{ value: 2 * Math.PI * a + h, feedback: 'Going round and then straight up is longer. Unroll the tank wall into a flat rectangle: the shortest path is its diagonal.' }, { value: h, feedback: 'That would not go round the tank. The cable must wrap once.' }],
@@ -223,7 +223,7 @@ Near a point $p$, a sphere bends away from its tangent plane in every direction 
         const [R, rho] = r.pick([[4.7, 1.95], [4.7, 1.5], [6, 2.5], [3.5, 1.2]]);
         const al = Math.asin(rho / R), om = 2 * Math.PI * (1 - Math.cos(al));
         return {
-          prompt: t`A capsule’s heat shield is a spherical cap: part of a sphere of radius $${R}$ m, with a circular rim of radius $${rho}$ m. Its outward normals point into a cone of directions. What solid angle do they cover — the area of the shield’s Gauss image on the unit sphere — in steradians?`,
+          prompt: t`A capsule’s heat shield is a spherical cap: part of a sphere of radius $${R}\ \text{m}$, with a circular rim of radius $${rho}\ \text{m}$. Its outward normals point into a cone of directions. What solid angle do they cover — the area of the shield’s Gauss image on the unit sphere — in steradians?`,
           visual: one(0, { domain: [[0, 1], [r6(1 - al / Math.PI), 1]], curves: [{ param: G[0].X('t', r6(1 - al / Math.PI)), t: [0, 1], color: 'gold', width: 2.4 }, ...[0, 0.33, 0.67].map((u) => ({ param: G[0].X(u, r6(1 - al / Math.PI)).map((q, i) => `${q} + 0.9*t*(${G[0].n(u, r6(1 - al / Math.PI))[i]})`), t: [0, 1], color: 'bad', width: 2.6 }))], pitch: 0.25, dist: 4.2, target: [0, 0, -1.45] }, 'The shield’s true shape, scaled down, facing the flow below it, with its rim (gold) and the normals at three rim points (red).'),
           answer: om, units: 'sr', tol: { rel: 0.01 },
           errors: [{ value: 2 * Math.PI * R * R * (1 - Math.cos(al)), feedback: t`That is the shield’s area in $\text{m}^2$. The Gauss image lives on the *unit* sphere: divide by $R^2$.` }, { value: Math.PI * al * al, feedback: t`A small flat disc of angular radius $\alpha$ would cover about $\pi\alpha^2$; the exact cap area is $2\pi(1 - \cos\alpha)$.` }].filter((e) => Math.abs(e.value - om) > 0.03 * om),

@@ -14,9 +14,9 @@
 // reads comes from code here or from a run in the Atlas's Pyodide (noted).
 import { boss, mcq, num, code } from '../../src/core/content.js';
 import { tex } from '../../src/core/format.js';
-import { errbar } from './_numkit.js';
+import { errbar, normals } from './_numkit.js';
 import { linlsq } from './_fit.js';
-import { normals, uniforms } from './_solvers.js';
+import { uniforms } from './_solvers.js';
 
 const t = String.raw;
 const lg = Math.log10;
@@ -60,7 +60,7 @@ const E90 = (A_ORB / 1000), V90 = VR;
 
 export default boss({
   title: 'The Simulation Challenge',
-  intro: t`In 2014 a faulty upper stage left two Galileo navigation satellites on eccentric orbits, useless for navigation — and in 2018 two teams turned the accident into a test of general relativity: a clock that swings between 23 000 and 33 000 km from Earth's centre should run fast and slow by a precise, periodic amount. This boss imagines a successor, ***Tempo***, on the same kind of orbit ($a = 27\,977$ km, $e = 0.162$, $\mu = 398\,600.4418\ \text{km}^3/\text{s}^2$). Relativity predicts that its clock, compared with a steady one, gains and loses $\Delta\tau = -\frac{2}{c^2}\sqrt{\mu a}\,e\,\sin E$, where $E$ is the eccentric anomaly — an amplitude of about $${A_NS.toFixed(0)}$ ns. Your job: make the simulation run, converge it, test it, measure the effect — and say honestly what you have shown.`,
+  intro: t`In 2014 a faulty upper stage left two Galileo navigation satellites on eccentric orbits, useless for navigation — and in 2018 two teams turned the accident into a test of general relativity: a clock that swings between 23 000 and 33 000 km from Earth's centre should run fast and slow by a precise, periodic amount. This boss imagines a successor, *Tempo*, on the same kind of orbit ($a = 27\,977$ km, $e = 0.162$, $\mu = 398\,600.4418\ \text{km}^3/\text{s}^2$). Relativity predicts that its clock, compared with a steady one, gains and loses $\Delta\tau = -\frac{2}{c^2}\sqrt{\mu a}\,e\,\sin E$, where $E$ is the eccentric anomaly — an amplitude of about $${A_NS.toFixed(0)}$ ns. Your job: make the simulation run, converge it, test it, measure the effect — and say honestly what you have shown.`,
   pass: 0.7,
   rounds: [
     {
@@ -245,7 +245,7 @@ def rhs(t, s):
     return [vx, vy, -mu * x / r3, -mu * y / r3]
 
 def integrate(s, duration):
-    """The state after integrating rhs for `duration` seconds from state s."""
+    """The state after integrating rhs for \`duration\` seconds from state s."""
     sol = solve_ivp(lambda t, s: rhs(t, s), (0, duration), s, rtol=1e-11, atol=1e-11)
     return sol.y[:, -1]
 
@@ -437,7 +437,7 @@ spec = np.abs(np.fft.rfft(offsets))          # ${N} samples
 freq = np.fft.rfftfreq(${N}, d=${dt})          # Hz; bin k is at k / (${N} × ${dt} s)
 \`\`\``,
               answer: key, tol: { rel: 0, abs: 0.5 },
-              errors: apart([{ value: Math.floor(k) === key ? Math.ceil(k) : Math.floor(k), feedback: t`The line falls between bins, at $k = ${k.toFixed(2)}$; round to the nearer one.` }, { value: Math.round((days * 86400) / T_ORB / dt), feedback: 'The bin spacing is 1/(total duration), not 1/(sampling interval).' }], key, 0.001),
+              errors: apart([{ value: Math.floor(k) === key ? Math.ceil(k) : Math.floor(k), feedback: t`The line falls between bins, at $k = ${k.toFixed(2)}$; round to the nearer one.` }], key, 0.001),
               hints: [t`Bin $k$ sits at frequency $k/(N\Delta t)$, so the line is at $k = N\Delta t / T$.`, t`$N\Delta t = ${days}$ days $= ${days * 86400}$ s.`],
               teach: 'The rfft bin spacing is one over the record length; a signal of period T falls at bin (record length)/T — usually between two bins.',
               explain: t`$k = ${days * 86400}/${T_ORB.toFixed(0)} = ${k.toFixed(2)}$, so bin ${key}. The record holds ${k.toFixed(2)} orbits — not a whole number — so the line leaks into neighbouring bins (a window helps). Fitting $A\sin E$ directly, as in the last problem, uses the orbit's known phase and is more precise than reading a bin.`,
