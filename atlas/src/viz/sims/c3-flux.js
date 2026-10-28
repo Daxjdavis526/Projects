@@ -26,7 +26,8 @@
 //       tint: true, arrows: true, arrowsOn: 'surface',   // tint by the integrand; field arrows on the surface or on a 'grid'
 //       normals: true, ghosts: false,
 //       patch: null,                        // { u: 'u0', v: 'v0', du: 0.3, dv: 0.3 } (numbers or slider keys); with
-//                                           //   frac: true all four are fractions of the surface's own u and v ranges
+//                                           //   frac: true all four are fractions of the surface's own u and v ranges;
+//                                           //   labels: ['rᵤΔu', 'rᵥΔv'] names the two edge vectors (plain text)
 //       points: [{ at: [x, y, z], label, color }],
 //       readouts: ['flux', 'area', 'circ', 'volume', 'patch'],   // which numbers to show; [] or false hides them all
 //       n: 22, quad: 16,                    // the drawn grid; Gauss–Legendre panels per direction for the integrals
@@ -248,8 +249,9 @@ export function mount(F, P) {
       view.arrow(p, add(p, b), { color: 'violet', width: 2.6, bias: 0.12 });
       if (L > 1e-12) { const s = (C.sign * 0.5 * R) / L; view.arrow(p, add(p, nr.map((x) => x * s)), { color: 'ink', width: 2.6, bias: 0.12 }); }
       view.point(p, { color: 'gold', r: 4.5 });
-      view.label(add(p, a.map((x) => x * 1.25)), 'rᵤΔu', { color: 'accent' });
-      view.label(add(p, b.map((x) => x * 1.25)), 'rᵥΔv', { color: 'violet' });
+      const [la, lb] = P.patch.labels || ['rᵤΔu', 'rᵥΔv'];
+      view.label(add(p, a.map((x) => x * 1.25)), la, { color: 'accent' });
+      view.label(add(p, b.map((x) => x * 1.25)), lb, { color: 'violet' });
       patchRow = { factor: Math.hypot(...M.cross(ru, rv)), area: L };
     }
     for (const pt of P.points || []) {

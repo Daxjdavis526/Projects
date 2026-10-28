@@ -178,7 +178,7 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
           errors: [{ value: la + sign * lb, feedback: t`Wavelengths do not add; wavenumbers do. Combine $1/\lambda$ values, then invert.` }, { value: 1 / (1 / la - sign / lb), feedback: t`Check the sign: ${sign > 0 ? 'the third line is the sum of the two jumps' : 'the third line is the difference'}, so ${sign > 0 ? 'add' : 'subtract'} the wavenumbers.` }],
           hints: [t`$\dfrac{1}{\lambda} = \dfrac{1}{${nmT(la, 6)}\ \text{nm}} ${sign > 0 ? '+' : '-'} \dfrac{1}{${nmT(lb, 6)}\ \text{nm}}$.`],
           teach: 'Ritz’s combination principle: hydrogen’s line wavenumbers are differences of terms, so they add and subtract like steps on a ladder.',
-          explain: t`$\dfrac{1}{\lambda} = ${fmt(1 / la, 5)} ${sign > 0 ? '+' : '-'} ${fmt(1 / lb, 5)} = ${fmt(1 / ans, 5)}\ \text{nm}^{-1}$, so $\lambda = ${nmT(ans, 5)}$ nm — exactly ${desc}. Every line is the gap between two terms $R_H/n^2$, so two gaps that share a rung combine into a third.`,
+          explain: t`In inverse micrometres, $\dfrac{1}{\lambda} = ${fmt(1000 / la, 5)} ${sign > 0 ? '+' : '-'} ${fmt(1000 / lb, 5)} = ${fmt(1000 / ans, 5)}\ \mu\text{m}^{-1}$, so $\lambda = ${nmT(ans, 5)}$ nm — exactly ${desc}. Every line is the gap between two terms $R_H/n^2$, so two gaps that share a rung combine into a third.`,
           // a sum is a two-step path (tip to tail at one x); a difference sets the two jumps side by side
           visual: terms([[a[0], a[1], 1.4, 'accent', `${a[0]} → ${a[1]}`], [b[0], b[1], sign > 0 ? 1.4 : 3.2, 'violet', `${b[0]} → ${b[1]}`], [ansN[0], ansN[1], 4.6, 'gold', '?']]),
         };
@@ -239,7 +239,7 @@ with whole numbers $n_2 > n_1$ and one constant fitted to the data. Classical ph
       id: 'deuterium', difficulty: 3,
       prompt: t`The Rydberg constant depends slightly on the mass $M$ of the nucleus: $R_M = \dfrac{R_\infty}{1 + m_e/M}$ (a correction you will derive with the Bohr model). Ordinary hydrogen has $m_e/m_p = 1/1836.15$; deuterium, whose nucleus is a proton and a neutron, has $m_e/m_d = 1/3670.48$. Hydrogen’s Hα line is at 656.470 nm. How much shorter is deuterium’s Hα? Answer in nm.`,
       answer: D_SHIFT, units: 'nm', tol: { rel: 0.01 },
-      errors: [{ value: lam(3, 2) * ME_MD, feedback: t`The shift comes from the *difference* of the two corrections, $m_e/m_p - m_e/m_d$: hydrogen’s line already carries its own.` }],
+      errors: [{ value: lam(3, 2) * ME_MP, feedback: t`That is roughly how far hydrogen’s own line sits from the infinitely heavy nucleus case. Deuterium’s correction is about half as big; the shift between them is the *difference*, $m_e/m_p - m_e/m_d$.` }],
       hints: [t`Wavelength scales as $1/R_M$, so $\dfrac{\lambda_D}{\lambda_H} = \dfrac{1 + m_e/m_d}{1 + m_e/m_p}$.`, t`$\lambda_H - \lambda_D = \lambda_H\left(1 - \dfrac{1 + 1/3670.48}{1 + 1/1836.15}\right)$.`],
       teach: 'A heavier nucleus raises the Rydberg constant slightly, so isotopes of one element show lines shifted by tiny but measurable amounts.',
       explain: t`$\lambda_H - \lambda_D = 656.470\times\left(1 - \dfrac{1.000\,272\,4}{1.000\,544\,6}\right) = ${fmt(D_SHIFT, 3)}$ nm. In 1931 Harold Urey and colleagues evaporated liquid hydrogen to concentrate the heavy isotope, and found faint companion lines just this far to the blue of Hα and Hβ: the discovery of deuterium.`,

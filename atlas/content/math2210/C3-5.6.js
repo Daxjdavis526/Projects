@@ -65,7 +65,7 @@ The cross product $\vec r_u\times\vec r_v$ is also a **normal** to the surface â
   },
   example: {
     prompt: t`A capsuleâ€™s heat shield is modelled as a spherical cap: part of a sphere of radius $R = 4.7$ m, with a rim of radius $1.9$ m (close to the Apollo command moduleâ€™s shield). Find its area. In this courseâ€™s convention, $\theta$ is measured from the $+z$-axis and $\phi$ round from $+x$.`,
-    visual: still({ label: 'Cap', x: '4.7*sin(u)*cos(v)', y: '4.7*sin(u)*sin(v)', z: '4.7*cos(u)', u: [0, r6(Math.asin(1.9 / 4.7))], v: [0, '2*pi'] }, { axes: false, n: 18, patch: { u: 0.55, v: 0.1, du: 0.18, dv: 0.06, frac: true }, readouts: ['area'], pitch: 0.55, caption: 'The heat shield as a cap of a sphere, with one patch and its edge vectors. The readout is its area, computed numerically. Drag to rotate.' }),
+    visual: still({ label: 'Cap', x: '4.7*sin(u)*cos(v)', y: '4.7*sin(u)*sin(v)', z: '4.7*cos(u)', u: [0, r6(Math.asin(1.9 / 4.7))], v: [0, '2*pi'] }, { axes: false, n: 18, patch: { u: 0.62, v: 0.1, du: 0.3, dv: 0.1, frac: true }, readouts: ['area'], pitch: 0.55, caption: 'The heat shield as a cap of a sphere, with one patch and its edge vectors. The readout is its area, computed numerically. Drag to rotate.' }),
     steps: [
       { label: 'Parametrize', text: t`$\vec r(\theta, \phi) = R\langle\sin\theta\cos\phi,\ \sin\theta\sin\phi,\ \cos\theta\rangle$ with $0 \le \phi \le 2\pi$ and $0 \le \theta \le \theta_0$, where the rim has $R\sin\theta_0 = 1.9$ m: $\sin\theta_0 = 1.9/4.7$.` },
       { label: 'Tangents', text: t`$\vec r_\theta = R\langle\cos\theta\cos\phi,\ \cos\theta\sin\phi,\ -\sin\theta\rangle$ and $\vec r_\phi = R\langle -\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0\rangle$.` },
@@ -95,11 +95,11 @@ The cross product $\vec r_u\times\vec r_v$ is also a **normal** to the surface â
     num({
       id: 'stretch', difficulty: 2,
       gen(r) {
-        const [a, b] = r.pick([[1, 2], [2, 1], [1, 1], [2, 2], [0, 1]]);
+        const [a, b] = r.pick([[1, 0], [0, 1], [1, 1], [1, -1], [0.5, 1]]);
         const val = Math.sqrt(1 + 4 * a * a + 4 * b * b);
         return {
           prompt: t`The paraboloid $z = x^2 + y^2$ is parametrized by $\vec r(x, y) = \langle x,\ y,\ x^2 + y^2\rangle$. Find the area-stretching factor $|\vec r_x\times\vec r_y|$ at $(x, y) = (${a}, ${b})$.`,
-          visual: still({ label: 'Paraboloid', x: 'u', y: 'v', z: 'u^2 + v^2', u: [-2.2, 2.2], v: [-2.2, 2.2] }, { n: 18, range: 2.4, patch: { u: a, v: b, du: 0.25, dv: 0.25 }, pitch: 0.5, caption: t`The paraboloid, with the patch over the square $${a} \le x \le ${a + 0.25}$, $${b} \le y \le ${b + 0.25}$: its edge vectors $\vec r_x\Delta x$, $\vec r_y\Delta y$ and its normal. Drag to rotate.` }),
+          visual: still({ label: 'Paraboloid', x: 'u', y: 'v', z: 'u^2 + v^2', u: [-1.6, 1.6], v: [-1.6, 1.6] }, { n: 18, range: 1.8, patch: { u: a, v: b, du: 0.25, dv: 0.25, labels: ['along x', 'along y'] }, pitch: 0.5, caption: t`The paraboloid, with the patch over the square $${a} \le x \le ${a + 0.25}$, $${b} \le y \le ${b + 0.25}$: its edge vectors $\vec r_x\Delta x$, $\vec r_y\Delta y$ and its normal. Drag to rotate.` }),
           answer: val, tol: { rel: 2e-3 },
           errors: [{ value: 1 + 4 * a * a + 4 * b * b, feedback: 'That is the squared length: take the square root.' }, { value: Math.sqrt(1 + 2 * a + 2 * b), feedback: t`$f_x = 2x$ and $f_y = 2y$ get **squared**: the factor is $\sqrt{1 + f_x^2 + f_y^2}$.` }],
           hints: [t`$\vec r_x = \langle 1, 0, 2x\rangle$ and $\vec r_y = \langle 0, 1, 2y\rangle$.`, t`$\vec r_x\times\vec r_y = \langle -2x,\ -2y,\ 1\rangle$; take its length.`],
