@@ -83,7 +83,7 @@ export default lesson({
     multi({
       id: 'which-cyclic', difficulty: 2,
       prompt: t`Which of these coordinates are **cyclic** in the Lagrangian given?`,
-      visual: { type: 'cm2-noether', params: { kind: 'rotation', eps: 0, sliders: [], play: false, panels: ['plane'] }, caption: t`A puck in a circularly symmetric potential well: nothing about the potential singles out a direction.` },
+      visual: { type: 'cm2-noether', params: { kind: 'rotation', eps: 0, sliders: [], play: false, panels: ['plane'], readout: false }, caption: t`A puck in a circularly symmetric potential well: nothing about the potential singles out a direction.` },
       choices: [
         t`$\phi$, in $L = \tfrac12m(\dot r^2 + r^2\dot\phi^2) - \tfrac12kr^2$`,
         t`$x$, in $L = \tfrac12m(\dot x^2 + \dot y^2) - mgy$`,

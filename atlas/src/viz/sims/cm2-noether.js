@@ -18,12 +18,13 @@
 //       panels: ['plane', 'Q'],
 //       play: true,                // a Play button that runs the motion; otherwise the whole path is drawn
 //       labels: true,              // the symmetry's name on the plane
+//       readout: true,             // the time and each quantity's ratio under the picture
 //   } }
 
 import { Plot } from '../plot.js';
 import * as N from '../model/cm2-noether.js';
 
-export const defaults = { kind: 'rotation', kinds: false, eps: 0, sliders: ['eps'], show: null, panels: ['plane', 'Q'], play: true, labels: true };
+export const defaults = { kind: 'rotation', kinds: false, eps: 0, sliders: ['eps'], show: null, panels: ['plane', 'Q'], play: true, labels: true, readout: true };
 const EMAX = { rotation: 1, translation: 0.4, time: 0.25 };
 const TMAX = { rotation: 20, translation: 6, time: 20 };
 const SHOW = { rotation: ['L', 'E'], translation: ['px', 'E'], time: ['E', 'L'] };
@@ -124,7 +125,7 @@ export function mount(F, P0) {
         pq.text(QNAME[k], pq.R - 8, pq.T + 12 + idx * 16, { screen: true, color: COL[k], size: 12, align: 'right', weight: 650 });
       });
     }
-    F.readout([['$t$', `${trim(r.t[i])}\\,\\mathrm{s}`], ...show.map((k) => [`$${QTEX[k]}/${QTEX[k]}(0)$`, trim(r.q[k][i] / r.q[k][0], 4)])]);
+    if (P.readout !== false) F.readout([['$t$', `${trim(r.t[i])}\\,\\mathrm{s}`], ...show.map((k) => [`$${QTEX[k]}/${QTEX[k]}(0)$`, trim(r.q[k][i] / r.q[k][0], 4)])]);
   }
   F.draw(draw);
   F.caption('A 1 kg point puck, no friction; the grey lines are contours of equal potential energy. Integrated numerically (RK4). Each quantity is plotted as a fraction of its starting value.');

@@ -26,7 +26,9 @@ export default lesson({
   minutes: 15, difficulty: 3,
   intro: t`In three dimensions the point source is a single point, and the response to it falls off with distance. The Green’s function of the Laplacian — written $\mathcal G$ here, to keep $G$ for Newton’s constant — solves $\nabla^2\mathcal G = \delta^3(\mathbf x - \mathbf x')$ and vanishes far away:
 
-$$\mathcal G(\mathbf x, \mathbf x') = -\frac{1}{4\pi\,|\mathbf x - \mathbf x'|}, \qquad u(\mathbf x) = \int \mathcal G(\mathbf x, \mathbf x')\,f(\mathbf x')\,d^3x' \ \text{ solves } \ \nabla^2 u = f .$$
+$$\mathcal G(\mathbf x, \mathbf x') = -\frac{1}{4\pi\,|\mathbf x - \mathbf x'|},$$
+
+and then $u(\mathbf x) = \int \mathcal G(\mathbf x, \mathbf x')\,f(\mathbf x')\,d^3x'$ solves $\nabla^2 u = f$.
 
 For gravity, $\nabla^2\Phi = 4\pi G\rho$, so $\Phi(\mathbf x) = -G\displaystyle\int\frac{\rho(\mathbf x')}{|\mathbf x - \mathbf x'|}\,d^3x'$: **every gravitational potential is a sum of point-mass potentials** $-GM/r$. Near a boundary the free-space $\mathcal G$ is not enough, and an **image** source behind the boundary fixes it.`,
   symbols: [
@@ -37,7 +39,7 @@ For gravity, $\nabla^2\Phi = 4\pi G\rho$, so $\Phi(\mathbf x) = -G\displaystyle\
     { tex: t`\Phi`, text: 'the gravitational potential (J/kg), with $\\rho$ the mass density (kg/m³)' },
     { tex: 'G', text: t`Newton’s constant, $6.674\times10^{-11}\ \text{m}^3/(\text{kg s}^2)$` },
   ],
-  why: t`The same kernel, multiplied by $4G/c^4$, gives the metric perturbation of a slowly moving mass in linearized general relativity; let the source move and it becomes the retarded Green’s function of the next lesson, the one behind gravitational-wave emission.`,
+  why: t`The same $1/|\mathbf x - \mathbf x'|$, weighted by $4G/c^4$ and integrated against the energy density, gives the metric perturbation of a slowly moving mass in linearized general relativity; let the source move and it becomes the retarded Green’s function of the next lesson, the one behind gravitational-wave emission.`,
   visual: {
     type: 'c3-contour',
     title: 'A potential built from point masses',
