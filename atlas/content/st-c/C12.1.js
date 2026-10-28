@@ -46,7 +46,7 @@ In a chart everything is then fixed by $n^3$ functions, $\nabla_{\partial_\mu}\p
       t`Drag Q to the equator ($\theta = 90^\circ$): the routes still disagree under Levi-Civita. The gap is the curvature enclosed, as in C6.3.`,
     ],
     params: { metric: 'sphere', metrics: ['sphere', 'compass'], mode: 'transport', P: [1.0, 0.9], Q: [2.6, 1.6], sliders: ['angle'], angle: 60, field: false, readout: ['turn', 'area'] },
-    caption: t`Arrows drawn by their chart components; both rules keep lengths. Readout: the angle between the two arrivals, and $\iint K\,dA$ of the rectangle for the connection shown (the compass connection has none).`,
+    caption: t`Arrows drawn by their chart components; both rules keep lengths. Readout: the turn round the loop (from the second arrival to the first), and $\iint K\,dA$ of the rectangle for the connection shown (the compass connection has none).`,
   },
   example: {
     prompt: t`On the unit sphere, $ds^2 = d\theta^2 + \sin^2\theta\,d\varphi^2$, the **compass connection** declares the unit vectors pointing south, $\hat e_\theta = \partial_\theta$, and east, $\hat e_\varphi = \partial_\varphi/\sin\theta$, to be constant: $\nabla_X\hat e_\theta = \nabla_X\hat e_\varphi = 0$ for every $X$. Find its $\Gamma$’s, and compare $\nabla_{\partial_\varphi}\partial_\varphi$ with the Levi-Civita value.`,

@@ -300,7 +300,7 @@ export default boss({
           gen(r) {
             const C = nullCase(r);
             return {
-              prompt: t`The radio phase-modulates its carrier with a test tone of frequency $f_m = ${C.fm}$ kHz: the signal is $\cos(\omega_ct + \beta\sin2\pi f_mt)$, and by the generating function $e^{i\beta\sin\phi} = \sum_nJ_n(\beta)e^{in\phi}$ the carrier line has amplitude $J_0(\beta)$. Engineers raise $\beta$ until the carrier line first vanishes. What peak frequency deviation $\Delta f = \beta f_m$ does that set, in kHz?`,
+              prompt: t`The radio phase-modulates its carrier with a test tone of frequency $f_m = ${C.fm}\ \text{kHz}$: the signal is $\cos(\omega_ct + \beta\sin2\pi f_mt)$, and by the generating function $e^{i\beta\sin\phi} = \sum_nJ_n(\beta)e^{in\phi}$ the carrier line has amplitude $J_0(\beta)$. Engineers raise $\beta$ until the carrier line first vanishes. What peak frequency deviation $\Delta f = \beta f_m$ does that set, in kHz?`,
               answer: C.key, units: 'kHz', tol: { rel: 0.003 },
               errors: apart([
                 { value: besselZero(1, 1) * C.fm, feedback: t`$3.832$ is the first zero of $J_1$, where the first sidebands vanish. The carrier is $J_0$.` },

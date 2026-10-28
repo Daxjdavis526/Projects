@@ -29,7 +29,7 @@ const G = `(0.5*step(1 - ${RR}) + 0.5*step(${RR} - 1)/(x^2 + y^2))`;
 /** The solenoid's vector potential (or −∂A/∂t, scaled by k) as a field2d picture without readouts. */
 const solPic = (caption, { E = false, probe = false } = {}) => ({
   type: 'field2d',
-  params: { P: `${E ? '' : '-'}y*${G}`, Q: `${E ? '-' : ''}x*${G}`, x: [-3, 3], y: [-3, 3], density: 13, particles: false, readout: false, probe },
+  params: { P: `${E ? '' : '-'}y*${G}`, Q: `${E ? '-' : ''}x*${G}`, x: [-3, 3], y: [-3, 3], density: 13, particles: false, readout: false, probe, loop: { r: 1 } },
   caption,
 });
 
@@ -50,7 +50,7 @@ export default lesson({
   visual: {
     type: 'field2d',
     title: 'The vector potential of a solenoid, and the electric field it makes',
-    lead: t`A long solenoid of radius 1 (the circle) seen end-on, with field $B = 1$ inside. Its vector potential circles the axis, growing as $s/2$ inside and falling as $1/2s$ outside — not zero outside, though $\vec B$ is. Switch to the electric field of a changing current: $\vec E = -\partial\vec A/\partial t$. Drag the probe and read its curl.`,
+    lead: t`A long solenoid of radius 1 (the gold circle is its winding) seen end-on, with field $B = 1$ inside. Its vector potential circles the axis, growing as $s/2$ inside and falling as $1/2s$ outside — not zero outside, though $\vec B$ is. Switch to the electric field of a changing current: $\vec E = -\partial\vec A/\partial t$. Drag the probe and read its curl.`,
     tasks: [
       t`Showing $\vec A$: the curl at the probe is 1 inside (that is $\vec B$) and 0 outside, although $\vec A$ is not zero there.`,
       t`Showing $\vec E$ with the current rising ($dB/dt > 0$): $\vec E$ circles the opposite way to $\vec A$, and its curl is $-dB/dt$ inside — Faraday’s law.`,
@@ -61,20 +61,20 @@ export default lesson({
       x: [-3, 3], y: [-3, 3], density: 15, probe: [0.5, 0.3],
       choices: [{ key: 'w', label: 'Show', options: [[1, t`the vector potential $\vec A$`], [2, t`the electric field $-\partial\vec A/\partial t$`]], value: 1, explain: t`The same arrows up to a factor: $\vec E = -\partial\vec A/\partial t$ where there are no charges.` }],
       sliders: [{ key: 'k', label: t`Rate of change $dB/dt$`, min: -1, max: 1, step: 0.1, value: 1, explain: t`In units of the field per unit time. It scales $\vec A$’s rate of change, so it matters only when $\vec E$ is shown.` }],
-      loop: { r: 2 },
+      loop: { r: 1 },
     },
-    caption: t`An ideal infinite solenoid of radius 1 (units: $B = 1$ inside), seen end-on; quasistatic. Arrow lengths are compressed; the probe’s divergence and curl and the gold loop’s circulation are computed numerically. The circulation round the gold loop equals the flux inside, as Stokes’s theorem demands.`,
+    caption: t`An ideal infinite solenoid of radius 1 (units: $B = 1$ inside), seen end-on; quasistatic. Arrow lengths are compressed; the probe’s divergence and curl and the gold loop’s circulation are computed numerically. The circulation round the gold circle equals the flux inside it, as Stokes’s theorem demands (the numerical flux integral is slightly off because the field’s curl jumps at the winding).`,
   },
   example: {
     prompt: t`A long solenoid of radius ${EX.R * 100} cm with ${EX.n} turns per metre has its current rising at ${EX.dIdt} A/s. Using the vector potential, find the induced electric field ${EX.s * 100} cm from its axis, and check it against Faraday’s law.`,
-    visual: solPic(t`The solenoid end-on and the induced $\vec E = -\partial\vec A/\partial t$ around it while the current rises. Arrow lengths compressed.`, { E: true }),
+    visual: solPic(t`The solenoid end-on (gold circle) and the induced $\vec E = -\partial\vec A/\partial t$ while the current rises. Arrow lengths compressed.`, { E: true }),
     steps: [
       { label: 'The potential', text: t`Outside a long solenoid (Coulomb gauge, [PHYS 3600 M6.4](#/lesson/phys3600.M6.4)) $\vec A$ circles the axis with $A = \dfrac{\mu_0nIR^2}{2s}$ — set by the flux inside, $\Phi = \mu_0nI\pi R^2$, through $2\pi sA = \Phi$.` },
       { label: 'No charges', text: t`The solenoid is neutral, so $V = 0$ and $\vec E = -\partial\vec A/\partial t$: the electric field circles the axis, **against** the current while the current grows.` },
-      { label: 'Numbers', text: t`$\dfrac{\partial A}{\partial t} = \dfrac{\mu_0n\,(dI/dt)\,R^2}{2s}$. With $\mu_0n\,dI/dt = ${nice(sf(EX.dBdt, 3))}$ T/s, $E = ${nice(sf(EX.dBdt, 3))} \times \dfrac{(${EX.R})^2}{2(${EX.s})} \approx ${tex(EX.E, 3)}$ V/m.` },
-      { label: 'Check', text: t`Faraday: $E\cdot 2\pi s = d\Phi/dt = ${tex(EX.emf, 3)}$ V, so $E = ${tex(EX.emf / (2 * PI * EX.s), 3)}$ V/m ✓. The vector potential did the same job in one line, and it says something Faraday’s law does not: the field is $-\partial\vec A/\partial t$ **at each point**, with no loop needed.` },
+      { label: 'Numbers', text: t`$\dfrac{\partial A}{\partial t} = \dfrac{\mu_0n\,(dI/dt)\,R^2}{2s}$. With $\mu_0n\,dI/dt = ${nice(sf(EX.dBdt, 3))}$ T/s, $E = ${nice(sf(EX.dBdt, 3))} \times \dfrac{(${EX.R})^2}{2(${EX.s})} \approx ${nice(sf(EX.E * 1e3, 3))}$ mV/m.` },
+      { label: 'Check', text: t`Faraday: $E\cdot 2\pi s = d\Phi/dt = ${tex(EX.emf, 3)}$ V, so $E = ${nice(sf((EX.emf / (2 * PI * EX.s)) * 1e3, 3))}$ mV/m ✓. The vector potential did the same job in one line, and it says something Faraday’s law does not: the field is $-\partial\vec A/\partial t$ **at each point**, with no loop needed.` },
     ],
-    answer: t`$E \approx ${tex(EX.E, 3)}$ V/m, circling the axis opposite to the current; $\oint\vec E\cdot d\vec l = -d\Phi/dt$ ✓.`,
+    answer: t`$E \approx ${nice(sf(EX.E * 1e3, 3))}$ mV/m, circling the axis opposite to the current; $\oint\vec E\cdot d\vec l = -d\Phi/dt$ ✓.`,
   },
   practice: [
     mcq({

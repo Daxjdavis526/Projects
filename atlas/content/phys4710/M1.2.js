@@ -41,11 +41,10 @@ function hePic({ caption, models = false, arrows = [], zoom = true, extra = {} }
   const L = (E, x0, color, text, side) => ({ E, x0, x1: x0 + 1.2, color, label: text, ...(side === 'l' ? { lx: x0, dx: -6, align: 'right' } : {}) });
   const levels = [L(LV.s1, 0.4, 'accent', '2¹S', zoom ? 'r' : 'l'), L(LV.p1, 0.4, 'accent', '2¹P'), L(LV.s3, 2.4, 'gold', '2³S', zoom ? 'r' : 'l'), L(LV.p3, 2.4, 'gold', '2³P')];
   if (!zoom) levels.unshift(L(LV.g, 0.4, 'accent', '1¹S'));
-  const y = zoom ? [-60.2, -53] : [-81.5, -52];
+  const y = zoom ? [-61, -53] : [-81.5, -52];
   const pic = levelPic(levels, { y, x: [0, 4.4], ylabel: 'energy (eV)', caption, arrows, yticks: zoom ? 7 : 6, extra });
   pic.params.curves.push({ ...seg(0.2, LIM, 4.2, LIM, 'ink3', 1.4), dash: [6, 4] });
-  pic.params.points.push(label(2.2, LIM, 'He⁺ + e⁻', 'ink3', 0, -10, 'center'), label(1, y[0] + (zoom ? 0.35 : 1), 'singlet (para)', 'accent', 0, 0, 'center'), label(3, y[0] + (zoom ? 0.35 : 1), 'triplet (ortho)', 'gold', 0, 0, 'center'));
-  if (zoom) pic.params.points.push(label(2.2, y[0] + 1.1, 'ground state 1¹S: −79.0 eV, far below', 'ink3', 0, 0, 'center'));
+  pic.params.points.push(label(2.2, LIM, 'He⁺ + e⁻', 'ink3', 0, -10, 'center'), label(1, y[0] + (zoom ? 0.4 : 1), 'singlet (para)', 'accent', 0, 0, 'center'), label(3, y[0] + (zoom ? 0.4 : 1), 'triplet (ortho)', 'gold', 0, 0, 'center'));
   if (models) {
     const m = [[E0X + J2S + K2S, 0.4, 'step(0.5 - abs(model - 1))'], [E0X + J2S - K2S, 2.4, 'step(0.5 - abs(model - 1))'], [E0X + J2P + K2P, 0.4, 'step(0.5 - abs(model - 1))'], [E0X + J2P - K2P, 2.4, 'step(0.5 - abs(model - 1))'], [SCR, 0.4, 'step(model - 1.5)'], [SCR, 2.4, 'step(model - 1.5)']];
     for (const [E, x0, when] of m) pic.params.curves.push({ ...seg(x0, E, x0 + 1.2, E, 'good', 2), dash: [5, 4], when });
@@ -109,7 +108,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
           prompt: t`Two electrons in a 1D infinite well of width $L = ${L}$ nm occupy states $${a}$ and $${b}$, with a spatial wave function that is ${s > 0 ? 'symmetric (spin singlet)' : 'antisymmetric (spin triplet)'}. Using $\langle x^2\rangle_n = L^2(\tfrac13 - \tfrac{1}{2n^2\pi^2})$, $\langle x\rangle_n = L/2$ and $\langle x\rangle_{ab} = -\dfrac{8abL}{\pi^2(a^2 - b^2)^2}$ (for $a + b$ odd), find the rms separation $\sqrt{\langle(x_1 - x_2)^2\rangle}$, in nm.`,
           visual: pairPic({ a, b, s, caption: `The joint density for states ${a} and ${b}.` }),
           answer: ans, units: 'nm', tol: { rel: 0.005 },
-          errors: [{ value: L * Math.sqrt(sep2(a, b, -s)), feedback: s > 0 ? 'The symmetric state brings the electrons together: subtract 2|⟨x⟩ab|², do not add it.' : 'The antisymmetric state keeps the electrons apart: add 2|⟨x⟩ab|².' }, { value: L * Math.sqrt(sep2(a, b, 0)), feedback: 'That is the distinguishable result; identical particles add the exchange term ∓2|⟨x⟩ab|².' }, { value: L * L * sep2(a, b, s), feedback: 'That is ⟨(x₁ − x₂)²⟩ in nm²; take the square root.' }],
+          errors: [{ value: L * Math.sqrt(sep2(a, b, -s)), feedback: s > 0 ? 'The symmetric state brings the electrons together: subtract 2|⟨x⟩ab|², do not add it.' : 'The antisymmetric state keeps the electrons apart: add 2|⟨x⟩ab|².' }, { value: L * Math.sqrt(sep2(a, b, 0)), feedback: 'That is the distinguishable result; identical particles add the exchange term ∓2|⟨x⟩ab|².' }, { value: L * L * sep2(a, b, s), feedback: 'That is ⟨(x₁ − x₂)²⟩ in nm²; take the square root.' }].filter((e) => Math.abs(e.value - ans) > 0.012 * ans),
           hints: [t`$\langle(x_1 - x_2)^2\rangle = \langle x^2\rangle_a + \langle x^2\rangle_b - 2\langle x\rangle_a\langle x\rangle_b \mp 2|\langle x\rangle_{ab}|^2$, upper sign symmetric.`, t`$\langle x\rangle_{${a}${b}} = ${fmt(xab(a, b), 4)}L$.`],
           teach: 'The exchange term ∓2|⟨x⟩ab|² pulls symmetric pairs together and pushes antisymmetric pairs apart; it needs overlap between the two states.',
           explain: t`$\langle(x_1 - x_2)^2\rangle = ${fmt(sep2(a, b, s), 4)}L^2$, so the rms separation is $${fmt(Math.sqrt(sep2(a, b, s)), 4)}\times${L} = ${fmt(ans, 4)}$ nm. Distinguishable particles would give $${fmt(L * Math.sqrt(sep2(a, b, 0)), 4)}$ nm.`,
@@ -147,7 +146,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
           visual: hePic({ caption: 'The measured levels, for comparison after you answer.' }),
           answer: ans, units: 'eV', tol: { rel: 0.002 },
           errors: [{ value: E0X + J - s * K, feedback: s > 0 ? 'The singlet has the symmetric spatial part: + K.' : 'The triplet has the antisymmetric spatial part: − K.' }, { value: E0X + s * K, feedback: t`Include the direct Coulomb integral $J$ as well.` }],
-          hints: [t`$E = E^{(0)} + J \pm K$: upper sign for the singlet.`],
+          hints: [t`The singlet has a symmetric spatial part, the triplet an antisymmetric one.`, t`$E = E^{(0)} + J \pm K$: upper sign for the singlet.`],
           teach: 'First-order perturbation theory gives E⁽⁰⁾ + J ± K for helium’s 1snl levels, the triplet lower by 2K.',
           explain: t`$E = ${fmt(E0X, 5)} + ${fmt(J, 4)} ${s > 0 ? '+' : '-'} ${fmt(K, 4)} = ${fmt(ans, 5)}$ eV. Measured: $${fmt(meas[s], 5)}$ eV. The model is $${fmt(ans - meas[s], 2)}$ eV too high, because a hydrogenic $Z = 2$ outer orbital ignores screening by the $1s$ electron, which lets the outer one spread out and repel less — and the predicted splitting $2K = ${fmt(2 * K, 3)}$ eV overshoots the measured $${fmt(meas[1] - meas[-1], 3)}$ eV for the same reason.`,
         };
@@ -160,7 +159,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
         const ans = lam(up - lo);
         return {
           prompt: t`Helium’s measured levels lie, above the ground state, at $2^3S$: $${fmt(HE.s3, 6)}$ eV, $2^1S$: $${fmt(HE.s1, 6)}$ eV, $2^3P$: $${fmt(HE.p3, 6)}$ eV, $2^1P$: $${fmt(HE.p1, 6)}$ eV. What is the vacuum wavelength of ${name}, in nm? ($hc = ${fmt(HC_EVNM, 9)}$ eV nm.)`,
-          visual: hePic({ zoom: false, caption: 'The measured levels (singlets left, triplets right), to scale.', arrows: [{ from: [up === HE.p3 ? 3 : 1, r6(upl)], to: [up === HE.p3 ? 3 : 1, r6(lol)], color: 'warn', width: 2.4 }] }),
+          visual: hePic({ zoom: lo !== 0, caption: lo === 0 ? 'The measured levels (singlets left, triplets right), to scale.' : 'The measured n = 2 levels (the ground state is 20 eV lower).', arrows: [{ from: [up === HE.p3 ? 3 : 1, r6(upl)], to: [up === HE.p3 ? 3 : 1, r6(lol)], color: 'warn', width: 2.4 }] }),
           answer: ans, units: 'nm', tol: { rel: 0.001 },
           errors: [{ value: lam(up), feedback: 'Use the difference between the two levels, not the upper level’s height above the ground state.' }].filter((e) => Math.abs(e.value - ans) > 0.002 * ans),
           hints: [t`$\lambda = hc/\Delta E$ with $\Delta E$ the difference of the two levels.`],
@@ -243,7 +242,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
         2: t`The exchange term is $\mp2|\langle x\rangle_{ab}|^2$ — never of the opposite sign, and here zero.`,
         3: t`Antisymmetrizing two different states always gives a normalizable function.`,
       },
-      hints: [t`About the centre of the box, $\psi_1$ and $\psi_3$ are both even, while $x - L/2$ is odd.`],
+      hints: [t`The exchange term in $\langle(x_1 - x_2)^2\rangle$ is $\mp2|\langle x\rangle_{ab}|^2$. What is $\langle x\rangle_{13}$?`, t`About the centre of the box, $\psi_1$ and $\psi_3$ are both even, while $x - L/2$ is odd.`],
       teach: 'The exchange contribution to a quantity needs the two orbitals to overlap through that quantity’s operator.',
       explain: t`$\psi_1$ and $\psi_3$ are both even about $L/2$, so $\int(x - L/2)\psi_1\psi_3\,dx = 0$, and with orthogonality $\langle x\rangle_{13} = 0$. The second moment of the separation is blind to the symmetry here, though higher moments are not: the diagonal is still empty. In atoms, $K$ involves $1/r_{12}$, which does not vanish this way, so every 1snl pair is split.`,
     }),

@@ -354,7 +354,10 @@ export function mount(F, P) {
       plot.point(a1, toY(b1), { color: 'ink', r: 4, label: P.labels !== false ? 'Q' : '', ldx: 10, ldy: 12 });
       if (want('P')) rows.push(['$P \\to Q$', `(${num(a0)},\\ ${num(b0)}) \\to (${num(a1)},\\ ${num(b1)})`]);
       const tr = D.turn(M, a1, b1, k, E1, E2);
-      if (want('turn')) rows.push(L ? ['rapidity between the two arrivals', num(tr, 3)] : ['angle between the two arrivals', `${num(tr / DEG, 3)}^\\circ`]);
+      // out along the first route and back along the second is a loop, counterclockwise in the chart when
+      // a1 > a0 and b1 > b0; its holonomy (from the second arrival to the first) then equals +∬K dA
+      const hol = L ? tr : -tr * Math.sign((a1 - a0) * (b1 - b0) || 1);
+      if (want('turn')) rows.push(L ? ['rapidity between the two arrivals', num(tr, 3)] : ['turn round the loop', `${num(hol / DEG, 3)}^\\circ`]);
       if (want('area')) {
         // ∫∫ K √|g| da db over the rectangle, by the midpoint rule
         let A = 0, KA = 0;

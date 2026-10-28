@@ -43,7 +43,7 @@ On a surface you already know a scalar version: the turn is $K\times$ area (C6.3
     title: 'Two routes, one loop',
     lead: t`One arrow at $P$ is carried to $Q$ along two routes round a coordinate rectangle: blue along the first coordinate first, violet along the second first. Out along one route and back along the other is a loop, so **the angle between the two arrivals is the turn picked up round the loop**. Compare it with $\iint K\,dA$ of the rectangle.`,
     tasks: [
-      t`Sphere: drag $Q$ toward $P$. The angle and $\iint K\,dA$ shrink together and stay equal in size (the readout’s sign only says which arrival the angle is measured from) — for a small loop that is $K\times\text{area}$.`,
+      t`Sphere: drag $Q$ toward $P$. The turn round the loop and $\iint K\,dA$ shrink together and stay equal, sign and all — for a small loop that is $K\times\text{area}$. On the half-plane both come out negative.`,
       t`Change the arrow’s starting angle: the turn does not change. In two dimensions the holonomy rotates every vector by the same angle, so one number, $K$, carries all of Riemann.`,
       t`Switch to the polar chart of the flat plane: its $\Gamma$s are not zero, yet both routes always agree. Then try the half-plane: the turn changes sign, because $K < 0$.`,
     ],

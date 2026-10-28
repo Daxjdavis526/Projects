@@ -252,7 +252,7 @@ This **covector** $df$ needs no lengths and no angles. Its components transform 
         3: t`Only the time–time entry of the inverse metric is negative; the space component keeps its sign.`,
       },
       hints: [t`Raising an index uses the inverse metric: $\partial^\mu\phi = \eta^{\mu\nu}\partial_\nu\phi$ (summed over $\nu$).`, t`For $\eta = \mathrm{diag}(-1, 1)$ the inverse is also $\mathrm{diag}(-1, 1)$.`],
-      teach: 'With signature (−, +), raising an index flips the sign of the time component: ∂^t φ = −∂_t φ.',
+      teach: 'With signature (−, +), raising an index flips the sign of the time component: $\\partial^t\\phi = -\\partial_t\\phi$.',
       explain: t`$\partial^t\phi = \eta^{tt}\partial_t\phi = -3$ and $\partial^x\phi = \eta^{xx}\partial_x\phi = +2$. In Carroll’s conventions, signature $(-,+,+,+)$, this sign flip is everywhere: it is why a field increasing toward the future has a gradient arrow pointing toward the **past**.`,
     }),
   ],

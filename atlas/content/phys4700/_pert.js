@@ -123,3 +123,33 @@ export const fsUnit = (n, Z = 1) => (Z ** 4 * RYD_EV * ALPHA * ALPHA) / (4 * n *
 export const fsShift = (n, j, Z = 1) => fsUnit(n, Z) * (3 - (4 * n) / (j + 0.5));
 /** The relativistic (p⁴) part alone for (n, l), eV. */
 export const relShift = (n, l, Z = 1) => -fsUnit(n, Z) * ((4 * n) / (l + 0.5) - 3);
+
+/** Eigenvalues of a real symmetric matrix (array of rows), ascending, by cyclic Jacobi rotations. */
+export function symEig(A0) {
+  const n = A0.length, A = A0.map((row) => row.slice());
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += A[p][q] * A[p][q];
+    if (off < 1e-26) break;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
+      if (Math.abs(A[p][q]) < 1e-300) continue;
+      const th = (A[q][q] - A[p][p]) / (2 * A[p][q]);
+      const tt = Math.sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1)), c = 1 / Math.sqrt(tt * tt + 1), s = tt * c;
+      for (let k = 0; k < n; k++) { const akp = A[k][p], akq = A[k][q]; A[k][p] = c * akp - s * akq; A[k][q] = s * akp + c * akq; }
+      for (let k = 0; k < n; k++) { const apk = A[p][k], aqk = A[q][k]; A[p][k] = c * apk - s * aqk; A[q][k] = s * apk + c * aqk; }
+    }
+  }
+  return A.map((row, i) => row[i]).sort((a, b) => a - b);
+}
+
+/**
+ * The oscillator H = p²/2 + x²/2 + λx⁴ (units ħω and √(ħ/mω)) in its first N
+ * number states, x = (a + a†)/√2 and x⁴ the fourth power of the truncated x:
+ * the lowest eigenvalue.
+ */
+export function anharmonicE0(lambda, N = 60) {
+  const X = Array.from({ length: N }, (_, i) => Array.from({ length: N }, (__, j) => (j === i + 1 ? Math.sqrt(j / 2) : i === j + 1 ? Math.sqrt(i / 2) : 0)));
+  const mul = (P, Q) => P.map((row) => Q[0].map((_, j) => row.reduce((s, v, k) => s + v * Q[k][j], 0)));
+  const X2 = mul(X, X), X4 = mul(X2, X2);
+  return symEig(X4.map((row, i) => row.map((v, j) => lambda * v + (i === j ? i + 0.5 : 0))))[0];
+}
