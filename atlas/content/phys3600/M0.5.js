@@ -49,14 +49,14 @@ That is why Maxwell’s equations are written as one divergence and one curl for
   visual: {
     type: 'field2d',
     title: 'Sources and swirl, then a field they cannot see',
-    lead: t`The left disk is a **source**: inside it $\nabla\cdot\vec F = a$. The right disk is a **swirl**: inside it the curl is $b$. Everywhere else both are zero. Drag the probe and read them off; then add a uniform field.`,
+    lead: t`The left disk is a **source**: inside it $\nabla\cdot\vec F = a$. The right disk, ringed in gold, is a **swirl**: inside it the curl is $b$, and the readouts add its circulation. Everywhere else both are zero. Drag the probe and read them off; then add a uniform field.`,
     tasks: [
       t`Probe across the left disk: the divergence reads $a$ inside and $0$ outside, and the curl is $0$ throughout. The right disk is the mirror image for the curl.`,
       t`Turn up the uniform part $c$. The field changes everywhere, but no reading of divergence or curl changes. Only the condition $\vec F \to 0$ far away rules it out.`,
       t`Set $a = 0$: a pure swirl, curl without divergence — the pattern of $\vec B$ round a current-carrying wire. Set $b = 0$: a pure source, the pattern of $\vec E$ round a charged rod.`,
     ],
     params: {
-      P, Q, x: [-3, 3], y: [-3, 3], probe: [-1.1, 0.3],
+      P, Q, x: [-3, 3], y: [-3, 3], probe: [-1.1, 0.3], loop: { r: 0.6, c: [1.3, 0] },
       sliders: [
         { key: 'a', label: t`Source strength $a$`, min: -2, max: 2, step: 0.1, value: 1, explain: 'The divergence inside the left disk: how strongly field lines start there (negative: end there).' },
         { key: 'b', label: t`Swirl strength $b$`, min: -2, max: 2, step: 0.1, value: 1, explain: 'The curl inside the right disk: how strongly the field circulates there (negative: clockwise).' },

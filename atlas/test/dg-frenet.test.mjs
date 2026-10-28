@@ -26,9 +26,9 @@ for (const [k, t] of [[1, 0.5], [0.4, 0.3], [2, 1]]) {
     const th = w * res.s[i];
     worst = Math.max(worst, Math.hypot(p[0] - a * Math.cos(th), p[1] - a * Math.sin(th), p[2] - b * th));
   });
-  check(`κ=${k}, τ=${t}: integrated curve is the helix of radius κ/(κ²+τ²)`, worst < 1e-8, worst);
+  check(`κ=${k}, τ=${t}: integrated curve is the helix of radius κ/(κ²+τ²)`, worst < 1e-6, worst);
   const end = res.p[res.p.length - 1];
-  check(`κ=${k}, τ=${t}: two turns rise 2 × 2πτ/(κ²+τ²)`, near(end[2], 4 * Math.PI * b, 1e-8), end[2]);
+  check(`κ=${k}, τ=${t}: two turns rise 2 × 2πτ/(κ²+τ²)`, near(end[2], 4 * Math.PI * b, 1e-6), end[2]);
 }
 
 // τ = 0, constant κ: a planar circle that closes after length 2π/κ

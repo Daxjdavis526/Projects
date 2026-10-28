@@ -6,7 +6,7 @@
 
 import { fmt } from '../../src/core/format.js';
 import * as M from '../../src/viz/model/th-einstein.js';
-export { KB, NA, R, MOLAR, LN2, LOX, ATM, C0, tag } from '../phys2210/_thermal.js';
+export { KB, NA, R, MOLAR, LN2, LOX, ATM, C0, tag, apart } from '../phys2210/_thermal.js';
 export const { lnFact, lnChoose, choose, lnOmega, omega, pairDist, stirling, stirling2, microstates } = M;
 
 // ─── constants (exact SI values, or CODATA 2022) ───────────────────────────

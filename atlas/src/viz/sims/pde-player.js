@@ -128,9 +128,10 @@ export function mount(F, P0) {
     const col = themeColors(), pos = rgbOf(col.accent), neg = rgbOf(col.warn);
     const c = document.createElement('canvas'); c.width = C.nx; c.height = C.nt;
     const g = c.getContext('2d'), im = g.createImageData(C.nx, C.nt), scale = Math.max(C.hi, -C.lo) || 1;
+    const gam = C.o.mode === 'heat' ? 0.45 : 0.8;      // heat profiles sink fast: a gentler ramp keeps the late spread visible
     for (let j = 0; j < C.nt; j++) for (let i = 0; i < C.nx; i++) {
       const v = C.vals[j * C.nx + i], k = ((C.nt - 1 - j) * C.nx + i) * 4, rgb = v >= 0 ? pos : neg;
-      im.data[k] = rgb[0]; im.data[k + 1] = rgb[1]; im.data[k + 2] = rgb[2]; im.data[k + 3] = Math.round(235 * Math.min(1, Math.abs(v) / scale) ** 0.8);
+      im.data[k] = rgb[0]; im.data[k + 1] = rgb[1]; im.data[k + 2] = rgb[2]; im.data[k + 3] = Math.round(235 * Math.min(1, Math.abs(v) / scale) ** gam);
     }
     g.putImageData(im, 0, 0);
     C.img = c;
