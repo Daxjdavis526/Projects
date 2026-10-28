@@ -78,6 +78,16 @@ check('stats ddof', (() => { const s = M.stats([1, 2, 3, 4]); return close(s.sd,
   check('Planck–SH0ES z', close(M.zscore(67.4, 0.5, 73.04, 1.04), 4.88, 0.01) && close(h.birge, 4.88, 0.01));
 }
 
+// instrument readings and specifications
+{
+  const xs = M.instrumentReadings({ truth: 5, bias: 0.002, sd: 0.0004, res: 0.001, n: 4000, seed: 3 });
+  check('readings are rounded to the display step', xs.every((x) => Math.abs(x * 1000 - Math.round(x * 1000)) < 1e-6));
+  check('readings centre on truth + bias', Math.abs(M.stats(xs).mean - 5.002) < 1e-4);
+  check('readings are seeded', M.instrumentReadings({ truth: 1, sd: 0.1, n: 5, seed: 2 }).join() === M.instrumentReadings({ truth: 1, sd: 0.1, n: 5, seed: 2 }).join());
+  check('spec ±(0.05 % + 1 digit) at 5.000 V', close(M.specLimit(5, { pct: 0.05, digits: 1, res: 0.001 }), 0.0035, 1e-12));
+  check('spec of full scale', close(M.specLimit(100, { fsPct: 0.25, fullScale: 3000 }), 7.5, 1e-12));
+}
+
 // the simulation's validator
 check('defaults validate', validate({ ...defaults }).length === 0, validate({ ...defaults }).join('; '));
 for (const mode of ['target', 'readings', 'hist', 'mc', 'tail']) check(`mode ${mode} validates`, validate({ ...defaults, mode }).length === 0, validate({ ...defaults, mode }).join('; '));
