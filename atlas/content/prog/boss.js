@@ -332,7 +332,7 @@ def with_drag(t, s, k=1e-7):
         num({
           id: 'r3-c', skill: 'prog.P15.2', difficulty: 2,
           gen(r) {
-            const [shown, cval] = r.pick([['3e8', 3e8], ['2.998e8', 2.998e8], ['2.9979e8', 2.9979e8]]);
+            const [shown, cval] = r.pick([['3e8', 3e8], ['2.998e8', 2.998e8], ['2.9979e8', 2.9979e8]]), cT = tex(cval, 5);
             const ps = A_NS * 1000 * Math.abs(1 - (299792458 / cval) ** 2);
             return {
               prompt: t`The orbit code and the clock analysis each define the speed of light:
@@ -348,9 +348,9 @@ c = ${shown}               # m/s
 The predicted amplitude is proportional to $1/c^2$. If the analysis uses its own value, by how many **picoseconds** does its prediction of the ${A_NS.toFixed(1)} ns amplitude differ from the orbit code's?`,
               answer: ps, units: 'ps', tol: { rel: 0.02 },
               errors: apart([{ value: ps / 2, feedback: t`The amplitude goes as $1/c^2$: a relative error $\delta$ in $c$ gives about $2\delta$.` }], ps),
-              hints: [t`The ratio of the two predictions is $(c_\text{true}/c_\text{rounded})^2$.`, t`Difference $= ${A_NS.toFixed(2)}\ \text{ns}\times\lvert 1 - (299\,792\,458/${shown})^2\rvert$, then ×1000 for ps.`],
+              hints: [t`The ratio of the two predictions is $(c_\text{true}/c_\text{rounded})^2$.`, t`Difference $= ${A_NS.toFixed(2)}\ \text{ns}\times\lvert 1 - (2.99792458\times10^{8}/${cT})^2\rvert$, then ×1000 for ps.`],
               teach: 'A constant defined in two places will disagree; import it from one source (scipy.constants.c) so every part of a project uses the same physics.',
-              explain: t`$\lvert 1 - (299\,792\,458/${shown})^2\rvert = ${tex(Math.abs(1 - (299792458 / cval) ** 2), 3)}$, so the predictions differ by ${ps.toFixed(1)} ps. Whether that matters depends on the precision you claim — here ${ps > 100 ? 'it is comparable to the measurement’s uncertainty, and would bias the result' : 'it is far below the measurement’s uncertainty, but it is a silent difference between two parts of one project'}. Use \`from scipy.constants import c\` in both.`,
+              explain: t`$\lvert 1 - (2.99792458\times10^{8}/${cT})^2\rvert = ${tex(Math.abs(1 - (299792458 / cval) ** 2), 3)}$, so the predictions differ by ${ps.toFixed(1)} ps. Whether that matters depends on the precision you claim — here ${ps > 100 ? 'it is comparable to the measurement’s uncertainty, and would bias the result' : 'it is far below the measurement’s uncertainty, but it is a silent difference between two parts of one project'}. Use \`from scipy.constants import c\` in both.`,
             };
           },
         }),
@@ -411,7 +411,7 @@ print(f"A = {A:.2f} ± {dA:.2f} ns, chi²/dof = {chi2_red:.2f}")`,
               answer: alpha, tol: { rel: 0.02, abs: 0.02 },
               errors: apart([{ value: Af - A_NS, feedback: t`That is the difference in ns. $\alpha$ is relative: divide by $A_\text{GR}$.` }, { value: (Af - A_NS) / s, feedback: 'That is the number of standard deviations, z. α is the fractional difference.' }], alpha),
               hints: [t`$\alpha = A/A_\text{GR} - 1$.`, 'Multiply by 1000 to express it in units of 10⁻³.'],
-              teach: 'Report a test of a theory as a bound on a parametrized deviation, α ± σ_α, not as a yes or no.',
+              teach: t`Report a test of a theory as a bound on a parametrized deviation, $\alpha \pm \sigma_\alpha$, not as a yes or no.`,
               explain: t`$\alpha = ${Af}/${A_NS.toFixed(2)} - 1 = (${alpha.toFixed(2)} \pm ${da.toFixed(2)})\times10^{-3}$, where $\sigma_\alpha = \sigma_A/A_\text{GR}$. That is ${Math.abs(z).toFixed(1)} standard deviations from zero: ${Math.abs(z) < 2 ? 'consistent with general relativity' : 'a mild tension, about what one experiment in twenty shows by chance — worth checking the systematics before claiming anything'}.`,
               visual: {
                 type: 'graph',
