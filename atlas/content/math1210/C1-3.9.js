@@ -227,7 +227,7 @@ What is wrong?`,
           hints: [t`$\dfrac{d\phi}{d\beta} = \dfrac{1}{d\beta/d\phi}$.`, t`$\dfrac{d\beta}{d\phi} = 1 - \tanh^2\phi = 1 - \beta^2$.`],
           teach: t`The inverse-function rule turns the slope of $\tanh$ into the slope of $\operatorname{artanh}$ without a formula for it.`,
           explain: t`$\dfrac{d\phi}{d\beta} = \dfrac{1}{1 - \beta^2} = \dfrac{1}{${nice(1 - beta * beta)}} = ${nice(ans, 4)}$ — that is $\gamma^2$. Near light speed a small gain in $\beta$ costs a large gain in rapidity, which is why $c$ can never be reached.`,
-          visual: curveFig({ fn: '0.5*ln((1 + x)/(1 - x))', x: [-0.05, 1.05], y: [-0.2, 3.4], xlabel: 'β = v/c', ylabel: 'rapidity φ', domain: [0, 0.998], points: [{ x: beta, y: Math.atanh(beta), color: 'gold', label: `β = ${beta}` }], caption: t`Rapidity against speed. Rapidities of collinear boosts simply add; speeds do not. As $\beta \to 1$ the rapidity grows without bound.`, extra: { vlines: [{ x: 1, label: 'c' }] } }),
+          visual: curveFig({ fn: '0.5*ln((1 + x)/(1 - x))', x: [-0.05, 1.05], y: [-0.2, 3.4], xlabel: 'β = v/c', ylabel: 'rapidity φ', domain: [0, 0.998], points: [{ x: beta, y: Math.atanh(beta), color: 'gold', label: `β = ${beta}`, labelDx: 8, labelDy: 18 }], caption: t`Rapidity against speed. Rapidities of collinear boosts simply add; speeds do not. As $\beta \to 1$ the rapidity grows without bound.`, extra: { vlines: [{ x: 1, label: 'c' }] } }),
         };
       },
     }),

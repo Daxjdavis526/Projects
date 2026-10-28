@@ -191,7 +191,7 @@ function mountField(F, P) {
   const { canvas } = F.canvas({ aspect: '', label: P.alt || 'A field of identical arrows on a polar grid, with two points A and B' });
   const R = P.range;
   F.slider({ key: 'alpha', label: 'Direction of every arrow', min: -180, max: 180, step: 5, value: P.alpha, unit: '^\\circ', explain: 'Measured anticlockwise from east. Every arrow in the field is the same.' });
-  F.toggle({ key: 'naive', label: 'At B, copy A’s components', value: P.naive, explain: 'Red dashed: the arrow with the same $(V_r, V_\\theta)$ as at A — not the same arrow.' });
+  F.toggle({ key: 'naive', label: 'At B, copy A’s components', value: P.naive, explain: 'Red dashed: the arrow with the same $(V^{\\hat r}, V^{\\hat\\theta})$ as at A — not the same arrow.' });
   const pts = [{ x: P.a[0], y: P.a[1], name: 'A' }, { x: P.b[0], y: P.b[1], name: 'B' }];
   const plot = new Plot(canvas, { x: [-R, R], y: [-R, R], equal: true, grid: false, axes: false });
   for (const p of pts) plot.handle(() => [p.x, p.y], (x, y) => { const r = Math.hypot(x, y); const k = r < 0.4 ? 0.4 / (r || 1) : 1; p.x = Math.max(-R, Math.min(R, x * k)); p.y = Math.max(-R, Math.min(R, y * k)); });
@@ -226,13 +226,13 @@ function mountField(F, P) {
     pts.forEach((p) => plot.text(p.name, p.x, p.y, { dx: -18, dy: 14, weight: 700, color: 'ink' }));
     const turn = dAngle(comp[0].th, comp[1].th);
     if (P.readout !== false) F.readout([
-      ['at A: $(V_r,\\ V_\\theta)$', `(${comp[0].c[0].toFixed(3)},\\ ${comp[0].c[1].toFixed(3)})`],
-      ['at B: $(V_r,\\ V_\\theta)$', `(${comp[1].c[0].toFixed(3)},\\ ${comp[1].c[1].toFixed(3)})`],
+      ['at A: $(V^{\\hat r},\\ V^{\\hat\\theta})$', `(${comp[0].c[0].toFixed(3)},\\ ${comp[0].c[1].toFixed(3)})`],
+      ['at B: $(V^{\\hat r},\\ V^{\\hat\\theta})$', `(${comp[1].c[0].toFixed(3)},\\ ${comp[1].c[1].toFixed(3)})`],
       ['the grid turns from A to B by', fmtDeg(turn)],
     ]);
   }
   F.draw(draw);
-  F.caption(P.caption || 'Every gold and grey arrow is the same arrow — same length, same direction. Blue $\\hat r$ (“out”) and violet $\\hat\\theta$ (“around”, anticlockwise) are the polar grid’s own unit arrows at A and at B. The components $(V_r, V_\\theta)$ say how much of the arrow lies along each; they change because $\\hat r$ and $\\hat\\theta$ turn from place to place, not because the field does.');
+  F.caption(P.caption || 'Every gold and grey arrow is the same arrow — same length, same direction. Blue $\\hat r$ (“out”) and violet $\\hat\\theta$ (“around”, anticlockwise) are the polar grid’s own unit arrows at A and at B. The components $(V^{\\hat r}, V^{\\hat\\theta})$ say how much of the arrow lies along each; they change because $\\hat r$ and $\\hat\\theta$ turn from place to place, not because the field does.');
   return { get: (k) => F.params[k] };
 }
 

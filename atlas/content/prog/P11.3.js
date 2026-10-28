@@ -59,7 +59,7 @@ It reveals more than accuracy. A general-purpose method like RK4 lets the energy
     title: 'Three hundred orbits, two integrators',
     lead: t`Press **Run**. An orbit of eccentricity 0.6 (units with $GM = 1$, period $2\pi$) is integrated for 300 orbits by RK4 with 100 steps per orbit and by leapfrog with 400 — the same number of force evaluations. The plot shows $\lvert\Delta E/E_0\rvert$ at the end of each orbit, on log–log axes.`,
     tasks: [
-      'RK4’s error grows in a straight line of slope 1: the same drift every orbit. Leapfrog’s stays flat.',
+      'RK4’s error grows in a straight line of slope 1: the same drift every orbit. Leapfrog’s rises for a few dozen orbits, then levels off and never grows again.',
       'Read the printed angles: where should the body be after a whole number of orbits? Which method is closer after one orbit, and after 300?',
       'Halve both step sizes. RK4’s drift falls about 32-fold; leapfrog’s level falls about 4-fold (it is second order).',
     ],
@@ -114,7 +114,7 @@ ax.set_ylabel("|ΔE / E₀| at the end of the orbit")
 ax.legend()
 plt.show()`,
     },
-    caption: 'A two-body orbit with fixed steps and no perturbations. Leapfrog’s energy error is sampled at perihelion; within each orbit it swings up and down, largest near perihelion.',
+    caption: 'A two-body orbit with fixed steps and no perturbations. The error is sampled every 2π of time. Within each orbit leapfrog’s energy error swings up and down, largest near perihelion; as its phase slips, the samples land on different parts of that swing — hence the rise to a plateau, which is the swing’s bounded size.',
   },
   example: {
     prompt: t`Compare RK4 (100 steps per orbit) and leapfrog (400 steps per orbit, the same number of force evaluations) on the $e = 0.6$ orbit, by energy **and** by where the body is after a whole number of orbits — it should be back at perihelion, at angle 0.`,
@@ -131,8 +131,8 @@ plt.show()`,
 $$\begin{array}{c|c|c|c|c} \text{orbits} & \Delta E/E_0\ \text{(RK4)} & \Delta E/E_0\ \text{(leapfrog)} & \text{angle (RK4)} & \text{angle (leapfrog)} \\ \hline ${[1, 10].map((k) => `${k} & ${fmtE(R[k].rk)} & ${fmtE(R[k].lf)} & ${R[k].prk.toFixed(3)} & ${R[k].plf.toFixed(3)}`).join(t` \\ `)} \\ ${[100, 1000].map((k) => t`${k} & ${fmtE(R[k].rk)} & ${fmtE(R[k].lf)} & \text{—} & \text{—}`).join(t` \\ `)} \end{array}$$
 
 (angles in radians; after 100 orbits both phases have wandered too far to quote meaningfully).` },
-      { label: 'Read the energy', text: t`RK4's error grows tenfold for every tenfold in time: a **secular drift** of about $${fmtE(R[1].rk)}$ per orbit, always the same sign, so the orbit slowly gains energy and grows. Leapfrog's sits near $${fmtE(R[1000].lf)}$ whether you look after 100 orbits or 1000. Leapfrog is *symplectic*: it exactly conserves a slightly perturbed “shadow” energy, so the true energy can only oscillate about it.` },
-      { label: 'Read the position', text: t`After **one** orbit RK4 is the more accurate: ${R[1].prk.toFixed(3)} rad from perihelion against ${R[1].plf.toFixed(3)} for leapfrog, a fourth-order method against a second-order one. Leapfrog's error is mostly a **phase** error — the body runs on an orbit of the right shape and energy, slightly ahead or behind schedule — and energy cannot see it. RK4's drift, meanwhile, lengthens the period orbit by orbit, so its phase error grows like the square of the time: after 10 orbits it is ${R[10].prk.toFixed(2)} rad.` },
+      { label: 'Read the energy', text: t`RK4's error grows tenfold for every tenfold in time: a **secular drift** of about $${fmtE(R[1].rk)}$ per orbit, always the same sign: $\Delta E/E_0 > 0$ with $E_0 < 0$ means the energy is becoming more negative, so the orbit slowly loses energy and shrinks. Leapfrog's sits near $${fmtE(R[1000].lf)}$ whether you look after 100 orbits or 1000. Leapfrog is *symplectic*: it exactly conserves a slightly perturbed “shadow” energy, so the true energy can only oscillate about it.` },
+      { label: 'Read the position', text: t`After **one** orbit RK4 is the more accurate: $${R[1].prk.toFixed(3)}$ rad from perihelion against $${R[1].plf.toFixed(3)}$ for leapfrog, a fourth-order method against a second-order one. Leapfrog's error is mostly a **phase** error — the body runs on an orbit of the right shape and energy, slightly ahead or behind schedule — and energy cannot see it. RK4's drift, meanwhile, shrinks the orbit and so shortens the period a little more every orbit; the body runs ever further ahead, and its phase error grows like the square of the time: after 10 orbits it is ${R[10].prk.toFixed(2)} rad.` },
       { label: 'Conclude', text: t`For a long run where the statistics matter — the stability of a planetary system over millions of orbits — use a symplectic method. For a short, accurate ephemeris use a high-order method with tight tolerances and check phase against something independent: a known period, a run with half the step, or another integrator.` },
     ],
     answer: t`RK4 drifts by about $${fmtE(R[1].rk)}$ per orbit (${(100 * R[1000].rk).toFixed(0)}% after 1000 orbits); leapfrog's energy error stays near $${fmtE(Math.abs(R[1000].lf))}$ — but it carries a larger phase error, which energy does not show.`,
@@ -172,8 +172,8 @@ print((E - E0) / E0)
           prompt: t`Euler's method on the oscillator $\dot x = v$, $\dot v = -x$ maps $(x, v) \to (x + hv,\ v - hx)$, which multiplies the energy $\tfrac12(x^2 + v^2)$ by exactly $1 + h^2$ every step. With ${n} steps per period, by what factor has the energy grown after ${periods} periods?`,
           visual: {
             type: 'graph',
-            params: { x: [-2.2, 2.2], y: [-2.2, 2.2], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'v',
-              curves: [{ param: ['cos(t)', '-sin(t)'], t: [0, 6.2832], color: 'ink3', dash: true }, { param: ['1.0311^(t/0.2513)*cos(t)', '-1.0311^(t/0.2513)*sin(t)'], t: [0, 12.566], color: 'warn' }] },
+            params: { x: [-3.4, 3.4], y: [-3.4, 3.4], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'v',
+              curves: [{ param: ['cos(t)', '-sin(t)'], t: [0, 6.2832], color: 'ink3', dash: true }, { param: ['1.0311^(t/0.2513)*cos(t)', '-1.0311^(t/0.2513)*sin(t)'], t: [0, 10.2], color: 'warn' }] },
             caption: 'Phase space: the exact circle (dashed) and an Euler run spiralling outward — drawn with a large step (25 per period) so the spiral is visible.',
           },
           answer: factor, tol: { rel: 0.01 },

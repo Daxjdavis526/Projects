@@ -30,10 +30,10 @@ function circles({ mark = null, sliders = null, points = [], readouts = null, vl
   };
 }
 
-/** A saddle surface z = (x² − y²)/2 drawn in polar form, so its rim is round. */
+/** A saddle surface z = (x² − y²)/2. */
 const saddle = (caption) => ({
   type: 'surface3d',
-  params: { surface: ['u*cos(v)', 'u*sin(v)', '0.5*u^2*cos(2*v)'], domain: [[0, 1.5], [0, 2 * Math.PI]], n: 36, aspect: 'wide', dist: 6.5, pitch: 0.75, yaw: 0.5, zscale: 0.7 },
+  params: { z: '(x^2 - y^2)/2', domain: [[-1.6, 1.6], [-1.6, 1.6]], n: 32, aspect: 'wide' },
   caption: caption ?? t`A saddle, $z = (x^2 - y^2)/2$: it curves up in one direction and down in the other. Its Gaussian curvature is $-1$ at the centre and weakens outward. No smooth surface in ordinary space has the same negative curvature everywhere (Hilbert’s theorem), so the exact “saddle geometry” of this lesson can only be drawn in pieces. Drag to turn it.`,
 });
 
@@ -224,7 +224,7 @@ The function $f$ is the whole geometry: a circle of radius $\rho$ has circumfere
     mcq({
       id: 'cp-cone', difficulty: 3,
       prompt: t`A paper cone has metric $ds^2 = d\rho^2 + (\rho/2)^2\,d\phi^2$, with $\rho$ measured from its tip. What is true of it?`,
-      visual: { type: 'gr-surface', params: { mode: 'basis', surface: 'cone', surfaces: false, readout: false, controls: false }, caption: 'A cone, coloured by Gaussian curvature (teal: zero). Its tip is the one special point.' },
+      visual: { type: 'gr-surface', params: { mode: 'basis', surface: 'cone', surfaces: false, readout: false, controls: false }, caption: 'A cone, coloured by Gaussian curvature (teal: zero). Its tip is the one special point. (Drawn with a narrower opening than the cone in the question.)' },
       choices: [t`$K = 0$ away from the tip, yet every circle round the tip has length $\pi\rho$`, t`$K = -f''/f > 0$ everywhere, like a sphere`, t`It is a plane in disguise: circles have length $2\pi\rho$`, t`$K = 1/\rho^2$, growing toward the tip`],
       answer: 0,
       why: {

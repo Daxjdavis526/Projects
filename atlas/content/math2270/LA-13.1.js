@@ -64,7 +64,7 @@ Since $\bar z z = |z|^2$, every length is real and positive again. The price: $\
       x: [-1.45, 8.75], y: [-2.55, 2.55], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
       sliders: [
         { key: 'r1', label: t`$|z_1|$`, min: 0, max: 1, step: 0.05, value: 1, explain: t`The modulus of the first component.` },
-        { key: 'p1', label: t`phase of $z_1$`, min: 0, max: 360, step: 5, value: 0, unit: t`^\circ`, explain: t`Its angle in the complex plane: $z_1 = |z_1|e^{i\varphi_1}$.` },
+        { key: 'p1', label: t`phase of $z_1$`, min: 0, max: 360, step: 5, value: 30, unit: t`^\circ`, explain: t`Its angle in the complex plane: $z_1 = |z_1|e^{i\varphi_1}$.` },
         { key: 'r2', label: t`$|z_2|$`, min: 0, max: 1, step: 0.05, value: 1, explain: t`The modulus of the second component.` },
         { key: 'p2', label: t`phase of $z_2$`, min: 0, max: 360, step: 5, value: 60, unit: t`^\circ`, explain: t`Its angle: $z_2 = |z_2|e^{i\varphi_2}$.` },
       ],
@@ -80,7 +80,7 @@ Since $\bar z z = |z|^2$, every length is real and positive again. The price: $\
         { from: [6.55, 0], to: ['6.55 + r1^2*cos(2*p1*pi/180)', 'r1^2*sin(2*p1*pi/180)'], color: 'accent', width: 2.4, label: 'z₁²' },
         { from: ['6.55 + r1^2*cos(2*p1*pi/180)', 'r1^2*sin(2*p1*pi/180)'], to: ['6.55 + r1^2*cos(2*p1*pi/180) + r2^2*cos(2*p2*pi/180)', 'r1^2*sin(2*p1*pi/180) + r2^2*sin(2*p2*pi/180)'], color: 'warn', width: 2.4, label: 'z₂²' },
         { from: [6.55, 0], to: ['6.55 + r1^2', 0], color: 'good', width: 4 },
-        { from: ['6.55 + r1^2', 0], to: ['6.55 + r1^2 + r2^2', 0], color: 'good', width: 4, label: '|z₁|² + |z₂|²', labelDy: 18 },
+        { from: ['6.55 + r1^2', 0], to: ['6.55 + r1^2 + r2^2', 0], color: 'good', width: 4, label: '|z₁|² + |z₂|²', labelDx: -96, labelDy: 20 },
       ],
       points: [
         { x: -1.25, y: 1.45, r: 0, label: 'component z₁', color: 'ink2' },
