@@ -1204,6 +1204,33 @@ const APPARATUS = {
       if (slip && grat) sysTag(pl, 14.0, 4.6, 'sin θ taken as y/L', { size: 10.5 });
     }
   },
+
+  // a vibrator driving a string over a pulley to a hanging mass, with its standing wave
+  string(pl, E, P, st, o) {
+    const sys = st.sys, byT = E === B.EXPERIMENTS['string-T'];
+    const n = byT ? P.nT : st.setting ?? E.setting.value, M = byT ? st.setting ?? E.setting.value : P.M;
+    const x0 = 2.4, x1 = 15.6, ys = 5.6, A = 0.95, r = st.row?.R?.[0];
+    block(pl, 0.4, ys - 1.1, 1.7, 2.2, 'ink3', 0.75);
+    pl.line(x0 - 0.15, ys - 0.7, x0 - 0.15, ys + 0.7, { color: 'ink2', width: 3 });
+    pl.arrow(1.25, ys + 1.45, 1.25, ys + 1.95, { color: 'ink3', width: 1.2, head: 5 }); pl.arrow(1.25, ys + 1.45, 1.25, ys + 0.95, { color: 'ink3', width: 1.2, head: 5 });
+    // the standing wave: the string's two extremes (its blur) and the nodes
+    for (const s of [1, -1]) pl.curve((u) => x0 + u * (x1 - x0), (u) => ys + s * A * Math.sin(n * Math.PI * u), 0, 1, { color: sys === 'stretch' ? 'warn' : 'accent', width: 1.8, alpha: s > 0 ? 1 : 0.55 });
+    for (let k = 0; k <= n; k++) pl.circle(x0 + (k * (x1 - x0)) / n, ys, 0.09, { fill: 'ink', stroke: false });
+    // the pulley and the hanging mass
+    pl.circle(x1 + 0.45, ys - 0.45, 0.45, { color: 'ink2', width: 1.6 });
+    pl.line(x1 + 0.9, ys - 0.45, x1 + 0.9, 2.2, { color: 'ink2', width: 1.3 });
+    const hm = 0.6 + 0.9 * M;
+    block(pl, x1 + 0.45, 2.2 - hm, 0.9, hm, 'violet', 0.85);
+    pl.line(x1 + 0.45, ys - 0.9, x1 + 0.45, 0.6, { color: 'ink4', width: 3 });
+    if (st.labels) {
+      dim(pl, x0, ys - 2.2, x1, ys - 2.2, `L = ${fx(P.L, 3)} m`, { dy: -0.45, dx: -1.2, color: 'ink3' });
+      pl.text(`M = ${fx(M, 3)} kg`, x1 + 1.55, 2.2 - hm / 2, { color: 'violet', size: 11.5, weight: 600 });
+      pl.text('vibrator', 1.25, ys - 1.5, { color: 'ink3', size: 10.5, align: 'center' });
+      pl.text(`${n} loop${n > 1 ? 's' : ''}`, (x0 + x1) / 2, ys + A + 0.55, { color: 'accent', size: 11.5, weight: 600, align: 'center' });
+      display(pl, 0.6, 8.4, [`f = ${Number.isFinite(r) ? r.toFixed(1) : '—'} Hz`, `T = ${(M * P.g).toFixed(2)} N`], { compact: o.compact, title: 'generator and tension' });
+      if (sys === 'stretch') sysTag(pl, 19.6, 9.3, 'elastic string: stretches 4% at 4.90 N', { size: 10.5, align: 'right' });
+    }
+  },
 };
 
 /** A zigzag (a wound resistor wire) between two world points, `n` half-turns of half-width w. */
