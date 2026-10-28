@@ -16,9 +16,7 @@ const fprimeFig = (fn, x, y, caption, more = {}) => ({
 
 // the second-derivative test, one variant per sign of f″(c)
 const SECOND = [
-  { s: -1, ans: 0, fn: '2 - 0.75*(x - 2)^2' },
-  { s: 1, ans: 1, fn: '1 + 0.75*(x - 2)^2' },
-  { s: 0, ans: 3, fn: '1.5 + 0.3*(x - 2)^3' },
+  { s: -1, ans: 0 }, { s: 1, ans: 1 }, { s: 0, ans: 3 },
 ];
 
 export default lesson({
@@ -229,9 +227,7 @@ Where $f'$ changes sign the graph has a peak or a valley (the **first-derivative
           hints: [t`At a flat point, concave up (a cup) is a valley; concave down (a dome) is a peak.`, t`If $f''(c) = 0$, the second-derivative test gives no verdict — use the first-derivative test.`],
           teach: t`Second-derivative test: $f'(c) = 0$ with $f''(c) < 0$ is a maximum, with $f''(c) > 0$ a minimum, and $f''(c) = 0$ decides nothing.`,
           explain: v.s < 0 ? t`$f''(2) = ${k} < 0$: concave down at a flat point — a local maximum.` : v.s > 0 ? t`$f''(2) = ${k} > 0$: concave up at a flat point — a local minimum.` : t`$f''(2) = 0$: the test is silent. The point could be a maximum, a minimum or neither; check the sign of $f'$ on each side.`,
-          visual: v.s === 0
-            ? curveFig({ fn: '1 + 0.25*(x - 2)^4', x: [0, 4], y: [-0.2, 3.4], points: [{ x: 2, y: 1, color: 'gold' }], curves: [{ fn: '1 + 0.3*(x - 2)^3', color: 'violet', domain: [0.3, 3.7] }], caption: t`Two functions with $f'(2) = f''(2) = 0$: a minimum (blue) and an inflection point (violet). The values alone cannot tell them apart.` })
-            : curveFig({ fn: v.fn, x: [0, 4], y: [-0.2, 3.4], points: [{ x: 2, y: v.s > 0 ? 1 : 2, color: 'gold' }], curves: [{ fn: `${v.s > 0 ? 1 : 2}`, color: 'gold', dash: true, width: 1.4, domain: [1.3, 2.7] }], caption: 'One function with these values near x = 2, with its flat tangent there.' }),
+          visual: { type: 'graph', params: { x: [0, 4], y: [0, 3], aspect: 'wide', curves: [{ fn: '1.5', color: 'gold', dash: true, width: 1.6, domain: [1.2, 2.8] }], points: [{ x: 2, y: 1.5, color: 'gold', label: 'x = 2' }] }, caption: t`All you are told: the tangent at $x = 2$ is flat. Which way does the curve bend away from it?` },
         };
       },
     }),
@@ -247,7 +243,7 @@ Where $f'$ changes sign the graph has a peak or a valley (the **first-derivative
           hints: [t`$U'(r) = 4\varepsilon\left[-\dfrac{12\sigma^{12}}{r^{13}} + \dfrac{6\sigma^6}{r^7}\right]$.`, t`Setting it to zero: $12\sigma^{12}/r^{13} = 6\sigma^6/r^7$, so $r^6 = 2\sigma^6$.`],
           teach: 'An equilibrium is a critical point of the potential; it is stable when that critical point is a minimum.',
           explain: t`$U' = 0$ gives $r^6 = 2\sigma^6$, so $r = 2^{1/6}\sigma = 1.1225\times${s.toFixed(3)} = ${nice(rm, 4)}$ nm. $U'$ goes from $-$ to $+$ there (the force changes from repulsive to attractive), so it is a minimum: a stable spacing.`,
-          visual: curveFig({ fn: `4*((${s}/x)^12 - (${s}/x)^6)`, x: [0.8 * s, 2.6 * s], y: [-1.3, 1.6], xlabel: 'r (nm)', ylabel: 'U / ε', domain: [0.95 * s, 2.6 * s], caption: t`The Lennard-Jones model, with $U$ in units of the well depth $\varepsilon$ and a typical fitted $\sigma$. It is an empirical model; real interatomic potentials differ in detail.` }),
+          visual: curveFig({ fn: `4*((${s}/x)^12 - (${s}/x)^6)`, x: [0.8 * s, 2.6 * s], y: [-1.3, 1.6], xlabel: 'r', extra: { xticks: 0 }, ylabel: 'U / ε', domain: [0.95 * s, 2.6 * s], caption: t`The shape of the Lennard-Jones potential, with $U$ in units of the well depth $\varepsilon$ (the $r$ axis is left unnumbered). The $\sigma$ values are typical fits. It is an empirical model; real interatomic potentials differ in detail.` }),
         };
       },
     }),

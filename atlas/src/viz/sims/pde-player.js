@@ -63,7 +63,11 @@ export function mount(F, P0) {
   const wanted = P.controls === true || (P.controls === null && !F.compact)
     ? [...(modes.length > 1 ? ['mode'] : []), ...(modes.length > 1 ? [...new Set(modes.flatMap((m) => DEFAULT_CONTROLS[m]))] : DEFAULT_CONTROLS[P.mode])]
     : Array.isArray(P.controls) ? P.controls : [];
-  const ctl = (key, make) => (wanted.includes(key) ? make() : (F.params[key] = P[key]));
+  const nodes = {};
+  const ctl = (key, make) => (wanted.includes(key) ? (nodes[key] = make()) : (F.params[key] = P[key]));
+  // with several modes on offer, show only the controls that matter to the current one
+  const RELEVANT = { init: ['wave'], speed: ['variable'], slow: ['variable'], lambda: ['transport'], D: ['heat'], c: ['transport', 'variable', 'wave'] };
+  const showRelevant = () => { for (const [k, ms] of Object.entries(RELEVANT)) if (nodes[k]?.node) nodes[k].node.style.display = ms.includes(F.params.mode) ? '' : 'none'; };
   const [XL, XR] = P.x;
   const TM = P.tmax;
 
@@ -73,7 +77,8 @@ export function mount(F, P0) {
   ctl('speed', () => F.choice({ key: 'speed', label: 'Speed field', options: [['river', 'a slow reach'], ['stretch', '$c = a x$']], value: P.speed, explain: 'A river slowing where it widens, or a flow that speeds up in proportion to $x$.' }));
   ctl('c', () => F.slider(P.mode === 'variable' && P.speed === 'stretch'
     ? { key: 'c', label: 'Rate $a$', min: 0.1, max: 1, step: 0.05, value: P.c, unit: '\\mathrm{s^{-1}}', explain: 'In $c(x) = a x$: the farther from $x = 0$, the faster the flow.' }
-    : P.mode === 'wave' || modes.length > 1 ? { key: 'c', label: 'Wave speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'How fast each half of the disturbance runs along the string.' }
+    : modes.length > 1 ? { key: 'c', label: 'Speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'Transport: how fast the profile is carried. Wave: how fast each half runs.' }
+    : P.mode === 'wave' ? { key: 'c', label: 'Wave speed $c$', min: 0.5, max: 4, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'How fast each half of the disturbance runs along the string.' }
       : P.mode === 'variable' ? { key: 'c', label: 'Speed outside the reach $c$', min: 0.5, max: 3, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'The flow speed upstream and downstream of the slow reach.' }
         : { key: 'c', label: 'Speed $c$', min: -3, max: 3, step: 0.1, value: P.c, unit: '\\mathrm{m/s}', explain: 'Positive: the profile is carried toward $+x$. Negative: toward $-x$.' }));
   ctl('lambda', () => F.slider({ key: 'lambda', label: 'Decay rate $\\lambda$', min: 0, max: 1.5, step: 0.05, value: P.lambda, unit: '\\mathrm{s^{-1}}', explain: 'In $u_t + c u_x = -\\lambda u$: the substance decays as it rides along.' }));
@@ -83,7 +88,7 @@ export function mount(F, P0) {
   ctl('t', () => F.slider({ key: 't', label: 'Time $t$', min: 0, max: TM, step: TM / 200, value: P.t, unit: '\\mathrm{s}', explain: 'The moment shown above, and the gold line below.' }));
 
   const top = F.canvas({ aspect: 'wide', label: P.alt || 'The solution u(x, t) at the chosen time' });
-  const tp = new Plot(top.canvas, { x: [XL, XR], y: [-0.2, 1.2], xlabel: 'x (m)', ylabel: 'u', xticks: 10 });
+  const tp = new Plot(top.canvas, { x: [XL, XR], y: [-0.2, 1.2], xlabel: 'x (m)', ylabel: 'u', xticks: 10, axesAt: 'edge' });
   const bot = P.xt ? F.canvas({ aspect: 'wide', label: 'The x–t plane: the solution as shading, the characteristics, the current time' }) : null;
   const xp = bot ? new Plot(bot.canvas, { x: [XL, XR], y: [0, TM], xlabel: 'x (m)', ylabel: 't (s)', xticks: 10, axesAt: 'edge' }) : null;
 
@@ -95,7 +100,7 @@ export function mount(F, P0) {
 
   const opts = () => {
     const p = F.params;
-    return { mode: p.mode, profile: p.profile, A: P.A, w: p.w, x0: P.x0, c: p.c, lambda: p.lambda, speed: p.speed, slow: p.slow, init: p.init, D: p.D };
+    return { mode: p.mode, profile: p.profile, A: P.A, w: p.w, x0: P.x0, c: p.c, lambda: p.lambda, speed: p.mode === 'variable' ? p.speed : 'const', slow: p.slow, init: p.init, D: p.D };
   };
   const u = (o, x, t) => (o.mode === 'variable' ? M.transport(o, x, t) : M.solve(o, x, t));
 
@@ -139,6 +144,7 @@ export function mount(F, P0) {
     tp.setView([XL, XR], [C.lo - 0.08 * span - fluxRoom - enRoom, C.hi + 0.18 * span]);
     tp.clear();
     const narrow = (top.canvas.clientWidth || 600) < 520, fs = narrow ? 10 : 11.5;
+    tp.line(XL, 0, XR, 0, { color: 'ink3', width: 1 });
     if (o.mode === 'variable' && o.speed === 'river') tp.rect(-2, tp.vy0, 5, tp.vy1 - tp.vy0, { color: 'teal', alpha: 0.07, stroke: false });
     if (!(o.mode === 'wave' && o.init === 'strike')) tp.fn((x) => M.initial(o, x), { color: 'ink3', width: 1.3, dash: [5, 4], samples: 900 });
     if (o.mode === 'wave' && P.halves) {
@@ -263,8 +269,9 @@ export function mount(F, P0) {
     } });
     F.button({ label: 'Back to t = 0', onClick: () => setT(0) });
   }
-  F.onChange(() => drawAll());
+  F.onChange((k) => { if (k === 'mode') showRelevant(); drawAll(); });
   F.draw(() => { cache.img = null; drawAll(); });
+  showRelevant();
   F.caption(P.caption || {
     transport: 'Exact solution u = e^(−λt) f(x − ct) on an infinite line; the window is a piece of it. Shading below: blue where u > 0, its depth showing the size of u. Grey lines: characteristics, along which u is carried unchanged.',
     variable: 'Exact solution: u is constant along each characteristic dx/dt = c(x). The slow reach is shaded; its edges are smoothed over about 0.35 m. Units are illustrative.',

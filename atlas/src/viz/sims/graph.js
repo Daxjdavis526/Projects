@@ -137,7 +137,9 @@ export function mount(F, P) {
     }
     for (const p of P.points || []) {
       if (!shown(p)) continue;
-      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
+      // hollow: an open circle, for a hole in a graph (a removable discontinuity, an excluded endpoint)
+      const pc = p.color || 'accent2';
+      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), p.hollow ? { color: 'bg', ring: pc, lcolor: pc, label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign } : { color: pc, label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
     }
     for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: dashOf(a.dash), label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();

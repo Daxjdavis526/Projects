@@ -34,7 +34,7 @@ function tripPicture({ s, p, numbers = true, caption }) {
     lines: [{ pts: [[0, 0], [0, T]], color: 'accent', width: 2.4, label: 'Earth twin', at: 0, dx: -8, dy: 0, align: 'right' }],
     events: [[0, 0, 'departure', 'ink2', 9, 10], [0, T, 'reunion', 'ink2', 9, -6], [D, T / 2, 'turnaround', 'gold', 9, 0]],
     extra: { curves: tripCurves(s, p) },
-    caption: caption ?? t`Earth’s frame, years up and light-years across ($c = 1$). The traveller (gold) accelerates away, decelerates to the turnaround, accelerates home and decelerates, each phase at the same proper acceleration. Not every axis is to the same scale as the light cone: check the tick numbers.`,
+    caption: caption ?? t`Earth’s frame, years up and light-years across ($c = 1$). The traveller (gold) accelerates away, decelerates to the turnaround, accelerates home and decelerates, each phase at the same proper acceleration.`,
   });
 }
 
@@ -64,7 +64,7 @@ where $v(t)$ is the clock’s speed in any one inertial frame. Every moment of m
       'Make α small: the worldline hugs Earth’s and the two clocks nearly agree.',
     ],
     params: {
-      x: [-3, 15], y: [-0.6, 30], aspect: 'square', axesAt: 'edge', xlabel: 'x (light-years)', ylabel: 't (years, Earth)',
+      x: [-4, 16], y: [-0.6, 30], equal: true, aspect: 'square', axesAt: 'edge', xlabel: 'x (light-years)', ylabel: 't (years, Earth)',
       sliders: [
         { key: 'A', label: t`Proper acceleration $\alpha$`, min: 0.2, max: 2, step: 0.05, value: 1, unit: 'g', explain: 'Felt by the crew in every phase; only its direction changes.' },
         { key: 'T', label: t`Crew time per phase $\tau_1$`, min: 0.2, max: 2.6, step: 0.05, value: 2, unit: t`\text{yr}`, explain: 'Four phases, so the crew ages 4τ₁ in all.' },
@@ -76,12 +76,12 @@ where $v(t)$ is the clock’s speed in any one inertial frame. Every moment of m
         { param: ['2*s0/A*(cosh(A*T/s0) - 1) - s0/A*(cosh(t) - 1)', '2*s0/A*sinh(A*T/s0) - s0/A*sinh(t)'], t: [0, 'A*T/s0'], color: 'gold', width: 2.6 },
         { param: ['2*s0/A*(cosh(A*T/s0) - 1) - s0/A*(cosh(t) - 1)', '2*s0/A*sinh(A*T/s0) + s0/A*sinh(t)'], t: [0, 'A*T/s0'], color: 'gold', width: 2.6 },
         { param: ['s0/A*(cosh(t) - 1)', '4*s0/A*sinh(A*T/s0) - s0/A*sinh(t)'], t: [0, 'A*T/s0'], color: 'gold', width: 2.6 },
-        { fn: 'x', domain: [0, 15], color: 'warn', dash: true, width: 1.1 },
+        { fn: 'x', domain: [0, 30], color: 'warn', dash: true, width: 1.1 },
       ],
       points: [
         { x: 0, y: '4*s0/A*sinh(A*T/s0)', color: 'ink2', label: 'reunion' },
         { x: '2*s0/A*(cosh(A*T/s0) - 1)', y: '2*s0/A*sinh(A*T/s0)', color: 'gold', label: 'turnaround' },
-        { x: -0.3, y: 28.5, r: 0.01, color: 'accent', label: 'Earth twin', labelAlign: 'right' },
+        { x: -0.8, y: 28.5, r: 0.01, color: 'accent', label: 'Earth twin', labelAlign: 'right' },
       ],
       readouts: [
         { label: t`traveller ages $4\tau_1$`, expr: '4*T', digits: 4, unit: t`\text{yr}` },
@@ -90,7 +90,7 @@ where $v(t)$ is the clock’s speed in any one inertial frame. Every moment of m
         { label: 'top speed', expr: 'tanh(A*T/s0)', digits: 4, unit: 'c' },
       ],
     },
-    caption: t`Earth’s frame, years up and light-years across, $c = 1$ (dashed: light). The axes are not drawn to equal scale: the worldline is always steeper than light. Each phase is a hyperbolic arc (lesson R0.2); fuel, shielding and the time spent turning the ship are ignored.`,
+    caption: t`Earth’s frame, years up and light-years across, $c = 1$ (dashed: light). Each phase is a hyperbolic arc (lesson R0.2); fuel, shielding and the time spent turning the ship are ignored.`,
   },
   example: {
     prompt: t`A crew flies a four-phase voyage at a steady $1g$: accelerate for 2.5 years of crew time, decelerate for 2.5 to stop at the turnaround, then the same coming home. How much does each twin age, how far away is the turnaround, and how fast does the ship go?`,
@@ -138,7 +138,7 @@ where $v(t)$ is the clock’s speed in any one inertial frame. Every moment of m
           answer: ans, units: 'yr', tol: { rel: 0.003 },
           errors: [{ value: ab + bc - T, feedback: 'Spacetime’s triangle inequality is reversed: the bent path is shorter, so the difference is positive.' }],
           hints: [t`$\tau_{AB} = \sqrt{${tb}^2 - ${xb}^2}$ and $\tau_{BC} = \sqrt{${T - tb}^2 - ${xb}^2}$.`, t`$\tau_{AC} = ${T}$; subtract $\tau_{AB} + \tau_{BC}$.`],
-          teach: 'In spacetime the straight timelike side of a triangle is the longest: τ_AC ≥ τ_AB + τ_BC.',
+          teach: t`In spacetime the straight timelike side of a triangle is the longest: $\tau_{AC} \ge \tau_{AB} + \tau_{BC}$.`,
           explain: t`$\tau_{AB} = ${fmt(ab, 4)}$, $\tau_{BC} = ${fmt(bc, 4)}$, total ${fmt(ab + bc, 4)} years, short of $\tau_{AC} = ${T}$ by ${fmt(ans, 4)} years. On paper the bent path *looks* longer — the minus sign in the metric reverses Euclid.`,
         };
       },
@@ -163,8 +163,8 @@ where $v(t)$ is the clock’s speed in any one inertial frame. Every moment of m
       id: 'not-acceleration', difficulty: 3,
       prompt: 'Two travellers leave Earth together and later return to it together. Both make identical burns — the same accelerations for the same lengths of their own time — but X turns around right after its first burns, while Y coasts for three years at top speed first and therefore returns later. Compared at their reunions with Earth, what does this show?',
       visual: st({ x: [-1.5, 6.5], t: [-0.4, 15], numbers: false, aspect: 'square',
-        lines: [{ pts: [[0, 0], [0, 15]], color: 'accent', label: 'Earth', at: 0, dx: -8, align: 'right' },
-          { pts: [[0, 0], [0.4, 1.2], [1.4, 2.6], [1.8, 3.8], [1.4, 5], [0.4, 6.4], [0, 7.6]], color: 'violet', label: 'X', at: 2, dx: 8 },
+        lines: [{ pts: [[0, 0], [0, 15]], color: 'accent', label: 'Earth', at: 0, dx: -8, dy: -150, align: 'right' },
+          { pts: [[0, 0], [0.4, 1.2], [1.4, 2.6], [1.8, 3.8], [1.4, 5], [0.4, 6.4], [0, 7.6]], color: 'violet', label: 'X', at: 4, dx: 10 },
           { pts: [[0, 0], [0.4, 1.2], [1.4, 2.6], [3.8, 5.6], [4.2, 6.8], [3.8, 8], [1.4, 11], [0.4, 12.4], [0, 13.6]], color: 'gold', label: 'Y', at: 3, dx: 8 }],
         caption: 'Earth’s frame (c = 1), schematic: the curved burns drawn as short bends. X and Y bend identically; only Y has long straight coasts.' }),
       choices: ['Y falls further behind Earth than X does, so the age gap is not set by the accelerations', 'Both fall behind Earth by the same amount, because they made the same accelerations', 'Neither falls behind: the coasting legs are inertial, so they cancel', 'X falls further behind, because its accelerations are packed closer together'],
