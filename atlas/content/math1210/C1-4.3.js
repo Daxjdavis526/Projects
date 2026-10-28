@@ -225,10 +225,10 @@ So the **closed-interval method** is: find the critical points inside the interv
         const p = r.pick([11000, 13000, 15000]), e = r.pick([0.1, 0.3, 0.5, 0.6]);
         const rmax = p / (1 - e), ans = rmax - 6371;
         return {
-          prompt: t`A satellite’s distance from Earth’s centre is $r(\theta) = \dfrac{${p}}{1 + ${e}\cos\theta}$ km, where $\theta$ is its angle around the orbit, $0 \le \theta \le 2\pi$. Find its greatest **altitude** above the surface, taking Earth’s radius as $6371$ km.`,
+          prompt: t`A satellite’s distance from Earth’s centre is $r(\theta) = \dfrac{${String(p).replace(/(\d{3})$/, '\\,$1')}}{1 + ${e}\cos\theta}$ km, where $\theta$ is its angle around the orbit, $0 \le \theta \le 2\pi$. Find its greatest **altitude** above the surface, taking Earth’s radius as $6371$ km.`,
           answer: ans, units: 'km', tol: { rel: 0.005 },
           errors: [{ value: rmax, feedback: t`That is the distance from Earth’s **centre**. Subtract the radius, $6371$ km, for the altitude.` }, { value: p / (1 + e) - 6371, feedback: t`That is the **lowest** point, at $\theta = 0$, where the denominator is largest.` }],
-          hints: [t`$r'(\theta) = \dfrac{${p}\cdot ${e}\sin\theta}{(1 + ${e}\cos\theta)^2}$, zero at $\theta = 0$, $\pi$ and $2\pi$.`, t`$r$ is largest where $1 + ${e}\cos\theta$ is smallest: at $\theta = \pi$, $r = \dfrac{${p}}{1 - ${e}}$.`],
+          hints: [t`$r'(\theta) = \dfrac{${String(p).replace(/(\d{3})$/, '\\,$1')}\cdot ${e}\sin\theta}{(1 + ${e}\cos\theta)^2}$, zero at $\theta = 0$, $\pi$ and $2\pi$.`, t`$r$ is largest where $1 + ${e}\cos\theta$ is smallest: at $\theta = \pi$, $r = \dfrac{${String(p).replace(/(\d{3})$/, '\\,$1')}}{1 - ${e}}$.`],
           teach: 'Extremes of a periodic quantity over one full period sit at its critical points — here perigee and apogee.',
           explain: t`Candidates: $r(0) = r(2\pi) = ${nice(p / (1 + e), 5)}$ km and $r(\pi) = ${nice(rmax, 5)}$ km. Apogee altitude $= ${nice(rmax, 5)} - 6371 = ${nice(ans, 5)}$ km.`,
           visual: curveFig({ fn: `${p}/(1 + ${e}*cos(x))`, x: [-0.3, 6.6], y: [0, 1.15 * rmax], xlabel: 'θ (rad)', ylabel: 'r (km)', domain: [0, 2 * Math.PI], extra: { hlines: [{ y: 6371, label: 'Earth’s surface' }] }, caption: t`Distance from Earth’s centre around one orbit: a Kepler ellipse with Earth at a focus. No drag, no perturbations.` }),

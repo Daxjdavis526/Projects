@@ -52,7 +52,7 @@ Where $f'$ changes sign the graph has a peak or a valley (the **first-derivative
       choices: [{ key: 's', label: 'Show', options: [[0, 'f only'], [1, 'f and f′'], [2, 'f, f′ and f″']], value: 1, explain: 'Which derivatives to draw on top of f.' }],
       curves: [
         { fn: 'x^3 - 3*p*x', color: 'accent', label: 'f', labelAt: 2.05, labelDx: 8 },
-        { fn: '3*x^2 - 3*p', color: 'good', dash: true, width: 1.8, when: 'step(s - 0.5)', label: 'f′', labelAt: -1.95, labelDx: -18 },
+        { fn: '3*x^2 - 3*p', color: 'good', dash: true, width: 1.8, when: 'step(s - 0.5)', label: 'f′', labelAt: 1.6, labelDx: -22 },
         { fn: '6*x', color: 'warn', dash: true, width: 1.8, when: 'step(s - 1.5)', label: 'f″', labelAt: 0.8 },
       ],
       tangent: { fn: 'x^3 - 3*p*x', at: -1.6 },
@@ -66,7 +66,7 @@ Where $f'$ changes sign the graph has a peak or a valley (the **first-derivative
   },
   example: {
     prompt: t`A critically damped gauge needle, kicked at $t = 0$, deflects as $\theta(t) = A\,\dfrac{t}{\tau}\,e^{-t/\tau}$, where $A$ sets the size and $\tau$ is the gauge’s time constant. In units where $\tau = 1$ and $A = 1$, sketch $f(t) = t\,e^{-t}$ for $t \ge 0$: when does the needle peak, and when is it swinging back fastest?`,
-    visual: curveFig({ fn: 'x*e^(-x)', x: [-0.3, 6.2], y: [-0.06, 0.46], xlabel: 't / τ', ylabel: 'θ / A', domain: [0, 6.2], points: [{ x: 1, y: E1, color: 'gold', label: 'peak' }, { x: 2, y: E2, color: 'violet', label: 'inflection' }], caption: t`$f(t) = t e^{-t}$: up to a peak at $t = \tau$, back down fastest at the inflection point $t = 2\tau$, then creeping towards $0$. An ideal critically damped needle; a real gauge also has friction and a little overshoot.` }),
+    visual: curveFig({ fn: 'x*e^(-x)', x: [-0.3, 6.2], y: [-0.06, 0.46], xlabel: 't / τ', ylabel: 'θ / A', domain: [0, 6.2], points: [{ x: 1, y: E1, color: 'gold', label: 'peak' }, { x: 2, y: E2, color: 'violet', label: 'inflection' }], caption: t`$f(t) = t e^{-t}$: up to a peak at $t = \tau$, back down fastest at the inflection point $t = 2\tau$, then creeping towards $0$. An ideal critically damped needle; real gauges are often tuned slightly underdamped, so they overshoot a little.` }),
     steps: [
       { label: 'Ends', text: t`$f(0) = 0$, and as $t \to \infty$ the exponential wins: $f \to 0$. So the graph starts and ends on the axis.` },
       { label: 'First derivative', text: t`Product rule: $f'(t) = e^{-t} - t e^{-t} = (1 - t)\,e^{-t}$. Since $e^{-t} > 0$, the sign is the sign of $1 - t$: positive before $t = 1$, negative after.` },

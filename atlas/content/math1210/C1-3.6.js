@@ -225,7 +225,7 @@ What is wrong?`,
           errors: [{ value: -ans, feedback: t`Check the sign: $v = \sqrt{GM/r}$ falls as $r$ grows. Thrusting forward to climb leaves the satellite **slower**.` }],
           hints: [t`$\dfrac{dv}{dt} = \dfrac{dv}{dr}\dfrac{dr}{dt}$, and $v = \sqrt{GM}\,r^{-1/2}$ gives $\dfrac{dv}{dr} = -\dfrac{v}{2r}$.`, t`$v = ${nice(v, 4)}$ m/s at this radius; $-\dfrac{v}{2r}$ is in (m/s) per km when $r$ is in km.`],
           teach: t`Through the chain rule, a slow change in orbit size becomes a slow change in speed — of the opposite sign.`,
-          explain: t`$v = \sqrt{3.986\times10^{14}/${rk * 1000}} = ${nice(v, 4)}$ m/s; $\dfrac{dv}{dr} = -\dfrac{${nice(v, 4)}}{2\times ${rk}} = ${nice(-v / (2 * rk), 3)}$ (m/s)/km; times $${dr}$ km/day gives $${nice(ans, 3)}$ m/s per day.`,
+          explain: t`$v = \sqrt{3.986\times10^{14}/(${tex(rk * 1000, 3)})} = ${nice(v, 4)}$ m/s; $\dfrac{dv}{dr} = -\dfrac{${nice(v, 4)}}{2\times ${rk}} = ${nice(-v / (2 * rk), 3)}$ (m/s)/km; times $${dr}$ km/day gives $${nice(ans, 3)}$ m/s per day.`,
           visual: curveFig({ fn: `sqrt(${MU}/(x*1000))`, x: [6400, 12200], y: [5500, 8100], xlabel: 'r (km)', ylabel: 'v (m/s)', domain: [6500, 12200], points: [{ x: rk, y: v, color: 'gold', label: `${rk} km` }], caption: t`Circular-orbit speed against radius. The spiral is slow enough that the orbit stays nearly circular at every moment, which is what lets $v = \sqrt{GM/r}$ apply throughout.` }),
         };
       },
