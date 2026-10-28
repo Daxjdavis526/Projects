@@ -15,11 +15,11 @@ export const r6 = (v) => +(+v).toPrecision(6);
 /**
  * The graph z = f(x, y) on surface3d. `f` is a template (x, y) => expression,
  * so a path can be substituted into it. paths: [{ x: 't', y: '2*t', t: [a, b],
- * color }] are drawn on the surface (curves are not scaled by zscale, so the
- * template is scaled here when zscale is set).
+ * color }] are drawn on the surface (surface3d scales them by zscale along
+ * with the surface).
  */
 export function surf(f, { domain = [[-2, 2], [-2, 2]], paths = [], traces = [], zscale = 1, caption = 'Drag to rotate.', curves = [], ...rest } = {}) {
-  const Z = (x, y) => (zscale === 1 ? f(x, y) : `${zscale}*(${f(x, y)})`);
+  const Z = (x, y) => f(x, y);
   return {
     type: 'surface3d',
     params: {

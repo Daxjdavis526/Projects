@@ -254,8 +254,10 @@ export function mount(F, P) {
   function draw() {
     const st = stepData();
     const n = last();
-    const opTxt = st.op ? `\\text{Step ${step} of ${n}:}\\quad ${Q.opTeX(st.op)}` : n ? `\\text{The starting matrix} \\;(${n} \\text{ step${n === 1 ? '' : 's'} to go})` : '\\text{Already reduced}';
-    opLine.innerHTML = tex(opTxt);
+    const opTxt = st.op ? (P.stepper ? `\\text{Step ${step} of ${n}:}\\quad ${Q.opTeX(st.op)}` : `\\text{After } ${Q.opTeX(st.op)}`)
+      : !P.stepper ? '' : n ? `\\text{The starting matrix} \\;(${n} \\text{ step${n === 1 ? '' : 's'} to go})` : '\\text{Already reduced}';
+    opLine.innerHTML = opTxt ? tex(opTxt) : '';
+    opLine.style.display = opTxt ? '' : 'none';
     opLine.setAttribute('aria-label', st.op ? `Step ${step}: ${Q.opText(st.op)}` : 'The starting matrix');
     const cols = cur.A[0].length;
     const heads = P.colLabels || [...vars(cur.nvar), ...Array(cur.rhs).fill('')];

@@ -102,10 +102,12 @@ export function lines2(rows, { x = [-5, 5], y = [-3.5, 3.5], point = null, names
   const curves = rows.map(([a, b, c], k) => {
     const color = LINE_COLORS[k % LINE_COLORS.length], label = names ? names[k] : `R${'₁₂₃₄'[k]}`;
     if (Math.abs(b) > 1e-12) {
-      // label near the right end of the window, kept inside it
-      let at = x[0] + 0.86 * (x[1] - x[0]);
-      const yAt = (t) => (c - a * t) / b;
-      if (yAt(at) > y[1] - 0.3 || yAt(at) < y[0] + 0.3) { const target = yAt(at) > y[1] ? y[1] - 0.6 : y[0] + 0.6; at = (c - b * target) / a; }
+      // label towards the right of the window, inside it and clear of the x-axis's numbers
+      const yAt = (t) => (c - a * t) / b, ys = y[1] - y[0];
+      const tries = [0.86, 0.78, 0.7, 0.92, 0.62, 0.3, 0.2, 0.12].map((f) => x[0] + f * (x[1] - x[0]) + k * 0.04 * (x[1] - x[0]));
+      const ok = (t) => yAt(t) < y[1] - 0.12 * ys && yAt(t) > y[0] + 0.08 * ys && Math.abs(yAt(t)) > 0.1 * ys;
+      let at = tries.find(ok);
+      if (at === undefined) { const target = yAt(tries[0]) > y[1] ? y[1] - 0.15 * ys : y[0] + 0.15 * ys; at = Math.abs(a) > 1e-12 ? (c - b * target) / a : tries[0]; }
       return { fn: `(${c} - (${a})*x)/(${b})`, color, label, labelAt: at };
     }
     return { param: [`${c / a}`, 't'], t: [y[0], y[1]], color, label, labelAt: y[0] + 0.85 * (y[1] - y[0]) };

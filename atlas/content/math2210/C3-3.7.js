@@ -63,8 +63,8 @@ $D > 0$ with $f_{xx} > 0$: a **local minimum**. $D > 0$ with $f_{xx} < 0$: a **l
         { key: 'c', label: '$c$', min: -1.5, max: 1.5, step: 0.1, value: 0.5, explain: t`Half the curvature along $y$: $f_{yy} = 2c$.` },
       ],
       curves: [
-        { param: ['t*cos(atan2(b, a - c)/2)', 't*sin(atan2(b, a - c)/2)', '0.6*(a*cos(atan2(b, a - c)/2)^2 + b*cos(atan2(b, a - c)/2)*sin(atan2(b, a - c)/2) + c*sin(atan2(b, a - c)/2)^2)*t^2'], t: [-1.2, 1.2], color: 'gold', width: 3 },
-        { param: ['-t*sin(atan2(b, a - c)/2)', 't*cos(atan2(b, a - c)/2)', '0.6*(a*sin(atan2(b, a - c)/2)^2 - b*cos(atan2(b, a - c)/2)*sin(atan2(b, a - c)/2) + c*cos(atan2(b, a - c)/2)^2)*t^2'], t: [-1.2, 1.2], color: 'violet', width: 3 },
+        { param: ['t*cos(atan2(b, a - c)/2)', 't*sin(atan2(b, a - c)/2)', '(a*cos(atan2(b, a - c)/2)^2 + b*cos(atan2(b, a - c)/2)*sin(atan2(b, a - c)/2) + c*sin(atan2(b, a - c)/2)^2)*t^2'], t: [-1.2, 1.2], color: 'gold', width: 3 },
+        { param: ['-t*sin(atan2(b, a - c)/2)', 't*cos(atan2(b, a - c)/2)', '(a*sin(atan2(b, a - c)/2)^2 - b*cos(atan2(b, a - c)/2)*sin(atan2(b, a - c)/2) + c*cos(atan2(b, a - c)/2)^2)*t^2'], t: [-1.2, 1.2], color: 'violet', width: 3 },
       ],
       readouts: [
         { label: '$D = 4ac - b^2$', expr: '4*a*c - b^2', digits: 3 },

@@ -95,12 +95,12 @@ export function mount(F, P) {
     // component names under the stems
     for (let k = 0; k < n; k++) left.text(P.labels ? P.labels[k] : String(k + 1), k + 1, left.vy0, { color: 'ink3', align: 'center', dy: 12, size: 11 });
     if (P.xlabel) left.text(P.xlabel, left.R, left.T - 10, { screen: true, color: 'ink3', align: 'right', size: 11 });
-    const stems = (x, color, { width = 3, alpha = 1, ring = false } = {}) => x.forEach((val, k) => {
-      const at = k + 1 + offs, top = val;
-      left.line(at, 0, at, top, { color, width, alpha });
-      left.point(at, top, { color, r: ring ? 5.5 : 4.5 });
-      if (ring) left.point(at, top, { color: 'panel', r: 3 });
-    });
+    // stems pushed past the panel (a large weight) are clipped at its edge
+    const stems = (x, color, { width = 3, alpha = 1 } = {}) => {
+      g.save(); left._clip();
+      x.forEach((val, k) => { const at = k + 1 + offs; left.line(at, 0, at, val, { color, width, alpha }); left.point(at, val, { color, r: 4.5 }); });
+      g.restore();
+    };
     let offs = 0;
     if (combo) {
       const [i, j] = combo.of, a = values(vecs[i], i), b = values(vecs[j], j), tgt = values(vecs[combo.target], combo.target);
@@ -109,7 +109,9 @@ export function mount(F, P) {
       offs = off(1, 3); stems(b, vecs[j].color, { width: 2, alpha: 0.55 });
       offs = off(2, 3);
       stems(mix, 'gold', { width: 3.2 });
+      g.save(); left._clip();
       tgt.forEach((val, k) => { left.point(k + 1 + offs, val, { color: vecs[combo.target].color, r: 7 }); left.point(k + 1 + offs, val, { color: 'panel', r: 4.2 }); });
+      g.restore();
       const resid = M.normN(tgt.map((x, k) => x - mix[k]));
       legend([[vecs[i].name, vecs[i].color], [vecs[j].name, vecs[j].color], [`c₁${vecs[i].name} + c₂${vecs[j].name}`, 'gold'], [`${vecs[combo.target].name} (rings)`, vecs[combo.target].color]]);
       left.drawHandles();

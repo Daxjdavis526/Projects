@@ -21,7 +21,7 @@ const braggDeg = (lam, d, n = 1) => Math.asin((n * lam) / (2 * d)) / DEG;
 // The tube targets: Kα (Kα₁ and Kα₂ unresolved for molybdenum), Kβ, the K edge,
 // and the reference voltage at which the continuum’s peak is drawn 1 unit high.
 const TUBE = {
-  mo: { lines: [[kalphaPm('mo'), 1], [HC / XRAY.mo.kb1, 0.2]], edge: XRAY.mo.edge, ref: 35, H0: 5.5, span: 30, w: 0.6, x: [0, 130] },
+  mo: { lines: [[kalphaPm('mo'), 1], [HC / XRAY.mo.kb1, 0.2]], edge: XRAY.mo.edge, ref: 35, H0: 3.2, span: 30, w: 0.6, x: [0, 130] },
   w: { lines: [[HC / XRAY.w.ka1, 1], [HC / XRAY.w.ka2, 0.55], [HC / XRAY.w.kb1, 0.3]], edge: XRAY.w.edge, ref: 100, H0: 3, span: 50, w: 0.22, x: [0, 70] },
 };
 /** The spectrum’s expression (per unit wavelength, x in pm) for a voltage V — a number or a slider key. */
@@ -87,8 +87,8 @@ const collision = (pm, theta, caption) => ({ type: 'qm-compton', params: { lambd
 const ePc = {
   type: 'graph',
   params: {
-    x: [0, 2.2], y: [0, 2.4], aspect: 'wide', equal: true, xlabel: 'pc (MeV)', ylabel: 'E (MeV)',
-    curves: [{ fn: `sqrt(x^2 + ${r6(MEC2 ** 2)})`, color: 'accent', width: 2.6, label: 'every free electron: E² = (pc)² + (mc²)²', labelAt: 1.25, labelDx: 10, labelDy: 14 }],
+    x: [-0.3, 4.7], y: [0, 2.4], aspect: 'wide', equal: true, xlabel: 'pc (MeV)', ylabel: 'E (MeV)',
+    curves: [{ fn: `sqrt(x^2 + ${r6(MEC2 ** 2)})`, domain: [0, 4.7], color: 'accent', width: 2.6, label: 'every free electron: E² = (pc)² + (mc²)²', labelAt: 1.25, labelDx: 10, labelDy: 14 }],
     arrows: [{ from: [0, r6(MEC2)], to: [1, r6(MEC2 + 1)], color: 'gold', label: 'add a 1 MeV photon', labelDx: 8, labelDy: -6 }],
     points: [{ x: 0, y: r6(MEC2), color: 'accent', r: 5, label: 'electron at rest', labelDx: 8, labelDy: 12 }, { x: 1, y: r6(MEC2 + 1), color: 'bad', r: 5 }],
   },
@@ -111,7 +111,7 @@ const comptel = (() => {
       arrows: [{ from: P, to: [P[0] + 1.1 * el[0], P[1] + 1.1 * el[1]], color: 'accent', width: 2.4 }],
       points: [
         { x: P[0], y: P[1], r: 4, color: 'ink' }, { x: r6(P[0] + end * o[0]), y: -1.25, r: 4, color: 'ink' },
-        label(-3, 2.25, 'upper detector: the electron’s energy E₁', 'accent', 0, -22, 'left'),
+        label(3, 2.25, 'upper detector: the electron’s energy E₁', 'accent', 0, -22, 'right'),
         label(-3.5, -1.25, 'lower detector: the photon’s energy E₂', 'gold', 0, 22, 'left'),
         label(P[0] - 2.7 * u[0], P[1] - 2.7 * u[1], 'gamma ray in', 'violet', -6, -8, 'right'),
         label(0.55, 1.15, 'θ = ?', 'ink', 6, 0),
@@ -155,8 +155,8 @@ It is exactly what conservation of four-momentum demands when a photon collides 
       'Compare the continuum at 25 and 50 kV: doubling the voltage roughly quadruples its height.',
     ],
     params: {
-      x: [0, 130], y: [0, 6.3], aspect: 'wide', xlabel: 'wavelength (pm)', ylabel: 'intensity', yticks: 0, axesAt: 'edge',
-      sliders: [{ key: 'V', label: 'Tube voltage $V$', min: 10, max: 50, step: 0.5, value: 25, unit: '\\mathrm{kV}', explain: 'Each electron reaches the target with kinetic energy $eV$.' }],
+      x: [0, 130], y: [0, 3.4], aspect: 'wide', xlabel: 'wavelength (pm)', ylabel: 'intensity', yticks: 0, axesAt: 'edge',
+      sliders: [{ key: 'V', label: 'Tube voltage $V$', min: 10, max: 50, step: 0.5, value: 35, unit: '\\mathrm{kV}', explain: 'Each electron reaches the target with kinetic energy $eV$.' }],
       curves: [{ fn: spectrumFn('mo', 'V'), domain: [0.5, 130], color: 'accent', width: 2.2 }],
       vlines: [{ x: `${r6(HC)}/V`, label: 'λmin', color: 'gold' }],
       readouts: [{ label: '$\\lambda_{\\min} = hc/eV$', expr: `${r6(HC)}/V`, unit: '\\mathrm{pm}', digits: 4 }, { label: 'largest photon energy $eV$', expr: 'V', unit: '\\mathrm{keV}', digits: 3 }],

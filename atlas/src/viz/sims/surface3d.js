@@ -41,7 +41,7 @@ export function mount(F, P) {
       const fx = fn(P.surface[0], ['u', 'v', ...keys]), fy = fn(P.surface[1], ['u', 'v', ...keys]), fz = fn(P.surface[2], ['u', 'v', ...keys]);
       grid = Array.from({ length: n + 1 }, (_, i) => Array.from({ length: n + 1 }, (_, j) => {
         const u = x0 + ((x1 - x0) * i) / n, v = y0 + ((y1 - y0) * j) / n;
-        return [fx({ ...E, u, v }), fy({ ...E, u, v }), fz({ ...E, u, v })];
+        return [fx({ ...E, u, v }), fy({ ...E, u, v }), fz({ ...E, u, v }) * (P.zscale ?? 1)];
       }));
     }
     const zs = grid.flat().map((p) => p[2]).filter(Number.isFinite);
@@ -82,9 +82,11 @@ export function mount(F, P) {
       readout = [['point', `(${px.toFixed(2)}, ${py.toFixed(2)})`], ['$f$', z0.toFixed(3)], ['$\\partial f/\\partial x$', fx.toFixed(3)], ['$\\partial f/\\partial y$', fy.toFixed(3)], ['$|\\nabla f|$', Math.hypot(fx, fy).toFixed(3)]];
     }
     for (const c of P.curves || []) {
+      if (c.when && !num(c.when, E)) continue;           // drawn only while `when` is nonzero
       const fx = fn(c.param[0], ['t', ...keys]), fy = fn(c.param[1], ['t', ...keys]), fz = fn(c.param[2], ['t', ...keys]);
       const [t0, t1] = c.t.map((v) => num(v, E));
-      const pts = Array.from({ length: 161 }, (_, k) => { const t = t0 + ((t1 - t0) * k) / 160; return [fx({ ...E, t }), fy({ ...E, t }), fz({ ...E, t })]; });
+      const zs = P.zscale ?? 1;                          // curves share the surface's vertical scale
+      const pts = Array.from({ length: 161 }, (_, k) => { const t = t0 + ((t1 - t0) * k) / 160; return [fx({ ...E, t }), fy({ ...E, t }), fz({ ...E, t }) * zs]; });
       view.line(pts, { color: c.color || 'gold', width: c.width || 2.6, bias: 0.04 });
     }
     view.end();
@@ -120,7 +122,7 @@ export function validate(P) {
   if (P.z) tryParse(P.z, ['x', 'y'], 'z');
   else if (P.surface) P.surface.forEach((s) => tryParse(s, ['u', 'v'], 'surface'));
   else problems.push('surface3d needs z or surface');
-  for (const c of P.curves || []) { c.param.forEach((s) => tryParse(s, ['t'], 'curve')); (c.t || []).forEach((s) => tryParse(s, [], 'curve t range')); }
+  for (const c of P.curves || []) { c.param.forEach((s) => tryParse(s, ['t'], 'curve')); (c.t || []).forEach((s) => tryParse(s, [], 'curve t range')); if (c.when) tryParse(c.when, [], 'curve when'); }
   for (const r of P.readouts || []) tryParse(r.expr, [], 'readout');
   if (P.target && !(P.target.length === 3 && P.target.every(Number.isFinite))) problems.push('surface3d target must be [x, y, z] numbers');
   if (P.tangentAt) P.tangentAt.forEach((s) => tryParse(s, [], 'tangentAt'));

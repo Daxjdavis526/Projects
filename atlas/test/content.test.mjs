@@ -48,6 +48,16 @@ async function checkVisual(where, spec) {
   (function walk(v) { if (typeof v === 'string') strings.push(v); else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x); })(spec.params || {});
   const damaged = strings.find((x) => /[\t\f\v\b\r]/.test(x));
   if (damaged !== undefined) check(`${where}: visual text has no control characters`, false, `“${damaged.slice(0, 40).replace(/[\t\f\v\b\r]/g, '�')}” — a backslash was eaten by a JS string escape; use String.raw`);
+  // calc-vectors3d draws its labels as TeX (no $): each must typeset
+  if (spec.type === 'calc-vectors3d') {
+    const P = spec.params || {};
+    for (const el of ['vectors', 'points', 'planes', 'parallelograms', 'lines', 'curves', 'spheres'].flatMap((k) => P[k] || [])) {
+      if (typeof el?.label !== 'string') continue;
+      try { tex(el.label, false); } catch (e) { check(`${where}: calc-vectors3d label TeX`, false, `${el.label}: ${e.message}`); }
+      const dmg = escapeDamage(el.label, { prose: false });
+      if (dmg) check(`${where}: calc-vectors3d label`, false, `“${el.label}” ${dmg}`);
+    }
+  }
   // choice options (in any sim taking params.choices) are markup
   for (const c of (spec.params || {}).choices || []) for (const o of c.options || []) {
     const dmg = typeof o?.[1] === 'string' && escapeDamage(o[1]);

@@ -79,7 +79,7 @@ Maxwell’s equations broke the pattern: they predict light moving at $c = 1/\sq
       'Past κ ≈ 0.004 the curve folds back on itself: we would see one star in several places at once. Real binaries show clean orbits, so κ must be far smaller.',
     ],
     params: {
-      x: [0, 3], y: [-1.5, 1.7], aspect: 'wide', xlabel: 'arrival time at Earth (orbital periods)', ylabel: 'radial velocity seen (× 100 km/s)',
+      x: [0, 3], y: [-1.5, 1.7], aspect: 'wide', axesAt: 'edge', hlines: [{ y: 0, color: 'ink3' }], xlabel: 'arrival time at Earth (orbital periods)', ylabel: 'radial velocity seen (× 100 km/s)',
       constants: { A: r6(DS.A) },
       sliders: [{ key: 'k', label: 'Share $\\kappa$ of the source’s speed that light inherits', min: 0, max: 0.02, step: 0.0005, value: 0, unit: '', explain: 'Light would leave the star at $c + \\kappa v$. Einstein’s second postulate says $\\kappa = 0$.' }],
       curves: [
@@ -99,11 +99,11 @@ Maxwell’s equations broke the pattern: they predict light moving at $c = 1/\sq
     steps: [
       { label: 'Einstein’s rule', text: t`By the second postulate light takes as long to go out as to come back, so in Earth’s frame the reflection happened halfway between sending and receiving: $t_2 = \tfrac12(t_1 + t_3) = ${EX.t2.toFixed(3)}$ s.` },
       { label: 'Compare the clocks', text: t`At that event the lander’s clock read ${EX.tR.toFixed(3)} s, so it runs ${EX.off.toFixed(3)} s **ahead** of Earth’s. Set it back by ${EX.off.toFixed(3)} s and the two clocks are synchronized in Earth’s frame.` },
-      { label: 'The distance', text: t`$d = \tfrac12 c\,(t_3 - t_1) = \tfrac12(2.998\times10^{8}\ \text{m/s})(${EX.t3}\ \text{s}) = ${tex(EX.d, 4)}$ m, about ${Math.round(EX.d / 1e6) * 1000} km: the Moon’s distance.` },
+      { label: 'The distance', text: t`$d = \tfrac12 c\,(t_3 - t_1) = \tfrac12(2.998\times10^{8}\ \text{m/s})(${EX.t3}\ \text{s}) = ${tex(EX.d, 4)}$ m, about 384 000 km: the Moon’s distance.` },
       { label: 'What the rule assumes', text: t`You cannot time light over a one-way trip with a single clock: you would need an already synchronized clock at the far end — the very thing you are setting up. So Einstein’s rule *defines* simultaneity at a distance, and the postulates guarantee it is consistent: clocks synchronized this way agree with each other in pairs, all across the frame. Every measurement of light’s round-trip speed gives $c$.` },
       { label: 'Sense check', text: t`In relativity a **frame** is a lattice of rulers and clocks synchronized like this, and an **observer** records each event with the clock right beside it — no light delays left to subtract. What anyone *sees* is something else: the light reaches their eyes later. Lunar laser ranging times such echoes to a few picoseconds, giving the Moon’s distance to millimetres.` },
     ],
-    answer: t`No: the lander’s clock is ${EX.off.toFixed(3)} s fast. The reflection happened at $t_2 = ${EX.t2.toFixed(3)}$ s Earth time, ${Math.round(EX.d / 1e6) * 1000} km away.`,
+    answer: t`No: the lander’s clock is ${EX.off.toFixed(3)} s fast. The reflection happened at $t_2 = ${EX.t2.toFixed(3)}$ s Earth time, about 384 000 km away.`,
   },
   practice: [
     mcq({
@@ -148,9 +148,9 @@ Maxwell’s equations broke the pattern: they predict light moving at $c = 1/\sq
             type: 'graph',
             params: frame([-1.6, 4.6], [-0.3, 3.6], {
               aspect: 'wide',
-              curves: [seg(1.5, 0.2, 2.1, 3.1, 'ink', 7), seg(1.5, 0.2, 2.1, 3.1, 'accent', 3), ...[2.9, 3.4, 3.9].map((x) => seg(x, 3.4, x, 1.2, 'gold', 1.6, true))],
+              curves: [seg(1.5, 0.2, 2.1, 3.1, 'ink', 7), seg(1.5, 0.2, 2.1, 3.1, 'accent', 3), ...[3.3, 3.8, 4.3].map((x) => seg(x, 3.4, x, 1.2, 'gold', 1.6, true))],
               arrows: [{ from: [-1.2, 0.4], to: [0.6, 0.4], color: 'violet', width: 2.2, label: 'telescope moves at v', labelDx: -130, labelDy: 18 }],
-              points: [label(2.1, 3.1, 'telescope, tilted by α', 'accent', 10, -4), label(3.4, 1.2, 'starlight', 'gold', 0, 16, 'center')],
+              points: [label(2.1, 3.1, 'telescope, tilted by α', 'accent', -12, -4, 'right'), label(3.8, 1.2, 'starlight', 'gold', 0, 16, 'center')],
             }),
             caption: 'A telescope moving to the right must lean forward so that light entering its top reaches the bottom. The tilt is drawn hugely exaggerated: it is a few hundred-thousandths of a radian.',
           },
@@ -225,10 +225,10 @@ Maxwell’s equations broke the pattern: they predict light moving at $c = 1/\sq
       visual: {
         type: 'graph',
         params: {
-          x: [1700, 1990], y: [-1, 1.5], aspect: 'wide', axesAt: 'edge', xlabel: 'year', ylabel: '', yticks: 0, grid: false,
-          points: [[1727, 'Bradley', 0.6], [1851, 'Fizeau', -0.5], [1887, 'Michelson–Morley', 0.6], [1913, 'de Sitter', -0.5], [1964, 'CERN pions', 0.6]].map(([x, s, y]) => ({ x, y: 0, r: 5, color: 'accent', label: s, labelDx: 0, labelDy: y > 0 ? -16 : 18, labelAlign: 'center' })),
+          x: [1700, 1990], y: [-0.9, 1.6], aspect: 'wide', axesAt: 'edge', xlabel: 'year', ylabel: '', yticks: 0, grid: false,
+          points: [...[[1727, 'Bradley', 0.6], [1851, 'Fizeau', -0.5], [1887, 'Michelson–Morley', 0.6], [1913, 'de Sitter', -0.5], [1964, 'CERN pions', 0.6]].map(([x, s, y]) => ({ x, y: 0, r: 5, color: 'accent', label: s, labelDx: x === 1887 ? -8 : 0, labelDy: y > 0 ? -16 : 18, labelAlign: x === 1887 ? 'right' : 'center' })), label(1905, 1.15, 'Einstein, 1905', 'gold', 0, -12, 'center')],
           curves: [seg(1700, 0, 1990, 0, 'ink3', 1.4)],
-          arrows: [{ from: [1905, 1.2], to: [1905, 0.15], color: 'gold', width: 2, label: 'Einstein, 1905', labelDx: 8, labelDy: -6 }],
+          arrows: [{ from: [1905, 1.15], to: [1905, 0.15], color: 'gold', width: 2 }],
         },
         caption: 'The experiments on a timeline, with Einstein’s 1905 paper.',
       },

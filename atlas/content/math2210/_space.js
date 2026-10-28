@@ -57,15 +57,15 @@ export const lineTeX = (P, v, par = 't') => ['x', 'y', 'z'].map((name, k) => {
  * (x, y) => expression string, so a trace can substitute into it:
  * traces: [{ y: b }] draws the curve where the plane y = b cuts the graph
  * (gold), [{ x: a }] the cut by x = a (violet). zs scales every height
- * (the traces too, which surface3d itself does not scale).
+ * (surface3d's zscale, which scales the traces with the surface).
  */
 export function graphOf(f, { domain = [[-2, 2], [-2, 2]], disk = null, traces = [], zs = 1, curves = [], caption = 'Drag to rotate.', ...view } = {}) {
-  const Z = (x, y) => (zs === 1 ? f(x, y) : `${zs}*(${f(x, y)})`);
+  const Z = (x, y) => f(x, y);
   // a function defined only on a disk or ellipse (|x| ≤ A, |y| ≤ B) is drawn on a
   // polar grid, so the edge of the graph is smooth rather than a staircase
   const [A, B] = disk || [];
   const surf = disk
-    ? { surface: [`${A}*u*cos(v)`, `${B}*u*sin(v)`, Z(`(${A}*u*cos(v))`, `(${B}*u*sin(v))`)], domain: [[0, 0.9995], [0, 2 * Math.PI]] }
+    ? { surface: [`${A}*u*cos(v)`, `${B}*u*sin(v)`, Z(`(${A}*u*cos(v))`, `(${B}*u*sin(v))`)], zscale: zs, domain: [[0, 0.9995], [0, 2 * Math.PI]] }
     : { z: f('x', 'y'), zscale: zs, domain };
   const ext = disk ? [[-A, A], [-B, B]] : domain;
   return {
