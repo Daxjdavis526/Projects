@@ -153,10 +153,14 @@ function mountForm(F, P) {
         const runs = M.conic(S, lev, rmax);
         runs.forEach((run) => plot.path(run, { color: col, width: 1.8, alpha: 0.9 }));
         if (P.indicatrixLabels && runs.length) {
-          // label the curve where it is highest on the screen inside the window
-          let best = null;
-          for (const run of runs) for (const p of run) if (p[0] > wx[0] + 0.4 && p[0] < wx[1] - 0.4 && p[1] < wy[1] - 0.25 && p[1] > wy[0] + 0.25 && (!best || p[1] > best[1])) best = p;
-          if (best) plot.text(`${tPlain}(X, X) = ${lev > 0 ? '1' : '−1'}`, best[0], best[1], { color: col, dy: -11, align: 'center', size: 11.5, weight: 650 });
+          // label the curve near its vertex: the +1 curve on its right-hand side, the −1 curve at its top
+          let best = null, score = Infinity;
+          for (const run of runs) for (const p of run) {
+            if (!(p[0] > wx[0] + 0.4 && p[0] < wx[1] - 1.2 && p[1] < wy[1] - 0.3 && p[1] > wy[0] + 0.3)) continue;
+            const sc = lev > 0 ? (p[0] > 0 ? Math.abs(p[1]) : Infinity) : (p[1] > 0 ? Math.abs(p[0]) : Infinity);
+            if (sc < score) { score = sc; best = p; }
+          }
+          if (best) plot.text(`${tPlain}(X, X) = ${lev > 0 ? '1' : '−1'}`, best[0], best[1], lev > 0 ? { color: col, dx: 8, dy: -10, align: 'left', size: 11.5, weight: 650 } : { color: col, dy: -12, align: 'center', size: 11.5, weight: 650 });
         }
       }
     }

@@ -113,6 +113,9 @@ export function escapeDamage(text, { prose = true } = {}) {
     if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
+    // a row break written as \\ inside String.raw arrives as one backslash (a control space): an
+    // environment with columns, a lone "\ " and no row break at all was surely meant to have rows
+    if (/\\begin\{(?:[pbvBV]?matrix|array|aligned|cases)\}/.test(m.tex) && /&/.test(m.tex) && !/\\\\/.test(m.tex) && /(?<!\\)\\ (?!\\)/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” has columns but no row break, and a lone “\\ ” (a control space) where \\\\ was probably meant — inside t\`…\` write \\\\`;
     // a number that failed to compute: NaN, undefined or Infinity spliced into the math
     const junk = /(?<![A-Za-z\\])(NaN|undefined|Infinity|null)(?![A-Za-z])/.exec(m.tex);
     if (junk) return `the math “${m.tex.slice(0, 40)}” contains “${junk[1]}” — a value failed to compute before it was spliced in`;

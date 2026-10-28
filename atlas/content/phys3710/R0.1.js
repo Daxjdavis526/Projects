@@ -21,41 +21,43 @@ const BODIES = [
   ['Earth', 5.9722e24, 6.371e6, 8, -8],
   ['Jupiter', 1.89813e27, 6.9911e7, 8, -8],
   ['Sun', MSUN_KG, 6.957e8, 8, -10],
-  ['Sirius B', 1.018 * MSUN_KG, 5.84e6, 8, 12],
+  ['Sirius B', 1.018 * MSUN_KG, 5.84e6, -8, -6, 'right'],
   ['neutron star', 2.08 * MSUN_KG, 1.24e4, 8, 4],
-  ['GW150914 remnant', 62 * MSUN_KG, 2 * KM * 62 * MSUN_KG, -8, -8, 'right'],
+  ['GW150914 remnant', 62 * MSUN_KG, 2 * KM * 62 * MSUN_KG, 10, 14],
   ['Sgr A*', 4.3e6 * MSUN_KG, 2 * KM * 4.3e6 * MSUN_KG, -8, -8, 'right'],
   ['M87*', 6.5e9 * MSUN_KG, 2 * KM * 6.5e9 * MSUN_KG, -8, -8, 'right'],
 ];
+// drawn only when a problem asks about them
+const EXTRA = [['the Moon', 7.342e22, 1.7374e6, 8, -8], ['Mars', 6.4169e23, 3.3895e6, 8, 10]];
 
 /** The mass–radius ladder on log axes, with the horizon line R = 2GM/c² and the region inside it shaded. */
-function ladder({ only = null, mark = null, sliders = null, readouts = null, extraCurves = [], caption } = {}) {
-  const list = only ? BODIES.filter((b) => only.includes(b[0])) : BODIES;
+function ladder({ only = null, mark = null, sliders = null, readouts = null, extraCurves = [], vlines = null, caption } = {}) {
+  const list = only ? [...BODIES, ...EXTRA].filter((b) => only.includes(b[0])) : BODIES;
   const points = list.map(([name, m, r, dx, dy, align]) => ({ x: r6(Math.log10(m)), y: r6(Math.log10(r)), r: 4.5, color: name === mark ? 'gold' : 'accent2', label: name, labelDx: dx, labelDy: dy, ...(align ? { labelAlign: align } : {}) }));
   return {
     type: 'graph',
     params: {
-      x: [23.5, 41], y: [-3, 14.5], aspect: 'wide', xlog: true, ylog: true, axesAt: 'edge',
+      x: [22, 41], y: [-3, 14.5], aspect: 'wide', xlog: true, ylog: true, axesAt: 'edge',
       xlabel: 'mass (kg)', ylabel: 'radius (m)',
-      shade: [{ fn: `x - ${r6(-LOG2K)}`, lower: '-3', from: 23.5, to: 41, color: 'bad', alpha: 0.13 }],
+      shade: [{ fn: `x - ${r6(-LOG2K)}`, lower: '-3', from: 22, to: 41, color: 'bad', alpha: 0.13 }],
       curves: [
         { fn: `x - ${r6(-LOG2K)}`, color: 'bad', width: 1.8, label: 'R = 2GM/c²: a horizon', labelAt: 33.6, labelDx: 10, labelDy: 14 },
         ...extraCurves,
       ],
       points: [...points, label(37.5, -1.6, 'inside its own horizon', 'bad', 0, 0, 'center')],
-      ...(sliders ? { sliders } : {}), ...(readouts ? { readouts } : {}),
+      ...(sliders ? { sliders } : {}), ...(readouts ? { readouts } : {}), ...(vlines ? { vlines } : {}),
     },
     caption: caption ?? t`Mass across, radius up, both on logarithmic scales. The red line is $R = 2GM/c^2$, the horizon radius of a non-rotating black hole: ordinary bodies sit far above it, black holes on it. The three black holes are drawn at that radius, ignoring their spin.`,
   };
 }
 
 /** A clock-rate curve √(1 − 2M/r) against r/M (geometric units). */
-const clockRate = (caption) => ({
+const clockRate = (caption, isco = false) => ({
   type: 'graph',
   params: {
     x: [0, 20], y: [0, 1.1], aspect: 'wide', xlabel: 'r / M', ylabel: 'clock rate dτ/dt',
     curves: [{ fn: 'sqrt(1 - 2/x)', domain: [2.0001, 20], color: 'accent', label: 'a hovering clock', labelAt: 9, labelDy: 16 }],
-    hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 2, label: 'r = 2M', color: 'bad' }],
+    hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 2, label: 'r = 2M', color: 'bad' }, ...(isco ? [{ x: 6, label: 'r = 6M', color: 'gold' }] : [])],
   },
   caption: caption ?? t`A clock hovering at radius $r$ outside a black hole ticks slower than one far away. With $G = c = 1$ the curve depends on $r$ only through $r/M$.`,
 });
@@ -82,8 +84,8 @@ These are **geometric units**, the units of Hartle’s *Gravity* and of almost e
     lead: t`Slide the mass from the Earth to the largest black holes. The readouts give it in geometric units, as a length $GM/c^2$ and as a time $GM/c^3$. The red line is the horizon radius $2GM/c^2$; the height of a body above it is how weak its gravity is.`,
     tasks: [
       t`Set the mass to the Sun’s, about $10^{30.3}$ kg: it is 1.48 km, or 4.9 μs.`,
-      'Compare the Earth with the Sun: a million times the mass, a million times the length — the conversion is just a fixed factor.',
-      'Find the neutron star: only about four times its own mass above the horizon line, so M/R ≈ 0.25.',
+      'Compare the Earth with the Sun: 333 000 times the mass, so 333 000 times the length (4.4 mm against 1.48 km). The conversion is one fixed factor.',
+      'Find the neutron star: its radius is only about twice its horizon radius, so M/R ≈ 0.25.',
     ],
     ...ladder({
     sliders: [{ key: 'm', label: t`Mass, $\log_{10}(M/\text{kg})$`, min: 24, max: 41, step: 0.01, value: 30.3, explain: t`From the Earth ($6\times10^{24}$ kg) to the black hole in M87 ($10^{40}$ kg).` }],
@@ -94,16 +96,17 @@ These are **geometric units**, the units of Hartle’s *Gravity* and of almost e
       { label: t`horizon radius $2GM/c^2$`, expr: `${r6(2 * KM * 1e28)}*10^(m - 28)`, digits: 4, unit: t`\text{m}` },
     ],
     extraCurves: [],
+    vlines: [{ x: 'm', color: 'gold', label: 'your mass' }],
     }),
   },
   example: {
     prompt: t`Express the Sun’s mass, $M_\odot$, in metres and in seconds, using $GM_\odot = ${tex(GM_SUN, 12)}\ \text{m}^3/\text{s}^2$. Then find the ratio $M/R$ at its surface ($R_\odot = ${tex(R_SUN, 4)}$ m) and say what it measures.`,
-    visual: ladder({ only: ['Earth', 'Jupiter', 'Sun', 'Sirius B', 'neutron star'], mark: 'Sun', caption: t`The Sun among other bodies, mass against radius on logarithmic scales. The red line is the horizon radius $2GM/c^2$; the Sun sits about half a million times above it.` }),
+    visual: ladder({ only: ['Earth', 'Jupiter', 'Sun', 'Sirius B', 'neutron star'], mark: 'Sun', caption: t`The Sun among other bodies, mass against radius on logarithmic scales. The red line is the horizon radius $2GM/c^2$; the Sun’s radius is about 240 000 times its horizon radius.` }),
     steps: [
       { label: 'Why GM, not M', text: t`Astronomers know $GM_\odot$ to twelve figures from planetary orbits, but $G$ alone only to five. Geometric units need $GM/c^2$, so start from $GM_\odot$ and never divide out $G$.` },
       { label: 'Mass as a length', text: t`$M_\odot = \dfrac{GM_\odot}{c^2} = \dfrac{${tex(GM_SUN, 12)}}{(${tex(C, 9)})^2}\ \text{m} = ${nice(MSUN_M, 5)}$ m — about $1.48$ km.` },
       { label: 'Mass as a time', text: t`Divide once more by $c$: $GM_\odot/c^3 = ${tex(MSUN_S, 4)}$ s $\approx 4.93\ \mu\text{s}$, the time light takes to cross $1.48$ km.` },
-      { label: 'Compactness', text: t`$M/R = ${nice(MSUN_M, 5)}/${tex(R_SUN, 4)} = ${tex(MSUN_M / R_SUN, 3)}$. Both are lengths, so the ratio has no units at all: it is the same number in every unit system. Put back $G$ and $c$ and it is $GM/(c^2R)$, the Newtonian potential at the surface divided by $c^2$.` },
+      { label: 'Compactness', text: t`$M/R = ${nice(MSUN_M, 5)}/(${tex(R_SUN, 4)}) = ${tex(MSUN_M / R_SUN, 3)}$. Both are lengths, so the ratio has no units at all: it is the same number in every unit system. Put back $G$ and $c$ and it is $GM/(c^2R)$, the Newtonian potential at the surface divided by $c^2$.` },
       { label: 'Sense check', text: t`Relativistic corrections at the Sun’s surface are of order $M/R \approx 2\times10^{-6}$. Light from the surface loses that fraction of its frequency climbing out: a redshift equivalent to $${tex(MSUN_M / R_SUN, 3)}\times c = ${nice(MSUN_M / R_SUN * C, 3)}$ m/s, which solar spectroscopists do measure (about 0.63 km/s, after correcting for convection).` },
     ],
     answer: t`$M_\odot = ${nice(MSUN_M, 5)}$ m $= ${tex(MSUN_S, 4)}$ s, and $M/R = ${tex(MSUN_M / R_SUN, 3)}$ at the surface: the size of relativistic effects there.`,
@@ -119,7 +122,7 @@ These are **geometric units**, the units of Hartle’s *Gravity* and of almost e
         const ans = GM / (C * C);
         return {
           prompt: t`The gravitational parameter of ${name} is $GM = ${tex(GM, 7)}\ \text{m}^3/\text{s}^2$. What is its mass in geometric units, $GM/c^2$? Answer in ${unit === 'mm' ? 'millimetres' : 'metres'}.`,
-          visual: ladder({ only: ['Earth', 'Jupiter', 'Sun'], mark: name === 'Jupiter' ? 'Jupiter' : name === 'the Earth' ? 'Earth' : null, caption: t`The ladder of masses and radii (logarithmic scales). The red line marks $R = 2GM/c^2$; planets lie very far above it.` }),
+          visual: ladder({ only: ['Earth', 'Jupiter', 'Sun', name], mark: name === 'the Earth' ? 'Earth' : name, caption: t`The ladder of masses and radii (logarithmic scales). The red line marks $R = 2GM/c^2$; planets lie very far above it.` }),
           answer: ans * f, units: unit, tol: { rel: 0.005 },
           errors: [{ value: (GM / C) * f, feedback: t`Divide by $c^2$, not $c$: $GM$ has units $\text{m}^3/\text{s}^2$, and only $c^2$ (in $\text{m}^2/\text{s}^2$) leaves metres.` }],
           hints: [t`$GM/c^2$ with $c = ${tex(C, 9)}$ m/s; check that the units leave metres.`, t`$c^2 = ${tex(C * C, 6)}\ \text{m}^2/\text{s}^2$.`],
@@ -216,7 +219,7 @@ These are **geometric units**, the units of Hartle’s *Gravity* and of almost e
     num({
       id: 'cp-isco', difficulty: 3, transfer: true,
       prompt: t`Sagittarius A*, the black hole at the centre of the Milky Way, has $M = 4.30\times10^{6}\,M_\odot$. In geometric units Kepler’s third law for a circular orbit is exactly $T = 2\pi\sqrt{r^3/M}$, where $T$ is the period measured by a distant clock. The innermost stable circular orbit of a non-spinning hole is at $r = 6M$. What is the orbital period there, in minutes? ($M_\odot = 4.9255\ \mu\text{s}$.)`,
-      visual: clockRate(t`Radii near a black hole are measured in units of $M$. The innermost stable circular orbit sits at $r = 6M$, three times the horizon radius, for a hole that does not spin.`),
+      visual: clockRate(t`Radii near a black hole are measured in units of $M$. The innermost stable circular orbit sits at $r = 6M$, three times the horizon radius, for a hole that does not spin.`, true),
       answer: (2 * Math.PI * 6 ** 1.5 * 4.3e6 * MSUN_S) / 60, units: 'min', tol: { rel: 0.01 },
       errors: [
         { value: (2 * Math.PI * 4.3e6 * MSUN_S) / 60, feedback: t`With $r = 6M$, $\sqrt{r^3/M} = 6^{3/2}M$, not $M$.` },

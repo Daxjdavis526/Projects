@@ -78,7 +78,7 @@ export function mount(F, P0) {
       for (let J = 0; J <= Jmax; J++) {
         const y = yOf[v](J);
         plot.line(x0, y, x1, y, { color: 'ink3', width: 1.2 });
-        if (J === 0 || (yOf[v](J) - yOf[v](J - 1)) > 2.2) plot.text(`J = ${J}`, x0 - 1, y, { color: 'ink3', align: 'right', size: fs - 1.5 });
+        if (J === 0 || (w >= 520 && (yOf[v](J) - yOf[v](J - 1)) > 2.2) || (w < 520 && J === Jmax)) plot.text(`J = ${J}`, x0 - 1, y, { color: 'ink3', align: 'right', size: fs - 1.5 });
       }
       plot.text(S.mode === 'ir' ? `v = ${v}` : 'v = 0', 1, (ya + yb) / 2, { color: 'ink2', size: fs, weight: 650 });
     }
@@ -122,9 +122,11 @@ export function mount(F, P0) {
       if (X(l) < lo || X(l) > hi) continue;
       const col = selected(l) ? 'gold' : l.branch === 'P' ? 'warn' : 'accent';
       splot.line(X(l), 0, X(l), l.I / top, { color: col, width: selected(l) ? 3.2 : 2.2 });
-      if (!hide.has('labels') && l.I > 0.12 * top) splot.text(name(l), X(l), l.I / top, { color: col, align: 'center', dy: -9, size: 10 });
+      const nar = (bot.canvas.clientWidth || 600) < 520;
+      if (!hide.has('labels') && l.I > (nar ? 0.45 : 0.12) * top && (!nar || l.J % 2 === 1 || l.branch === 'J')) splot.text(name(l), X(l), l.I / top, { color: col, align: 'center', dy: -9, size: nar ? 9 : 10 });
     }
-    if (S.iso_on) splot.text(`violet: ${S.iso.label}`, hi, 1.18, { color: 'violet', align: 'right', size: 10.5 });
+    const narrowS = (bot.canvas.clientWidth || 600) < 520;
+    if (S.iso_on) splot.text(`violet: ${S.iso.label}`, narrowS ? lo : hi, 1.18, { color: 'violet', align: narrowS ? 'left' : 'right', dx: narrowS ? 4 : 0, size: 10.5 });
   }
 
   let last = '';

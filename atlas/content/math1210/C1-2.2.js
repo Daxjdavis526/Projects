@@ -39,7 +39,7 @@ So for polynomials and for rational functions whose denominator is not zero at $
   visual: {
     type: 'graph',
     title: 'Three kinds of 0/0, and the simpler function behind each',
-    lead: t`Each blue curve has a hole where substitution gives $0/0$. The dashed curve is the simplified function — identical except that it is defined at the hole. Shrink $d$: the values on both sides of the hole close in on the simplified function’s value there.`,
+    lead: t`Each curve has a hole where substitution gives $0/0$. After simplifying you get a function that is identical except that it is defined at the hole; the last readout is its value there. Shrink $d$: the values on both sides of the hole close in on that number.`,
     tasks: [
       t`Factor: $\frac{x^2 - 1}{x - 1} = x + 1$ for $x \ne 1$, so the limit at $1$ is $2$.`,
       t`Rationalize: $\frac{\sqrt{x+1} - 1}{x} = \frac{1}{\sqrt{x+1} + 1}$ for $x \ne 0$; at $0$ that is $\tfrac12$.`,
@@ -50,16 +50,16 @@ So for polynomials and for rational functions whose denominator is not zero at $
       choices: [{ key: 'k', label: 'Technique', options: [[0, 'factor'], [1, 'rationalize'], [2, 'combine fractions']], value: 0, explain: 'Which kind of 0/0 to look at.' }],
       sliders: [{ key: 'd', label: t`Distance $d$ from the hole`, min: 0.001, max: 0.9, step: 0.001, value: 0.6, logScale: true, explain: t`How far the two sample points sit from the point being approached.` }],
       curves: [
-        ...ORIG.flatMap((f, k) => [{ fn: f, color: 'accent', when: is(k), domain: [k === 1 ? -1 : -1.6, (k === 0 ? 1 : 0) - 0.04] }, { fn: f, color: 'accent', when: is(k), domain: [(k === 0 ? 1 : 0) + 0.04, 3] }]),
-        ...SIMP.map((f, k) => ({ fn: f, color: 'gold', dash: true, width: 1.4, when: is(k), domain: [k === 1 ? -1 : -1.6, 3] })),
+        ...ORIG.flatMap((f, k) => [{ fn: f, color: 'accent', when: is(k), domain: [k === 1 ? -1 : -1.6, (k === 0 ? 1 : 0) - 0.06] }, { fn: f, color: 'accent', when: is(k), domain: [(k === 0 ? 1 : 0) + 0.06, 3] }]),
       ],
       points: [{ x: `${A} - d`, y: mix('-1'), color: 'violet' }, { x: `${A} + d`, y: mix('1'), color: 'violet' }],
       readouts: [
         { label: t`left value`, expr: mix('-1'), digits: 5 },
         { label: t`right value`, expr: mix('1'), digits: 5 },
+        { label: t`simplified function at the hole`, expr: SIMP.map((f, k) => `${is(k)}*${f.replace(/x/g, `(${A})`)}`).join(' + '), digits: 5 },
       ],
     },
-    caption: t`The blue curve is the original function, drawn with a small gap at its hole; the dashed gold curve is the simplified one. They are the same function everywhere except at the hole.`,
+    caption: t`The curve is the original function, drawn with a small gap at its hole; at the hole itself it has no value. The simplified functions are $x + 1$, $\frac{1}{\sqrt{x+1}+1}$ and $\frac{-1}{x+2}$.`,
   },
   example: {
     prompt: t`A particle of mass $m$ and momentum $p$ has total energy $E = \sqrt{p^2c^2 + m^2c^4}$, and $E - mc^2$ is its kinetic energy. Find $\displaystyle\lim_{p\to 0}\frac{E - mc^2}{p^2}$.`,

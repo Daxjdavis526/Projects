@@ -6,7 +6,7 @@
 // trajectory list.
 import { lesson, mcq, num, code, order } from '../../src/core/content.js';
 import { tex } from '../../src/core/format.js';
-import { rk4Step, eulerStep, kepler2d, orbitEnergy } from './_solvers.js';
+import { rk4Step, eulerStep, kepler2d, thou } from './_solvers.js';
 
 const t = String.raw;
 
@@ -103,7 +103,7 @@ plt.show()`,
     caption: 'A point-mass Earth: the real Molniya orbit is shaped by Earth’s oblateness (its 63.4° inclination is chosen so that the perigee does not drift). The orbit is drawn in its own plane.',
   },
   example: {
-    prompt: t`Integrate the Molniya orbit (perigee radius $${RP.toFixed(0)}$ km, apogee $${RA.toFixed(0)}$ km, $GM = 398\,600.4418$ km³/s²) for one period with RK4, and **check the code** before trusting it: after exactly one period the satellite must be back at perigee.`,
+    prompt: t`Integrate the Molniya orbit (perigee radius $${thou(RP)}$ km, apogee $${thou(RA)}$ km, $GM = 398\,600.4418$ km³/s²) for one period with RK4, and **check the code** before trusting it: after exactly one period the satellite must be back at perigee.`,
     visual: {
       type: 'graph',
       params: { x: [-50, 12], y: [-22, 22], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x (1000 km)', ylabel: 'y (1000 km)',
@@ -121,9 +121,9 @@ def kepler(t, s):
     return np.array([vx, vy, -mu * x / r3, -mu * y / r3])
 \`\`\`` },
       { label: 'Method and driver', text: t`\`rk4_step(f, t, y, h)\` takes **any** right-hand side and returns the next state; \`integrate(step, f, y0, t1, n)\` takes **any** stepper. Neither knows about orbits. The driver fills a preallocated array \`Y\` row by row — row $i$ is the state at $t_i$ — so nothing is overwritten by accident (see the aliasing problem below).` },
-      { label: 'Test against physics', text: t`One period is $T = 2\pi\sqrt{a^3/GM} = ${PER.toFixed(1)}$ s. After it, the miss distance from perigee is ${NS.map((n) => `${ERR[n] >= 1 ? ERR[n].toFixed(1) : `$${tex(ERR[n], 2)}$`} km with ${n} steps`).join(', ')}.` },
+      { label: 'Test against physics', text: t`One period is $T = 2\pi\sqrt{a^3/GM} = ${thou(PER)}$ s. After it, the miss distance from perigee is ${NS.map((n) => `${ERR[n] >= 1000 ? `$${thou(ERR[n])}$` : ERR[n] >= 1 ? ERR[n].toFixed(1) : `$${tex(ERR[n], 2)}$`} km with ${n} steps`).join(', ')}.` },
       { label: 'Measure the order', text: t`The ratios of successive errors are ${NS.slice(1).map((n) => (ERR[n / 2] / ERR[n]).toFixed(1)).join(', ')}, tending to $2^4 = 16$: the code is fourth order, as RK4 must be. A ratio of 2 would betray a bug that degraded it to first order — a typo such as \`k3 = f(t + h/2, y + h/2 * k1)\` changes the order without changing anything else visible. With few steps the ratio is above 16 because the error is not yet in its asymptotic regime.` },
-      { label: 'Sense check', text: t`Euler with 400 steps misses by $${tex(ERR_EU[400], 2)}$ km — more than the orbit's size — and still by $${tex(ERR_EU[3200], 2)}$ km with 3200. Perigee, where the satellite moves at ${VP.toFixed(1)} km/s and the path bends sharply, is where a fixed step does its damage.` },
+      { label: 'Sense check', text: t`Euler with 400 steps misses by $${tex(ERR_EU[400], 2)}$ km — more than the orbit's size — and still by $${thou(Math.round(ERR_EU[3200] / 1000) * 1000)}$ km with 3200. Perigee, where the satellite moves at ${VP.toFixed(1)} km/s and the path bends sharply, is where a fixed step does its damage.` },
     ],
     answer: t`RK4 needs about ${N_NEEDED} steps per orbit to return within 1 km of perigee; the error falls 16-fold per halving of $h$.`,
   },
@@ -237,7 +237,7 @@ for i in range(n):
             objects: { L1: { type: 'list', items: ['@A1', '@A1', '@A1'] }, A1: { type: 'array', items: [6.91, 1.12], dtype: 'float64' } },
             highlight: ['A1'] }],
         },
-        caption: 'Names and objects after two steps (a one-dimensional state of two numbers, for illustration).',
+        caption: 'Names and objects after two steps, for a state of two numbers (values illustrative).',
       },
       choices: [
         '`+=` changes the one array in place, and `traj` stores references to that same array, so every entry shows its latest value',

@@ -166,7 +166,7 @@ Units make it concrete: a temperature gradient of 6.5 K per kilometre is 0.0065 
       },
       hints: [t`Substitute $\mathbf e'_j = A^i{}_j\mathbf e_i$ into $\mathbf V\cdot\mathbf e'_j$.`],
       teach: t`Projections onto the basis vectors are covariant: they are the lower-index components $V_j$ of the arrow, made with the metric.`,
-      explain: t`$\mathbf V\cdot\mathbf e'_j = A^i{}_j(\mathbf V\cdot\mathbf e_i)$: they follow the basis, like $\omega_j$. With the dot product — the metric — an arrow defines a covector $V_j = \mathbf V\cdot\mathbf e_j$; that is “lowering the index” (lesson A7).`,
+      explain: t`$\mathbf V\cdot\mathbf e'_j = A^i{}_j(\mathbf V\cdot\mathbf e_i)$: they follow the basis, like $\omega_j$. With the dot product — the metric — an arrow defines a covector $V_j = \mathbf V\cdot\mathbf e_j$; that is “lowering the index” (lesson A6.4).`,
     }),
     order({
       id: 'derive', difficulty: 2,

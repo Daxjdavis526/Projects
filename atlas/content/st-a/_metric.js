@@ -18,7 +18,7 @@ export const plainNum = (x) => (Math.abs(x - Math.round(x)) < 1e-9 ? String(Math
 export const r6 = (x) => +(+x).toFixed(6);
 
 export const matTeX = (A) => `\\begin{pmatrix} ${A.map((row) => row.map(fr).join(' & ')).join(' \\\\ ')} \\end{pmatrix}`;
-export const vecTeX = (v) => `(${v.map(fr).join(',\\ ')})`;
+export const vecTeX = (v) => `(${v.map(fr).join(',\\;')})`;
 
 // ── matrices as arrays of rows ────────────────────────────────────────────
 export const transpose = (A) => A[0].map((_, j) => A.map((row) => row[j]));

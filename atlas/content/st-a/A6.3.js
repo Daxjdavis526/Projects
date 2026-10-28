@@ -37,9 +37,9 @@ Lesson A4.3 found $\partial_r$ (length 1) and $\partial_\theta$ (length $r$), pe
   visual: {
     type: 'ten-metric',
     title: 'Polar and spherical coordinates, measured',
-    lead: t`Drag the probe P. The readout gives the metric there, the lengths of the coordinate basis vectors (the square roots of the diagonal) and $\sqrt{|g|}$. In the polar chart, the left panel shows the true plane.`,
+    lead: t`Drag the probe P. The readout gives the metric there, the lengths of the coordinate basis vectors (the square roots of the diagonal) and $\sqrt{|g|}$. In the polar chart, a second panel shows the true plane.`,
     tasks: [
-      t`Polar: move P outward. $g_{\theta\theta} = r^2$ grows and the ellipses squeeze in $\theta$, while in the true plane they stay identical circles.`,
+      t`Polar: move P outward. $g_{\theta\theta} = r^2$ grows and the ellipses squeeze in $\theta$, while in the true-plane panel they stay identical circles.`,
       t`Switch to the 2-sphere (radius 1): $g_{\theta\theta} = 1$ everywhere, but $g_{\phi\phi} = \sin^2\theta$ falls to zero at the poles, where the chart stretches each ellipse sideways.`,
       t`Compare $\sqrt{|g|}$ with $|\partial_r|\,|\partial_\theta|$ in polar coordinates: they agree, because the basis is perpendicular.`,
     ],
@@ -88,7 +88,7 @@ Lesson A4.3 found $\partial_r$ (length 1) and $\partial_\theta$ (length $r$), pe
     mcq({
       id: 'why-diagonal', difficulty: 2,
       prompt: t`Why is $g_{r\theta} = 0$ in polar coordinates?`,
-      visual: chartPic({ chart: 'polar', probe: [2, 1], space: true }, t`Polar coordinates: the true plane (left) and the chart (right). On the plane, the circles of constant $r$ meet the rays of constant $\theta$ at right angles.`),
+      visual: chartPic({ chart: 'polar', probe: [2, 1], space: true }, t`Polar coordinates: the true plane and the chart, side by side. On the plane, the circles of constant $r$ meet the rays of constant $\theta$ at right angles.`),
       choices: [t`Because $\partial_r$ and $\partial_\theta$ are perpendicular at every point: $g_{r\theta} = \partial_r\cdot\partial_\theta = 0$`, t`Because $r$ and $\theta$ have different units`, t`Because metrics are always diagonal`, t`Because $g_{r\theta}$ would have to equal $g_{\theta r}$`],
       answer: 0,
       why: {

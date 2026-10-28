@@ -474,7 +474,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `calc-polar` | polar and parametric curves, swept areas as thin wedges (½∫r²dθ), tangents, arc length, conics with focus and directrix, Kepler's equation with equal-time sectors |
 | `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
-| `calc-vectors3d` | (camera `yaw` and `pitch` in radians) a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
+| `calc-vectors3d` | (camera `yaw` and `pitch` in radians; in the default view a vector near (2, 1, 1) points at the viewer — turn the camera) a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
 | `c3-contour` | (x and y share one scale: give a window with the canvas's aspect, 16:10 by default or 2:1 when wide) a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c |
 | `c3-coords` | cylindrical or spherical coordinates as three surfaces meeting at a point, turning unit vectors, the volume-element box (`edgeLabels: false` hides its edge lengths) |
 | `c3-curve` | a point riding a space curve: T, N, B frame, osculating circle, acceleration split into tangential and normal parts (gravity-turn preset) |
@@ -483,6 +483,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
 | `la-subspaces` | Strang's four subspaces as squares sized by dimension, with exact bases; slider entries change the rank; subspaces can be renamed (self-stresses, mechanisms) and a dimension hidden as “?” |
+| `la-svd` | a 2×2 matrix acting on the unit circle as turn–stretch–turn with its singular vectors (rank-1 toggle); a computed picture beside its rank-k approximation with singular values on a log scale |
 | `la-det` | two columns' parallelogram, coloured by the sign of the determinant with an orientation arrow; the ad − bc proof by pieces; Cramer's rule as a ratio of areas |
 | `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
 | `de-plane`, `de-tracedet`, `de-modes` | phase planes of any 2D system (nullclines, typed equilibria, eigenvector lines, conserved-quantity contours and separatrices, launchable trajectories, e^{At} carrying a shape); the trace–determinant map beside the phase portrait; coupled masses and CO₂ with normal modes, beats and energy bars |
@@ -497,6 +498,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `mech-rotor` | a rigid body about a fixed axis: moments of inertia, the parallel-axis theorem, torques with lever arms |
 | `mech-kepler` | Kepler orbits with real data (ISS, GPS, the Moon, Mercury, Halley, S2) and Newton's cannon |
 | `ten-basis` | a 2D vector or a covector (a stack of level lines) against a draggable basis: old-basis ghost, dual basis, components, the pairing as lines crossed; `get('point')` returns the arrow's tip; `rotate` and `dragBasis` cannot be combined |
+| `ten-metric` | form mode: a (0,2) tensor fed draggable arrows (lowering an index as a stack of lines, the metric's unit circle or light-cone hyperbolae, raising, tensor products, signature); chart mode: Tissot ellipses on polar, sphere, half-plane, Minkowski and skewed charts with a measured segment |
 | `gr-light-clock` | two light clocks, one moving: time dilation from the constancy of c |
 | `gr-coordinates` | one flat plane under different coordinate labels: lengths agree, components do not |
 | `gr-sphere-transport` | parallel transport around a loop on a sphere: the arrow returns rotated by area/R² |
@@ -530,12 +532,18 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `qm-slits`, `qm-hydrogen` | electrons through slits arriving one at a time and building fringes; hydrogen's levels and series, the spectrum in true colour, Bohr orbits or probability clouds |
 | `qm-binding`, `qm-decay` | binding energy per nucleon from AME2020 masses with the liquid-drop curve; a sample decaying nucleus by nucleus against the exponential law |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
+| `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
 | `mp-junction` | a p–n junction's band diagram (true widths), moving carriers, the Fermi level splitting under bias, the I–V curve; Si, Ge, GaAs, GaAsP, InGaN; LED and solar-cell modes |
 | `mp-schrodinger`, `mp-orbitals` | infinite, finite, harmonic and double wells (levels, ψ and |ψ|², forbidden regions, a sloshing superposition) and scattering off steps and barriers with exact transmission; hydrogen orbitals for n ≤ 5 — a cloud slice, the |Y_lm|² shape, P(r) with its markers, real or complex orbitals |
 | `mp-collide` | collisions and decays on the energy–momentum diagram: four-momentum arrows, mass hyperbolas, √s and thresholds, any frame |
 | `mp-rutherford`, `mp-franck-hertz`, `mp-packet` | alpha particles on exact Coulomb hyperbolas past a nucleus (against Thomson's atom) with angle and count-rate panels; a mercury or neon Franck–Hertz tube with its current dips; a packet built from plane waves under four dispersion laws, and the x–k trade-off |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
+In TeX `%` starts a comment and swallows the rest: write `\\%` (in a
+plain string) or `\%` (in `t\`…\``) wherever a percent sign lands in math —
+slider units and readouts included. Inside an environment with columns
+(`matrix`, `array`), a row break is `\\` (two backslashes in `t\`…\``); the
+test flags an environment with columns, no row break and a lone `\ `.
 A slider's range is fixed when it is made: to explore a different range,
 give a different visual (or a choice that switches scale).
 Choices take `{ key, label, options: [[value, text], …], value, explain }`;

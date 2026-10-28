@@ -34,7 +34,7 @@ The second formula adds up such steps along a curve $x^\mu(\lambda)$: it is the 
     title: 'Ellipses that are really circles',
     lead: t`Each chart is drawn as a plain grid of its own coordinates. At grid points, the gold ellipses are all the small steps of one fixed true length $\varepsilon$, from the line element; the orange one sits on the probe P, whose metric components the readout gives. Drag P, and drag the ends of the blue segment to compare its true length with the naive one.`,
     tasks: [
-      t`Polar: the ellipses flatten in the $\theta$ direction as $r$ grows — one radian of $\theta$ is $r$ long. The left panel shows the true plane, where every one of them is the same circle.`,
+      t`Polar: the ellipses flatten in the $\theta$ direction as $r$ grows — one radian of $\theta$ is $r$ long. The second panel shows the true plane, where every one of them is the same circle.`,
       t`The 2-sphere: near the poles the ellipses balloon sideways — a degree of longitude there is almost no distance. This is a flat map of a round globe, and the ellipses are its distortion.`,
       t`The half-plane: the ellipses are circles that shrink toward $y = 0$. Measured with $ds^2 = (dx^2 + dy^2)/y^2$, the edge is infinitely far away.`,
     ],
