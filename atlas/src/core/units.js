@@ -217,6 +217,6 @@ export function unitTeX(u) {
   return '\\mathrm{' + String(u)
     .replace(/\*/g, '\\cdot ').replace(/·/g, '\\cdot ')
     .replace(/\^\(?(-?\d+)\)?/g, '^{$1}')
-    .replace(/μ|µ/g, '\\mu ').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^\\circ').replace(/%/g, '\\%')
+    .replace(/μ|µ/g, '\\mu ').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
     .replace(/ /g, '\\,') + '}';
 }

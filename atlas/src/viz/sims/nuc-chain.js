@@ -10,7 +10,7 @@
 //
 //   { type: 'nuc-chain', params: {
 //       chain: 'pair',      // pair (a parent and a daughter: set the ratio of half-lives), moly, radon, radium, u238
-//       ratio: 0.1,         // pair: the daughter's half-life over the parent's (0.01–100)
+//       ratio: 0.1,         // pair: the daughter's half-life over the parent's (0.001–100)
 //       logy: false,        // activities on a logarithmic scale (the u238 chain always is)
 //       time: null,         // a time marker, in the chain's display unit (parent half-lives, h, min, d; log₁₀ years for u238)
 //       peak: false,        // pair, moly: mark when the daughter's activity peaks
@@ -33,7 +33,7 @@ const VIEWS = {
   moly: { unit: K.HOUR, x: [0, 120], xlabel: 'time since the generator was last emptied (h)', tunit: 'h', show: [0, 1] },
   radon: { unit: K.MIN, x: [0, 240], xlabel: 'time after sealing pure radon (min)', tunit: 'min', show: [0, 1, 2, 3] },
   radium: { unit: K.DAY, x: [0, 30], xlabel: 'time after sealing pure radium (days)', tunit: 'd', show: [0, 1, 4] },
-  u238: { unit: K.YEAR, x: [-8, 11], log: true, xlabel: 'time after purifying uranium (years, log scale)', tunit: 'yr', show: [0, 1, 3, 4, 5, 11] },
+  u238: { unit: K.YEAR, x: [-8, 10], log: true, xlabel: 'time after purifying uranium (years, log scale)', tunit: 'yr', show: [0, 1, 3, 4, 5, 11] },
 };
 
 const sig = (x, n = 3) => (x === 0 ? '0' : Math.abs(x) >= 1e4 || Math.abs(x) < 1e-3 ? x.toExponential(n - 1).replace(/e\+?(-?\d+)/, '\\times10^{$1}') : String(+x.toPrecision(n)));
@@ -45,7 +45,7 @@ export function mount(F, P0) {
     .filter((c) => !(c === 'ratio' && P.chain !== 'pair') && !(c === 'logy' && P.chain === 'u238'));
   const ctl = (key, make, value) => (wanted.includes(key) ? make() : (F.params[key] = value));
   F.params.chain = P.chain;
-  ctl('ratio', () => F.slider({ key: 'ratio', label: 'Daughter’s half-life ÷ parent’s, $T_2/T_1$', min: 0.01, max: 100, value: P.ratio, logScale: true, fmt: (v) => sig(v, 2), explain: 'Below about 0.01 the parent barely decays while the daughter settles (secular); between, both fall together (transient); above 1 the daughter outlives the parent (no equilibrium).' }), P.ratio);
+  ctl('ratio', () => F.slider({ key: 'ratio', label: 'Daughter’s half-life ÷ parent’s, $T_2/T_1$', min: 0.001, max: 100, value: P.ratio, logScale: true, fmt: (v) => sig(v, 2), explain: 'Below about 0.01 the parent barely decays while the daughter settles (secular); up to 1, both fall together (transient); above 1 the daughter outlives the parent (no equilibrium).' }), P.ratio);
   ctl('logy', () => F.toggle({ key: 'logy', label: 'Logarithmic activity scale', value: P.logy, explain: 'On a log scale an exponential decay is a straight line, and parallel lines mean a fixed ratio.' }), P.logy);
   const V0 = VIEWS[P.chain];
   const t0 = P.time ?? (V0.log ? 3 : V0.x[1] * 0.4);
@@ -122,7 +122,7 @@ export function mount(F, P0) {
     const tm = F.params.time;
     if (tm !== null && tm !== undefined) {
       const a = K.activities(ch, K.pureParent(ch), (V.log ? 10 ** tm : tm) * u);
-      rows.push(['time', V.log ? `${sig(10 ** tm, 2)}\\ \\text{yr}` : `${sig(tm, 3)}\\ \\text{${V.tunit === 'T₁' ? 'T_1' : V.tunit}}`]);
+      rows.push(['time', V.log ? `${sig(10 ** tm, 2)}\\ \\text{yr}` : V.tunit === 'T₁' ? `${sig(tm, 3)}\\,T_1` : `${sig(tm, 3)}\\ \\text{${V.tunit}}`]);
       (V.show || [0, 1]).slice(1).forEach((m) => rows.push([`${ch.members[m].label} ÷ parent now`, hide.has('ratio') ? '?' : sig(a[m] / a[0], 3)]));
     }
     F.readout(rows);
@@ -137,7 +137,7 @@ export function mount(F, P0) {
 export function validate(P) {
   const p = [];
   if (!VIEWS[P.chain]) p.push(`nuc-chain: unknown chain “${P.chain}”`);
-  if (!(P.ratio >= 0.01 && P.ratio <= 100)) p.push('nuc-chain: ratio must lie in 0.01–100');
+  if (!(P.ratio >= 0.001 && P.ratio <= 100)) p.push('nuc-chain: ratio must lie in 0.001–100');
   if (P.time !== null && VIEWS[P.chain] && !(P.time >= VIEWS[P.chain].x[0] && P.time <= VIEWS[P.chain].x[1])) p.push(`nuc-chain: time must lie in ${VIEWS[P.chain].x.join('–')}`);
   for (const h of P.hide || []) if (!['ratio', 'kind', 'peak'].includes(h)) p.push(`nuc-chain: unknown hide “${h}”`);
   if (Array.isArray(P.controls)) for (const c of P.controls) if (!CONTROLS.includes(c)) p.push(`nuc-chain: unknown control “${c}”`);

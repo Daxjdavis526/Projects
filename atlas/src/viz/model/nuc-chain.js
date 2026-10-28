@@ -130,13 +130,14 @@ export const peakTime = (l1, l2) => Math.log(l2 / l1) / (l2 - l1);
 /**
  * The equilibrium a parent–daughter pair settles into, and the ratio of their
  * activities then (with the daughter's branching fraction b):
- * secular (λ₁ ≪ λ₂): A₂/A₁ → b; transient (λ₁ < λ₂): b·λ₂/(λ₂ − λ₁); none (λ₁ ≥ λ₂).
+ * secular (λ₁ ≪ λ₂, here T₁/T₂ ≥ 100, so the ratio is within 1% of b): A₂/A₁ → b;
+ * transient (λ₁ < λ₂): b·λ₂/(λ₂ − λ₁); none (λ₁ ≥ λ₂).
  */
 export function equilibrium(T1, T2, b = 1) {
   const l1 = LN2 / T1, l2 = LN2 / T2;
   if (l1 >= l2) return { kind: 'none', ratio: Infinity };
   const ratio = (b * l2) / (l2 - l1);
-  return { kind: T1 / T2 > 1000 ? 'secular' : 'transient', ratio };
+  return { kind: T1 / T2 >= 100 ? 'secular' : 'transient', ratio };
 }
 
 /** Radon ingrowth from radium in a sealed volume: the radon's activity as a fraction of radium's after time t (same unit as T). */

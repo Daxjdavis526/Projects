@@ -139,6 +139,12 @@ Brace multi-letter subscripts and commands in them: `v_{\max}`, `T_{\text{eff}}`
 Write thousands as `$6{,}371$` or with a thin space, `$6\,371$` — and never
 put `toLocaleString()` output inside math (its commas render as "42, 164").
 Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
+Nothing checks for thousands without a separator, or for a generated number
+that falls into e-notation (`1.2e+5`) inside math — format big and small
+numbers yourself (`\times 10^{5}`). The test rejects the words NaN,
+undefined, Infinity and null anywhere inside math, `\text{undefined}`
+included: a slope that does not exist is "has no value" or "is not defined"
+in prose, or $\pm\infty$ when it diverges.
 
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
@@ -311,6 +317,9 @@ that the answer's derivative is that right-hand side.
 
 `items` listed **in the correct order** (3+); the player shuffles them.
 Good for the steps of a derivation or an experimental procedure.
+An `order` item takes a `visual` like any other. Keep each step short: on a
+phone the steps sit in a narrow column beside the move buttons, so a long
+display equation wraps badly — split a derivation into more, shorter steps.
 
 ### Matching — `match`
 
@@ -382,6 +391,13 @@ demonstration must accumulate in a loop. Timings in the browser vary from run to
 of three before printing a speed-up. Write code with `` t`…` `` so `\n`
 inside Python strings survives. Run
 `node atlas/test/code.test.mjs <lesson-id>` after `content.test.mjs`.
+
+The same test also runs every `code-runner` snippet (an Explore step, or one
+anywhere else in the lesson) with the browser's helper modules, draws its
+figures, and fails if it raises or prints anything on stderr — a NumPy
+`RuntimeWarning` shows the learner red text before they have typed a thing.
+It does not check what a snippet prints: if a lesson's prose quotes a number
+the snippet prints, run the snippet and copy the number from its output.
 
 ### Generators
 

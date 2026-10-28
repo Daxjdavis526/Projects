@@ -12,6 +12,7 @@
 import { makeRng, hashString } from './rng.js';
 import { grade } from './check.js';
 import { mathIn, escapeDamage, bareCommand } from './markup.js';
+import { unitTeX } from './units.js';
 
 export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider', 'code'];
 export const LESSON_KINDS = ['lesson', 'concept', 'dissection'];
@@ -147,6 +148,8 @@ export function validateItem(item, tex) {
     if (dmg) p.push(`TeX “${String(src).slice(0, 40)}…” ${dmg}`);
     if (tex) { try { tex(src, false); } catch (e) { p.push(`bad TeX “${src}”: ${e.message}`); } }
   }
+  // the unit box beside a numeric answer is typeset from the units string
+  if (tex && item.units) { try { tex(unitTeX(item.units), false); } catch (e) { p.push(`units “${item.units}” do not typeset: ${e.message}`); } }
   if (item.type === 'code') {
     // run by test/code.test.mjs in real Python: the reference passes, the starter does not
     need(typeof item.starter === 'string', 'a coding exercise needs starter code (it may be empty)');

@@ -110,7 +110,7 @@ export default boss({
                   vectors: [{ to: w.map((c) => r4(c / 10)), color: 'accent', label: t`\boldsymbol\omega` }, { to: x.map((c) => r4(c / 100)), color: 'gold', label: t`\mathbf r` }],
                   curves: [{ param: [`${r4(ring)}*cos(t)`, `${r4(ring)}*sin(t)`, '0'], t: [0, 6.2832], color: 'teal' }],
                 },
-                caption: t`The spin $\boldsymbol\omega$ (blue, drawn 10 m long per 0.1 rad/s) tipped off the design axis $z$, and the accelerometer’s position $\mathbf r$ (gold, in hundreds of metres). The teal circle is the ring at the accelerometer’s distance from the axis. Drag to rotate.`,
+                caption: t`The spin $\boldsymbol\omega$ (blue, to its own scale: one axis unit per 0.1 rad/s) tipped off the design axis $z$, and the accelerometer’s position $\mathbf r$ (gold, one axis unit per 100 m). The teal circle is the ring at the accelerometer’s distance from the axis. Drag to rotate.`,
               },
             };
           },
@@ -169,8 +169,8 @@ export default boss({
               teach: t`Covector components transform with the same matrix as the basis vectors, $\omega'_j = A^i{}_j\,\omega_i$ — lower index, “co-variant” — because they are the covector’s values on those vectors.`,
               explain: t`$\partial'_jT = A^i{}_j\,\partial_iT$, with column $j$ of $A$ the arrow $\mathbf e'_j$: $$\partial'_{${k + 1}}T = (${w[0]})(${E[k][0]}) + (${w[1]})(${E[k][1]}) = ${key}\ \text{K/m}.$$ The other is $\partial'_{${2 - k}}T = ${other}$ K/m. A walk along $\mathbf e'_{${k + 1}}$ changes the temperature by ${key} K, whichever basis you write it in: paired with deck components of a displacement, these give the same temperature change as the station’s components do.`,
               visual: still({ mode: 'covector', basis: SQ, covector: w, names: ['e₁', 'e₂'], showVector: false, levelLabels: false, crossings: false, wname: 'dT',
-                arrows: [{ from: [0, 0], to: E[0], color: 'violet', label: 'e′₁' }, { from: [0, 0], to: E[1], color: 'violet', label: 'e′₂' }] },
-              t`The gradient $dT$ as its stack of isotherms one kelvin apart (teal), the station’s basis, and the deck arrows (violet). Isotherms only near the heater: a real gradient is not uniform over the deck.`),
+                arrows: [{ from: [0, 0], to: E[0], color: 'gold', label: 'e′₁' }, { from: [0, 0], to: E[1], color: 'gold', label: 'e′₂' }] },
+              t`The gradient $dT$ as its stack of isotherms one kelvin apart (teal), the station’s basis, and the deck arrows (gold). Isotherms only near the heater: a real gradient is not uniform over the deck.`),
             };
           },
         }),
@@ -219,7 +219,7 @@ export default boss({
             const R = r.pick([180, 200, 225, 250]), a = r.pick([6, 8, 10]);
             const V = 2 * PI * PI * R * a * a, M = 1.2 * V;
             return {
-              prompt: t`The habitat ring is a torus: its tube’s centre-line is a circle of radius $R = ${R}$ m round the station’s axis, and the tube has radius $${a}$ m. Toroidal coordinates $(s, \psi, \phi)$ — distance $s$ from the tube’s centre-line, angle $\psi$ round the tube, angle $\phi$ round the station’s axis — are $$x = (${R} + s\cos\psi)\cos\phi,\quad y = (${R} + s\cos\psi)\sin\phi,\quad z = s\sin\psi.$$ Find the volume element’s factor $\sqrt g$, with $g = \det g_{\mu\nu}$, so that $dV = \sqrt g\,ds\,d\psi\,d\phi$. Write it in terms of $s$ and $\psi$.`,
+              prompt: t`The habitat ring is a torus: its tube’s centre-line is a circle of radius $R = ${R}$ m round the station’s axis, and the tube has radius $${a}$ m. Toroidal coordinates $(s, \psi, \phi)$ — distance $s$ from the tube’s centre-line, angle $\psi$ round the tube, angle $\phi$ round the station’s axis — are $$\begin{aligned} x &= (${R} + s\cos\psi)\cos\phi, \\ y &= (${R} + s\cos\psi)\sin\phi, \\ z &= s\sin\psi. \end{aligned}$$ Find the volume element’s factor $\sqrt g$, with $g = \det g_{\mu\nu}$, so that $dV = \sqrt g\,ds\,d\psi\,d\phi$. Write it in terms of $s$ and $\psi$.`,
               answer: `s*(${R} + s*cos(psi))`, answerTeX: t`s\,(${R} + s\cos\psi)`,
               vars: { s: [0.5, a], psi: [-3, 3] }, lhs: t`\sqrt g`, keys: [['ψ', 'psi']],
               errors: [
@@ -307,8 +307,8 @@ export default boss({
               explain: t`Metric compatibility gives $\Gamma^\theta{}_{\phi\phi} = -\sin\theta\cos\theta$. Along the parallel, $a^\theta = -\sin\theta_0\cos\theta_0\cdot\dfrac{1}{R^2\sin^2\theta_0} = -\dfrac{\cot\theta_0}{R^2}$: negative, toward the pole. Its size along the ground is $R|a^\theta| = \cot\theta_0/R = \tan(${lat}^\circ)/(${R_MARS}\ \text{km})$, so over 100 km the heading turns by $$\frac{\tan ${lat}^\circ\times100}{${R_MARS}}\ \text{rad} = ${tn(key)}^\circ,$$ always toward the pole. Driven without steering, the rover would follow a great circle, curving toward the equator — as the geodesic in the picture does. At the equator $\tan0 = 0$: the equator is a geodesic.`,
               visual: {
                 type: 'gr-surface',
-                params: { mode: 'geodesic', surface: 'sphere', v: r4((90 - lat) * DEG), heading: 0, length: 2.2, controls: false, readout: false },
-                caption: t`A sphere with the rover’s starting point P. The gold curve is the geodesic launched along the parallel through P — where the rover goes if it drives straight. Drag to rotate.`,
+                params: { mode: 'geodesic', surface: 'sphere', v: r4((90 - lat) * DEG), heading: 0, length: 2.2, controls: false, readout: false, colorK: false },
+                caption: t`A sphere with the rover’s starting point P. The coloured curve is the geodesic launched along the parallel through P — where the rover goes if it drives straight. Drag to rotate.`,
               },
             };
           },
@@ -335,7 +335,7 @@ export default boss({
                 t`For $\sin\theta\cos\phi$: the $\theta$ part gives $\cos2\theta\cos\phi/\sin\theta$ and the $\phi$ part $-\cos\phi/\sin\theta$; together, $(\cos2\theta - 1)\cos\phi/\sin\theta = -2\sin\theta\cos\phi$.`,
               ],
               teach: t`The divergence $\nabla_\mu V^\mu = \frac{1}{\sqrt g}\partial_\mu(\sqrt g\,V^\mu)$ applied to the raised gradient $V^\mu = g^{\mu\nu}\partial_\nu f$ gives the Laplacian in any coordinates, on any surface.`,
-              explain: t`With $g^{\theta\theta} = 1/R^2$ and $g^{\phi\phi} = 1/(R^2\sin^2\theta)$, $$R^2\nabla^2f = \frac{1}{\sin\theta}\partial_\theta(\sin\theta\,\partial_\theta f) + \frac{1}{\sin^2\theta}\partial_\phi^2f.$$ For $\cos^2\theta$: $\frac{1}{\sin\theta}\partial_\theta(-2\sin^2\theta\cos\theta) = -4\cos^2\theta + 2\sin^2\theta = 2 - 6\cos^2\theta$. For $\sin\theta\cos\phi$: $\frac{\cos2\theta - 1}{\sin\theta}\cos\phi = -2\sin\theta\cos\phi$. So $$R^2\nabla^2f = ${a}\,(2 - 6\cos^2\theta) ${B2 < 0 ? '-' : '+'} ${Math.abs(B2)}\sin\theta\cos\phi.$$ Check: $\sin\theta\cos\phi = x/R$ is a spherical harmonic with $\ell = 1$, and $\nabla^2Y_\ell = -\ell(\ell + 1)Y_\ell/R^2 = -2Y_1/R^2$ ✓. (SymPy agrees, term by term.)`,
+              explain: t`With $g^{\theta\theta} = 1/R^2$ and $g^{\phi\phi} = 1/(R^2\sin^2\theta)$, $$R^2\nabla^2f = \frac{1}{\sin\theta}\partial_\theta(\sin\theta\,\partial_\theta f) + \frac{1}{\sin^2\theta}\partial_\phi^2f.$$ For $\cos^2\theta$: $$\frac{1}{\sin\theta}\partial_\theta(-2\sin^2\theta\cos\theta) = 2 - 6\cos^2\theta.$$ For $\sin\theta\cos\phi$: $$\frac{\cos2\theta - 1}{\sin\theta}\cos\phi = -2\sin\theta\cos\phi.$$ So $$R^2\nabla^2f = ${a}\,(2 - 6\cos^2\theta) ${B2 < 0 ? '-' : '+'} ${Math.abs(B2)}\sin\theta\cos\phi.$$ Check: $\sin\theta\cos\phi = x/R$ is a spherical harmonic with $\ell = 1$, and $\nabla^2Y_\ell = -\ell(\ell + 1)Y_\ell/R^2 = -2Y_1/R^2$ ✓. (SymPy agrees, term by term.)`,
               visual: {
                 type: 'c3-contour',
                 params: {
@@ -351,7 +351,7 @@ export default boss({
     },
     {
       title: 'Clocks on the rim',
-      story: t`Back aboard, the navigator rewrites flat spacetime in coordinates that turn with the station, $\phi = \phi_\star - \omega t$ with $\phi_\star$ fixed to the stars, so that *Halcyon* sits still in them. The result is a perfectly good metric of special relativity, with no gravity anywhere — and it already looks like the metrics of general relativity: $$ds^2 = -(c^2 - \omega^2r^2)\,dt^2 + 2\omega r^2\,dt\,d\phi + dr^2 + r^2\,d\phi^2 + dz^2.$$`,
+      story: t`Back aboard, the navigator rewrites flat spacetime in coordinates that turn with the station, $\phi = \phi_\star - \omega t$ with $\phi_\star$ fixed to the stars, so that *Halcyon* sits still in them. The result is a perfectly good metric of special relativity, with no gravity anywhere — and it already looks like the metrics of general relativity: $$\begin{aligned} ds^2 = &-(c^2 - \omega^2r^2)\,dt^2 + 2\omega r^2\,dt\,d\phi \\ &+ dr^2 + r^2\,d\phi^2 + dz^2. \end{aligned}$$`,
       items: [
         num({
           id: 'r4-rim-clock', skill: 'st-a.A6.2', difficulty: 3, transfer: true,
@@ -377,7 +377,7 @@ export default boss({
                 const W = wheel({ a0: 0.35 });
                 return plane({
                   x: [-1.5, 1.5], y: [-1.25, 1.3], curves: W.curves, arrows: [W.head],
-                  points: [dotp(0, 0, 'accent', 6), tag(0, 0, 'hub clock', 'accent', -30, 26), dotp(Math.cos(-0.6), Math.sin(-0.6), 'gold', 6), tag(Math.cos(-0.6), Math.sin(-0.6), 'rim clock', 'gold', 10, 10),
+                  points: [dotp(0, 0, 'accent', 6), tag(0, 0, 'hub clock', 'accent', -30, 34), dotp(Math.cos(-0.6), Math.sin(-0.6), 'gold', 6), tag(Math.cos(-0.6), Math.sin(-0.6), 'rim clock', 'gold', 14, 14),
                     tag(1.18 * Math.cos(0.85), 1.18 * Math.sin(0.85), 'ω', 'teal', 6, -4)],
                   caption: 'The two clocks on Halcyon, seen along its axis: one at the hub, one on the rim, both at rest in the turning coordinates. Not to scale.',
                 });
@@ -406,13 +406,13 @@ export default boss({
               },
               hints: [t`Signature is the count of positive and negative eigenvalues, and it cannot change unless $\det g$ passes through zero.`, t`Compute the determinant of the $(t, \phi)$ block: $-(c^2 - \omega^2r^2)\,r^2 - (\omega r^2)^2$.`],
               teach: t`The signature is a property of the metric, not of a coordinate: it is fixed by the signs of $g$’s eigenvalues, so a diagonal entry changing sign, like $g_{tt}$ here, means only that a coordinate direction changed character.`,
-              explain: t`$$\det\begin{pmatrix} -(c^2 - \omega^2r^2) & \omega r^2 \\ \omega r^2 & r^2 \end{pmatrix} = -c^2r^2 + \omega^2r^4 - \omega^2r^4 = -c^2r^2,$$ the same as for $-c^2dt^2 + r^2d\phi_\star^2$ — these are only new coordinates on flat spacetime. A negative $2\times2$ determinant means one eigenvalue of each sign, and with $dr^2 + dz^2$ the signature is $(-, +, +, +)$ at every radius. Beyond $r = c/\omega$ the curves of fixed $(r, \phi, z)$ would be spacelike: no observer can ride the grid there, but other worldlines remain timelike. The same thing happens inside a rotating black hole’s ergosphere, where $g_{tt} > 0$ and nothing can stay still.`,
+              explain: t`The $(t, \phi)$ block’s determinant is $$\begin{aligned} g_{tt}g_{\phi\phi} - g_{t\phi}^2 &= -(c^2 - \omega^2r^2)\,r^2 - \omega^2r^4 \\ &= -c^2r^2, \end{aligned}$$ the same as for $-c^2dt^2 + r^2d\phi_\star^2$ — these are only new coordinates on flat spacetime. A negative $2\times2$ determinant means one eigenvalue of each sign, and with $dr^2 + dz^2$ the signature is $(-, +, +, +)$ at every radius. Beyond $r = c/\omega$ the curves of fixed $(r, \phi, z)$ would be spacelike: no observer can ride the grid there, but other worldlines remain timelike. The same thing happens inside a rotating black hole’s ergosphere, where $g_{tt} > 0$ and nothing can stay still.`,
               visual: plane({
                 x: [-1.6, k + 1.6], y: [-1.3, 1.6],
                 curves: [arc(0, 0, 1, 0, 2 * PI, 'bad', 2, true)],
                 points: [dotp(0, 0, 'ink2', 4), tag(0, 0, 'station', 'ink2', -22, 18), dotp(k * Math.cos(0.35), k * Math.sin(0.35), 'gold', 6),
                   tag(k * Math.cos(0.35), k * Math.sin(0.35), `r = ${k} c/ω`, 'gold', -30, -12), tag(Math.cos(-0.8), Math.sin(-0.8), 'light cylinder, r = c/ω', 'bad', 8, 14)],
-                caption: t`The station’s plane seen along its axis. On the dashed circle the turning grid would move at the speed of light; the gold point lies beyond it. Not to scale: the station itself is less than $10^{-3}$ of the light cylinder’s radius.`,
+                caption: t`The station’s plane seen along its axis. On the dashed circle the turning grid would move at the speed of light; the gold point lies beyond it. Not to scale: the station is less than a millionth of the light cylinder’s radius.`,
               }),
             };
           },
@@ -461,11 +461,11 @@ export default boss({
           id: 'r5-scalar', skill: 'st-a.A7.3', difficulty: 3,
           prompt: t`The courier’s crew compute $E_{\text{obs}} = -p_\mu u^\mu$ in their own frame; the station computes it in the station’s. To trust both, prove that $p_\mu u^\mu$ takes the same value in any coordinates $x'^\mu$. Put the steps in order.`,
           items: [
-            t`Write each factor’s transformation law: $p'_\mu = \dfrac{\partial x^\alpha}{\partial x'^\mu}\,p_\alpha$ (a covector) and $u'^\mu = \dfrac{\partial x'^\mu}{\partial x^\beta}\,u^\beta$ (a vector).`,
-            t`Multiply and sum over the repeated $\mu$: $p'_\mu u'^\mu = \dfrac{\partial x^\alpha}{\partial x'^\mu}\dfrac{\partial x'^\mu}{\partial x^\beta}\,p_\alpha u^\beta$.`,
-            t`Recognise the chain rule: $\dfrac{\partial x^\alpha}{\partial x'^\mu}\dfrac{\partial x'^\mu}{\partial x^\beta} = \dfrac{\partial x^\alpha}{\partial x^\beta} = \delta^\alpha_\beta$.`,
-            t`Let the delta rename the index: $p'_\mu u'^\mu = \delta^\alpha_\beta\,p_\alpha u^\beta = p_\alpha u^\alpha$.`,
-            t`Conclude: with no free index left, $p_\mu u^\mu$ is a type $(0, 0)$ tensor — a scalar — so the courier and the station must get the same energy.`,
+            t`Transform each factor: $p'_\mu = \frac{\partial x^\alpha}{\partial x'^\mu}\,p_\alpha$, $u'^\mu = \frac{\partial x'^\mu}{\partial x^\beta}\,u^\beta$.`,
+            t`Multiply, summing over $\mu$: $p'_\mu u'^\mu = \frac{\partial x^\alpha}{\partial x'^\mu}\frac{\partial x'^\mu}{\partial x^\beta}\,p_\alpha u^\beta$.`,
+            t`Chain rule: $\frac{\partial x^\alpha}{\partial x'^\mu}\frac{\partial x'^\mu}{\partial x^\beta} = \delta^\alpha_\beta$.`,
+            t`The delta renames the index: $p'_\mu u'^\mu = p_\alpha u^\alpha$.`,
+            t`No free index is left: $p_\mu u^\mu$ is a type $(0, 0)$ tensor, a scalar, so both get the same energy.`,
           ],
           hints: [t`Start from what you know about each factor separately: how its components change.`, t`The two Jacobian matrices are inverses of each other; that fact is the chain rule, and it is the heart of the proof.`],
           teach: t`Contracting an upper index with a lower one cancels a Jacobian against its inverse, so a fully contracted expression — no free indices — is a scalar, the same in every chart.`,

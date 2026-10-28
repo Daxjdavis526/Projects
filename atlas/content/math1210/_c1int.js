@@ -28,3 +28,6 @@ export function areaFig({ fn, x, y, from, to, caption, xlabel, ylabel, domain, l
     caption,
   };
 }
+
+/** An integer as TeX with thin-space thousands separators: 30587 → 30\,587 (for use inside $…$). */
+export const thou = (x) => String(Math.round(x)).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,');

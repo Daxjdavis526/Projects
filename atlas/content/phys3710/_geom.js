@@ -53,7 +53,7 @@ export function st({ x, t, xlabel = 'x (light-years)', ylabel = 't (years)', con
     const g = 1 / Math.sqrt(1 - b * b);
     curves.push(seg(x0 - span * b, t0 - span, x0 + span * b, t0 + span, color, 1.9), seg(x0 - span, t0 - span * b, x0 + span, t0 + span * b, color, 1.9));
     for (let n = 1; n <= ticks; n++) {
-      points.push({ x: r6(x0 + g * b * n), y: r6(t0 + g * n), r: 3, color }, { x: r6(x0 + g * n), y: r6(t0 + g * b * n), r: 3, color });
+      points.push({ x: r6(x0 + g * b * n), y: r6(t0 + g * n), r: 3, color }, { x: r6(x0 + g * n), y: r6(t0 + g * b * n), r: 3, color }, { x: r6(x0 - g * n), y: r6(t0 - g * b * n), r: 3, color });
     }
     if (labels) {
       const tt = t[1] - 0.08 * (t[1] - t[0]), xx = x[1] - 0.06 * (x[1] - x[0]);

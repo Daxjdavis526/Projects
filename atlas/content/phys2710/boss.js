@@ -68,7 +68,7 @@ function shieldPic(lam, Th, Tc) {
       x: [x0, x1], y: [lo, 1.5], xlog: true, aspect: 'wide', axesAt: 'edge', yticks: 0,
       xlabel: 'wavelength (μm)', ylabel: 'spectral radiance (log scale)',
       curves: [
-        { fn: curve(Th), domain: [x0, x1], color: 'warn', width: 2.4, label: `hot layer, ${Th} K`, labelAt: 0.62, labelDx: 6, labelDy: -10 },
+        { fn: curve(Th), domain: [x0, x1], color: 'warn', width: 2.4, label: `hot layer, ${Th} K`, labelAt: 0.55, labelDx: -10, labelDy: -22 },
         { fn: curve(Tc), domain: [r4(xs), x1], color: 'accent', width: 2.4, label: `cold layer, ${Tc} K`, labelAt: 1.72, labelDx: -40, labelDy: 22 },
       ],
       vlines: [{ x: r4(Math.log10(lam)), label: `camera, ${lam} μm`, color: 'gold' }],
@@ -84,22 +84,23 @@ const CELLS = {
   gaas: { name: 'single-junction gallium arsenide (GaAs) cells', layers: ['GaAs'] },
   triple: { name: 'triple-junction cells', layers: ['GaInP', 'GaAs', 'germanium'] },
 };
+const L0 = (cell) => (CELLS[cell].layers.length === 1 ? 1.6 : 1.1);
 function cellPic(cell, photon) {
-  const L = CELLS[cell].layers, h = 1.1, w = 7, colors = ['violet', 'accent', 'teal'];
+  const L = CELLS[cell].layers, h = L0(cell), w = 7, colors = ['violet', 'accent', 'teal'];
   const shade = [], curves = [], points = [];
   L.forEach((name, i) => {
     const top = -i * h, bot = top - h;
     shade.push({ fn: String(r4(top)), lower: String(r4(bot)), from: 0, to: w, color: L.length === 1 ? 'accent' : colors[i], alpha: 0.28 });
     curves.push(seg(0, bot, w, bot, 'ink3', 1.2));
-    points.push(label(w, top - h / 2, `${name}: gap ${LAYERS[name]} eV`, 'ink2', 10, 0, 'left'));
+    points.push(label(w / 2, top - h / 2, `${name}, gap ${LAYERS[name]} eV`, 'ink', 0, 0, 'center'));
   });
   curves.push(seg(0, 0, w, 0, 'ink2', 2), seg(0, 0, 0, -L.length * h, 'ink2', 1.4), seg(w, 0, w, -L.length * h, 'ink2', 1.4));
   return {
     type: 'graph',
-    params: frame([-6.5, 14], [-L.length * h - 0.6, 3.2], {
-      aspect: 'wide', shade, curves,
+    params: frame([-4.5, 9], [r4(-L.length * h - 0.5), 3.1], {
+      aspect: 'wide', equal: false, shade, curves,
       arrows: [{ from: [-3.2, 2.7], to: [2.2, 0.1], color: 'gold', width: 2.6 }],
-      points: [...points, label(-3.2, 2.7, photon, 'gold', 0, -10, 'center')],
+      points: [...points, label(-4.3, 2.7, photon, 'gold', 0, -10, 'left')],
       alt: 'A solar cell in cross-section, its layers stacked, with a photon arriving at the top',
     }),
     caption: 'The cell in cross-section, schematic (real junctions are micrometres thick, on a thicker substrate). Light enters at the top; each layer is transparent to photons with less energy than its gap.',
@@ -117,13 +118,13 @@ function tofPic(z) {
       shade: [{ fn: '4.25', lower: '0.85', from: -2, to: 3.8, color: 'ink3', alpha: 0.12 }],
       curves: [seg(-2, 0.85, 3.8, 0.85, 'ink2', 1.4), seg(-2, 4.25, 3.8, 4.25, 'ink2', 1.4), seg(-2, 0.85, -2, 4.25, 'ink2', 1.4), seg(3.8, 0.85, 3.8, 4.25, 'ink2', 1.4),
         seg(-1.6, 4.7, 3.4, 4.7, 'accent', 4), seg(-1.6, 0.35, 3.4, 0.35, 'accent', 4), ...planes, track],
-      arrows: [{ from: [-3.4, 4.7], to: [-3.4, 0.35], color: 'ink3', label: '1.20 m', labelDx: -46, labelDy: 30 }, { from: [1.22, 5.5], to: [1.18, 4.95], color: 'gold' }],
-      points: [label(3.4, 4.7, 'time-of-flight plane 1', 'accent', 10, 0, 'left'), label(3.4, 0.35, 'time-of-flight plane 2', 'accent', 10, 0, 'left'),
-        label(3.8, 2.55, `magnet, 0.140 T`, 'ink2', 10, -8, 'left'), label(3.8, 2.55, 'silicon tracker inside', 'violet', 10, 10, 'left'),
+      arrows: [{ from: [-3.4, 4.7], to: [-3.4, 0.35], color: 'ink3' }, { from: [1.22, 5.5], to: [1.18, 4.95], color: 'gold' }],
+      points: [label(-3.4, 2.5, '1.20 m', 'ink3', -8, 0, 'right'), label(3.4, 4.7, 'TOF plane 1', 'accent', 10, 0, 'left'), label(3.4, 0.35, 'TOF plane 2', 'accent', 10, 0, 'left'),
+        label(3.8, 2.55, 'magnet', 'ink2', 10, -8, 'left'), label(3.8, 2.55, 'tracker', 'violet', 10, 10, 'left'),
         label(1.22, 5.5, z === 2 ? 'cosmic ray, charge +2e' : 'cosmic ray, charge +e', 'gold', -10, 0, 'right')],
       alt: 'A particle detector: a cosmic ray passes a time-of-flight plane, curves gently through a magnet with tracking planes, and passes a second time-of-flight plane',
     }),
-    caption: 'The detector in side view, schematic: the track’s bend is hugely exaggerated (its real radius is tens of metres), and the field points into the page.',
+    caption: 'The detector in side view, schematic: two time-of-flight (TOF) planes either side of a 0.140 T magnet holding the silicon tracker. The track’s bend is hugely exaggerated (its real radius is tens of metres); the field points into the page.',
   };
 }
 
@@ -148,8 +149,8 @@ function pi0Pic(L) {
 // ── round 3 pictures ─────────────────────────────────────────────────────────
 function uvPic(Z, n2) {
   const E = (n) => -(Z * Z * RYDP) / (n * n);
-  const list = [1, 2, 3, 4].map((n) => ({ E: E(n), label: `n = ${n}`, color: n === 1 || n === n2 ? 'ink' : 'ink3', dy: n === 4 ? 6 : 0 }));
-  list.push({ E: 0, label: 'free (ionized)', color: 'ink3', dash: true, dy: -6 });
+  const list = (n2 === 3 ? [1, 2, 3] : [1, 2]).map((n) => ({ E: E(n), label: `n = ${n}`, color: n === 1 || n === n2 ? 'ink' : 'ink3' }));
+  list.push({ E: 0, label: 'free (ionized)', color: 'ink3', dash: true });
   return levels(list, {
     arrows: [{ from: E(n2), to: E(1), x: 2, color: 'violet', label: 'ultraviolet photon', width: 2.6 }],
     caption: `${Z === 1 ? 'Hydrogen' : 'The helium ion He⁺'}’s levels to scale (no numbers: working them out is part of the problem), with the jump that makes the line.`,
@@ -171,7 +172,7 @@ function rtgPic() {
       shade: [{ fn: 'sqrt(max(0, 1.21 - x^2))', lower: '-sqrt(max(0, 1.21 - x^2))', from: -1.1, to: 1.1, color: 'ink2', alpha: 0.3 }, { fn: 'sqrt(max(0, 0.36 - x^2))', lower: '-sqrt(max(0, 0.36 - x^2))', from: -0.6, to: 0.6, color: 'warn', alpha: 0.7 }],
       curves: [circle(0, 0, 1.1, 'ink2', 2), ...fins],
       arrows: heat,
-      points: [label(-0.6, 0, 'plutonium-238', 'warn', -100, 4, 'right'), label(2.9 * Math.cos(Math.PI / 8), 2.9 * Math.sin(Math.PI / 8), 'radiator fins', 'ink2', 10, 0, 'left'),
+      points: [label(0, 3.3, 'plutonium-238 core (orange)', 'warn', 0, 0, 'center'), label(2.9 * Math.cos(Math.PI / 8), 2.9 * Math.sin(Math.PI / 8), 'radiator fins', 'ink2', 10, 0, 'left'),
         label(0, -3.3, 'thermocouples between the fuel and the case', 'ink3', 0, 6, 'center')],
       alt: 'A radioisotope generator seen end-on: a hot plutonium core inside a case with eight radiator fins, heat radiating outward',
     }),
@@ -188,8 +189,8 @@ function gamowPic() {
       shade: [{ fn: `${k}/x`, lower: String(E8), from: R, to: r4(k / E8), color: 'bad', alpha: 0.18 }],
       curves: [{ fn: `${k}/x`, domain: [R, 62], color: 'ink2', width: 2.4 }, seg(R, -5, R, k / R, 'ink2', 2.4), seg(0, -5, R, -5, 'ink2', 2.4),
         seg(0, E8, 62, E8, 'gold', 2), seg(0, E6, 62, E6, 'violet', 2, true)],
-      points: [label(61, E6, 'Pu-236 alpha, 5.77 MeV', 'violet', 0, -11, 'right'), label(61, E8, 'Pu-238 alpha, 5.50 MeV', 'gold', 0, 14, 'right'),
-        label(R + 2, 20, 'Coulomb barrier', 'ink2', 8, 0, 'left'), label(26, 8, 'forbidden: tunnelled through', 'bad', 0, 0, 'center')],
+      points: [label(17, 7.6, 'forbidden', 'bad', 0, 0, 'center')],
+      legend: [{ label: 'Pu-236 alpha, 5.77 MeV', color: 'violet', dash: true }, { label: 'Pu-238 alpha, 5.50 MeV', color: 'gold' }], legendAt: 'tr',
       alt: 'The Coulomb barrier around a uranium nucleus, with two alpha energies drawn as horizontal lines',
     },
     caption: 'The alpha particle’s potential energy outside the uranium nucleus its parent becomes (Z = 92), with the two alpha energies; the well inside is schematic. The red band is the forbidden stretch at the lower energy; the higher one’s is a little thinner.',
@@ -207,7 +208,7 @@ function diodePic(W0) {
         seg(W0, 0.5, W1, 0.5, 'ink3', 1.6, true), seg(W1, 0.5, W1, 0, 'ink3', 1.6, true),
         { fn: '0.22*cos(2.2*x)', domain: [-6, 0], color: 'accent', width: 1.8 }, { fn: '0.22*exp(-0.35*x)', domain: [0, W0], color: 'accent', width: 1.8 }],
       arrows: [{ from: [0, 0.72], to: [W0, 0.72], color: 'ink2', label: `W₀ = ${W0} nm`, labelDx: -40, labelDy: -8 }],
-      points: [label(W1, 0.5, 'after damage: wider', 'ink3', 6, -10, 'left'), label(-5.8, 0, 'electron energy', 'gold', 0, 14, 'left'), label(W0 / 2, 0.25, 'barrier 0.5 eV high', 'bad', 0, 0, 'center')],
+      points: [label(W1, 0.5, 'after damage', 'ink3', 0, -10, 'right'), label(-5.8, 0, 'electron energy', 'gold', 0, 14, 'left'), label(W0 / 2, 0.25, 'barrier 0.5 eV high', 'bad', 0, 0, 'center')],
       alt: 'A rectangular barrier half an electronvolt high and a few nanometres wide, with a wave decaying inside it, and a dashed outline where damage widens it',
     },
     caption: 'The rectangular-barrier teaching model of the junction (the real barrier is closer to a triangle). The wave’s decay inside is drawn far gentler than it really is, so it stays visible.',
@@ -223,10 +224,10 @@ function altPic() {
       aspect: 'wide',
       shade: [{ fn: '0', lower: '-0.7', from: -7.6, to: 7.6, color: 'ink3', alpha: 0.35 }, { fn: '5.0', lower: '4.4', from: -0.5, to: 0.5, color: 'ink2', alpha: 0.5 }],
       curves: [circle(0, R, R, 'violet', 1.6, true), seg(-0.08, H0 - 0.2, -0.25, 0, 'bad', 1.6), seg(0.08, H0 - 0.2, 0.25, 0, 'bad', 1.6), seg(-7.6, 0, 7.6, 0, 'ink2', 1.6)],
-      arrows: [{ from: [0.7, 0.2], to: [0.7, H0 - 0.3], color: 'violet', width: 2 }, { from: [-3.4, 0.05], to: [-3.4, H0 - 0.05], color: 'ink3', label: 'h', labelDx: -16, labelDy: 30 },
+      arrows: [{ from: [0.7, 0.2], to: [0.7, H0 - 0.3], color: 'violet', width: 2 }, { from: [-5.4, H0 - 0.05], to: [-5.4, 0.05], color: 'ink3' }, { from: [-5.4, 0.05], to: [-5.4, H0 - 0.05], color: 'ink3' },
         { from: [-0.5, R], to: [-2.2, 2.2], color: 'violet', width: 1.4 }, { from: [0.5, R], to: [2.2, 2.2], color: 'violet', width: 1.4 }],
-      points: [label(0.5, 4.7, 'Petrel: laser and telescope', 'ink2', 10, 0, 'left'), label(-0.2, 2.6, 'laser pulse', 'bad', -14, 0, 'right'), label(0.7, 2.4, 'echo', 'violet', 8, 0, 'left'),
-        label(R, R, 'scattered light: brightest straight up', 'violet', 10, 16, 'left'), label(-7.4, -0.35, 'dark, dusty surface', 'ink2', 0, 4, 'left')],
+      points: [label(0.5, 4.7, 'Petrel', 'ink2', 10, 0, 'left'), label(-0.2, 3.4, 'laser pulse', 'bad', -10, 0, 'right'), label(0.7, 2.4, 'echo', 'violet', 8, 0, 'left'), label(-5.4, 2.3, 'h', 'ink3', -8, 0, 'right'),
+        label(R, R, 'scattered light', 'violet', 10, 16, 'left'), label(-7.4, -0.35, 'dusty surface', 'ink2', 0, 4, 'left')],
       alt: 'A probe firing a laser pulse down at a surface, which scatters the light in a lobe brightest straight up, part of it returning to the probe’s telescope',
     }),
     caption: 'Far from scale: the altitude is kilometres and the telescope centimetres. The dashed circle is a Lambertian surface’s scattering pattern: the intensity in each direction is proportional to the cosine of its angle from the vertical.',
@@ -236,12 +237,12 @@ function altPic() {
 function ndPic() {
   return levels([
     { E: 0, label: 'ground level', color: 'ink' },
-    { E: 2.111, label: 'lower laser level, 2111 cm⁻¹', color: 'gold' },
-    { E: 11.502, label: 'upper laser level, 11 502 cm⁻¹', color: 'gold', dy: 8 },
-    { E: 12.6, label: 'pump band (808 nm diodes)', color: 'violet', dy: -8 },
+    { E: 2.111, label: 'lower laser level', color: 'gold' },
+    { E: 11.502, label: 'upper laser level', color: 'gold', dy: 8 },
+    { E: 12.6, label: 'pump band', color: 'violet', dy: -8 },
   ], {
-    arrows: [{ from: 0, to: 12.6, x: 0.5, color: 'violet', label: 'pump', width: 2.2 }, { from: 12.6, to: 11.6, x: 1.7, color: 'ink3', dash: true },
-      { from: 11.502, to: 2.111, x: 2.6, color: 'bad', label: '1064 nm laser', width: 2.6 }, { from: 2.111, to: 0.1, x: 3.5, color: 'ink3', dash: true, label: 'fast', dy: 0 }],
+    arrows: [{ from: 0, to: 12.6, x: 0.5, color: 'violet', label: '808 nm', width: 2.2 }, { from: 12.6, to: 11.6, x: 1.7, color: 'ink3', dash: true },
+      { from: 11.502, to: 2.111, x: 2.6, color: 'bad', label: '1064 nm', width: 2.6 }, { from: 2.111, to: 0.1, x: 3.5, color: 'ink3', dash: true, label: 'fast', dy: 0 }],
     x: [-0.6, 10.5],
     caption: 'The Nd:YAG levels that matter, to scale in wavenumber (each level is really a narrow group of sublevels). Dashed arrows are fast decays that give their energy to the crystal as heat.',
   });
@@ -254,7 +255,7 @@ function rotationPic() {
     params: {
       x: [0, 30], y: [0, 200], aspect: 'wide', axesAt: 'edge', xlabel: 'distance from the galaxy’s centre (kpc)', ylabel: 'orbital speed (km/s)',
       curves: [{ fn: '150*(1 - exp(-x/2.6))', domain: [0.2, 30], color: 'accent', width: 2.2, label: 'measured', labelAt: 22, labelDx: 0, labelDy: -14 },
-        { fn: '411*sqrt((1 - (1 + x/3)*exp(-x/3))/x)', domain: [0.1, 30], color: 'warn', width: 2.2, dash: true, label: 'expected from the stars and gas', labelAt: 19, labelDx: -20, labelDy: 18 }],
+        { fn: '411*sqrt((1 - (1 + x/3)*exp(-x/3))/x)', domain: [0.1, 30], color: 'warn', width: 2.2, dash: true, label: 'from visible matter alone', labelAt: 12, labelDx: -10, labelDy: 26 }],
       points: pts,
       alt: 'A galaxy rotation curve: measured speeds stay flat far out, while the speeds expected from visible matter fall away',
     },
@@ -270,7 +271,7 @@ const PARTICLES = [
 const LINES = [
   { key: 'lya', Z: 1, n2: 2, what: t`hydrogen's Lyman-α line ($n = 2 \to 1$), which maps the hydrogen clouds around comets and the interstellar hydrogen drifting through the solar system`, who: 'hydrogen' },
   { key: 'lyb', Z: 1, n2: 3, what: t`hydrogen's Lyman-β line ($n = 3 \to 1$)`, who: 'hydrogen' },
-  { key: 'he', Z: 2, n2: 2, what: t`the brightest ultraviolet line of the helium ion He$^+$ ($Z = 2$, $n = 2 \to 1$), which solar imagers use to watch the Sun's transition region`, who: 'the helium ion' },
+  { key: 'he', Z: 2, n2: 2, what: t`the brightest ultraviolet line of the helium ion $\text{He}^+$ ($Z = 2$, $n = 2 \to 1$), which solar imagers use to watch the Sun's transition region`, who: 'the helium ion' },
 ];
 const SOURCES = [
   { iso: 'iron-55', Zp: 26, half: '2.74 years', parent: 'iron', daughter: 'manganese' },
@@ -296,7 +297,7 @@ export default boss({
             const x = (T) => HCK / (lam * 1e-6 * T), xh = x(Th), xc = x(Tc);
             const ratio = Math.expm1(xc) / Math.expm1(xh);
             return {
-              prompt: t`Halcyon's sunshield is a stack of five thin films. The layer facing the Sun settles at ${Th} K; the coldest layer, facing the telescope, at ${Tc} K. The mid-infrared camera works at a wavelength of ${lam} μm. Treat both layers as blackbodies. At that wavelength, by what factor does a square metre of the hot layer outshine a square metre of the cold one — that is, what is the ratio of their spectral radiances $B_\lambda$? ($hc/k = 1.4388\times10^{-2}$ m K)`,
+              prompt: t`Halcyon's sunshield is a stack of five thin films. The layer facing the Sun settles at ${Th} K; the coldest layer, facing the telescope, at ${Tc} K. The mid-infrared camera works at a wavelength of ${lam} μm. Treat both layers as blackbodies. At that wavelength, by what factor does a square metre of the hot layer outshine a square metre of the cold one — that is, what is the ratio of their spectral radiances $B_\lambda$? ($hc/k = 1.4388\times10^{-2}$ m K)`,
               answer: ratio, tol: { rel: 0.02 },
               errors: apart([
                 { value: (Th / Tc) ** 4, feedback: t`$(T_h/T_c)^4$ compares the *total* power of the two layers (Stefan–Boltzmann). At one wavelength far down the cold layer's short-wavelength side, Planck's law gives a far bigger ratio.` },
@@ -322,8 +323,8 @@ export default boss({
             const layers = CELLS[cell].layers, absorbed = layers.find((n) => LAYERS[n] <= E), Eg = LAYERS[absorbed];
             const heat = 100 * (1 - Eg / E);
             const which = ph === 'sun'
-              ? t`A photon from the peak of the Sun's spectrum — taking the Sun as a ${T_SUN} K blackbody and its spectrum per unit wavelength, with Wien's constant $b = 2.898\times10^{-3}$ m K —`
-              : t`A photon of wavelength ${lam} nm`;
+              ? t`A photon from the peak of the Sun's spectrum — taking the Sun as a ${T_SUN} K blackbody and its spectrum per unit wavelength, with Wien's constant $b = 2.898\times10^{-3}$ m K —`
+              : t`A photon of wavelength ${lam} nm`;
             const stack = cell === 'triple'
               ? t`Light enters through a GaInP layer (gap 1.88 eV), then a GaAs layer (1.42 eV), then germanium (0.66 eV); each layer is transparent to photons with less energy than its gap.`
               : t`The cell's band gap is ${Eg} eV.`;
@@ -360,7 +361,7 @@ export default boss({
             const errs = [{ value: pc / beta, feedback: t`$pc/\beta$ is the particle's total energy, $E = \gamma mc^2$ — what Newton's $p = mv$ would call $mc^2$. The mass is $m = p/\gamma v$, smaller by $\gamma = ${tex(1 / Math.sqrt(1 - beta * beta), 3)}$.` }];
             if (P.z === 2) errs.push({ value: m / 2, feedback: t`The charge is $+2e$, so the momentum is $p = 2eBr$: a doubly charged particle bends half as much as a singly charged one with the same momentum.` });
             return {
-              prompt: t`A cosmic ray crosses Halcyon's magnetic spectrometer. In the 0.140 T field of its magnet, the silicon tracker finds that the track curves with a radius of ${rad} m, and the size of its signals shows a charge of ${P.z === 1 ? '$+e$' : '$+2e$'}. Two time-of-flight planes 1.20 m apart along the track time its passage at ${dt} ns. What is the particle's mass, as a rest energy $mc^2$, in MeV? ($c = 2.998\times10^8$ m/s)`,
+              prompt: t`A cosmic ray crosses Halcyon's magnetic spectrometer. In the 0.140 T field of its magnet, the silicon tracker finds that the track curves with a radius of ${rad} m, and the size of its signals shows a charge of ${P.z === 1 ? '$+e$' : '$+2e$'}. Two time-of-flight planes 1.20 m apart along the track time its passage at ${dt} ns. What is the particle's mass, as a rest energy $mc^2$, in MeV? ($c = 2.998\times10^8$ m/s)`,
               answer: m, units: 'MeV', tol: { rel: 0.01 },
               errors: apart(errs, m),
               hints: [
@@ -381,7 +382,7 @@ export default boss({
             const half = Math.asin(MPI0 / (E * 1000)), s = 2 * L * Math.tan(half) * 100;
             const sHalf = 2 * L * Math.tan(Math.asin(MPI0 / (2 * E * 1000))) * 100;
             return {
-              prompt: t`Cosmic rays striking Halcyon's structure make neutral pions, $\pi^0$ (rest energy 134.98 MeV), which at once decay into two photons, $\pi^0 \to \gamma\gamma$. A $\pi^0$ with a total energy of ${E} GeV, heading straight at the calorimeter, decays ${L} m in front of its face. The photons may share the energy in any proportion, and the sharing sets the angle between them. What is the smallest possible distance between the two photons' hits on the calorimeter face, in cm?`,
+              prompt: t`Cosmic rays striking Halcyon's structure make neutral pions, $\pi^0$ (rest energy 134.98 MeV), which at once decay into two photons, $\pi^0 \to \gamma\gamma$. A $\pi^0$ with a total energy of ${E} GeV, heading straight at the calorimeter, decays ${L} m in front of its face. The photons may share the energy in any proportion, and the sharing sets the angle between them. What is the smallest possible distance between the two photons' hits on the calorimeter face, in cm?`,
               answer: s, units: 'cm', tol: { rel: 0.01 },
               errors: apart([
                 { value: sHalf, feedback: t`Each photon carries *part* of the pion's energy: for the smallest angle they share it equally, $E_1 = E_2 = E/2$. Then $m^2c^4 = 2E_1E_2(1 - \cos\theta)$ gives $\sin(\theta/2) = mc^2/E$, not $mc^2/2E$.` },
@@ -413,10 +414,10 @@ export default boss({
             const key = ask === 'V' ? K : speed(K);
             const noPhi = ask === 'V' ? E : speed(E);
             const errs = [{ value: noPhi, feedback: t`Some of the photon's energy, the threshold $\phi = 6.2$ eV, is spent freeing the electron; only $E - \phi$ is left as kinetic energy.` }];
-            if (Ln.Z === 2) { const Kz = 2 * RYDP * 0.75 - phi; errs.push({ value: ask === 'V' ? Kz : speed(Kz), feedback: t`Bohr's energies scale as $Z^2$: for He$^+$ they are four times hydrogen's, not twice.` }); }
+            if (Ln.Z === 2) { const Kz = 2 * RYDP * 0.75 - phi; errs.push({ value: ask === 'V' ? Kz : speed(Kz), feedback: t`Bohr's energies scale as $Z^2$: for $\text{He}^+$ they are four times hydrogen's, not twice.` }); }
             if (ask === 'v') errs.push({ value: key / Math.SQRT2, feedback: t`Kinetic energy is $\tfrac12mv^2$, so $v = \sqrt{2K/m}$.` });
             return {
-              prompt: t`Halcyon's ultraviolet camera images ${Ln.what}. Its photocathode is caesium iodide, whose photoemission threshold, 6.2 eV, plays the part of a work function: no visible photon can free an electron from it, so the camera is blind to ordinary sunlight. Using Bohr's model (with $R_\infty hc = 13.606$ eV, ignoring the nucleus's recoil), find ${ask === 'V' ? 'the stopping voltage of the photoelectrons this line ejects, in volts' : t`the greatest speed of the photoelectrons this line ejects, in km/s ($m_ec^2 = 511.0$ keV, $c = 2.998\times10^8$ m/s)`}.`,
+              prompt: t`Halcyon's ultraviolet camera images ${Ln.what}. Its photocathode is caesium iodide, whose photoemission threshold, 6.2 eV, plays the part of a work function: no visible photon can free an electron from it, so the camera is blind to ordinary sunlight. Using Bohr's model (with $R_\infty hc = 13.606$ eV, ignoring the nucleus's recoil), find ${ask === 'V' ? 'the stopping voltage of the photoelectrons this line ejects, in volts' : t`the greatest speed of the photoelectrons this line ejects, in km/s ($m_ec^2 = 511.0$ keV, $c = 2.998\times10^8$ m/s)`}.`,
               answer: key, units: ask === 'V' ? 'V' : 'km/s', tol: { rel: 0.01 },
               errors: apart(errs, key),
               hints: [
@@ -464,7 +465,7 @@ export default boss({
           gen(r) {
             const kg = r.pick([3.6, 4.0, 4.4]), yrs = r.pick([16, 20, 25]), eta = r.pick([0.055, 0.065]), A = r.pick([1.0, 1.2, 1.4]), eps = 0.9, Q = 5.593, Th = 87.7;
             const N0 = ((kg * 1000) / 238.05) * NA, lam = Math.LN2 / (Th * YR), P0 = lam * N0 * Q * MEV_J, P = P0 * 2 ** (-yrs / Th);
-            const Tof = (Pw, e = eps) => (Pw / (e * SIG * A)) ** 0.25 - 273.15;
+            const Tof = (Pw, e = eps) => (Pw / (e * SIG * A)) ** 0.25;
             const key = Tof((1 - eta) * P);
             const errs = [
               { value: Tof((1 - eta) * P0), feedback: t`The plutonium has been decaying for ${yrs} years: the heat now is $P_0\,2^{-${yrs}/87.7}$.` },
@@ -473,16 +474,16 @@ export default boss({
               { value: Tof((1 - eta) * P, 1), feedback: t`The fins radiate $\varepsilon\sigma AT^4$, with emissivity $\varepsilon = 0.90$.` },
             ].filter((e) => Math.abs(e.value - key) > 3);
             return {
-              prompt: t`Petrel's generator was loaded with ${kg} kg of plutonium-238 (238.05 g/mol, half-life 87.7 years) ${yrs} years ago. Each decay deposits $Q = 5.593$ MeV as heat. Thermocouples turn ${tex(eta * 100, 2)}% of that heat into electricity, and the rest leaves through radiator fins with a total radiating area of ${A} m² and an emissivity of 0.90. Taking the fins to be at one temperature, radiating into cold space, what is that temperature now, in °C? ($N_A = 6.022\times10^{23}$ per mol, 1 MeV $= 1.602\times10^{-13}$ J, 1 year $= 3.156\times10^7$ s, $\sigma = 5.670\times10^{-8}\ \text{W m}^{-2}\,\text{K}^{-4}$)`,
-              answer: key, units: '°C', tol: { rel: 0, abs: 1.5 },
+              prompt: t`Petrel's generator was loaded with ${kg} kg of plutonium-238 (238.05 g/mol, half-life 87.7 years) ${yrs} years ago. Each decay deposits $Q = 5.593$ MeV as heat. Thermocouples turn ${tex(eta * 100, 2)}% of that heat into electricity, and the rest leaves through radiator fins with a total radiating area of ${A} m² and an emissivity of 0.90. Taking the fins to be at one temperature, radiating into cold space, what is that temperature now, in kelvin? ($N_A = 6.022\times10^{23}$ per mol, 1 MeV $= 1.602\times10^{-13}$ J, 1 year $= 3.156\times10^7$ s, $\sigma = 5.670\times10^{-8}\ \text{W m}^{-2}\,\text{K}^{-4}$)`,
+              answer: key, units: 'K', tol: { rel: 0, abs: 1.5 },
               errors: errs,
               hints: [
                 t`The heat is the activity times $Q$: $P = \lambda NQ$, with $\lambda = \ln 2/T_{1/2}$ (in s$^{-1}$) and $N$ the number of plutonium-238 nuclei.`,
                 t`After ${yrs} years, $N = N_0\,2^{-${yrs}/87.7}$, with $N_0 = \dfrac{${kg * 1000}\ \text{g}}{238.05\ \text{g/mol}}\,N_A$.`,
-                t`The fins radiate $(1 - ${eta})P = \varepsilon\sigma AT^4$: solve for $T$ in kelvin, then subtract 273.15.`,
+                t`The fins radiate $(1 - ${eta})P = \varepsilon\sigma AT^4$: solve for $T$.`,
               ],
               teach: 'An RTG’s heat is its activity times the energy per decay, it fades with the half-life, and what the thermocouples do not take must leave as thermal radiation, σT⁴ per unit area.',
-              explain: t`$N_0 = \dfrac{${kg * 1000}}{238.05}(6.022\times10^{23}) = ${tex(N0, 4)}$ nuclei and $\lambda = \dfrac{\ln 2}{(87.7)(3.156\times10^7\ \text{s})} = ${tex(lam, 4)}\ \text{s}^{-1}$, so at loading $P_0 = \lambda N_0Q = ${tex(P0, 4)}$ W — about 0.57 W per gram. After ${yrs} years, $P = P_0\,2^{-${yrs}/87.7} = ${tex(P, 4)}$ W, of which $${tex((1 - eta) * P, 4)}$ W reaches the fins. Then $$T = \left(\frac{${tex((1 - eta) * P, 4)}}{(0.90)(5.670\times10^{-8})(${A})}\right)^{1/4} = ${tex(key + 273.15, 4)}\ \text{K} = ${tex(key, 3)}\ ^\circ\text{C}.$$ Their glow peaks near $${tex(B_WIEN * 1e6 / (key + 273.15), 2)}$ μm, in the mid-infrared: a probe carrying an infrared camera must keep the generator out of its view. This is an idealization — real fins are hotter at their roots than their tips — and over the decades the falling heat lowers the thermocouples' output twice over, since their efficiency also falls as the temperature difference shrinks.`,
+              explain: t`$N_0 = \dfrac{${kg * 1000}}{238.05}(6.022\times10^{23}) = ${tex(N0, 4)}$ nuclei and $\lambda = \dfrac{\ln 2}{(87.7)(3.156\times10^7\ \text{s})} = ${tex(lam, 4)}\ \text{s}^{-1}$, so at loading $P_0 = \lambda N_0Q = ${tex(P0, 4)}$ W — about 0.57 W per gram. After ${yrs} years, $P = P_0\,2^{-${yrs}/87.7} = ${tex(P, 4)}$ W, of which $${tex((1 - eta) * P, 4)}$ W reaches the fins. Then $$T = \left(\frac{${tex((1 - eta) * P, 4)}}{(0.90)(5.670\times10^{-8})(${A})}\right)^{1/4} = ${tex(key, 4)}\ \text{K},$$ or $${tex(key - 273.15, 3)}\ ^\circ\text{C}$. Their glow peaks near $${tex(B_WIEN * 1e6 / key, 2)}$ μm, in the mid-infrared: a probe carrying an infrared camera must keep the generator out of its view. This is an idealization — real fins are hotter at their roots than their tips — and over the decades the falling heat lowers the thermocouples' output twice over, since their efficiency also falls as the temperature difference shrinks.`,
               visual: rtgPic(),
             };
           },
@@ -523,7 +524,7 @@ export default boss({
             const kap = (m) => Math.sqrt(2 * m * MEC2_KEV * 1000 * U) / HBARC;   // per nm
             const W1 = W0 / Math.sqrt(1 - f), dW = W1 - W0, F = Math.exp(-2 * kap(mr) * dW);
             return {
-              prompt: t`Petrel's altimeter times its echoes with a tunnel-diode oscillator: a gallium arsenide p–n junction doped so heavily that its depletion layer is only $W_0 = ${W0}$ nm wide, and electrons tunnel straight through it. Model the layer as a rectangular barrier rising 0.5 eV above the electrons' energy, with the electron's effective mass in GaAs, $m^* = 0.067\,m_e$. Neutrons from the generator knock dopant atoms out of place, and over the mission ${tex(f * 100, 2)}% of the dopants stop working. The depletion width is $W = \sqrt{\dfrac{2\varepsilon V_\text{bi}}{e}\left(\dfrac{1}{N_A} + \dfrac{1}{N_D}\right)}$; ignore the small change in $V_\text{bi}$. By what factor does the tunnelling probability change — new divided by old? ($\hbar c = 197.33$ eV nm, $m_ec^2 = 511.0$ keV)`,
+              prompt: t`Petrel's altimeter times its echoes with a tunnel-diode oscillator: a gallium arsenide p–n junction doped so heavily that its depletion layer is only $W_0 = ${W0}$ nm wide, and electrons tunnel straight through it. Model the layer as a rectangular barrier rising 0.5 eV above the electrons' energy, with the electron's effective mass in GaAs, $m^* = 0.067\,m_e$. Neutrons from the generator knock dopant atoms out of place, and over the mission ${tex(f * 100, 2)}% of the dopants stop working. The depletion width is $W = \sqrt{\dfrac{2\varepsilon V_\text{bi}}{e}\left(\dfrac{1}{N_A} + \dfrac{1}{N_D}\right)}$; ignore the small change in $V_\text{bi}$. By what factor does the tunnelling probability change — new divided by old? ($\hbar c = 197.33$ eV nm, $m_ec^2 = 511.0$ keV)`,
               answer: F, tol: { rel: 0.02 },
               errors: apart([
                 { value: Math.exp(-2 * kap(1) * dW), feedback: t`Inside the crystal the electron moves as if its mass were $m^* = 0.067\,m_e$; with the free mass, $\kappa$ comes out $\sqrt{1/0.067} \approx 3.9$ times too big.` },
@@ -553,7 +554,7 @@ export default boss({
             const Ep = r.pick([2, 3, 5]), h = r.pick([8, 12, 20]), D = r.pick([10, 15, 20]), rho = r.pick([0.06, 0.1, 0.15]), eta = 0.4, lam = 1064;
             const Nph = (Ep * 1e-3 * lam * 1e-9) / (HPL * C), frac = (rho * (D / 100) ** 2) / (4 * (h * 1000) ** 2), N = Nph * frac * eta;
             return {
-              prompt: t`Petrel's altimeter fires ${Ep} mJ pulses of 1064 nm light from a Nd:YAG laser straight down at the surface, ${h} km below. The dusty surface reflects a fraction $\rho = ${rho}$ of the light, scattering it as a Lambertian surface does: the intensity in a direction at angle $\theta$ from the vertical is proportional to $\cos\theta$. A telescope ${D} cm across, beside the laser, catches part of the echo, and its detector registers 40% of the photons that reach it. How many photoelectrons does one pulse's echo produce? ($h = 6.626\times10^{-34}$ J s, $c = 2.998\times10^8$ m/s)`,
+              prompt: t`Petrel's altimeter fires ${Ep} mJ pulses of 1064 nm light from a Nd:YAG laser straight down at the surface, ${h} km below. The dusty surface reflects a fraction $\rho = ${rho}$ of the light, scattering it as a Lambertian surface does: the intensity in a direction at angle $\theta$ from the vertical is proportional to $\cos\theta$. A telescope ${D} cm across, beside the laser, catches part of the echo, and its detector registers 40% of the photons that reach it. How many photoelectrons does one pulse's echo produce? ($h = 6.626\times10^{-34}$ J s, $c = 2.998\times10^8$ m/s)`,
               answer: N, tol: { rel: 0.02 },
               errors: apart([
                 { value: N / 2, feedback: t`A Lambertian surface is not an even spreader over the hemisphere: it sends most light straight up. Integrating $I_0\cos\theta$ over the hemisphere gives $\pi I_0$, so straight up $I_0 = \rho P/\pi$ per steradian — twice the even-spread value $\rho P/2\pi$.` },
@@ -578,7 +579,7 @@ export default boss({
             const T = r.pick([290, 320, 350]), hck = 1.4388;      // cm K
             const f = Math.exp((-2111 * hck) / T), slip = Math.exp((-21.11 * hck) / T), photon = Math.exp((-9391 * hck) / T);
             return {
-              prompt: t`The altimeter's laser crystal, Nd:YAG, sits at ${T} K. Its 1064 nm laser line runs from an upper level 11 502 cm⁻¹ above the ground level down to a lower level just 2111 cm⁻¹ above it (energies in wavenumbers, $E/hc$). Each of these levels holds the same number of states. In thermal equilibrium, what fraction of the ions are in the lower laser level, compared with the ground level — and what does that mean for the laser? ($hc/k = 1.4388$ cm K)`,
+              prompt: t`The altimeter's laser crystal, Nd:YAG, sits at ${T} K. Its 1064 nm laser line runs from an upper level 11 502 cm⁻¹ above the ground level down to a lower level just 2111 cm⁻¹ above it (energies in wavenumbers, $E/hc$). Each of these levels holds the same number of states. In thermal equilibrium, what fraction of the ions are in the lower laser level, compared with the ground level — and what does that mean for the laser? ($hc/k = 1.4388$ cm K)`,
               choices: [
                 t`About $${tex(f, 2)}$: the lower level is practically empty, so the first ions pumped into the upper level already make an inversion`,
                 t`About $${tex(f, 2)}$, but it does not matter: light is amplified only once more than half of all the ions are in the upper level`,

@@ -26,12 +26,12 @@ function boostPicture({ k, ev, numbers = true, name = 'E', caption }) {
 /** A square of events and its image under a boost (as drawn in the new coordinates), with light rays. */
 function squeezePicture({ p, caption, sliders = null, readouts = null, extraPoints = [] }) {
   const P = typeof p === 'number' ? r6(p) : p;
-  const sq = [[-0.5, 1.5], [0.5, 1.5], [0.5, 2.5], [-0.5, 2.5], [-0.5, 1.5]];
+  const sq = [[0, 1.3], [0.7, 2], [0, 2.7], [-0.7, 2], [0, 1.3]];        // a diamond whose edges are light rays
   const img = (xe, te) => [`(${xe})*cosh(${P}) - (${te})*sinh(${P})`, `(${te})*cosh(${P}) - (${xe})*sinh(${P})`];
   const curves = [
     { fn: 'x', color: 'warn', dash: true, width: 1.2 }, { fn: '-x', color: 'warn', dash: true, width: 1.2 },
     { param: ['sinh(t)', 'cosh(t)'], t: [-2.2, 2.2], color: 'ink3', width: 1, dash: true },
-    { param: ['2*sinh(t)', '2*cosh(t)'], t: [-1.6, 1.6], color: 'ink3', width: 1, dash: true },
+    { param: ['1.73205*sinh(t)', '1.73205*cosh(t)'], t: [-1.7, 1.7], color: 'ink3', width: 1, dash: true },
   ];
   for (let i = 0; i < 4; i++) {
     const [x0, t0] = sq[i], [x1, t1] = sq[i + 1];
@@ -69,7 +69,7 @@ With $\cosh\varphi = \gamma$ and $\sinh\varphi = \gamma\beta$ this is the Lorent
   why: 'Thinking of boosts as hyperbolic rotations makes every special-relativity diagram a piece of geometry, and the squeeze picture is how gravitational-wave and black-hole physicists use null coordinates.',
   visual: {
     title: 'A boost squeezes along the light rays',
-    lead: t`The dashed square is a set of events; the gold shape is the same events in coordinates boosted by rapidity $\varphi$. Grey curves are hyperbolae $t^2 - x^2 = 1$ and $4$. Slide $\varphi$ and watch where the square stretches, where it shrinks, and what stays fixed.`,
+    lead: t`The dashed diamond is a set of events whose edges run along light rays; the gold shape is the same events in coordinates boosted by rapidity $\varphi$. Grey curves are hyperbolae $t^2 - x^2 = 1$ and $3$; the event E lies on the second. Slide $\varphi$ and watch where the diamond stretches, where it shrinks, and what stays fixed.`,
     tasks: [
       t`The gold shape stretches along one light line and shrinks along the other — by $e^{\varphi}$ and $e^{-\varphi}$. Its area never changes.`,
       'Follow E: it slides along its hyperbola, as a point on a circle slides round when you rotate.',
@@ -87,7 +87,7 @@ With $\cosh\varphi = \gamma$ and $\sinh\varphi = \gamma\beta$ this is the Lorent
         { label: t`E′: $v' = t' + x'$`, expr: '3*e^(-p)', digits: 4 },
         { label: t`$u'v'$`, expr: '(2 - 1)*e^p*3*e^(-p)', digits: 4 },
       ],
-      caption: t`One direction of space, $c = 1$. Grey dashed: the square of events in your coordinates; gold: the same events in the boosted coordinates. Light rays (dashed orange) map to themselves. E is the event $(t, x) = (2, 1)$.`,
+      caption: t`One direction of space, $c = 1$. Grey dashed: the diamond of events in your coordinates; gold: the same events in the boosted coordinates. Light rays (dashed orange) map to themselves. E is the event $(t, x) = (2, 1)$.`,
     }),
   },
   example: {
@@ -148,7 +148,7 @@ With $\cosh\varphi = \gamma$ and $\sinh\varphi = \gamma\beta$ this is the Lorent
         const up = k * u, vp = v / k, ans = (up + vp) / 2;
         return {
           prompt: t`An event has light-cone coordinates $u = t - x = ${u}$ and $v = t + x = ${v}$ (years). A boost with $e^{\varphi} = ${ks}$ multiplies $u$ by $e^{\varphi}$ and $v$ by $e^{-\varphi}$. What is the event’s time $t'$ in the boosted frame?`,
-          visual: squeezePicture({ p: Math.log(k), caption: t`A square of events (dashed) and its image under a boost with $e^{\varphi} = ${ks}$ (gold): stretched along one light line by ${ks}, squeezed along the other.` }),
+          visual: squeezePicture({ p: Math.log(k), caption: t`A diamond of events (dashed) and its image under a boost with $e^{\varphi} = ${ks}$ (gold): stretched along one light line by ${ks}, squeezed along the other.` }),
           answer: ans, units: 'yr', tol: { rel: 0.003 },
           errors: [{ value: (u / k + v * k) / 2, feedback: t`Here $u = t - x$ is the one that is stretched: $u' = ${ks}\,u$, $v' = v/${ks}$.` }],
           hints: [t`$u' = ${ks}\times${u} = ${up}$ and $v' = ${v}/${ks} = ${nice(vp, 4)}$.`, t`$t' = (u' + v')/2$.`],
@@ -187,7 +187,7 @@ With $\cosh\varphi = \gamma$ and $\sinh\varphi = \gamma\beta$ this is the Lorent
     mcq({
       id: 'eigen', difficulty: 2,
       prompt: 'A boost maps every direction in the (x, t) plane to a new direction, except for some special ones that it only stretches or shrinks. Which?',
-      visual: squeezePicture({ p: -0.6, caption: 'A boost by φ = −0.6: the square’s edges along the light lines stay along the light lines.' }),
+      visual: squeezePicture({ p: -0.6, caption: 'A boost by φ = −0.6: the diamond’s edges lie along light rays before and after — they are stretched or shrunk, never tilted.' }),
       choices: ['The two light rays, x = t and x = −t', 'The time axis', 'The space axis', 'None: a boost tilts every direction'],
       answer: 0,
       why: {
@@ -254,11 +254,11 @@ With $\cosh\varphi = \gamma$ and $\sinh\varphi = \gamma\beta$ this is the Lorent
     }),
     mcq({
       id: 'cp-area', difficulty: 2,
-      prompt: 'A boost turns a small square of events on a spacetime diagram into a parallelogram. How does its area compare?',
-      visual: squeezePicture({ p: 0.8, caption: 'A square of events (dashed) and its boosted image (gold).' }),
-      choices: ['It is the same: the boost’s determinant is cosh²φ − sinh²φ = 1', 'It is larger by γ', 'It is smaller by 1/γ', 'It depends on where the square is'],
+      prompt: 'A boost turns a small diamond of events on a spacetime diagram into a longer, thinner one. How does its area compare?',
+      visual: squeezePicture({ p: 0.8, caption: 'A diamond of events (dashed) and its boosted image (gold).' }),
+      choices: ['It is the same: the boost’s determinant is cosh²φ − sinh²φ = 1', 'It is larger by γ', 'It is smaller by 1/γ', 'It depends on where the diamond is'],
       answer: 0,
-      why: { 1: t`One direction stretches by $e^{\varphi}$, the other shrinks by $e^{-\varphi}$: the factors cancel.`, 2: 'One direction shrinks, but the other stretches by the inverse factor.', 3: 'A boost is linear: every square changes the same way.' },
+      why: { 1: t`One direction stretches by $e^{\varphi}$, the other shrinks by $e^{-\varphi}$: the factors cancel.`, 2: 'One direction shrinks, but the other stretches by the inverse factor.', 3: 'A boost is linear: every region changes the same way.' },
       hints: ['Multiply the stretch along one light ray by the squeeze along the other.'],
       teach: 'Boosts preserve spacetime area: the squeeze stretches one light direction exactly as much as it shrinks the other.',
       explain: t`$e^{\varphi}\times e^{-\varphi} = 1$: the area of any region of events is the same in every inertial frame.`,
