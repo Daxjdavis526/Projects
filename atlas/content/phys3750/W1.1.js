@@ -62,7 +62,7 @@ One complex number $\tilde A$ carries both the amplitude and the phase. This is 
         { param: [RE, `(${IM})*t`], t: [0, 1], color: 'gold', width: 1, dash: [4, 4] },
       ],
       arrows: [
-        { from: [0, 0], to: [RE, IM], color: 'accent', width: 2.6, label: 'Ã e⁻ⁱᵚᵗ'.replace('ᵚ', 'ω'), labelDx: 6, labelDy: -6 },
+        { from: [0, 0], to: [RE, IM], color: 'accent', width: 2.6, label: 'Ã e^(−iωt)', labelDx: 6, labelDy: -6 },
         { from: [0, 0], to: [IM, `-(${RE})`], color: 'good', width: 2, label: 'v/ω phasor', labelDx: 6, labelDy: 10 },
       ],
       points: [{ x: RE, y: 0, color: 'gold', r: 6, label: 'x(t)', labelDx: 6, labelDy: 14 }],
@@ -156,10 +156,10 @@ One complex number $\tilde A$ carries both the amplitude and the phase. This is 
         return {
           prompt: t`An oscillator has $\omega = ${w}$ rad/s and complex amplitude $\tilde A = (${a} ${bs}i)$ cm. Write $x(t) = \operatorname{Re}\big[\tilde Ae^{-i\omega t}\big]$ in cm as a combination of $\cos$ and $\sin$.`,
           visual: phasorPic(a, b, t`$\tilde A$ at $t = 0$, in cm. As time runs, the arrow turns clockwise at $${w}$ rad/s.`, { R: 5.5 }),
-          answer: `${a} cos(${w} t) + ${b} sin(${w} t)`,
+          answer: `${a} cos(${w} t) + (${b}) sin(${w} t)`,
           answerTeX: t`${a}\cos ${w}t ${b < 0 ? '-' : '+'} ${Math.abs(b)}\sin ${w}t`,
           lhs: 'x(t)', vars: { t: [0, 3] },
-          errors: [{ answer: `${a} cos(${w} t) - ${b} sin(${w} t)`, feedback: t`That is $\operatorname{Re}[\tilde Ae^{+i\omega t}]$. With $e^{-i\omega t} = \cos\omega t - i\sin\omega t$, the product $(a + ib)(\cos\omega t - i\sin\omega t)$ has real part $a\cos\omega t + b\sin\omega t$.` }],
+          errors: [{ answer: `${a} cos(${w} t) - (${b}) sin(${w} t)`, feedback: t`That is $\operatorname{Re}[\tilde Ae^{+i\omega t}]$. With $e^{-i\omega t} = \cos\omega t - i\sin\omega t$, the product $(a + ib)(\cos\omega t - i\sin\omega t)$ has real part $a\cos\omega t + b\sin\omega t$.` }],
           hints: [t`Write $e^{-i\omega t} = \cos\omega t - i\sin\omega t$.`, t`Multiply out $(a + ib)(\cos\omega t - i\sin\omega t)$ and keep the terms with no $i$: note $ib \cdot (-i\sin\omega t) = +b\sin\omega t$.`],
           teach: t`$\operatorname{Re}\big[(a + ib)e^{-i\omega t}\big] = a\cos\omega t + b\sin\omega t$: the real part of $\tilde A$ multiplies cosine, the imaginary part multiplies sine.`,
           explain: t`$x(t) = ${a}\cos ${w}t ${b < 0 ? '-' : '+'} ${Math.abs(b)}\sin ${w}t$ cm. Check: $x(0) = ${a}$ cm $= \operatorname{Re}\tilde A$ and $\dot x(0) = ${b * w}$ cm/s $= \omega\operatorname{Im}\tilde A$.`,
@@ -279,6 +279,6 @@ One complex number $\tilde A$ carries both the amplitude and the phase. This is 
   ],
   sources: [
     { label: 'Torre, Foundations of Wave Phenomena, ch. 1 (DigitalCommons@USU)', url: 'https://digitalcommons.usu.edu/foundation_wave/1/' },
-    { label: 'Georgi, The Physics of Waves, ch. 1 (MIT OCW)', url: 'https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/' },
+    { label: 'Georgi, The Physics of Waves, ch. 1 (free from the author)', url: 'https://www.people.fas.harvard.edu/~hgeorgi/new.htm' },
   ],
 });

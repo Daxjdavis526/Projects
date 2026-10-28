@@ -154,7 +154,7 @@ export default lesson({
         const h = r.pick([2, 3, 5]), tau = r.pick([1, 2, 4]), n = r.pick([1, 2, 3]);
         const bn = ((2 * h) / (n * Math.PI)) * (n % 2 ? 1 : -1);
         return {
-          prompt: t`A force per unit mass rises steadily from $-${h}$ to $+${h}$ m/s² over each period $\tau = ${tau}$ s and then drops back: $f(t) = ${2 * h}t/${tau}$ for $-${tau / 2} < t < ${tau / 2}$ s, repeated. Find the sine coefficient $b_{${n}}$.`,
+          prompt: t`A force per unit mass rises steadily from $-${h}$ to $+${h}$ m/s² over each period $\tau = ${tau}$ s and then drops back: $f(t) = ${2 * h / tau === 1 ? '' : 2 * h / tau}t$ for $-${tau / 2} < t < ${tau / 2}$ s, repeated. Find the sine coefficient $b_{${n}}$.`,
           answer: bn, units: 'm/s^2', tol: { rel: 0.01 },
           integrand: `(2/${tau})*(${2 * h}*x/${tau})*sin(2*pi*${n}*x/${tau})`, limits: [-tau / 2, tau / 2], vars: { x: [-tau / 2, tau / 2] },
           errors: distinct([{ value: -bn, feedback: t`Check the sign of the boundary term: $\int t\sin kt\,dt = -\tfrac{t}{k}\cos kt + \tfrac{1}{k^2}\sin kt$, and $\cos n\pi = (-1)^n$.` }, { value: bn / 2, feedback: t`The coefficient formula has $2/\tau$ in front.` }], bn),
@@ -203,7 +203,7 @@ export default lesson({
     mcq({
       id: 'cp-duty', difficulty: 2, transfer: true,
       prompt: t`A pulse train at 1 Hz with half duty excites a 3 Hz panel mode through its third harmonic. Keeping the rate at 1 Hz, which duty cycle removes the third harmonic entirely?`,
-      visual: { type: 'cm-fourier', params: { wave: 'pulse', h: 1, d: 0.5, tau: 1, w0: 18.8496, beta: 0.2, N: 9, nmax: 9, sliders: ['d'], readouts: [], panels: ['spectrum'] }, caption: t`The force harmonics (blue) against the panel's gain curve (violet). Try the duty-cycle slider.` },
+      visual: { type: 'cm-fourier', params: { wave: 'pulse', h: 1, d: 0.5, tau: 1, w0: 18.8496, beta: 0.2, N: 9, nmax: 9, sliders: [], readouts: [], panels: ['spectrum'] }, caption: t`At half duty: the force harmonics (blue), the panel's gain curve (violet) and the response harmonics (gold), each set relative to its largest.` },
       choices: ['1/3', '1/4', '1/6', '1/2'],
       answer: 0,
       why: { 1: t`$\sin(3\pi/4) \ne 0$: a quarter duty removes every fourth harmonic, not the third.`, 2: t`$\sin(3\pi/6) = \sin(\pi/2) = 1$: that makes the third harmonic as large as it can be.`, 3: t`That is the starting duty: $\sin(3\pi/2) = -1$, the third harmonic at full strength.` },
@@ -222,7 +222,7 @@ export default lesson({
           hints: [t`$\langle f^2\rangle = h^2d$ (it is $h^2$ for a fraction $d$ of the time) and $a_0/2 = hd$.`, t`Fraction $= (hd)^2/(h^2d)$.`],
           teach: t`Parseval lets you check a series' bookkeeping: the mean term's share of a pulse train's mean square is exactly its duty cycle.`,
           explain: t`$(hd)^2/(h^2d) = d = ${d}$. The other $${sci(1 - d, 2)}$ is spread over the harmonics — short, sharp pulses put most of their power into oscillation.`,
-          visual: pulsePic(1, d, 1, t`The pulse train ($h = 1$, duty ${d}), with its mean dashed.`, { hlines: [{ y: d, color: 'gold', label: 'mean' }], ylabel: 'f / h' }),
+          visual: pulsePic(1, d, 1, t`The pulse train ($h = 1$, duty ${d}), over three periods.`, { ylabel: 'f / h' }),
         };
       },
     }),
