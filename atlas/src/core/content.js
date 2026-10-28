@@ -174,6 +174,7 @@ export function validateItem(item, tex) {
     }
     if (item.type === 'expression') {
       for (const e of item.errors || []) need(!grade(item, e.answer).correct, `known error form ${e.answer} would be graded correct`);
+      need(item.form === undefined || item.form === 'expanded' || item.form === 'factored', `form is 'expanded' or 'factored' (got ${item.form})`);
     }
     if (item.type === 'order') need(item.items?.length >= 3, 'ordering needs 3+ steps');
     if (item.type === 'match' || item.type === 'label') {

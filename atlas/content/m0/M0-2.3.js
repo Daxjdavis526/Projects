@@ -13,7 +13,7 @@ const moonFig = (caption, highlight) => ({
   type: 'graph',
   params: { x: [-1.4, 1.1], y: [0.2, 2.7], xlog: true, ylog: true, aspect: 'wide', xlabel: 'a³ (10¹⁸ km³)', ylabel: 'T² (days²)',
     curves: [{ fn: `x + ${N(Math.log10(41.74))}`, color: 'ink4', dash: true }],
-    points: MOONS.map(([n, a, T]) => ({ x: N(Math.log10(a ** 3)), y: N(Math.log10(T * T)), label: n, color: n === highlight ? 'accent' : 'gold', labelDx: 10, labelAlign: 'left', labelDy: 10 })) },
+    points: MOONS.map(([n, a, T]) => ({ x: N(Math.log10(a ** 3)), y: N(Math.log10(T * T)), label: n, color: n === highlight ? 'accent' : 'gold', labelDx: n === 'Callisto' ? -10 : 10, labelAlign: n === 'Callisto' ? 'right' : 'left', labelDy: 10 })) },
   caption,
 });
 
@@ -59,9 +59,9 @@ Divide by $v_e$, then undo the logarithm with its inverse, the exponential. Once
     visual: { type: 'graph', params: { x: [0, 2.2], y: [0, 3.2], aspect: 'wide', xlabel: 'length L (m)', ylabel: 'period T (s)', curves: [{ fn: '2pi*sqrt(x/9.81)', color: 'accent' }], points: [{ x: 1, y: 2.006, label: 'measured', color: 'gold' }] }, caption: t`$T = 2\pi\sqrt{L/g}$ with $g = 9.81\ \text{m/s}^2$, and the measured point. The formula is the small-angle approximation.` },
     steps: [
       { label: 'List the operations', text: t`Starting from $g$: divide $L$ by it, take the square root, multiply by $2\pi$. Undo them last-first.` },
-      { label: 'Undo the 2π', text: t`$\dfrac{T}{2\pi} = \sqrt{\dfrac{L}{g}}$.` },
+      { label: 'Undo the factor', text: t`$\dfrac{T}{2\pi} = \sqrt{\dfrac{L}{g}}$.` },
       { label: 'Undo the root', text: t`Square both sides: $\dfrac{T^2}{4\pi^2} = \dfrac{L}{g}$.` },
-      { label: 'Free g', text: t`Take reciprocals of both sides and multiply by $L$: $g = \dfrac{4\pi^2 L}{T^2}$.` },
+      { label: 'Isolate the unknown', text: t`Take reciprocals of both sides and multiply by $L$: $g = \dfrac{4\pi^2 L}{T^2}$.` },
       { label: 'Evaluate', text: t`$g = \dfrac{39.48 \times 1.000}{2.006^2}$ $= \dfrac{39.48}{4.024}$ $= 9.81\ \text{m/s}^2$. Units: $\text{m}/\text{s}^2$ ✓. And $g$ falls as $T$ grows — a slower swing means weaker gravity, as on the Moon.` },
     ],
     answer: t`$g = \dfrac{4\pi^2 L}{T^2} = 9.81\ \text{m/s}^2$.`,

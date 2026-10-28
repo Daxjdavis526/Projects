@@ -61,8 +61,8 @@ The cure is simple and non-negotiable: **substitute every candidate back into th
     steps: [
       { label: 'Square both sides', text: t`$x + 3 = (x - 3)^2 = x^2 - 6x + 9$ — with the cross term, not $x^2 + 9$.` },
       { label: 'Solve the quadratic', text: t`$x^2 - 7x + 6 = 0$, so $(x - 1)(x - 6) = 0$: candidates $x = 1$ and $x = 6$.` },
-      { label: 'Check x = 6', text: t`$\sqrt{9} = 3$ and $6 - 3 = 3$ ✓.` },
-      { label: 'Check x = 1', text: t`$\sqrt{4} = 2$ but $1 - 3 = -2$ ✗. It solves $\sqrt{x+3} = -(x - 3)$, the equation squaring could not tell apart.` },
+      { label: 'Check the larger', text: t`$\sqrt{9} = 3$ and $6 - 3 = 3$ ✓.` },
+      { label: 'Check the smaller', text: t`$\sqrt{4} = 2$ but $1 - 3 = -2$ ✗. It solves $\sqrt{x+3} = -(x - 3)$, the equation squaring could not tell apart.` },
       { label: 'Conclude', text: t`A square root is never negative, so the right side must be $\ge 0$ — $x \ge 3$ — which rules out $x = 1$ at a glance.` },
     ],
     answer: t`$x = 6$ only; $x = 1$ is extraneous.`,

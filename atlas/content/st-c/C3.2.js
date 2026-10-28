@@ -53,7 +53,7 @@ defined up to a sign: swapping the roles of $u$ and $v$ flips it. Notice what ea
     params: {
       range: 3, grid: false,
       sliders: [
-        { key: 'a', label: '$u_0$', min: 0, max: 6.28, step: 0.01, value: 2.1, explain: 'Angle round the central axis, in radians.' },
+        { key: 'a', label: '$u_0$', min: 0, max: 6.28, step: 0.01, value: 1.4, explain: 'Angle round the central axis, in radians.' },
         { key: 'b', label: '$v_0$', min: 0, max: 6.28, step: 0.01, value: 0.9, explain: 'Angle round the tube, in radians; 0 is the outer equator.' },
       ],
       choices: [{ key: 'o', label: 'Orientation', options: [[1, '$(u, v)$'], [-1, '$(v, u)$']], value: 1, explain: t`Which cross product defines $\mathbf n$: $\mathbf X_u\times\mathbf X_v$ or $\mathbf X_v\times\mathbf X_u$.` }],

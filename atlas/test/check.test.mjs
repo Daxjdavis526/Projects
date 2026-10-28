@@ -158,6 +158,10 @@ check('expr: known error form', grade({ type: 'expression', answer: 'cos(x)', va
 check('expr: physics symbols', grade({ type: 'expression', answer: 'sqrt(2 g h)', vars: { g: [5, 15], h: [0.1, 10] } }, '√(2gh)').correct);
 check('expr: v0 subscripts', grade({ type: 'expression', answer: 'v_0^2 sin(2 theta)/g', vars: { v_0: [1, 30], theta: [0.1, 1.4], g: [9, 10] } }, '2 v0^2 sinθ cosθ / g').correct);
 check('expr: forbid abs', grade({ type: 'expression', answer: 'sqrt(x^2)', vars: ['x'], forbid: ['abs'] }, '|x|').status === 'invalid');
+check('expr: form expanded accepts the expansion', grade({ type: 'expression', answer: 'x^2 + 2x + 1', vars: ['x'], form: 'expanded' }, '1 + 2x + x^2').correct);
+check('expr: form expanded rejects the bracket typed back', !grade({ type: 'expression', answer: 'x^2 + 2x + 1', vars: ['x'], form: 'expanded' }, '(x + 1)^2').correct && !grade({ type: 'expression', answer: 'x^2 - 1', vars: ['x'], form: 'expanded' }, 'x(x + 1) - (x + 1)').correct);
+check('expr: form factored accepts a product in any order and sign', grade({ type: 'expression', answer: '(x - 2)(x - 3)', vars: ['x'], form: 'factored' }, '-(3 - x)(x - 2)').correct);
+check('expr: form factored rejects the polynomial typed back', !grade({ type: 'expression', answer: '(x - 2)(x - 3)', vars: ['x'], form: 'factored' }, 'x^2 - 5x + 6').correct);
 check('expr: undefined where key is defined', /undefined/.test(grade({ type: 'expression', answer: 'x', vars: { x: [-2, 2] } }, 'sqrt(x)^2').feedback));
 check('expr: compareExpr ratio', compareExpr({ f: (e) => 3 * e.x }, { f: (e) => e.x }, { x: [1, 2] }).ratio === 3);
 

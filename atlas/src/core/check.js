@@ -202,7 +202,31 @@ function sigfigNote(numberText, want) {
  *            (a potential function, defined up to one number)
  *   errors   [{ answer, feedback }] known wrong forms
  *   forbid   function names the learner may not use (e.g. ['abs'])
+ *   form     'expanded' (no bracketed sum multiplied, raised to a power or negated)
+ *            | 'factored' (a product, not a sum, at the top level): checked once the
+ *            value is right, so "expand" and "factor" tasks can't be answered by
+ *            typing the question back
  */
+const ungroup = (n) => (n && n.t === 'group' ? ungroup(n.a) : n);
+const isSum = (n) => { n = ungroup(n); return !!n && (n.t === '+' || n.t === '-'); };
+// a bracketed sum that is multiplied, raised to a power or negated: not yet expanded
+function unexpanded(n) {
+  if (!n || typeof n !== 'object') return false;
+  if (n.t === '*' && (isSum(n.a) || isSum(n.b))) return true;
+  if (n.t === '^' && isSum(n.a)) return true;
+  if (n.t === 'neg' && isSum(n.a)) return true;
+  return [n.a, n.b, ...(n.args || [])].some(unexpanded);
+}
+function formProblem(ast, form) {
+  if (form === 'expanded' && unexpanded(ast)) return 'That has the right value, but it is not expanded: multiply out every bracket and collect like terms.';
+  if (form === 'factored') {
+    let root = ungroup(ast);
+    while (root.t === 'neg') root = ungroup(root.a);
+    if (isSum(root)) return 'That has the right value, but it is not factored: write it as a product of factors.';
+  }
+  return null;
+}
+
 export function gradeExpression(item, input) {
   const text = String(input ?? '').trim();
   if (!text) return bad('Type an expression first.');
@@ -218,7 +242,10 @@ export function gradeExpression(item, input) {
   const key = parseSide(item.answer, names, item.mode);
   const preview = student.tex;
   const cmp = compareExpr(student, key, domains, item.mode || 'exact', item.seed ?? 12345, item.wrt);
-  if (cmp.verdict === 'equal') return ok('', { preview });
+  if (cmp.verdict === 'equal') {
+    const wrong = formProblem(student.ast, item.form);
+    return wrong ? no(wrong, { preview, form: true }) : ok('', { preview });
+  }
   if (cmp.verdict === 'undefined') return no('Your expression is undefined at points where the answer is defined — check for a division by zero or a square root of a negative.', { preview });
   for (const e of item.errors || []) {
     const err = parseSide(e.answer, names, item.mode);

@@ -27,11 +27,11 @@ const RECT = {
   paths: [
     { from: 'A', legs: [['isobaric', 'B'], ['isochoric', 'C']], label: 'A → B → C' },
     { from: 'A', legs: [['isochoric', 'D'], ['isobaric', 'C']], label: 'A → D → C' },
-    { from: 'A', legs: [['isobaric', 'B'], ['isochoric', 'C'], ['isobaric', 'D'], ['isochoric', 'A']], label: 'round the cycle' },
+    { from: 'A', legs: [['isochoric', 'D'], ['isobaric', 'C'], ['isochoric', 'B'], ['isobaric', 'A']], label: 'round the cycle' },
   ],
 };
 const NAIR = (100e3 * 0.01) / (8.314462618 * 300);
-const rectPic = (show, caption, extra = {}) => ({ type: 'therm-pv', params: { mode: 'paths', gas: 'air', n: r4(NAIR), ...RECT, show, readouts: [], vrange: [0, 30], prange: [0, 300], isotherms: false, ...extra }, caption });
+const rectPic = (show, caption, extra = {}) => ({ type: 'therm-pv', params: { mode: 'paths', gas: 'air', n: r4(NAIR), states: RECT.states, paths: RECT.paths.slice(0, 2), show, readouts: [], vrange: [0, 30], prange: [0, 300], isotherms: false, ...extra }, caption });
 
 // two chambers, one full and one empty (free expansion)
 const chambersPic = (caption) => ({
@@ -72,7 +72,7 @@ This course follows Schroeder: $Q$ is heat *into* the system and $W$ is work don
     tasks: [
       t`Compare A → B → C with A → D → C: $Q$ and $W$ both change, but $\Delta U$ does not.`,
       t`Choose “round the cycle”: $\Delta U = 0$, yet heat and work are not zero — they are equal and opposite in our convention.`,
-      'The cycle runs counter-clockwise, so the surroundings do net work on the gas, and the gas gives out the same amount as heat.',
+      'The cycle runs clockwise, so the gas does net work on its surroundings (the area inside the rectangle) and takes in exactly that much net heat.',
     ],
     params: { mode: 'paths', gas: 'air', n: r4(NAIR), ...RECT, controls: ['path'], readouts: ['Q', 'W', 'dU', 'legs'], vrange: [0, 30], prange: [0, 300], isotherms: false },
     caption: 'Air (γ = 1.4) as an ideal gas, about 0.4 mol, every leg quasi-static. Shaded: the area under the chosen path, which is the work done by the gas (negative where the gas is compressed).',
@@ -205,7 +205,7 @@ This course follows Schroeder: $Q$ is heat *into* the system and $W$ is work don
           errors: apart([{ value: (P * 1e6) / (mdot * LOX.c), feedback: 'Only the lost fraction, 1 − η, heats the LOX; the rest raises its pressure.' }, { value: (eta * P * 1e6) / (mdot * LOX.c), feedback: 'You used the useful fraction. The losses are 1 − η.' }], dT),
           hints: [t`Per second: $(1-\eta)P$ joules become internal energy of $\dot m$ kilograms.`, t`$\Delta T = \dfrac{(1-\eta)P}{\dot m c}$.`],
           teach: 'Work dissipated in a fluid raises its internal energy exactly as heat would.',
-          explain: t`$\Delta T = \dfrac{(${fmt(1 - eta, 2)})(${P}\times10^{6})}{(${mdot})(${LOX.c})} = ${fmt(dT, 3)}$ K — enough to matter, because warmer LOX is closer to boiling and the pump inlet must avoid cavitation.`,
+          explain: t`$\Delta T = \dfrac{(${fmt(1 - eta, 2)})(${P}\times10^{6})}{(${mdot})(${LOX.c})} = ${fmt(dT, 3)}$ K — small but real. Designers track it: leakage that recirculates warmed LOX back to the pump inlet brings it closer to boiling there, where cavitation must be avoided.`,
           visual: energyBars({ Q: 0, W: (1 - eta) * P, dU: (1 - eta) * P, unit: 'MW', caption: 'Per second, for the LOX passing through: the dissipated part of the shaft work becomes internal energy (the useful part, raising the pressure, is left out). A simplification: real pumps also lose energy to bearings, seals and recirculated flow.' }),
         };
       },

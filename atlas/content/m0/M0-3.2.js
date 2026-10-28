@@ -61,7 +61,7 @@ Solve by **substitution** (solve one equation for a variable, put it in the othe
     steps: [
       { label: 'Name the unknowns', text: t`$x$ kg of the $90\%$ stock and $y$ kg of the $70\%$ stock.` },
       { label: 'Two facts, two equations', text: t`Total mass: $x + y = 500$. Peroxide mass: $0.90x + 0.70y = 0.85 \times 500 = 425$.` },
-      { label: 'Eliminate y', text: t`Multiply the first by $0.70$: $0.70x + 0.70y = 350$. Subtract it from the second: $0.20x = 75$, so $x = 375$.` },
+      { label: 'Eliminate one unknown', text: t`Multiply the first by $0.70$: $0.70x + 0.70y = 350$. Subtract it from the second: $0.20x = 75$, so $x = 375$.` },
       { label: 'Back-substitute', text: t`$y = 500 - 375 = 125$.` },
       { label: 'Check', text: t`$0.90(375) + 0.70(125) = 337.5 + 87.5 = 425$ ✓. And $85\%$ lies three-quarters of the way from $70\%$ to $90\%$, matching three parts in four of the strong stock.` },
     ],

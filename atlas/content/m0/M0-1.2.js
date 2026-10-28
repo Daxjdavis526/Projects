@@ -48,7 +48,7 @@ Out of every $1 + r$ kilograms, $r$ are oxidizer and $1$ is fuel. A percentage i
       t`Go from $r = 3$ to $r = 6$: the ratio doubles, but the oxidizer share only rises from 75% to 86%.`,
     ],
     params: {
-      x: [-0.05, 1.05], y: [-0.12, 0.5], xlabel: 'fraction of the propellant mass', ylabel: '', yticks: 0, grid: false, axesAt: 'edge',
+      x: [-0.05, 1.05], y: [0.02, 0.46], xlabel: 'fraction of the propellant mass', ylabel: '', yticks: 0, grid: false, axesAt: 'edge',
       sliders: [{ key: 'r', label: t`Mixture ratio $r$ (O/F)`, min: 0.5, max: 8, step: 0.05, value: 2.4, explain: t`Kilograms of oxidizer burned per kilogram of fuel.` }],
       shade: [{ fn: '0.4', lower: '0.2', from: 0, to: 'r/(1 + r)', color: 'accent', alpha: 0.4 }, { fn: '0.4', lower: '0.2', from: 'r/(1 + r)', to: 1, color: 'warn', alpha: 0.4 }],
       points: [{ x: 'r/(1 + r)/2', y: 0.3, r: 0, label: 'oxidizer', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink' }, { x: '(1 + r/(1 + r))/2', y: 0.3, r: 0, label: 'fuel', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink', when: 'step(1/(1 + r) - 0.09)' },
