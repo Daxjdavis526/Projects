@@ -11,6 +11,7 @@
 // AME2020, in u.
 
 import { seg, label, frame, r6 } from './_diagrams.js';
+import { position, symbol } from '../../src/viz/model/mp-shells.js';
 
 // ---- successive ionization energies, eV (NIST ASD): [first, second, third, fourth]
 export const IE_SUCCESSIVE = {
@@ -120,3 +121,39 @@ export function wellLadder(N, { kind = 'fermion', nTop = 5, show = true, caption
 }
 
 export { seg, label, frame, r6 };
+
+/**
+ * The periodic table as a grid of dots (a graph): marked elements large, in
+ * colour, with their symbols; the rest small and grey. marks: { Z: color };
+ * symbols: extra Zs to name; rows: period numbers to underline.
+ */
+export function tableDots({ marks = {}, symbols = [], rows = [], caption } = {}) {
+  const points = [], curves = [];
+  for (let Z = 1; Z <= 86; Z++) {
+    const { row, col } = position(Z), y = row === 8 ? -7.7 : -row;
+    const m = marks[Z];
+    points.push(m ? { x: col, y, r: 7.5, color: m } : { x: col, y, r: 2.6, color: 'ink4' });
+    if (m || symbols.includes(Z)) points.push(label(col, y, symbol(Z), m || 'ink2', 0, -13, 'center'));
+  }
+  for (const p of rows) curves.push(seg(0.5, -p - 0.42, 18.5, -p - 0.42, 'gold', 1.6, true));
+  return {
+    type: 'graph',
+    params: frame([-0.5, 19.5], [-8.4, -0.3], { aspect: 'wide', points, curves }),
+    caption: caption ?? 'The periodic table as dots, hydrogen (top left) to radon; the strip below is the f-block, which belongs in period 6 between groups 2 and 3.',
+  };
+}
+
+/** Bars (a graph): [[label, value, color]], with the value written above each bar. */
+export function bars(items, { ylabel = '', ymax, caption, digits = 3, unit = '' } = {}) {
+  const top = ymax ?? 1.18 * Math.max(...items.map((i) => i[1]));
+  const shade = [], points = [];
+  items.forEach(([lab, v, color = 'accent'], i) => {
+    shade.push({ fn: String(r6(v)), lower: '0', from: i + 0.2, to: i + 0.8, color, alpha: 0.7 });
+    points.push(label(i + 0.5, v, `${+v.toPrecision(digits)}${unit}`, color, 0, -10, 'center'), label(i + 0.5, 0, lab, 'ink2', 0, 12, 'center'));
+  });
+  return {
+    type: 'graph',
+    params: { x: [-0.2, items.length + 0.2], y: [0, r6(top)], aspect: 'wide', xticks: 0, xlabel: '', ylabel, axesAt: 'edge', grid: false, shade, points },
+    caption,
+  };
+}

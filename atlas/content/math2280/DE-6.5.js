@@ -135,7 +135,7 @@ Read the input as a stream of small kicks $f(\tau)\,d\tau$; each is answered by 
           vars: { t: [0, 3] },
           errors: [
             { answer: `e^(-${a + b}t)`, feedback: 'A convolution is not the product of the two functions: it integrates one against the other, flipped and slid.' },
-            { answer: `e^(-${a}t) - e^(-${b}t)`, feedback: t`Check the constant: $\int_0^t e^{${b - a}\tau}\,d\tau = \dfrac{e^{${b - a}t} - 1}{${b - a}}$.` },
+            ...(b - a > 1 ? [{ answer: `e^(-${a}t) - e^(-${b}t)`, feedback: t`Check the constant: $\int_0^t e^{${b - a}\tau}\,d\tau = \dfrac{e^{${b - a}t} - 1}{${b - a}}$.` }] : []),
           ],
           hints: [t`Pull out what does not depend on $\tau$: $e^{-${b}t}\displaystyle\int_0^t e^{(${b} - ${a})\tau}\,d\tau$.`, t`Or use the convolution theorem: $\dfrac{1}{s + ${a}}\cdot\dfrac{1}{s + ${b}}$, then partial fractions.`],
           teach: t`Convolve by integrating over $\tau$ with $t$ held fixed — or multiply the transforms and invert.`,
@@ -261,7 +261,7 @@ print(peak, t_peak)`,
         return {
           prompt: t`A gravitational-wave detector hangs its mirrors as pendulums, so ground motion is filtered before it reaches them. Model one stage, with negligible damping, as $H(s) = \dfrac{\omega_0^2}{s^2 + \omega_0^2}$ from the motion of the suspension point to the motion of the mirror, with $f_0 = \omega_0/2\pi = ${f0}$ Hz. Ground vibration at ${f} Hz shakes the suspension point. By what factor is it reduced at the mirror, $1/|H(i\omega)|$?`,
           answer: att, tol: { rel: 0.005 },
-          errors: [{ value: f / f0, feedback: t`The gain falls like $(\omega_0/\omega)^2$, not $\omega_0/\omega$: the factor ${n(f / f0)} must be squared.` }, { value: (f / f0) ** 2 + 1, feedback: t`At $s = i\omega$, $s^2 = -\omega^2$: the denominator is $\omega_0^2 - \omega^2$, so the factor is $(f/f_0)^2 - 1$.` }],
+          errors: [{ value: f / f0, feedback: t`The gain falls like $(\omega_0/\omega)^2$, not $\omega_0/\omega$: the factor ${n(f / f0)} must be squared.` }, { value: (f / f0) ** 2 + 1, feedback: t`At $s = i\omega$, $s^2 = -\omega^2$: the denominator is $\omega_0^2 - \omega^2$, so the factor is $(f/f_0)^2 - 1$.` }].filter((e) => Math.abs(e.value - att) > 0.01 * att),
           hints: [t`At $s = i\omega$: $H(i\omega) = \dfrac{\omega_0^2}{\omega_0^2 - \omega^2}$.`, t`$\dfrac{1}{|H|} = \left|1 - \dfrac{\omega^2}{\omega_0^2}\right| = \left(\dfrac{f}{f_0}\right)^2 - 1$ above resonance.`],
           teach: t`Far above its resonance a mass on a pendulum (or spring) follows its support with gain $(f_0/f)^2$, falling a hundredfold per tenfold in frequency.`,
           explain: t`$1/|H| = (${f}/${f0})^2 - 1 = ${fmt(att, 4)}$. Stacking stages multiplies the factors, which is why LIGO’s test masses hang from a four-stage pendulum, on top of active seismic isolation. A single ideal stage only: real suspensions have several modes and some damping, and below $f_0$ a pendulum does not isolate at all.`,

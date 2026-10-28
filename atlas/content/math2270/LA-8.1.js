@@ -114,7 +114,7 @@ The **sign** records orientation: positive if the map keeps the turn from the fi
         return {
           prompt: t`The map $A = ${matTeX(A)}$ is applied to a disc of radius $${R}$ centred at the origin. The image is an ellipse. What is its area?`,
           answer: ans, tol: { rel: 0.005 },
-          errors: [{ value: Math.PI * R * R / Math.abs(D), feedback: t`The map multiplies areas by $|\det A|$; you divided.` }, { value: Math.PI * R * Math.abs(D), feedback: t`The disc's area is $\pi R^2$, not $\pi R$.` }],
+          errors: [{ value: Math.PI * R * R / Math.abs(D), feedback: t`The map multiplies areas by $|\det A|$; you divided.` }, { value: Math.PI * R * Math.abs(D), feedback: t`The disc's area is $\pi R^2$, not $\pi R$.` }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`area of image $= |\det A|\times$ area of disc.`, t`$\det A = ${D}$ and the disc has area $\pi\cdot${R}^2$.`],
           teach: 'A linear map scales the area of every region, curved or not, by |det A|.',
           explain: t`$|\det A|\,\pi R^2 = ${Math.abs(D)}\times${R * R}\pi = ${Math.abs(D) * R * R}\pi \approx ${nice(ans)}$. No integral is needed: the factor is the same for every little piece of the disc.`,

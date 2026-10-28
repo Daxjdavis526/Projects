@@ -59,7 +59,7 @@ Each term is smaller than the last by about $v^2/c^2$, so Newton's $\tfrac12 mv^
 import sympy as sp
 import matplotlib.pyplot as plt
 
-beta = sp.symbols("beta", positive=True)      # v / c
+beta = sp.symbols("beta", positive=True)       # v / c
 K = 1/sp.sqrt(1 - beta**2) - 1                 # kinetic energy in units of m c²
 print("K / mc² =", sp.series(K, beta, 0, 8))
 
