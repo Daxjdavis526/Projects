@@ -96,7 +96,7 @@ with $P_l^m(x) = (1 - x^2)^{m/2}\frac{d^m}{dx^m}P_l(x)$. They are orthonormal, $
         const c00 = Math.sqrt(4 * PI) * (a + b / 3), ans = ((2 * b) / 3) * Math.sqrt((4 * PI) / 5);
         return {
           prompt: t`A temperature pattern on a sphere is $f(\theta) = ${a} ${b < 0 ? '-' : '+'} ${Math.abs(b)}\cos^2\theta$ (kelvin, measured from some reference). Expand it as $f = c_{00}Y_0^0 + c_{20}Y_2^0$. What is $c_{20}$?`,
-          visual: sph({ terms: [[0, 0, c00], [2, 0, ans]] }, 'The pattern f(θ) on the sphere: it depends only on latitude.'),
+          visual: sph({ terms: [[2, 0, ans]] }, 'The varying part of f on the sphere (the constant part only shifts every value): it depends only on latitude.'),
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: (2 * b) / 3, feedback: t`That is the coefficient of $P_2(\cos\theta)$. Convert: $P_2 = \sqrt{4\pi/5}\,Y_2^0$.` }, { value: b * Math.sqrt((4 * PI) / 5), feedback: t`$\cos^2\theta = \tfrac13 + \tfrac23P_2(\cos\theta)$: only $\tfrac23$ of $b$ goes to $P_2$.` }],
           hints: [t`$\cos^2\theta = \tfrac13P_0 + \tfrac23P_2(\cos\theta)$.`, t`$Y_2^0 = \sqrt{5/4\pi}\,P_2(\cos\theta)$, so $P_2 = \sqrt{4\pi/5}\,Y_2^0$.`],
@@ -142,7 +142,7 @@ with $P_l^m(x) = (1 - x^2)^{m/2}\frac{d^m}{dx^m}P_l(x)$. They are orthonormal, $
         const ans = (4 * PI / 5) * sum;
         return {
           prompt: t`The **addition theorem** says $P_l(\cos\gamma) = \dfrac{4\pi}{2l + 1}\sum_mY_l^m(\hat n_1)\,\bar Y_l^m(\hat n_2)$, where $\gamma$ is the angle between two directions. For $\hat n_1 = (\theta, \varphi) = (${t1}^\circ, ${p1}^\circ)$ and $\hat n_2 = (${t2}^\circ, ${p2}^\circ)$, find $P_2(\cos\gamma)$.`,
-          visual: sph({ l: 2, m: 0, nodal: false }, 'Two directions on the sphere; only the angle between them matters.'),
+          visual: gpic({ x: [-1, 1], y: [-0.6, 1.1], xlabel: 'x = cos γ', curves: [{ fn: '1.5*x^2 - 0.5', color: 'accent', width: 2.3, label: 'P₂(x)', labelAt: 0.75, labelDx: 8 }] }, 'P₂ against the cosine of the angle between the two directions.'),
           answer: ans, tol: { rel: 0.01, abs: 0.002 },
           errors: [{ value: cg, feedback: t`That is $\cos\gamma$ itself; apply $P_2(x) = \tfrac12(3x^2 - 1)$.` }],
           hints: [t`You do not need the five harmonics: $\cos\gamma = \cos\theta_1\cos\theta_2 + \sin\theta_1\sin\theta_2\cos(\varphi_1 - \varphi_2)$.`, t`Here $\cos\gamma = ${r4(cg)}$.`],
