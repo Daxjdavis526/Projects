@@ -170,6 +170,8 @@ arrows are drawn over their letter.
 A template literal *inside* a `` t`…` `` (`` t`${k ? `\times` : ''}` ``) is an
 ordinary one again and eats its backslashes: tag it too (`` t`\times` ``). The
 content test catches this in lessons; in a sim file only a screenshot will.
+And `${` inside `` t`…` `` is always JavaScript, even in TeX: `$${\star}F$`
+breaks the module ("Invalid or unexpected token") — write `$\star F$`.
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
 test catches this ("escape damage"), but it is easier not to make the mistake.
 Inside `` t`…` `` you can still interpolate: `` t`$\frac{${a}}{${b}}$` ``.
@@ -528,7 +530,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `c3-coords` | cylindrical or spherical coordinates as three surfaces meeting at a point, turning unit vectors, the volume-element box (`edgeLabels: false` hides its edge lengths); `radius: 's'` names the cylindrical radius $s$ as Griffiths does (default ρ) |
 | `c3-curve` | a point riding a space curve: T, N, B frame, osculating circle, acceleration split into tangential and normal parts (gravity-turn preset) `vectors: 'bold'` writes its labels **T**, **N**, **B** instead of arrows. |
 | `c3-boxes`, `c3-slicer`, `c3-jacobian` | boxes under a surface summing to a double integral; a region sliced in strips both ways (the two orders' limits); a change of variables stretching each cell by its Jacobian |
-| `c3-lineint`, `c3-cells`, `c3-flux` | a bead riding a path through a vector field with F·dr adding up; a region cut into cells whose inner edges cancel (Green's theorem, the FTC); a 3D field through tiltable surfaces — the flux integrand, curl through butterfly nets, the divergence theorem `c3-flux`: `flip: true` reverses the normal *and* the drawn direction of the rim (Stokes's orientation follows the normal); its point and surface labels are plain text, not TeX (unlike `calc-vectors3d`) |
+| `c3-lineint`, `c3-cells`, `c3-flux` | a bead riding a path through a vector field with F·dr adding up; a region cut into cells whose inner edges cancel (Green's theorem, the FTC); a 3D field through tiltable surfaces — the flux integrand, curl through butterfly nets, the divergence theorem `c3-flux`: `flip: true` reverses the normal *and* the drawn direction of the rim (Stokes's orientation follows the normal); its point and surface labels are plain text, not TeX (unlike `calc-vectors3d`) `arrows: false` hides the field arrows but not the normals: add `normals: false`. |
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
 | `la-subspaces` | Strang's four subspaces as squares sized by dimension, with exact bases; slider entries change the rank; subspaces can be renamed (self-stresses, mechanisms) and a dimension hidden as “?” |

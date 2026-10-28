@@ -46,13 +46,14 @@ export function realPic({ fn, x, y, xlabel = 'x', ylabel = '', color = 'accent',
 
 // ── black-hole quasinormal modes (G = c = 1) ────────────────────────────────
 // Leaver's continued fraction (1985), solved for this course to 30 digits:
-// Schwarzschild ℓ = 2 (n = 0, 1) and ℓ = 3, n = 0; Kerr ℓ = m = 2, n = 0 at
+// Schwarzschild ℓ = 2 (n = 0, 1) and ℓ = 3, 4 (n = 0); Kerr ℓ = m = 2, n = 0 at
 // several spins χ = a/M. Berti, Cardoso & Will's fit agrees with every Kerr
 // value here to about 1%.
 export const QNM = {
   s20: [0.37367168, -0.08896232],
   s21: [0.34671100, -0.27391488],
   s30: [0.59944329, -0.09270305],
+  s40: [0.80917838, -0.09416396],
 };
 export const KERR = [
   [0, 0.3736717, -0.0889623], [0.3, 0.4195267, -0.0877293], [0.5, 0.4641230, -0.0856388], [0.6, 0.4940448, -0.0837652],

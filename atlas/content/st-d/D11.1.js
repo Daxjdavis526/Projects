@@ -225,7 +225,7 @@ and the same with the roles swapped and a minus sign. The absorption ($\operator
       choices: [
         t`It cannot be built to run in real time: $h(t) \ne 0$ before the input arrives. Its $H(\omega)$ is real with $\operatorname{Im}H = 0$, which by Kramers–Kronig would force $\operatorname{Re}H$ to be constant`,
         'It can be built exactly, given fast enough electronics',
-        'It is causal, because the main peak is at t = 0',
+        t`It is causal, because the main peak is at $t = 0$`,
         'It violates causality only because its gain is greater than 1',
       ],
       answer: 0,
