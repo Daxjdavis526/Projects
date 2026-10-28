@@ -120,9 +120,9 @@ print(r, info.iterations, info.function_calls)
 \`\`\`
 
 It prints $r = ${(L1 / 1e8).toFixed(5)}\times10^{8}$ m after ${BRENT_L1.iterations} iterations and ${BRENT_L1.calls} evaluations of $f$. Bisection over the same bracket would need about 50 halvings to reach the default tolerance.` },
-      { label: 'Sense check', text: t`L1 is $R - r = ${((RM - L1) / 1e3).toFixed(0)}$ km from the Moon, ${(100 * (RM - L1) / RM).toFixed(1)}% of the way. The Hill-sphere estimate $R\left[1 - (m/3M)^{1/3}\right] = ${(HILL / 1e8).toFixed(3)}\times10^{8}$ m is within ${(100 * Math.abs(HILL - L1) / L1).toFixed(0)}% — a good check that the root is the one intended. (L1 is unstable: a craft parked there needs small station-keeping burns.)` },
+      { label: 'Sense check', text: t`L1 is $R - r = ${((RM - L1) / 1e3).toFixed(0).replace(/(\d\d)(\d{3})$/, '$1{,}$2')}$ km from the Moon, ${(100 * (RM - L1) / RM).toFixed(1)}% of the way. The Hill-sphere estimate $R\left[1 - (m/3M)^{1/3}\right] = ${(HILL / 1e8).toFixed(3)}\times10^{8}$ m is within ${(100 * Math.abs(HILL - L1) / L1).toFixed(0)}% — a good check that the root is the one intended. (L1 is unstable: a craft parked there needs small station-keeping burns.)` },
     ],
-    answer: t`$r \approx ${(L1 / 1e8).toFixed(4)}\times10^{8}$ m from Earth's centre, about ${Math.round((RM - L1) / 1e3 / 1000) * 1000} km short of the Moon.`,
+    answer: t`$r \approx ${(L1 / 1e8).toFixed(4)}\times10^{8}$ m from Earth's centre, about ${Math.round((RM - L1) / 1e6)} 000 km short of the Moon.`,
   },
   practice: [
     mcq({
@@ -170,7 +170,7 @@ Why?`,
           visual: {
             type: 'graph',
             params: { x: [-0.15, 1.25], y: [-0.15, Math.max(0.6, sn + 0.15)], equal: true, aspect: 'wide', axes: false, grid: false,
-              arrows: [{ from: [0, 0], to: [1, 0], color: 'accent', label: 'before' }, { from: [0, 0], to: [c, sn], color: 'gold', label: 'after', labelDx: 6 }, { from: [1, 0], to: [c, sn], color: 'bad', dash: true, label: 'Δv', labelDx: 8 }] },
+              arrows: [{ from: [0, 0], to: [1, 0], color: 'accent', label: 'before' }, { from: [0, 0], to: [c, sn], color: 'gold', label: 'after', labelDx: -46, labelDy: -6 }, { from: [1, 0], to: [c, sn], color: 'bad', dash: true, label: 'Δv', labelDx: 14, labelDy: 22 }] },
             caption: `Velocity before and after, equal in length, ${th}° apart; the dashed arrow is the change. Drawn to scale.`,
           },
           answer: dv, units: 'km/s', tol: { rel: 0.005 },

@@ -11,7 +11,7 @@ const chord = (x1, y1, x2, y2) => `(${y1}) + (${(y2 - y1) / (x2 - x1)})*(x - (${
 // a curve with the secant joining two of its points (labels are plain text)
 function secantFig({ fn, f, x1, x2, x, y, xlabel, ylabel, l1 = 'P', l2 = 'Q', caption, extra = {} }) {
   const y1 = f(x1), y2 = f(x2);
-  const lo = Math.min(x1, x2) - 0.15 * Math.abs(x2 - x1), hi = Math.max(x1, x2) + 0.15 * Math.abs(x2 - x1);
+  const lo = Math.min(x1, x2) - 0.5 * Math.abs(x2 - x1), hi = Math.max(x1, x2) + 0.5 * Math.abs(x2 - x1);
   return {
     type: 'graph',
     params: {
@@ -56,7 +56,7 @@ A rocket’s altimeter gives altitude against time; the difference quotient of t
       t`Move $t_1$ later with $\Delta t$ fixed: the rocket is speeding up, so every secant is steeper than the one before.`,
     ],
     params: {
-      x: [-0.3, 10.5], y: [-120, 1600], xlabel: 't (s)', ylabel: 'h (m)',
+      x: [-0.3, 10.5], y: [-120, 1680], xlabel: 't (s)', ylabel: 'h (m)',
       sliders: [{ key: 'dt', label: t`Interval $\Delta t$`, min: -3, max: 4, step: 0.05, value: 3, unit: t`\text{s}`, explain: t`The length of the time interval, from $t_1$ to $t_1 + \Delta t$; negative means the interval reaches back in time.` }],
       curves: [{ fn: '15*x^2', color: 'accent', domain: [0, 10], label: 'h(t) = 15t²', labelAt: 8.3, labelDx: 10 }],
       tangent: { fn: '15*x^2', at: 2, secant: 'dt' },

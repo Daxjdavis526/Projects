@@ -193,6 +193,7 @@ export const LESSONS = {
   'math2270.LA-11.1': () => import('./math2270/LA-11.1.js'),
   'math2270.LA-11.2': () => import('./math2270/LA-11.2.js'),
   'math2270.LA-11.3': () => import('./math2270/LA-11.3.js'),
+  'math2270.LA-12.1': () => import('./math2270/LA-12.1.js'),
   'math2270.LA-2.1': () => import('./math2270/LA-2.1.js'),
   'math2270.LA-2.2': () => import('./math2270/LA-2.2.js'),
   'math2270.LA-2.3': () => import('./math2270/LA-2.3.js'),
@@ -551,6 +552,7 @@ export const LESSONS = {
   'st-a.A7.3': () => import('./st-a/A7.3.js'),
   'st-a.A8.1': () => import('./st-a/A8.1.js'),
   'st-a.A8.2': () => import('./st-a/A8.2.js'),
+  'st-a.A8.3': () => import('./st-a/A8.3.js'),
 };
 
 export const BOSSES = {
