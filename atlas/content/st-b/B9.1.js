@@ -14,9 +14,10 @@ const r3 = (x) => +x.toPrecision(3);
 // the tent G(x, s) = min(x, s)(L − max(x, s))/L as an expression of x
 const tent = (s, L = 1) => `min(x, ${s})*(${L} - max(x, ${s}))/${L}`;
 // a sagging cable: −(deflection), so the picture hangs down
-const sag = (curves, L, ymin, extra = {}) => ({
+const sag = (curves, L, ymin, extra = {}, caption) => ({
   type: 'graph',
-  params: { x: [-0.04 * L, 1.04 * L], y: [ymin, -0.12 * ymin], aspect: 'wide', xlabel: 'x (m)', ylabel: 'sag (m)', axesAt: 'edge', yticks: 4, curves, ...extra },
+  params: { x: [-0.04 * L, 1.04 * L], y: [ymin, -0.12 * ymin], aspect: 'wide', xlabel: 'x (m)', ylabel: 'sag (m)', axesAt: 'edge', yticks: 4, curves: curves.map((c) => ({ domain: [0, L], ...c })), ...extra },
+  ...(caption ? { caption } : {}),
 });
 // stainless steel 304 at 300 K: k = 14.9 W/(m K) (Incropera, Table A.1)
 const K_SS = 14.9;
@@ -56,9 +57,9 @@ where $G(x, s)$, the **Green’s function**, is the response at $x$ to a unit po
         { key: 'N', label: 'Number of loads $N$', min: 1, max: 24, step: 1, value: 3, explain: 'Each carries $1/N$, at $s_j = (j - \\tfrac12)/N$ (many-loads view).' },
       ],
       curves: [
-        { fn: `-(${tent('s')})`, color: 'accent', width: 2.6, when: 'step(0.5 - view)' },
+        { fn: `-(${tent('s')})`, color: 'accent', width: 2.6, when: 'step(0.5 - view)', domain: [0, 1] },
         { sum: '-(1/N)*min(x, (k - 0.5)/N)*(1 - max(x, (k - 0.5)/N))', k: [1, 'N'], color: 'accent', width: 2.6, when: 'step(view - 0.5)' },
-        { fn: '-x*(1 - x)/2', color: 'gold', width: 1.6, dash: [5, 4], when: 'step(view - 0.5)', label: 'uniform load: x(1 − x)/2', labelAt: 0.62, labelDy: 16 },
+        { fn: '-x*(1 - x)/2', color: 'gold', width: 1.6, dash: [5, 4], when: 'step(view - 0.5)', domain: [0, 1], label: 'uniform load: x(1 − x)/2', labelAt: 0.62, labelDy: 16 },
       ],
       points: [{ x: 's', y: '-s*(1 - s)', color: 'warn', when: 'step(0.5 - view)', label: 'unit load', labelDy: 14 }],
       readouts: [
@@ -70,8 +71,12 @@ where $G(x, s)$, the **Green’s function**, is the response at $x$ to a unit po
     caption: t`$-u'' = f$ on $[0, 1]$ with both ends fixed; the sag is drawn downward. Each point load is an ideal spike — a real hook spreads its load over a short length, which rounds the corner without changing the tent elsewhere. Small slopes are assumed, as in every taut-string model.`,
   },
   example: {
-    prompt: t`Solve $-u'' = 1$ on $0 \le x \le 1$ with $u(0) = u(1) = 0$ by the Green’s function $G(x, s) = x(1 - s)$ for $x \le s$, $s(1 - x)$ for $x \ge s$. Then read it as a cable of length $L = 10$ m under tension $T = 2000$ N carrying a uniform $q = 50$ N/m: how far does the middle sag?`,
-    visual: sag([{ fn: '-x*(1 - x)/2', color: 'accent', width: 2.6 }, ...[0.25, 0.5, 0.75].map((s) => ({ fn: `-0.18*(${tent(s)})`, color: 'ink3', width: 1.2, dash: [4, 4] }))], 1, -0.14, { xlabel: 'x', ylabel: 'sag', points: [{ x: 0.5, y: -0.125, label: '1/8', color: 'gold', labelDy: 14 }] }),
+    prompt: t`Solve $-u'' = 1$ on $0 \le x \le 1$ with $u(0) = u(1) = 0$ by the Green’s function
+
+$$G(x, s) = \begin{cases} x(1 - s), & x \le s \\ s(1 - x), & x \ge s. \end{cases}$$
+
+Then read it as a cable of length $L = 10$ m under tension $T = 2000$ N carrying a uniform $q = 50$ N/m: how far does the middle sag?`,
+    visual: sag([{ fn: '-x*(1 - x)/2', color: 'accent', width: 2.6 }, ...[0.25, 0.5, 0.75].map((s) => ({ fn: `-0.18*(${tent(s)})`, color: 'ink3', width: 1.2, dash: [4, 4] }))], 1, -0.14, { xlabel: 'x', ylabel: 'sag', points: [{ x: 0.5, y: -0.125, label: '1/8', color: 'gold', labelDy: 14 }] }, t`The solution $x(1 - x)/2$ (blue, drawn downward) and, dashed, the tents of three of the point loads it is built from (scaled down to fit).`),
     steps: [
       { label: 'Split the integral', text: t`For a fixed $x$, the sources at $s < x$ see the right-hand branch of the tent and those at $s > x$ the left: $u(x) = \int_0^x s(1 - x)\,ds + \int_x^1 x(1 - s)\,ds$.` },
       { label: 'Integrate', text: t`$= (1 - x)\dfrac{x^2}{2} + x\dfrac{(1 - x)^2}{2} = \dfrac{x(1 - x)}{2}\big(x + 1 - x\big) = \dfrac{x(1 - x)}{2}$.` },
@@ -104,7 +109,7 @@ where $G(x, s)$, the **Green’s function**, is the response at $x$ to a unit po
         const s = L * frac, d = (P * s * (L - s)) / (T * L);
         return {
           prompt: t`A cable of length $L = ${L}$ m is stretched to tension $T = ${T}$ N between two fixed anchors. An instrument of weight $P = ${P}$ N hangs from it at $s = ${r3(s)}$ m from one end. Its sag obeys $-Tu'' = P\,\delta(x - s)$. How far below the anchors is the instrument, in centimetres?`,
-          visual: sag([{ fn: `-(${(P / T).toFixed(6)})*(${tent(r3(s), L)})`, color: 'accent', width: 2.6 }], L, -1.6 * d, { points: [{ x: r3(s), y: -d, color: 'warn', label: `${P} N`, labelDy: 14 }], yticks: 0 }),
+          visual: sag([{ fn: `-(${(P / T).toFixed(6)})*(${tent(r3(s), L)})`, color: 'accent', width: 2.6 }], L, -1.6 * d, { points: [{ x: r3(s), y: -d, color: 'warn', label: `${P} N`, labelDy: 14 }], yticks: 0 }, 'The cable and the hanging instrument. The sag is exaggerated: the real one is at most a few per cent of the length.'),
           answer: d * 100, units: 'cm', tol: { rel: 0.01 },
           errors: [{ value: (P * s * (L - s)) / T * 100, feedback: t`On an interval of length $L$ the tent is $G(x, s) = x(L - s)/L$ for $x \le s$: divide by $L$.` }, { value: (P * (L - s)) / T * 100, feedback: 'That is the slope of the left side of the tent, not the sag.' }].filter((e) => Math.abs(e.value - d * 100) > 0.02 * d * 100),
           hints: [t`$u = \dfrac{P}{T}\,G(x, s)$ with $G(x, s) = \dfrac{x(L - s)}{L}$ for $x \le s$.`, t`At the load, $x = s$: $u = \dfrac{P\,s(L - s)}{T\,L}$.`],
@@ -222,11 +227,11 @@ print(np.max(np.abs(np.linalg.inv(A) - h * Gm)))`,
     num({
       id: 'cp-heater', difficulty: 3, transfer: true,
       gen(r) {
-        const L = r.pick([0.3, 0.4, 0.5]), s = r.pick([0.1, 0.15]), Q = r.pick([0.2, 0.5, 1]), dmm = r.pick([8, 10, 12]);
+        const L = r.pick([0.3, 0.4, 0.5]), s = r.pick([0.1, 0.15]), Q = r.pick([0.1, 0.2, 0.3]), dmm = r.pick([10, 12]);
         const A = (Math.PI * (dmm / 1000) ** 2) / 4, kA = K_SS * A, dT = (Q * s * (L - s)) / (kA * L);
         return {
           prompt: t`A solid stainless-steel strut ($k = ${K_SS}$ W/(m K), diameter ${dmm} mm, length $L = ${L}$ m) joins two mounts on a cryogenic tank, both held at the tank temperature. A sensor heater on the strut puts $Q = ${Q}$ W into it at $s = ${s}$ m from one end. In vacuum, ignoring radiation, the steady temperature rise obeys $-kA\,u'' = Q\,\delta(x - s)$ with $u = 0$ at both ends. How much warmer than the tank is the heater, in kelvin?`,
-          visual: { type: 'graph', params: { x: [-0.02, L + 0.02], y: [-0.15 * dT, 1.3 * dT], aspect: 'wide', xlabel: 'x (m)', ylabel: 'temperature rise (K)', axesAt: 'edge', yticks: 0, curves: [{ fn: `0*x`, color: 'ink3', width: 6, domain: [0, L] }], points: [{ x: s, y: 0, color: 'warn', label: `heater, ${Q} W`, labelDy: -14 }, { x: 0, y: 0, color: 'accent', label: 'mount', labelDy: 14 }, { x: L, y: 0, color: 'accent', label: 'mount', labelDy: 14, labelAlign: 'right', labelDx: -6 }] }, caption: 'The strut (grey), its heater and the two mounts at tank temperature. Radiation and conduction into the sensor are neglected; the mounts are assumed perfectly cold.' },
+          visual: { type: 'graph', params: { x: [-0.02, L + 0.02], y: [-0.5, 1], aspect: 'wide', xlabel: 'x (m)', ylabel: '', axesAt: 'edge', yticks: 0, curves: [{ fn: `0*x`, color: 'ink3', width: 6, domain: [0, L] }], points: [{ x: s, y: 0, color: 'warn', label: `heater, ${Q} W`, labelDy: -14 }, { x: 0, y: 0, color: 'accent', label: 'mount', labelDy: 14 }, { x: L, y: 0, color: 'accent', label: 'mount', labelDy: 14, labelAlign: 'right', labelDx: -6 }] }, caption: 'The strut (grey), its heater and the two mounts at tank temperature. Radiation and conduction into the sensor are neglected; the mounts are assumed perfectly cold.' },
           answer: dT, units: 'K', tol: { rel: 0.01 },
           errors: [{ value: (Q * s * (L - s)) / (K_SS * L), feedback: t`Divide by $kA$, the conductivity times the cross-sectional area $\pi d^2/4$.` }, { value: (Q * s * (L - s)) / kA, feedback: t`The tent on $[0, L]$ is $s(L - s)/L$ at its corner: divide by $L$.` }],
           hints: [t`Same tent as a cable: $u(x) = \dfrac{Q}{kA}\,G(x, s)$ with $G(s, s) = \dfrac{s(L - s)}{L}$.`, t`$A = \pi d^2/4$ with $d$ in metres.`, t`$\Delta T = \dfrac{Q\,s(L - s)}{kA\,L}$.`],

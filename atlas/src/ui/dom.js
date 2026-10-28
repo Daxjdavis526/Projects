@@ -1,7 +1,7 @@
 // Small DOM helpers: element construction, math rendering through KaTeX,
 // lesson markup, icons, progress rings and toasts. No framework.
 
-import { render as renderMarkup, renderInline } from '../core/markup.js';
+import { render as renderMarkup, renderInline, groupDigits } from '../core/markup.js';
 import { STATES, STATE_LABEL } from '../core/mastery.js';
 
 /** h('div.card#x', {attrs}, ...children) */
@@ -59,7 +59,7 @@ export function tex(src, display = false) {
   const K = globalThis.katex;
   if (!K) return `<code>${escapeHTML(src)}</code>`;
   try {
-    out = K.renderToString(src, { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore', trust: false });
+    out = K.renderToString(groupDigits(src), { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore', trust: false });
   } catch (e) {
     out = `<code class="tex-error">${escapeHTML(src)}</code>`;
   }
@@ -73,7 +73,7 @@ export function tex(src, display = false) {
  */
 export function texParts(src, display = true) {
   const K = globalThis.katex;
-  const marked = String(src).replace(/\\part\{(\d+)\}/g, '\\htmlClass{eqp eqp-$1}');
+  const marked = groupDigits(src).replace(/\\part\{(\d+)\}/g, '\\htmlClass{eqp eqp-$1}');
   if (!K) return `<code>${escapeHTML(src)}</code>`;
   try {
     return K.renderToString(marked, { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore', trust: (c) => c.command === '\\htmlClass' });

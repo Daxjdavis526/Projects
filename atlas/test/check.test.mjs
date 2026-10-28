@@ -222,5 +222,16 @@ check('a reciprocal unit 1/N', describeDims(parseUnit('1/N').dims) === describeD
 check('a number with a reciprocal unit', parseQuantity('2.08e-43 1/N').si === 2.08e-43);
 check('arcsec graded against a degree answer', grade({ type: 'numeric', answer: 1.75 / 3600, units: 'deg', tol: { rel: 0.01 } }, '1.75 arcsec').correct);
 
+// thousands separators added when math is typeset
+{
+  const { groupDigits } = await import('../src/core/markup.js');
+  check('a five-digit integer is grouped', groupDigits('a = 42164') === 'a = 42\\,164');
+  check('a seven-digit integer is grouped in threes', groupDigits('1234567') === '1\\,234\\,567');
+  check('four digits stay whole', groupDigits('5730') === '5730');
+  check('decimals, exponents, subscripts and text are left alone', groupDigits('0.0001234567 + 10^{12345} + x_{12345} + \\text{run 12345}') === '0.0001234567 + 10^{12345} + x_{12345} + \\text{run 12345}');
+  check('a fraction numerator is grouped', groupDigits('\\frac{12345}{2}') === '\\frac{12\\,345}{2}');
+  check('a number already grouped is left alone', groupDigits('26\\,560 + 6{,}371') === '26\\,560 + 6{,}371');
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

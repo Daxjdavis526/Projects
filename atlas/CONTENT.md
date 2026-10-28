@@ -145,9 +145,12 @@ screen. Break a long chain into several pieces at its `=` signs
 A number in math followed by its unit in prose (`$${v}$ km/s`) may wrap
 between the two; keep them together with the unit inside the math,
 `$${v}\ \text{km/s}$`, or a no-break space (`$${v}$\u00a0km/s`).
-Nothing checks for thousands without a separator, or for a generated number
-that falls into e-notation (`1.2e+5`) inside math — format big and small
-numbers yourself (`\times 10^{5}`). The test rejects the words NaN,
+Inside math, a bare integer of five or more digits is grouped for you when it
+is typeset (`42164` shows as 42 164; four digits stay whole, decimals and
+exponents are left alone), so `String(n)` is fine there; in prose, group it
+yourself. A generated number that falls into e-notation (`1.2e+5`) inside math
+fails the test — format very big and small numbers with `\times 10^{5}`
+(`nice()` can produce e-notation for values ≥ 10⁵ or < 10⁻³: use `tex()`). The test rejects the words NaN,
 undefined, Infinity and null anywhere inside math, `\text{undefined}`
 included: a slope that does not exist is "has no value" or "is not defined"
 in prose, or $\pm\infty$ when it diverges.

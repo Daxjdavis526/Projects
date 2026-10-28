@@ -26,6 +26,12 @@ const P45 = lagrange(TX, TY, 45 * DEG), S45 = Math.sin(45 * DEG);
 const OM45 = Math.abs(omega(TX)(45 * DEG));
 const BOUND45 = OM45 / 24;
 
+// ── ten equally spaced epochs: the nodal polynomial inside and four spacings beyond ──
+const OM10 = omegaExpr([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const W10 = omega([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const W13 = Math.abs(W10(13));
+let WIN = 0; for (let k = 0; k <= 18000; k++) WIN = Math.max(WIN, Math.abs(W10(k / 2000)));
+
 // ── GPS orbit (circular approximation) ──
 const GM = 3.986004418e14, RGPS = 2.656e7;
 const W_GPS = Math.sqrt(GM / RGPS ** 3);
@@ -91,7 +97,7 @@ The first factor belongs to the function, the second — the **nodal polynomial*
     num({
       id: 'lagrange-eval', difficulty: 2,
       gen(r) {
-        const xs = [0, 1, 3].map((v) => v + r.int(0, 1));
+        const s0 = r.int(0, 2), xs = [0, 1, 3].map((v) => v + s0);
         const ys = [r.int(1, 5), r.int(2, 8), r.int(-2, 4)];
         const x = xs[1] + r.pick([0.5, 1.5]);
         const ans = lagrange(xs, ys, x);
@@ -194,7 +200,7 @@ The first factor belongs to the function, the second — the **nodal polynomial*
         const xe = 1 - 1 / n, xc = 1 / n;
         const ans = Math.abs(w(xe)) / Math.abs(w(xc));
         return {
-          prompt: t`For $n + 1 = ${n + 1}$ equally spaced nodes on $[-1, 1]$ (spacing $${tex(2 / n, 3)}$), compare the nodal polynomial $\omega(x) = \prod(x - x_i)$ at the middle of the **last** interval, $x = ${tex(xe, 4)}$, with its value at the middle of a **central** interval, $x = ${tex(xc, 4)}$. What is $\lvert\omega(${tex(xe, 4)})\rvert / \lvert\omega(${tex(xc, 4)})\rvert$?`,
+          prompt: t`For $n + 1 = ${n + 1}$ equally spaced nodes on $[-1, 1]$ (spacing $${+(2 / n).toFixed(4)}$), compare the nodal polynomial $\omega(x) = \prod(x - x_i)$ at the middle of the **last** interval, $x = ${+xe.toFixed(4)}$, with its value at the middle of a **central** interval, $x = ${+xc.toFixed(4)}$. What is $\lvert\omega(${+xe.toFixed(4)})\rvert / \lvert\omega(${+xc.toFixed(4)})\rvert$?`,
           visual: {
             type: 'graph',
             params: { x: [-1.05, 1.05], y: [-Math.abs(w(xe)) * 1.3, Math.abs(w(xe)) * 1.3], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'ω(x)',
@@ -203,9 +209,9 @@ The first factor belongs to the function, the second — the **nodal polynomial*
             caption: t`The nodal polynomial for ${n + 1} equispaced nodes (gold): small humps in the middle, large ones at the ends.`,
           },
           answer: ans, tol: { rel: 0.01 },
-          hints: ['Multiply out the n + 1 distances |x − xᵢ| at each point (a short loop is easiest).', t`At $x = ${tex(xe, 4)}$ the nearest nodes are $\pm ${tex(1 / n, 3)}$ away, but the far nodes are nearly 2 away; in the middle, every node is at most about 1 away.`],
+          hints: ['Multiply out the n + 1 distances |x − xᵢ| at each point (a short loop is easiest).', t`At $x = ${+xe.toFixed(4)}$ the nearest nodes are $\pm ${tex(1 / n, 3)}$ away, but the far nodes are nearly 2 away; in the middle, every node is at most about 1 away.`],
           teach: 'For equispaced nodes the nodal polynomial’s humps grow rapidly towards the ends of the interval, and the ratio grows exponentially with n.',
-          explain: t`$\lvert\omega(${tex(xe, 4)})\rvert = ${tex(Math.abs(w(xe)), 3)}$ and $\lvert\omega(${tex(xc, 4)})\rvert = ${tex(Math.abs(w(xc)), 3)}$, a ratio of $${tex(ans, 3)}$. For $n = 4, 6, 8, 10$ it is $2.3, 6.6, 20, 67$: the end humps outgrow the middle ones by about a factor of 3 for every two extra nodes.`,
+          explain: t`$\lvert\omega(${+xe.toFixed(4)})\rvert = ${tex(Math.abs(w(xe)), 3)}$ and $\lvert\omega(${+xc.toFixed(4)})\rvert = ${tex(Math.abs(w(xc)), 3)}$, a ratio of $${tex(ans, 3)}$. For $n = 4, 6, 8, 10$ it is $2.3, 6.6, 20, 67$: the end humps outgrow the middle ones by about a factor of 3 for every two extra nodes.`,
         };
       },
     }),
@@ -296,10 +302,10 @@ print(err10, err20)`,
         const M4 = RGPS * W_GPS ** 4;          // |d⁴x/dt⁴| ≤ r ω⁴ for a circular orbit
         const ans = (M4 / 24) * 0.5625 * h ** 4;
         return {
-          prompt: t`The same receiver switches to the **cubic** through four consecutive epochs, $${hmin}$ minutes apart, and uses it only in the **middle** interval, where $\max\lvert\omega\rvert = \tfrac{9}{16}h^4$. For a circular orbit $x = r\cos\omega t$, so $\lvert x^{(4)}\rvert \le r\omega^4$, with $r = 26\,560$ km and $\omega = \sqrt{GM/r^3} = ${tex(W_GPS, 4)}\ \text{s}^{-1}$. Bound the error, in metres.`,
+          prompt: t`The same receiver switches to the **cubic** through four consecutive epochs, $${hmin}$ minutes apart, and uses it only in the **middle** interval, where $\max\lvert\omega\rvert = \tfrac{9}{16}h^4$. For a circular orbit $x = r\cos\Omega t$, so $\lvert x^{(4)}\rvert \le r\Omega^4$, with $r = 26\,560$ km and orbital rate $\Omega = \sqrt{GM/r^3} = ${tex(W_GPS, 4)}\ \text{s}^{-1}$. Bound the error, in metres.`,
           visual: {
             type: 'graph',
-            params: { x: [-0.3, 3.3], y: [-0.7, 0.7], aspect: 'wide', axesAt: 'edge', xlabel: 'time (in units of h)', ylabel: 'ω(t)/h⁴',
+            params: { x: [-0.3, 3.3], y: [-1.1, 0.75], aspect: 'wide', axesAt: 'edge', xlabel: 'time (in units of h)', ylabel: 'ω(t)/h⁴',
               curves: [{ fn: 'x*(x - 1)*(x - 2)*(x - 3)', color: 'accent', width: 2, domain: [0, 3] }],
               shade: [{ fn: 'x*(x - 1)*(x - 2)*(x - 3)', from: 1, to: 2, color: 'gold', alpha: 0.3 }],
               points: [0, 1, 2, 3].map((x) => ({ x, y: 0, r: 4.5, color: 'gold' })) },
@@ -307,19 +313,19 @@ print(err10, err20)`,
           },
           answer: ans, units: 'm', tol: { rel: 0.01 },
           errors: [{ value: (M4 / 24) * h ** 4, feedback: t`That uses $\max\lvert\omega\rvert = h^4$, the value in the *outer* intervals. In the middle one it is $\tfrac{9}{16}h^4$.` }],
-          hints: [t`$r\omega^4 = ${tex(M4, 3)}\ \text{m/s}^4$.`, t`Bound $= \dfrac{r\omega^4}{4!}\cdot\dfrac{9}{16}h^4$ with $h = ${h}$ s.`],
-          teach: 'Raising the degree replaces h²g/8 by a factor of (ωh)⁴ times r: for smooth orbits each extra node buys roughly a factor ωh ≈ 0.13 at 15-minute spacing.',
-          explain: t`$\dfrac{${tex(M4, 3)}}{24}\times\dfrac{9}{16}\times(${h})^4 = ${tex(ans, 3)}$ m: far better than linear, still far from the centimetres wanted. Each further pair of nodes multiplies the bound by roughly $(\omega h)^2$, which is why degree 8–10 reaches the centimetre level — and why using the interpolant *near the middle* of its window matters.`,
+          hints: [t`$r\Omega^4 = ${tex(M4, 3)}\ \text{m/s}^4$.`, t`Bound $= \dfrac{r\Omega^4}{4!}\cdot\dfrac{9}{16}h^4$ with $h = ${h}$ s.`],
+          teach: 'Raising the degree replaces h²g/8 by roughly r(Ωh)⁴: for smooth orbits each extra node buys about a factor Ωh ≈ 0.13 at 15-minute spacing.',
+          explain: t`$\dfrac{${tex(M4, 3)}}{24}\times\dfrac{9}{16}\times(${h})^4 = ${tex(ans, 3)}$ m: far better than linear, still far from the centimetres wanted. Each further pair of nodes multiplies the bound by roughly $(\Omega h)^2$, which is why degree 8–10 reaches the centimetre level — and why using the interpolant *near the middle* of its window matters.`,
         };
       },
     }),
     mcq({
       id: 'cp-extrapolate', difficulty: 2, transfer: true,
-      prompt: t`A predictive-navigation code fits a degree-9 polynomial through the last ten tabulated positions of a satellite and evaluates it **one hour beyond** the last epoch. The prediction is off by kilometres, although the same polynomial is accurate to centimetres between the epochs. Why?`,
+      prompt: t`A predictive-navigation code fits a degree-9 polynomial through the last ten tabulated positions of a satellite (epochs 15 minutes apart) and evaluates it **one hour beyond** the last epoch. The prediction is off by kilometres, although the same polynomial is accurate to centimetres between the epochs. Why?`,
       visual: {
         type: 'graph',
-        params: { x: [-0.5, 13], y: [-3, 3], aspect: 'wide', axesAt: 'edge', xlabel: 'time (in units of the spacing)', ylabel: 'ω(t), scaled',
-          curves: [{ fn: `sign(${omegaExpr([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])})*log10(1 + abs(${omegaExpr([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])}))/2`, color: 'accent', width: 2, domain: [0, 12.8] }],
+        params: { x: [-0.5, 13.3], y: [-3, 5], aspect: 'wide', axesAt: 'edge', xlabel: 'time (in units of the spacing)', ylabel: 'ω(t), scaled',
+          curves: [{ fn: `(2*step(${OM10}) - 1)*log10(1 + abs(${OM10}))/2`, color: 'accent', width: 2, domain: [0, 12.8] }],
           points: Array.from({ length: 10 }, (_, k) => ({ x: k, y: 0, r: 3.5, color: 'gold' })),
           vlines: [{ x: 9, label: 'last epoch', color: 'ink3' }] },
         caption: 'The nodal polynomial of ten equally spaced epochs, on a compressed (logarithmic) vertical scale. Beyond the last node it rises by orders of magnitude.',
@@ -338,13 +344,12 @@ print(err10, err20)`,
       },
       hints: ['Evaluate the node factor |∏(t − tᵢ)| at t = 9.5 and at t = 13 (four spacings past the end).', 'Inside the data every factor is at most ~9; outside, every factor exceeds 4 at t = 13.'],
       teach: 'Interpolation is accurate between the nodes; beyond them the nodal polynomial — and with it the error — grows like a power of the distance, so polynomial extrapolation of orbits fails fast.',
-      explain: t`At four spacings past the last epoch, $\lvert\omega\rvert = 13\cdot12\cdots4 \approx 1.6\times10^{9}$ (in units of the spacing to the tenth), against at most about $5\times10^{4}$ between the nodes — some thirty thousand times larger. Prediction needs a dynamical model (integrate the equations of motion), not a longer polynomial.`,
+      explain: t`At four spacings past the last epoch, $\lvert\omega\rvert = 13\cdot12\cdots4 = ${tex(W13, 3)}$ (in units of the spacing to the tenth power), against at most $${tex(WIN, 2)}$ between the nodes — about $${tex(W13 / WIN, 2)}$ times larger. Prediction needs a dynamical model (integrate the equations of motion), not a longer polynomial.`,
     }),
   ],
   sources: [
     { label: 'Trefethen (2019), Approximation Theory and Approximation Practice, extended ed., SIAM, ch. 11–13 (interpolation, Runge’s phenomenon)', url: 'https://doi.org/10.1137/1.9781611975949' },
     { label: 'Süli & Mayers (2003), An Introduction to Numerical Analysis, Cambridge, ch. 6 (polynomial interpolation)', url: 'https://doi.org/10.1017/CBO9780511801181' },
-    { label: 'Runge (1901), Über empirische Funktionen und die Interpolation zwischen äquidistanten Ordinaten, Z. Math. Phys. 46, 224', url: 'https://archive.org/details/zeitschriftfrma12runggoog' },
     { label: 'IGS: precise orbit products (SP3, 15-minute epochs)', url: 'https://igs.org/products/' },
   ],
 });

@@ -15,7 +15,7 @@
 //
 //   { type: 'cx2-contour', params: {
 //       f: '1/z',                 // the integrand: a complex expression of z (+ − * / ^, i, pi, e, exp log sqrt sin cos tan cot sinh cosh tanh conj re im abs arg; slider keys are real numbers)
-//       fns: null,                // or [{ f, label, marks }]: a control to switch integrands (label is markup; marks replace the default marks)
+//       fns: null,                // or [{ f, label, marks, value, valueLabel }]: a control to switch integrands (label is markup; marks replace the default marks; value: a complex expression of the slider keys shown in the readout as valueLabel)
 //       sliders: [], constants: {}, choices: [],
 //       contour: { kind: 'circle', c: [0, 0], r: 1 },   // or arc { c, r, from, to }, segment { from, to }, poly { pts, closed }, rect { x, y }, param { param: [x(t), y(t)], t: [a, b] }; numbers or expressions of slider keys; null: no contour
 //       ccw: true,                // circle and rect: anticlockwise
@@ -284,7 +284,7 @@ export function mount(F, P) {
           wp.point(0, 0, { color: 'ink2', r: 3.5 });
           if (walk >= 1) {
             wp.circle(Iv[0], Iv[1], (wp.vx1 - wp.vx0) * 0.022, { color: 'gold', width: 2.4 });
-            wp.text(div ? (closed ? '(1/2πi)∮ f dz' : '(1/2πi)∫ f dz') : (closed ? '∮ f dz' : '∫ f dz'), Iv[0], Iv[1], { color: 'gold', dx: 12, dy: -12, weight: 700 });
+            wp.text(div ? (closed ? '(1/2πi)∮ f dz' : '(1/2πi)∫ f dz') : (closed ? '∮ f dz' : '∫ f dz'), Iv[0], Iv[1], { color: 'gold', weight: 700, ...(Iv[0] > (wp.vx0 + wp.vx1) / 2 ? { align: 'right', dx: -12 } : { dx: 12 }), dy: Iv[1] > wp.vy1 - 0.12 * (wp.vy1 - wp.vy0) ? 16 : -12 });
           }
           g.restore();
         }
@@ -340,6 +340,8 @@ export function mount(F, P) {
       if (want('M') && Mx.at && Number.isFinite(Mx.M)) zp.point(Mx.at[0], Mx.at[1], { color: 'gold', r: 5, label: 'M', ldx: 8, ldy: -12 });
     }
     for (const r of Array.isArray(P.readout) ? P.readout : []) if (r && typeof r === 'object') rows.push([r.label, cTeX(C.compile(r.value, keys)([0, 0], E))]);
+    const cur = current();
+    if (cur.value && P.readout !== false) rows.push([cur.valueLabel || 'value', cTeX(C.compile(cur.value, keys)([0, 0], E))]);
     lastI = Iv;
     F.readout(P.readout === false ? [] : rows);
     F.caption(split
@@ -374,7 +376,7 @@ export function validate(P) {
   };
   if (P.fns != null) {
     if (!Array.isArray(P.fns) || !P.fns.length) problems.push('cx2-contour fns must be a list of { f, label }');
-    else P.fns.forEach((o, k) => { cexpr(o.f, `fns[${k}].f`); if (!o.label) problems.push(`cx2-contour fns[${k}] needs a label`); (o.marks || []).forEach((m, j) => { check(m.x, `fns[${k}].marks[${j}].x`); check(m.y, `fns[${k}].marks[${j}].y`); }); });
+    else P.fns.forEach((o, k) => { cexpr(o.f, `fns[${k}].f`); if (!o.label) problems.push(`cx2-contour fns[${k}] needs a label`); (o.marks || []).forEach((m, j) => { check(m.x, `fns[${k}].marks[${j}].x`); check(m.y, `fns[${k}].marks[${j}].y`); }); if (o.value != null) cexpr(o.value, `fns[${k}].value`); });
   } else cexpr(P.f, 'f');
   for (const s of P.sliders || []) {
     if (!(s.min < s.max) || s.value < s.min || s.value > s.max) problems.push(`cx2-contour slider ${s.key}: value must lie in [min, max]`);

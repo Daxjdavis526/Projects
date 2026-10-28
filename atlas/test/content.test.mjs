@@ -11,7 +11,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { CATALOG, COURSES } from '../content/catalog.js';
 import { validateCatalog } from '../src/core/catalog.js';
 import { validateLesson, validateItem, instantiate, itemsOf } from '../src/core/content.js';
-import { mathIn, escapeDamage } from '../src/core/markup.js';
+import { mathIn, escapeDamage, groupDigits } from '../src/core/markup.js';
 import { scan, render as renderLoads } from '../tools/register.mjs';
 import ACHIEVEMENTS from '../content/achievements.js';
 import GALLERY from '../content/gallery.js';
@@ -20,7 +20,8 @@ import { makeRng } from '../src/core/rng.js';
 
 const require = createRequire(import.meta.url);
 const katex = require('../vendor/katex-0.19.0/katex.min.js');
-const tex = (src, display) => katex.renderToString(src, { displayMode: display, throwOnError: true, strict: 'ignore' });
+// typeset exactly as the browser does, thousands separators included
+const tex = (src, display) => katex.renderToString(groupDigits(src), { displayMode: display, throwOnError: true, strict: 'ignore' });
 
 const only = process.argv[2];
 const VARIANTS = +(process.env.VARIANTS || 25);

@@ -178,3 +178,16 @@ function lostRowBreak(tex) {
   }
   return '';
 }
+
+/**
+ * Thousands separators for bare integers of five or more digits in TeX:
+ * 42164 → 42\,164 (SI style; a four-digit number stays whole). Leaves alone
+ * \text{…}, exponents and subscripts (10^{12345}), decimals and digits after
+ * a separator already written. Applied when math is typeset, so a generator's
+ * plain String(n) reads like the rest of the Atlas.
+ */
+export function groupDigits(src) {
+  return String(src).replace(/(\\text\{[^{}]*\})|(?<![\d.,^_]|[\^_]\{)(\d{5,})(?!\d)/g,
+    (m, text, num) => text || num.replace(/\B(?=(\d{3})+(?!\d))/g, '\\,'));
+}
+
