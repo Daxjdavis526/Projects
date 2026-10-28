@@ -145,7 +145,7 @@ The **binormal** $\vec B = \vec T\times\vec N$ completes a right-handed frame of
       hints: [t`$\vec a = a_T\vec T + a_N\vec N$. What is $a_T$ here?`, t`$\vec N$ points toward the inside of the bend.`],
       teach: 'When the speed is momentarily constant, the whole acceleration is normal: κv², toward the centre of curvature.',
       explain: t`$a_T = 0$, so $\vec a = \kappa v^2\vec N$, and at the bottom of a dip $\vec N$ points straight up. That is why riders feel heavy there: the seat must push up with $m(g + \kappa v^2)$.`,
-      visual: { type: 'c3-curve', params: { curve: { param: ['t', '0', '0.05*t^2'], t: [-20, 20] }, plane: 'xz', at: 0, fixed: true, show: ['v'], scale: { v: 8 }, readouts: [], xlabel: 'x (m)', ylabel: 'height (m)' }, caption: 'The dip, and the car’s velocity at its lowest point.' },
+      visual: { type: 'c3-curve', params: { curve: { param: ['t', '0', 't^2/60'], t: [-25, 25] }, plane: 'xz', at: 0, fixed: true, show: ['v'], scale: { v: 8 }, readouts: [], xlabel: 'x (m)', ylabel: 'height (m)' }, caption: 'The dip, and the car’s velocity at its lowest point.' },
     }),
     num({
       id: 'binormal', difficulty: 2,

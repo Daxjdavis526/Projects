@@ -70,7 +70,7 @@ The same formula compares two spectra, two sensor records or two signals, whatev
       { label: 'Lengths', text: t`$\|\mathbf u\| = \sqrt{1 + 4 + 0 + 4 + 16} = \sqrt{25} = 5$ and $\|\mathbf v\| = \sqrt{4 + 1 + 4 + 16 + 0} = \sqrt{25} = 5$. Each is Pythagoras with five squares instead of two.` },
       { label: 'Cosine', text: t`$\cos\theta = \dfrac{12}{5\cdot5} = 0.48$.` },
       { label: 'Angle', text: t`$\theta = \arccos 0.48 = 61.3^\circ$.` },
-      { label: 'Sense check', text: t`The cosine is positive, so the angle is acute: the two lists are large in partly the same places (components 2 and 4) and differ elsewhere. Cauchy–Schwarz holds: $|12| \le 5\cdot5 = 25$.` },
+      { label: 'Sense check', text: t`The cosine is positive, so the angle is acute: the products are largest where both lists are large (component 4), while $\mathbf u$'s biggest component meets a zero in $\mathbf v$. Cauchy–Schwarz holds: $|12| \le 5\cdot5 = 25$.` },
     ],
     answer: t`$\theta \approx 61.3^\circ$ ($\cos\theta = 0.48$).`,
   },
@@ -105,7 +105,7 @@ The same formula compares two spectra, two sensor records or two signals, whatev
           answer: d, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: abs, feedback: 'You dropped the signs: a product of a positive and a negative component subtracts.' }],
           hints: ['Multiply the first components together, then the second, and so on; add the six products.', t`$\mathbf u\cdot\mathbf v = ${products(u, v)}$.`],
-          teach: 'The dot product of two vectors in Rⁿ multiplies matching components and adds the n products.',
+          teach: t`The dot product of two vectors in $\mathbb R^n$ multiplies matching components and adds the $n$ products.`,
           explain: t`$${products(u, v)} = ${d}$.`,
           visual: stems([['u', u, 'accent'], ['v', v, 'warn']], { caption: 'u and v side by side, component by component. Where one stem points up and the other down, that product is negative.' }),
         };
@@ -120,7 +120,7 @@ The same formula compares two spectra, two sensor records or two signals, whatev
           answer: th, units: 'deg', tol: { rel: 0, abs: 0.06 },
           errors: [{ value: 180 - th, feedback: 'Check the sign of the dot product: a negative dot product means an obtuse angle, a positive one an acute angle.' }],
           hints: [t`You need three numbers: $\mathbf u\cdot\mathbf v$, $\|\mathbf u\|$ and $\|\mathbf v\|$.`, t`$\mathbf u\cdot\mathbf v = ${d}$, $\|\mathbf u\| = \sqrt{${dot(u, u)}}$ and $\|\mathbf v\| = \sqrt{${dot(v, v)}}$; then $\theta = \arccos\dfrac{\mathbf u\cdot\mathbf v}{\|\mathbf u\|\|\mathbf v\|}$.`],
-          teach: 'The angle between vectors in Rⁿ comes from the cosine formula: dot product over the product of the lengths.',
+          teach: t`The angle between vectors in $\mathbb R^n$ comes from the cosine formula: dot product over the product of the lengths.`,
           explain: t`$\cos\theta = \dfrac{${d}}{\sqrt{${dot(u, u)}}\sqrt{${dot(v, v)}}} = ${nice(d / (norm(u) * norm(v)))}$, so $\theta = ${th.toFixed(1)}^\circ$.`,
           visual: stems([['u', u, 'accent'], ['v', v, 'warn']], { caption: 'The two vectors as stems. The angle between them lives in the plane they span — the right panel of the Explore picture.' }),
         };

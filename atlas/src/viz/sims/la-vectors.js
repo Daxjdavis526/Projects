@@ -53,7 +53,7 @@ export function mount(F, P) {
   const yr = P.y || [Math.min(0, ...all) < 0 || vecs.some((v) => v.drag) ? -big : -0.12 * big, big];
   const split = showPlane ? 0.6 : 1;
   const left = new Plot(canvas, { x: [0.4, n + 0.6], y: yr, xlabel: '', ylabel: '', xticks: 0, grid: true });
-  const right = showPlane ? new Plot(canvas, { x: [-1, 1], y: [-1, 1], equal: true, xlabel: '', ylabel: '', grid: true }) : null;
+  const right = showPlane ? new Plot(canvas, { x: [-1, 1], y: [-1, 1], equal: true, xlabel: '', ylabel: '', grid: false, xticks: 0, yticks: 0 }) : null;
   let planeR = 0;   // the plane panel's scale: grows to fit, never shrinks
 
   const values = (v, k) => {
@@ -129,19 +129,22 @@ export function mount(F, P) {
       const pl = M.planeOf(u, v);
       planeR = Math.max(planeR, nu, nv, 1e-9);
       const R = planeR;
-      right.setView([-0.75 * R, 1.25 * R], [-0.45 * R, 1.15 * R]);
+      right.setView([-0.55 * R, 1.25 * R], [-0.35 * R, 1.15 * R]);
       right.resize(); right.refreshTheme(); right.grid(); right.axes();
       right.text(`the plane of ${vecs[0].name} and ${vecs[1].name}`, right.L + 4, right.T - 12, { screen: true, color: 'ink3', size: 11 });
       if (pl) {
         const [vx, vy] = pl.v;
         right.line(vx, vy, vx, 0, { color: 'ink4', width: 1.2, dash: [4, 4] });
-        right.arrow(0, 0, pl.u[0], 0, { color: vecs[0].color, width: 2.8, label: vecs[0].name, ldx: 6, ldy: 12 });
+        right.arrow(0, 0, pl.u[0], 0, { color: vecs[0].color, width: 2.8, label: vecs[0].name, ldx: 6, ldy: vy < 0.25 * R ? 12 : -10 });
         if (nv > 0) {
           right.arrow(0, 0, vx, vy, { color: vecs[1].color, width: 2.8, label: vecs[1].name, ldx: 6, ldy: -10 });
           const r = 0.28 * Math.min(nu, nv);
           right.curve((t) => r * Math.cos(t), (t) => r * Math.sin(t), 0, th, { color: 'gold', width: 2 });
           const showTheta = P.readout === true || (Array.isArray(P.readout) && P.readout.includes('theta'));
-          right.text(showTheta ? `θ = ${(th * 180 / Math.PI).toFixed(1)}°` : 'θ', (r * 1.25) * Math.cos(th / 2), (r * 1.25) * Math.sin(th / 2), { color: 'gold', weight: 700, dx: 4, dy: -4 });
+          const label = showTheta ? `θ = ${(th * 180 / Math.PI).toFixed(1)}°` : 'θ';
+          // a wide angle has room for its label inside the arc's bisector; a narrow one gets it just below the arc's foot
+          if (th > 0.7) right.text(label, (r * 1.2) * Math.cos(th / 2), (r * 1.2) * Math.sin(th / 2), { color: 'gold', weight: 700, dx: 4, dy: -2 });
+          else right.text(label, r, 0, { color: 'gold', weight: 700, dx: -4, dy: 14 });
         }
       }
     }
