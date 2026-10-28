@@ -42,7 +42,7 @@ function normItem(id, keys, difficulty) {
 }
 
 /** A step from 0 to V₀ at x = 0 for an electron of energy E (eV). */
-const stepPic = (E, Vb, caption, extra = {}) => ({ type: 'mp-schrodinger', params: { mode: 'scatter', barrier: 'step', E, Vb, controls: false, readout: false, panels: ['energy', 'wave'], ...extra }, caption });
+const stepPic = (E, Vb, caption, extra = {}) => ({ type: 'mp-schrodinger', params: { mode: 'scatter', barrier: 'step', E, Vb, controls: false, readout: false, hide: ['T'], panels: ['energy', 'wave'], ...extra }, caption });
 const kOf = (E) => Math.sqrt(E / HB2M_EVNM2);       // nm⁻¹, an electron of kinetic energy E (eV)
 
 /** Relativistic speed of an electron of kinetic energy K (eV). */
@@ -67,14 +67,14 @@ A plane wave $Ae^{ikx}$ carries $J = |A|^2\,\hbar k/m$: density times velocity. 
   why: 'Transmission through barriers, tunnelling currents in electronics and the flux in every scattering experiment are probability currents.',
   visual: {
     type: 'mp-schrodinger',
-    title: 'A wave meets a step',
-    lead: t`An electron’s plane wave comes in from the left and meets a potential step. On the left, the incident and reflected waves interfere, so $|\psi|^2$ ripples; on the right only the transmitted wave runs, so $|\psi|^2$ is flat. The current is the same on both sides: what comes in is what is reflected plus what gets through.`,
+    title: 'A wave meets a barrier',
+    lead: t`An electron’s plane wave comes in from the left and meets a barrier. On the left, the incident and reflected waves interfere, so $|\psi|^2$ ripples; on the right only the transmitted wave runs, so $|\psi|^2$ is flat. The current is the same everywhere: what comes in equals what is reflected plus what gets through, $R + T = 1$.`,
     tasks: [
-      'Raise E well above the step: the ripples fade as less is reflected, and T climbs toward 1.',
-      'Drop E below the step: the wave leaks a little way in and dies — no current crosses, T = 0.',
-      'Switch to a barrier and make it thin: a current now leaks through even below the top.',
+      'Thicken the barrier while E is below its top: the transmitted current falls roughly exponentially.',
+      'Raise E above the top: T climbs toward 1, reaching it exactly at resonances, and the ripples on the left fade.',
+      'With almost everything reflected, the minima of |ψ|² on the left touch zero: a standing wave carries no net current.',
     ],
-    params: { mode: 'scatter', barrier: 'step', E: 5, Vb: 3, controls: ['barrier', 'E', 'Vb', 'd'], panels: ['energy', 'wave', 'T'] },
+    params: { mode: 'scatter', barrier: 'rect', E: 0.8, Vb: 1, d: 0.5, controls: ['E', 'Vb', 'd'], panels: ['energy', 'wave', 'T'] },
   },
   example: {
     prompt: t`An electron of energy $E = 5$ eV meets a step up to $V_0 = 3$ eV at $x = 0$. Find the reflection and transmission probabilities from the currents, and check that they add to 1.`,

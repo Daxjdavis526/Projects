@@ -80,7 +80,7 @@ export const loopAxis = (I, R, z) => (MU0 * I * R * R) / (2 * (R * R + z * z) **
  * E (V/m) of a disk of uniform charge σ (radius a, in the plane z = 0, centred
  * on the axis) at (s, z) off its axis, numerically: [E_s, E_z].
  */
-export function diskE(sigma, a, s, z, nr = 6, np = 8) {
+export function diskE(sigma, a, s, z, nr = 5, np = 6) {
   let Es = 0, Ez = 0;
   // one pass for both components: Σ w (R/d³) ρ over the disk
   const hr = a / nr, hp = (2 * PI) / np;

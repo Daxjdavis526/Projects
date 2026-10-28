@@ -5,7 +5,7 @@
 // the Legendre transform; MOXIE on Mars from NASA polynomials.
 import { lesson, mcq, num, match } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
-import { r4, texNum, apart } from './_count.js';
+import { r4, texNum, apart, thouTeX } from './_count.js';
 import { R, STD, FARADAY, rxn, SPLIT_CO2 } from './_phase.js';
 
 const t = String.raw;
@@ -72,7 +72,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
       readouts: [
         { label: '$-\\Delta G$ (kJ/mol)', expr: `${r4(-LIQ.dH / 1000)} + T*${r4(LIQ.dS / 1000)}`, digits: 4 },
         { label: 'cell voltage (V)', expr: `(${r4(-LIQ.dH)} + T*${r4(LIQ.dS)})/(2*${r4(F)})`, digits: 4 },
-        { label: 'max efficiency $\\Delta G/\\Delta H$', expr: `1 + T*${r4(LIQ.dS / -LIQ.dH)}`, digits: 3 },
+        { label: 'max efficiency $\\Delta G/\\Delta H$', expr: `1 + T*${(LIQ.dS / -LIQ.dH).toPrecision(6)}`, digits: 3 },
       ],
     },
     caption: 'H₂ + ½O₂ → H₂O(liquid) at 1 bar, from CODATA values at 298.15 K; ΔH and ΔS are held at those values (they change by under 1 % over this range).',
@@ -83,7 +83,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
     steps: [
       { label: 'Entropy change', text: t`$\Delta S = ${STD.H2Ol.S} - ${STD.H2.S} - \tfrac12(${STD.O2.S}) = ${fmt(LIQ.dS, 4)}$ J/K: one and a half moles of gas become a mole of liquid.` },
       { label: 'Gibbs energy', text: t`$\Delta G = \Delta H - T\Delta S = ${fmt(LIQ.dH / 1000, 5)} - (298.15)(${fmt(LIQ.dS / 1000, 4)}) = ${fmt(EX.G / 1000, 5)}$ kJ/mol. At most $${fmt(-EX.G / 1000, 4)}$ kJ of electrical work per mole.` },
-      { label: 'Voltage', text: t`Each water molecule moves two electrons through the circuit, so $\mathcal{E} = -\Delta G/(2F) = ${fmt(-EX.G, 5)}/(2\times96\,485) = ${fmt(EX.E, 4)}$ V, with $F = eN_A$ the Faraday constant.` },
+      { label: 'Voltage', text: t`Each water molecule moves two electrons through the circuit, so $\mathcal{E} = -\Delta G/(2F) = ${thouTeX(Math.round(-EX.G))}/(2\times96\,485) = ${fmt(EX.E, 4)}$ V, with $F = eN_A$ the Faraday constant.` },
       { label: 'Heat', text: t`The remaining $-T\Delta S = ${fmt(EX.Q / 1000, 3)}$ kJ/mol leaves as heat even in a perfect cell: the products have less entropy, and the surroundings must receive it.` },
       { label: 'Sense check', text: t`Efficiency limit $\Delta G/\Delta H = ${fmt(EX.eff, 3)}$. A heat engine burning the hydrogen would face Carnot’s limit; the fuel cell faces this one instead, because it never turns the energy into heat first. Real cells run at 0.6–0.9 V, losing more to internal resistance and electrode chemistry.` },
     ],
@@ -115,7 +115,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
           errors: apart([{ value: -LIQ.dH / (2 * F), feedback: 'That uses ΔH: it is the thermoneutral voltage. The electrical work available is ΔG.' }, { value: -dG(LIQ, T) / F, feedback: 'Two electrons flow for every water molecule: divide by 2F.' }], v),
           hints: [t`$\Delta G = \Delta H - T\Delta S$.`, t`$\mathcal{E} = -\Delta G/(2F)$ with $F = 96\,485$ C/mol.`],
           teach: t`Ideal cell voltage $= -\Delta G/(nF)$, where $n$ is the electrons per reaction.`,
-          explain: t`$\Delta G = ${fmt(dG(LIQ, T) / 1000, 5)}$ kJ/mol, so $\mathcal{E} = ${fmt(-dG(LIQ, T), 5)}/(2\times96\,485) = ${fmt(v, 4)}$ V — slightly lower than at room temperature.`,
+          explain: t`$\Delta G = ${fmt(dG(LIQ, T) / 1000, 5)}$ kJ/mol, so $\mathcal{E} = ${thouTeX(Math.round(-dG(LIQ, T)))}/(2\times96\,485) = ${fmt(v, 4)}$ V — slightly lower than at room temperature.`,
           visual: { type: 'graph', params: { x: [270, 380], y: [1.15, 1.26], aspect: 'wide', xlabel: 'cell temperature (K)', ylabel: 'ideal voltage (V)', axesAt: 'edge', curves: [{ fn: `(${r4(-LIQ.dH)} + x*${r4(LIQ.dS)})/(2*${r4(F)})`, domain: [270, 380], color: 'good' }], vlines: [{ x: T, color: 'gold' }] }, caption: 'The reversible voltage of a hydrogen fuel cell making liquid water, against temperature (ΔH and ΔS held constant). Gold: this cell.' },
         };
       },
@@ -145,7 +145,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
           prompt: t`An electrolyser splits liquid water at 25 °C. Its minimum voltage is $${fmt(EX.E, 4)}$ V (set by $\Delta G$); at the **thermoneutral voltage** $-\Delta H/(2F)$ it needs no heat from outside. If it runs at $${Vcell}$ V, how much heat does it release per mole of water split? ($\Delta H = ${fmt(LIQ.dH / 1000, 5)}$ kJ/mol.)`,
           answer: heat, units: 'kJ', tol: { rel: 0.01 },
           errors: apart([{ value: (Vcell - EX.E) * 2 * F / 1000, feedback: 'Compare with the thermoneutral voltage (ΔH), not the minimum voltage (ΔG): between those two the cell absorbs heat.' }, { value: (Vcell - Etn) * F / 1000, feedback: 'Two electrons per water molecule: the electrical energy per mole is 2FV.' }], heat),
-          hints: [t`Thermoneutral voltage $= ${fmt(-LIQ.dH, 5)}/(2\times96\,485) = ${fmt(Etn, 4)}$ V.`, t`Heat released per mole $= 2F(V - V_\text{tn})$.`],
+          hints: [t`Thermoneutral voltage $= ${thouTeX(Math.round(-LIQ.dH))}/(2\times96\,485) = ${fmt(Etn, 4)}$ V.`, t`Heat released per mole $= 2F(V - V_\text{tn})$.`],
           teach: 'Between 1.23 V and 1.48 V an electrolyser absorbs heat; above 1.48 V it gives heat off.',
           explain: t`Electrical energy in: $2F\times${Vcell} = ${fmt((2 * F * Vcell) / 1000, 4)}$ kJ/mol; the products need $-\Delta H = ${fmt(-LIQ.dH / 1000, 5)}$ kJ/mol. The excess, $${fmt(heat, 3)}$ kJ/mol, is released as heat.`,
           visual: { type: 'graph', params: { x: [1, 2.2], y: [0, 1], aspect: 'wide', xlabel: 'cell voltage (V)', ylabel: '', yticks: 0, axesAt: 'edge', vlines: [{ x: r4(EX.E), label: '1.23 V: ΔG', color: 'good' }, { x: r4(Etn), label: '1.48 V: ΔH', color: 'warn' }, { x: Vcell, color: 'gold' }], shade: [{ fn: '1', from: r4(EX.E), to: r4(Etn), color: 'accent', alpha: 0.15 }, { fn: '1', from: r4(Etn), to: 2.2, color: 'warn', alpha: 0.12 }], points: [{ x: 1.3, y: 0.5, r: 0.01, color: 'accent', label: 'absorbs heat', labelDx: -10 }, { x: 1.8, y: 0.5, r: 0.01, color: 'warn', label: 'releases heat', labelDx: -10 }] }, caption: 'An electrolyser’s voltage scale at 25 °C. Gold: this cell.' },
@@ -161,7 +161,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
       hints: ['Read off which quantities appear as differentials (dS, dV, dT, dP, dN).'],
       teach: 'Subtracting TS swaps S for T; adding PV swaps V for P — a Legendre transform, like going from the Lagrangian to the Hamiltonian.',
       explain: t`$U(S,V,N)$, $H(S,P,N)$, $F(T,V,N)$, $G(T,P,N)$. Each of $H$, $F$, $G$ subtracts a product of conjugate variables ($-PV$ adds back as $+PV$ in $H$), trading a variable that is hard to control (entropy, volume) for one that is easy (temperature, pressure). Mechanics does the same when $H = p\dot q - L$ trades $\dot q$ for $p$.`,
-      visual: { type: 'graph', params: { x: [0, 4], y: [0, 3], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', points: [{ x: 1, y: 2.3, r: 6, color: 'accent', label: 'U (S, V)', labelDx: -60 }, { x: 3, y: 2.3, r: 6, color: 'teal', label: 'H (S, P)', labelDx: 10 }, { x: 1, y: 0.7, r: 6, color: 'warn', label: 'F (T, V)', labelDx: -60 }, { x: 3, y: 0.7, r: 6, color: 'good', label: 'G (T, P)', labelDx: 10 }], arrows: [{ from: [1.2, 2.3], to: [2.8, 2.3], color: 'ink3', label: '+PV', labelDx: -60, labelDy: -12 }, { from: [1, 2.1], to: [1, 0.9], color: 'ink3', label: '−TS', labelDx: 8, labelDy: 30 }, { from: [1.2, 0.7], to: [2.8, 0.7], color: 'ink3', label: '+PV', labelDx: -60, labelDy: 18 }, { from: [3, 2.1], to: [3, 0.9], color: 'ink3', label: '−TS', labelDx: 8, labelDy: 30 }] }, caption: 'The four energies, each a Legendre transform of U: adding PV trades V for P; subtracting TS trades S for T.' },
+      visual: { type: 'graph', params: { x: [0, 4], y: [0, 3], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', points: [{ x: 1, y: 2.3, r: 6, color: 'accent', label: 'U (S, V)', labelDx: -60 }, { x: 3, y: 2.3, r: 6, color: 'teal', label: 'H (S, P)', labelDx: 10 }, { x: 1, y: 0.7, r: 6, color: 'warn', label: 'F (T, V)', labelDx: -60 }, { x: 3, y: 0.7, r: 6, color: 'good', label: 'G (T, P)', labelDx: 10 }], arrows: [{ from: [1.2, 2.3], to: [2.8, 2.3], color: 'ink3', label: '+PV', labelDx: -60, labelDy: -12 }, { from: [1, 2.1], to: [1, 0.9], color: 'ink3', label: '−TS', labelDx: 8, labelDy: -55 }, { from: [1.2, 0.7], to: [2.8, 0.7], color: 'ink3', label: '+PV', labelDx: -60, labelDy: 18 }, { from: [3, 2.1], to: [3, 0.9], color: 'ink3', label: '−TS', labelDx: 8, labelDy: -55 }] }, caption: 'The four energies, each a Legendre transform of U: adding PV trades V for P; subtracting TS trades S for T.' },
     }),
     num({
       id: 'compress-H2', difficulty: 3,
@@ -190,8 +190,8 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
           errors: apart([{ value: g / F, feedback: 'Two electrons per CO₂: divide by 2F.' }, { value: rxn(SPLIT_CO2, 298.15).dG / (2 * F), feedback: 'Use ΔG at the cell temperature: it is much smaller than at 25 °C.' }], v),
           hints: [t`$\mathcal{E}_\text{min} = \Delta G/(2F)$.`, t`$F = 96\,485$ C/mol.`],
           teach: 'Electrolysis needs at least ΔG/(nF); running hot lowers ΔG because TΔS supplies more of the energy.',
-          explain: t`$\mathcal{E} = ${fmt(g, 5)}/(2\times96\,485) = ${fmt(v, 3)}$ V. At 25 °C it would be $${fmt(rxn(SPLIT_CO2, 298.15).dG / (2 * F), 3)}$ V: running at about ${Tc} °C lets the heat $T\Delta S$ pay part of the bill. (Real partial pressures differ from 1 bar, which shifts this by a few tens of millivolts.)`,
-          visual: { type: 'graph', params: { x: [250, 1300], y: [0.8, 1.4], aspect: 'wide', xlabel: 'cell temperature (K)', ylabel: 'minimum voltage (V)', axesAt: 'edge', curves: [{ fn: `(${r4(rxn(SPLIT_CO2, 298.15).dH)} - x*${r4(rxn(SPLIT_CO2, 298.15).dS)})/(2*${r4(F)})`, domain: [250, 1300], color: 'accent' }], vlines: [{ x: r4(T), color: 'gold' }] }, caption: 'The minimum voltage to split CO₂ against temperature, estimated with ΔH and ΔS held at their 298 K values (the true curve, from NASA data, differs by about 1 %). Gold: MOXIE’s temperature.' },
+          explain: t`$\mathcal{E} = ${thouTeX(Math.round(g))}/(2\times96\,485) = ${fmt(v, 3)}$ V. At 25 °C it would be $${fmt(rxn(SPLIT_CO2, 298.15).dG / (2 * F), 3)}$ V: running at about ${Tc} °C lets the heat $T\Delta S$ pay part of the bill. (Real partial pressures differ from 1 bar, which shifts this by a few tens of millivolts.)`,
+          visual: { type: 'graph', params: { x: [250, 1300], y: [150, 270], aspect: 'wide', xlabel: 'cell temperature (K)', ylabel: 'ΔG to split CO₂ (kJ/mol)', axesAt: 'edge', curves: [{ fn: `${r4(rxn(SPLIT_CO2, 298.15).dH / 1000)} - x*${(rxn(SPLIT_CO2, 298.15).dS / 1000).toPrecision(6)}`, domain: [250, 1300], color: 'accent' }], vlines: [{ x: r4(T), color: 'gold' }] }, caption: 'The Gibbs energy needed to split CO₂ against temperature, estimated with ΔH and ΔS held at their 298 K values (the NASA-data value at MOXIE’s temperature differs by under 1 %). Gold: MOXIE’s temperature.' },
         };
       },
     }),

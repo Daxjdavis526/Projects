@@ -13,7 +13,7 @@ import { EPS0, PI, DEG, sf, diskE, arrowsAt, grid, circle, polygon, is, bare } f
 const t = String.raw;
 
 // ── the bar electret: uniform P along +x, bound charge ±P on its end faces ──
-const SHAPES = [{ name: 'long rod', h: 1.3, a: 0.3 }, { name: 'thin disc', h: 0.15, a: 1.1 }];
+const SHAPES = [{ name: 'long rod', h: 1.3, a: 0.55 }, { name: 'thin disc', h: 0.15, a: 1.2 }];
 const WIN = { x: [-3.2, 3.2], y: [-1.55, 1.55] };
 /** E (units P/ε₀) of the electret at (X, Y) in a slice through its axis, by quadrature over both faces. */
 function electretE({ h, a }, X, Y) {
@@ -23,9 +23,11 @@ function electretE({ h, a }, X, Y) {
 }
 const inside = ({ h, a }, X, Y) => Math.abs(X) < h && Math.abs(Y) < a;
 const nearFace = ({ h, a }, X, Y) => (Math.abs(Math.abs(X) - h) < 0.09 && Math.abs(Y) < a + 0.09) || (Math.abs(Math.abs(Y) - a) < 0.07 && Math.abs(X) < h + 0.07);
-const PTS = grid(WIN.x, WIN.y, 16);
+const PTS = grid(WIN.x, WIN.y, 20);
 const fieldSets = SHAPES.map((S, g) => {
-  const pts = PTS.filter(([x, y]) => !nearFace(S, x, y));
+  // a thin disc falls between grid columns: give it a column of its own along its mid-plane
+  const extra = S.h < 0.2 ? [...new Set(PTS.map(([, y]) => y))].filter((y) => Math.abs(y) < S.a - 0.07).map((y) => [0, y]) : [];
+  const pts = [...PTS.filter(([x, y]) => !nearFace(S, x, y)), ...extra];
   const E = new Map(pts.map(([x, y]) => [`${x},${y}`, electretE(S, x, y)]));
   const Ef = (x, y) => E.get(`${x},${y}`);
   const Df = (x, y) => { const [u, v] = Ef(x, y); return inside(S, x, y) ? [u + 1, v] : [u, v]; };
@@ -104,7 +106,7 @@ export default lesson({
   },
   example: {
     prompt: t`An electret rod of radius 5.0 mm and length 10 cm has a uniform polarization $P = 1.0\ \mu\text{C/m}^2$ along its axis and no free charge. Find $\vec E$ and $\vec D$ at its centre. Then do the same for a disc of the same material, 1.0 mm thick and 5.0 cm in radius.`,
-    visual: { type: 'graph', params: bare([-3, 3], [-1, 1], { curves: [...polygon([[-2, -0.35], [2, -0.35], [2, 0.35], [-2, 0.35]], 'ink2'), { param: ['2*t', '0.35*t'], t: [0, 1], color: 'ink3', dash: [4, 4], width: 1.5 }, { param: ['-2*t', '0.35*t'], t: [0, 1], color: 'ink3', dash: [4, 4], width: 1.5 }], points: [...outline(0, false).points.map((p) => ({ ...p, x: p.x > 0 ? 2.06 : -2.06, y: (p.y * 0.35) / 0.3 })), { x: 0, y: 0, r: 4, color: 'good', label: 'centre', labelDx: -20, labelDy: 16 }, { x: 2.1, y: 0.62, r: 0, label: '+P face', labelDx: -20, color: 'warn' }, { x: -2.1, y: 0.62, r: 0, label: '−P face', labelDx: -20, color: 'accent' }], arrows: [{ from: [-0.6, -0.65], to: [0.6, -0.65], color: 'gold', width: 2.6, label: 'P', labelDx: 6, labelDy: 4 }] }), caption: t`The rod cut through its axis (radius exaggerated): bound charge $\pm P$ on its end faces. Each face is a uniformly charged disk seen from a point on its axis (dashed lines to the rims).` },
+    visual: { type: 'graph', params: bare([-3, 3], [-1, 1], { curves: [...polygon([[-2, -0.35], [2, -0.35], [2, 0.35], [-2, 0.35]], 'ink2'), { param: ['2*t', '0.35*t'], t: [0, 1], color: 'ink3', dash: [4, 4], width: 1.5 }, { param: ['-2*t', '0.35*t'], t: [0, 1], color: 'ink3', dash: [4, 4], width: 1.5 }], points: [...[-0.28, -0.14, 0, 0.14, 0.28].flatMap((y) => [{ x: 2.07, y, r: 3, color: 'warn' }, { x: -2.07, y, r: 3, color: 'accent' }]), { x: 0, y: 0, r: 4, color: 'good', label: 'centre', labelDx: -20, labelDy: 16 }, { x: 2.1, y: 0.62, r: 0, label: '+P face', labelDx: -20, color: 'warn' }, { x: -2.1, y: 0.62, r: 0, label: '−P face', labelDx: -20, color: 'accent' }], arrows: [{ from: [-0.6, -0.65], to: [0.6, -0.65], color: 'gold', width: 2.6, label: 'P', labelDx: 6, labelDy: 4 }] }), caption: t`The rod cut through its axis (radius exaggerated): bound charge $\pm P$ on its end faces. Each face is a uniformly charged disk seen from a point on its axis (dashed lines to the rims).` },
     steps: [
       { label: 'Bound charge', text: t`$\vec P$ is uniform, so $\rho_b = 0$; on the end faces $\sigma_b = \pm P$, on the curved side $\vec P\cdot\hat n = 0$. Two charged disks, a distance $h = L/2$ from the centre.` },
       { label: 'Field of each disk', text: t`From [M1.1](#/lesson/phys3600.M1.1), a disk of charge $\sigma$ and radius $a$ makes $\dfrac{\sigma}{2\varepsilon_0}\left(1 - \dfrac{h}{\sqrt{h^2 + a^2}}\right)$ on its axis at distance $h$. Both faces push the centre’s field the same way, from $+$ to $-$: **against** $\vec P$. So $E = \dfrac{P}{\varepsilon_0}\left(1 - \dfrac{h}{\sqrt{h^2 + a^2}}\right)$.` },

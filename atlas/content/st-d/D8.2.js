@@ -55,7 +55,7 @@ over the singularities $a_k$ inside $\gamma$. You rarely need the whole Laurent 
   },
   example: {
     prompt: t`Compute $\displaystyle\oint_{|z - i| = 1} \frac{dz}{z^2 + 1}$ — then use the same residue to evaluate $\displaystyle\int_{-\infty}^{\infty}\frac{dx}{1 + x^2}$.`,
-    visual: contour({ f: '1/(z^2 + 1)', contour: D(3), marks: pm, x: [-3.6, 3.6], y: [-1.6, 3.6], n: 30, readout: ['I'] }, t`The real segment $[-3, 3]$ closed by the upper semicircle: the chain of $\Delta z/(z^2 + 1)$ ends at $\pi$, the $2\pi i\times$ the residue at $i$.`),
+    visual: contour({ f: '1/(z^2 + 1)', contour: D(3), marks: pm, x: [-3.6, 3.6], y: [-1.6, 3.6], n: 30, readout: ['I'] }, t`The real segment $[-3, 3]$ closed by the upper semicircle: the chain of $\Delta z/(z^2 + 1)$ ends at $\pi$, which is $2\pi i$ times the residue at $i$.`),
     steps: [
       { label: 'Poles', text: t`$z^2 + 1 = (z - i)(z + i)$: simple poles at $\pm i$. The circle $|z - i| = 1$ encloses $i$ only.` },
       { label: 'Residue', text: t`$\operatorname{Res}(f, i) = \lim_{z \to i}(z - i)\dfrac{1}{(z - i)(z + i)} = \dfrac{1}{2i}$. (Or $g/h' = 1/(2z)$ at $z = i$.)` },
@@ -211,10 +211,12 @@ over the singularities $a_k$ inside $\gamma$. You rarely need the whole Laurent 
       gen(r) {
         const K = r.pick([4, 6, 10, 12, 20]);
         const big = K > 8;
-        const ymax = +(0.7 * K).toFixed(2);
+        let ymax = 0;
+        for (let j = 0; j <= 2000; j++) { const u = -PI / 2 + (PI * j) / 2000, c = Math.cos(u), sn = Math.sin(u); ymax = Math.max(ymax, Math.abs(K * sn * c ** 3 * (3 * c * c - sn * sn))); }
+        ymax = +(1.1 * ymax).toFixed(2);
         return {
           prompt: t`A satellite’s attitude loop has open-loop transfer function $L(s) = \dfrac{${K}}{(s + 1)^3}$, stable on its own (no poles with $\operatorname{Re} s > 0$, so $P = 0$). Closing the loop, its modes are the zeros of $1 + L(s)$. The **argument principle** — the residue theorem applied to $\frac{(1 + L)'}{1 + L}$, whose residues count zeros minus poles — gives Nyquist’s rule: if the curve $L(i\omega)$, $-\infty < \omega < \infty$, encircles $-1$ clockwise $N$ times, then $Z = N + P$ closed-loop modes are unstable. The curve crosses the negative real axis at $L = -${K}/8$. How many unstable closed-loop modes are there?`,
-          visual: { type: 'graph', params: { x: [-3.5, K + 1], y: [-ymax, ymax], equal: true, xlabel: 'Re L', ylabel: 'Im L', curves: [{ param: [`${K}*(1 - 3t^2)/(1 + t^2)^3`, `-${K}*(3t - t^3)/(1 + t^2)^3`], t: [-40, 40], color: 'accent', width: 2.4 }], points: [{ x: -1, y: 0, label: '−1', color: 'bad' }, { x: -K / 8, y: 0, label: '', color: 'accent', r: 3 }] }, caption: t`The Nyquist plot: the image of the imaginary axis $s = i\omega$ under $L$ (the contour’s infinite arc maps to $0$), with the critical point $-1$ marked. A model loop: real attitude dynamics have more poles, but the counting rule is the same.` },
+          visual: { type: 'graph', params: { x: [-3.5, K + 1], y: [-ymax, ymax], equal: true, xlabel: 'Re L', ylabel: 'Im L', curves: [{ param: [`${K}*(cos(t)^2 - 3*sin(t)^2)*cos(t)^4`, `-${K}*sin(t)*cos(t)^3*(3*cos(t)^2 - sin(t)^2)`], t: [-1.5708, 1.5708], color: 'accent', width: 2.4 }], points: [{ x: -1, y: 0, label: '−1', color: 'bad' }, { x: -K / 8, y: 0, label: '', color: 'accent', r: 3 }] }, caption: t`The Nyquist plot, drawn with $\omega = \tan u$: the image of the imaginary axis $s = i\omega$ under $L$ (the contour’s infinite arc maps to $0$), with the critical point $-1$ marked. A model loop: real attitude dynamics have more poles, but the counting rule is the same.` },
           choices: ['0', '1', '2', '3'],
           answer: big ? 2 : 0,
           fixedOrder: true,
