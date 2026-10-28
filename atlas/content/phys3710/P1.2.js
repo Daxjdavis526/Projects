@@ -153,7 +153,7 @@ Each extra vertex costs a factor of about $1/137$, which is why the simplest dia
       hints: [t`$\Gamma = \dfrac{(1.1664\times10^{-5})^2(0.105658)^5}{192\pi^3}$ GeV, then $\tau = \hbar/\Gamma$.`, t`$192\pi^3 = ${fmt(192 * Math.PI ** 3, 5)}$ and $(0.105658)^5 = ${tex(M_MU ** 5, 4)}$.`],
       teach: t`The muon lifetime is how $G_F$ is measured: the weak coupling, read from a clock.`,
       explain: t`$\Gamma = ${tex((GF * GF * M_MU ** 5) / (192 * Math.PI ** 3), 4)}$ GeV, so $\tau = ${fmt(TAU_GF * 1e6, 4)}$ μs. Measured: 2.197 μs; the 0.4% difference is a QED radiative correction. In practice the logic runs backwards: the muon lifetime, measured to a part per million, defines $G_F$ — the weak force’s strength, $\approx10^{-5}\ \text{GeV}^{-2}$, tiny because the W is heavy ($G_F \propto g^2/M_W^2$).`,
-      visual: diagram(DIAGRAMS.muon(), { caption: 'Muon decay, μ⁻ → νμ e⁻ ν̄ₑ, through a virtual W⁻. At low energy the W line shrinks to a point and Fermi’s constant G_F stands for the whole middle of the diagram. Time runs left to right.' }),
+      visual: diagram(DIAGRAMS.muon(), { caption: 'Muon decay, μ⁻ → νμ e⁻ ν̄ₑ, through a virtual W⁻. At low energy the W line shrinks to a point, and Fermi’s constant stands for the whole middle of the diagram. Time runs left to right.' }),
     }),
     match({
       id: 'vertices', difficulty: 1,

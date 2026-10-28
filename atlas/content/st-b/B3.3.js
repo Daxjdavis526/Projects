@@ -88,8 +88,8 @@ and $u(x_0, t_0)$ does not notice. In the $x$–$t$ plane this interval is the b
     mcq({
       id: 'which-feels', difficulty: 2,
       prompt: t`Initial data are nonzero only on the gold stretch $[-1, 1]$; $c = 1$. Which of the marked events is **guaranteed** to have $u = 0$?`,
-      visual: xtPlane({ x: [-6, 6], y: [0, 4], xticks: 12, yticks: 4, xlabel: 'x (m)', ylabel: 't (s)', shade: [{ fn: '4', lower: 'max(0, x - 1, -1 - x)', from: -6, to: 6, color: 'gold', alpha: 0.15 }], hlines: [], curves: [{ fn: '0*x', color: 'gold', width: 6, domain: [-1, 1] }],
-        points: [{ x: 4.5, y: 3, label: 'P' }, { x: 3.5, y: 3, label: 'Q', labelDy: 14 }, { x: 0, y: 3.5, label: 'R' }, { x: -2, y: 2, label: 'S' }] }, t`The data’s range of influence, $|x| \le 1 + t$, is shaded.`),
+      visual: xtPlane({ x: [-6, 6], y: [0, 4], xticks: 12, yticks: 4, xlabel: 'x (m)', ylabel: 't (s)', curves: [{ fn: '0*x', color: 'gold', width: 6, domain: [-1, 1] }],
+        points: [{ x: 4.5, y: 3, label: 'P' }, { x: 3.5, y: 3, label: 'Q', labelDy: 14 }, { x: 0, y: 3.5, label: 'R' }, { x: -2, y: 2, label: 'S' }] }, t`The disturbed stretch at $t = 0$ (gold) and four events.`),
       choices: ['P', 'Q', 'R', 'S'],
       answer: 0,
       why: {
