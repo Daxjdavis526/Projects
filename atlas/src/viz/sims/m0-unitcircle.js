@@ -233,7 +233,7 @@ export function mount(F, P) {
   function drawUnroll(th) {
     const fnSel = F.params.fn;
     right.setView([lo - 0.05 * (hi - lo), hi + 0.04 * (hi - lo)], [-1.3, 1.3]);
-    right.clear();
+    right.resize(); right.refreshTheme(); right.grid(); right.axes();   // not clear(): that would wipe the circle panel
     piTicks(right, lo, hi, P.units);
     const both = fnSel === 'both';
     const curves = [];
@@ -282,7 +282,7 @@ export function mount(F, P) {
     const f = inv === 'asin' ? Math.sin : inv === 'acos' ? Math.cos : Math.tan;
     const yr = inv === 'atan' ? 3.4 : 1.3, a = -TAU, b = TAU;
     right.setView([a - 0.15, b + 0.15], [-yr, yr]);
-    right.clear();
+    right.resize(); right.refreshTheme(); right.grid(); right.axes();   // not clear(): that would wipe the circle panel
     piTicks(right, a, b, P.units === 'both' ? 'rad' : P.units);
     right.fn(f, { domain: [a, b], color: 'ink3', width: 1.4, alpha: 0.55 });
     const [ba, bb] = inv === 'acos' ? [0, PI] : inv === 'asin' ? [-PI / 2, PI / 2] : [-PI / 2 + 0.02, PI / 2 - 0.02];
