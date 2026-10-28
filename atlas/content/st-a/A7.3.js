@@ -15,7 +15,7 @@ function fieldsPic(Ec, B, angleDeg = 90, caption) {
   const big = Math.max(Ec, B), s = 1.6 / big;
   const a = angleDeg * DEG;
   return plane({
-    x: [-2.6, 2.6], y: [-0.6, 2.2],
+    x: [-1.2, 2.6], y: [-0.3, 1.9],
     arrows: [
       { from: [0, 0], to: [0, r6(Ec * s)], color: 'gold', width: 3, label: 'E/c', labelDx: 6 },
       { from: [0, 0], to: [r6(B * s * Math.sin(a)), r6(B * s * Math.cos(a))], color: 'accent', width: 3, label: 'B', labelDx: 6 },
@@ -100,7 +100,7 @@ Observers moving relative to each other disagree about $\mathbf E$ and $\mathbf 
     steps: [
       { label: 'Build the tensor', text: t`With $E_y/c = 3.0\times10^5/2.998\times10^8 = 1.0007\times10^{-3}$ T: $F_{02} = -E_y/c$, $F_{20} = +E_y/c$, $F_{12} = B_z$, $F_{21} = -B_z$; the other twelve components are zero.` },
       { label: 'Raise both indices', text: t`$F^{\mu\nu} = \eta^{\mu\alpha}\eta^{\nu\beta}F_{\alpha\beta}$. A time index picks up $\eta^{00} = -1$, a space index $+1$: $F^{02} = +E_y/c$, $F^{20} = -E_y/c$, $F^{12} = F_{12}$, $F^{21} = F_{21}$.` },
-      { label: 'Contract', text: t`$F_{\mu\nu}F^{\mu\nu} = F_{02}F^{02} + F_{20}F^{20} + F_{12}F^{12} + F_{21}F^{21} = -2(E_y/c)^2 + 2B_z^2 = 2(4.000 - 1.001)\times10^{-6} = 6.00\times10^{-6}\ \text{T}^2$.` },
+      { label: 'Contract', text: t`$F_{\mu\nu}F^{\mu\nu} = F_{02}F^{02} + F_{20}F^{20} + F_{12}F^{12} + F_{21}F^{21}$, which is $-2(E_y/c)^2 + 2B_z^2 = 2(4.000 - 1.001)\times10^{-6} = 6.00\times10^{-6}\ \text{T}^2$.` },
       { label: 'Use the invariant', text: t`It is positive: $B$ wins. An observer moving along $\mathbf E\times\mathbf B$ at $v = E/B = 1.5\times10^{8}$ m/s $= 0.50c$ sees $E' = 0$, and the invariant fixes what they do see: $2B'^2 = 6.00\times10^{-6}\ \text{T}^2$, so $B' = 1.73$ mT.` },
       { label: 'Check', text: t`The Lorentz transformation gives $B' = \gamma(B - vE/c^2) = 1.155\,(2.0 - 0.50\times1.0007)$ mT $= 1.73$ mT ✓ — the long way round, which the invariant let you skip.` },
     ],
@@ -278,9 +278,9 @@ print(invariant(F_low))`,
           prompt: t`An electrodynamic tether — a long conducting wire hanging from a satellite — moves at $${v}$ km/s through Earth’s magnetic field of $${B}\ \mu\text{T}$, at right angles to it. In the satellite’s frame there is an electric field $E' = \gamma vB$ along the wire (and $B' = \gamma B$), where in Earth’s frame (ignoring its rotation) there was none. What voltage appears along ${Lk} km of tether?`,
           visual: plane({
             x: [-3.4, 3.4], y: [-2.1, 2.1],
-            curves: [{ param: ['1.5*cos(t)', '1.5*sin(t)'], t: [0, 6.2832], color: 'accent', width: 2 }, { param: ['2.6*cos(t)', '2.6*sin(t)'], t: [0.6, 1.6], color: 'ink4', width: 1, dash: [5, 4] }],
-            arrows: [{ from: [r6(2.6 * Math.cos(1.1)), r6(2.6 * Math.sin(1.1))], to: [r6(1.9 * Math.cos(1.1)), r6(1.9 * Math.sin(1.1))], color: 'gold', width: 2, label: 'tether', labelDx: 8 }, { from: [r6(2.6 * Math.cos(1.1)), r6(2.6 * Math.sin(1.1))], to: [r6(2.6 * Math.cos(1.1) - 0.8 * Math.sin(1.1)), r6(2.6 * Math.sin(1.1) + 0.8 * Math.cos(1.1))], color: 'ink', width: 2, label: 'v' }],
-            points: [{ x: 0, y: 0, r: 0.01, color: 'accent', label: 'Earth', labelDx: 0, labelDy: 0, labelAlign: 'center' }, { x: r6(2.6 * Math.cos(1.1)), y: r6(2.6 * Math.sin(1.1)), r: 5, color: 'ink' }],
+            curves: [{ param: ['1.2*cos(t)', '1.2*sin(t)'], t: [0, 6.2832], color: 'accent', width: 2 }, { param: ['2.1*cos(t)', '2.1*sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1, dash: [5, 4] }],
+            arrows: [{ from: [1.6062, 1.3528], to: [1.1473, 0.9663], color: 'gold', width: 2.4, label: 'tether', labelDx: 8, labelDy: 10 }, { from: [1.6062, 1.3528], to: [0.9621, 2.1176], color: 'ink', width: 2, label: 'v' }],
+            points: [{ x: 0, y: 0, r: 0.01, color: 'accent', label: 'Earth', labelDx: 0, labelDy: 0, labelAlign: 'center' }, { x: 1.6062, y: 1.3528, r: 5, color: 'ink' }],
             caption: 'Schematic, not to scale: a satellite in low orbit trailing a tether toward Earth, crossing the geomagnetic field (out of the page here).',
           }),
           answer: V, units: 'V', tol: { rel: 0.01 },

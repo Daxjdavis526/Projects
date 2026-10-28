@@ -31,6 +31,7 @@ const PANELS = ['levels', 'cavity', 'curve'];
 const HIDE = ['threshold', 'output'];
 const WMIN = 0.01, WMAX = 3;
 const NAMES = { g: 'ground state', p: 'pump band', u: 'upper laser level', l: 'lower laser level' };
+const SHORT = { g: 'ground', p: 'pump', u: 'upper', l: 'lower' };
 const SPEED = 0.6;                    // units of τ₂₁ per second of animation
 const DT = 0.004;
 
@@ -44,13 +45,13 @@ export function mount(F, P0) {
   else F.params.scheme = P.scheme;
   if (wanted.includes('W')) F.slider({ key: 'W', label: 'Pump rate $W$', min: WMIN, max: WMAX, value: P.W, logScale: true, unit: '/\\tau_{21}', fmt: (v) => (v < 0.1 ? v.toFixed(3) : v.toFixed(2)), explain: 'How often each ground-state atom is lifted by the pump, in units of the upper level’s spontaneous decay rate. Logarithmic.' });
   else F.params.W = P.W;
-  if (wanted.includes('R')) F.slider({ key: 'R', label: 'Output mirror reflectivity $R$', min: 0.8, max: 0.995, step: 0.005, value: P.R, unit: '', fmt: (v) => `${(100 * v).toFixed(1)}%`, explain: 'The rest of the light that reaches it leaves as the beam. A better mirror keeps photons longer, lowering the threshold — but lets less out.' });
+  if (wanted.includes('R')) F.slider({ key: 'R', label: 'Output mirror reflectivity $R$', min: 0.8, max: 0.995, step: 0.005, value: P.R, unit: '', fmt: (v) => `${(100 * v).toFixed(1)}\\%`, explain: 'The rest of the light that reaches it leaves as the beam. A better mirror keeps photons longer, lowering the threshold — but lets less out.' });
   else F.params.R = P.R;
 
   const top = panels.includes('levels') || panels.includes('cavity') ? F.canvas({ aspect: panels.includes('levels') && panels.includes('cavity') ? '' : 'wide', label: P.alt || 'The energy levels of a laser medium with its atoms, and the laser cavity with its photons' }) : null;
   const plot = top ? new Plot(top.canvas, { x: [0, 100], y: [0, 62.5], grid: false, axes: false, pad: { l: 0, r: 0, t: 0, b: 0 } }) : null;
   const cur = panels.includes('curve') ? F.canvas({ aspect: 'wide', label: 'Steady-state inversion and output against pump rate' }) : null;
-  const cplot = cur ? new Plot(cur.canvas, { x: [Math.log10(WMIN), Math.log10(WMAX)], y: [-1.05, 1.1], xlabel: 'pump rate W (units of 1/τ₂₁)', ylabel: '', yticks: 5, xfmt: (v) => `${+(10 ** v).toPrecision(2)}` }) : null;
+  const cplot = cur ? new Plot(cur.canvas, { x: [Math.log10(WMIN), Math.log10(WMAX)], y: [-1.3, 1.45], xlabel: 'pump rate W (units of 1/τ₂₁)', ylabel: '', yticks: 6, axesAt: 'edge', xfmt: (v) => `${+(10 ** v).toPrecision(2)}` }) : null;
 
   const now = () => ({ scheme: L.SCHEMES[F.params.scheme] ? F.params.scheme : 'four', W: Math.min(WMAX, Math.max(WMIN, F.params.W)), R: Math.min(0.995, Math.max(0.8, F.params.R)) });
 
@@ -106,20 +107,25 @@ export function mount(F, P0) {
     if (panels.includes('levels')) {
       const Emax = Math.max(...Object.values(real.levels));
       const yOf = (lv) => levY0 + 3 + (levY1 - levY0 - 9) * (real.levels[lv] / Emax);
-      const x0 = 6, x1 = 50;
+      const x0 = 24, x1 = 54;
       const counts = atoms.counts();
       const placed = Object.fromEntries(sch.levels.map((lv) => [lv, 0]));
       const posOf = {};
-      atoms.state.forEach((lv, i) => { posOf[i] = [x0 + 1 + (placed[lv]++ + 0.5) * ((x1 - x0 - 2) / L.NA), yOf(lv)]; });
-      for (const lv of sch.levels) {
-        const y = yOf(lv), laserLv = lv === sch.upper || lv === sch.lower;
+      atoms.state.forEach((lv, i) => { posOf[i] = [x0 + 0.5 + (placed[lv]++ + 0.5) * ((x1 - x0 - 1) / L.NA), yOf(lv)]; });
+      // labels left of the lines; two levels closer than a label’s height are nudged apart
+      const ys = sch.levels.map(yOf);
+      sch.levels.forEach((lv, k) => {
+        const y = ys[k], laserLv = lv === sch.upper || lv === sch.lower;
+        const near = ys.find((o, j) => j !== k && Math.abs(o - y) < 2.6);
+        const dy = near === undefined ? 0 : near > y ? 6 : -6;
         plot.line(x0, y, x1, y, { color: laserLv ? 'ink' : 'ink3', width: laserLv ? 2.2 : 1.6 });
-        plot.text(`${NAMES[lv]}${S.scheme === 'two' && lv === 'u' ? '' : `: ${real.levels[lv].toFixed(2)} eV`} — ${counts[lv]} atom${counts[lv] === 1 ? '' : 's'}`, x0, y, { color: laserLv ? 'ink2' : 'ink3', dy: -9, size: fs - 1 });
-      }
+        plot.text(w < 520 ? SHORT[lv] : `${NAMES[lv]}${S.scheme === 'two' ? '' : `, ${real.levels[lv].toFixed(2)} eV`}`, x0 - 1, y, { color: laserLv ? 'ink2' : 'ink3', align: 'right', dy, size: fs - 1 });
+        plot.text(String(counts[lv]), x1 + 0.8, y, { color: laserLv ? 'ink' : 'ink3', size: fs - 1, dy });
+      });
       for (const [i, [x, y]] of Object.entries(posOf)) plot.point(x, y + 0.9, { color: 'accent', r: 2.6 });
       for (const f of flashes) { const p = posOf[f.atom]; if (p) plot.circle(p[0], p[1] + 0.9, 1.6 * (1 - f.t / 0.35) + 0.4, { fill: f.kind === 'stim' ? 'bad' : 'violet', alpha: f.t / 0.35, stroke: false }); }
       // the processes, as arrows
-      const ax = (k) => x1 + 4 + 3.4 * k;
+      const ax = (k) => x1 + 6 + 3.2 * k;
       const arrow = (k, a, b, color, dash) => plot.arrow(ax(k), yOf(a) + (yOf(b) > yOf(a) ? 0.6 : -0.6), ax(k), yOf(b), { color, width: 2.2, head: 7, dash: dash ? [4, 3] : [] });
       const items = [];
       const pumpW = 1.2 + 2.6 * Math.log10(S.W / WMIN) / Math.log10(WMAX / WMIN);
@@ -128,9 +134,10 @@ export function mount(F, P0) {
       if (S.scheme !== 'two') { arrow(1, 'p', 'u', 'ink3', true); items.push(['ink3', 'fast decay (heat)']); }
       arrow(2, sch.upper, sch.lower, 'bad'); items.push(['bad', `laser transition${real.laser ? ` (${real.laser} nm)` : ''}`]);
       if (S.scheme === 'four') { arrow(3, 'l', 'g', 'ink3', true); }
-      items.forEach(([c, txt], k) => { const y = levY1 - 2 - 3.6 * k; plot.line(ax(4) + 2, y, ax(4) + 5, y, { color: c, width: 2.4 }); plot.text(txt, ax(4) + 6, y, { color: c, size: fs - 1 }); });
+      items.forEach(([c, txt], k) => { const y = levY1 - 2 - 3.6 * k; plot.line(ax(4) + 2, y, ax(4) + 4.5, y, { color: c, width: 2.4 }); plot.text(txt, ax(4) + 5.2, y, { color: c, size: fs - 1 }); });
       const inv = counts[sch.upper] - counts[sch.lower];
-      plot.text(inv > 0 ? `inversion: ${inv} more atoms in the upper laser level than the lower` : `no inversion: the lower laser level holds ${-inv} more atoms`, ax(4) + 2, levY1 - 2 - 3.6 * items.length - 1, { color: inv > 0 ? 'good' : 'warn', size: fs - 1 });
+      plot.text(inv > 0 ? `inverted: ${inv} more atoms up` : `not inverted: ${-inv} more atoms down`, ax(4) + 2, levY1 - 2 - 3.6 * items.length - 1, { color: inv > 0 ? 'good' : 'warn', size: fs - 1 });
+      plot.text('atoms', x1 + 0.8, levY1 - 0.5, { color: 'ink3', size: fs - 2 });
       plot.text(real.name, x0, levY1 + 0.5, { color: 'ink2', size: fs, weight: 650 });
     }
     if (panels.includes('cavity')) {
@@ -171,16 +178,18 @@ export function mount(F, P0) {
     const lw = (W) => Math.log10(W);
     cplot.line(cplot.vx0, 0, cplot.vx1, 0, { color: 'ink4', width: 1 });
     if (P.compare && !hide.has('output')) for (const s of ['two', 'three', 'four']) if (s !== S.scheme) cplot.path(C.ws.map((W, i) => [lw(W), C.by[s][i].output / C.top]), { color: 'ink4', width: 1.2, dash: [4, 4] });
-    cplot.path(C.ws.map((W, i) => [lw(W), C.by[S.scheme][i].inversion / L.NA]), { color: 'gold', width: 2.4 });
+    const dth = L.thresholdInversion(S.R);
+    cplot.line(cplot.vx0, 1, cplot.vx1, 1, { color: 'gold', width: 1, dash: [3, 4], alpha: 0.6 });
+    cplot.path(C.ws.map((W, i) => [lw(W), Math.max(-5, C.by[S.scheme][i].inversion / dth)]), { color: 'gold', width: 2.4 });
     if (!hide.has('output')) cplot.path(C.ws.map((W, i) => [lw(W), C.by[S.scheme][i].output / C.top]), { color: 'bad', width: 2.6 });
     const th = L.thresholdPump(S.scheme, S.R);
     if (!hide.has('threshold') && th < WMAX) { cplot.line(lw(th), cplot.vy0, lw(th), cplot.vy1, { color: 'ink3', width: 1.2, dash: [5, 5] }); cplot.text('threshold', lw(th), cplot.vy1, { color: 'ink3', dx: 4, dy: 10 }); }
     const ss = L.steady(S.scheme, S.W, S.R);
-    cplot.point(lw(S.W), ss.inversion / L.NA, { color: 'gold', r: 5 });
+    cplot.point(lw(S.W), Math.max(cplot.vy0, ss.inversion / dth), { color: 'gold', r: 5 });
     if (!hide.has('output')) cplot.point(lw(S.W), ss.output / C.top, { color: 'bad', r: 5 });
     const narrow = (cur.canvas.clientWidth || 600) < 520;
-    cplot.text('inversion (Nᵤ − N_lower)/N', lw(WMIN) + 0.05, Math.max(-0.95, C.by[S.scheme][0].inversion / L.NA), { color: 'gold', dy: -11, size: narrow ? 9.5 : 11.5 });
-    if (!hide.has('output')) cplot.text(`laser output${P.compare ? ' (dashed: the other schemes)' : ''}`, lw(WMIN) + 0.05, 0.95, { color: 'bad', size: narrow ? 9.5 : 11.5 });
+    cplot.text('inversion ÷ threshold inversion (clamps at 1)', lw(WMIN) + 0.05, 1, { color: 'gold', dy: -10, size: narrow ? 9.5 : 11.5 });
+    if (!hide.has('output')) cplot.text(`laser output, relative${P.compare ? ' (dashed: the other schemes)' : ''}`, lw(WMIN) + 0.05, 1.32, { color: 'bad', size: narrow ? 9.5 : 11.5 });
   }
 
   let lastRead = '';

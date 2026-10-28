@@ -43,16 +43,16 @@ The split does not depend on the basis: a tensor symmetric in one basis is symme
     caption: t`The teal lines are $T(\mathbf U, \cdot\,)$; the bold ones are those $\mathbf V$ crosses. ${AXES_NOTE}`,
   },
   example: {
-    prompt: t`In a region of an ion thruster’s channel, with $c = 1$, the fields are $\mathbf E = (0, 3, 0)$ and $\mathbf B = (0, 0, 2)$ (in matching units). Build $F_{\mu\nu}$, check that it is antisymmetric, count its independent components, and show that $F_{\mu\nu}u^\mu u^\nu = 0$ for the four-velocity $u^\mu = (1.25, 0.75, 0, 0)$.`,
+    prompt: t`In a region of an ion thruster’s channel, with $c = 1$, the fields are $\mathbf E = (3, 0, 0)$ and $\mathbf B = (0, 0, 2)$ (in matching units). Build $F_{\mu\nu}$, check that it is antisymmetric, count its independent components, and show that $F_{\mu\nu}u^\mu u^\nu = 0$ for the four-velocity $u^\mu = (1.25, 0.75, 0, 0)$.`,
     visual: fGrid(t`The pattern of $F_{\mu\nu}$ (rows $\mu$, columns $\nu$): $\mathbf E$ in the time row and column, $\mathbf B$ in the space block. Entries across the diagonal are negatives of each other.`),
     steps: [
-      { label: 'Fill the array', text: t`$F_{0i} = -E_i$ and $F_{i0} = E_i$; $F_{12} = B_z = 2$, $F_{21} = -2$; everything else is zero: $F_{\mu\nu} = ${matTeX(Fmat([0, 3, 0], [0, 0, 2]))}$.` },
+      { label: 'Fill the array', text: t`$F_{0i} = -E_i$ and $F_{i0} = E_i$; $F_{12} = B_z = 2$, $F_{21} = -2$; everything else is zero: $F_{\mu\nu} = ${matTeX(Fmat([3, 0, 0], [0, 0, 2]))}$.` },
       { label: 'Antisymmetric', text: t`Every entry has its negative across the diagonal and the diagonal is zero: $F_{\nu\mu} = -F_{\mu\nu}$, so $F$ is its own antisymmetric part and its symmetric part is zero.` },
       { label: 'Count', text: t`Choosing the entries above the diagonal fixes everything: $4\cdot3/2 = 6$ numbers, exactly $E_x, E_y, E_z, B_x, B_y, B_z$.` },
-      { label: 'A repeated vector', text: t`$F_{\mu\nu}u^\mu u^\nu$ pairs each term $F_{\mu\nu}u^\mu u^\nu$ with $F_{\nu\mu}u^\nu u^\mu = -F_{\mu\nu}u^\mu u^\nu$. Here only $u^0u^1$ survives: $(F_{01} + F_{10})\,u^0u^1 = (0 + 0)(1.25)(0.75) = 0$. ✓` },
+      { label: 'A repeated vector', text: t`$F_{\mu\nu}u^\mu u^\nu$ pairs each term $F_{\mu\nu}u^\mu u^\nu$ with $F_{\nu\mu}u^\nu u^\mu = -F_{\mu\nu}u^\mu u^\nu$. Here only $u^0u^1$ survives: $(F_{01} + F_{10})\,u^0u^1 = (-3 + 3)(1.25)(0.75) = 0$. ✓` },
       { label: 'Meaning', text: t`The Lorentz four-force is $q\,F^\mu{}_\nu u^\nu$ (index raised with the metric, lesson A6.4). Its pairing with $u$ is $q\,F_{\mu\nu}u^\mu u^\nu = 0$: the force changes a particle’s energy and momentum but never its rest mass.` },
     ],
-    answer: t`$F_{\mu\nu} = ${matTeX(Fmat([0, 3, 0], [0, 0, 2]))}$ — antisymmetric, 6 independent components, and $F_{\mu\nu}u^\mu u^\nu = 0$ for every $u$.`,
+    answer: t`$F_{\mu\nu} = ${matTeX(Fmat([3, 0, 0], [0, 0, 2]))}$ — antisymmetric, 6 independent components, and $F_{\mu\nu}u^\mu u^\nu = 0$ for every $u$.`,
   },
   practice: [
     num({

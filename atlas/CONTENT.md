@@ -474,7 +474,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `calc-polar` | polar and parametric curves, swept areas as thin wedges (½∫r²dθ), tangents, arc length, conics with focus and directrix, Kepler's equation with equal-time sectors |
 | `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
-| `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
+| `calc-vectors3d` | (camera `yaw` and `pitch` in radians) a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
 | `c3-contour` | (x and y share one scale: give a window with the canvas's aspect, 16:10 by default or 2:1 when wide) a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c |
 | `c3-coords` | cylindrical or spherical coordinates as three surfaces meeting at a point, turning unit vectors, the volume-element box (`edgeLabels: false` hides its edge lengths) |
 | `c3-curve` | a point riding a space curve: T, N, B frame, osculating circle, acceleration split into tangential and normal parts (gravity-turn preset) |
@@ -482,6 +482,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `c3-lineint`, `c3-cells`, `c3-flux` | a bead riding a path through a vector field with F·dr adding up; a region cut into cells whose inner edges cancel (Green's theorem, the FTC); a 3D field through tiltable surfaces — the flux integrand, curl through butterfly nets, the divergence theorem |
 | `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `la-vectors`, `la-rowreduce`, `la-map2d` | vectors in Rⁿ as stem plots beside the plane two of them span; exact-fraction elimination step by step (echelon, Gauss–Jordan, LU) with each row drawn as a line or plane; a 2×2 matrix as a map of the plane — draggable columns, composition in either order, the inverse, eigen-lines, a morph slider |
+| `la-det` | two columns' parallelogram, coloured by the sign of the determinant with an orientation arrow; the ad − bc proof by pieces; Cramer's rule as a ratio of areas |
 | `de-slopefield`, `de-stepper` | slope fields with isoclines, a phase line with labelled equilibria and solution curves added by clicking; Euler, improved Euler, midpoint and RK4 stage by stage, with a log–log panel of error against h |
 | `de-plane`, `de-tracedet`, `de-modes` | phase planes of any 2D system (nullclines, typed equilibria, eigenvector lines, conserved-quantity contours and separatrices, launchable trajectories, e^{At} carrying a shape); the trace–determinant map beside the phase portrait; coupled masses and CO₂ with normal modes, beats and energy bars |
 | `de-poles` | the poles of a transfer function H(s), draggable in the s-plane, beside the exact impulse or step response, each pole's term, and the gain |H(iω)| with the probe iω |
@@ -494,7 +495,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `mech-collide` | 1D and 2D collisions with momentum and kinetic-energy charts, restitution, the centre of mass |
 | `mech-rotor` | a rigid body about a fixed axis: moments of inertia, the parallel-axis theorem, torques with lever arms |
 | `mech-kepler` | Kepler orbits with real data (ISS, GPS, the Moon, Mercury, Halley, S2) and Newton's cannon |
-| `ten-basis` | a 2D vector or a covector (a stack of level lines) against a draggable basis: old-basis ghost, dual basis, components, the pairing as lines crossed; `get('point')` returns the arrow's tip |
+| `ten-basis` | a 2D vector or a covector (a stack of level lines) against a draggable basis: old-basis ghost, dual basis, components, the pairing as lines crossed; `get('point')` returns the arrow's tip; `rotate` and `dragBasis` cannot be combined |
 | `gr-light-clock` | two light clocks, one moving: time dilation from the constancy of c |
 | `gr-coordinates` | one flat plane under different coordinate labels: lengths agree, components do not |
 | `gr-sphere-transport` | parallel transport around a loop on a sphere: the arrow returns rotated by area/R² |

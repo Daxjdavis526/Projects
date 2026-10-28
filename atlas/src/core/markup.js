@@ -113,6 +113,9 @@ export function escapeDamage(text, { prose = true } = {}) {
     if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
+    // a number that failed to compute: NaN, undefined or Infinity spliced into the math
+    const junk = /(?<![A-Za-z\\])(NaN|undefined|Infinity|null)(?![A-Za-z])/.exec(m.tex);
+    if (junk) return `the math “${m.tex.slice(0, 40)}” contains “${junk[1]}” — a value failed to compute before it was spliced in`;
     // '\rho' in an ordinary string is a carriage return + "ho", which a later rewrite may turn into a newline
     if (/\n(ho|ight|angle|floor|ceil|ightarrow|m)(?![A-Za-z])/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” has a line break where \\rho, \\right or \\rangle was probably meant; use String.raw`;
   }
