@@ -112,3 +112,57 @@ export function sackurTetrode(mU, T, P) {
   const m = mU * AMU, vQ = (H / Math.sqrt(2 * Math.PI * m * KB_ * T)) ** 3, VperN = (KB_ * T) / P;
   return 8.31446261815324 * (Math.log(VperN / vQ) + 2.5);
 }
+
+// ─── diatomic heat capacities from quantum levels ──────────────────────────
+// hc/k in cm·K (exact SI constants)
+export const HCK = (H * CL * 100) / 1.380649e-23;
+/** Molecular constants: θ_rot from the ground-state rotational constant B₀, θ_vib from the fundamental band (cm⁻¹, NIST Chemistry WebBook / Huber–Herzberg). */
+export const DIATOMIC = {
+  H2: { B: 59.322, nu: 4161.17, spin: [1, 3] },      // para (even J) : ortho (odd J) = 1 : 3 in normal hydrogen
+  D2: { B: 29.904, nu: 2993.6, spin: [2, 1] },       // ortho (even J) : para (odd J) = 2 : 1 in normal deuterium
+  N2: { B: 1.98957, nu: 2329.9, spin: [2, 1] },
+  O2: { B: 1.4377, nu: 1556.4, spin: null },
+};
+export const thetaRot = (g) => DIATOMIC[g].B * HCK;
+export const thetaVib = (g) => DIATOMIC[g].nu * HCK;
+
+/** C_rot/R of a rigid rotor restricted to J of one parity (0 even, 1 odd, null both), at θ/T = b — computed numerically. */
+function cRotNum(b, parity, Jmax = 60) {
+  let Z = 0, E1 = 0, E2 = 0;
+  for (let J = 0; J <= Jmax; J++) {
+    if (parity !== null && J % 2 !== parity) continue;
+    const e = J * (J + 1), w = (2 * J + 1) * Math.exp(-e * b);
+    Z += w; E1 += w * e; E2 += w * e * e;
+  }
+  return b * b * (E2 / Z - (E1 / Z) ** 2);
+}
+/** C_vib/R of one harmonic vibration at θ/T = b (the Einstein function). */
+const cVibNum = (b) => (b > 300 ? 0 : (b * b * Math.exp(b)) / (Math.exp(b) - 1) ** 2);
+/** C_V/R of an ideal diatomic gas at T: translation + rotation (fixed spin mixture) + vibration. */
+export function diatomicCv(g, T, { vib = true } = {}) {
+  const d = DIATOMIC[g], br = thetaRot(g) / T;
+  let rot;
+  if (d.spin && br > 0.02) { const [we, wo] = d.spin; rot = (we * cRotNum(br, 0) + wo * cRotNum(br, 1)) / (we + wo); }
+  else rot = br > 0.02 ? cRotNum(br, null) : 1;
+  return 1.5 + rot + (vib ? cVibNum(thetaVib(g) / T) : 0);
+}
+
+/** The same C_V/R as expression text in the variable expression Tv (e.g. '10^x' or 'T'), for graph curves and readouts. */
+export function diatomicCvExpr(g, Tv = '10^x', Jmax = 22) {
+  const d = DIATOMIC[g], tr = r4(thetaRot(g)), tv = r4(thetaVib(g));
+  const b = `(${tr}/(${Tv}))`;
+  const sums = (par) => {
+    const Js = [];
+    for (let J = 0; J <= Jmax; J++) if (par === null || J % 2 === par) Js.push(J);
+    const term = (J, p) => `${(2 * J + 1) * (J * (J + 1)) ** p}*e^(-${J * (J + 1)}*${b})`;
+    const S = (p) => `(${Js.map((J) => term(J, p)).join(' + ')})`;
+    return `${b}^2*(${S(2)}/${S(0)} - (${S(1)}/${S(0)})^2)`;
+  };
+  let rot;
+  if (d.spin) { const [we, wo] = d.spin; rot = `(${we}*${sums(0)} + ${wo}*${sums(1)})/${we + wo}`; }
+  else rot = sums(null);
+  const bv = `(${tv}/(${Tv}))`;
+  const vib = `${bv}^2*e^(${bv})/(e^(${bv}) - 1)^2`;
+  // above T = θ_rot/0.04 the rotor is classical (C_rot/R = 1 to better than 0.1%)
+  return `1.5 + step(${b} - 0.04)*${rot} + step(0.04 - ${b}) + ${vib}`;
+}

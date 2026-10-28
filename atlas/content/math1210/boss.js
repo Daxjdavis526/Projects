@@ -143,7 +143,7 @@ export function canisterCase(r) {
   return { R, H, V: (4 * PI * R * R * H) / 27 / 1000 };     // litres
 }
 export function heatCase(r) {
-  const qpk = r.pick([600, 800, 1000, 1200]), tau = r.pick([20, 25, 30, 40]), T = tau * r.pick([1, 1.5, 2, 3]);
+  const qpk = r.pick([600, 800, 1000, 1200]), tau = r.pick([10, 12, 15, 20]), T = tau * r.pick([1, 1.5, 2, 3]);
   const U = (T * T) / (2 * tau * tau);
   const Q = (qpk * tau * Math.sqrt(Math.E) * (1 - Math.exp(-U))) / 1000;   // kJ/cm²
   return { qpk, tau, T, U, Q };
@@ -271,7 +271,7 @@ export default boss({
                 t`Together: $\dfrac{dv}{dr} = -\dfrac{\mu}{r^2\sqrt{\mu(2/r - 1/a)}} = -\dfrac{\mu}{r^2\,v}$.`,
               ],
               teach: t`The chain rule on a square root: differentiate the root, $\dfrac{1}{2\sqrt u}$, then multiply by the derivative of what is inside it.`,
-              explain: t`With $u = \mu(2/r - 1/a)$, $\dfrac{du}{dr} = -\dfrac{2\mu}{r^2}$, so $$\frac{dv}{dr} = \frac{1}{2\sqrt u}\cdot\left(-\frac{2\mu}{r^2}\right) = -\frac{\mu}{r^2\,v(r)} = -\frac{398\,600}{r^2\sqrt{398\,600\left(\frac2r - \frac1{${aT}}\right)}}.$$ Sense check: near perigee at $r = ${thou(rp)}\ \text{km}$ (300 km up), $v = ${tex(v(rp), 4)}\ \text{km/s}$ and $dv/dr = ${tex(dv(rp), 3)}$ s⁻¹ — the probe loses about $${tex(-dv(rp) * 1000, 2)}$ m/s of speed for every kilometre it climbs there, and less and less further out, where gravity is weaker. Note that $a$ fixes the orbit's energy: $dv/dr$ depends on $a$ but not on the eccentricity.`,
+              explain: t`With $u = \mu(2/r - 1/a)$, $\dfrac{du}{dr} = -\dfrac{2\mu}{r^2}$, so $$\frac{dv}{dr} = \frac{1}{2\sqrt u}\cdot\left(-\frac{2\mu}{r^2}\right) = -\frac{\mu}{r^2\,v(r)} = -\frac{398\,600}{r^2\sqrt{398\,600\left(\frac2r - \frac1{${aT}}\right)}}.$$ Sense check: near perigee at $r = ${thou(rp)}\ \text{km}$ (300 km up), $v = ${tex(v(rp), 4)}\ \text{km/s}$ and $dv/dr = ${tex(dv(rp), 3)}$ s⁻¹ — the probe loses about $${tex(-dv(rp) * 1000, 2)}\ \text{m/s}$ of speed for every kilometre it climbs there, and less and less further out, where gravity is weaker. Note that $a$ fixes the orbit's energy: $dv/dr$ depends on $a$ but not on the eccentricity.`,
               visual: fig({
                 fn: `sqrt(398.6*(2/x - 1/${a / 1000}))`, x: [5, a / 500 + 2], y: [0, 11.5], domain: [6.378, a / 500 - 0.001], xlabel: 'distance from Earth’s centre r (thousand km)', ylabel: 'speed v (km/s)',
                 at: a / 1000, f: (x) => v(1000 * x), df: (x) => 1000 * dv(1000 * x), span: a / 3000, xticks: 5, yticks: 4,
@@ -289,7 +289,7 @@ export default boss({
             const k = (MU * m) / 1000;                    // μm in GJ·km
             const Fk = (x) => (MU * m) / 1e6 / (x * x);   // kN, x in thousand km
             return {
-              prompt: t`Before the departure burn, the team budgets the energy to lift Shearwater, mass $${m}$ kg, from its parking orbit at $r_1 = ${thou(r1)}\ \text{km}$ (${h1} km up) to the apogee of its phasing orbit, $r_2 = ${thou(r2)}\ \text{km}$ from Earth's centre. Earth's gravity pulls with $F(r) = \dfrac{\mu m}{r^2}$, $\mu = 398\,600\ \text{km}^3/\text{s}^2$, so the work done against it is $$W = \int_{r_1}^{r_2} \frac{\mu m}{r^2}\,dr.$$ With $r$ in km, $\mu m/r^2$ is in kN and $W$ comes out in MJ. Find $W$ in GJ.`,
+              prompt: t`Before the departure burn, the team budgets the energy to lift Shearwater, mass $${m}\ \text{kg}$, from its parking orbit at $r_1 = ${thou(r1)}\ \text{km}$ (${h1} km up) to the apogee of its phasing orbit, $r_2 = ${thou(r2)}\ \text{km}$ from Earth's centre. Earth's gravity pulls with $F(r) = \dfrac{\mu m}{r^2}$, $\mu = 398\,600\ \text{km}^3/\text{s}^2$, so the work done against it is $$W = \int_{r_1}^{r_2} \frac{\mu m}{r^2}\,dr.$$ With $r$ in km, $\mu m/r^2$ is in kN and $W$ comes out in MJ. Find $W$ in GJ.`,
               answer: W, units: 'GJ', tol: { rel: 0.005 },
               integrand: `${N(k)}/x^2`, limits: [r1, r2],
               errors: apart([
@@ -303,7 +303,7 @@ export default boss({
                 t`$\mu m = 398\,600 \times ${m}$; with $r$ in km the result is in MJ. Divide by $1000$ for GJ.`,
               ],
               teach: 'The Fundamental Theorem turns the area under a force curve into a difference of one antiderivative at two points.',
-              explain: t`$$W = \left[-\frac{\mu m}{r}\right]_{${thou(r1)}}^{${thou(r2)}} = 398\,600 \times ${m}\left(\frac{1}{${thou(r1)}} - \frac{1}{${thou(r2)}}\right)\ \text{MJ} = ${tex(W * 1000, 4)}\ \text{MJ} \approx ${tex(W, 3)}\ \text{GJ}.$$ Most of it is spent close to Earth: the climb from $r_1$ to $2r_1$ alone costs half the energy of escaping altogether. Surface gravity all the way would have given about $${tex((m * 9.81e-3 * (r2 - r1)) / 1000, 2)}$ GJ — wildly too much. This is the change in gravitational potential energy only. A coasting probe pays for the climb from its own kinetic energy; what the engine must supply is set by the speeds the orbits need, which is what vis-viva gives.`,
+              explain: t`$$W = \left[-\frac{\mu m}{r}\right]_{${thou(r1)}}^{${thou(r2)}} = 398\,600 \times ${m}\left(\frac{1}{${thou(r1)}} - \frac{1}{${thou(r2)}}\right)\ \text{MJ} = ${tex(W * 1000, 4)}\ \text{MJ} \approx ${tex(W, 3)}\ \text{GJ}.$$ Most of it is spent close to Earth: the climb from $r_1$ to $2r_1$ alone costs half the energy of escaping altogether. Surface gravity all the way would have given about $${tex((m * 9.81e-3 * (r2 - r1)) / 1000, 2)}\ \text{GJ}$ — wildly too much. This is the change in gravitational potential energy only. A coasting probe pays for the climb from its own kinetic energy; what the engine must supply is set by the speeds the orbits need, which is what vis-viva gives.`,
               visual: areaFig({
                 fn: `${N((MU * m) / 1e6)}/x^2`, x: [0, (r2 / 1000) * 1.06], y: [0, Fk(r1 / 1000) * 1.18], from: r1 / 1000, to: r2 / 1000, domain: [r1 / 1000 - 0.4, (r2 / 1000) * 1.06], signed: false,
                 xlabel: 'distance from Earth’s centre (thousand km)', ylabel: 'gravity’s pull (kN)', label: 'F(r)', labelAt: r1 / 1000 + 2,
@@ -384,7 +384,7 @@ export default boss({
                     { from: [0, 0], to: [0.71, 0.71], color: 'gold', width: 2, label: 'rₛ', labelDx: 6, labelDy: -6 },
                     { from: [5.6, 2.2], to: [1.5, 0.8], color: 'accent', width: 2 },
                   ],
-                  points: [tag(5.6, 2.2, 'infalling gas', 'accent', 0, -10, 'center'), tag(0, -1.25, 'horizon', 'ink2', 0, 8, 'center'), tag(-4.6, -0.7, 'glowing disc', 'warn', 0, 16, 'center')],
+                  points: [tag(5.6, 2.2, 'infalling gas', 'accent', 4, -12, 'right'), tag(0, -1.25, 'horizon', 'ink2', 0, 8, 'center'), tag(-4.6, -0.7, 'glowing disc', 'warn', 0, 16, 'center')],
                   alt: 'A black disc for the horizon, ringed by an accretion disc, with gas spiralling in',
                 },
                 caption: 'Schematic and far from scale: a quasar’s glowing disc reaches out hundreds to thousands of Schwarzschild radii, and the horizon itself gives off no light.',
@@ -401,7 +401,7 @@ export default boss({
             const PT = to ? '1+\\beta' : '1-\\beta', QT = to ? '1-\\beta' : '1+\\beta';
             const D = `sqrt((${P})/(${Q}))`;
             return {
-              prompt: t`The quasar fires a jet. A blob of plasma in it moves at speed $v = \beta c$ straight ${to ? 'toward' : 'away from'} Shearwater${to ? '' : t` — it is in the fainter counter-jet`}. A photon the blob emits with energy $${E0}$ keV, in its own frame, arrives with energy $$E(\beta) = ${E0}\sqrt{\frac{${PT}}{${QT}}}\ \text{keV}$$ (the relativistic Doppler shift). Find $\dfrac{dE}{d\beta}$, in keV per unit of $\beta$.`,
+              prompt: t`The quasar fires a jet. A blob of plasma in it moves at speed $v = \beta c$ straight ${to ? 'toward' : 'away from'} Shearwater${to ? '' : t` — it is in the fainter counter-jet`}. A photon the blob emits with energy $${E0}\ \text{keV}$, in its own frame, arrives with energy $$E(\beta) = ${E0}\sqrt{\frac{${PT}}{${QT}}}\ \text{keV}$$ (the relativistic Doppler shift). Find $\dfrac{dE}{d\beta}$, in keV per unit of $\beta$.`,
               answer: to ? `${E0}/((1 - beta)*sqrt(1 - beta^2))` : `-${E0}/((1 + beta)*sqrt(1 - beta^2))`,
               answerTeX: to ? t`\dfrac{${E0}}{(1-\beta)\sqrt{1-\beta^2}}` : t`-\dfrac{${E0}}{(1+\beta)\sqrt{1-\beta^2}}`,
               lhs: t`\dfrac{dE}{d\beta}`,
@@ -447,7 +447,7 @@ export default boss({
             const xt = -1 / k, yt = Math.sqrt(1 - 1 / (k * k));       // tangent point (units of R), probe at (−k, 0)
             const ext = 1.25, slope = yt / (xt + k);
             return {
-              prompt: t`Shearwater closes on Jupiter at $${v}$ km/s. Treat its path as a straight line toward the planet's centre. Its navigation camera sees Jupiter's disc span the angle $$\theta = 2\arcsin\frac{R}{D},$$ where $R = 71\,492\ \text{km}$ is Jupiter's equatorial radius and $D$ the distance to its centre. How fast is $\theta$ growing at the moment $D = ${k}R$? Give degrees per hour.`,
+              prompt: t`Shearwater closes on Jupiter at $${v}\ \text{km/s}$. Treat its path as a straight line toward the planet's centre. Its navigation camera sees Jupiter's disc span the angle $$\theta = 2\arcsin\frac{R}{D},$$ where $R = 71\,492\ \text{km}$ is Jupiter's equatorial radius and $D$ the distance to its centre. How fast is $\theta$ growing at the moment $D = ${k}R$? Give degrees per hour.`,
               answer: rate, units: 'deg/h', tol: { rel: 0.01 },
               errors: apart([
                 { value: small, feedback: t`That uses the small-angle form $\theta \approx 2R/D$. At $D = ${k}R$ the disc is ${tex((2 * Math.asin(1 / k) * 180) / PI, 3)}° across — not small — and the exact derivative carries the factor $1/\sqrt{1 - R^2/D^2}$.` },
@@ -493,7 +493,7 @@ export default boss({
             const { x0, y0, vx, vy, ts, Dmin, T, inside, ans, dist } = C;
             const tAbeam = -x0 / vx, abeam = Math.abs(y0 + vy * tAbeam);
             const errs = [];
-            if (!inside) errs.push({ value: Dmin, feedback: t`That is the least distance along the whole line, reached at $t^* = ${tex(ts, 4)}\ \text{s}$ — after the window closes at $${thou(T)}$ s. On a closed interval, check the endpoints too: here the distance is still falling when the window ends.` });
+            if (!inside) errs.push({ value: Dmin, feedback: t`That is the least distance along the whole line, reached at $t^* = ${tex(ts, 4)}\ \text{s}$ — after the window closes at $${thou(T)}\ \text{s}$. On a closed interval, check the endpoints too: here the distance is still falling when the window ends.` });
             errs.push({ value: abeam, feedback: t`That is the distance when Shearwater crosses $x = 0$, directly "abeam" of the moon. The path is tilted, so the closest point comes at a different time: minimize the distance itself.` });
             errs.push({ value: ans * ans, feedback: t`That is the least value of $s = x^2 + y^2$, the distance **squared**, in $\text{km}^2$. Take its square root.` });
             const ysg = (n) => `${n < 0 ? '-' : '+'} ${Math.abs(n) === 1 ? '' : Math.abs(n)}`;
@@ -503,7 +503,7 @@ export default boss({
             const xs = [X(0), X(tEnd), 0], ys = [Y(0), Y(tEnd), 0];
             const xr = [Math.min(...xs) - 4, Math.max(...xs) + 4], yr = [Math.min(...ys) - 3, Math.max(...ys) + 3];
             return {
-              prompt: t`Inbound to Jupiter, Shearwater passes Himalia, a small outer moon about 150 km across. In a frame moving with Himalia (which sits at the origin), Shearwater's position over a short stretch is $$x(t) = ${thou(x0)} + ${vx}t,\qquad y(t) = ${thou(y0)} ${ysg(vy)}t$$ in km, with $t$ in seconds. Its camera can image the moon only during the window $0 \le t \le ${thou(T)}\ \text{s}$. What is the **least** distance between Shearwater and Himalia during the window, in km?`,
+              prompt: t`Inbound to Jupiter, Shearwater passes Himalia, a small outer moon about 150 km across. In a frame moving with Himalia (which sits at the origin), Shearwater's position over a short stretch is $$\begin{aligned} x(t) &= ${thou(x0)} + ${vx}t \\ y(t) &= ${thou(y0)} ${ysg(vy)}t \end{aligned}$$ in km, with $t$ in seconds. Its camera can image the moon only during the window $0 \le t \le ${thou(T)}\ \text{s}$. What is the **least** distance between Shearwater and Himalia during the window, in km?`,
               answer: ans, units: 'km', tol: { rel: 0.005 },
               errors: apart(errs, ans),
               hints: [
@@ -513,8 +513,8 @@ export default boss({
               ],
               teach: 'An extreme value on a closed interval lives at a critical point inside it or at an endpoint — check them all.',
               explain: t`$s(t) = (${thou(x0)} + ${vx}t)^2 + (${thou(y0)} ${ysg(vy)}t)^2$ has $s'(t) = 0$ at $$t^* = -\frac{(${thou(x0)})(${vx}) + (${thou(y0)})(${vy})}{${vx}^2 + ${vy * vy}} = ${tex(ts, 4)}\ \text{s}.$$ ${inside
-                ? t`That is inside the window, so the least distance is $\sqrt{s(t^*)} = ${km(ans)}\ \text{km}$; the ends of the window give $${km(dist(0))}$ km and $${km(dist(T))}$ km, both larger.`
-                : t`That is **after** the window closes at $${thou(T)}$ s. On $[0, ${thou(T)}]$ the distance only falls, so its least value is at the endpoint: $\sqrt{s(${thou(T)})} = ${km(ans)}\ \text{km}$. (The closest approach of all, $${km(Dmin)}$ km, comes too late to image.)`} Himalia's own gravity barely bends the path, and Jupiter pulls on the moon and the probe almost equally over this short stretch, which is why the relative path is so nearly straight.`,
+                ? t`That is inside the window, so the least distance is $\sqrt{s(t^*)} = ${km(ans)}\ \text{km}$; the ends of the window give $${km(dist(0))}\ \text{km}$ and $${km(dist(T))}\ \text{km}$, both larger.`
+                : t`That is **after** the window closes at $${thou(T)}\ \text{s}$. On $[0, ${thou(T)}]$ the distance only falls, so its least value is at the endpoint: $\sqrt{s(${thou(T)})} = ${km(ans)}\ \text{km}$. (The closest approach of all, $${km(Dmin)}\ \text{km}$, comes too late to image.)`} Himalia's own gravity barely bends the path, and Jupiter pulls on the moon and the probe almost equally over this short stretch, which is why the relative path is so nearly straight.`,
               visual: {
                 type: 'graph',
                 params: {
@@ -526,8 +526,8 @@ export default boss({
                   arrows: [{ from: [r4(X(0.3 * T)), r4(Y(0.3 * T))], to: [r4(X(0.45 * T)), r4(Y(0.45 * T))], color: 'accent', width: 2.4 }],
                   points: [
                     { x: 0, y: 0, r: 6, color: 'gold', label: 'Himalia', labelDx: 8, labelDy: y0 > 0 ? 16 : -10 },
-                    { x: r4(X(0)), y: r4(Y(0)), r: 4, color: 'accent', label: 't = 0', labelDx: -8, labelDy: 4, labelAlign: 'right' },
-                    { x: r4(X(T)), y: r4(Y(T)), r: 4, color: 'accent', label: 'window ends', labelDx: 8, labelDy: vy > 0 ? 18 : -10 },
+                    { x: r4(X(0)), y: r4(Y(0)), r: 4, color: 'accent', label: 't = 0', labelDx: 6, labelDy: vy < 0 ? -10 : 18 },
+                    { x: r4(X(T)), y: r4(Y(T)), r: 4, color: 'accent', label: 'window ends', labelDx: -8, labelDy: vy < 0 ? 18 : -10, labelAlign: 'right' },
                   ],
                   alt: 'A straight path passing near a small moon at the origin, solid during the imaging window and dashed after it',
                 },
@@ -560,7 +560,6 @@ export default boss({
               visual: fig({
                 fn: `${e}*sinh(x) - x - ${M}`, x: xr, y: [-M - 0.6, Math.max(g(xr[1]), 1) + 0.4], xlabel: 'F', ylabel: 'g(F)', xticks: 5, yticks: 4,
                 at: F0, f: g, df: dg, span: 0.8, tangentLabel: 'F₀',
-                label: 'g(F) = e sinh F − F − M', labelAt: 0.25,
                 alt: 'A rising curve crossing the axis, with a dashed tangent line at the starting guess',
                 caption: 'g(F) and its tangent line at the starting guess F₀ (dashed). Newton’s step follows the tangent to where it crosses the axis.',
               }, 6, -26, -10, -10),
@@ -597,7 +596,7 @@ export default boss({
               visual: {
                 type: 'graph',
                 params: {
-                  x: [r4(-R * 1.45), r4(R * 1.45)], y: [r4(-H * 0.2), r4(H * 1.15)], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+                  x: [r4(-R * 1.45), r4(R * 1.45)], y: [r4(-H * 0.2), r4(H * 1.15)], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
                   shade: [{ fn: `${H}*(1 - abs(x)/${R})`, from: -R, to: R, color: 'ink3', alpha: 0.12 }, { fn: String(r4(hc)), from: r4(-rc), to: r4(rc), color: 'accent', alpha: 0.22 }],
                   curves: [
                     seg(-R, 0, 0, H, 'ink2', 2), seg(0, H, R, 0, 'ink2', 2), seg(-R * 1.1, 0, R * 1.1, 0, 'warn', 3),
@@ -612,7 +611,7 @@ export default boss({
                   points: [tag(-rc, hc * 0.45, 'h', 'accent', -14, 0, 'right'), tag(-R * 1.1, 0, 'heat shield', 'warn', 0, 16, 'left')],
                   alt: 'A cross-section of a cone standing on the heat shield, with a dashed rectangle inside it for one possible canister',
                 },
-                caption: 'Cross-section through the capsule’s axis. The dashed canister is one candidate, not the best one. Real back shells are blunter, truncated cones; the cone is a teaching shape.',
+                caption: 'Cross-section through the capsule’s axis. The dashed canister is one candidate, not the best one. Heights are stretched to fill the frame. Real back shells are blunter, truncated cones; the cone is a teaching shape.',
               },
             };
           },
@@ -624,7 +623,7 @@ export default boss({
             const t2 = tau * tau;
             const qfn = `${qpk}*(x/${tau})*exp((1 - x^2/${t2})/2)`;
             return {
-              prompt: t`The capsule hits the atmosphere at about 12 km/s. The heat flowing into the nose of its heat shield is modelled as $$q(t) = ${qpk}\cdot\frac{t}{${tau}}\,e^{\left(1 - t^2/${t2}\right)/2}\ \text{W/cm}^2,$$ which rises from zero to a peak of $${qpk}$ W/cm² at $t = ${tau}\ \text{s}$ and then dies away. How much heat, in kJ/cm², does each square centimetre of the nose take in during the first $${T}\ \text{s}$? That is $$Q = \int_0^{${T}} q(t)\,dt.$$`,
+              prompt: t`The capsule hits the atmosphere at about 12 km/s. The heat flowing into the nose of its heat shield is modelled as $$q(t) = ${qpk}\cdot\frac{t}{${tau}}\,e^{\left(1 - t^2/${t2}\right)/2}\ \text{W/cm}^2,$$ which rises from zero to a peak of $${qpk}\ \text{W/cm}^2$ at $t = ${tau}\ \text{s}$ and then dies away. How much heat, in kJ/cm², does each square centimetre of the nose take in during the first $${T}\ \text{s}$? That is $$Q = \int_0^{${T}} q(t)\,dt.$$`,
               answer: Q, units: 'kJ/cm^2', tol: { rel: 0.005 },
               integrand: `${N(qpk / 1000)}*(x/${tau})*exp((1 - x^2/${t2})/2)`, limits: [0, T],
               errors: apart([
@@ -641,9 +640,9 @@ export default boss({
               explain: t`With $u = t^2/(2\cdot ${t2})$ and $t\,dt = ${t2}\,du$, $$Q = ${qpk}\cdot${tau}\sqrt e\int_0^{${nice(U)}} e^{-u}\,du = ${qpk}\cdot${tau}\sqrt e\left(1 - e^{-${nice(U)}}\right) = ${thou(Math.round(Q * 1000))}\ \text{J/cm}^2 \approx ${tex(Q, 3)}\ \text{kJ/cm}^2.$$ The whole pulse would deliver $${qpk}\cdot${tau}\sqrt e \approx ${tex((qpk * tau * Math.sqrt(Math.E)) / 1000, 3)}\ \text{kJ/cm}^2$; the first ${T} s hold ${tex(100 * (1 - Math.exp(-U)), 3)}% of it. A smooth pulse like this is a teaching model: real heating comes from the flight path and from aerothermal codes, and at these speeds part of it is radiated by the hot gas in front of the shield.`,
               visual: areaFig({
                 fn: qfn, x: [0, 3.2 * tau], y: [0, qpk * 1.2], from: 0, to: T, signed: false, xlabel: 'time (s)', ylabel: 'heat flux (W/cm²)',
-                more: { points: [{ x: tau, y: qpk, r: 4, color: 'warn', label: `peak, ${qpk} W/cm²`, labelDx: 8, labelDy: -8 }], vlines: [{ x: T, label: `t = ${T} s`, color: 'ink3' }], xticks: 5, yticks: 4,
+                more: { points: [{ x: tau, y: qpk, r: 4, color: 'warn', label: `peak, ${qpk} W/cm²`, labelDx: 8, labelDy: -8 }], vlines: [{ x: T, color: 'ink3' }], xticks: 5, yticks: 4,
                   alt: 'A heating pulse rising to a peak and dying away, with the area under it shaded up to a chosen time' },
-                caption: 'The modelled heat flux into the nose; the shaded area is the heat taken in per square centimetre over the time asked about.',
+                caption: `The modelled heat flux into the nose. The shaded area, up to the dashed line at t = ${T} s, is the heat taken in per square centimetre.`,
               }),
             };
           },

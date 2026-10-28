@@ -139,6 +139,9 @@ Brace multi-letter subscripts and commands in them: `v_{\max}`, `T_{\text{eff}}`
 Write thousands as `$6{,}371$` or with a thin space, `$6\,371$` — and never
 put `toLocaleString()` output inside math (its commas render as "42, 164").
 Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
+A number in math followed by its unit in prose (`$${v}$ km/s`) may wrap
+between the two; keep them together with the unit inside the math,
+`$${v}\ \text{km/s}$`, or a no-break space (`$${v}$\u00a0km/s`).
 Nothing checks for thousands without a separator, or for a generated number
 that falls into e-notation (`1.2e+5`) inside math — format big and small
 numbers yourself (`\times 10^{5}`). The test rejects the words NaN,

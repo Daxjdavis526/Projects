@@ -33,6 +33,7 @@
 //       view: 'grid',             // 'grid' | 'colour'; showChoice: true adds a control between them
 //       showChoice: false,
 //       key: true,                // colour view, split: the w panel shows the colour key
+//       ticks: true,              // false hides the numbers on the axes
 //       curves: [],               // [{ param: [x(t), y(t)], t: [a, b], color, label, wlabel, follow }] in z, drawn with their images
 //       points: [],               // [{ x, y, label, wlabel, color }] fixed points and their images
 //       drag: { x: 1, y: 0.5, snap: 0, label: 'z', wlabel: 'f(z)' },   // the draggable point (false for none)
@@ -59,7 +60,7 @@ export const defaults = {
   layout: 'split', x: [-2, 2], y: [-2, 2], wx: null, wy: null,
   grid: 'cartesian', gx: null, gy: null, gn: 9, gr: [0.25, 2], gth: [-Math.PI, Math.PI], gm: 12, ghost: true,
   shape: null, shapeAt: [0.4, 0.3], shapeSize: 1,
-  view: 'grid', showChoice: false, key: true,
+  view: 'grid', showChoice: false, key: true, ticks: true,
   curves: [], points: [], drag: { x: 1, y: 0.5 }, arrows: false, amplitwist: false, eps: 0.3,
   follow: false, play: false, trail: false, cut: true, readout: true, zname: 'z-plane', wname: 'w-plane',
 };
@@ -90,8 +91,9 @@ export function mount(F, P) {
   const split = P.layout !== 'same';
   const { canvas, box } = F.canvas({ aspect: split ? (narrow ? '' : 'wide') : (narrow ? 'square' : ''), label: P.alt || 'A complex function as a map: a grid in the z-plane and its image in the w-plane' });
   if (split && narrow) box.style.aspectRatio = '4 / 5';      // a phone stacks the two planes
-  const zp = new Plot(canvas, { x: P.x, y: P.y, equal: true, xlabel: '', ylabel: '', grid: false, axes: false, xticks: 5, yticks: 5 });
-  const wp = split ? new Plot(canvas, { x: P.wx || P.x, y: P.wy || P.y, equal: true, xlabel: '', ylabel: '', grid: false, axes: false, xticks: 5, yticks: 5 }) : zp;
+  const tk = P.ticks === false ? 0 : 5;      // ticks: false hides the numbers on the axes (and the faint grid)
+  const zp = new Plot(canvas, { x: P.x, y: P.y, equal: true, xlabel: '', ylabel: '', grid: false, axes: false, xticks: tk, yticks: tk });
+  const wp = split ? new Plot(canvas, { x: P.wx || P.x, y: P.wy || P.y, equal: true, xlabel: '', ylabel: '', grid: false, axes: false, xticks: tk, yticks: tk }) : zp;
 
   for (const s of P.sliders || []) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
@@ -327,7 +329,7 @@ export function mount(F, P) {
     const rows = [];
     if (D) {
       if (want('z')) rows.push(['$z$', cTeX(z0)]);
-      if (want('w')) rows.push([`$f(z)$`, cTeX(w0)]);
+      if (want('w')) rows.push([P.drag.wlabel && P.drag.wlabel !== 'f(z)' ? P.drag.wlabel : '$f(z)$', cTeX(w0)]);
       if (want('fp')) rows.push([`$f'(z)$`, at ? cTeX(at.d) : '\\text{none}']);
       if (want('amp')) rows.push(['amplification $|f\'(z)|$', at ? n3(at.amp) : '\\text{none: not differentiable}']);
       if (want('twist')) rows.push(['twist $\\arg f\'(z)$', at ? `${n3((at.twist * 180) / Math.PI)}^\\circ` : '\\text{none}']);

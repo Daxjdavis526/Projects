@@ -57,7 +57,7 @@ Solve by **substitution** (solve one equation for a variable, put it in the othe
   },
   example: {
     prompt: t`A rocket team needs $500$ kg of $85\%$ hydrogen peroxide (by mass) and has stocks of $90\%$ and $70\%$. How much of each should they blend?`,
-    visual: linesFig([1, 1, 500], [0.9, 0.7, 425], 300, 250, 330, t`The total-mass line and the peroxide-mass line in the plane of the two amounts; the blend is their crossing. Real blending also has to respect that concentrated peroxide is hazardous to handle.`, { ticks: true, labels: ['x + y = 500', '0.9x + 0.7y = 425'], xlabel: 'x: 90% stock (kg)', ylabel: 'y: 70% stock (kg)', extra: { points: [{ x: 375, y: 125, label: '(375, 125)', color: 'violet' }] } }),
+    visual: linesFig([1, 1, 500], [0.9, 0.7, 425], 300, 250, 330, t`The total-mass line and the peroxide-mass line in the plane of the two amounts; the blend is their crossing. Real blending also has to respect that concentrated peroxide is hazardous to handle.`, { ticks: true, labels: ['x + y = 500', '0.9x + 0.7y = 425'], xlabel: 'x: 90% stock (kg)', ylabel: 'y: 70% stock (kg)', extra: { x: [0, 620], y: [0, 560], legendAt: 'tr', points: [{ x: 375, y: 125, label: '(375, 125)', color: 'violet' }] } }),
     steps: [
       { label: 'Name the unknowns', text: t`$x$ kg of the $90\%$ stock and $y$ kg of the $70\%$ stock.` },
       { label: 'Two facts, two equations', text: t`Total mass: $x + y = 500$. Peroxide mass: $0.90x + 0.70y = 0.85 \times 500 = 425$.` },
