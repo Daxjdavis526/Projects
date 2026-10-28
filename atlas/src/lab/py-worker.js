@@ -123,7 +123,9 @@ async function boot() {
   await py.runPythonAsync(['import sys, os, warnings',
     'if "/home/pyodide" not in sys.path: sys.path.insert(0, "/home/pyodide")',
     'os.environ["MPLBACKEND"] = "Agg"',
-    'warnings.filterwarnings("ignore", message=".*non-interactive.*")'].join('\n'));
+    'warnings.filterwarnings("ignore", message=".*non-interactive.*")',
+    // this Matplotlib build warns about its own text layout on every tight_layout(): noise, not the learner's
+    'warnings.filterwarnings("ignore", message=".*The x parameter as float.*")'].join('\n'));
   py.setStdout({ batched: (s) => { captured += s + '\n'; postMessage({ type: 'stdout', id: currentId, text: s + '\n' }); } });
   py.setStderr({ batched: (s) => postMessage({ type: 'stderr', id: currentId, text: s + '\n' }) });
   postMessage({ type: 'ready', version: py.version, python: py.runPython('import sys; sys.version.split()[0]') });

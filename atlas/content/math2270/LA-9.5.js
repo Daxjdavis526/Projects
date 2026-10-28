@@ -20,13 +20,13 @@ function chainPic(a, b, { names = ['S₁', 'S₂'], caption } = {}) {
         { param: ['2.95 + 0.6*cos(t)', '0.6*sin(t)'], t: [-2.55, 2.55], color: 'ink3', width: 1.6 },
       ],
       arrows: [
-        { from: [-1.45, 0.4], to: [1.45, 0.4], color: 'accent', width: 2 },
-        { from: [1.45, -0.4], to: [-1.45, -0.4], color: 'warn', width: 2 },
+        { from: [-1.45, 0.3], to: [1.45, 0.3], color: 'accent', width: 2 },
+        { from: [1.45, -0.3], to: [-1.45, -0.3], color: 'warn', width: 2 },
       ],
       points: [
         { x: -2, y: 0, r: 24, color: 'accent' }, { x: 2, y: 0, r: 24, color: 'warn' },
-        lab(-2, 0, names[0], 'panel'), lab(2, 0, names[1], 'panel'),
-        lab(0, 0.85, `${nice(a)}`, 'accent'), lab(0, -0.85, `${nice(b)}`, 'warn'),
+        lab(-2, -0.78, names[0], 'accent'), lab(2, -0.78, names[1], 'warn'),
+        lab(0, 0.8, `${nice(a)}`, 'accent'), lab(0, -0.8, `${nice(b)}`, 'warn'),
         lab(-3.95, 0, `${nice(1 - a)}`, 'ink2'), lab(3.95, 0, `${nice(1 - b)}`, 'ink2'),
       ],
     },
@@ -67,12 +67,12 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
       choices: [{ key: 'l1', label: t`Dominant eigenvalue $\lambda_1$`, options: [[1.1, '1.1 (grows)'], [0.9, '0.9 (decays)']], value: 1.1, explain: t`The stretch factor along $\mathbf v_1$ per step.` }],
       sliders: [
         { key: 'k', label: t`Steps shown, $k$`, min: 0, max: 14, step: 1, value: 3, explain: 'How many iterates to draw.' },
-        { key: 'p', label: t`Start: first component of $\mathbf x_0$`, min: -2, max: 2, step: 0.25, value: -1.5, explain: t`Moves the starting point $\mathbf x_0$ left and right.` },
-        { key: 'q', label: t`Start: second component of $\mathbf x_0$`, min: -2, max: 2, step: 0.25, value: 1.75, explain: t`Moves $\mathbf x_0$ up and down.` },
+        { key: 'p', label: t`Start: first component of $\mathbf x_0$`, min: -2, max: 2, step: 0.5, value: -1.5, explain: t`Moves the starting point $\mathbf x_0$ left and right.` },
+        { key: 'q', label: t`Start: second component of $\mathbf x_0$`, min: -2, max: 2, step: 0.5, value: 1, explain: t`Moves $\mathbf x_0$ up and down.` },
       ],
       curves: [
         { param: ['2*t', 't'], t: [-3, 3], color: 'violet', dash: [7, 5], label: 'v₁ line', labelAt: 1.9 },
-        { param: ['-t', 't'], t: [-3, 3], color: 'teal', dash: [7, 5], label: 'v₂ line', labelAt: 1.7 },
+        { param: ['-t', 't'], t: [-3, 3], color: 'teal', dash: [7, 5], label: 'v₂ line', labelAt: -1.6 },
       ],
       points: [
         { x: 'p', y: 'q', color: 'good', r: 6, label: 'x₀' },
@@ -86,21 +86,20 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
     caption: 'Green: the start x₀; gold: x₁ … xₖ. Dashed: the two eigenvector lines. The matrix is A = P diag(λ₁, 0.6) P⁻¹ with P’s columns v₁ and v₂.',
   },
   example: {
-    prompt: t`In 1913 Andrey Markov counted the first 20 000 letters of Pushkin's *Eugene Onegin*: 8 638 vowels and 11 362 consonants. A vowel was followed by a vowel with probability $0.128$; a consonant was followed by a vowel with probability $0.663$. Treat the letters as a two-state chain. What fraction of letters does it predict are vowels in the long run, and how fast does it forget the first letter?`,
+    prompt: t`In 1913 Andrey Markov counted the first 20 000 letters of Pushkin’s *Eugene Onegin*: 8 638 vowels and 11 362 consonants. A vowel was followed by a vowel with probability $0.128$; a consonant was followed by a vowel with probability $0.663$. Treat the letters as a two-state chain. What fraction of letters does it predict are vowels in the long run, and how fast does it forget the first letter?`,
     visual: {
       type: 'graph',
       params: {
         x: [-0.5, 8.5], y: [0, 1.05], aspect: 'wide', xlabel: 'letters after a vowel, k', ylabel: 'P(vowel)',
-        curves: [{ fn: '0.432 + 0.568*(-0.535)^x', domain: [0, 8], color: 'ink4', dash: [3, 4] }],
         points: Array.from({ length: 9 }, (_, k) => ({ x: k, y: 0.4319 + 0.5681 * (-0.535) ** k, color: 'gold', r: 5 })),
         hlines: [{ y: 0.432, label: 'steady state 0.432', color: 'good' }],
       },
-      caption: 'The chance that the k-th letter after a vowel is a vowel, from the chain: it overshoots and undershoots (λ₂ < 0) and settles at the steady state within a few letters. (The dashed curve only joins the points.)',
+      caption: 'The chance that the k-th letter after a vowel is a vowel, from the chain: it overshoots and undershoots (λ₂ < 0) and settles at the steady state within a few letters.',
     },
     steps: [
       { label: 'The matrix', text: t`Order the states (vowel, consonant); column $j$ holds the chances of the next letter given the current one is state $j$: $P = ${decTeX([[0.128, 0.663], [0.872, 0.337]])}$. Each column sums to 1.` },
       { label: 'Steady state', text: t`Solve $P\mathbf q = \mathbf q$, i.e. $(P - I)\mathbf q = \mathbf 0$: the first row gives $-0.872\,q_v + 0.663\,q_c = 0$. With $q_v + q_c = 1$: $q_v = \dfrac{0.663}{0.663 + 0.872} = 0.432$.` },
-      { label: 'Compare', text: t`Markov's count: $8\,638/20\,000 = 0.432$. ✓ The chain reproduces the vowel fraction from the pair statistics alone.` },
+      { label: 'Compare', text: t`Markov’s count: $8\,638/20\,000 = 0.432$. ✓ The chain reproduces the vowel fraction from the pair statistics alone.` },
       { label: 'Forgetting', text: t`The other eigenvalue is $\lambda_2 = \operatorname{tr}P - 1 = 0.128 + 0.337 - 1 = -0.535$. The memory of the starting letter shrinks by $|\lambda_2|$ per letter — to under 5% after five letters — and the minus sign makes it alternate: vowels and consonants tend to take turns.` },
       { label: 'Meaning', text: t`If letters were independent, a vowel would follow a vowel 43% of the time; Markov found 12.8%. That dependence was his point: the law of large numbers still holds for dependent events, which founded the theory of Markov chains.` },
     ],

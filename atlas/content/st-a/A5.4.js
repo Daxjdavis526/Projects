@@ -3,7 +3,7 @@
 // it is the trace, the same in every basis. Two lower indices cannot be
 // contracted without a metric.
 import { lesson, mcq, multi, num, code } from '../../src/core/content.js';
-import { nice } from '../../src/core/format.js';
+import { tex } from '../../src/core/format.js';
 import { still, legs, grid } from './_ten.js';
 import { matTeX, vecTeX, cong, inv2, mul, cols, trace, dot } from './_metric.js';
 
@@ -40,17 +40,17 @@ Without coordinates: on a product $\mathbf V\otimes\omega$ the contraction is th
       t`Switch to the rotation: now the dashed curve sits on the gold one too — for rotations $A^{-1} = A^\mathsf{T}$, so upper and lower indices transform alike. Only perpendicular unit bases hide the difference.`,
     ],
     params: {
-      x: [-2, 2], y: [-1, 6], aspect: 'wide', xlabel: 's (basis parameter)', ylabel: 'component',
+      x: [-2, 2], y: [-0.3, 6.5], aspect: 'wide', xlabel: 's (basis parameter)', ylabel: 'component',
       choices: [{ key: 'kind', label: 'Change of basis', options: [[0, 'Shear'], [1, 'Rotation']], value: 0, explain: t`Shear: $\mathbf e'_1 = \mathbf e_1$, $\mathbf e'_2 = s\,\mathbf e_1 + \mathbf e_2$. Rotation: both arrows turned by $s$ radians.` }],
       sliders: [{ key: 's', label: t`$s$`, min: -2, max: 2, step: 0.05, value: 0.8, explain: 'Which basis of the family; s = 0 is the original basis.' }],
       curves: [
-        { fn: '2 - 0.5*x', color: 'accent', width: 2.2, when: 'step(0.5 - kind)', label: 'M′¹₁', labelAt: -1.7 },
-        { fn: '1 + 0.5*x', color: 'violet', width: 2.2, when: 'step(0.5 - kind)', label: 'M′²₂', labelAt: -1.7, labelDy: 14 },
-        { fn: '3 + 1.5*x + 2*x^2', color: 'ink3', width: 2, dash: [6, 5], when: 'step(0.5 - kind)', label: 'T′₁₁ + T′₂₂', labelAt: 0.9, labelDx: 8 },
+        { fn: '2 - 0.5*x', color: 'accent', width: 2.2, when: 'step(0.5 - kind)', label: 'M′¹₁', labelAt: 1.6, labelDy: 14 },
+        { fn: '1 + 0.5*x', color: 'violet', width: 2.2, when: 'step(0.5 - kind)', label: 'M′²₂', labelAt: 1.6, labelDy: -12 },
+        { fn: '3 + 1.5*x + 2*x^2', color: 'ink3', width: 2, dash: [6, 5], when: 'step(0.5 - kind)', label: 'T′₁₁ + T′₂₂ (misread)', labelAt: -1.45, labelDx: 10 },
         { fn: '2*cos(x)^2 + 1.5*cos(x)*sin(x) + sin(x)^2', color: 'accent', width: 2.2, when: 'step(kind - 0.5)', label: 'M′¹₁', labelAt: 0.75 },
         { fn: '2*sin(x)^2 - 1.5*cos(x)*sin(x) + cos(x)^2', color: 'violet', width: 2.2, when: 'step(kind - 0.5)', label: 'M′²₂', labelAt: 0.75, labelDy: 14 },
         { fn: '3', color: 'ink3', width: 2, dash: [6, 5], when: 'step(kind - 0.5)' },
-        { fn: '3', color: 'gold', width: 3, label: 'trace M′ᵘᵤ = 3', labelAt: -1.95, labelDy: -12 },
+        { fn: '3', color: 'gold', width: 3, label: 'trace of M′ = 3', labelAt: -1.95, labelDy: -12 },
       ],
       vlines: [{ x: 's', color: 'ink3' }],
       readouts: [
@@ -145,7 +145,7 @@ Without coordinates: on a product $\mathbf V\otimes\omega$ the contraction is th
         const ans = n ** (k + l - 2 * c);
         return {
           prompt: t`A type $(${k}, ${l})$ tensor in ${n} dimensions is contracted ${c === 1 ? 'once' : 'twice'} (${c === 1 ? 'one upper index with one lower' : 'two upper indices each with a lower one'}). How many components does the result have?`,
-          visual: legs([{ name: 'T', up: ['α', 'β', 'γ'].slice(0, k), down: ['ρ', 'σ', 'τ'].slice(0, l) }], { loops: Array.from({ length: c }, () => ({ node: 0, index: '' })), caption: t`A type $(${k}, ${l})$ tensor; each contraction joins one upper leg to one lower leg.` }),
+          visual: legs([{ name: 'T', up: ['α', 'β', 'γ'].slice(0, k), down: ['ρ', 'σ', 'τ'].slice(0, l) }], { caption: t`A type $(${k}, ${l})$ tensor; each contraction joins one upper leg to one lower leg.` }),
           answer: ans, tol: { rel: 0, abs: 0.5 },
           errors: [{ value: n ** (k + l - c), feedback: 'Each contraction removes two indices — one upper and one lower — not one.' }].filter((e) => e.value !== ans),
           hints: [t`After ${c === 1 ? 'one contraction' : 'two contractions'} the type is $(${k - c}, ${l - c})$.`],
@@ -239,18 +239,18 @@ print(trace_old, trace_new, np.trace(T_new))`,
       gen(r) {
         const [what, rho, p, note] = r.pick([
           ['the dark energy that fills the universe today (a cosmological constant, $p = -\\rho$)', 5.3e-10, -5.3e-10, 'Planck 2018 values'],
-          ['the core of the Sun', 1.35e22, 2.4e16, 'standard solar model, rounded'],
+          ['the core of the Sun', 1.35e22, 2.5e16, 'standard solar model, rounded'],
           ['the core of a neutron star (an illustrative model)', 4.5e34, 5.0e33, 'model-dependent: the dense-matter equation of state is not known precisely'],
         ]);
         const ans = -rho + 3 * p;
         return {
-          prompt: t`In its rest frame, with $c = 1$, a perfect fluid has the mixed stress–energy tensor $T^\mu{}_\nu = \operatorname{diag}(-\rho, p, p, p)$, where $\rho$ is the energy density and $p$ the pressure. For ${what}, $\rho = ${rho.toExponential(2).replace('e', '\\times10^{').replace(/$/, '}')}$ J/m³ and $p = ${p.toExponential(2).replace('e', '\\times10^{').replace(/$/, '}')}$ Pa (${note}). Find the contraction $T^\mu{}_\mu$ in J/m³ — a number every observer, moving or not, agrees on.`,
+          prompt: t`In its rest frame, with $c = 1$, a perfect fluid has the mixed stress–energy tensor $T^\mu{}_\nu = \operatorname{diag}(-\rho, p, p, p)$, where $\rho$ is the energy density and $p$ the pressure. For ${what}, $\rho = ${tex(rho, 3)}$ J/m³ and $p = ${tex(p, 3)}$ Pa (${note}). Find the contraction $T^\mu{}_\mu$ in J/m³ — a number every observer, moving or not, agrees on.`,
           visual: grid([['−ρ', '0', '0', '0'], ['0', 'p', '0', '0'], ['0', '0', 'p', '0'], ['0', '0', '0', 'p']], { hl: [[0, 0], [1, 1], [2, 2], [3, 3]], rowNames: ['t', 'x', 'y', 'z'], colNames: ['t', 'x', 'y', 'z'], caption: t`$T^\mu{}_\nu$ in the fluid’s rest frame; the contraction sums the ringed diagonal.` }),
           answer: ans, units: 'J/m^3', tol: { rel: 0.01 },
           errors: [{ value: rho + 3 * p, feedback: t`The time–time entry of $T^\mu{}_\nu$ is $-\rho$ in the $(-,+,+,+)$ convention.` }, { value: -rho + p, feedback: 'There are three space directions, each contributing p.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * Math.abs(ans)),
           hints: [t`$T^\mu{}_\mu = T^0{}_0 + T^1{}_1 + T^2{}_2 + T^3{}_3 = -\rho + 3p$.`, 'Keep the signs and the powers of ten.'],
           teach: t`The trace $T^\mu{}_\mu = -\rho + 3p$ of a perfect fluid is a scalar: it vanishes for light ($p = \rho/3$) and is $-4\rho$ for a cosmological constant.`,
-          explain: t`$T^\mu{}_\mu = -\rho + 3p = ${(ans).toExponential(2).replace('e', '\\times10^{').replace(/$/, '}')}$ J/m³. ${p < 0 ? 'For dark energy it is −4ρ.' : p < 1e-3 * rho ? 'The pressure barely matters: in ordinary matter ρc² dwarfs p.' : 'Here the pressure is a sizeable fraction of the energy density.'} The trace of the stress–energy tensor is what sources the scalar curvature in Einstein’s equations.`,
+          explain: t`$T^\mu{}_\mu = -\rho + 3p = ${tex(ans, 3)}$ J/m³. ${p < 0 ? 'For dark energy it is −4ρ.' : p < 1e-3 * rho ? 'The pressure barely matters: in ordinary matter ρc² dwarfs p.' : 'Here the pressure is a sizeable fraction of the energy density.'} The trace of the stress–energy tensor is what sources the scalar curvature in Einstein’s equations.`,
         };
       },
     }),

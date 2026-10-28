@@ -262,6 +262,6 @@ print(r, len(N), len(LN))
   sources: [
     { label: 'Strang, “The fundamental theorem of linear algebra”, Amer. Math. Monthly 100 (1993) 848–855', url: 'https://doi.org/10.2307/2324660' },
     { label: 'Strang, Introduction to Linear Algebra (6th ed.), §3.5 and §4.1', url: 'https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html' },
-    { label: 'Pellegrino & Calladine, “Matrix analysis of statically and kinematically indeterminate frameworks”, Int. J. Solids Struct. 22 (1986)', url: 'https://doi.org/10.1016/0020-7683(86)90082-9' },
+    { label: 'Pellegrino & Calladine, “Matrix analysis of statically and kinematically indeterminate frameworks”, Int. J. Solids Struct. 22 (1986)', url: 'https://www.sciencedirect.com/search?qs=Matrix%20analysis%20of%20statically%20and%20kinematically%20indeterminate%20frameworks' },
   ],
 });

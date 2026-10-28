@@ -206,7 +206,7 @@ export function xrfSpectrum(peaks, { x = [0, 10], ask = null, caption, numbers =
  * at the right, and vertical arrows between them. Energies are in whatever
  * unit the caller chooses; the picture is drawn to that scale.
  *   list:   [{ E, label, color, x0, x1 }]  (x0, x1: the line’s ends; default 0 and 4)
- *   arrows: [{ from, to, x, color, label, dash }] — the label sits beside the arrow’s middle
+ *   arrows: [{ from, to, x, x2, color, label, dash, left, dy }] — vertical unless x2 is given; the label sits beside the arrow’s middle
  */
 export function levels(list, { arrows = [], caption, x = [-1.5, 9], pad = 0.12, aspect = 'wide' } = {}) {
   const Es = list.map((l) => l.E), lo = Math.min(...Es), hi = Math.max(...Es), span = hi - lo || 1;
@@ -217,8 +217,9 @@ export function levels(list, { arrows = [], caption, x = [-1.5, 9], pad = 0.12, 
     if (l.label) points.push(label(x1, l.E, l.label, l.color || 'ink2', 8, l.dy ?? 0, 'left'));
   }
   for (const a of arrows) {
-    arr.push({ from: [a.x, r6(a.from)], to: [a.x, r6(a.to)], color: a.color || 'gold', width: a.width || 2.4, ...(a.dash ? { dash: [5, 4] } : {}) });
-    if (a.label) points.push(label(a.x, (a.from + a.to) / 2, a.label, a.color || 'gold', a.left ? -7 : 7, 0, a.left ? 'right' : 'left'));
+    const x2 = a.x2 ?? a.x;
+    arr.push({ from: [r6(a.x), r6(a.from)], to: [r6(x2), r6(a.to)], color: a.color || 'gold', width: a.width || 2.4, ...(a.dash ? { dash: [5, 4] } : {}) });
+    if (a.label) points.push(label((a.x + x2) / 2, (a.from + a.to) / 2, a.label, a.color || 'gold', a.left ? -7 : 7, a.dy ?? 0, a.left ? 'right' : 'left'));
   }
   return {
     type: 'graph',

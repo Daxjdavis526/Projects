@@ -375,7 +375,10 @@ tolerance. Programs may import `numpy`, `scipy`, `matplotlib`, `sympy`,
 `mpmath` (loaded on demand — the first NumPy import costs a few seconds).
 The versions are Pyodide's: Python 3.14, NumPy 2.4, SciPy 1.18, Matplotlib
 3.10 — check an API exists there (the research notes quote newer releases).
-Timings in the browser vary from run to run: warm up once and report the best
+A test should read the program's own `fig` and `ax`, not `plt.gcf()` (figures
+are closed between exercises in the test, but be explicit). Since Python 3.12
+the built-in `sum()` of floats is compensated (exact-ish), so a round-off
+demonstration must accumulate in a loop. Timings in the browser vary from run to run: warm up once and report the best
 of three before printing a speed-up. Write code with `` t`…` `` so `\n`
 inside Python strings survives. Run
 `node atlas/test/code.test.mjs <lesson-id>` after `content.test.mjs`.

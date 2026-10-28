@@ -31,4 +31,5 @@ export function cleanTraceback(message) {
 export const SCIENTIFIC = ['numpy', 'scipy', 'matplotlib'];
 // does the code import a module — `import numpy`, `import sys, numpy as np`,
 // `from numpy.linalg import solve`, `import scipy.integrate`?
-export const imports = (code, mod) => new RegExp(`^\\s*(from\\s+${mod}\\b|import\\s+(?:[\\w.]+(?:\\s+as\\s+\\w+)?\\s*,\\s*)*${mod}\\b)`, 'm').test(code);
+export const imports = (code, mod) => new RegExp(`^\\s*(from\\s+${mod}\\b|import\\s+(?:[\\w.]+(?:\\s+as\\s+\\w+)?\\s*,\\s*)*${mod}\\b)`, 'm').test(code)
+  || new RegExp(`__import__\\(\\s*['"]${mod}\\b`).test(code);          // inside a test expression

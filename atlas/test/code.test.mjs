@@ -66,7 +66,11 @@ if (jobs.length) {
       return { ok: true, tests: JSON.parse(await py.runPythonAsync(testScript(item.tests), { globals: ns })) };
     } catch (e) {
       return { ok: false, error: cleanTraceback(e.message) };
-    } finally { ns.destroy(); }
+    } finally {
+      ns.destroy();
+      // figures belong to one exercise: close them so the next one starts clean, as in the browser
+      if (loaded.has('matplotlib')) await py.runPythonAsync('import matplotlib.pyplot as _p; _p.close("all")').catch(() => {});
+    }
   }
   for (const { where, item } of jobs) {
     const ref = await runWith(item.answer, item);

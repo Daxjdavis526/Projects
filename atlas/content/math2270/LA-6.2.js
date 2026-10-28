@@ -285,6 +285,6 @@ print(dp)
   sources: [
     { label: 'Strang, Introduction to Linear Algebra (6th ed.), §8.2 (the derivative matrix) and §4.4', url: 'https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html' },
     { label: 'Axler, Linear Algebra Done Right (4th ed.), ch. 3 and 6 (open access)', url: 'https://linear.axler.net/' },
-    { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics (3rd ed.), §2.2 and §3.1', url: 'https://www.cambridge.org/highereducation/books/introduction-to-quantum-mechanics/990799CA07A83FC5312402AF6860311E' },
+    { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics (3rd ed.), §2.2 and §3.1', url: 'https://www.cambridge.org/highereducation/search?q=Griffiths%20Introduction%20to%20Quantum%20Mechanics' },
   ],
 });
