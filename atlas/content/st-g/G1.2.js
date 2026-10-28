@@ -146,8 +146,8 @@ The **converse** $Q \Rightarrow P$ is a different statement, and confusing the t
       items: [
         t`State the contrapositive: if $x$ is even, then $x^2 - 6x + 5$ is odd.`,
         t`Assume $x$ is even: $x = 2a$ for some integer $a$.`,
-        t`Substitute: $x^2 - 6x + 5 = 4a^2 - 12a + 5$.`,
-        t`Rewrite: $4a^2 - 12a + 5 = 2(2a^2 - 6a + 2) + 1$.`,
+        t`Substitute: $x^2 - 6x + 5$ $= 4a^2 - 12a + 5$.`,
+        t`Rewrite it as $2(2a^2 - 6a + 2)$ $+ 1$.`,
         t`That is $2k + 1$ with $k$ an integer, so it is odd — which proves the contrapositive, and so the original.`,
       ],
       hints: ['Start by saying what you will prove instead.', 'An even x is 2a; an odd number is 2k + 1.'],
@@ -263,8 +263,8 @@ The **converse** $Q \Rightarrow P$ is a different statement, and confusing the t
       items: [
         t`Let $x < y$ be any two real numbers.`,
         t`Since $g$ is increasing, $g(x) < g(y)$.`,
-        t`Apply the definition for $f$ to the two numbers $g(x) < g(y)$: $f(g(x)) < f(g(y))$.`,
-        t`So $(f \circ g)(x) < (f \circ g)(y)$; since $x < y$ were arbitrary, $f \circ g$ is increasing.`,
+        t`Apply the definition for $f$ to the numbers $g(x) < g(y)$: $f(g(x))$ $< f(g(y))$.`,
+        t`So $(f \circ g)(x)$ $< (f \circ g)(y)$; since $x < y$ were arbitrary, $f \circ g$ is increasing.`,
       ],
       hints: [t`A $\forall x\ \forall y$ statement starts by taking arbitrary $x$ and $y$.`],
       teach: 'A direct proof of a “for all” statement takes arbitrary objects satisfying the hypothesis and pushes them through the definitions.',

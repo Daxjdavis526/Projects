@@ -179,7 +179,7 @@ This is **uniform continuity**: one input tolerance serves the whole interval. $
         t`Let $\varepsilon > 0$.`,
         t`Set $\delta = \varepsilon/K$.`,
         t`Take any $a, x \in I$ with $|x - a| < \delta$.`,
-        t`Then $|f(x) - f(a)| \le K|x - a| < K\delta = \varepsilon$.`,
+        t`Then $|f(x) - f(a)|$ $\le K|x - a|$ $< K\delta = \varepsilon$.`,
         t`$\delta$ did not depend on $a$ or $x$, so $f$ is uniformly continuous on $I$.`,
       ],
       hints: [t`$\delta$ must be named right after $\varepsilon$, before any point is chosen.`, t`The estimate uses the Lipschitz bound with $|x - a| < \delta = \varepsilon/K$.`],

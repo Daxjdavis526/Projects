@@ -69,7 +69,7 @@ the **contrapositive** (outside $Q$ means outside $P$). The **converse** $Q \Rig
       hints: [t`Converse swaps $P$ and $Q$; contrapositive swaps *and* negates both; inverse negates both without swapping; the negation of $P \Rightarrow Q$ is “$P$ and not $Q$”.`],
       teach: t`Only the contrapositive says the same as the original; the converse and the inverse say the same as each other.`,
       explain: t`With $P$ = “engine firing” and $Q$ = “chamber hot”: converse $Q \Rightarrow P$, contrapositive $\neg Q \Rightarrow \neg P$, inverse $\neg P \Rightarrow \neg Q$, negation $P \wedge \neg Q$. The chamber stays hot for a while after shutdown, so the converse (and the inverse) are false while the original is true.`,
-      visual: euler({ inner: 'firing', outer: 'chamber hot', outsideLabel: 'cold', points: [{ x: 1.25, y: -0.8, color: 'gold', r: 5, label: 'just shut down', labelDx: 8, labelDy: 12 }], caption: t`Firing lies inside hot; just after shutdown the chamber is hot but the engine is not firing.` }),
+      visual: euler({ inner: 'firing', outer: 'chamber hot', outsideLabel: 'cold', points: [{ x: 1.25, y: -0.8, color: 'gold', r: 5, label: 'just shut down', labelDx: 8, labelDy: -10 }], caption: t`Firing lies inside hot; just after shutdown the chamber is hot but the engine is not firing.` }),
     }),
     mcq({
       id: 'equilibrium', difficulty: 2,

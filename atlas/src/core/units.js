@@ -220,6 +220,7 @@ export function unitTeX(u) {
   return '\\mathrm{' + String(u)
     .replace(/\*/g, '\\cdot ').replace(/·/g, '\\cdot ')
     .replace(/\^\(?(-?\d+)\)?/g, '^{$1}')
-    .replace(/μ|µ/g, '\\mu ').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
+    .replace(/(^|[\s/(·*])u(?=(?:m|s|g|A|V|W|J|F|H|K|N|Pa|L|mol|Hz|as|T|C|rad|sr)(?![A-Za-z]))/g, '$1μ')   // um, us, uas: the ASCII micro prefix shown as μ
+    .replace(/μ|µ/g, '\\mu{}').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
     .replace(/ /g, '\\,') + '}';
 }

@@ -78,7 +78,7 @@ Sectional curvatures carry everything: knowing $K$ for every plane recovers all 
   },
   example: {
     prompt: t`In the space around a star (the Schwarzschild slice $t = \text{const}$, $G = c = 1$), the orthonormal frame components are $R_{\hat r\hat\theta\hat r\hat\theta} = R_{\hat r\hat\varphi\hat r\hat\varphi} = -M/r^3$, $R_{\hat\theta\hat\varphi\hat\theta\hat\varphi} = +2M/r^3$, and every component with three or four different indices is zero. Find $K$ for the plane spanned by $X = \hat e_\theta$ and $W = \cos\beta\,\hat e_r + \sin\beta\,\hat e_\varphi$; then find the Ricci component along $\hat e_\theta$ and the scalar $R$.`,
-    visual: tiltPic(35, 'The plane spanned by ê_θ and W, tilted by β = 35° from the radial direction toward ê_φ.'),
+    visual: tiltPic(35, t`The plane spanned by $\hat e_\theta$ and $W$, tilted by $\beta = 35^\circ$ from the radial direction toward $\hat e_\varphi$.`),
     steps: [
       { label: 'Denominator', text: t`$X$ and $W$ are orthonormal: $g(X, X)g(W, W) - g(X, W)^2 = 1$.` },
       { label: 'Expand', text: t`$R(W, X, W, X) = \cos^2\beta\,R_{\hat r\hat\theta\hat r\hat\theta} + \sin^2\beta\,R_{\hat\varphi\hat\theta\hat\varphi\hat\theta} + 2\sin\beta\cos\beta\,R_{\hat r\hat\theta\hat\varphi\hat\theta}$, and the last component is zero.` },
@@ -96,7 +96,7 @@ Sectional curvatures carry everything: knowing $K$ for every plane recovers all 
         const c2 = Math.cos(b * DEG) ** 2, s2 = 1 - c2, key = -c2 + 2 * s2;
         return {
           prompt: t`In the space around a star, as in the worked example ($K = -M/r^3$ for planes through $\hat e_r$, $+2M/r^3$ for the tangential plane, no mixed components), what is the sectional curvature of the plane spanned by $\hat e_\theta$ and $\cos\beta\,\hat e_r + \sin\beta\,\hat e_\varphi$ for $\beta = ${b}^\circ$? Give it in units of $M/r^3$.`,
-          visual: tiltPic(b, t`The plane spanned by ê_θ and W, tilted by β = ${b}° from the radial direction.`),
+          visual: tiltPic(b, t`The plane spanned by $\hat e_\theta$ and $W$, tilted by $\beta = ${b}^\circ$ from the radial direction.`),
           answer: key, tol: { rel: 0, abs: 0.005 },
           errors: [
             { value: 2 * c2 - s2, feedback: t`The two weights are swapped: $\beta = 0$ gives a plane through $\hat e_r$, where $K = -M/r^3$.` },
@@ -202,7 +202,7 @@ Sectional curvatures carry everything: knowing $K$ for every plane recovers all 
         const M = GM_EARTH / (C * C), rr = rk * 1e3, K = (2 * M) / rr ** 3, Rc = 1 / Math.sqrt(K) / AU;
         return {
           prompt: t`The space around the Earth (a slice $t = \text{const}$ of the Schwarzschild geometry, $M = GM_\oplus/c^2 = 4.435$ mm) has sectional curvature $2M/r^3$ for the plane tangent to the sphere of radius $r$. ${what[0].toUpperCase() + what.slice(1)}, a plane of that curvature curves like a sphere of what radius $1/\sqrt K$, in astronomical units ($1\ \text{AU} = 1.496\times10^{11}$ m)?`,
-          visual: tiltPic(90, 'The tangential plane (spanned by ê_θ and ê_φ) at a point above the Earth.'),
+          visual: tiltPic(90, t`The tangential plane (spanned by $\hat e_\theta$ and $\hat e_\varphi$) at a point above the Earth.`),
           answer: Rc, units: 'AU', tol: { rel: 0.01 },
           errors: [
             { value: Rc * Math.sqrt(2), feedback: t`The tangential plane has $K = 2M/r^3$; $M/r^3$ is the size of the radial planes’ value.` },
@@ -221,7 +221,7 @@ Sectional curvatures carry everything: knowing $K$ for every plane recovers all 
         const key = (p * p * -1 + q * q * 2) / (p * p + q * q);
         return {
           prompt: t`Around a star, as before ($K_{r\theta} = K_{r\varphi} = -M/r^3$, $K_{\theta\varphi} = +2M/r^3$, no mixed components), find the sectional curvature of the plane spanned by $X = ${p === 1 ? '' : p}\hat e_r + ${q === 1 ? '' : q}\hat e_\varphi$ and $Y = \hat e_\theta$, in units of $M/r^3$.`,
-          visual: tiltPic(Math.atan2(q, p) / DEG, 'The plane spanned by ê_θ and X, which leans between the radial direction and ê_φ.'),
+          visual: tiltPic(Math.atan2(q, p) / DEG, t`The plane spanned by $\hat e_\theta$ and $X$, which leans between the radial direction and $\hat e_\varphi$.`),
           answer: key, tol: { rel: 0, abs: 0.005 },
           errors: [
             { value: -p * p + 2 * q * q, feedback: t`Divide by the parallelogram’s squared area, $g(X,X)g(Y,Y) - g(X,Y)^2 = ${p * p + q * q}$.` },
@@ -236,7 +236,7 @@ Sectional curvatures carry everything: knowing $K$ for every plane recovers all 
     multi({
       id: 'cp-facts', difficulty: 3,
       prompt: t`Which statements about sectional curvature are true? Select all that are.`,
-      visual: tiltPic(60, 'A plane at a point of a 3D space, spanned by ê_θ and a direction between ê_r and ê_φ.'),
+      visual: tiltPic(60, t`A plane at a point of a 3D space, spanned by $\hat e_\theta$ and a direction between $\hat e_r$ and $\hat e_\varphi$.`),
       choices: [
         t`$K(X, Y) = K(2X + Y,\ Y)$`,
         'Knowing K for every plane at a point determines the whole Riemann tensor there',

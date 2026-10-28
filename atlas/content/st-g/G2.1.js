@@ -172,7 +172,7 @@ Every convergent sequence is Cauchy. The converse is the defining property of th
         t`Let $\varepsilon > 0$.`,
         t`Since $a_n \to L$, choose $N$ with $|a_n - L| < \varepsilon/2$ for all $n \ge N$.`,
         t`Take any $m, n \ge N$.`,
-        t`$|a_m - a_n| \le |a_m - L| + |L - a_n| < \tfrac\varepsilon2 + \tfrac\varepsilon2 = \varepsilon$.`,
+        t`$|a_m - a_n|$ $\le |a_m - L| + |L - a_n|$ $< \tfrac\varepsilon2 + \tfrac\varepsilon2$ $= \varepsilon$.`,
       ],
       hints: ['The challenge ε comes first.', 'Ask the convergence for ε/2, then use the triangle inequality through L.'],
       teach: t`Convergent implies Cauchy by the triangle inequality through the limit; the converse is not a theorem but a property of the space — completeness.`,

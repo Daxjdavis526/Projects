@@ -147,9 +147,9 @@ The difference decides whether limits can be swapped. A uniform limit of continu
       visual: { type: 'graph', params: { x: [0, 3], y: [-0.2, 1.6], aspect: 'wide', shade: [{ fn: '0.6 + 0.4*sin(2x) + 0.15', lower: '0.6 + 0.4*sin(2x) - 0.15', from: 0, to: 3, color: 'good', alpha: 0.2 }], curves: [{ fn: '0.6 + 0.4*sin(2x)', color: 'gold', width: 2, label: 'f', labelAt: 0.3, labelDy: -10 }, { fn: '0.6 + 0.4*sin(2x) + 0.1*sin(9x)', color: 'accent', width: 1.6, label: 'fₙ', labelAt: 2.5, labelDy: 18 }] }, caption: t`Once $f_n$ is inside a band of half-width $\eta$ around $f$ on all of $[a, b]$ (here $\eta = 0.15$ on $[0, 3]$), the integrals differ by at most $\eta\,(b - a)$.` },
       items: [
         t`Let $\varepsilon > 0$.`,
-        t`By uniform convergence choose $N$ with $\sup_{[a,b]}|f_n - f| < \dfrac{\varepsilon}{b - a}$ for all $n \ge N$.`,
-        t`For $n \ge N$: $\left|\int_a^b f_n - \int_a^b f\right| \le \int_a^b |f_n - f|$.`,
-        t`$\le (b - a)\sup_{[a,b]}|f_n - f| < \varepsilon$, so $\int_a^b f_n \to \int_a^b f$.`,
+        t`By uniform convergence choose $N$ with $\sup|f_n - f|$ $< \varepsilon/(b - a)$ for all $n \ge N$.`,
+        t`For $n \ge N$: $\bigl|\int f_n - \int f\bigr|$ $\le \int|f_n - f|$.`,
+        t`$\le (b - a)\sup|f_n - f|$ $< \varepsilon$, so $\int f_n \to \int f$.`,
       ],
       hints: [t`The tolerance asked of the sup norm is $\varepsilon/(b - a)$.`, t`Bound the integral of $|f_n - f|$ by length times the largest value.`],
       teach: t`On a bounded interval, $|\int f_n - \int f| \le (b - a)\lVert f_n - f\rVert_\infty$: uniform convergence carries the integral with it.`,

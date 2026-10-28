@@ -87,7 +87,7 @@ function depthPic(caption, { points = [], vlines = [], which = ['cu', 'sea'] } =
     type: 'graph',
     params: {
       x: [0, 10], y: [-7, 2], xlog: true, ylog: true, xlabel: 'frequency (Hz)', ylabel: 'skin depth (m)', aspect: 'wide',
-      curves: which.map((k) => ({ fn: line(r4(L[k][0])), color: L[k][1], width: 2.2, label: L[k][2], labelAt: k === 'sea' ? 6.2 : 7.5, labelDy: k === 'sea' ? -10 : 14 })),
+      curves: which.map((k) => ({ fn: line(r4(L[k][0])), color: L[k][1], width: 2.2, label: L[k][2], labelAt: { sea: 6.2, cu: 7.5, al: 3.2 }[k], labelDy: { sea: -10, cu: 14, al: -12 }[k] })),
       points, vlines,
     },
     caption,
@@ -155,8 +155,8 @@ export default lesson({
     steps: [
       { label: 'Good conductor?', text: t`The test is $\sigma/\varepsilon\omega \gg 1$. At ${nice(EX.f2 / 1e9)} GHz, $\sigma/\varepsilon_0\omega \approx ${tex(EX.q2, 2)}$; at ${EX.f1} Hz it is larger still. Copper is a superb conductor at both.` },
       { label: 'The formula', text: t`For $\sigma \gg \varepsilon\omega$, $k \approx \kappa \approx \sqrt{\omega\mu\sigma/2}$, so $\delta = \sqrt{2/\omega\mu\sigma}$: it shrinks as $1/\sqrt f$.` },
-      { label: 'Mains', text: t`$\delta = \sqrt{\dfrac{2}{2\pi(${EX.f1})(4\pi\times10^{-7})(${tex(CU, 3)})}} \approx ${nice(sf(EX.d1 * 1e3, 3))}$ mm. A thick busbar carries current mainly in its outer centimetre, which is why large ones are hollow tubes and overhead lines are aluminium strands around a steel core.` },
-      { label: 'Microwaves', text: t`$\delta \approx ${nice(sf(EX.d2 * 1e6, 3))}$ μm — ${nice(sf(EX.d1 / EX.d2, 2))} times thinner, as $\sqrt{${tex(EX.f2 / EX.f1, 2)}}$ predicts. A few micrometres of silver or gold plating carries all the current of a waveguide.` },
+      { label: 'Mains', text: t`$\delta = \sqrt{\dfrac{2}{2\pi(${EX.f1})(4\pi\times10^{-7})(${tex(CU, 3)})}} \approx ${nice(sf(EX.d1 * 1e3, 3))}$ mm. A thick busbar carries its current mainly in its outer centimetre, which is why large ones are hollow tubes, and why the steel core of an overhead line, there for strength, carries little of the current.` },
+      { label: 'Microwaves', text: t`$\delta \approx ${nice(sf(EX.d2 * 1e6, 3))}$ μm — about $${tex(EX.d1 / EX.d2, 2)}$ times thinner, as $\sqrt{${tex(EX.f2 / EX.f1, 2)}}$ predicts. A few micrometres of silver or gold plating carries all the current of a waveguide.` },
       { label: 'E against B', text: t`$\tilde k$ has phase $45^\circ$, so $B$ lags $E$ by $45^\circ$, and $B/E = |\tilde k|/\omega = \sqrt{\mu\sigma/\omega}$. At ${nice(EX.f2 / 1e9)} GHz $cB/E \approx ${nice(sf(EX.BE, 2))}$: the field inside is overwhelmingly magnetic, and almost all the incoming energy is reflected.` },
     ],
     answer: t`$\delta \approx ${nice(sf(EX.d1 * 1e3, 3))}$ mm at ${EX.f1} Hz and $${nice(sf(EX.d2 * 1e6, 3))}$ μm at ${nice(EX.f2 / 1e9)} GHz; inside, $B$ lags $E$ by $45^\circ$ and dominates it.`,
@@ -277,7 +277,7 @@ export default lesson({
           answer: fp / 1e6, units: 'MHz', tol: { rel: 0.01 },
           errors: [{ value: (2 * PI * fp) / 1e6, feedback: t`That is $\omega_p$ in rad/s; divide by $2\pi$.` }],
           hints: [t`$f_p = \dfrac{1}{2\pi}\sqrt{\dfrac{n_ee^2}{\varepsilon_0m_e}}$, with $e = 1.602\times10^{-19}$ C and $m_e = 9.109\times10^{-31}$ kg.`, t`A handy form: $f_p \approx 8.98\sqrt{n_e}$ Hz with $n_e$ in $\text{m}^{-3}$.`],
-          teach: 'A plasma’s free electrons set a frequency, f_p ≈ 8.98√nₑ Hz, below which waves cannot travel through it.',
+          teach: t`A plasma’s free electrons set a frequency, $f_p \approx 8.98\sqrt{n_e}$ Hz, below which waves cannot travel through it.`,
           explain: t`$f_p \approx 8.98\sqrt{${tex(n, 1)}} \approx ${nice(sf(fp / 1e6, 3))}$ MHz. Radio waves below this frequency sent straight up are reflected; above it they pass through.`,
         };
       },
@@ -332,7 +332,7 @@ export default lesson({
           answer: muf, units: 'MHz', tol: { rel: 0.01 },
           errors: [{ value: fc * Math.cos((th * PI) / 180), feedback: t`Oblique incidence lets **higher** frequencies reflect: only the vertical part of $\vec k$ has to be stopped, so $f_{\max} = f_c/\cos\theta$.` }, { value: fc, feedback: 'That is the limit straight up. At a slant the layer reflects higher frequencies.' }],
           hints: [t`Inside the plasma $c^2k^2 = \omega^2 - \omega_p^2$, and the component of $\vec k$ along the layer is fixed by the angle of incidence (as in Snell’s law).`, t`Turning back needs $\omega^2\cos^2\theta \le \omega_p^2$: $f_{\max} = f_c/\cos\theta$, the secant law.`],
-          teach: 'At a slant only the vertical part of k must be stopped, so the ionosphere reflects up to f_c/cos θ.',
+          teach: t`At a slant only the vertical part of $\vec k$ must be stopped, so the ionosphere reflects up to $f_c/\cos\theta$.`,
           explain: t`The along-layer component $k\sin\theta$ is conserved, leaving $c^2k_z^2 = \omega^2\cos^2\theta - \omega_p^2$; the wave turns back where this reaches zero. So $f_{\max} = ${fc}/\cos ${th}^\circ \approx ${nice(sf(muf, 3))}$ MHz. Real links use a curved-Earth correction and stay a little below the MUF, but the secant law is the heart of shortwave propagation forecasts.`,
         };
       },

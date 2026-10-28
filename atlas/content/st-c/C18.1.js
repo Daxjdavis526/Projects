@@ -49,7 +49,7 @@ function gapScene() {
   const brX = [1, 2, 3, 4].map((k) => `step(0.5 - abs(n - ${k}))*(${BRACKET[k][0]})`).join(' + ');
   const brY = [1, 2, 3, 4].map((k) => `step(0.5 - abs(n - ${k}))*(${BRACKET[k][1]})`).join(' + ');
   return {
-    x: [-2.6, 2.6], y: [-1.7, 1.7], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'y',
+    x: [-2.4, 2.4], y: [-1.6, 1.6], equal: true, axesAt: 'edge', xlabel: 'x', ylabel: 'y',
     sliders: [{ key: 'h', label: 'flow time $\\varepsilon$', min: 0.05, max: 0.8, step: 0.01, value: 0.5, explain: 'How long to follow each flow. The gap shrinks as ε².' }],
     choices: [{ key: 'n', label: 'Second field $Y$', options: [1, 2, 3, 4].map((k) => [k, Y_NAMES[k]]), value: 1, explain: 'X is always the rotation −y∂ₓ + x∂ᵧ.' }],
     drag: [{ key: 'p', x: 0.9, y: -0.6 }],
@@ -128,7 +128,7 @@ No Christoffel symbols appear: the flow itself says how to carry things, so the 
         const key = -1 / (r0 * r0);
         return {
           prompt: t`On the plane in polar coordinates, the coordinate fields commute, $[\partial_r, \partial_\theta] = 0$. The *unit* vectors are $\hat e_r = \partial_r$ and $\hat e_\theta = \tfrac1r\partial_\theta$. Their bracket is $[\hat e_r, \hat e_\theta] = c\,\partial_\theta$. Find $c$ at $r = ${r0}$.`,
-          visual: { type: 'graph', params: { x: [-3.5, 3.5], y: [-2.7, 2.7], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'y', curves: [1, 2].map((k) => ({ param: [`${k}*cos(t)`, `${k}*sin(t)`], t: [0, 2 * Math.PI], color: 'ink4', width: 1 })), arrows: [0.5, 1.6, 2.7].flatMap((th) => [1, 2].flatMap((rr) => [{ from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4((rr + 0.4) * Math.cos(th)), r4((rr + 0.4) * Math.sin(th))], color: 'accent', width: 1.8 }, { from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4(rr * Math.cos(th) - 0.4 * Math.sin(th)), r4(rr * Math.sin(th) + 0.4 * Math.cos(th))], color: 'violet', width: 1.8 }])) }, caption: 'The unit vectors ê_r (blue) and ê_θ (violet) at a few points: the same length everywhere, while the coordinate field ∂_θ grows with r.' },
+          visual: { type: 'graph', params: { x: [-3.5, 3.5], y: [-2.7, 2.7], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'y', curves: [1, 2].map((k) => ({ param: [`${k}*cos(t)`, `${k}*sin(t)`], t: [0, 2 * Math.PI], color: 'ink4', width: 1 })), arrows: [0.5, 1.6, 2.7].flatMap((th) => [1, 2].flatMap((rr) => [{ from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4((rr + 0.4) * Math.cos(th)), r4((rr + 0.4) * Math.sin(th))], color: 'accent', width: 1.8 }, { from: [r4(rr * Math.cos(th)), r4(rr * Math.sin(th))], to: [r4(rr * Math.cos(th) - 0.4 * Math.sin(th)), r4(rr * Math.sin(th) + 0.4 * Math.cos(th))], color: 'violet', width: 1.8 }])) }, caption: t`The unit vectors $\hat e_r$ (blue) and $\hat e_\theta$ (violet) at a few points: the same length everywhere, while the coordinate field $\partial_\theta$ grows with $r$.` },
           answer: key, tol: { rel: 0.005 },
           errors: [
             { value: 1 / (r0 * r0), feedback: t`Sign: $\hat e_r$ differentiating $\tfrac1r$ gives $-\tfrac1{r^2}$.` },

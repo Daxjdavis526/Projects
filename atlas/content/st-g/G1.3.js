@@ -96,9 +96,9 @@ The gentle versions are [proof by contradiction](#/lesson/m0.M0-14.3) and [proof
       },
       items: [
         t`Base case: for $n = 1$ both sides equal $1$.`,
-        t`Inductive hypothesis: assume $1^3 + \dots + n^3 = \tfrac14 n^2(n + 1)^2$ for some $n \ge 1$.`,
-        t`Add the next term: $1^3 + \dots + (n + 1)^3 = \tfrac14 n^2(n + 1)^2 + (n + 1)^3$.`,
-        t`Factor: $= \tfrac14(n + 1)^2\,(n^2 + 4n + 4) = \tfrac14(n + 1)^2(n + 2)^2$.`,
+        t`Inductive hypothesis: assume $1^3 + \dots + n^3$ $= \tfrac14 n^2(n + 1)^2$ for some $n \ge 1$.`,
+        t`Add the next term: $1^3 + \dots + (n + 1)^3$ $= \tfrac14 n^2(n + 1)^2$ $+ (n + 1)^3$.`,
+        t`Factor: $= \tfrac14(n + 1)^2\,(n^2 + 4n + 4)$ $= \tfrac14(n + 1)^2(n + 2)^2$.`,
         t`That is the formula for $n + 1$; by induction it holds for every $n \ge 1$.`,
       ],
       hints: ['Base case first, then the hypothesis, then use it on the sum up to n + 1.', t`$n^2 + 4(n + 1) = (n + 2)^2$.`],
@@ -215,7 +215,7 @@ The gentle versions are [proof by contradiction](#/lesson/m0.M0-14.3) and [proof
       visual: pyth(t`Squares of whole numbers, divided by $4$, leave remainder $0$ (even $n$, blue) or $1$ (odd $n$, gold) — never $2$ or $3$. Checked here to $n = 12$; the steps below prove it for all $n$.`),
       items: [
         t`Suppose, for contradiction, that $a$ and $b$ are both odd.`,
-        t`An odd square is $(2k + 1)^2 = 4(k^2 + k) + 1$: remainder $1$ on division by $4$.`,
+        t`An odd square is $(2k + 1)^2$ $= 4(k^2 + k) + 1$: remainder $1$ on division by $4$.`,
         t`So $a^2 + b^2$ leaves remainder $2$ on division by $4$.`,
         t`But any square $c^2$ leaves remainder $0$ (if $c$ is even) or $1$ (if $c$ is odd).`,
         t`$c^2$ cannot leave remainder $2$: contradiction, so $a$ or $b$ is even.`,

@@ -70,7 +70,7 @@ That is why $G_{\mu\nu}$, the **Einstein tensor**, is the geometry that matter c
   },
   example: {
     prompt: t`Starting from the Bianchi identity, show that $\nabla^\mu G_{\mu\nu} = 0$ for every metric, and say what this does for the field equation $G_{\mu\nu} = 8\pi T_{\mu\nu}$.`,
-    visual: starPic(0.5, 'Inside a uniform-density star with 2M/R = 0.5: the pressure that keeps it static, from ∇_μT^μr = 0 (blue), against Newton’s (dashed).'),
+    visual: starPic(0.5, t`Inside a uniform-density star with $2M/R = 0.5$: the pressure that keeps it static, from $\nabla_\mu T^{\mu r} = 0$ (blue), against Newton’s (dashed).`),
     steps: [
       { label: 'Why it holds', text: t`At any point choose coordinates with $\Gamma = 0$ there (C13). Then $\nabla_\lambda R_{\rho\sigma\mu\nu} = \partial_\lambda R_{\rho\sigma\mu\nu}$, and $R$ is $\partial\Gamma$ plus terms quadratic in $\Gamma$ whose first derivatives vanish there. The cyclic sum of $\partial_\lambda\partial_\mu\Gamma$ terms cancels in pairs. A tensor equation true in one chart is true in all.` },
       { label: 'Contract twice', text: t`Multiply by $g^{\nu\sigma}g^{\mu\lambda}$ (allowed inside $\nabla$, since $\nabla g = 0$). The three terms become $\nabla^\mu R_{\rho\mu}$, $-\nabla_\rho R$ and $\nabla^\nu R_{\rho\nu}$: so $2\nabla^\mu R_{\rho\mu} = \nabla_\rho R$.` },
@@ -141,7 +141,7 @@ That is why $G_{\mu\nu}$, the **Einstein tensor**, is the geometry that matter c
     order({
       id: 'why-source', difficulty: 3,
       prompt: t`Why must the geometric side of the field equation be divergence-free *identically*? Order the argument.`,
-      visual: starPic(0.3, 'Inside a uniform-density star with 2M/R = 0.3: the balance that ∇_μT^μν = 0 demands.'),
+      visual: starPic(0.3, t`Inside a uniform-density star with $2M/R = 0.3$: the balance that $\nabla_\mu T^{\mu\nu} = 0$ demands.`),
       items: [
         t`Matter’s energy and momentum are conserved locally: $\nabla_\mu T^{\mu\nu} = 0$.`,
         t`If the field equation is $E_{\mu\nu} = 8\pi T_{\mu\nu}$, every solution then has $\nabla^\mu E_{\mu\nu} = 0$.`,

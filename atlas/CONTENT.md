@@ -143,7 +143,7 @@ put `toLocaleString()` output inside math (its commas render as "42, 164").
 Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
 `\big(` followed by a minus sign spaces the minus as a subtraction: use
 `\bigl(` and `\bigr)` for sized brackets.
-Inline math does not wrap: on a 390 px phone a long `$…$` runs off the
+Inline math does not wrap (in an `order` step too): on a 390 px phone a long `$…$` runs off the
 screen. Break a long chain into several pieces at its `=` signs
 (`$a = b$, $= c$`) or give it a display line (`$$…$$`). A display line
 overflows too when it is wider than a phone: stack it with
@@ -312,7 +312,7 @@ In `mode: 'constant'` with several variables the constant may depend on every
 variable except the one integrated over (`wrt`, default the first in `vars`):
 ∫ 2xy dx = x²y + C(y). For a potential function, whose constant is one
 number, set `wrt: '*'`.
-Other fields: `form: 'expanded'` or `form: 'factored'` (once the value is right, the answer must be fully multiplied out — no bracketed sum multiplied, divided by, raised to a power or negated — or be a product at the top level; for "expand" and "factor" tasks, which would otherwise accept the question typed back; it cannot tell whether a factor is irreducible), `forbid: ['sqrt']` (the answer must not use a function),
+Other fields: `form: 'expanded'` or `form: 'factored'` (a factored form may be divided by a number, so `(k^2+3k+2)/2` counts as factored) (once the value is right, the answer must be fully multiplied out — no bracketed sum multiplied, divided by, raised to a power or negated — or be a product at the top level; for "expand" and "factor" tasks, which would otherwise accept the question typed back; it cannot tell whether a factor is irreducible), `forbid: ['sqrt']` (the answer must not use a function),
 `lhs: 'v(t)'` (TeX shown before the box — the `=` is added for you, so do not
 write `'y ='`), `keys: [['ω', 'omega']]` (extra keypad buttons). A variable
 with a Greek or decorated name, such as Δv, is declared in `vars` as `'Δv'` and
@@ -332,6 +332,8 @@ them in `vars` with the underscore). **`log` is base 10; `ln` is natural.**
 letters (`x2`) is rejected as ambiguous unless declared (`v0`).
 
 ### Let the test check your calculus
+
+`integrand` and `limits` assert that the answer *equals* that integral: do not set them on an item whose answer is something else built from it (a normalization constant, an average).
 
 Give a calculus problem the function it is about, and the content test
 verifies the key by calculus — it has caught real slips:
@@ -619,6 +621,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `cx3-flow` | ideal flow past a cylinder or a Joukowski airfoil: streamlines carried over from the circle plane, the Kutta condition, stagnation points, released dot rows (no equal transit time), speed shading | see the file header |
 | `cx3-causal` | draggable poles in the ω-plane beside the response in time (closing the contour by the sign of t), and Re/Im χ with its Kramers–Kronig reconstruction | see the file header |
 | `th-einstein` | two Einstein solids exchanging quanta at random above the exact Ω_A·Ω_B bars, the 1/√N sharpening of the peak, or every microstate of a small solid in stars and bars | `mode` (pair, list), `NA`, `NB`, `q`, `N`, `start`, `scale`, `x`, `tie`, `qper`, `controls`, `ranges`, `cells`, `visits`, `panels`, `numbers`, `play`, `readouts`, `hide` — see the file header |
+| `th4-ising` | a 2D Ising lattice run live by Metropolis Monte Carlo: domains forming and melting across Onsager's T_c, magnetization against the exact curve | see the file header |
 | `wv-chain` | N masses on springs (fixed, free or ring ends): start in a mode, pluck a mass or launch a pulse, motion as an exact sum of modes, beside the dispersion curve ω = 2√(k/m)|sin(qa/2)| with ω = vq and the cutoff | `N`, `bc`, `k`, `start`, `n`, `pluck`, `x0`, `width`, `view`, `panels`, `ghost`, `line`, `spectrum`, `labels`, `controls`, `maxN`, `play`, `time`, `readouts`, `hide` — see the file header |
 | `wv2-junction` | a pulse meeting the junction of two strings, solved exactly: the strings, the energy density with flux arrows, and bars of energy on each side against r² and 4Z₁Z₂/(Z₁ + Z₂)² | see the file header |
 | `wv3-kdv` | exact KdV solutions: one soliton (taller is faster), two solitons colliding with dashed "never met" ghosts showing the phase shift, and the equation taken apart (dispersion only, nonlinearity only, both) | see the file header |
@@ -799,6 +802,8 @@ it *is*. Use `$$…$$` of the equation in practice prompts and ask about its
 parts; `\underbrace{…}_{\text{?}}` in a prompt is a good way to point at one.
 
 ## Boss battles (`content/<course>/boss.js`)
+
+A boss is tested only by a whole-course run: `node atlas/test/content.test.mjs <course>` (and `code.test.mjs <course>` for code items).
 
 A boss is a short story in rounds of unassisted problems that mix the course's
 skills — the kind of multi-step problem the course exists to make solvable.
