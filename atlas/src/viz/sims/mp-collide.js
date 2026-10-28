@@ -141,7 +141,10 @@ export function mount(F, P0) {
       // labelled on the left branch, just outside the curve (the √s label goes inside)
       const pl = 0.55 * Math.max(X0, -top) * uf;
       const what = sc.products.map((k) => PLAIN[k] || k).join(' + ');
-      plot.text(`${what} at rest: ${sig(S.Mth / uf, 4)} ${un}`, pl / uf, Math.hypot(S.Mth, pl) / uf, { color: 'bad', dx: -10, dy: 6, align: 'right', size: fs - 1 });
+      const txt = `${what} at rest: ${sig(S.Mth / uf, 4)} ${un}`;
+      plot.ctx.font = `500 ${fs - 1}px Inter, system-ui, sans-serif`;
+      const w = plot.ctx.measureText(txt).width, xr = Math.max(plot.X(pl / uf) - 10, plot.L + 6 + w);   // keep it inside the frame
+      plot.text(txt, xr, plot.Y(Math.hypot(S.Mth, pl) / uf) + 6, { screen: true, color: 'bad', align: 'right', size: fs - 1 });
     }
     hyper(S.M, { color: 'gold', width: 1.3, alpha: 0.7 });
 

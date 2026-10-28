@@ -25,6 +25,7 @@ const GM = 398600;            // km³/s², Earth
 const RE = 6378;              // km, Earth's equatorial radius
 const r4 = (v) => +(+v).toFixed(4);
 const r6 = (v) => +(+v).toPrecision(6);
+const r12 = (v) => +(+v).toPrecision(12);   // for the calculus-check integrands
 /** A number as TeX to n significant figures, with a thin space in five-digit numbers. */
 const tn = (x, n = 3) => { const s = tex(x, n); return /^-?\d{5}(\.\d+)?$/.test(s) ? s.replace(/^(-?\d{2})(\d{3})/, '$1\\,$2') : s; };
 /** Keep only the slips whose values are finite and clearly apart from the key (and a little apart from each other). */
@@ -264,6 +265,8 @@ export default boss({
             return {
               prompt: t`The fuel tank is a **torus** wrapped round the engine: the centre-line of its tube is a circle of radius $R = ${R}$ m about the stage’s axis, and the tube itself has radius $a = ${a}$ m. Full, it holds RP-1 kerosene of density 810 kg/m³. For the roll-control thrusters, find the fuel’s moment of inertia about the stage’s axis, treating it as a solid that turns with the tank. Give 3 significant figures.`,
               answer: I, units: 'kg m^2', tol: { rel: 0.005 },
+              // for the calculus check: the ρ³ weight times the tube's chord at that ρ
+              integrand: `${r12(2 * PI * D)}*p^3*2*sqrt(max(0, ${r4(a * a)} - (p - ${R})^2))`, vars: { p: [R - a, R + a] }, limits: [R - a, R + a],
               errors: apart([
                 { value: M * R * R, feedback: t`That is a thin hoop, with all the fuel on the tube’s centre-line. The fuel spreads across the tube, and the part farther out counts for more.` },
                 { value: M * (R * R + 0.25 * a * a), feedback: t`That averages $\rho^2$ evenly over the tube’s cross-section. But $dV = \rho\,d\rho\,d\phi\,dz$: the outer half of the tube holds more fuel than the inner half, which raises $\tfrac14a^2$ to $\tfrac34a^2$.` },
@@ -315,6 +318,8 @@ export default boss({
             return {
               prompt: t`Across the right vortex, the survey’s data fit the Lamb–Oseen model of a vortex: the vorticity is $\omega(r) = \omega_0\,e^{-r^2/r_c^2}$, where $r$ is the distance from the vortex’s centre, $\omega_0 = ${w0}\ \text{s}^{-1}$ and the core radius is $r_c = ${rc}$ m. (Here $\omega = \partial v_y/\partial x - \partial v_x/\partial y$, the curl of the air’s velocity in the plane across the wake.) The survey window is a square 30 m on a side, centred on the vortex. Find the circulation round the window’s edge — and from it the carrier’s mass. A wing in level flight that sheds vortices of circulation $\Gamma$ makes lift $\rho V\Gamma$ per metre of span (the Kutta–Joukowski theorem), and for an elliptically loaded wing of span $b$ the two vortices are $\tfrac{\pi}{4}b$ apart, so the whole lift is $\rho V\Gamma\cdot\tfrac{\pi}{4}b$. The carrier, of span $b = 47$ m, was flying level at $V = ${V}$ m/s through air of density $\rho = 0.31$ kg/m³. What is its mass, in tonnes? ($g = 9.81$ m/s²)`,
               answer: m, units: 't', tol: { rel: 0.01 },
+              // for the calculus check: the vorticity integrated in rings, times ρVb₀/(1000g)
+              integrand: `${r12((0.31 * V * b0) / G0 / 1000)}*${w0}*exp(-r^2/${r4(rc * rc)})*2*pi*r`, vars: { r: [0, 20] }, limits: [0, 'inf'],
               errors: apart([
                 { value: (m * 4) / PI, feedback: t`The lift is $\rho V\Gamma$ times the vortices’ spacing, $\tfrac{\pi}{4}b$, not times the whole span: the circulation tapers off toward the wingtips.` },
                 { value: 2 * m, feedback: t`$\int_0^\infty e^{-r^2/r_c^2}\,r\,dr = \tfrac12r_c^2$: check the factor $\tfrac12$.` },
@@ -347,6 +352,8 @@ export default boss({
             return {
               prompt: t`The diverging part of the nozzle is a cone of half-angle $\alpha = ${al}^\circ$ ending at an exit lip of radius $R_e = ${Re}$ m. In the ideal conical-nozzle model the exhaust’s mass current is $$\rho\vec v = \rho_e v_e\,\frac{L^2}{r^2}\,\hat r,$$ where $r$ is the distance from the cone’s apex, $\hat r$ the unit vector pointing away from it, $L$ the distance from the apex to the lip, $\rho_e = ${rho}$ kg/m³ and $v_e = 2900$ m/s. Find the mass flow rate: the flux of $\rho\vec v$ through the flat exit plane, the disk spanning the lip. Give 3 significant figures.`,
               answer: md, units: 'kg/s', tol: { rel: 0.005 },
+              // for the calculus check: the flux through the flat disk, ring by ring — the hard way
+              integrand: `${r12(2 * PI * rho * ve * L * L * L * Math.cos(a))}*s/(s^2 + ${r12((L * Math.cos(a)) ** 2)})^1.5`, vars: { s: [0, Re] }, limits: [0, Re],
               errors: apart([
                 { value: flat, feedback: t`That takes $\rho_e v_e$ straight and evenly across the flat disk. In this model the exhaust crosses the disk at an angle and is denser near the middle, which is nearer the apex. Integrate — or move to a surface where the flux is simple.` },
                 { value: md * Math.cos(a) ** 2, feedback: t`On the sphere through the lip, $r = L$ is the slant distance from the apex to the lip, $R_e/\sin\alpha$ — not the distance along the axis, $R_e/\tan\alpha$.` },
@@ -372,6 +379,8 @@ export default boss({
             return {
               prompt: t`The same model of the nozzle: half-angle $\alpha = ${al}^\circ$, exit lip of radius $R_e = ${Re}$ m, and exhaust streaming out radially from the cone’s apex with mass current $\rho_e v_e L^2/r^2$, where $\rho_e = ${rho}$ kg/m³ and every particle moves at $v_e = 2900$ m/s. Thrust is a flux of **axial momentum**. On the spherical cap $r = L$ spanning the lip, a streamline at angle $\theta$ from the axis carries axial momentum out at the rate $\rho_e v_e^2\cos\theta$ per unit area. How much less is the total, $\iint_\text{cap}\rho_e v_e^2\cos\theta\,dS$, than $\dot m v_e$ — the thrust the engine would make if all its exhaust flowed straight back? Leave out the pressure part of the thrust, and give the answer in kN to 3 significant figures.`,
               answer: loss, units: 'kN', tol: { rel: 0.01 },
+              // for the calculus check: ṁv_e minus the axial momentum flux, ring by ring over the cap
+              integrand: `${r12((rho * ve * ve * L * L * 2 * PI) / 1000)}*sin(q)*(1 - cos(q))`, vars: { q: [0, a] }, limits: [0, a],
               errors: apart([
                 { value: mv * (1 - ca), feedback: t`That treats every streamline as leaving at the wall’s angle $\alpha$. Most leave nearer the axis: averaged over the cap’s area, $\cos\theta$ is $\tfrac12(1 + \cos\alpha)$.` },
                 { value: Fax, feedback: t`That is the axial thrust itself. The question asks how far short of $\dot m v_e$ it falls.` },

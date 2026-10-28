@@ -169,7 +169,7 @@ It is exactly what conservation of four-momentum demands when a photon collides 
     steps: [
       { label: 'Four-momenta', text: t`Before: the photon has energy $E$ and momentum $\vec p$ with $|\vec p| = E/c$; the electron has energy $m_ec^2$ and no momentum. After: the photon has $E'$ and $\vec p\,'$ at angle $\theta$; the electron has $E_e$ and $\vec p_e$. Conserving four-momentum means conserving both energy and momentum.` },
       { label: 'Isolate the electron', text: t`$E_e = E - E' + m_ec^2$ and $\vec p_e = \vec p - \vec p\,'$. By the law of cosines, $(p_ec)^2 = E^2 + E'^2 - 2EE'\cos\theta$.` },
-      { label: 'Use the invariant', text: t`Every free particle has $E^2 - (pc)^2 = (mc^2)^2$ (lesson MP3.3). For the electron afterwards:
+      { label: 'Use the invariant', text: t`Every free particle has $E^2 - (pc)^2 = (mc^2)^2$ ([lesson MP3.3](#/lesson/phys2710.MP3.3)). For the electron afterwards:
 $$(E - E' + m_ec^2)^2 - (E^2 + E'^2 - 2EE'\cos\theta) = (m_ec^2)^2.$$
 This one equation eliminates everything about the electron.` },
       { label: 'Simplify', text: t`Expanding, $E^2$, $E'^2$ and $(m_ec^2)^2$ cancel, leaving $-2EE' + 2(E - E')\,m_ec^2 + 2EE'\cos\theta = 0$, that is $(E - E')\,m_ec^2 = EE'(1 - \cos\theta)$.` },

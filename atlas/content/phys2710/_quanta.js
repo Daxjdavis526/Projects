@@ -27,7 +27,7 @@ export const IONO = (QE * QE) / (8 * Math.PI * Math.PI * EPS0 * ME);
 
 // ---- atomic masses (AME2020), in u ----
 export const M_O16 = 15.99491462;
-export const M_SI28 = 27.97692653;
+export { M_SI28 } from './_constants.js';   // one value for the course (AME2020)
 export const M_FE56 = 55.93493633;
 export const M_CS133 = 132.905451961;
 export const M_PB208 = 207.9766525;

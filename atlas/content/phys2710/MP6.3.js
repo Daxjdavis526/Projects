@@ -31,7 +31,7 @@ const E1_PEV = (MN * G0 * Z0 * AIRY1) / QE * 1e12;                // peV: the tr
 const Z1_UM = AIRY1 * Z0 * 1e6;                                   // μm: its classical turning height
 
 // ---- molecules: harmonic vibrational wavenumbers ωe, cm⁻¹ (Huber & Herzberg, NIST WebBook) ----
-const MOLECULES = { 'hydrogen, H₂': 4401.21, 'carbon monoxide, CO': 2169.81, 'nitrogen, N₂': 2358.57 };
+const MOLECULES = { 'hydrogen (H₂)': 4401.21, 'carbon monoxide (CO)': 2169.81, 'nitrogen (N₂)': 2358.57 };
 
 // ---- resonances: name, mass (MeV), width (MeV) ----
 const RESONANCES = [
@@ -53,7 +53,7 @@ function hydrogen({ ask = false } = {}) {
         { fn: `${k}/x^2 - ${u}/x`, domain: [0.37, 4], color: 'accent', width: 2.6, label: 'total', labelAt: 2.4, labelDx: 0, labelDy: -12 },
       ],
       hlines: [{ y: 0, color: 'ink4' }],
-      points: [{ x: 1, y: r6(E_EST), r: 5, color: 'accent' }, ...(ask ? [] : [label(0.97, -18.5, 'minimum: r = a₀, E = −13.6 eV', 'accent', 0, 0, 'right')])],
+      points: [{ x: 1, y: r6(E_EST), r: 5, color: 'accent' }, ...(ask ? [] : [label(0.97, -18.5, 'lowest: r = a₀, −13.6 eV', 'accent', 0, 0, 'right')])],
     },
     caption: ask
       ? 'The estimate of the energy of an electron held within a distance r of a proton: squeezing it raises the kinetic energy (gold) faster than it lowers the potential energy (violet).'
@@ -67,11 +67,11 @@ const oscillator = {
   params: {
     x: [0, 3], y: [0, 1.65], aspect: 'wide', xlabel: 'position spread Δx', ylabel: 'energy', xticks: 0, yticks: 0,
     curves: [
-      { fn: '0.25/x^2', domain: [0.39, 3], color: 'gold', width: 1.6, dash: true, label: 'kinetic (Δp)²/2m, with Δp = ħ/2Δx', labelAt: 0.5, labelDx: 8, labelDy: 0 },
+      { fn: '0.25/x^2', domain: [0.39, 3], color: 'gold', width: 1.6, dash: true, label: 'kinetic (Δp)²/2m, with Δp = ħ/2Δx', labelAt: 1.55, labelDx: 0, labelDy: -10, labelAlign: 'left' },
       { fn: '0.25*x^2', domain: [0, 2.55], color: 'violet', width: 1.6, dash: true, label: 'potential ½mω²(Δx)²', labelAt: 2.3, labelDx: 10, labelDy: 6 },
       { fn: '0.25*(x^2 + 1/x^2)', domain: [0.39, 2.55], color: 'accent', width: 2.6, label: 'total', labelAt: 1.75, labelDx: -10, labelDy: -12, labelAlign: 'right' },
     ],
-    points: [{ x: 1, y: 0.5, r: 5, color: 'accent', label: 'smallest possible energy', labelDx: 0, labelDy: 18, labelAlign: 'center' }],
+    points: [{ x: 1, y: 0.5, r: 5, color: 'accent', label: 'smallest possible energy', labelDx: 0, labelDy: -40, labelAlign: 'center' }],
   },
   caption: 'A particle in a harmonic well, with the smallest momentum spread the uncertainty principle allows for each position spread: neither spread can be zero, so neither can the energy.',
 };
@@ -90,7 +90,7 @@ function resonance(R) {
       xlabel: R.zero ? `collision energy − ${R.zero} MeV (keV)` : `collision energy (${R.unit})`,
       curves: [{ fn: `1/(1 + 4*((x - ${r6(c)})/${r6(w)})^2)`, domain: [x0, x1], color: 'accent', width: 2.4 }],
       arrows: [{ from: [r6(c), 0.5], to: [r6(c + w / 2), 0.5], color: 'gold', width: 1.5 }, { from: [r6(c), 0.5], to: [r6(c - w / 2), 0.5], color: 'gold', width: 1.5 }],
-      points: [label(c, 0.5, `full width at half height: Γ = ${widthText(R)}`, 'gold', 0, 16, 'center')],
+      points: [label(c + w / 2, 0.5, `full width at half height: Γ = ${widthText(R)}`, 'gold', 12, 0, 'left')],
     },
     caption: `How often ${R.name} is made as the collision energy is tuned across its mass: a peak whose full width at half height is Γ. (Drawn without the smearing a real beam adds.)`,
   };
@@ -105,10 +105,10 @@ const decayTrain = {
       { fn: 'step(x)*exp(-x/2.5)*cos(9*x)', domain: [-0.5, 10], color: 'bad', width: 1.8 },
       { fn: 'exp(-x/2.5)', domain: [0, 10], color: 'gold', width: 1.4, dash: true },
     ],
-    arrows: [{ from: [0, 1.15], to: [2.5, 1.15], color: 'gold', width: 1.4 }],
-    points: [label(2.6, 1.15, 'lifetime τ', 'gold', 8, 0, 'left')],
+    arrows: [{ from: [0, 1.15], to: [1.25, 1.15], color: 'gold', width: 1.4 }],
+    points: [label(1.3, 1.15, 'lifetime τ', 'gold', 8, 0, 'left')],
   },
-  caption: 'The light emitted as one excited state decays: a wave train whose amplitude dies away (dashed) over a time set by the state’s lifetime. Drawn with far fewer cycles than a real atom emits.',
+  caption: t`The light emitted as one excited state decays: a wave train whose amplitude dies away as $e^{-t/2\tau}$ (dashed), so that its intensity falls as $e^{-t/\tau}$. Drawn with far fewer cycles than a real atom emits.`,
 };
 
 /** Where Δx·Δp ≥ ħ/2 forbids a state, for electrons on logarithmic axes. */
@@ -130,17 +130,19 @@ const forbidden = (() => {
 /** The Pound–Rebka tower: iron-57 gamma rays climbing 22.5 m. */
 const tower = {
   type: 'graph',
-  params: frame([-5, 5], [-0.7, 4.2], {
+  params: frame([-3.8, 3.0], [-0.5, 3.9], {
     aspect: 'wide',
-    curves: [seg(-1.2, 0, -1.2, 3.6, 'ink3', 1.6), seg(1.2, 0, 1.2, 3.6, 'ink3', 1.6), seg(-2.6, 0, 2.6, 0, 'ink2', 2.2), seg(2.1, 0.25, 2.1, 3.25, 'ink3', 1.1)],
+    curves: [seg(-1.2, 0, -1.2, 3.6, 'ink3', 1.6), seg(1.2, 0, 1.2, 3.6, 'ink3', 1.6), seg(-2.0, 0, 2.0, 0, 'ink2', 2.2), seg(1.7, 0.25, 1.7, 3.25, 'ink3', 1.1)],
     arrows: [
-      { from: [0, 0.45], to: [0, 2.9], color: 'violet', width: 2, label: '14.4 keV gamma rays', labelDx: -10, labelDy: 0, labelAlign: 'right' },
-      { from: [2.1, 1.75], to: [2.1, 3.25], color: 'ink3', width: 1.1 }, { from: [2.1, 1.75], to: [2.1, 0.25], color: 'ink3', width: 1.1 },
+      { from: [0, 0.45], to: [0, 2.95], color: 'violet', width: 2 },
+      { from: [1.7, 1.75], to: [1.7, 3.25], color: 'ink3', width: 1.1 }, { from: [1.7, 1.75], to: [1.7, 0.25], color: 'ink3', width: 1.1 },
     ],
     points: [
-      { x: 0, y: 0.25, r: 7, color: 'gold', label: 'source: excited iron-57', labelDx: 0, labelDy: 18, labelAlign: 'center' },
-      { x: 0, y: 3.25, r: 7, color: 'accent', label: 'absorber: iron-57', labelDx: 12, labelDy: -10, labelAlign: 'left' },
-      label(2.1, 1.75, '22.5 m', 'ink2', 8, 0, 'left'),
+      { x: 0, y: 0.25, r: 7, color: 'gold' }, { x: 0, y: 3.25, r: 7, color: 'accent' },
+      label(-1.35, 0.25, 'source: excited iron-57', 'gold', -6, 0, 'right'),
+      label(-1.35, 3.25, 'absorber: iron-57', 'accent', -6, 0, 'right'),
+      label(-1.35, 1.7, '14.4 keV gamma rays', 'violet', -6, 0, 'right'),
+      label(1.7, 1.75, '22.5 m', 'ink2', 8, 0, 'left'),
     ],
   }),
   caption: 'Pound and Rebka’s experiment (1960): gamma rays from iron-57 at the foot of a tower at Harvard are absorbed only by iron-57 tuned to exactly the same energy at the top — unless gravity has shifted them. Not to scale.',
@@ -153,11 +155,11 @@ const bounce = {
     aspect: 'wide',
     shade: [{ fn: '2.75', lower: '2.25', from: -1.5, to: 4.6, color: 'violet', alpha: 0.28 }, { fn: '0', lower: '-0.35', from: -4.6, to: 4.6, color: 'ink3', alpha: 0.35 }],
     curves: [{ fn: '1.7*abs(sin(0.75*(x + 4.4)))', domain: [-4.4, 4.4], color: 'accent', width: 1.8, dash: true }],
-    arrows: [{ from: [4.2, 1.25], to: [4.2, 2.2], color: 'ink2', width: 1.1 }, { from: [4.2, 1.25], to: [4.2, 0.05], color: 'ink2', width: 1.1 }],
+    arrows: [{ from: [4.6, 1.25], to: [4.6, 2.2], color: 'ink2', width: 1.1 }, { from: [4.6, 1.25], to: [4.6, 0.05], color: 'ink2', width: 1.1 }],
     points: [
       label(-4.5, -0.62, 'mirror: neutrons bounce off it', 'ink2', 0, 0, 'left'),
       label(-1.4, 2.5, 'absorber at height h', 'violet', -8, 0, 'right'),
-      label(4.2, 1.25, 'h', 'ink2', -8, 0, 'right'),
+      label(4.6, 1.25, 'h', 'ink2', 8, 0, 'left'),
       label(-4.4, 1.9, 'neutron, a few m/s along', 'accent', 0, -6, 'left'),
     ],
   }),
@@ -278,7 +280,7 @@ The rest of this lesson uses these relations as tools: to size atoms, to find th
       gen(r) {
         const [name, wn] = r.pick(Object.entries(MOLECULES)), f = C * wn * 100, E = (H * f) / 2 / QE;
         return {
-          prompt: t`A molecule of ${name} vibrates like a mass on a spring at $f = ${tex(f, 4)}$ Hz. With the potential energy $\tfrac12m\omega^2x^2$ and the kinetic energy $p^2/2m$, the uncertainty principle forbids it from sitting still at the bottom of the well. Find the smallest energy it can have, in eV.`,
+          prompt: t`A ${name} molecule vibrates like a mass on a spring at $f = ${tex(f, 4)}$ Hz. With the potential energy $\tfrac12m\omega^2x^2$ and the kinetic energy $p^2/2m$, the uncertainty principle forbids it from sitting still at the bottom of the well. Find the smallest energy it can have, in eV.`,
           answer: E, units: 'eV', tol: { rel: 0.01 },
           errors: [
             { value: 2 * E, feedback: t`That is $hf$, the energy of one vibrational step. The lowest state has half of it.` },
@@ -342,7 +344,7 @@ The rest of this lesson uses these relations as tools: to size atoms, to find th
       ],
       hints: [t`$\Gamma = \hbar/\tau = (6.582\times10^{-16}\ \text{eV s})/(${fmt(FE57_TAU * 1e9, 4)}\times10^{-9}\ \text{s})$.`, t`Shift $= (14.4\times10^3\ \text{eV})\times(9.81)(${PR.h})/(3.00\times10^8)^2$; divide it by $\Gamma$.`],
       teach: 'A long-lived nuclear state has an extraordinarily narrow line — narrow enough to weigh a photon climbing a building.',
-      explain: t`$\Gamma = ${tex(PR.G, 3)}$ eV, only $${tex(PR.G / (FE57_KEV * 1e3), 2)}$ of the gamma ray’s energy. The shift is $${tex(PR.shift, 3)}$ eV, so shift$/\Gamma = ${fmt(PR.q, 3)}$: they had to find the centre of the line to better than 1% of its width. They did it by Doppler-shifting the source, moving it at speeds comparable to $gh/c = ${fmt((G0 * PR.h) / C * 1e6, 2)}$ μm/s, and confirmed Einstein’s prediction to 10% (1% by 1964).`,
+      explain: t`$\Gamma = ${tex(PR.G, 3)}$ eV, only $${tex(PR.G / (FE57_KEV * 1e3), 2)}$ of the gamma ray’s energy. The shift is $${tex(PR.shift, 3)}$ eV, and the ratio of the two is ${fmt(PR.q, 3)}: they had to find the centre of the line to better than 1% of its width. They did it by Doppler-shifting the source, moving it at speeds comparable to $gh/c = ${fmt((G0 * PR.h) / C * 1e6, 2)}$ μm/s, and confirmed Einstein’s prediction to 10% (1% by 1964).`,
       visual: tower,
     }),
     num({
@@ -359,10 +361,10 @@ The rest of this lesson uses these relations as tools: to size atoms, to find th
       id: 'cp-meaning', difficulty: 2,
       prompt: 'Classically an electron spiralling onto a proton could release unlimited energy. What does quantum mechanics say stops it?',
       choices: [
-        'Confining it within a radius r gives it momentum of order ħ/r, and the kinetic energy ħ²/2mr² rises faster than the potential energy falls; the total is lowest near r = a₀',
-        'At short distances the proton repels the electron',
-        'The electron cannot be observed that close to the proton, so it cannot be there',
-        'The electron orbits too fast to fall in, like a planet round the Sun',
+        'Squeezing it into a smaller region raises its kinetic energy faster than its potential energy falls, so the energy is lowest at a finite size',
+        'At very short distances the proton’s attraction turns into a repulsion that holds the electron off',
+        'The electron cannot be observed that close to the proton, so quantum mechanics forbids it from being there',
+        'Like a planet round the Sun, the electron moves too fast sideways to fall in',
       ],
       answer: 0,
       why: {

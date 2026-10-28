@@ -118,7 +118,7 @@ $$E_\gamma = 2m_ec^2 + K_- + K_+$$
 
 Energy alone is not enough. **A lone photon in empty space can never make a pair**, because it cannot conserve momentum at the same time; a nucleus nearby takes up the momentum while taking almost no energy. The reverse, annihilation, turns an electron and a positron into gamma rays — two of them, of 511 keV each when the pair is at rest — and every PET scan is built on those photon pairs.
 
-> This uses relativistic energy and the invariant $E^2 - (pc)^2 = (mc^2)^2$ from lessons MP3.2 and MP3.3.`,
+> This uses relativistic energy and the invariant $E^2 - (pc)^2 = (mc^2)^2$ from lessons [MP3.2](#/lesson/phys2710.MP3.2) and [MP3.3](#/lesson/phys2710.MP3.3).`,
   symbols: [
     { tex: 'E_\\gamma', text: 'the photon’s energy, in MeV' },
     { tex: 'm_ec^2', text: t`the rest energy of an electron — and of a positron — $${fmt(MEC2, 6)}$ MeV; the pair needs $2m_ec^2 = ${fmt(M2, 5)}$ MeV` },

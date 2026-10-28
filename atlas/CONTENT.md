@@ -190,7 +190,9 @@ mcq({ id: 'which-method', difficulty: 2,
 ```
 
 The player letters the choices A–D, so do not label points in the
-problem's picture A, B, C — use P, Q, R (or numbers) instead.
+problem's picture A, B, C — use P, Q, R (or numbers) instead. It also
+shuffles them, so an `explain` or `why` never says "the second choice": name
+the choice by what it says.
 
 Distractors must be **plausible wrong answers** — the result of a real slip
 (sign error, missing factor of 2, the classic misconception), never filler.
@@ -511,6 +513,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `qm-photoelectric`, `qm-compton` | light on a metal (stopping voltage, Millikan's plot of K against f); a photon scattering off an electron (momentum triangle, Δλ against angle) |
 | `qm-slits`, `qm-hydrogen` | electrons through slits arriving one at a time and building fringes; hydrogen's levels and series, the spectrum in true colour, Bohr orbits or probability clouds |
 | `qm-binding`, `qm-decay` | binding energy per nucleon from AME2020 masses with the liquid-drop curve; a sample decaying nucleus by nucleus against the exponential law |
+| `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
+| `mp-rutherford`, `mp-franck-hertz`, `mp-packet` | alpha particles on exact Coulomb hyperbolas past a nucleus (against Thomson's atom) with angle and count-rate panels; a mercury or neon Franck–Hertz tube with its current dips; a packet built from plane waves under four dispersion laws, and the x–k trade-off |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
 Choices take `{ key, label, options: [[value, text], …], value, explain }`;
