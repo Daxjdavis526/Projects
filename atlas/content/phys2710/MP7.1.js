@@ -220,7 +220,7 @@ The second condition — **normalisation** — says the particle is certainly so
         return {
           prompt: t`An electron in a box 1.0 nm wide is in the state $\psi(x) = \sqrt{2/L}\,\sin(${n === 1 ? '' : n}\pi x/L)$. The same state is prepared 20 000 times and each time the electron’s position is measured. About how many measurements find it between $x = ${a}$ nm and $x = ${b}$ nm?`,
           answer: count, tol: { rel: 0.02 },
-          errors: [{ value: N * (b - a), feedback: t`That assumes the electron is equally likely to be anywhere — the classical answer. Weight each place by $|\psi|^2$.` }],
+          errors: Math.abs(P - (b - a)) > 0.05 * P ? [{ value: N * (b - a), feedback: t`That assumes the electron is equally likely to be anywhere — the classical answer. Weight each place by $|\psi|^2$.` }] : [],
           hints: [t`Expected count $= N\times P$, with $P = \displaystyle\int_{${a}}^{${b}} \frac2L\sin^2\frac{${n === 1 ? '' : n}\pi x}{L}\,dx$.`, t`$\int \frac2L\sin^2\frac{n\pi x}{L}dx = \frac xL - \frac{1}{2n\pi}\sin\frac{2n\pi x}{L}$.`],
           teach: 'Born’s rule predicts frequencies: N repeated measurements put about N·P in each region.',
           explain: t`$P = ${fmt(P, 3)}$, so about $${fmt(count, 3)}$ of the 20 000 measurements land there (give or take $\sqrt{${Math.round(count)}} \approx ${Math.round(Math.sqrt(count))}$ from run to run).${n === 2 && a === 0.45 ? ' Very few: the state has a node at the centre.' : ''}`,
