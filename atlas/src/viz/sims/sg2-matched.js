@@ -7,8 +7,9 @@
 //   snr   the filter's output ρ(t) for the current template — its SNR at every
 //         arrival time, maximized over phase — with the noise-only mean √(π/2);
 //   scan  the peak SNR against the template's chirp mass (the template bank);
-//   post  the chirp-mass posterior ∝ exp(ρ²/2) under a flat prior, with its
-//         central credible interval shaded.
+//   post  the chirp-mass posterior under a flat prior — the likelihood
+//         exp(ρ²/2), maximized over amplitude and phase, summed over arrival
+//         times — with its central credible interval shaded; the axis zooms to it.
 // Model, numbers and tests: model/sg2-matched.js, test/sg2-matched.test.mjs.
 //
 //   { type: 'sg2-matched', params: {
@@ -71,10 +72,11 @@ export function mount(F, P0) {
     if (tk !== tplKey) { tplKey = tk; const T = M.cachedTemplate(p.tpl); tplCorr = { T, n: M.correlate(rec.noise, T), u: M.correlate(rec.unit, T) }; }
     const rho = M.snrFrom(tplCorr.n, tplCorr.u, p.amp);
     const pk = M.peak(rho);
-    const scan = parts ? M.scanAt(parts, p.amp) : null;
-    const post = scan ? M.posterior(BANK, scan) : null;
+    const both = parts ? M.scanBoth(parts, p.amp) : null;
+    const scan = both ? both.rho : null;
+    const post = both ? M.posteriorLog(BANK, both.logL) : null;
     const ci = post ? M.credible(BANK, post, P.level) : null;
-    return { p, rho, pk, scan, post, ci, T: tplCorr.T, opt: p.amp * M.cachedTemplate(p.Mc).norm };
+    return { p, rho, pk, scan, post, ci, T: tplCorr.T, opt: p.amp * rec.optimal };
   };
 
   const fsz = (plot) => ((plot.c.clientWidth || 600) < 520 ? 9.5 : 11);
@@ -133,7 +135,9 @@ export function mount(F, P0) {
   function drawPost(pl, S) {
     const { post, ci, p } = S;
     const ymax = Math.max(...post) * 1.15;
-    pl.setView([M.MC_MIN, M.MC_MAX], [0, ymax]);
+    const w = Math.max(1.5, ci.hi - ci.lo);
+    const x0 = Math.max(M.MC_MIN, ci.lo - 2 * w), x1 = Math.min(M.MC_MAX, ci.hi + 2 * w);
+    pl.setView([x0, x1], [0, ymax]);
     pl.clear();
     const inside = BANK.map((m, i) => [m, post[i]]).filter(([m]) => m >= ci.lo && m <= ci.hi);
     if (inside.length > 1) pl.path([[ci.lo, 0], ...inside, [ci.hi, 0]], { color: 'good', fill: 'good', fillAlpha: 0.25, stroke: false });
@@ -167,7 +171,7 @@ export function mount(F, P0) {
   }
   F.onChange(() => drawAll());
   F.draw(drawAll);
-  F.caption(P.caption || 'A one-second toy record sampled at 4096 Hz: white Gaussian noise (real detector noise is coloured, and real filters weight each frequency by it) plus a leading-order inspiral chirp from 30 to 250 Hz, cut off there — no merger or ringdown. The SNR is maximized over phase and arrival time; the posterior uses that maximized likelihood, a shortcut for the marginalization real analyses do.');
+  F.caption(P.caption || 'A one-second toy record sampled at 4096 Hz: white Gaussian noise (real detector noise is coloured, and real filters weight each frequency by it) plus a leading-order inspiral chirp from 30 to 250 Hz, cut off there — no merger or ringdown. The SNR is maximized over phase and arrival time. The posterior sums the likelihood over arrival time but maximizes it over amplitude and phase, a shortcut for the full marginalization real analyses do.');
   return { get: (k) => F.params[k] };
 }
 
