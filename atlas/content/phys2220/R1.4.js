@@ -14,6 +14,8 @@ const g = gamma;
 const L_SUN = 3.828e26;               // W, IAU 2015 nominal solar luminosity
 const UC2 = 931.49410372;             // MeV per atomic mass unit (CODATA 2022)
 const M_U235 = 235.0439301;           // u, atomic mass of uranium-235 (AME2020)
+const U235_REST = Math.round(M_U235 * UC2);  // MeV
+const thin = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,');   // 218942 → 218\,942 (TeX)
 const betaFromK = (K, m) => { const G = 1 + K / m; return Math.sqrt(1 - 1 / (G * G)); };
 
 // K/(mc²) against speed: relativistic and Newtonian
@@ -62,7 +64,7 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
   symbols: [
     { tex: 'p', text: t`momentum, in kg·m/s — or in MeV/$c$, the unit of particle physics` },
     { tex: 'E', text: t`the total energy, rest energy included, in J or MeV` },
-    { tex: 'm', text: t`the mass — the same in every frame. Particle masses are quoted as rest energies: the electron’s $mc^2$ is ${fmt(MEC2, 4)}$ MeV, the proton’s ${fmt(MPC2, 6)} MeV` },
+    { tex: 'm', text: t`the mass — the same in every frame. Particle masses are quoted as rest energies: the electron’s $mc^2$ is ${fmt(MEC2, 4)} MeV, the proton’s ${fmt(MPC2, 6)} MeV` },
     { tex: 'v', text: 'the speed, in m/s' },
     { tex: '\\gamma', text: t`the Lorentz factor $1/\sqrt{1 - v^2/c^2}$` },
     { tex: 'c', text: t`the speed of light, $2.998\times10^{8}$ m/s` },
@@ -270,9 +272,9 @@ At rest $E = mc^2$: a body’s **rest energy**, the energy locked in its mass. T
       prompt: t`When a uranium-235 nucleus splits, about 200 MeV is released. The atom’s rest energy is about $235.04 \times ${fmt(UC2, 6)}$ MeV. What percentage of its rest energy does one fission release?`,
       answer: 200 / (M_U235 * UC2) * 100, units: '%', tol: { rel: 0.01 },
       errors: [{ value: 200 / (M_U235 * UC2), feedback: 'That is the fraction; multiply by 100 for a percentage.' }],
-      hints: [t`Rest energy $= 235.04 \times ${fmt(UC2, 6)}\ \text{MeV} \approx ${fmt(M_U235 * UC2, 4)}$ MeV.`, 'Divide 200 MeV by it and multiply by 100.'],
+      hints: [t`Rest energy $= 235.04 \times ${fmt(UC2, 6)}\ \text{MeV} \approx ${thin(U235_REST)}$ MeV.`, 'Divide 200 MeV by it and multiply by 100.'],
       teach: 'Nuclear reactions release about a tenth of a percent of the rest energy — millions of times more per kilogram than chemistry, and still a tiny fraction of mc².',
-      explain: t`$\dfrac{200}{${fmt(M_U235 * UC2, 4)}}\times100\% = ${fmt(200 / (M_U235 * UC2) * 100, 3)}\%$. Burning fuel releases about a billionth of its rest energy; fission about a thousandth. Where that 0.09% comes from — the binding energy of nuclei — is lesson A1.2.`,
+      explain: t`$\dfrac{200}{${thin(U235_REST)}}\times100\% = ${fmt(200 / (M_U235 * UC2) * 100, 3)}\%$. Burning fuel releases about a billionth of its rest energy; fission about a thousandth. Where that 0.09% comes from — the binding energy of nuclei — is lesson A1.2.`,
       visual: {
         type: 'graph',
         params: {
