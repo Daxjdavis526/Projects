@@ -63,9 +63,10 @@ export function mount(F, P0) {
   const views = (P.views || ['B', 'H', 'M']).map(toView);
   const EXPL = { B: 'B and D have closed field lines', H: 'H and E start and end on the end faces', M: 'M and P live only inside the material' };
   ctl('show', () => F.choice({ key: 'show', label: 'Show', options: views.map((v) => [v, OPTS[v]]), value: toView(P.show), explain: `${views.map((v) => EXPL[v]).join('; ')}.` }), toView(P.show));
-  ctl('shape', () => F.choice({ key: 'shape', label: 'Shape', options: [['cylinder', 'cylinder'], ['sphere', 'sphere']], value: P.shape, explain: 'A sphere’s inside fields are uniform: B = ⅔μ₀M and H = −M/3.' }), P.shape);
+  const hasH = views.includes('H');
+  ctl('shape', () => F.choice({ key: 'shape', label: 'Shape', options: [['cylinder', 'cylinder'], ['sphere', 'sphere']], value: P.shape, explain: hasH ? 'A sphere’s inside fields are uniform: B = ⅔μ₀M and H = −M/3.' : 'A sphere’s inside field is uniform: B = ⅔μ₀M.' }), P.shape);
   ctl('ratio', () => F.slider({ key: 'ratio', label: 'Length ÷ diameter', min: 0.1, max: 4, step: 0.05, value: P.ratio, explain: 'A thin disk on the left of the scale, a long rod on the right.' }), P.ratio);
-  ctl('sources', () => F.toggle({ key: 'sources', label: 'Show the sources', value: P.sources, explain: 'Bound current K = M × n̂ for B; the pole density M·n̂ on the end faces for H (bound charge for an electret).' }), P.sources);
+  ctl('sources', () => F.toggle({ key: 'sources', label: 'Show the sources', value: P.sources, explain: hasH ? 'Bound current K = M × n̂ for B; the pole density M·n̂ on the end faces for H (bound charge for an electret).' : 'The bound current K = M × n̂ on the curved side.' }), P.sources);
 
   const a = F.canvas({ aspect: 'wide', label: P.alt || 'A uniformly magnetized body cut through its axis, with its field lines' });
   const plot = new Plot(a.canvas, { x: [-3.2, 3.2], y: [-1.6, 1.6], equal: true, axes: false, grid: false });

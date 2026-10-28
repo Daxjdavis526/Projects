@@ -22,8 +22,9 @@ function spreadPic(times, caption, { xmax = 6, labels = true } = {}) {
       x: [-xmax, xmax], y: [0, 0.45], aspect: 'wide', xlabel: 'x / σ₀', ylabel: '|Ψ|² (per σ₀)', axesAt: 'edge', xticks: 6, yticks: 3,
       curves: times.map((T, j) => {
         const s = Math.sqrt(1 + T * T);
-        return { fn: `exp(-x^2/(2*${r6(s * s)}))/(${r6(s)}*sqrt(2*pi))`, color: cols[j % 4], width: 2.4, ...(labels ? { label: T === 0 ? 't = 0' : `t = ${T === 1 ? '' : T}τ`, labelAt: r6(0.9 * s + 0.2), labelDy: -8 } : {}) };
+        return { fn: `exp(-x^2/(2*${r6(s * s)}))/(${r6(s)}*sqrt(2*pi))`, color: cols[j % 4], width: 2.4 };
       }),
+      ...(labels ? { legend: times.map((T, j) => ({ label: T === 0 ? 't = 0' : `t = ${T === 1 ? '' : T}τ`, color: cols[j % 4] })), legendAt: 'tr' } : {}),
     },
     caption,
   };

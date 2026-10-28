@@ -109,7 +109,7 @@ export default lesson({
     caption: t`Exact fields of a uniformly magnetized body (its bound current is a finite solenoid’s) with $M = 1000$ kA/m, about that of a sintered NdFeB magnet. Real magnets are not perfectly uniform, and only the probe’s readout is in real units.`,
   },
   example: {
-    prompt: t`A sphere of radius $R = 5.0$ mm is magnetized uniformly, $\vec M = M\hat z$ with $M = ${tex(M_NDFEB, 2)}$ A/m — about what a sintered NdFeB magnet carries. Find its bound currents, the field inside, and the field on its axis 2.0 cm from the centre.`,
+    prompt: t`A sphere of radius $R = 5.0$ mm is magnetized uniformly, $\vec M = M\hat z$ with $M = ${tex(M_NDFEB, 2)}\ \text{A/m}$ — about what a sintered NdFeB magnet carries. Find its bound currents, the field inside, and the field on its axis 2.0 cm from the centre.`,
     visual: magPic({ shape: 'sphere', show: 'B', sources: true }, t`The magnetized sphere cut through its axis (horizontal): its bound current (orange, $\odot$ out of the page and $\otimes$ into it, larger near the equator) and its field lines, uniform inside. Exact; lines spaced by equal flux in 3D.`),
     steps: [
       { label: 'Bound currents', text: t`$\vec M$ is constant, so $\vec J_b = \nabla\times\vec M = 0$. On the surface $\hat n = \hat r$, and $\vec K_b = M\,\hat z\times\hat r = M\sin\theta\,\hat\phi$: circling the axis, greatest at the equator, zero at the poles.` },
