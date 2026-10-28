@@ -606,6 +606,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `pde4-scheme` | a finite-difference lab: upwind, FTCS, Lax–Wendroff and leapfrog against the exact solution, the stencil's domain of dependence against the characteristic, G(θ) against the unit circle | see the file header |
 | `pde4-constraint` | Gauss's law kept (staggered) or drifting (collocated) on a grid, and a damped constraint violation decaying as e^(−γt) | see the file header |
 | `dg-frenet` | the fundamental theorem of curves: a space curve built from κ(s) and τ(s) by integrating the Frenet–Serret equations, a point riding it with its frame | `kappa`, `tau` (expressions of `s` and slider keys), `length`, `sliders`, `choices`, `constants`, `ghost`, `at`, `show`, `readouts`, `play`, `speed`, `fixed`, `yaw`, `pitch` |
+| `dg4-chart` | a 2D metric drawn on its own chart (unit ellipses, or light cones for a spacetime) over 16 spaces from the plane and sphere to Rindler, de Sitter and Schwarzschild; modes: probe (metric, Christoffels with a finite-difference check, K, torsion), geodesic shooter, transport along two routes, sideways variation of length or proper time | see the file header |
 | `cm-polar` | plane-polar kinematics: the rotating r̂ and θ̂ and the acceleration split into r̈, −rθ̇², rθ̈ and 2ṙθ̇, head to tail and as bars | `r`, `theta` (expressions of t), `T`, `at`, `presets`, `sliders`, `show`, `bars`, `values`, `scale`, `x`, `y`, `fixed`, `readouts`, `labels` |
 | `cm-resonance` | a driven damped oscillator: amplitude (or A² with its Lorentzian and 2β width) against drive frequency, the phase lag, and drive and response in time | `w0`, `beta`, `w`, `f0`, `wmax`, `panels`, `y`, `lorentz`, `width`, `sliders`, `ranges`, `marks`, `readouts`, `cycles` |
 | `cm-fourier` | a periodic force (pulse, square, sawtooth, triangle), its partial sums, its harmonics against an oscillator's gain curve, and the summed response | `wave`, `h`, `d`, `tau`, `w0`, `beta`, `N`, `panels`, `sliders`, `ranges`, `nmax`, `units`, `readouts`, `values`, `response` |
@@ -678,7 +679,7 @@ Expressions in `graph`, `surface3d`, `field2d` and `phase` use the Atlas
 syntax above; the test parses all of them, so a typo fails the test rather
 than drawing nothing.
 
-### A new simulation A Play/Pause control is `F.compact`, `F.animate` and `F.button` together (copy `wv-chain`).
+### A new simulation A Play/Pause control is `F.compact`, `F.animate` and `F.button` together (copy `wv-chain`). The content test validates a sim's params through its `validate()`, but it never sees the labels a sim draws on its own canvas: check those in a screenshot.
 
 Two `Plot`s on one canvas: `Plot.clear()` wipes the whole canvas, so call it on the first only (see `gr-timewarp`).
 

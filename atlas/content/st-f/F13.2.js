@@ -72,7 +72,7 @@ That is **Richardson extrapolation**: a higher-order answer from lower-order run
     prompt: t`Compute $\int_0^1 e^{-x^2}\,dx$ (exact $${ERFI.toFixed(10)}$) by Romberg integration from the trapezoid rule with 1, 2 and 4 panels — five function values in all. Then extrapolate a whole simulation.`,
     visual: {
       type: 'graph',
-      params: { x: [-0.03, 1.03], y: [0, 1.1], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'e^(−x²)',
+      params: { x: [-0.03, 1.03], y: [0, 1.1], aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'exp(−x²)',
         curves: [{ fn: 'exp(-x^2)', color: 'ink3', width: 2.4 }, ...[0, 0.25, 0.5, 0.75].map((x0) => ({ param: [`${x0} + 0.25*t`, `${n12(Math.exp(-x0 * x0))} + (${n12(Math.exp(-((x0 + 0.25) ** 2)) - Math.exp(-x0 * x0))})*t`], t: [0, 1], color: 'accent', width: 1.8, samples: 10 }))],
         points: [0, 0.25, 0.5, 0.75, 1].map((x) => ({ x, y: n12(Math.exp(-x * x)), r: 5, color: 'gold' })) },
       caption: 'The integrand and the four-panel trapezoid (blue chords) through the five samples (gold) that the whole table uses.',
