@@ -35,7 +35,7 @@ function blobArea(c, rad, T, b = 0, n = 720, steps = 2000) {
 }
 
 const EX = (() => {
-  const c = [0.6, 0.9], rad = 0.35, A0 = Math.PI * rad * rad;
+  const c = [0.3, 1.4], rad = 0.3, A0 = Math.PI * rad * rad;
   const A4 = blobArea(c, rad, 4), A8 = blobArea(c, rad, 8), b = 0.1, Ad = blobArea(c, rad, 8, b);
   return { c, rad, A0, A4, A8, b, Ad, Ad0: A0 * Math.exp(-b * 8) };
 })();
@@ -205,7 +205,7 @@ export default lesson({
       choices: [t`Its exact area is still the original area; but coarse-grained (any finite grid of cells it touches), it seems to fill more and more of the plane`, t`Its area has grown, because it now spreads over a much larger region`, t`Its area has shrunk, because it is so thin`, t`Liouville's theorem fails near a separatrix, where the motion is slow`],
       answer: 0,
       why: { 1: t`The region it spans grows, but the filament gets thinner in exact proportion: the area is unchanged.`, 2: t`It is thin but very long; length times width stays fixed.`, 3: t`The theorem holds everywhere for a smooth $H$, separatrix included.` },
-      hints: [t`What does Liouville's theorem say about the exact area? What changes if you only look with a coarse grid?`],
+      hints: [t`What does Liouville's theorem say about the exact area?`, t`Now imagine covering the plane with cells of fixed size and counting every cell the filament touches. Does that count stay fixed?`],
       teach: t`A Hamiltonian flow keeps exact phase-space volume while stretching it into fine filaments: the root of coarse-grained entropy growth.`,
       explain: t`Exact area is conserved; the apparent (coarse-grained) area grows. That distinction is how statistical mechanics reconciles reversible dynamics with entropy that increases ([ensembles](#/lesson/phys3700.T9.1)).`,
     }),

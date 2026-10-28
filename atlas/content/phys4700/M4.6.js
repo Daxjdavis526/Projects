@@ -135,7 +135,8 @@ Inserting that identity anywhere is the most useful move in quantum mechanics: w
           P = na && nb ? abs2(ab) / (na * nb) : 0;
         } while (P < 0.05 || P > 0.95);
         const z = (c) => { const [re, im] = c; if (!im) return `${re}`; const ims = im === 1 ? 'i' : im === -1 ? '-i' : `${im}i`; return re ? `(${re}${im > 0 ? '+' : ''}${ims})` : ims; };
-        const ket = (v, n) => t`${z(v[0])}|{+}\rangle ${z(v[1]).startsWith('-') ? '' : '+'} ${z(v[1])}|{-}\rangle`;
+        const zt = (c) => { const q = z(c); return q === '1' ? '' : q === '-1' ? '-' : q; };
+        const ket = (v) => t`${zt(v[0])}|{+}\rangle ${zt(v[1]).startsWith('-') ? '' : '+'} ${zt(v[1])}|{-}\rangle`;
         const noConj = abs2(cadd(cmul(a[0], b[0]), cmul(a[1], b[1]))) / ((abs2(a[0]) + abs2(a[1])) * (abs2(b[0]) + abs2(b[1])));
         return {
           prompt: t`A spin is prepared in the state proportional to $|\beta\rangle = ${ket(b)}$. A measurement asks whether it is in the state proportional to $|\alpha\rangle = ${ket(a)}$. With both normalized, the probability is $\dfrac{|\langle\alpha|\beta\rangle|^2}{\langle\alpha|\alpha\rangle\langle\beta|\beta\rangle}$. What is it?`,

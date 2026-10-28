@@ -43,7 +43,7 @@ In C4 the metric of a surface was *induced* — the dot product of $\mathbb R^3$
     lead: t`Three metrics, each drawn on its own coordinate chart. At every grid point the teal ellipse is the set of small steps of **one fixed true length** — the metric’s "unit circle" there. Where an ellipse is small, a short coordinate step is already long. Drag P to read $g_{\mu\nu}$ and the curvature $K$.`,
     tasks: [
       t`Stereographic sphere: the ellipses are circles (the chart keeps angles) that grow away from the centre — far out, a chart step covers little ground. $K = 1$ everywhere, although the chart is a flat plane of numbers.`,
-      t`Two-link arm: the ellipses lean — $g_{\theta_1\theta_2} \ne 0$, so the coordinate directions are not perpendicular in this geometry — and they fatten where $\theta_2 = \pm 180^\circ$ (arm folded).`,
+      t`Two-link arm: the ellipses lean — $g_{\theta_1\theta_2} \ne 0$, so the coordinate directions are not perpendicular in this geometry. They stretch most where the arm is straight ($\theta_2 = 0$) and become circles where it is folded back ($\theta_2 = \pm180^\circ$, where $g = \mathrm{diag}(1, 1)$).`,
       t`Doughnut torus: the ellipses are widest across on the inner side ($v$ near $\pm\pi$), where a turn of $u$ covers least distance. $K$ changes sign between the outer and inner sides.`,
     ],
     params: { metric: 'stereo', metrics: ['stereo', 'arm', 'torus'], mode: 'chart', readout: ['P', 'g', 'K'], cells: 8 },
