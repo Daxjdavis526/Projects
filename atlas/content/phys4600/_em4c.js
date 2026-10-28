@@ -61,7 +61,7 @@ export const boostPic = (params, caption) => ({ type: 'em4c-boost', params: { co
  * optional rays at angles (degrees) from the axis, each { deg, label, color },
  * and an optional second curve. The source sits at the centre.
  */
-export function patternPic(caption, { fn = 'sin(t)^2', rays = [], second = null, curve = true, labels = [], axisLabel = 'axis' } = {}) {
+export function patternPic(caption, { fn = 'sin(t)^2', rays = [], second = null, curve = true, labels = [], axisLabel = 'axis', more = [] } = {}) {
   const curves = [{ param: ['0', 't'], t: [-1.15, 1.15], color: 'ink4', width: 1, dash: [3, 4] }];
   if (curve) curves.push({ param: [`(${fn})*sin(t)`, `(${fn})*cos(t)`], t: [0, 6.2832], color: 'gold', width: 2.6 });
   if (second) curves.push({ param: [`(${second.fn})*sin(t)`, `(${second.fn})*cos(t)`], t: [0, 6.2832], color: second.color || 'accent', width: 2.2, dash: second.dash || [6, 4] });
@@ -74,7 +74,7 @@ export function patternPic(caption, { fn = 'sin(t)^2', rays = [], second = null,
     type: 'graph',
     params: {
       x: [-1.35, 1.35], y: [-1.2, 1.2], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0,
-      curves, arrows,
+      curves, arrows: [...arrows, ...more],
       points: [{ x: 0, y: 1.12, r: 0, label: axisLabel, color: 'ink3', labelDx: 6, labelDy: 0 }, ...labels],
     },
     caption,

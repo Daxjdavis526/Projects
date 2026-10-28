@@ -61,7 +61,7 @@ The sign of $K$ sorts points: $K > 0$ **elliptic** (the surface lies on one side
     ],
     params: {
       range: 2.8, grid: false,
-      choices: [{ key: 's', label: 'Surface', options: [[0, 'torus'], [1, 'catenoid'], [2, 'helicoid'], [3, 'saddle']], value: 0, explain: 'Each with the normal X_u × X_v of its own coordinates.' }],
+      choices: [{ key: 's', label: 'Surface', options: [[0, 'torus'], [1, 'catenoid'], [2, 'helicoid'], [3, 'saddle']], value: 0, explain: 'Each with the normal $\\mathbf X_u\\times\\mathbf X_v$ of its own coordinates.' }],
       sliders: [
         { key: 'a', label: '$u$ (scaled to 0–1)', min: 0, max: 1, step: 0.005, value: 0.1, explain: 'Moves the point along a v-curve.' },
         { key: 'b', label: '$v$ (scaled to 0–1)', min: 0, max: 1, step: 0.005, value: 0, explain: 'Moves the point along a u-curve.' },

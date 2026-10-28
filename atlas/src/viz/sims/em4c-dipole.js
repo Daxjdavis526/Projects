@@ -86,7 +86,7 @@ export async function mount(F, P0) {
   const lCv = panels.includes('lines') ? F.canvas({ aspect: 'wide', label: P.alt || 'Field lines of an oscillating dipole in a plane through its axis' }) : null;
   const pCv = panels.includes('pattern') ? F.canvas({ aspect: 'wide', label: 'The radiation pattern: power per solid angle against direction' }) : null;
   const pl = lCv && new Plot(lCv.canvas, { x: [-1, 1], y: [-1, 1], equal: true, grid: false, axes: false, pad: { l: 6, r: 6, t: 6, b: 6 } });
-  const pp = pCv && new Plot(pCv.canvas, { x: [-1.3, 1.3], y: [-1.15, 1.15], equal: true, grid: false, axes: false, pad: { l: 6, r: 6, t: 6, b: 6 } });
+  const pp = pCv && new Plot(pCv.canvas, { x: [-1.2, 1.2], y: [-0.6, 0.6], equal: true, grid: false, axes: false, pad: { l: 6, r: 6, t: 6, b: 6 } });
 
   const still = P.play === false || F.compact;
   const S = { running: !still && (P.play ?? true) && !reduced && want.includes('phase') };
@@ -159,20 +159,21 @@ export async function mount(F, P0) {
   function drawPattern() {
     pp.clear();
     const which = F.params.pattern;
-    pp.line(0, -1.12, 0, 1.12, { color: 'ink4', width: 1, dash: [3, 4] });
-    pp.line(-1.25, 0, 1.25, 0, { color: 'ink4', width: 1, dash: [1, 5] });
+    const yt = pp.vy1, yb = pp.vy0, xr = pp.vx1;
+    pp.line(0, yb, 0, yt, { color: 'ink4', width: 1, dash: [3, 4] });
+    pp.line(-xr, 0, xr, 0, { color: 'ink4', width: 1, dash: [1, 5] });
     const curve = (kind, o) => pp.curve((t) => D.pattern(kind, t) * Math.sin(t), (t) => D.pattern(kind, t) * Math.cos(t), 0, 2 * Math.PI, { samples: 720, ...o });
     if (which === 'short' || which === 'both') curve('short', { color: 'gold', width: 2.6 });
     if (which === 'half' || which === 'both') curve('half', { color: 'accent', width: 2.4, dash: which === 'both' ? [6, 4] : [] });
     // the source on the axis
     pp.line(0, -0.09, 0, 0.09, { color: 'ink2', width: 2.5 });
     if (P.labels !== false) {
-      pp.text('axis', 0, 1.05, { color: 'ink3', size: 11, dx: 6, align: 'left' });
+      pp.text('axis', 0, yt - 0.08 * (yt - yb), { color: 'ink3', size: 11, dx: 6, align: 'left' });
       if (which === 'both') {
-        pp.text('point dipole: sin²θ', 0.62, 0.62, { color: 'gold', size: 11.5 });
-        pp.text('half-wave antenna', 0.62, -0.62, { color: 'accent', size: 11.5 });
-      } else pp.text(which === 'half' ? 'half-wave antenna' : 'sin²θ', 0.68, 0.55, { color: which === 'half' ? 'accent' : 'gold', size: 12 });
-      pp.text('nothing along the axis', 0, -1.05, { color: 'ink3', size: 11, dx: 6, align: 'left' });
+        pp.text('point dipole: sin²θ', 0.55, 0.5, { color: 'gold', size: 11.5 });
+        pp.text('half-wave antenna', 0.55, -0.5, { color: 'accent', size: 11.5 });
+      } else pp.text(which === 'half' ? 'half-wave antenna' : 'sin²θ', 0.62, 0.47, { color: which === 'half' ? 'accent' : 'gold', size: 12 });
+      pp.text('nothing along the axis', 0, yb + 0.08 * (yt - yb), { color: 'ink3', size: 11, dx: 6, align: 'left' });
     }
   }
 

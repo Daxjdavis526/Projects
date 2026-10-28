@@ -80,7 +80,7 @@ Its elements are sums of products $v \otimes w$; a single product is a **simple*
     multi({
       id: 'bilinear', difficulty: 2,
       prompt: t`Which of these maps $B(u, v)$ on pairs of plane vectors $u = (u_1, u_2)$, $v = (v_1, v_2)$ are bilinear?`,
-      visual: { type: 'graph', params: { x: [-2.2, 2.2], y: [-14, 14], aspect: 'wide', xlabel: 's', ylabel: 'B(su, v)', curves: [{ fn: '5*x', color: 'accent', width: 2, label: 'u₁v₁ + u₂v₂', labelAt: 1.6, labelDx: 6, labelDy: 6 }, { fn: '-5*x', color: 'teal', width: 2, label: 'u₁v₂ − u₂v₁', labelAt: -2, labelDx: 2, labelDy: -10 }, { fn: 'x + 1', color: 'gold', width: 2, label: 'u₁ + v₂', labelAt: 1.9, labelDx: -40, labelDy: 14 }, { fn: '25*x^2', color: 'bad', width: 2, label: '(u·v)²', labelAt: 0.62, labelDx: 6 }, { fn: '-10*x', color: 'violet', width: 2, dash: true, label: 'det[v u]·2', labelAt: -1.2, labelDx: 8, labelDy: -8 }] }, caption: t`Each map evaluated on $(s\,u, v)$ for $u = (1, 2)$, $v = (3, 1)$, as $s$ varies. A map linear in the first slot gives a straight line through the origin.` },
+      visual: { type: 'graph', params: { x: [-2.2, 2.2], y: [-14, 14], aspect: 'wide', xlabel: 's', ylabel: 'B(su, v)', curves: [{ fn: '5*x', color: 'accent', width: 2, label: 'u₁v₁ + u₂v₂', labelAt: 1.6, labelDx: 6, labelDy: 6 }, { fn: '-5*x', color: 'teal', width: 2, label: 'u₁v₂ − u₂v₁', labelAt: -2, labelDx: 2, labelDy: -10 }, { fn: 'x + 1', color: 'gold', width: 2, label: 'u₁ + v₂', labelAt: 1.9, labelDx: -40, labelDy: 14 }, { fn: '25*x^2', color: 'bad', width: 2, label: '(u·v)²', labelAt: 0.62, labelDx: 6 }, { fn: '10*x', color: 'violet', width: 2, dash: true, label: '2 det[v u]', labelAt: -1.05, labelDx: 10, labelDy: 6 }] }, caption: t`Each map evaluated on $(s\,u, v)$ for $u = (1, 2)$, $v = (3, 1)$, as $s$ varies. A map linear in the first slot gives a straight line through the origin.` },
       choices: [t`$u_1v_1 + u_2v_2$`, t`$u_1v_2 - u_2v_1$`, t`$2\det\begin{pmatrix} v_1 & u_1 \\ v_2 & u_2\end{pmatrix}$`, t`$u_1 + v_2$`, t`$(u_1v_1 + u_2v_2)^2$`],
       answer: [0, 1, 2],
       why: {
@@ -102,7 +102,7 @@ Its elements are sums of products $v \otimes w$; a single product is a **simple*
           errors: [{ value: m + n, feedback: t`That is $\dim(V \times W)$, pairs of vectors. A tensor has a component for every *pair of basis vectors*: $${m}\times${n}$.` }].filter((e) => e.value !== ans),
           hints: [t`A basis of $V \otimes W$ is $\{e_i \otimes f_j\}$: one element for each $i$ and each $j$.`],
           teach: 'dim(V ⊗ W) = dim V · dim W: the tensor product multiplies dimensions where the Cartesian product adds them.',
-          explain: t`$${m}\cdot${n} = ${ans}$. Only $${m} + ${n} - 1 = ${m + n - 1}$ of those dimensions are reached by simple tensors $v \otimes w$ (the rest of the space is sums), which is why most tensors are not products.`,
+          explain: t`$${m}\cdot${n} = ${ans}$. The simple tensors $v \otimes w$ form only an $${m + n - 1}$-parameter family inside that space (sums fill the rest), which is why most tensors are not products.`,
         };
       },
     }),
@@ -125,9 +125,12 @@ Its elements are sums of products $v \otimes w$; a single product is a **simple*
     num({
       id: 'triple-product', difficulty: 2,
       gen(r) {
-        const a = [r.intExcept(-3, 3, [0]), r.int(-2, 2)], b = [r.int(-2, 2), r.intExcept(-3, 3, [0])], c = [r.intExcept(-2, 2, [0]), r.intExcept(-2, 2, [0])];
-        const u = [r.int(1, 2), r.intExcept(-1, 2, [0])], v = [r.intExcept(-2, 2, [0]), 1], w = [1, r.intExcept(-2, 2, [0])];
         const d = (x, y) => x[0] * y[0] + x[1] * y[1];
+        let a, b, c, u, v, w;
+        do {
+          a = [r.intExcept(-3, 3, [0]), r.int(-2, 2)]; b = [r.int(-2, 2), r.intExcept(-3, 3, [0])]; c = [r.intExcept(-2, 2, [0]), r.intExcept(-2, 2, [0])];
+          u = [r.int(1, 2), r.intExcept(-1, 2, [0])]; v = [r.intExcept(-2, 2, [0]), 1]; w = [1, r.intExcept(-2, 2, [0])];
+        } while (d(a, u) * d(b, v) * d(c, w) === 0);
         const au = d(a, u), bv = d(b, v), cw = d(c, w);
         const ans = au * bv * cw;
         const alt = d(a, u) + d(b, v) + d(c, w);
@@ -145,9 +148,12 @@ Its elements are sums of products $v \otimes w$; a single product is a **simple*
     num({
       id: 'expand', difficulty: 3,
       gen(r) {
-        const Tuu = r.int(-2, 3), Tuv = r.intExcept(-3, 3, [0]), Tvu = r.int(-3, 3), Tvv = r.intExcept(-2, 4, [0]);
-        const a = r.intExcept(-2, 3, [0]), b = r.intExcept(-2, 2, [0]), c = r.intExcept(-2, 2, [0]), d = r.intExcept(-2, 3, [0]);
-        const ans = a * c * Tuu + a * d * Tuv + b * c * Tvu + b * d * Tvv;
+        let Tuu, Tuv, Tvu, Tvv, a, b, c, d, ans;
+        do {
+          Tuu = r.int(-2, 3); Tuv = r.intExcept(-3, 3, [0]); Tvu = r.intExcept(-3, 3, [Tuv]); Tvv = r.intExcept(-2, 4, [0]);
+          a = r.intExcept(-2, 3, [0]); b = r.intExcept(-2, 2, [0]); c = r.intExcept(-2, 2, [0]); d = r.intExcept(-2, 3, [0]);
+          ans = a * c * Tuu + a * d * Tuv + b * c * Tvu + b * d * Tvv;
+        } while (ans === 0);
         const swapped = a * c * Tuu + a * d * Tvu + b * c * Tuv + b * d * Tvv;
         const coef = (k, s, first) => (k === 1 ? (first ? s : `+ ${s}`) : k === -1 ? `- ${s}` : k < 0 ? `- ${-k}${s}` : first ? `${k}${s}` : `+ ${k}${s}`);
         return {
@@ -253,7 +259,7 @@ for n in (2, 3, 4):
           answer: ans, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: kind === 'Riemann' ? n ** 4 : n * n, feedback: 'That counts every index combination; the symmetries tie most of them together.' }, { value: kind === 'metric' ? n * (n - 1) / 2 : kind === 'F' ? n * (n + 1) / 2 : n * (n + 1) / 2, feedback: kind === 'Riemann' ? 'That is the symmetric (0,2) count; Riemann is a symmetric form on antisymmetric pairs, minus the cyclic identity: n²(n² − 1)/12.' : 'Check the diagonal: free for a symmetric form, zero for an antisymmetric one.' }].filter((e) => e.value !== ans),
           hints: [t`Symmetric: $n(n+1)/2$. Antisymmetric: $n(n-1)/2$. Riemann: $n^2(n^2 - 1)/12$.`, 'Riemann is the hardest: antisymmetric pairs, symmetric under swapping the pairs, then one cyclic identity.'],
-          teach: 'Index symmetries cut a tensor’s n^k components down to the dimension of the space it really lives in.',
+          teach: t`Index symmetries cut a tensor’s $n^k$ components down to the dimension of the space it really lives in.`,
           explain: t`$${ans}$. ${kind === 'Riemann' && n === 3 ? 'In 3D that equals the number of Ricci components, which is why 2+1 gravity has no curvature outside matter and no gravitational waves.' : 'The same formulas give 10, 6 and 20 in 4D.'}`,
         };
       },

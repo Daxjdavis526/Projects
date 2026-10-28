@@ -27,7 +27,7 @@ EX.S = (3 * EX.P) / (8 * PI * EX.r ** 2);
 if (Math.abs(EX.R / EX.Rf - 1) > 1e-9) throw new Error('M5.1: radiation resistance two ways');
 
 /** A vertical dipole at the origin with receivers at the given angles from its axis (graph). */
-function geoPic(caption, spots) {
+function geoPic(caption, spots, axisY = -1.15) {
   return {
     type: 'graph',
     params: {
@@ -35,7 +35,7 @@ function geoPic(caption, spots) {
       curves: [{ param: ['0', 't'], t: [-1.2, 1.2], color: 'ink4', width: 1, dash: [3, 4] }, { param: ['0', 't'], t: [-0.12, 0.12], color: 'ink2', width: 3 }],
       points: [
         { x: 0, y: 0.12, r: 4, color: 'warn' }, { x: 0, y: -0.12, r: 4, color: 'accent' },
-        { x: 0, y: 1.15, r: 0, label: 'dipole axis', color: 'ink3', labelDx: 6, labelDy: 0 },
+        { x: 0, y: axisY, r: 0, label: 'dipole axis', color: 'ink3', labelDx: 6, labelDy: 0 },
         ...spots.map(([deg, label]) => ({ x: +(Math.sin(deg * DEG)).toFixed(4), y: +(Math.cos(deg * DEG)).toFixed(4), r: 5, color: 'good', label, labelDx: 9, labelDy: -9 })),
       ],
     },
@@ -53,7 +53,7 @@ export default lesson({
     { tex: 'p_0', text: t`the amplitude of the dipole moment, $q_0d$, in $\text{C·m}$` },
     { tex: '\\omega', text: 'the angular frequency of the oscillation, in rad/s' },
     { tex: '\\theta', text: 'the angle between the dipole’s axis and the direction you look in' },
-    { tex: 'r', text: 'the distance from the dipole, in m (far: r ≫ λ)' },
+    { tex: 'r', text: t`the distance from the dipole, in m (far away: $r \gg \lambda$)` },
     { tex: '\\langle\\vec S\\rangle', text: t`the Poynting vector averaged over a cycle — the intensity — in $\text{W/m}^2$` },
     { tex: '\\langle P\\rangle', text: 'the total power radiated, averaged over a cycle, in W' },
     { tex: '\\mu_0,\\ c', text: t`the permeability of free space ($1.257\times10^{-6}$ N/A²) and the speed of light` },
@@ -257,7 +257,7 @@ export default lesson({
     mcq({
       id: 'cp-overhead', difficulty: 3, transfer: true,
       prompt: t`A satellite carries a short dipole antenna pointing straight down at the Earth’s centre. A ground station tracks it from horizon to horizon. When is the signal weakest?`,
-      visual: geoPic('The satellite’s dipole (centre) points along the vertical dashed line toward the ground; the receivers are ground stations seeing the satellite from different angles. Not to scale.', [[180, 'overhead'], [135, ''], [100, 'near horizon']]),
+      visual: geoPic('The satellite’s dipole (centre) points along the vertical dashed line toward the ground; the receivers are ground stations seeing the satellite from different angles. Not to scale.', [[180, 'overhead'], [135, ''], [100, 'near horizon']], 1.15),
       choices: ['When the satellite is directly overhead', 'When it is near the horizon', 'The signal is the same throughout; only the distance matters', 'When it is at 45° elevation'],
       answer: 0,
       why: {

@@ -144,6 +144,7 @@ Outside math, write thousands as plain text: "6 371 km" or "6,371 km".
 `\big(` followed by a minus sign spaces the minus as a subtraction: use
 `\bigl(` and `\bigr)` for sized brackets.
 KaTeX's `\mathscr` has no lowercase letters (Griffiths's script r renders as plain r): write the separation vector as $\boldsymbol{\mathcal R}$ or R and say so.
+Run `tools/shots.mjs … 390` for a phone-width walk: it lists every equation, canvas or table that runs past the screen, which is otherwise clipped and easy to miss. `teach` strings are markup too and need `$…$`.
 Inline math does not wrap (in an `order` step too): on a 390 px phone a long `$…$` runs off the
 screen. Break a long chain into several pieces at its `=` signs
 (`$a = b$, $= c$`) or give it a display line (`$$…$$`). A display line

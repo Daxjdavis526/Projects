@@ -70,7 +70,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Every nucleus with spin $I$ carries a magnetic moment, and the electron’s field at the nucleus couples to it. For an atom with one valence electron in an s state ($J = \tfrac12$), first-order perturbation theory gives the hyperfine Hamiltonian $A\,\hat{\vec I}\cdot\hat{\vec J}/\hbar^2$, whose eigenstates have definite total angular momentum $\hat{\vec F} = \hat{\vec I} + \hat{\vec J}$:
 
-$$\begin{gathered} E_F = \frac{A}{2}\big[F(F + 1) - I(I + 1) - J(J + 1)\big] \\ F = I \pm \tfrac12,\qquad \Delta E = A\big(I + \tfrac12\big) \end{gathered}$$
+$$\begin{gathered} E_F = \frac{A}{2}\big[F(F + 1) - I(I + 1) - J(J + 1)\big] \\ F = I \pm \tfrac12 \\ \Delta E = A\big(I + \tfrac12\big) \end{gathered}$$
 
 [Adding angular momenta](#/lesson/phys4700.M6.3) worked out hydrogen ($I = \tfrac12$, the 21-cm line) from Fermi’s contact formula. This lesson takes the same Hamiltonian to heavier nuclei — above all **caesium-133**, whose ground-state splitting has defined the SI second since 1967: exactly $9\,192\,631\,770$ Hz.`,
   symbols: [

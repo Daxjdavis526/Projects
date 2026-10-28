@@ -61,7 +61,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Put hydrogen in a uniform electric field $\mathcal E$ along $z$: $\hat H' = e\mathcal Ez$. Its $n = 2$ level shifts **linearly**, because degenerate states of opposite parity mix ([degenerate perturbation theory](#/lesson/phys4700.M8.2)). The ground state cannot: it is non-degenerate and even, so $\langle100|z|100\rangle = 0$ ([parity](#/lesson/phys4710.M2.3)). Its shift starts at second order, quadratic in the field:
 
-$$\begin{gathered} \Delta E = -\sum_{n \ge 2}\frac{|\langle n10|e\mathcal Ez|100\rangle|^2}{E_n - E_1} \equiv -\tfrac12\alpha\mathcal E^2 \\ \alpha = \tfrac92\,(4\pi\epsilon_0)\,a_0^3 \end{gathered}$$
+$$\begin{gathered} \Delta E = -\sum_{n \ge 2}\frac{|\langle n10|e\mathcal Ez|100\rangle|^2}{E_n - E_1} \\ \equiv -\tfrac12\alpha\mathcal E^2 \\ \alpha = \tfrac92\,(4\pi\epsilon_0)\,a_0^3 \end{gathered}$$
 
 The field pulls the electron cloud slightly against itself, inducing a dipole $p = \alpha\mathcal E$, and that dipole’s energy is the shift. The **polarizability** $\alpha$ is one of the few second-order quantities known exactly — and computing it shows how much of a second-order sum hides in the continuum.`,
   symbols: [
@@ -92,7 +92,7 @@ The field pulls the electron cloud slightly against itself, inducing a dipole $p
       { label: 'Upper bound', text: t`Every denominator is at least $E_2 - E_1$. Replace them all by it, and the sum becomes $\sum_n|\langle n|z|1s\rangle|^2 = \langle z^2\rangle = a_0^2$ by completeness: $\alpha \le 2a_0^2/(\tfrac38) = \tfrac{16}{3} = ${fmt(16 / 3, 4)}$.` },
       { label: 'Exact', text: t`Dalgarno and Lewis solved the first-order equation for the perturbed wave function in closed form, $\psi^{(1)} \propto -(r + r^2/2a_0)\cos\theta\,\psi_{100}$, giving exactly $\alpha = \tfrac92(4\pi\epsilon_0)a_0^3$. The bound states give $${fmt(BOUND, 4)}$; the continuum, the remaining $${fmt(4.5 - BOUND, 3)}$.` },
       { label: 'In SI', text: t`$\alpha = 4\pi\epsilon_0\times4.5\,a_0^3 = ${tex(ALPHA_SI, 4)}$ C m²/V; $\alpha/4\pi\epsilon_0 = ${fmt((ALPHA_AU * A0 ** 3) * 1e30, 4)}\ \text{Å}^3$` },
-      { label: 'Shift', text: t`At $\mathcal E = 10^7$ V/m (100 kV/cm, near the limit of a laboratory capacitor): $\Delta E = -\tfrac12\alpha\mathcal E^2 = ${tex(-0.5 * ALPHA_SI * 1e14, 3)}$ J, or $h\times${fmt(-shiftHz(1e7) / 1e6, 3)}$ MHz — $${tex((0.5 * ALPHA_SI * 1e14) / QE, 3)}$ eV. Tiny against 13.6 eV, as the small parameter $\mathcal E/\mathcal E_{\text{at}}$ with $\mathcal E_{\text{at}} = ${tex(EAT, 4)}$ V/m promised.` },
+      { label: 'Shift', text: t`At $\mathcal E = 10^7$ V/m (100 kV/cm, near the limit of a laboratory capacitor): $\Delta E = -\tfrac12\alpha\mathcal E^2 = ${tex(-0.5 * ALPHA_SI * 1e14, 3)}$ J, or $-h\times${fmt(shiftHz(1e7) / 1e6, 3)}$ MHz — $${tex((0.5 * ALPHA_SI * 1e14) / QE, 3)}$ eV. Tiny against 13.6 eV, as the small parameter $\mathcal E/\mathcal E_{\text{at}}$ with $\mathcal E_{\text{at}} = ${tex(EAT, 4)}$ V/m promised.` },
     ],
     answer: t`$2p$ alone: $${fmt(T2, 3)}\,a_0^3$; all bound states $${fmt(BOUND, 3)}$; Unsöld bound $5.33$; exact $4.5$. At $10^7$ V/m the ground state drops by $h\times${fmt(shiftHz(1e7) / 1e6, 3)}$ MHz.`,
   },

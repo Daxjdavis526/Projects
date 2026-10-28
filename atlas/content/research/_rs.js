@@ -53,7 +53,7 @@ export function venn({ op = null, A = 'A', B = 'B', counts = null, choice = null
   return {
     type: 'graph',
     params: {
-      x: [-2.1, 2.1], y: [-1.2, 1.3], aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '',
+      x: [-2.1, 2.1], y: [-1.2, 1.3], aspect: 'wide', equal: true, axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '',
       curves: [
         { param: ['-0.55 + cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'accent2', width: 2 },
         { param: ['0.55 + cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'gold', width: 2 },
@@ -109,11 +109,14 @@ export function dataPlot(data, params = {}, { color = 'accent', cap = 0, caption
  */
 export function citeGraph(nodes, edges, params = {}, caption) {
   const N = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  // stop each arrow a fixed screen-like distance short of both dots: measure in
+  // a frame where the window is 1.6 wide and 1 tall (the wide aspect)
+  const X = params.x || [0, 1], Y = params.y || [0, 1];
+  const sx = 1.6 / (X[1] - X[0]), sy = 1 / (Y[1] - Y[0]);
   const arrows = edges.map(([a, b, o = {}]) => {
     const p = N[a], q = N[b];
-    const dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy);
-    // stop 14% short at each end in world units scaled by the window
-    const f0 = Math.min(0.32, 0.55 / L), f1 = 1 - Math.min(0.32, 0.6 / L);
+    const dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx * sx, dy * sy);
+    const f0 = Math.min(0.4, 0.03 / L), f1 = 1 - Math.min(0.4, 0.035 / L);
     return { from: [r6(p.x + f0 * dx), r6(p.y + f0 * dy)], to: [r6(p.x + f1 * dx), r6(p.y + f1 * dy)], color: o.color || 'ink3', width: o.width || 1.6, ...(o.dash ? { dash: o.dash } : {}), ...(o.when !== undefined ? { when: o.when } : {}) };
   });
   const points = nodes.map((n) => ({ x: n.x, y: n.y, label: n.label, color: n.color || 'accent', r: n.r ?? 6, labelDx: n.labelDx ?? 8, labelDy: n.labelDy ?? -10, ...(n.when !== undefined ? { when: n.when } : {}) }));

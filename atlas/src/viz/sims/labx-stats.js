@@ -305,6 +305,7 @@ export function mount(F, P0) {
     const pa = new Plot(a.canvas, { x: [0, 1], y: [0, 1], xticks: 6, yticks: 5, xlabel: P.xname, ylabel: two ? P.yname : 'density', axesAt: 'edge' });
     const b = F.canvas({ aspect: 'wide', label: 'The histogram of the output against linear propagation' });
     const pb = new Plot(b.canvas, { x: [0, 1], y: [0, 1], xticks: 7, yticks: 5, xlabel: P.fname, ylabel: 'density', axesAt: 'edge' });
+    const view = { x: null, y: null, f: null };
     function draw() {
       const mu = two ? [P.x[0], P.y[0]] : [P.x[0]], sg = two ? [F.params.sx, F.params.sy] : [F.params.sx];
       const rho = two ? F.params.rho ?? P.rho : 0, N = F.params.N || P.N;
@@ -312,16 +313,19 @@ export function mount(F, P0) {
       const lin = M.linear(fx, mu, sg, rho);
       const fs = narrowOf(a.canvas) ? 10.5 : 12;
       // inputs
-      const xr = [mu[0] - 4 * sg[0], mu[0] + 4 * sg[0]];
+      // views stay put while the draws fit, so a narrower spread looks narrower
+      if (!view.x || 4 * sg[0] > view.x[1] - mu[0] || 2 * sg[0] < 0.25 * (view.x[1] - mu[0])) view.x = [mu[0] - 4.5 * sg[0], mu[0] + 4.5 * sg[0]];
+      if (two && (!view.y || 4 * sg[1] > view.y[1] - mu[1] || 2 * sg[1] < 0.25 * (view.y[1] - mu[1]))) view.y = [mu[1] - 4.5 * sg[1], mu[1] + 4.5 * sg[1]];
+      const xr = view.x;
       if (two) {
-        pa.setView(xr, [mu[1] - 4 * sg[1], mu[1] + 4 * sg[1]]);
+        pa.setView(xr, view.y);
         pa.clear();
         const g = pa.ctx, show = Math.min(N, 2500);
         g.save(); g.fillStyle = pa.color('accent'); g.globalAlpha = 0.45;
         for (let i = 0; i < show; i++) { g.beginPath(); g.arc(pa.X(mc.inputs[0][i]), pa.Y(mc.inputs[1][i]), 1.6, 0, 2 * Math.PI); g.fill(); }
         g.restore();
         pa.point(mu[0], mu[1], { r: 4, color: 'gold' });
-        pa.text(`${show} of ${N} draws`, xr[1], mu[1] + 4 * sg[1], { align: 'right', size: fs - 0.5, color: 'ink3', dx: -6, dy: 10 });
+        pa.text(`${show} of ${N} draws`, xr[1], view.y[1], { align: 'right', size: fs - 0.5, color: 'ink3', dx: -6, dy: 10 });
       } else {
         const hx = M.histogram(mc.inputs[0], xr[0], xr[1], 50), dx = hx.counts.map((c) => c / (N * hx.w));
         pa.setView(xr, [0, 1.2 * Math.max(...dx)]);
@@ -330,7 +334,8 @@ export function mount(F, P0) {
       }
       // output
       const s = mc.sd, lo = Math.min(mc.lo95, lin.value - 3.2 * lin.sigma), hi = Math.max(mc.hi95, lin.value + 3.2 * lin.sigma);
-      const fr = P.fr || [lo - 0.25 * (hi - lo), hi + 0.25 * (hi - lo)];
+      if (!view.f || mc.lo95 < view.f[0] || mc.hi95 > view.f[1] || (hi - lo) < 0.12 * (view.f[1] - view.f[0])) view.f = [lo - 0.6 * (hi - lo), hi + 0.6 * (hi - lo)];
+      const fr = P.fr || view.f;
       const hf = M.histogram(mc.samples, fr[0], fr[1], 70), df = hf.counts.map((c) => c / (N * hf.w));
       const linPeak = lin.sigma > 0 ? M.normalPdf(0) / lin.sigma : 0;
       pb.setView(fr, [0, 1.18 * Math.max(...df, Math.min(linPeak, 3 * Math.max(...df)))]);
@@ -339,9 +344,11 @@ export function mount(F, P0) {
       if (P.lin !== false && lin.sigma > 0) pb.fn((x) => M.normalPdf((x - lin.value) / lin.sigma) / lin.sigma, { color: 'gold', width: 2, dash: [7, 4], samples: 500 });
       if (P.lin !== false && !(lin.sigma > 0)) pb.line(lin.value, 0, lin.value, pb.vy1, { color: 'gold', width: 2, dash: [7, 4] });
       const yT = pb.vy1 * 0.92;
-      pb.line(mc.lo, yT, mc.hi, yT, { color: 'violet', width: 3 });
-      pb.point(mc.median, yT, { r: 3.5, color: 'violet' });
-      pb.text('MC 68% interval', mc.hi, yT, { size: fs, color: 'violet', dx: 6 });
+      if (!hide.has('mc')) {                       // hide: ['mc'] keeps the interval off the picture too
+        pb.line(mc.lo, yT, mc.hi, yT, { color: 'violet', width: 3 });
+        pb.point(mc.median, yT, { r: 3.5, color: 'violet' });
+        pb.text('MC 68% interval', mc.hi, yT, { size: fs, color: 'violet', dx: 6 });
+      }
       if (P.lin !== false) pb.text('linear prediction', fr[1], pb.vy1 * 0.78, { size: fs, color: 'gold', align: 'right', dx: -6 });
       if (P.readout !== false) {
         F.readout([
@@ -362,7 +369,7 @@ export function mount(F, P0) {
   // ─── tail ───────────────────────────────────────────────────────────────
   const chi = P.test === 'chi2';
   ctl('nu', () => chi && F.slider({ key: 'nu', label: 'Degrees of freedom $\\nu$', min: 1, max: 40, step: 1, value: P.nu, unit: '', explain: 'For a fit: the number of data points minus the number of fitted parameters.' }));
-  const smax = chi ? Math.max(3 * P.nu + 10, 2 * P.stat) : 6;
+  const smax = chi ? (wanted.includes('nu') ? 130 : Math.max(3 * P.nu + 10, 2 * P.stat)) : 6;
   ctl('stat', () => F.slider({ key: 'stat', label: chi ? 'Observed $\\chi^2$' : 'Observed $z$', min: 0, max: chi ? Math.ceil(smax) : 6, step: chi ? 0.1 : 0.05, value: P.stat, unit: '', explain: chi ? 'The χ² your data gave: the sum of squared normalized residuals.' : 'How many standard uncertainties apart the measurement and the prediction are.' }));
   const a = F.canvas({ aspect: 'wide', label: P.alt || 'A test statistic’s distribution with the tail beyond the observed value shaded' });
   const pl = new Plot(a.canvas, { x: [0, 1], y: [0, 1], xticks: 8, yticks: 5, xlabel: chi ? 'χ²' : 'z', ylabel: 'probability density', axesAt: 'edge' });

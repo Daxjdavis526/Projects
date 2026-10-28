@@ -28,7 +28,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`Why do levels coincide? Because of symmetry — and the mechanism is short. Suppose two observables both commute with the Hamiltonian but not with each other:
 
-$$[\hat H, \hat A] = [\hat H, \hat B] = 0,\qquad [\hat A, \hat B] \neq 0$$
+$$\begin{gathered} [\hat H, \hat A] = [\hat H, \hat B] = 0 \\ [\hat A, \hat B] \neq 0 \end{gathered}$$
 
 If a level of $\hat H$ held only one state, that state would have to be an eigenstate of both $\hat A$ and $\hat B$ at once — impossible for all states when they do not commute. So some levels must be **degenerate**. Rotations are the classic case: $\hat L_x$, $\hat L_y$, $\hat L_z$ all commute with a central $\hat H$ but not with each other, and every level with angular momentum $l$ is $(2l + 1)$-fold degenerate. Run it backwards, and **breaking a symmetry splits a level** — every splitting in a spectrum is a symmetry being broken. When levels coincide with no obvious reason, look for a hidden symmetry.`,
   symbols: [

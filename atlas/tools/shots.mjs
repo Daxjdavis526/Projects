@@ -2,7 +2,8 @@
 // simulation in the gallery — in dark and light themes. Several rendering
 // bugs in this repository were only ever visible in a screenshot.
 //   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<gallery id>|boss:<course>|all] [dark|light] [width]
-//   (width, default 1280: e.g. 390 to walk a lesson, boss or sim at phone width)
+//   (width, default 1280: e.g. 390 to walk a lesson, boss or sim at phone width; it then also
+//   lists math, canvases, tables and code that run past the screen — clipped, so easy to miss)
 // It serves the repository itself on a free local port (so several runs can
 // go at once) and prints any page errors; exit status 1 if there were some.
 // Playwright comes preinstalled in this environment; nothing is installed.
@@ -39,11 +40,34 @@ const BASE = process.env.ATLAS_URL || `http://127.0.0.1:${server.address().port}
 const PAGES = [['home', '#/'], ['library', '#/library'], ['course', '#/course/math1220'], ['gr', '#/gr'], ['map', '#/map'], ['review', '#/review'], ['progress', '#/progress'], ['manifest', '#/manifest'], ['settings', '#/settings'], ['explore', '#/explore']];
 
 const browser = await chromium.launch();
-const errors = [];
+const errors = [], overflow = [];
 async function newPage(theme, width = 1280, height = 860) {
   const page = await browser.newPage({ viewport: { width, height } });
   page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`${page.url()}: ${m.text()}`); });
+  if (width < 600) {
+    // at phone width, after each shot, report math, pictures, tables and code that run past their
+    // clipping box or the screen: overflow is clipped, so a screenshot shows a cut-off edge at best
+    const shoot = page.screenshot.bind(page);
+    page.screenshot = async (o) => {
+      const r = await shoot(o);
+      const over = await page.evaluate(() => {
+        const W = innerWidth, found = [];
+        const clipOf = (el) => { for (let a = el.parentElement; a; a = a.parentElement) { const ox = getComputedStyle(a).overflowX; if (ox !== 'visible') return a; } return null; };
+        for (const el of document.querySelectorAll('main .katex, main canvas, main table, main pre, main img')) {
+          if (el.closest('.katex') && el.closest('.katex') !== el) continue;
+          const r = el.getBoundingClientRect();
+          if (!r.width) continue;
+          const c = clipOf(el), cr = c ? c.getBoundingClientRect() : { left: 0, right: W };
+          const lim = Math.min(cr.right, W);
+          if (r.right > lim + 2) found.push(`${el.tagName.toLowerCase()}${el.classList.contains('katex') ? ' (math)' : ''} by ${Math.round(r.right - lim)} px: ${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 50)}`);
+        }
+        return found;
+      });
+      if (over.length) overflow.push(`${o?.path?.split('/').pop() || page.url()}: ${over.slice(0, 4).join(' · ')}`);
+      return r;
+    };
+  }
   await page.goto(BASE + '#/settings');
   await page.waitForTimeout(400);
   // set the theme through the app itself, so it is saved with the other settings
@@ -197,4 +221,5 @@ for (const theme of themes) {
 await browser.close();
 server.close();
 console.log(errors.length ? errors.join('\n') : 'no page errors');
+if (WIDTH < 600) console.log(overflow.length ? `content wider than the screen (clipped):\n${overflow.join('\n')}` : 'nothing overflows the screen');
 process.exit(errors.length ? 1 : 0);

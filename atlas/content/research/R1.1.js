@@ -126,9 +126,9 @@ author:"^Taylor, J"
       visual: {
         type: 'graph',
         params: {
-          x: [-2.1, 2.1], y: [-1.2, 1.3], aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '',
-          curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'accent2', width: 2 }, { param: ['0.3 + 0.45*cos(t)', '-0.25 + 0.45*sin(t)'], t: [0, 6.2832], color: 'gold', width: 2 }],
-          points: [{ x: -1.25, y: 1.1, r: 0, label: 'author:"Taylor, J"', color: 'accent2' }, { x: 0.3, y: -0.25, r: 0, label: 'author:"^Taylor, J"', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 }],
+          x: [-2.1, 2.1], y: [-1.2, 1.3], aspect: 'wide', equal: true, axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '',
+          curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'accent2', width: 2 }, { param: ['0.25 + 0.62*cos(t)', '-0.2 + 0.62*sin(t)'], t: [0, 6.2832], color: 'gold', width: 2 }],
+          points: [{ x: -1.25, y: 1.1, r: 0, label: 'author:"Taylor, J"', color: 'accent2' }, { x: 0.25, y: -0.2, r: 0, label: 'author:"^Taylor, J"', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 }],
         },
         caption: 'Schematic: everything the second query finds, the first finds too.',
       },

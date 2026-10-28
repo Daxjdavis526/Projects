@@ -65,7 +65,7 @@ function levelsPic({ ns = [2], choice = false, qed = true, caption, numbers = tr
     }
   }
   const ymin = Math.min(...ns.map((n) => relShift(n, 0) * UEV));
-  const heads = ['Bohr', '+ relativity', '+ spin–orbit', ...(qed ? ['+ Lamb (n = 2)'] : [])].slice(0, upto);
+  const heads = ['Bohr', '+ rel.', '+ s–o', ...(qed ? ['+ Lamb'] : [])].slice(0, upto);
   heads.forEach((h, k) => points.push(label((col[k][0] + col[k][1]) / 2, -ymin * 0.1, h, 'ink3', 0, 0, 'center')));
   return {
     type: 'graph',
@@ -109,7 +109,7 @@ The energy depends on $n$ and the total angular momentum $j$ only — not on $l$
   ],
   why: 'Fine structure is the first place where relativity and spin show up in an atom’s spectrum; its leftovers — the Lamb shift and the electron’s anomalous moment — launched quantum electrodynamics, the most precisely tested theory in physics.',
   visual: {
-    ...levelsPic({ ns: [2, 3], choice: true, caption: t`First-order shifts computed from CODATA 2022 constants with an infinitely heavy proton; the hyperfine structure (under 1 μeV for $n = 2$) is left out. The Lamb shift column uses the measured $2S_{1/2}$–$2P_{1/2}$ interval, about 1057.8 MHz; smaller QED shifts of the other levels, and all of them for $n = 3$, are not drawn.` }),
+    ...levelsPic({ ns: [2, 3], choice: true, caption: t`Columns: Bohr’s level, then + the relativistic correction (rel.), + spin–orbit and Darwin terms (s–o), + the Lamb shift ($n = 2$ only). First-order shifts computed from CODATA 2022 constants with an infinitely heavy proton; the hyperfine structure (under 1 μeV for $n = 2$) is left out. The Lamb shift column uses the measured $2S_{1/2}$–$2P_{1/2}$ interval, about 1057.8 MHz; smaller QED shifts of the other levels, and all of them for $n = 3$, are not drawn.` }),
     title: 'One level, three corrections',
     lead: t`Take hydrogen’s $n = 2$ or $n = 3$ level apart. The relativistic correction lowers every state, the more the smaller its $l$ (low-$l$ orbits dive close to the proton, where the electron is fastest). Spin–orbit coupling then splits each $l$ into $j = l \pm \tfrac12$. Watch the end result: states with the same $j$ land at exactly the same energy.`,
     tasks: [
@@ -120,7 +120,7 @@ The energy depends on $n$ and the total angular momentum $j$ only — not on $l$
   },
   example: {
     prompt: t`Derive the first-order fine structure of hydrogen, then find the $2P_{3/2}$–$2P_{1/2}$ splitting in GHz and compare it with the measured 10 969.0 MHz.`,
-    visual: levelsPic({ ns: [2], caption: t`Hydrogen’s $n = 2$ level corrected step by step, from CODATA 2022 constants; the Lamb shift is the measured value. Hyperfine structure (under 1 μeV) not shown.` }),
+    visual: levelsPic({ ns: [2], caption: t`Hydrogen’s $n = 2$ level corrected step by step — relativistic (rel.), spin–orbit and Darwin (s–o), Lamb — from CODATA 2022 constants; the Lamb shift is the measured value. Hyperfine structure (under 1 μeV) not shown.` }),
     steps: [
       { label: 'Relativity', text: t`The kinetic energy is $$\begin{gathered} \sqrt{p^2c^2 + m^2c^4} - mc^2 \\ = \frac{p^2}{2m} - \frac{p^4}{8m^3c^2} + \dots \end{gathered}$$ so $\hat H'_r = -\hat p^4/8m^3c^2$. Write $\hat p^4/4m^2 = (\hat H^0 - V)^2$ and use $\langle1/r\rangle = 1/n^2a$, $\langle1/r^2\rangle = 1/[(l + \tfrac12)n^3a^2]$: $$E_r^1 = -\frac{E_n^2}{2mc^2}\Big(\frac{4n}{l + \frac12} - 3\Big).$$ The level is degenerate, but $\hat H'_r$ commutes with $\hat L^2$ and $\hat L_z$, so the states $|n\,l\,m\rangle$ are already good and the plain expectation value is right.` },
       { label: 'Spin–orbit', text: t`In the electron’s frame the proton circles it, making a field $\propto\vec L$; the electron’s magnetic moment $\propto\vec S$ sits in it. With Thomas’s factor of ½ (the electron’s frame rotates): $\hat H'_{so} = \dfrac{e^2}{8\pi\epsilon_0}\dfrac{\hat{\vec S}\cdot\hat{\vec L}}{m^2c^2r^3}$. It commutes with $\hat J^2$, $\hat L^2$, $\hat S^2$ and $\hat J_z$ but not with $\hat L_z$ or $\hat S_z$: the good states are $|n\,l\,j\,m_j\rangle$, as degenerate perturbation theory demands.` },
@@ -207,7 +207,7 @@ The energy depends on $n$ and the total angular momentum $j$ only — not on $l$
         const dE = fsShift(2, 1.5, Z) - fsShift(2, 0.5, Z), ans = GHZ(dE);
         return {
           prompt: t`A hydrogen-like ion — one electron bound to a nucleus of charge $Ze$ — has $E_n = -Z^2(13.6\ \text{eV})/n^2$, and its fine structure scales as $Z^4$. Hydrogen’s $2P_{3/2}$–$2P_{1/2}$ splitting is $${fmt(GHZ(SPLIT2), 5)}$ GHz at first order. What is it for ${name}, $Z = ${Z}$, in GHz?`,
-          visual: { type: 'graph', params: { x: [0.5, 6.5], y: [0, 4], aspect: 'wide', xlabel: 'nuclear charge Z', ylabel: 'log₁₀(splitting / hydrogen’s)', axesAt: 'edge', xticks: 6, yticks: 4, curves: [{ fn: '4*log(x)', color: 'accent', width: 2.2, domain: [1, 6.5] }], points: [{ x: 1, y: 0, r: 5, color: 'gold', label: 'H', labelDx: 6, labelDy: -10 }, { x: Z, y: r6(4 * Math.log10(Z)), r: 5, color: 'warn', hollow: true, label: `Z = ${Z}`, labelDx: 8, labelDy: 12 }] }, caption: 'The Z⁴ law on a log scale, relative to hydrogen; first-order theory, which loses accuracy as Zα grows.' },
+          visual: { type: 'graph', params: { x: [0.5, 6.5], y: [0, 4], aspect: 'wide', xlabel: 'nuclear charge Z', ylabel: 'log₁₀(splitting / hydrogen’s)', axesAt: 'edge', xticks: 6, yticks: 4, curves: [{ fn: '4*log(x)', color: 'accent', width: 2.2, domain: [1, 6.5] }], points: [{ x: 1, y: 0, r: 5, color: 'gold', label: 'H', labelDx: 6, labelDy: -10 }] }, caption: 'The Z⁴ law on a log scale, relative to hydrogen; first-order theory, which loses accuracy as Zα grows.' },
           answer: ans, units: 'GHz', tol: { rel: 0.005 },
           errors: [{ value: GHZ(SPLIT2) * Z * Z, feedback: t`Bohr energies scale as $Z^2$, but fine structure is $\alpha^2|E_n|/n^2$ with each $\alpha$ effectively $Z\alpha$: $Z^4$.` }, { value: GHZ(SPLIT2) * Z ** 3, feedback: t`It is $Z^4$: $E_n^2$ brings $Z^4$ and nothing divides it back.` }],
           hints: [t`$E^1_{fs} \propto E_n^2/mc^2$, and $E_n \propto Z^2$.`, t`Multiply $${fmt(GHZ(SPLIT2), 5)}$ GHz by $Z^4 = ${Z ** 4}$.`],

@@ -42,7 +42,7 @@ function hePic({ caption, models = false, arrows = [], zoom = true, extra = {} }
   const levels = [L(LV.s1, 0.4, 'accent', '2¹S', zoom ? 'r' : 'l'), L(LV.p1, 0.4, 'accent', '2¹P'), L(LV.s3, 2.4, 'gold', '2³S', zoom ? 'r' : 'l'), L(LV.p3, 2.4, 'gold', '2³P')];
   if (!zoom) levels.unshift(L(LV.g, 0.4, 'accent', '1¹S'));
   const y = zoom ? [-61, -53] : [-81.5, -52];
-  const pic = levelPic(levels, { y, x: [0, 4.4], ylabel: 'energy (eV)', caption, arrows, yticks: zoom ? 7 : 6, extra });
+  const pic = levelPic(levels, { y, x: [0, 4.4], ylabel: 'energy (eV)', caption, arrows, yticks: zoom ? 4 : 6, extra });
   pic.params.curves.push({ ...seg(0.2, LIM, 4.2, LIM, 'ink3', 1.4), dash: [6, 4] });
   pic.params.points.push(label(2.2, LIM, 'He⁺ + e⁻', 'ink3', 0, -10, 'center'), label(1, y[0] + (zoom ? 0.4 : 1), 'singlet (para)', 'accent', 0, 0, 'center'), label(3, y[0] + (zoom ? 0.4 : 1), 'triplet (ortho)', 'gold', 0, 0, 'center'));
   if (models) {
@@ -58,7 +58,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Lesson M1.1 showed identical fermions avoiding each other and bosons bunching. In an atom this changes the energy: the electrons repel, so a state that keeps them apart costs less. For helium with one electron in $1s$ and one in $nl$, first-order perturbation theory in the repulsion gives
 
-$$\begin{gathered} E_\pm = E^{(0)} + J \pm K \\ J = \Big\langle \psi_a\psi_b \Big|\frac{e^2}{4\pi\epsilon_0r_{12}}\Big|\psi_a\psi_b\Big\rangle,\quad K = \Big\langle \psi_a\psi_b \Big|\frac{e^2}{4\pi\epsilon_0r_{12}}\Big|\psi_b\psi_a\Big\rangle \end{gathered}$$
+$$\begin{gathered} E_\pm = E^{(0)} + J \pm K \\ J = \Big\langle \psi_a\psi_b \Big|\frac{e^2}{4\pi\epsilon_0r_{12}}\Big|\psi_a\psi_b\Big\rangle \\ K = \Big\langle \psi_a\psi_b \Big|\frac{e^2}{4\pi\epsilon_0r_{12}}\Big|\psi_b\psi_a\Big\rangle \end{gathered}$$
 
 The upper sign belongs to the symmetric spatial state, whose spins form a singlet (**parahelium**); the lower sign to the antisymmetric spatial state, a spin triplet (**orthohelium**). Since $K > 0$, the triplet lies lower, by $2K$. No spin force does this — the spins only decide which spatial symmetry is allowed. That is the **exchange interaction**, and it is behind Hund’s rules and ferromagnetism.`,
   symbols: [

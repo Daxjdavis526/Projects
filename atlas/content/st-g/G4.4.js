@@ -1,7 +1,7 @@
 // Bayesian parameter estimation for gravitational waves. Gaussian noise makes
 // the likelihood ln L(θ) = ⟨d, h(θ)⟩ − ½⟨h(θ), h(θ)⟩ (= −½‖d − h‖² + const);
 // times a prior, a posterior over chirp mass whose width falls roughly as 1/ρ
-// (sg2-matched posterior panel: 90% width 1.41 M☉ at peak = 1σ, 0.49 at 2σ for
+// (sg2-matched posterior panel: 90% width 1.40 M☉ at peak = 1σ, 0.47 at 2σ for
 // the default record; it collapses from the whole range to a peak as the
 // signal crosses detectability). Worked: GW150914’s 36 + 29 M☉ → ℳ = 28.1
 // (source) and (1 + z)ℳ = 30.6 (detector, z = 0.09) — the waveform only knows
@@ -41,18 +41,18 @@ The exponent is $-\tfrac12\lVert d - h(\theta)\rVert^2$ up to a constant: parame
   visual: {
     type: 'sg2-matched',
     title: 'A posterior sharpening',
-    lead: t`Top: the loudest SNR each chirp-mass template finds in the record. Bottom: the posterior on chirp mass, $\propto e^{\rho^2/2}$ with a flat prior, and its $90\%$ credible interval (shaded).`,
+    lead: t`Top: the loudest SNR each chirp-mass template finds in the record. Bottom: the posterior on chirp mass with a flat prior — the likelihood $e^{\rho^2/2}$ summed over arrival times — and its $90\%$ credible interval (shaded); its axis zooms to fit.`,
     tasks: [
       t`Lower the signal to $0.5\sigma$: the posterior spreads over the whole range — nothing has been measured. Raise it past about $0.7\sigma$: it collapses onto a peak. Detection and measurement switch on together.`,
-      t`Double the signal from $1$ to $2$: the interval shrinks roughly in proportion to $1/\rho$.`,
+      t`Double the signal from $1$ to $2$: the interval shrinks from about $1.4$ to $0.5\ M_\odot$ — a little faster than $1/\rho$ here, because near SNR $8$ the posterior still has broad shoulders.`,
       t`Set the true chirp mass to $50\ M_\odot$: with fewer cycles in band, the same SNR buys a much wider interval. Then press “New noise” a few times with “Reveal” on: the interval wanders around the truth and occasionally misses it.`,
     ],
     params: { Mc: 30, tpl: 30, amp: 1, seed: 2, panels: ['scan', 'post'], controls: ['amp', 'Mc', 'noise', 'reveal'] },
-    caption: t`A toy: white noise, one detector, a leading-order chirp from 30 to 250 Hz. The likelihood is maximized over amplitude, phase and arrival time instead of marginalized, and only the chirp mass is varied — real analyses sample about fifteen parameters at once.`,
+    caption: t`A toy: white noise, one detector, a leading-order chirp from 30 to 250 Hz. The likelihood is maximized over amplitude, phase and arrival time instead of marginalized, and only the chirp mass is varied — real analyses sample about fifteen parameters at once. The posterior’s bumps are this noise realization’s imprint, not physics.`,
   },
   example: {
     prompt: t`GW150914’s component masses were about $36$ and $29\ M_\odot$ in the source’s rest frame, at redshift $z = 0.09$. What chirp mass does the detector measure, and why is it not the source’s?`,
-    visual: { type: 'graph', params: { x: [0, 0.3], y: [20, 260], aspect: 'wide', axesAt: 'edge', xlabel: 'time before cut-off τ (s)', ylabel: 'frequency (Hz)', curves: [{ fn: '(1/pi)*(5/(256*x))^(3/8)*(28.1*4.926e-6)^(-5/8)', color: 'ink2', width: 1.8, dash: true, domain: [0.002, 0.3], label: 'ℳ = 28.1 (source)', labelAt: 0.2, labelDy: -10 }, { fn: '(1/pi)*(5/(256*x))^(3/8)*(30.6*4.926e-6)^(-5/8)', color: 'accent', width: 2.2, domain: [0.002, 0.3], label: 'ℳ = 30.6 (as received)', labelAt: 0.09, labelDx: 8 }] }, caption: t`Leading-order frequency against time to coalescence for the two chirp masses. A heavier chirp mass sweeps more slowly at a given time before merger; redshift does the same to the received signal.` },
+    visual: { type: 'graph', params: { x: [0, 0.3], y: [20, 260], aspect: 'wide', axesAt: 'edge', xlabel: 'time before cut-off τ (s)', ylabel: 'frequency (Hz)', curves: [{ fn: '(1/pi)*(5/(256*x))^(3/8)*(28.1*4.926e-6)^(-5/8)', color: 'ink2', width: 1.8, dash: true, domain: [0.002, 0.3], label: 'ℳ = 28.1 (source)', labelAt: 0.22, labelDy: -14 }, { fn: '(1/pi)*(5/(256*x))^(3/8)*(30.6*4.926e-6)^(-5/8)', color: 'accent', width: 2.2, domain: [0.002, 0.3], label: 'ℳ = 30.6 (as received)', labelAt: 0.1, labelDx: 4, labelDy: 16 }] }, caption: t`Leading-order frequency against time to coalescence for the two chirp masses. A heavier chirp mass sweeps more slowly at a given time before merger; redshift does the same to the received signal.` },
     steps: [
       { label: 'Chirp mass', text: t`$\mathcal M = \dfrac{(36\times29)^{3/5}}{65^{1/5}} = 28.1\ M_\odot$ in the source frame.` },
       { label: 'Masses are times', text: t`With $G = c = 1$ a mass is a time: the waveform depends on $\mathcal M$ only through $G\mathcal M/c^3$ ($4.93\ \mu\text{s}$ per solar mass). Every time scale of the signal is set by it.` },
@@ -70,7 +70,7 @@ The exponent is $-\tfrac12\lVert d - h(\theta)\rVert^2$ up to a constant: parame
         const ans = chirp(a, b);
         return {
           prompt: t`A binary has component masses $m_1 = ${a}\ M_\odot$ and $m_2 = ${b}\ M_\odot$. What is its chirp mass $\mathcal M = (m_1m_2)^{3/5}/(m_1 + m_2)^{1/5}$?`,
-          visual: { type: 'graph', params: { x: [0, 100], y: [0, 80], aspect: 'wide', axesAt: 'edge', xlabel: 'm₁ (M☉)', ylabel: 'm₂ (M☉)', curves: [mcCurve(10, 'ink3', 'ℳ = 10'), mcCurve(30, 'ink3', 'ℳ = 30'), mcCurve(60, 'ink3', 'ℳ = 60'), { fn: 'x', color: 'ink4', width: 1, domain: [0, 80] }], points: [{ x: a, y: b, color: 'gold', label: 'this binary' }] }, caption: t`Lines of constant chirp mass in the plane of component masses. The data pin the binary near one such line; where along it is much less certain.` },
+          visual: { type: 'graph', params: { x: [0, 150], y: [0, 80], aspect: 'wide', axesAt: 'edge', xlabel: 'm₁ (M☉)', ylabel: 'm₂ (M☉)', curves: [mcCurve(10, 'ink3', 'ℳ = 10'), mcCurve(30, 'ink3', 'ℳ = 30'), mcCurve(60, 'ink3', 'ℳ = 60'), { fn: 'x', color: 'ink4', width: 1, domain: [0, 80] }], points: [{ x: a, y: b, color: 'gold', label: 'this binary' }] }, caption: t`Lines of constant chirp mass in the plane of component masses. The data pin the binary near one such line; where along it is much less certain.` },
           answer: ans, units: 'Msun', tol: { rel: 0.005 },
           errors: [{ value: (a * b) / (a + b), feedback: t`That is the reduced mass $m_1m_2/(m_1 + m_2)$. The chirp mass uses the powers $3/5$ and $1/5$.` }, { value: (a + b) / 2, feedback: 'The average mass is not the chirp mass, though for equal masses they are related: ℳ = m/2^(1/5).' }],
           hints: [t`$m_1m_2 = ${a * b}$, $m_1 + m_2 = ${a + b}$.`, t`$\mathcal M = ${a * b}^{0.6}/${a + b}^{0.2}$.`],
@@ -86,7 +86,7 @@ The exponent is $-\tfrac12\lVert d - h(\theta)\rVert^2$ up to a constant: parame
         const ans = (1 + z) * M;
         return {
           prompt: t`A binary with source-frame chirp mass $${M}\ M_\odot$ merges at redshift $z = ${z}$. What chirp mass does a waveform fit to the detector data find?`,
-          visual: { type: 'graph', params: { x: [0, 1], y: [0, 80], aspect: 'wide', axesAt: 'edge', xlabel: 'redshift z', ylabel: 'detector-frame ℳ (M☉)', curves: [{ fn: `${M}*(1 + x)`, color: 'accent', width: 2.2 }], vlines: [{ x: z, color: 'gold', label: `z = ${z}` }] }, caption: t`The detector-frame chirp mass grows linearly with redshift. Not to scale beyond $z \approx 1$ for this binary’s detectability.` },
+          visual: { type: 'graph', params: { x: [0, 1], y: [0, 2.4 * M], aspect: 'wide', axesAt: 'edge', xlabel: 'redshift z', ylabel: 'detector-frame ℳ (M☉)', curves: [{ fn: `${M}*(1 + x)`, color: 'accent', width: 2.2 }], vlines: [{ x: z, color: 'gold', label: `z = ${z}` }] }, caption: t`The detector-frame chirp mass grows linearly with redshift. Not to scale beyond $z \approx 1$ for this binary’s detectability.` },
           answer: ans, units: 'Msun', tol: { rel: 0.005 },
           errors: [{ value: M / (1 + z), feedback: t`Redshift makes the source look **heavier**: its signal is stretched in time, like a heavier binary’s.` }, { value: M, feedback: 'The detector sees the redshifted, time-stretched waveform; the fitted mass absorbs the factor 1 + z.' }],
           hints: [t`The waveform depends on $G\mathcal M/c^3$, a time, and every received time is stretched by $1 + z$.`, t`$\mathcal M_{\text{det}} = (1 + z)\mathcal M$.`],
@@ -115,11 +115,11 @@ The exponent is $-\tfrac12\lVert d - h(\theta)\rVert^2$ up to a constant: parame
       type: 'slider', id: 'target-precision', difficulty: 2,
       prompt: t`The record below holds a $30\ M_\odot$ chirp. How loud must it be for the $90\%$ credible interval on chirp mass to be narrower than $1\ M_\odot$? Set the signal strength to the smallest value that achieves it.`,
       visual: { type: 'sg2-matched', params: { Mc: 30, tpl: 30, amp: 0.6, seed: 2, panels: ['post'], controls: ['amp'], hide: ['opt'] }, caption: t`The chirp-mass posterior for this record; the interval is in the readout. Toy model: white noise, maximized likelihood, flat prior.` },
-      param: 'amp', answer: [1.35, 1.5],
+      param: 'amp', answer: [1.3, 1.45],
       instruction: 'Raise the signal until the 90% interval is just under 1 M☉ wide, then check.',
-      hints: ['Read the interval from the readout as you move the slider.', t`It is near $2\ M_\odot$ wide at a signal of $0.7\sigma$ and shrinks steadily after that.`],
+      hints: ['Read the interval from the readout as you move the slider.', t`It is about $2\ M_\odot$ wide at a signal of $0.75\sigma$ and shrinks steadily after that.`],
       teach: 'Measurement precision is bought with SNR: halving an error bar needs roughly twice the signal-to-noise.',
-      explain: t`The interval first drops below $1\ M_\odot$ at a signal of about $1.35\sigma$ (SNR near $10$). Below about $0.7\sigma$ the posterior spreads over the whole range: no measurement at all.`,
+      explain: t`The interval first drops below $1\ M_\odot$ at a signal of about $1.3\sigma$ (optimal SNR near $10$). Below about $0.7\sigma$ the posterior spreads over the whole range: no measurement at all.`,
     },
     mcq({
       id: 'credible-meaning', difficulty: 2,
@@ -159,7 +159,7 @@ The exponent is $-\tfrac12\lVert d - h(\theta)\rVert^2$ up to a constant: parame
       },
       hints: [t`Expand $\langle d - h, d - h\rangle = \langle d, d\rangle - 2\langle d, h\rangle + \langle h, h\rangle$.`, t`Which terms depend on $\theta$, and with which sign?`],
       teach: 'The Gaussian-noise likelihood rewards waveforms that leave noise-like residuals: high correlation with the data, but no more loudness than the data hold.',
-      explain: t`Maximizing over an overall amplitude $A$ in $h = A\hat h$ gives $A = \langle d, \hat h\rangle/\langle\hat h, \hat h\rangle$ and $\ln L = \tfrac12\rho^2$ — the matched-filter SNR again, which is why the simulation’s posterior is $\propto e^{\rho^2/2}$.`,
+      explain: t`Maximizing over an overall amplitude $A$ in $h = A\hat h$ gives $A = \langle d, \hat h\rangle/\langle\hat h, \hat h\rangle$ and $\ln L = \tfrac12\rho^2$ — the matched-filter SNR again, which is why the simulation builds its posterior from $e^{\rho^2/2}$.`,
     }),
     code({
       id: 'grid-posterior', difficulty: 3,
@@ -247,7 +247,6 @@ print(f"chirp mass {med:.1f}, 90% interval {lo:.1f} to {hi:.1f} Msun")
     mcq({
       id: 'cp-calibration', difficulty: 3,
       prompt: t`An analysis is applied to $20$ simulated signals injected into real noise, each with its own $90\%$ credible interval for chirp mass. If the analysis is well calibrated, how many intervals should miss the injected value?`,
-      visual: { type: 'graph', params: { x: [-0.5, 7.5], y: [0, 0.32], aspect: 'wide', axesAt: 'edge', xlabel: 'number of misses out of 20', ylabel: 'probability', xticks: 8, shade: [0.1216, 0.2702, 0.2852, 0.1901, 0.0898, 0.0319, 0.0089, 0.0020].map((p, k) => ({ fn: String(p), lower: 0, from: k - 0.35, to: k + 0.35, color: 'accent', alpha: 0.5 })) }, caption: t`The binomial distribution of misses when each interval independently has a $10\%$ chance to miss.` },
       choices: [
         t`About $2$, though anywhere from $0$ to $4$ is unremarkable`,
         t`None: a correct analysis never misses`,
@@ -262,7 +261,7 @@ print(f"chirp mass {med:.1f}, 90% interval {lo:.1f} to {hi:.1f} Msun")
       },
       hints: [t`Each interval misses with probability $0.1$.`, t`The expected number of misses is $20\times0.1$; the spread is $\sqrt{20\times0.1\times0.9}$.`],
       teach: 'A credible interval is calibrated if, over many injections, it contains the truth the stated fraction of the time — the standard test of a parameter-estimation pipeline.',
-      explain: t`Expected misses: $2$, standard deviation $\sqrt{1.8} \approx 1.3$. Plotting the fraction of injections inside each credible level against the level (a P–P plot) is how gravitational-wave pipelines are checked; the simulation’s toy covers the truth $37$ times in $40$ noise draws at $90\%$.`,
+      explain: t`Expected misses: $2$, standard deviation $\sqrt{1.8} \approx 1.3$; the binomial probabilities of $0, 1, 2, 3, 4$ misses are $0.12, 0.27, 0.29, 0.19, 0.09$. Plotting the fraction of injections inside each credible level against the level (a P–P plot) is how gravitational-wave pipelines are checked; the simulation’s toy covers the truth $37$ times in $40$ noise draws at $90\%$.`,
     }),
   ],
   sources: [

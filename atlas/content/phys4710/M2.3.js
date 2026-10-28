@@ -37,7 +37,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Not every symmetry is continuous. **Parity** reflects space through the origin, and **time reversal** runs motion backwards:
 
-$$\begin{gathered} \hat\Pi\,\psi(\vec r) = \psi(-\vec r), \qquad \hat\Pi^2 = 1 \\ \hat\Theta:\ \vec r \to \vec r,\quad \vec p \to -\vec p,\quad \vec J \to -\vec J,\quad i \to -i \end{gathered}$$
+$$\begin{gathered} \hat\Pi\,\psi(\vec r) = \psi(-\vec r), \qquad \hat\Pi^2 = 1 \\ \hat\Theta:\ \vec r \to \vec r,\quad \vec p \to -\vec p \\ \vec J \to -\vec J,\quad i \to -i \end{gathered}$$
 
 Discrete symmetries have no generator and give no conservation law in the Noether sense, but they still constrain everything: a state of definite parity cannot have an electric dipole moment, so an electric-dipole photon must connect states of **opposite parity** (the Laporte rule). Time reversal is stranger — it must complex-conjugate the wave function, and for spin ½ applying it twice gives $-1$. That single sign forces **Kramers degeneracy**: every level of a system with an odd number of electrons is at least doubly degenerate unless a magnetic field is present.`,
   symbols: [

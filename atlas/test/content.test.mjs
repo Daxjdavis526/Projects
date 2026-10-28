@@ -80,7 +80,12 @@ async function checkVisual(where, spec) {
     try { p = mod.validate({ ...(mod.defaults || {}), ...(spec.params || {}) }); } catch (e) { p = [`validate threw: ${e.message}`]; }
     check(`${where}: ${spec.type} parameters`, p.length === 0, p.slice(0, 3).join('; '));
   }
-  for (const s of [spec.lead, spec.caption, spec.explain, spec.note, spec.title, ...(spec.tasks || [])]) {
+  // control labels and their explanations are markup too (sliders, choices, readouts of any sim)
+  const PP = spec.params || {};
+  const arr = (v) => (Array.isArray(v) ? v : []);   // some sims take sliders: true or a list of names
+  const controlText = [...arr(PP.sliders), ...arr(PP.choices)].flatMap((c) => (c && typeof c === 'object' ? [c.label, c.explain] : []))
+    .concat(arr(PP.readouts).map((r) => (r && typeof r === 'object' ? r.label : null)));
+  for (const s of [spec.lead, spec.caption, spec.explain, spec.note, spec.title, ...(spec.tasks || []), ...controlText.filter((x) => typeof x === 'string')]) {
     if (!s) continue;
     const dmg = escapeDamage(s);
     if (dmg) check(`${where}: visual text`, false, `“${String(s).slice(0, 40)}…” ${dmg}`);

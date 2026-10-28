@@ -90,7 +90,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Treat a metal’s valence electrons as free particles in a box of volume $V$. With periodic boundary conditions the allowed wave vectors form a cubic lattice in **k-space**, one point per volume $(2\pi)^3/V$, each holding two electrons (spin up and down). Fermions fill these states from the bottom, so the ground state is a sphere of occupied points — the **Fermi sea** — of radius $k_F$. Counting points gives $N = 2\cdot\tfrac43\pi k_F^3\cdot V/(2\pi)^3$, so
 
-$$\begin{gathered} k_F = (3\pi^2n)^{1/3}, \qquad E_F = \frac{\hbar^2k_F^2}{2m} = \frac{\hbar^2}{2m}(3\pi^2n)^{2/3} \end{gathered}$$
+$$\begin{gathered} k_F = (3\pi^2n)^{1/3} \\ E_F = \frac{\hbar^2k_F^2}{2m} = \frac{\hbar^2}{2m}(3\pi^2n)^{2/3} \end{gathered}$$
 
 with $n = N/V$. The top electrons carry several eV of kinetic energy at absolute zero — pure Pauli exclusion. Add a periodic potential and the spectrum breaks into **bands** separated by gaps, which decides metal or insulator.`,
   symbols: [
