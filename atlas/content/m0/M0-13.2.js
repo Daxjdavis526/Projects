@@ -89,7 +89,7 @@ an estimate is a staircase on a log scale, and each guess that is off by a facto
     steps: [
       { label: 'Plan', text: t`Photons per second $=$ (power the Sun emits) $\div$ (energy of one photon). Estimate each.` },
       { label: 'The power', text: t`At Earth’s distance $d$, sunlight spreads over a sphere of area $4\pi d^2 = 4\pi(1.5\times10^{11})^2 = ${tex(4 * Math.PI * AU * AU, 2)}\ \text{m}^2$, each square metre getting $1361$ W. So $L \approx ${tex(LSUN, 2)}$ W.` },
-      { label: 'One photon', text: t`Sunlight peaks in the visible, so take $\lambda \approx 500$ nm: $E = \dfrac{hc}{\lambda} = \dfrac{(6.6\times10^{-34})(3.0\times10^{8})}{5\times10^{-7}} \approx ${tex(E500, 1)}$ J.` },
+      { label: 'One photon', text: t`Sunlight peaks in the visible, so take $\lambda \approx 500$ nm: $$E = \frac{hc}{\lambda} = \frac{(6.6\times10^{-34})(3.0\times10^{8})}{5\times10^{-7}} \approx ${tex(E500, 1)}\ \text{J}.$$` },
       { label: 'Divide', text: t`$N \approx \dfrac{${tex(LSUN, 2)}}{${tex(E500, 1)}} \approx ${tex(N_EST, 1)}$ photons per second: about $10^{45}$.` },
       { label: 'Check against reality', text: t`For a $5772$ K blackbody the average photon carries $2.70\,kT = ${tex(2.701 * KB * 5772, 3)}$ J, less than a green one, because much of sunlight is infrared. That gives $${tex(N_BB, 2)}$ per second: our estimate is low by a factor of $${nice(sig(N_BB / N_EST, 2))}$ — well within a Fermi estimate’s factor of a few.` },
     ],
@@ -146,7 +146,7 @@ an estimate is a staircase on a log scale, and each guess that is off by a facto
           shade: [{ fn: 'sqrt(max(0, 1 - x^2))', lower: '-sqrt(max(0, 1 - x^2))', from: -1, to: 1, color: 'teal', alpha: 0.35 }],
           curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'teal', width: 2 }, { param: ['0', 't'], t: [-1, 1], color: 'gold', width: 2.4, dash: true }],
           arrows: [-0.75, -0.25, 0.25, 0.75, -1.5, 1.5].map((y) => ({ from: [-4.2, y], to: [Math.abs(y) < 1 ? -Math.sqrt(1 - y * y) - 0.05 : 2.6, y], color: 'gold', width: 1.6 })),
-          points: [{ x: 0.3, y: 1.35, r: 0, label: 'cross-section πR²', labelAlign: 'left', labelDx: 0, labelDy: 0, color: 'gold' }],
+          points: [{ x: 1.15, y: 0, r: 0, label: 'cross-section πR²', labelAlign: 'left', labelDx: 0, labelDy: 0, color: 'gold' }],
         },
         caption: t`Parallel sunlight (from the left) meets the Earth: the beam it intercepts is a disc as wide as the Earth (gold dashes). Not to scale.`,
       },

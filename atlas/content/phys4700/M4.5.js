@@ -63,7 +63,7 @@ export default lesson({
   minutes: 17, difficulty: 3,
   intro: t`For any two observables, Robertson’s inequality bounds the product of their spreads by their commutator. Its proof throws a term away; keeping it gives Schrödinger’s stronger form, which still bites when the commutator’s average vanishes. Observables that commute are **compatible**: they share a complete set of eigenfunctions and can both be sharp at once. Time is not an observable — there is no time operator — yet a true energy–time relation follows when $B$ is the Hamiltonian:
 
-$$\sigma_A^2\sigma_B^2 \ge \Big(\frac{1}{2i}\langle[\hat A, \hat B]\rangle\Big)^2, \qquad \sigma_H\,\Delta t \ge \frac{\hbar}{2}\ \ \text{with}\ \ \Delta t \equiv \frac{\sigma_Q}{|d\langle Q\rangle/dt|}$$
+$$\begin{gathered} \sigma_A^2\sigma_B^2 \ge \Big(\frac{1}{2i}\langle[\hat A, \hat B]\rangle\Big)^2 \\ \sigma_H\,\Delta t \ge \frac{\hbar}{2}\ \ \text{with}\ \ \Delta t \equiv \frac{\sigma_Q}{|d\langle Q\rangle/dt|} \end{gathered}$$
 
 $\Delta t$ is the time it takes the average of **some** observable $Q$ to move by one standard deviation: a state with a sharp energy changes slowly, and a state that changes fast must have a spread of energies.`,
   symbols: [

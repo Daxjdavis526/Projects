@@ -45,7 +45,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`Born’s rule for position is one case of a rule for **every** observable. Expand the state in the eigenfunctions $f_n$ of the observable’s Hermitian operator $\hat Q$. A measurement of $Q$ gives one of the eigenvalues $q_n$, with probability equal to the squared size of that component; afterwards the state **is** that eigenfunction (or, for a degenerate eigenvalue, the state’s projection onto its eigenspace). For a continuous spectrum, sums become integrals and probabilities become densities:
 
-$$P(q_n) = |c_n|^2 = |\langle f_n|\Psi\rangle|^2, \qquad \Phi(p, t) = \frac{1}{\sqrt{2\pi\hbar}}\int e^{-ipx/\hbar}\,\Psi(x, t)\,dx$$
+$$\begin{gathered} P(q_n) = |c_n|^2 = |\langle f_n|\Psi\rangle|^2 \\ \Phi(p, t) = \frac{1}{\sqrt{2\pi\hbar}}\int e^{-ipx/\hbar}\,\Psi(x, t)\,dx \end{gathered}$$
 
 $|\Phi(p, t)|^2dp$ is the probability that a momentum measurement gives a value in $[p, p + dp]$, exactly as $|\Psi(x, t)|^2dx$ is for position: $\Phi$ is the same state written in the momentum basis.`,
   symbols: [
@@ -86,7 +86,7 @@ $|\Phi(p, t)|^2dp$ is the probability that a momentum measurement gives a value 
       { label: 'Write the component', text: t`$\Phi(p) = \langle f_p|\psi\rangle = \dfrac{\sqrt\kappa}{\sqrt{2\pi\hbar}}\displaystyle\int_{-\infty}^{\infty}e^{-ipx/\hbar}e^{-\kappa|x|}\,dx$ — the generalized rule with $f_p = e^{ipx/\hbar}/\sqrt{2\pi\hbar}$.` },
       { label: 'Integrate', text: t`Split at $x = 0$: the two halves give $\dfrac{1}{\kappa + ip/\hbar} + \dfrac{1}{\kappa - ip/\hbar} = \dfrac{2\kappa}{\kappa^2 + p^2/\hbar^2}$. So $\Phi(p) = \sqrt{\dfrac{2}{\pi}}\,\dfrac{p_0^{3/2}}{p^2 + p_0^2}$, real and even.` },
       { label: 'Check normalization', text: t`With $u = p/p_0$: $\int|\Phi|^2dp = \tfrac{2}{\pi}\int\tfrac{du}{(1 + u^2)^2} = \tfrac{2}{\pi}\cdot\tfrac{\pi}{2} = 1$. ✓ Plancherel’s theorem guarantees it: the state is normalized in either basis.` },
-      { label: 'The inside', text: t`$P(|p| < p_0) = \tfrac{2}{\pi}\displaystyle\int_{-1}^{1}\tfrac{du}{(1 + u^2)^2} = \tfrac{2}{\pi}\Big[\tfrac{u}{2(1 + u^2)} + \tfrac{\arctan u}{2}\Big]_{-1}^{1} = \tfrac{2}{\pi}\Big(\tfrac12 + \tfrac{\pi}{4}\Big)$.` },
+      { label: 'The inside', text: t`$P(|p| < p_0) = \tfrac{2}{\pi}\displaystyle\int_{-1}^{1}\tfrac{du}{(1 + u^2)^2}$ $= \tfrac{2}{\pi}\Big[\tfrac{u}{2(1 + u^2)} + \tfrac{\arctan u}{2}\Big]_{-1}^{1}$ $= \tfrac{2}{\pi}\Big(\tfrac12 + \tfrac{\pi}{4}\Big)$.` },
       { label: 'Answer', text: t`$P(|p| > p_0) = 1 - \tfrac{1}{\pi} - \tfrac12 = ${fmt(1 - deltaP(1), 4)}$. A measurement gives a definite value of $p$ — never “$p$ is spread out” — and just under one time in five, that value lies beyond $\pm p_0$.` },
       { label: 'Sense check', text: t`$\langle p^2\rangle = \int p^2|\Phi|^2dp = p_0^2$, so $\langle p^2\rangle/2m = \hbar^2\kappa^2/2m = -E$: the kinetic energy is $|E|$ and the potential energy $2E$, as the virial theorem for a delta well demands.` },
     ],

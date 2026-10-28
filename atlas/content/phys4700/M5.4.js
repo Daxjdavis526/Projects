@@ -185,7 +185,7 @@ They are orthonormal over the sphere, $\int Y_l^{m*}Y_{l'}^{m'}\,d\Omega = \delt
       },
       hints: [t`$\partial_\theta\cos\theta = -\sin\theta$ and $\partial_\phi$ of $Y_1^0$ is zero.`, t`Compare $-\hbar\sqrt{3/4\pi}\sin\theta\,e^{i\phi}$ with $Y_1^1 = -\sqrt{3/8\pi}\sin\theta\,e^{i\phi}$.`],
       teach: 'The ladder operators act on spherical harmonics with the same coefficients the algebra predicts, ħ√(l(l + 1) − m(m ± 1)).',
-      explain: t`$\hat L_+Y_1^0 = \hbar e^{i\phi}\sqrt{\tfrac{3}{4\pi}}(-\sin\theta) = \sqrt2\,\hbar\Big(-\sqrt{\tfrac{3}{8\pi}}\sin\theta\,e^{i\phi}\Big) = \sqrt2\,\hbar\,Y_1^1$ — the coefficient the ladder algebra gave, $\sqrt{1\cdot2 - 0}$, and the Condon–Shortley phase is chosen precisely so that it comes out positive.`,
+      explain: t`$\hat L_+Y_1^0 = \hbar e^{i\phi}\sqrt{\tfrac{3}{4\pi}}(-\sin\theta)$ $= \sqrt2\,\hbar\Big(-\sqrt{\tfrac{3}{8\pi}}\sin\theta\,e^{i\phi}\Big)$ $= \sqrt2\,\hbar\,Y_1^1$ — the coefficient the ladder algebra gave, $\sqrt{1\cdot2 - 0}$, and the Condon–Shortley phase is chosen precisely so that it comes out positive.`,
     }),
   ],
   checkpoint: [

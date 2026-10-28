@@ -64,9 +64,11 @@ export function blochPic({ states = [], points = [], caption, yaw = 0.55, pitch 
     params: {
       range: 1.35, yaw, pitch,
       spheres: [{ centre: [0, 0, 0], radius: 1, color: 'ink3' }],
-      points: [...P, ...points],
-      vectors: states.map((s) => ({ to: s.v.map(r6), color: s.color || 'gold', label: s.label || '\\psi' })),
       ...extra,
+      // lists in extra add to the picture's own rather than replacing them
+      points: [...P, ...points, ...(extra.points || [])],
+      vectors: [...states.map((s) => ({ to: s.v.map(r6), color: s.color || 'gold', label: s.label || '\\psi' })), ...(extra.vectors || [])],
+      ...(extra.curves ? { curves: extra.curves } : {}),
     },
     caption: caption || 'The Bloch sphere: each spin-½ state, up to an overall phase, is a point on it. States at opposite ends of a diameter are orthogonal. Drag to rotate.',
   };

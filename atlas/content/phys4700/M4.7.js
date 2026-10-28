@@ -50,7 +50,7 @@ export default lesson({
   minutes: 17, difficulty: 3,
   intro: t`For a Hamiltonian that does not change, the Schrödinger equation is solved once and for all by the **time-evolution operator** $\hat U(t) = e^{-i\hat Ht/\hbar}$: $|\Psi(t)\rangle = \hat U(t)|\Psi(0)\rangle$. It is unitary, so lengths and probabilities are preserved. Every prediction is an inner product like $\langle\Psi(t)|\hat Q|\Psi(t)\rangle$, so you may equally keep the state fixed and let the **operators** evolve — the **Heisenberg picture**:
 
-$$\hat Q_H(t) = \hat U^\dagger\hat Q\,\hat U, \qquad \frac{d\hat Q_H}{dt} = \frac{i}{\hbar}\big[\hat H, \hat Q_H\big] + \Big(\frac{\partial\hat Q}{\partial t}\Big)_H$$
+$$\begin{gathered} \hat Q_H(t) = \hat U^\dagger\hat Q\,\hat U \\ \frac{d\hat Q_H}{dt} = \frac{i}{\hbar}\big[\hat H, \hat Q_H\big] + \Big(\frac{\partial\hat Q}{\partial t}\Big)_H \end{gathered}$$
 
 Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\langle Q\rangle/dt = \tfrac{i}{\hbar}\langle[\hat H, \hat Q]\rangle + \langle\partial\hat Q/\partial t\rangle$: anything that commutes with $\hat H$ is conserved, and averages obey equations that look like Newton’s.`,
   symbols: [
@@ -90,7 +90,7 @@ Taking the expectation value gives the generalized **Ehrenfest theorem**, $d\lan
     prompt: t`Find the Heisenberg-picture operators $\hat x_H(t)$ and $\hat p_H(t)$ for (a) the harmonic oscillator $\hat H = \hat p^2/2m + \tfrac12m\omega^2\hat x^2$ and (b) the free particle. What do they say about $\langle x\rangle$ and about how a free packet spreads?`,
     visual: phasePic(2, 1, t`For the oscillator, $(\langle x\rangle, \langle p\rangle/m\omega)$ turns clockwise round a circle at the angular frequency $\omega$ — exactly the classical motion.`),
     steps: [
-      { label: 'Heisenberg equation', text: t`Differentiate $\hat Q_H = \hat U^\dagger\hat Q\hat U$ with $d\hat U/dt = -\tfrac{i}{\hbar}\hat H\hat U$ and $\hat U$ commuting with $\hat H$: $\dfrac{d\hat Q_H}{dt} = \dfrac{i}{\hbar}\hat U^\dagger[\hat H, \hat Q]\hat U = \dfrac{i}{\hbar}[\hat H, \hat Q_H]$.` },
+      { label: 'Heisenberg equation', text: t`Differentiate $\hat Q_H = \hat U^\dagger\hat Q\hat U$ with $d\hat U/dt = -\tfrac{i}{\hbar}\hat H\hat U$ and $\hat U$ commuting with $\hat H$: $\dfrac{d\hat Q_H}{dt} = \dfrac{i}{\hbar}\hat U^\dagger[\hat H, \hat Q]\hat U$ $= \dfrac{i}{\hbar}[\hat H, \hat Q_H]$.` },
       { label: 'Commutators', text: t`$[\hat H, \hat x] = \tfrac{1}{2m}[\hat p^2, \hat x] = -\tfrac{i\hbar}{m}\hat p$ and $[\hat H, \hat p] = \tfrac12m\omega^2[\hat x^2, \hat p] = i\hbar m\omega^2\hat x$. So $\dot{\hat x}_H = \hat p_H/m$ and $\dot{\hat p}_H = -m\omega^2\hat x_H$ — Hamilton’s equations, for operators.` },
       { label: 'Solve', text: t`$\hat x_H(t) = \hat x\cos\omega t + \dfrac{\hat p}{m\omega}\sin\omega t$ and $\hat p_H(t) = \hat p\cos\omega t - m\omega\,\hat x\sin\omega t$, with $\hat x$, $\hat p$ the operators at $t = 0$.` },
       { label: 'Ehrenfest', text: t`Take the expectation value in the fixed state: $\langle x\rangle(t) = \langle x\rangle_0\cos\omega t + \tfrac{\langle p\rangle_0}{m\omega}\sin\omega t$, the classical orbit of the picture. Exact, because the force $-m\omega^2x$ is linear in $x$.` },

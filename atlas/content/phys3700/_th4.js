@@ -117,8 +117,38 @@ export const atmAt = (z) => ATM76.find((r) => r.z === z);
 /** log₁₀ of a column of the table as graph expression text in x (altitude, km), linear between rows. */
 export function atmExpr(f, xv = 'x') {
   const R = ATM76.map((r) => [r.z, Math.log10(f(r))]);
-  return R.slice(0, -1).map(([a, la], i) => { const [b, lb] = R[i + 1]; return `step(${xv} - ${a})*step(${b} - ${xv})*(${r4(la)} + ${r4((lb - la) / (b - a))}*(${xv} - ${a}))`; }).join(' + ');
+  return R.slice(0, -1).map(([a, la], i) => { const [b, lb] = R[i + 1]; const a0 = i === 0 ? a - 1 : a, b0 = i === R.length - 2 ? b + 1 : b;
+    return `step(${xv} - ${a0})*step(${b0} - ${xv})*(${r4(la)} + ${r4((lb - la) / (b - a))}*(${xv} - ${a}))`; }).join(' + ');
 }
 export const D_EFF = 3.65e-10;              // m, the 1976 standard's effective collision diameter
 /** Mean free path λ = 1/(√2 π d² n), m. */
 export const mfp = (n, d = D_EFF) => 1 / (Math.SQRT2 * Math.PI * d * d * n);
+
+// ─── black-hole pictures (shared by T11.2's style and the boss) ───────────
+/** Predicted Hawking temperature against mass on log axes, with the CMB line, the crossover, and an optional marked mass. */
+export function hawkingPic({ M = null, caption, cross = true, x = [8, 38], y = [-16, 16] } = {}) {
+  const lt1 = r4(Math.log10(hawkingT(1)));
+  return {
+    type: 'graph',
+    params: {
+      x, y, aspect: 'wide', axesAt: 'edge', xlog: true, ylog: true, xlabel: 'mass (kg)', ylabel: 'Hawking temperature (K)',
+      curves: [{ fn: `${lt1} - x`, domain: x, color: 'violet', width: 2.4 }],
+      hlines: [{ y: r4(Math.log10(T_CMB)), color: 'warn', label: 'CMB today, 2.725 K' }],
+      vlines: [...(cross ? [{ x: r4(Math.log10(M_CROSS)), color: 'ink4' }] : []), ...(M === null ? [] : [{ x: r4(Math.log10(M)), color: 'gold' }])],
+    },
+    caption: caption || 'Predicted Hawking temperature against mass (log axes): T ∝ 1/M. The grey line is the crossover, about 0.6 Moon masses, where a hole is exactly as warm as the CMB. Theory: never observed.',
+  };
+}
+/** Bekenstein–Hawking entropy against mass on log axes (slope 2), with an optional marked mass. */
+export function entropyPic({ M = null, caption, x = [10, 32] } = {}) {
+  const ls1 = r4(Math.log10(bhS(1)));
+  return {
+    type: 'graph',
+    params: {
+      x, y: [ls1 + 2 * x[0], ls1 + 2 * x[1]], aspect: 'wide', axesAt: 'edge', xlog: true, ylog: true, xlabel: 'mass (kg)', ylabel: 'entropy S / k',
+      curves: [{ fn: `${ls1} + 2*x`, domain: x, color: 'violet', width: 2.4 }],
+      vlines: M === null ? [] : [{ x: r4(Math.log10(M)), color: 'gold' }],
+    },
+    caption: caption || 'Bekenstein–Hawking entropy against mass on log axes: a line of slope 2, since S ∝ M². Theory.',
+  };
+}

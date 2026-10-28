@@ -69,7 +69,7 @@ where $\pi d^2$ is the target area a molecule of diameter $d$ presents and $n$ i
     lead: t`The curve is the mean free path of air from the ground to 500 km, from the U.S. Standard Atmosphere 1976 (note the logarithmic axis: each grid line is ten times the last). Drag the altitude and compare $\lambda$ with the size of a spacecraft.`,
     tasks: [
       'At sea level λ is 66 nm: a 1 m object meets air as a smooth continuous fluid.',
-      'Climb to about 100 km (the Kármán line): λ is about 14 cm. Above 120 km it passes 1 m.',
+      'Climb to about 100 km (the Kármán line): λ is about 14 cm. Near 110 km it passes 1 m.',
       'At 400 km, the ISS’s altitude, λ is 16 km: a molecule that bounces off the station will almost never hit another one nearby.',
     ],
     params: {
@@ -190,7 +190,7 @@ where $\pi d^2$ is the target area a molecule of diameter $d$ presents and $n$ i
           errors: apart([{ value: v * 4, feedback: 'The impact rate per unit area is n v̄/4: only a quarter of the molecules’ flux reaches a given wall.' }, { value: (v * 3) / 4, feedback: 'Molecules that hit a wall carry 2kT on average, not (3/2)kT: faster ones arrive more often.' }, { value: P, feedback: 'That is in W/m²; convert to mW/m².' }], v),
           hints: [t`$\bar v = \sqrt{8kT/\pi m} = ${fmt(vb, 4)}$ m/s.`, t`Power per area $= \tfrac14 n\bar v\times2kT$.`],
           teach: 'In orbit the hot thermosphere delivers almost no heat: too few molecules. Spacecraft temperatures are set by sunlight in and thermal radiation out.',
-          explain: t`$\tfrac14 n\bar v = ${texNum(flux, 3)}\ \text{m}^{-2}\text{s}^{-1}$, times $2kT = ${texNum(2 * KB * row.T, 3)}$ J, gives $${fmt(v, 3)}$ mW/m² — about $${texNum(P / S0, 2)}$ of sunlight. The gas temperature is real but irrelevant: a satellite at ${z} km runs at whatever temperature balances sunlight, Earthshine and its own radiation. (Its orbital speed of 7.7 km/s adds the ram flux $\tfrac12\rho v^3$, of order a watt per square metre at 400 km — larger, still small, and the source of drag.)`,
+          explain: t`$\tfrac14 n\bar v = ${texNum(flux, 3)}\ \text{m}^{-2}\text{s}^{-1}$, times $2kT = ${texNum(2 * KB * row.T, 3)}$ J, gives $${fmt(v, 3)}$ mW/m² — about $${texNum(P / S0, 2)}$ of sunlight. The gas temperature is real but irrelevant: a satellite at ${z} km runs at whatever temperature balances sunlight, Earthshine and its own radiation. (Its orbital speed of 7.7 km/s adds the ram flux $\tfrac12\rho v^3$, about 0.6 W/m² at 400 km — larger, still small, and the source of drag.)`,
           visual: altPic({ z, caption: 'Mean free path against altitude (U.S. Standard Atmosphere 1976): at this height λ is kilometres, so the gas reaches the satellite molecule by molecule.' }),
         };
       },
@@ -215,7 +215,7 @@ where $\pi d^2$ is the target area a molecule of diameter $d$ presents and $n$ i
       prompt: 'Which situation must be modelled molecule by molecule (free-molecular flow) rather than as a continuous fluid?',
       choices: [
         'A cubesat at 400 km, where λ is about 16 km and the satellite about 30 cm',
-        'A jet airliner at 11 km, where λ is about 0.3 μm',
+        'A jet airliner at 11 km, where λ is about 0.2 μm',
         'A capsule’s parachute opening at 10 km',
         'Air flowing through a rocket engine’s turbopump',
       ],

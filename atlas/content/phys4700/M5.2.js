@@ -44,7 +44,7 @@ export default lesson({
   minutes: 18, difficulty: 3,
   intro: t`Put the Coulomb potential into the radial equation and only one thing can go wrong: the power series for $u(r)$ may fail to stop, and then it grows like $e^{2\kappa r}$ and cannot be normalized. Demanding that it stop forces a whole number $n$ and gives the energies — with the **reduced mass** $\mu$ of electron and proton, because the proton moves too:
 
-$$E_n = -\frac{\mu}{2\hbar^2}\Big(\frac{e^2}{4\pi\epsilon_0}\Big)^2\frac{1}{n^2} = -\frac{hcR_H}{n^2}, \qquad \mu = \frac{m_em_p}{m_e + m_p}$$
+$$\begin{gathered} E_n = -\frac{\mu}{2\hbar^2}\Big(\frac{e^2}{4\pi\epsilon_0}\Big)^2\frac{1}{n^2} \\ = -\frac{hcR_H}{n^2} \\ \mu = \frac{m_em_p}{m_e + m_p} \end{gathered}$$
 
 The terminated series are associated Laguerre polynomials, and the wave functions are $\psi_{nlm} = R_{nl}(r)Y_l^m(\theta, \phi)$ with $l = 0, 1, \dots, n - 1$. Every level is $n^2$-fold degenerate (twice that with spin) — more than spherical symmetry alone explains.`,
   symbols: [

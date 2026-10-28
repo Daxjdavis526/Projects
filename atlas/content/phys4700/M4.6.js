@@ -42,7 +42,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`Dirac’s notation writes a state as a **ket** $|\psi\rangle$, a vector that exists before any basis is chosen. Its **bra** $\langle\psi|$ is the conjugate-transposed row that turns any ket into a number, $\langle\psi|\phi\rangle$. A basis gives components $\langle e_n|\psi\rangle$ and turns every operator into a matrix of numbers $Q_{mn}$. The **outer product** $|e_n\rangle\langle e_n|$ projects onto one basis vector, and adding all of them gives the identity:
 
-$$\sum_n|e_n\rangle\langle e_n| = \hat 1, \qquad Q_{mn} = \langle e_m|\hat Q|e_n\rangle$$
+$$\begin{gathered} \sum_n|e_n\rangle\langle e_n| = \hat 1 \\ Q_{mn} = \langle e_m|\hat Q|e_n\rangle \end{gathered}$$
 
 Inserting that identity anywhere is the most useful move in quantum mechanics: with position and momentum bases, $\int|x\rangle\langle x|\,dx = \int|p\rangle\langle p|\,dp = \hat 1$, it gives $\psi(x) = \langle x|\psi\rangle$, $\Phi(p) = \langle p|\psi\rangle$ and the Fourier transform between them.`,
   symbols: [
@@ -121,7 +121,7 @@ Inserting that identity anywhere is the most useful move in quantum mechanics: w
       },
       hints: [t`$\langle\alpha| = |\alpha\rangle^\dagger$: transpose and complex-conjugate.`],
       teach: 'A bra carries the complex conjugates of its ket’s components, so that ⟨α|α⟩ = Σ|cₙ|² is real and positive.',
-      explain: t`$\langle\alpha| = (2i)^*\langle1| + (-3)^*\langle2| + (1 - i)^*\langle3| = -2i\langle1| - 3\langle2| + (1 + i)\langle3|$. Then $\langle\alpha|\alpha\rangle = 4 + 9 + 2 = 15$, real as it must be.`,
+      explain: t`$\langle\alpha| = (2i)^*\langle1| + (-3)^*\langle2| + (1 - i)^*\langle3|$ $= -2i\langle1| - 3\langle2| + (1 + i)\langle3|$. Then $\langle\alpha|\alpha\rangle = 4 + 9 + 2 = 15$, real as it must be.`,
     }),
     num({
       id: 'transition', difficulty: 2,
@@ -204,7 +204,7 @@ Inserting that identity anywhere is the most useful move in quantum mechanics: w
       },
       hints: [t`$\langle p|\psi\rangle = \int\langle p|x\rangle\langle x|\psi\rangle\,dx$.`, t`$\langle p|x\rangle = \langle x|p\rangle^*$ and $\langle x|\psi\rangle = \psi(x)$.`],
       teach: 'Inserting a complete set of states turns an abstract bracket into an integral (or a sum) over components.',
-      explain: t`$\langle p|\psi\rangle = \int\langle p|x\rangle\langle x|\psi\rangle\,dx = \tfrac{1}{\sqrt{2\pi\hbar}}\int e^{-ipx/\hbar}\psi(x)\,dx$: the Fourier transform of the last lesson, now a one-line consequence of $\hat 1 = \int|x\rangle\langle x|\,dx$.`,
+      explain: t`$\langle p|\psi\rangle = \int\langle p|x\rangle\langle x|\psi\rangle\,dx$ $= \tfrac{1}{\sqrt{2\pi\hbar}}\int e^{-ipx/\hbar}\psi(x)\,dx$: the Fourier transform of the last lesson, now a one-line consequence of $\hat 1 = \int|x\rangle\langle x|\,dx$.`,
     }),
     code({
       id: 'change-basis', difficulty: 3,
@@ -301,7 +301,7 @@ print(np.round(to_basis(Sy, By), 6))`,
       },
       hints: [t`Check with matrices: $(|\alpha\rangle\langle\beta|)_{mn} = \alpha_m\beta_n^*$. What is the conjugate transpose?`],
       teach: 'Taking the adjoint reverses the order of everything and conjugates every number: (c|α⟩⟨β|)† = c*|β⟩⟨α|.',
-      explain: t`$\big((c\,|\alpha\rangle\langle\beta|)^\dagger\big)_{mn} = \big(c\,\alpha_n\beta_m^*\big)^* = c^*\beta_m\alpha_n^*$, the matrix of $c^*|\beta\rangle\langle\alpha|$. That is why $\hat Q$ in the worked example needed $-i|2\rangle\langle1|$ alongside $i|1\rangle\langle2|$.`,
+      explain: t`$\big((c\,|\alpha\rangle\langle\beta|)^\dagger\big)_{mn} = \big(c\,\alpha_n\beta_m^*\big)^*$ $= c^*\beta_m\alpha_n^*$, the matrix of $c^*|\beta\rangle\langle\alpha|$. That is why $\hat Q$ in the worked example needed $-i|2\rangle\langle1|$ alongside $i|1\rangle\langle2|$.`,
     }),
     num({
       id: 'cp-qkd', difficulty: 2, transfer: true,

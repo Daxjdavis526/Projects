@@ -184,7 +184,9 @@ export function mount(F, P0) {
     p.mode = p.mode === 'scatter' ? 'scatter' : 'bound';
     const sup = Array.isArray(P.super) ? P.super : null;
     const nSel = Math.round(p.n);
-    p.topN = Math.max(p.top || 0, (sup ? Math.max(...sup) : nSel) + (p.well === 'harmonic' ? 2 : 1), p.well === 'harmonic' ? 6 : 4);
+    // levels drawn: exactly `top` when given (but never hiding the chosen state), else the chosen one and a few more
+    const need = (sup ? Math.max(...sup) : nSel) + (p.well === 'harmonic' ? 1 : 0);
+    p.topN = p.top ? Math.max(p.top, need) : Math.max(need + 1, p.well === 'harmonic' ? 6 : 4);
     p.sup = sup;
     return p;
   };

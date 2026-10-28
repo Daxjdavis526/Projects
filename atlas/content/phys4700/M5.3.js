@@ -52,7 +52,7 @@ export default lesson({
   minutes: 17, difficulty: 3,
   intro: t`The orbital angular momentum $\hat{\vec L} = \hat{\vec r}\times\hat{\vec p}$ has components that do not commute with each other — but each commutes with $\hat L^2$. So you can know the length of $\vec L$ and **one** component, conventionally $L_z$, never two. The commutators alone, through the **ladder operators** $\hat L_\pm = \hat L_x \pm i\hat L_y$, fix every possible result:
 
-$$[\hat L_x, \hat L_y] = i\hbar\hat L_z, \qquad \hat L^2f_l^m = \hbar^2l(l+1)\,f_l^m, \qquad \hat L_zf_l^m = \hbar m\,f_l^m$$
+$$\begin{gathered} [\hat L_x, \hat L_y] = i\hbar\hat L_z \\ \hat L^2f_l^m = \hbar^2l(l+1)\,f_l^m \\ \hat L_zf_l^m = \hbar m\,f_l^m \end{gathered}$$
 
 with $m = -l, -l + 1, \dots, l$ and $l$ a whole or half-whole number. $\hat L_+$ climbs from $m$ to $m + 1$, $\hat L_-$ descends, and the ladder stops at $\pm l$.`,
   symbols: [

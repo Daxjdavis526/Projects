@@ -71,7 +71,8 @@ export function staircase({ steps, real, realLabel, y, caption, ylabel = 'runnin
   shade.push({ fn: N(cum), lower: '0', from: N(K - 0.36), to: N(K + 0.36), color: 'gold', alpha: 0.5 });
   curves.push({ fn: N(cum), domain: [N(K - 1.64), N(K - 0.36)], color: 'ink3', width: 1.2, dash: true });
   points.push({ x: K, y: N(cum), r: 0, label: totalLabel, labelAlign: 'center', labelDx: 0, labelDy: -11, color: 'gold' });
-  const hl = real ? [{ y: N(Math.log10(real)), color: 'good', label: realLabel }] : [];
+  const hl = real ? [{ y: N(Math.log10(real)), color: 'good' }] : [];
+  if (real && realLabel) points.push({ x: 0.4, y: N(Math.log10(real)), r: 0, label: realLabel, labelAlign: 'left', labelDx: 0, labelDy: -10, color: 'good' });
   const top = Math.max(cum, ...(real ? [Math.log10(real)] : []));
   return {
     type: 'graph',

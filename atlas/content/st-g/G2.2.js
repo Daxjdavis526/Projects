@@ -237,7 +237,7 @@ This is **uniform continuity**: one input tolerance serves the whole interval. $
     mcq({
       id: 'cp-heine-cantor', difficulty: 3,
       prompt: t`Which function does the Heine–Cantor theorem (continuous on a closed, bounded interval $\Rightarrow$ uniformly continuous) guarantee to be uniformly continuous?`,
-      visual: { type: 'graph', params: { x: [0, 1.65], y: [0, 16], aspect: 'wide', curves: [{ fn: 'tan(x)', color: 'accent', width: 2.2, domain: [0, 1.5] }, { fn: 'tan(x)', color: 'ink4', width: 1.2, dash: true, domain: [1.5, 1.507] }], vlines: [{ x: 1.5, color: 'gold', label: 'x = 1.5' }, { x: +(Math.PI / 2).toFixed(5), color: 'bad', label: 'π/2' }] }, caption: t`$\tan x$ up to $x = 1.5$ (solid), where it is $14.1$, and its blow-up at $\pi/2 \approx 1.571$.` },
+      visual: { type: 'graph', params: { x: [0, 1.65], y: [0, 16], aspect: 'wide', curves: [{ fn: 'tan(x)', color: 'accent', width: 2.2, domain: [0, 1.5] }, { fn: 'tan(x)', color: 'ink4', width: 1.2, dash: true, domain: [1.5, 1.507] }], vlines: [{ x: 1.5, color: 'gold' }, { x: +(Math.PI / 2).toFixed(5), color: 'bad', label: 'π/2' }] }, caption: t`$\tan x$ up to $x = 1.5$ (solid), where it is $14.1$, and its blow-up at $\pi/2 \approx 1.571$.` },
       choices: [t`$\tan x$ on $[0, 1.5]$`, t`$\tan x$ on $[0, \pi/2)$`, t`$x^2$ on $[0, \infty)$`, t`$1/x$ on $(0, 1]$`],
       answer: 0,
       why: {

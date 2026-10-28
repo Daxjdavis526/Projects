@@ -200,7 +200,7 @@ On a surface there is only one plane, so nothing is lost: $R_{ab} = K\,g_{ab}$ a
     multi({
       id: 'cp-zero', difficulty: 3,
       prompt: t`Which of these follow from $R_{\mu\nu} = 0$ at every point of a space (or spacetime)? Select all that do.`,
-      visual: { type: 'gr-dustball', params: { mode: 'tides', body: 'earth', t: 0.6, readout: false }, caption: 'A small ball of dust falling freely in empty space near the Earth (exaggerated): it changes shape, but its volume starts out unchanged.' },
+      visual: { type: 'gr-dustball', params: { mode: 'tides', body: 'earth', t: 0.6, readout: false, views: 'side', play: false }, caption: 'A small ball of dust falling freely in empty space near the Earth, some time after release (side view; the deformation is exaggerated).' },
       choices: [
         t`The Ricci scalar is zero`,
         t`Small balls start out with their flat volume (to the order the formula shows)`,

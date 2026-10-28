@@ -23,7 +23,7 @@ export default lesson({
   minutes: 16, difficulty: 3,
   intro: t`Spin ½ is angular momentum with $s = \tfrac12$ — the half-integer case the ladder algebra allowed and orbital motion forbade. Its operators are $2\times2$ matrices, $\hat{\vec S} = \tfrac{\hbar}{2}\vec\sigma$, built from the three **Pauli matrices**, whose whole algebra fits on one line:
 
-$$\sigma_x = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \ \sigma_y = \begin{pmatrix} 0 & -i \\ i & 0 \end{pmatrix},\ \ \sigma_z = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}, \qquad \sigma_j\sigma_k = \delta_{jk}\,\mathbb 1 + i\epsilon_{jkl}\,\sigma_l$$
+$$\begin{gathered} \sigma_x = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \ \sigma_y = \begin{pmatrix} 0 & -i \\ i & 0 \end{pmatrix} \\ \sigma_z = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} \\ \sigma_j\sigma_k = \delta_{jk}\,\mathbb 1 + i\epsilon_{jkl}\,\sigma_l \end{gathered}$$
 
 From it: every component $\hat n\cdot\vec\sigma$ squares to $\mathbb 1$, so a spin measured along **any** axis gives $\pm\hbar/2$; any Hermitian $2\times2$ matrix is $a_0\mathbb 1 + \vec a\cdot\vec\sigma$; and a rotation by $2\pi$ turns a spinor into minus itself.`,
   symbols: [
@@ -68,7 +68,7 @@ From it: every component $\hat n\cdot\vec\sigma$ squares to $\mathbb 1$, so a sp
     prompt: t`(a) Use $\sigma_j\sigma_k = \delta_{jk} + i\epsilon_{jkl}\sigma_l$ to show $(\vec\sigma\cdot\vec a)(\vec\sigma\cdot\vec b) = \vec a\cdot\vec b + i\vec\sigma\cdot(\vec a\times\vec b)$. (b) Find the eigenvalues of $\hat S_n = \tfrac{\hbar}{2}\hat n\cdot\vec\sigma$ without diagonalizing. (c) Find the eigenvalues of $\mathsf H = \begin{pmatrix} 3 & 1 - 2i \\ 1 + 2i & -1 \end{pmatrix}$ (in eV) the same way.`,
     visual: { type: 'calc-vectors3d', params: { range: 3.3, yaw: 0.7, pitch: 0.35, vectors: [{ to: [1, 2, 2], color: 'gold', label: '\\vec a = (1, 2, 2)' }], components: [{ to: [1, 2, 2], color: 'ink3' }] }, caption: t`The vector $\vec a$ hidden in $\mathsf H$: its length 3 is half the gap between the eigenvalues. Drag to rotate.` },
     steps: [
-      { label: 'Multiply out', text: t`$(\vec\sigma\cdot\vec a)(\vec\sigma\cdot\vec b) = \sum_{jk}a_jb_k\sigma_j\sigma_k = \sum_{jk}a_jb_k\big(\delta_{jk} + i\epsilon_{jkl}\sigma_l\big) = \vec a\cdot\vec b + i\sum_l\sigma_l(\vec a\times\vec b)_l$.` },
+      { label: 'Multiply out', text: t`$(\vec\sigma\cdot\vec a)(\vec\sigma\cdot\vec b) = \sum_{jk}a_jb_k\sigma_j\sigma_k$ $= \sum_{jk}a_jb_k\big(\delta_{jk} + i\epsilon_{jkl}\sigma_l\big)$ $= \vec a\cdot\vec b + i\sum_l\sigma_l(\vec a\times\vec b)_l$.` },
       { label: 'Square a component', text: t`With $\vec a = \vec b = \hat n$: $(\hat n\cdot\vec\sigma)^2 = \hat n\cdot\hat n + 0 = \mathbb 1$. An operator whose square is $\mathbb 1$ has eigenvalues whose squares are 1: $\pm1$.` },
       { label: 'Any direction', text: t`So $\hat S_n$ has eigenvalues $\pm\hbar/2$ for every $\hat n$ — exactly what tilted Stern–Gerlach analysers find. Its $+$ eigenvector is $\big(\cos\tfrac\theta2,\ e^{i\phi}\sin\tfrac\theta2\big)$.` },
       { label: 'Decompose', text: t`Every Hermitian $2\times2$ matrix is $a_0\mathbb 1 + \vec a\cdot\vec\sigma$ with $a_0 = \tfrac12\operatorname{Tr}\mathsf H$ and $a_k = \tfrac12\operatorname{Tr}(\mathsf H\sigma_k)$. Here $a_0 = 1$, $a_z = 2$, and the off-diagonal $1 - 2i = a_x - ia_y$ gives $a_x = 1$, $a_y = 2$.` },
@@ -147,7 +147,7 @@ From it: every component $\hat n\cdot\vec\sigma$ squares to $\mathbb 1$, so a sp
       },
       hints: [t`$\sigma_k^2 = \mathbb 1$ for each $k$.`],
       teach: 'S² = s(s + 1)ħ² = ¾ħ² is the same for every spin-½ state: the length of a spin is fixed, only its direction varies.',
-      explain: t`$\hat S^2 = \tfrac{\hbar^2}{4}(\sigma_x^2 + \sigma_y^2 + \sigma_z^2) = \tfrac34\hbar^2\mathbb 1 = s(s+1)\hbar^2$ with $s = \tfrac12$. Spin ½ is not a state that can be changed: it is a fixed property of the electron, proton or neutron.`,
+      explain: t`$\hat S^2 = \tfrac{\hbar^2}{4}(\sigma_x^2 + \sigma_y^2 + \sigma_z^2)$ $= \tfrac34\hbar^2\mathbb 1$ $= s(s+1)\hbar^2$ with $s = \tfrac12$. Spin ½ is not a state that can be changed: it is a fixed property of the electron, proton or neutron.`,
     }),
     code({
       id: 'pauli', difficulty: 3,
