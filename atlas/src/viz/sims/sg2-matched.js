@@ -33,7 +33,6 @@ export const defaults = { Mc: 30, tpl: 24, amp: 1, seed: 2, panels: ['data', 'sn
 const PANELS = ['data', 'snr', 'scan', 'post'];
 const CONTROLS = ['tpl', 'amp', 'Mc', 'noise', 'reveal'];
 const HIDE = ['opt', 'peak', 'time', 'ci'];
-const BANK = M.bank(M.MC_MIN, M.MC_MAX, 181);
 const ROOT_HALF_PI = Math.sqrt(Math.PI / 2);
 
 export function mount(F, P0) {
@@ -63,11 +62,11 @@ export function mount(F, P0) {
   }
 
   // caches: the record (Mc, seed); the bank's noise and signal correlations (Mc, seed); the current template's
-  let recKey = '', rec = null, parts = null, tplKey = '', tplCorr = null;
+  let recKey = '', rec = null, parts = null, BANK = [], tplKey = '', tplCorr = null;
   const needScan = panels.includes('scan') || panels.includes('post');
   const state = () => {
     const p = F.params, key = `${p.Mc}|${p.seed}`;
-    if (key !== recKey) { recKey = key; rec = M.record({ Mc: p.Mc, amp: 1, seed: p.seed }); parts = needScan ? M.scanParts(rec, BANK) : null; tplKey = ''; }
+    if (key !== recKey) { recKey = key; rec = M.record({ Mc: p.Mc, amp: 1, seed: p.seed }); BANK = M.bankFor(p.Mc); parts = needScan ? M.scanParts(rec, BANK) : null; tplKey = ''; }
     const tk = `${key}|${p.tpl}`;
     if (tk !== tplKey) { tplKey = tk; const T = M.cachedTemplate(p.tpl); tplCorr = { T, n: M.correlate(rec.noise, T), u: M.correlate(rec.unit, T) }; }
     const rho = M.snrFrom(tplCorr.n, tplCorr.u, p.amp);

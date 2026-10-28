@@ -25,8 +25,8 @@
 //       // readings
 //       truth: 5, sd: 0.001, specPct: 0, specDigits: 0, specFS: 0, fullScale: 0, unit: 'V', xr: null,
 //       // hist
-//       dist: 'normal', mu: 0, sigma: 1, a: 1, lam: 4, m: 1, bins: null, xr: null, pdf: true, band: 0,
-//       stats: true, gauss: false, xlabel: null,
+//       dist: 'normal', mu: 0, sigma: 1, a: 1, lam: 4, m: 1, bins: null, data: null, xr: null, pdf: true, band: 0,
+//       stats: true, gauss: false, xlabel: null, data: null,   // data: fixed readings shown instead of draws
 //       // mc
 //       f: 'x*y', x: [1, 0.1], y: null, rho: 0, N: 20000, xname: 'x', yname: 'y', fname: 'f', lin: true, fr: null,
 //       // tail
@@ -45,7 +45,7 @@ export const defaults = {
   mode: 'hist', seed: 1, controls: null, readout: true, hide: [], caption: null, alt: null,
   bias: 0, spread: 0.6, res: 0, n: 12, angle: 30, targets: null,
   truth: 5, sd: 0.001, specPct: 0, specDigits: 0, specFS: 0, fullScale: 0, unit: '', xr: null,
-  dist: 'normal', mu: 0, sigma: 1, a: 1, lam: 4, m: 1, bins: null, pdf: true, band: 0, stats: true, gauss: false, xlabel: null,
+  dist: 'normal', mu: 0, sigma: 1, a: 1, lam: 4, m: 1, bins: null, data: null, pdf: true, band: 0, stats: true, gauss: false, xlabel: null,
   f: 'x*y', x: [1, 0.1], y: null, rho: 0, N: 20000, xname: 'x', yname: 'y', fname: 'f', lin: true, fr: null,
   test: 'z2', nu: 5, stat: 2,
 };
@@ -228,10 +228,11 @@ export function mount(F, P0) {
     const a = F.canvas({ aspect: 'wide', label: P.alt || 'A histogram of readings over the distribution they were drawn from' });
     const pl = new Plot(a.canvas, { x: [0, 1], y: [0, 1], xticks: 8, yticks: 5, xlabel: P.xlabel ?? 'value', ylabel: 'probability density', axesAt: 'edge' });
     function draw() {
-      const dist = F.params.dist, n = F.params.n, m = F.params.m || 1, k = F.params.band;
+      const given = Array.isArray(P.data) ? P.data : null;                 // fixed readings to show instead of draws
+      const dist = F.params.dist, n = given ? given.length : F.params.n, m = given ? 1 : F.params.m || 1, k = F.params.band;
       const par = { mu: P.mu, sigma: F.params.sigma, a: F.params.a, lam: F.params.lam };
       const mo = M.moments(dist, par), sdm = mo.sd / Math.sqrt(m);
-      const xs = M.samples(dist, par, n, seed, m);
+      const xs = given || M.samples(dist, par, n, seed, m);
       const st = M.stats(xs);
       const discrete = dist === 'poisson' && m === 1;
       const flat = m === 1 && (dist === 'uniform' || dist === 'triangular');   // bin edges on ±a
@@ -282,7 +283,7 @@ export function mount(F, P0) {
         ]);
       }
     }
-    if (!F.compact) F.button({ label: 'New sample', onClick: () => { seed++; draw(); } });
+    if (!F.compact && !Array.isArray(P.data)) F.button({ label: 'New sample', onClick: () => { seed++; draw(); } });
     F.onChange(draw);
     F.draw(draw);
     F.caption(P.dist === 'poisson' ? 'Seeded random counts: bars are the sample, violet dots the exact Poisson probabilities. The gold line is the sample mean, the gold bar its ±1 SEM, the teal band ±1 sample SD.' : 'Seeded random draws: bars are the sample, the violet curve the distribution they were drawn from. The gold line is the sample mean, the gold bar its ±1 SEM, the teal band ±1 sample SD.');
@@ -422,6 +423,7 @@ export function validate(P0) {
   if (P.mode === 'hist') {
     if (!M.DISTS.includes(P.dist)) p.push(`labx-stats: dist must be one of ${M.DISTS.join(', ')}`);
     if (!(Number.isInteger(P.n) && P.n >= 2 && P.n <= 100000)) p.push('labx-stats: n is 2–100000 readings');
+    if (P.data !== null && !(Array.isArray(P.data) && P.data.length >= 2 && P.data.every(Number.isFinite))) p.push('labx-stats: data is a list of at least two numbers');
     if (!(P.sigma > 0 && P.a > 0 && P.lam > 0)) p.push('labx-stats: sigma, a and lam must be positive');
     if (![1, 2, 4, 16].includes(P.m) && !(Number.isInteger(P.m) && P.m >= 1 && P.m <= 100)) p.push('labx-stats: m is a whole number of draws, 1–100');
     if (!(P.band >= 0 && P.band <= 5)) p.push('labx-stats: band is 0–5 standard deviations');

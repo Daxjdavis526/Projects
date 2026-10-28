@@ -62,7 +62,6 @@ function n2Pic({ explore = false, Bmax = 2, mark = null, numbers = true, caption
       } : { constants: { cmp: 0 }, ...(mark !== null ? { vlines: [{ x: mark, color: 'ink3' }] } : {}) }),
       curves: [...exact, ...(explore ? [...weak, ...strong] : [])],
       ...(explore ? { points: [label(0.02, E32, '2P3/2', 'gold', 4, -10), label(0.02, E12, '2S1/2, 2P1/2', 'teal', 4, 14)] } : {}),
-      legend: [{ label: '2S, mⱼ = ±½', color: 'teal' }, { label: '2P, mⱼ = ±3/2', color: 'gold' }, { label: '2P, mⱼ = +½ (mixed)', color: 'accent' }, { label: '2P, mⱼ = −½ (mixed)', color: 'violet' }], legendAt: 'bl',
     },
     caption,
   };
@@ -128,7 +127,7 @@ $g_J$ is the **Landé g-factor**. With no spin ($s = 0$) it is 1 and every line 
   ],
   why: 'Zeeman splittings measure magnetic fields where no probe can go — on the Sun, in stars, around magnetars — and set the frequencies of every atomic clock, magnetometer and laser-cooled atom trap.',
   visual: {
-    ...n2Pic({ explore: true, caption: t`Hydrogen’s $n = 2$ level in a field, found by diagonalizing fine structure plus $\hat H_Z$ exactly within the level (solid). The Lamb shift (4.4 μeV) and hyperfine structure are left out, and $g_s = 2$. Dashed: the straight-line weak- or strong-field approximations. Energies from CODATA 2022 constants.` }),
+    ...n2Pic({ explore: true, caption: t`Hydrogen’s $n = 2$ level in a field, found by diagonalizing fine structure plus $\hat H_Z$ exactly within the level (solid: teal $2S$, gold $2P$ with $m_j = \pm\tfrac32$, blue and violet the mixed $2P$ pairs with $m_j = +\tfrac12$ and $-\tfrac12$). The Lamb shift (4.4 μeV) and hyperfine structure are left out, and $g_s = 2$. Dashed: the straight-line weak- or strong-field approximations. Energies from CODATA 2022 constants.` }),
     title: 'From Landé to Paschen–Back',
     lead: t`Hydrogen’s $n = 2$ level: eight states, $2S_{1/2}$ and $2P_{1/2}$ together and $2P_{3/2}$ $${fmt(FS2, 3)}\ \mu$eV above. Turn up the field and compare the exact levels with the two straight-line limits.`,
     tasks: [
@@ -142,7 +141,7 @@ $g_J$ is the **Landé g-factor**. With no spin ($s = 0$) it is 1 and every line 
     visual: sticks([...D1.map((c) => [c.dE, c.pi ? 1 : 0.6, c.pi ? 'warn' : 'accent'])], t`The D1 line’s four components in a weak field, offsets in units of $\mu_BB$: π (orange, $\Delta m_j = 0$) and σ (blue, $\Delta m_j = \pm1$). Heights schematic.`),
     steps: [
       { label: 'Project on J', text: t`In a weak field $\vec L$ and $\vec S$ precess fast about $\vec J$, so only their components along $\vec J$ survive on average. $\vec L + 2\vec S = \vec J + \vec S$, and the average of $\vec S$ is $\dfrac{\vec S\cdot\vec J}{J^2}\vec J$.` },
-      { label: 'Dot product', text: t`$\vec S\cdot\vec J = \tfrac12(J^2 + S^2 - L^2)$, so $\langle\vec L + 2\vec S\rangle = \Big[1 + \dfrac{j(j+1) - l(l+1) + s(s+1)}{2j(j+1)}\Big]\vec J = g_J\vec J$, and $E_Z = g_J\mu_BBm_j$. This is first-order degenerate perturbation theory in the $|j\,m_j\rangle$ basis, where $\hat H_Z$ is diagonal.` },
+      { label: 'Dot product', text: t`$\vec S\cdot\vec J = \tfrac12(J^2 + S^2 - L^2)$, so $$\begin{gathered} \langle\vec L + 2\vec S\rangle = g_J\vec J, \\ g_J = 1 + \frac{j(j+1) - l(l+1) + s(s+1)}{2j(j+1)}, \end{gathered}$$ and $E_Z = g_J\mu_BBm_j$. This is first-order degenerate perturbation theory in the $|j\,m_j\rangle$ basis, where $\hat H_Z$ is diagonal.` },
       { label: 'Sodium’s g', text: t`Sodium’s one outer electron: $3S_{1/2}$ ($l = 0$) has $g = 2$; $3P_{1/2}$ has $g = 1 + \dfrac{\frac34 - 2 + \frac34}{\frac32} = \tfrac23$; $3P_{3/2}$ has $g = 1 + \dfrac{\frac{15}{4} - 2 + \frac34}{\frac{15}{2}} = \tfrac43$.` },
       { label: 'Patterns', text: t`A photon carries $\Delta m_j = 0$ (π) or $\pm1$ (σ). Each component is shifted by $(g_um_u - g_lm_l)\mu_BB$. D1: $\pm\tfrac23$ and $\pm\tfrac43$ — four lines. D2: $\pm\tfrac13$, $\pm1$, $\pm\tfrac53$ — six lines. Neither looks like the normal triplet.` },
       { label: 'Numbers', text: t`$\mu_BB = ${fmt(MUB_UEV, 4)}\ \mu$eV at 1 T. In wavelength, $\Delta\lambda = \lambda^2\Delta E/hc$: $${fmt((NA_D1 ** 2 * MUB) / HC * 1000, 3)}$ pm per $\mu_BB$ at D1, so its outer components sit $\pm${fmt(((4 / 3) * NA_D1 ** 2 * MUB) / HC * 1000, 3)}$ pm from the line centre.` },
@@ -325,7 +324,7 @@ print(levels(1e5) / 1e5)
           errors: [{ value: ans * g, feedback: t`Divide by the Landé factor: $g(^5P_1) = 1 + \dfrac{2 - 2 + 6}{4} = ${g}$.` }, { value: (ans * g) / 2, feedback: t`$g = 2$ is the free electron’s. For $^5P_1$ ($L = 1$, $S = 2$, $J = 1$): $g = 1 + \dfrac{J(J+1) - L(L+1) + S(S+1)}{2J(J+1)} = ${g}$.` }],
           hints: [t`$g(^5P_1)$: $L = 1$, $S = 2$, $J = 1$ in $1 + \dfrac{J(J+1) - L(L+1) + S(S+1)}{2J(J+1)}$.`, t`$B = \dfrac{\Delta\lambda\,hc}{g\,\lambda^2\mu_B}$ with $hc = ${fmt(HC, 7)}$ eV nm and $\mu_B = ${tex(MUB, 6)}$ eV/T.`],
           teach: 'A Zeeman triplet’s splitting, with g computed from the upper level’s term, turns a spectrum into a magnetometer.',
-          explain: t`$g = 1 + (2 - 2 + 6)/4 = ${g}$ — this line is chosen because its large $g$ makes it sensitive. Then $B = \dfrac{(${dlr}\times10^{-3}\ \text{nm})(${fmt(HC, 7)}\ \text{eV nm})}{${g}(${FE630}\ \text{nm})^2(${tex(MUB, 5)}\ \text{eV/T})} = ${fmt(ans, 3)}$ T, typical of a sunspot umbra (0.2–0.4 T, about ten thousand times Earth’s field). Hinode also measures the components’ polarization, which gives the field’s direction; NASA’s Solar Dynamics Observatory uses a similar iron line at 617.3 nm, also with $g = 2.5$.`,
+          explain: t`$g = 1 + (2 - 2 + 6)/4 = ${g}$ — this line is chosen because its large $g$ makes it sensitive. Then $$\begin{gathered} B = \frac{(${dlr}\times10^{-3}\ \text{nm})(${fmt(HC, 7)}\ \text{eV nm})}{${g}(${FE630}\ \text{nm})^2(${tex(MUB, 5)}\ \text{eV/T})} \\ = ${fmt(ans, 3)}\ \text{T}, \end{gathered}$$ typical of a sunspot umbra (0.2–0.4 T, about ten thousand times Earth’s field). Hinode also measures the components’ polarization, which gives the field’s direction; NASA’s Solar Dynamics Observatory uses a similar iron line at 617.3 nm, also with $g = 2.5$.`,
         };
       },
     }),
@@ -361,7 +360,7 @@ print(levels(1e5) / 1e5)
           errors: [{ value: ans / 2, feedback: t`That is one component’s offset; the outermost pair are $\tfrac83\mu_BB$ apart.` }, { value: ans * 3 / 8 * 2, feedback: t`The outermost are at $\pm\tfrac43$, not $\pm1$: their separation is $\tfrac83\mu_BB$.` }],
           hints: [t`$\Delta E = \tfrac83\mu_BB$, with $\mu_B = ${tex(MUB, 6)}$ eV/T.`, t`$\Delta\lambda = \lambda^2\Delta E/hc$ with $hc = ${fmt(HC, 7)}$ eV nm.`],
           teach: 'An anomalous Zeeman pattern’s spacings follow from the g-factors of both levels.',
-          explain: t`$\Delta E = \tfrac83(${tex(MUB, 5)})(${B}) = ${tex(dE, 4)}$ eV, so $\Delta\lambda = (${NA_D1})^2\times${tex(dE, 4)}/${fmt(HC, 7)}\ \text{nm} = ${fmt(ans, 3)}$ pm. A good grating spectrometer resolves a few pm, which is how Zeeman, Lorentz and later Landé read off these patterns.`,
+          explain: t`$\Delta E = \tfrac83(${tex(MUB, 5)})(${B}) = ${tex(dE, 4)}$ eV, so $\Delta\lambda = (${NA_D1})^2\times${tex(dE, 4)}/${fmt(HC, 7)}\ \text{nm}$ $= ${fmt(ans, 3)}$ pm. A good grating spectrometer resolves a few pm, which is how Zeeman, Lorentz and later Landé read off these patterns.`,
         };
       },
     }),

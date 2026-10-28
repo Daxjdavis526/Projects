@@ -10,9 +10,10 @@
 // The filter correlates the record with two quadrature templates (cosine and
 // sine of the template's phase), so it maximizes over the unknown phase, and
 // does so at every arrival time at once (by FFT). Its output is the SNR
-// ρ(t) = √(⟨d, c_t⟩² + ⟨d, s_t⟩²)/‖c‖: with noise alone, ρ² at one time is χ²
+// ρ(t) = the length of the data’s projection onto the plane of the two
+// quadratures at that time (see quadSnr): with noise alone, ρ² at one time is χ²
 // with 2 degrees of freedom (mean ρ = √(π/2) ≈ 1.25); with the exact template
-// it is near ρ_opt = amp × ‖ĥ‖, where ĥ is the unit-peak template.
+// it is near ρ_opt = amp × ‖ĥ‖, where ĥ is the unit-peak signal.
 // The chirp-mass "posterior" uses the likelihood maximized over amplitude,
 // phase and time, exp(ρ²/2) — a shortcut: real analyses marginalize instead.
 // Tested in test/sg2-matched.test.mjs.
@@ -73,7 +74,12 @@ export function fft(re, im, inv = false) {
   if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
 }
 
-/** The unit-peak template for chirp mass Mc: quadratures c, s (length L), ending at F_HIGH; norm = ‖c‖. */
+/**
+ * The unit-peak template for chirp mass Mc: quadratures c, s (length L), ending
+ * at F_HIGH; norm = ‖c‖, and the Gram entries cc, cs, ss used to project the
+ * data onto the plane the two quadratures span (they are nearly, not exactly,
+ * orthogonal and equal in length).
+ */
 export function template(Mc) {
   const tau0 = tauOfF(F_LOW, Mc), tau1 = tauOfF(F_HIGH, Mc);
   const L = Math.floor((tau0 - tau1) * FS) + 1;
@@ -83,9 +89,9 @@ export function template(Mc) {
     const fk = fOfTau(tau, Mc), a = (fk / F_HIGH) ** (2 / 3), ph = -phaseOfTau(tau, Mc);
     c[k] = a * Math.cos(ph); s[k] = a * Math.sin(ph); f[k] = fk;
   }
-  let n2 = 0;
-  for (let k = 0; k < L; k++) n2 += c[k] * c[k];
-  return { Mc, L, c, s, f, norm: Math.sqrt(n2), duration: L / FS };
+  let cc = 0, cs = 0, ss = 0;
+  for (let k = 0; k < L; k++) { cc += c[k] * c[k]; cs += c[k] * s[k]; ss += s[k] * s[k]; }
+  return { Mc, L, c, s, f, cc, cs, ss, norm: Math.sqrt(cc), duration: L / FS };
 }
 
 const tplCache = new Map();
@@ -107,7 +113,9 @@ export function record({ Mc = 30, amp = 0.5, seed = 1 } = {}) {
     sig[i] = amp * unit[i];
     d[i] += sig[i];
   }
-  return { d, noise, unit, sig, phi0, end, Mc, amp, seed, optimal: amp * T.norm };
+  let u2 = 0;
+  for (let i = 0; i < N; i++) u2 += unit[i] * unit[i];
+  return { d, noise, unit, sig, phi0, end, Mc, amp, seed, optimal: amp * Math.sqrt(u2) };
 }
 
 const specCache = new WeakMap();
@@ -137,7 +145,18 @@ export function correlate(x, T) {
     pi[k] = D.im[k] * re[k] - D.re[k] * im[k];
   }
   fft(pr, pi, true);
-  return { re: pr.subarray(0, N), im: pi.subarray(0, N), L: T.L, norm: T.norm };
+  return { re: pr.subarray(0, N), im: pi.subarray(0, N), L: T.L, T };
+}
+
+/**
+ * The SNR from the two quadrature correlations a = ⟨d, c⟩, b = ⟨d, s⟩: the length
+ * of the data’s projection onto span{c, s}, ρ² = (ss a² − 2cs ab + cc b²)/(cc ss − cs²).
+ * It is the SNR maximized over amplitude and phase; with noise alone ρ² is χ² with
+ * 2 degrees of freedom exactly.
+ */
+export function quadSnr(T, a, b) {
+  const det = T.cc * T.ss - T.cs * T.cs;
+  return Math.sqrt(Math.max(0, (T.ss * a * a - 2 * T.cs * a * b + T.cc * b * b) / det));
 }
 
 /** SNR series from correlations: rho[j] with the template ending at sample j (NaN where it would stick out of the record). Pass a second correlation and its weight to add them. */
@@ -145,7 +164,7 @@ export function snrFrom(A, B = null, w = 0) {
   const rho = new Float64Array(N).fill(NaN);
   for (let lag = 0; lag + A.L <= N; lag++) {
     const r = A.re[lag] + (B ? w * B.re[lag] : 0), i = A.im[lag] + (B ? w * B.im[lag] : 0);
-    rho[lag + A.L - 1] = Math.hypot(r, i) / A.norm;
+    rho[lag + A.L - 1] = quadSnr(A.T, r, -i);   // the imaginary part is −⟨d, s⟩
   }
   return rho;
 }
@@ -157,7 +176,7 @@ export const snrSeries = (d, T) => snrFrom(correlate(d, T));
 export function snrAt(d, T, j) {
   let a = 0, b = 0;
   for (let k = 0; k < T.L; k++) { const v = d[j - T.L + 1 + k]; a += v * T.c[k]; b += v * T.s[k]; }
-  return Math.hypot(a, b) / T.norm;
+  return quadSnr(T, a, b);
 }
 
 /** Largest value of a series and where it is. */
@@ -167,8 +186,36 @@ export function peak(rho) {
   return { rho: best, j: at, t: at / FS };
 }
 
+/**
+ * ln Σⱼ exp(ρⱼ²/2): the likelihood (amplitude and phase maximized) summed over
+ * every arrival time the template fits — marginalized over arrival time with a
+ * flat prior, up to a constant. Summing, not maximizing, is what keeps the
+ * posterior smooth: the noise makes the best arrival time jump about.
+ */
+export function logSumTime(rho) {
+  let top = -Infinity;
+  for (const v of rho) if (v > top) top = v;
+  const t2 = (top * top) / 2;
+  let s = 0;
+  for (const v of rho) if (Number.isFinite(v)) s += Math.exp((v * v) / 2 - t2);
+  return t2 + Math.log(s);
+}
+
 /** The template bank: chirp masses evenly spaced from lo to hi. */
 export const bank = (lo = MC_MIN, hi = MC_MAX, n = 91) => Array.from({ length: n }, (_, i) => lo + ((hi - lo) * i) / (n - 1));
+
+/**
+ * A bank fine enough for the posterior: 91 masses across the whole range, plus
+ * 121 packed within ±w of `around` (w grows as Mc^(8/3), like the posterior’s
+ * width), sorted. A numerical device only: the posterior must be resolved
+ * wherever it is not negligible, and for a detectable signal that is near the
+ * true value; far from it, the coarse grid suffices because the posterior is broad.
+ */
+export function bankFor(around) {
+  const w = Math.min(20, 3 * (around / 30) ** (8 / 3));
+  const fine = bank(Math.max(MC_MIN, around - w), Math.min(MC_MAX, around + w), 121);
+  return [...new Set([...bank(MC_MIN, MC_MAX, 91), ...fine].map((m) => +m.toFixed(4)))].sort((a, b) => a - b);
+}
 
 /** Peak SNR (over arrival time and phase) for every template in the bank. */
 export function scan(d, masses) {
@@ -183,7 +230,23 @@ export function scanParts(rec, masses) {
 /** Peak SNR for every template when the signal has peak amplitude amp. */
 export const scanAt = (parts, amp) => parts.map((p) => peak(snrFrom(p.n, p.u, amp)).rho);
 
-/** Posterior on a grid: prior(m) × exp(ρ(m)²/2), normalized to unit area (trapezoid rule). */
+/** Peak SNR and time-marginalized log-likelihood for every template, in one pass. */
+export function scanBoth(parts, amp) {
+  const rho = [], logL = [];
+  for (const p of parts) { const r = snrFrom(p.n, p.u, amp); rho.push(peak(r).rho); logL.push(logSumTime(r)); }
+  return { rho, logL };
+}
+
+/** Posterior on a grid from log-likelihoods: prior(m) × e^(logL), normalized to unit area (trapezoid rule). */
+export function posteriorLog(masses, logL, prior = () => 1) {
+  const top = Math.max(...logL);
+  const w = masses.map((m, i) => prior(m) * Math.exp(logL[i] - top));
+  let area = 0;
+  for (let i = 1; i < masses.length; i++) area += ((w[i] + w[i - 1]) / 2) * (masses[i] - masses[i - 1]);
+  return w.map((v) => v / area);
+}
+
+/** Posterior on a grid with the arrival time maximized: prior(m) × exp(ρ(m)²/2), normalized to unit area. */
 export function posterior(masses, rhos, prior = () => 1) {
   const top = Math.max(...rhos);
   const w = masses.map((m, i) => prior(m) * Math.exp((rhos[i] * rhos[i] - top * top) / 2));

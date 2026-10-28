@@ -38,7 +38,8 @@
 //       hide: [],                          // rows or marks not to show (the answer to a problem)
 //       controls: [],                      // sliders: { key, label, min, max, step, value, unit, explain,
 //                                          //   set: [[elementIndex, prop, scale = 1, offset = 0], …] or 'angle';
-//                                          //   ['obj', 0 | 1, scale, offset] moves the object point's z or y }
+//                                          //   ['obj', 0 | 1, scale, offset] moves the object point's z or y;
+//                                          //   prop 'c' sets a surface's curvature 1/R }
 //       toggle: false,                     // a paraxial/exact switch
 //       labels: true, axis: false,         // element labels; a scale along the axis
 //       clip: true,                        // exact: stop rays outside an element's aperture
@@ -93,7 +94,9 @@ export function mount(F, P0) {
       for (const [i, prop, sc = 1, off = 0] of c.set || []) {
         let x = sc * v + off;
         if ((prop === 'f' || prop === 'R') && x === 0) x = Infinity;        // a slider passing 0: no lens, a flat surface
-        if (i === 'obj') { P.obj = P.obj.slice(); P.obj[prop] = x; } else els[i][prop] = x;
+        if (i === 'obj') { P.obj = P.obj.slice(); P.obj[prop] = x; }
+        else if (prop === 'c') els[i].R = x === 0 ? Infinity : 1 / x;      // a curvature 1/R (linear in a lens's bending)
+        else els[i][prop] = x;
       }
     }
   }
@@ -314,7 +317,7 @@ export function mount(F, P0) {
       else if (k === 'bfd') rows.push(['back focal distance', card.afocal ? '\\text{—}' : `${trim(card.bfd)}${u}`]);
       else if (k === 'ffd') rows.push(['front focal distance', card.afocal ? '\\text{—}' : `${trim(-card.ffd)}${u}`]);
       else if (k === 'H') rows.push(['$H$ from first vertex', card.afocal ? '\\text{—}' : `${trim(card.h1)}${u}`]);
-      else if (k === 'H2') rows.push(['$H′$ from last vertex', card.afocal ? '\\text{—}' : `${trim(card.h2)}${u}`]);
+      else if (k === 'H2') rows.push(["$H'$ from last vertex", card.afocal ? '\\text{—}' : `${trim(card.h2)}${u}`]);
       else if ((k === 'image' || k === 'm') && P.source === 'point') {
         const im = M.image(els, els[0].z - P.obj[0], { lambda: P.lambda });
         const scr = els[els.length - 1].kind === 'screen';
@@ -325,7 +328,7 @@ export function mount(F, P0) {
         rows.push(['edge-ray focus − paraxial', `${trim(M.longitudinal(els, h, { lambda: P.lambda }), 3)}${u}`]);
       } else if (k === 'colour') {
         const fl = (l) => M.cardinal(els, { lambda: l }).zF2;
-        rows.push(['$F′$(red 656) − $F′$(blue 486)', `${trim(fl(656.27) - fl(486.13), 3)}${u}`]);
+        rows.push(["$F'$ (red 656) − $F'$ (blue 486)", `${trim(fl(656.27) - fl(486.13), 3)}${u}`]);
       }
     }
     F.readout(rows);

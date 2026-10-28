@@ -166,7 +166,7 @@ function dotsPic(l, caption) {
   for (let ml = -l; ml <= l; ml++) for (const ms of [0.5, -0.5]) pts.push({ x: ml + ms, y: ms > 0 ? 1.4 : 0.6, r: 6, color: ms > 0 ? 'gold' : 'accent' });
   return {
     type: 'graph',
-    params: { x: [r6(-l - 1.2), r6(l + 1.2)], y: [0, 2.8], aspect: 'wide', xlabel: 'total m = mₗ + mₛ', ylabel: '', axesAt: 'edge', xticks: 2 * l + 2, yticks: 0, points: pts, legend: [{ label: 'spin up', color: 'gold', point: true }, { label: 'spin down', color: 'accent', point: true }], legendAt: 'tr' },
+    params: { x: [r6(-l - 1.2), r6(l + 1.2)], y: [0, 2.1], aspect: 'wide', xlabel: 'total m = mₗ + mₛ', ylabel: '', axesAt: 'edge', xticks: 2 * l + 2, yticks: 0, points: pts },
     caption,
   };
 }
@@ -443,8 +443,8 @@ def P2(t):
             const { l, m2, m, key } = C;
             const jt = `${2 * l - 1}/2`;
             return {
-              prompt: t`An electron with $l = ${l}$ and spin ½ is in the total-angular-momentum state $|j = ${jt},\ m_j = ${m2}/2\rangle$, the lower of the two $j$ values. Its Clebsch–Gordan expansion is $$\begin{gathered} |l - \tfrac12,\ m\rangle = -\sqrt{\frac{l - m + \frac12}{2l + 1}}\,|m - \tfrac12\rangle|{\uparrow}\rangle \\ + \sqrt{\frac{l + m + \frac12}{2l + 1}}\,|m + \tfrac12\rangle|{\downarrow}\rangle \end{gathered}$$ What is the probability that a measurement of $\hat L_z$ gives $m_l\hbar$ with $m_l = ${fmt(m - 0.5, 2)}$?`,
-              visual: dotsPic(l, t`The $2(2l + 1) = ${2 * (2 * l + 1)}$ product states $|m_l\rangle|m_s\rangle$ for $l = ${l}$, placed by total $m$; each $j$ state of given $m$ mixes the two dots in its column.`),
+              prompt: t`An electron with $l = ${l}$ and spin ½ is in the total-angular-momentum state $|j = ${jt},\ m_j = ${m2}/2\rangle$, the lower of the two $j$ values. Its Clebsch–Gordan expansion is $$\begin{gathered} |l - \tfrac12,\ m\rangle = -\sqrt{\tfrac{l - m + 1/2}{2l + 1}}\,|m - \tfrac12\rangle|{\uparrow}\rangle \\ + \sqrt{\tfrac{l + m + 1/2}{2l + 1}}\,|m + \tfrac12\rangle|{\downarrow}\rangle \end{gathered}$$ What is the probability that a measurement of $\hat L_z$ gives $m_l\hbar$ with $m_l = ${fmt(m - 0.5, 2)}$?`,
+              visual: dotsPic(l, t`The $2(2l + 1) = ${2 * (2 * l + 1)}$ product states $|m_l\rangle|m_s\rangle$ for $l = ${l}$, placed by total $m$: spin up (gold, top row) and spin down (blue). Each $j$ state of given $m$ mixes the two dots in its column.`),
               answer: key, tol: { rel: 0, abs: 0.003 },
               errors: apart([
                 { value: (l + m + 0.5) / (2 * l + 1), feedback: t`That is the weight of the other product state, $|m + \tfrac12\rangle|{\downarrow}\rangle$, which has $m_l = ${fmt(m + 0.5, 2)}$.` },

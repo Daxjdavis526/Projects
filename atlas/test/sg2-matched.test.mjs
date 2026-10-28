@@ -89,7 +89,7 @@ function check(name, ok, detail = '') {
   const mu = sOpt / K, sd = Math.sqrt(s2 / K - mu * mu);
   check('SNR at the true time averages ρ_opt (within 0.5)', Math.abs(mu - R.optimal) < 0.5, `${mu} vs ${R.optimal}`);
   check('its scatter is about 1', sd > 0.6 && sd < 1.4, sd);
-  check('ρ_opt = amp × ‖ĥ‖ = 7.69 for 30 M☉ at amp 1', Math.abs(R.optimal - 7.69) < 0.01, R.optimal);
+  check('ρ_opt = amp × ‖ĥ‖ = 7.68 for 30 M☉ at amp 1', Math.abs(R.optimal - 7.68) < 0.01, R.optimal);
   check('the filter finds the arrival time (to 2.5 ms) in most draws', found >= 0.9 * K, `${found}/${K}`);
 }
 
@@ -112,6 +112,20 @@ function check(name, ok, detail = '') {
     lastW = ci.hi - ci.lo;
   }
   check('the interval narrows as the signal grows', ok);
+}
+
+// noise-free: the exact template is the loudest (projection onto the quadrature plane)
+for (const Mc of [20, 25, 40, 55]) {
+  const R = M.record({ Mc, amp: 1, seed: 2 });
+  const ms = M.bankFor(Mc).filter((m) => Math.abs(m - Mc) < 2);
+  const sc = ms.map((m) => M.peak(M.snrSeries(R.unit, M.cachedTemplate(m))).rho);
+  const best = ms[sc.indexOf(Math.max(...sc))];
+  check(`noise-free bank peaks at the true ${Mc} M☉`, Math.abs(best - Mc) < 1e-6, best);
+  check(`noise-free peak SNR equals ‖signal‖ (${Mc} M☉)`, Math.abs(Math.max(...sc) - R.optimal) < 1e-6 * R.optimal);
+}
+{
+  const b = M.bankFor(30);
+  check('bankFor is sorted and spans 15–60', b.every((v, i) => i === 0 || v > b[i - 1]) && b[0] === 15 && b[b.length - 1] === 60);
 }
 
 // validate

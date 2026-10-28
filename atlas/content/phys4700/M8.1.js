@@ -113,21 +113,21 @@ The first is just the perturbation averaged over the unperturbed state. The seco
         { fn: 'sqrt(1 + x)', color: 'gold', width: 2.8, domain: [-1, 2], label: 'exact √(1 + ε)', labelAt: 1.45, labelDx: -30, labelDy: -16 },
         { sum: '(-1)^(k+1)*gamma(2k+1)/(4^k*gamma(k+1)^2*(2k-1))*x^k', k: [0, 'N'], color: 'accent', width: 2.2 },
       ],
-      vlines: [{ x: 'e', color: 'ink3' }, { x: 1, color: 'bad', label: 'radius of convergence' }],
+      vlines: [{ x: 'e', color: 'ink3' }, { x: 1, color: 'bad', label: 'ε = 1' }],
       readouts: [
         { label: 'exact √(1 + ε)', expr: 'sqrt(1 + e)', digits: 5 },
         { label: 'first order 1 + ε/2', expr: '1 + e/2', digits: 5 },
         { label: 'second order 1 + ε/2 − ε²/8', expr: '1 + e/2 - e^2/8', digits: 5 },
       ],
     },
-    caption: t`Gold: the exact energy. Blue: the perturbation series through order $N$ — the binomial series of $\sqrt{1 + \varepsilon}$, which converges only for $|\varepsilon| < 1$. Exact for an ideal oscillator; units of $(n + \tfrac12)\hbar\omega$.`,
+    caption: t`Gold: the exact energy. Blue: the perturbation series through order $N$; red line: its radius of convergence. It is the binomial series of $\sqrt{1 + \varepsilon}$, which converges only for $|\varepsilon| < 1$. Exact for an ideal oscillator; units of $(n + \tfrac12)\hbar\omega$.`,
   },
   example: {
     prompt: t`An electron sits in an infinite square well of width $a = 1.00$ nm, where $E_1^0 = ${fmt(E1W, 4)}$ eV. A gate voltage raises the floor of the right half, $a/2 < x < a$, by $V_0 = ${EX_V}$ eV. Find the ground-state energy to second order, and compare it with the exact answer.`,
     visual: wellPic({ pieces: EXP, vmax: EXu * 1.6, curves: [{ fn: sinN(1, 0.85), color: 'ink3', dash: [6, 4], label: 'ψ₁⁰', labelAt: 0.8, labelDy: -16 }, { fn: `0.85*(${EXpsi.expr})`, color: 'gold', label: 'exact ψ₁', labelAt: 0.2, labelDy: -16 }], y: [-0.3, 1.6], caption: t`The well with its step (teal; height not to scale) and the ground state before (dashed) and after (gold). The exact state leans away from the step: that lean is the mixing of other states that second order counts.` }),
     steps: [
       { label: 'Units', text: t`Measure lengths in $a$ and energies in $E_1^0$, so $E_n^0 = n^2$ and the step is $V_0/E_1^0 = ${fmt(EXu, 4)}$. The states are $\psi_n^0 = \sqrt{2/a}\,\sin(n\pi x/a)$.` },
-      { label: 'First order', text: t`$E_1^1 = \langle\psi_1^0|V|\psi_1^0\rangle = V_0\displaystyle\int_{a/2}^{a}|\psi_1^0|^2dx = \tfrac12V_0 = ${fmt(EX_V / 2, 4)}$ eV. $|\psi_1^0|^2$ is symmetric about the middle, so half the probability sits on the step. (Every level gets the same first-order shift.)` },
+      { label: 'First order', text: t`$E_1^1 = \langle\psi_1^0|V|\psi_1^0\rangle$ $= V_0\displaystyle\int_{a/2}^{a}|\psi_1^0|^2dx$ $= \tfrac12V_0 = ${fmt(EX_V / 2, 4)}$ eV. $|\psi_1^0|^2$ is symmetric about the middle, so half the probability sits on the step. (Every level gets the same first-order shift.)` },
       { label: 'Matrix elements', text: t`$H'_{m1} = \dfrac{2V_0}{a}\displaystyle\int_{a/2}^{a}\sin\frac{m\pi x}{a}\sin\frac{\pi x}{a}\,dx$. For odd $m \ne 1$ it vanishes; for even $m$ it is not small: $H'_{21} = -\dfrac{4V_0}{3\pi} = ${fmt(EXv2 * E1W, 3)}$ eV — the step breaks the well’s mirror symmetry, so it mixes even states into odd ones.` },
       { label: 'Second order', text: t`$E_1^2 = \sum_m |H'_{m1}|^2/(E_1^0 - E_m^0)$. The $m = 2$ term alone is $(${fmt(EXv2 * E1W, 3)}\ \text{eV})^2/(-3\times${fmt(E1W, 4)}\ \text{eV}) = ${fmt((EXv2 * E1W) ** 2 / (-3 * E1W), 3)}$ eV, almost all of it; the full sum, which converges fast because the denominators grow as $m^2$, is $${fmt(EXs.E2 * E1W, 4)}$ eV. Negative, as second order for a ground state must be.` },
       { label: 'Total', text: t`$E_1 \approx ${fmt(E1W, 4)} + ${fmt(EXs.E1 * E1W, 4)} ${fmt(EXs.E2 * E1W, 3)} = ${fmt((1 + EXs.E1 + EXs.E2) * E1W, 5)}$ eV.` },
@@ -329,7 +329,7 @@ print(pert(1, 40))
           errors: [{ value: ans * 2 * Math.PI, feedback: t`Divide by $h$, not $\hbar$, to turn an energy into an ordinary frequency.` }, { value: ans * (2 * Math.PI) ** 2, feedback: t`$\omega$ is the angular frequency, $2\pi\times${f}$ MHz.` }],
           hints: [t`$|E^2| = \dfrac{(e\mathcal E)^2}{2m\omega^2}$ in joules, with $m = ${fmt(M_CA40 / U, 8)}\times${tex(U, 6)}$ kg.`, t`Then divide by $h = ${tex(H, 9)}$ J s, and by 1000 for kHz.`],
           teach: 'For a linear push on an oscillator, second-order perturbation theory is exact: the parabola just shifts.',
-          explain: t`$|E^2| = \dfrac{(${tex(QE, 4)}\times${E})^2}{2(${tex(M_CA40, 4)})(${tex(w, 4)})^2} = ${tex(-dE, 3)}$ J, or $${fmt(ans, 3)}$ kHz. Completing the square shows it is exact: $\tfrac12m\omega^2x^2 - e\mathcal Ex$ is the same parabola centred at $x_0 = e\mathcal E/m\omega^2 = ${fmt(x0 * 1e9, 3)}$ nm, lowered by $\tfrac12m\omega^2x_0^2$. Every level drops equally, so the trap frequency is untouched — but the ion is pushed off the trap’s centre, where the radio-frequency drive makes it jiggle (“micromotion”), which is why ion-trap clocks null stray fields to well below a volt per metre.`,
+          explain: t`$$\begin{gathered} |E^2| = \frac{(${tex(QE, 4)}\times${E})^2}{2(${tex(M_CA40, 4)})(${tex(w, 4)})^2} \\ = ${tex(-dE, 3)}\ \text{J}, \end{gathered}$$ or $${fmt(ans, 3)}$ kHz. Completing the square shows it is exact: $\tfrac12m\omega^2x^2 - e\mathcal Ex$ is the same parabola centred at $x_0 = e\mathcal E/m\omega^2 = ${fmt(x0 * 1e9, 3)}$ nm, lowered by $\tfrac12m\omega^2x_0^2$. Every level drops equally, so the trap frequency is untouched — but the ion is pushed off the trap’s centre, where the radio-frequency drive makes it jiggle (“micromotion”), which is why ion-trap clocks null stray fields to well below a volt per metre.`,
         };
       },
     }),

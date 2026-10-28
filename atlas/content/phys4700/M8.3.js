@@ -49,9 +49,9 @@ function levelsPic({ ns = [2], choice = false, qed = true, caption, numbers = tr
       if (upto >= 3) for (const j of [l - 0.5, l + 0.5].filter((jj) => jj > 0)) curves.push(S(col[1][1], yr, col[2][0], fsShift(n, j) * UEV, 'ink4', 1, [3, 4]));
     }
     for (let j = 0.5; j < n && upto >= 3; j++) {
-      const y = fsShift(n, j) * UEV, names = [j - 0.5, j + 0.5].filter((l) => l < n && l >= 0).map((l) => `${n}${LJ[l]}${jtxt(j)}`);
+      const y = fsShift(n, j) * UEV;
       curves.push(S(col[2][0], y, col[2][1], y, 'gold', 3));
-      points.push(L(col[2][1], y, names.join(', '), 'gold', 5, 0));
+      points.push(L(col[2][1], y, `j = ${jtxt(j)}`, 'gold', 5, 0));
       if (qed && upto >= 4 && n === 2) {
         if (j === 0.5) {
           curves.push(S(col[2][1], y, col[3][0], y + LAMB_UEV, 'ink4', 1, [3, 4]), S(col[3][0], y + LAMB_UEV, col[3][1], y + LAMB_UEV, 'violet', 3));
@@ -65,7 +65,7 @@ function levelsPic({ ns = [2], choice = false, qed = true, caption, numbers = tr
     }
   }
   const ymin = Math.min(...ns.map((n) => relShift(n, 0) * UEV));
-  const heads = ['Bohr', '+ relativistic', '+ spin–orbit, Darwin', ...(qed ? ['+ Lamb shift (n = 2)'] : [])].slice(0, upto);
+  const heads = ['Bohr', '+ relativity', '+ spin–orbit', ...(qed ? ['+ Lamb (n = 2)'] : [])].slice(0, upto);
   heads.forEach((h, k) => points.push(label((col[k][0] + col[k][1]) / 2, -ymin * 0.1, h, 'ink3', 0, 0, 'center')));
   return {
     type: 'graph',
@@ -122,7 +122,7 @@ The energy depends on $n$ and the total angular momentum $j$ only — not on $l$
     prompt: t`Derive the first-order fine structure of hydrogen, then find the $2P_{3/2}$–$2P_{1/2}$ splitting in GHz and compare it with the measured 10 969.0 MHz.`,
     visual: levelsPic({ ns: [2], caption: t`Hydrogen’s $n = 2$ level corrected step by step, from CODATA 2022 constants; the Lamb shift is the measured value. Hyperfine structure (under 1 μeV) not shown.` }),
     steps: [
-      { label: 'Relativity', text: t`The kinetic energy $\sqrt{p^2c^2 + m^2c^4} - mc^2 = \dfrac{p^2}{2m} - \dfrac{p^4}{8m^3c^2} + \dots$, so $\hat H'_r = -\hat p^4/8m^3c^2$. Write $\hat p^4/4m^2 = (\hat H^0 - V)^2$ and use $\langle1/r\rangle = 1/n^2a$, $\langle1/r^2\rangle = 1/[(l + \tfrac12)n^3a^2]$: $$E_r^1 = -\frac{E_n^2}{2mc^2}\Big(\frac{4n}{l + \frac12} - 3\Big).$$ The level is degenerate, but $\hat H'_r$ commutes with $\hat L^2$ and $\hat L_z$, so the states $|n\,l\,m\rangle$ are already good and the plain expectation value is right.` },
+      { label: 'Relativity', text: t`The kinetic energy is $$\begin{gathered} \sqrt{p^2c^2 + m^2c^4} - mc^2 \\ = \frac{p^2}{2m} - \frac{p^4}{8m^3c^2} + \dots \end{gathered}$$ so $\hat H'_r = -\hat p^4/8m^3c^2$. Write $\hat p^4/4m^2 = (\hat H^0 - V)^2$ and use $\langle1/r\rangle = 1/n^2a$, $\langle1/r^2\rangle = 1/[(l + \tfrac12)n^3a^2]$: $$E_r^1 = -\frac{E_n^2}{2mc^2}\Big(\frac{4n}{l + \frac12} - 3\Big).$$ The level is degenerate, but $\hat H'_r$ commutes with $\hat L^2$ and $\hat L_z$, so the states $|n\,l\,m\rangle$ are already good and the plain expectation value is right.` },
       { label: 'Spin–orbit', text: t`In the electron’s frame the proton circles it, making a field $\propto\vec L$; the electron’s magnetic moment $\propto\vec S$ sits in it. With Thomas’s factor of ½ (the electron’s frame rotates): $\hat H'_{so} = \dfrac{e^2}{8\pi\epsilon_0}\dfrac{\hat{\vec S}\cdot\hat{\vec L}}{m^2c^2r^3}$. It commutes with $\hat J^2$, $\hat L^2$, $\hat S^2$ and $\hat J_z$ but not with $\hat L_z$ or $\hat S_z$: the good states are $|n\,l\,j\,m_j\rangle$, as degenerate perturbation theory demands.` },
       { label: 'Evaluate', text: t`$\hat{\vec S}\cdot\hat{\vec L} = \tfrac12\big[j(j+1) - l(l+1) - \tfrac34\big]\hbar^2$ and $\langle1/r^3\rangle = 1/[l(l + \tfrac12)(l + 1)n^3a^3]$ give $$E_{so}^1 = \frac{E_n^2}{mc^2}\,\frac{n\big[j(j+1) - l(l+1) - \frac34\big]}{l(l + \frac12)(l + 1)}.$$ (For $l = 0$ this is $0/0$; the Darwin term, from the Dirac equation, supplies the right answer there.)` },
       { label: 'Add them', text: t`Put $l = j \mp \tfrac12$: the $l$-dependence cancels exactly, leaving $E_{fs}^1 = \dfrac{E_n^2}{2mc^2}\Big(3 - \dfrac{4n}{j + \frac12}\Big)$. Since $|E_n| = \tfrac12\alpha^2mc^2/n^2$, this is $\alpha^2|E_n|/n^2$ times a number of order 1 — the $\alpha^2$ scaling.` },

@@ -51,7 +51,7 @@ export function normalPic({ k = null, tail = null, two = true, caption, labels =
     params: {
       aspect: 'wide', x: [-4.5, 4.5], y: [0, 0.47], xlabel: 'z = (x − μ)/σ', ylabel: 'density', xticks: 9, yticks: 4, axesAt: 'edge',
       curves: [{ fn: 'e^(-x^2/2)/sqrt(2pi)', color: 'accent' }], shade,
-      ...(labels && k ? { vlines: [{ x: -k, color: 'gold' }, { x: k, color: 'gold' }] } : {}),
+      ...(labels && k ? { vlines: [{ x: -k, color: 'gold' }, { x: k, color: 'gold' }] } : labels && tail !== null ? { vlines: [{ x: tail, color: 'warn' }, ...(two ? [{ x: -tail, color: 'warn' }] : [])] } : {}),
     },
     ...(caption ? { caption } : {}),
   };

@@ -30,7 +30,7 @@ function fanPic({ Emax = 100, mark = null, numbers = true, caption }) {
       x: [0, Emax], y: [-ytop, ytop], aspect: 'wide', xlabel: 'electric field ℰ (kV/cm)', ylabel: 'shift (μeV)', axesAt: 'edge', xticks: 5, yticks: numbers ? 4 : 0,
       curves: [
         { fn: `${k}*x`, color: 'warn', width: 2.4, label: '(ψ₂₀₀ − ψ₂₁₀)/√2', labelAt: Emax * 0.3, labelDx: -20, labelDy: -20 },
-        { fn: '0', color: 'accent', width: 3, label: 'ψ₂₁₁, ψ₂₁₋₁ (unshifted)', labelAt: Emax * 0.62, labelDx: 0, labelDy: -12 },
+        { fn: '0', color: 'accent', width: 3, label: 'ψ₂₁₁, ψ₂₁₋₁', labelAt: Emax * 0.6, labelDx: 0, labelDy: -12 },
         { fn: `-${k}*x`, color: 'good', width: 2.4, label: '(ψ₂₀₀ + ψ₂₁₀)/√2', labelAt: Emax * 0.3, labelDx: -20, labelDy: 22 },
       ],
       ...(mark !== null ? { vlines: [{ x: mark, color: 'ink3' }] } : {}),
@@ -117,7 +117,7 @@ The eigenvalues are the first-order shifts; the eigenvectors are the good states
       { label: 'The matrix', text: t`$W$ is $4\times4$ in the basis $\psi_{200}, \psi_{211}, \psi_{210}, \psi_{21-1}$. Two symmetries empty most of it.` },
       { label: 'Parity', text: t`$z$ is odd under $\vec r \to -\vec r$, and every state of given $l$ has parity $(-1)^l$. So $\langle\psi|z|\psi'\rangle = 0$ unless the two have opposite parity: every diagonal element vanishes, and so does any element between two $l = 1$ states.` },
       { label: 'Angular momentum', text: t`$[\hat L_z, z] = 0$, so $z$ cannot change $m$: $\langle 200|z|21{\pm1}\rangle = 0$. Only $\langle 200|z|210\rangle$ survives.` },
-      { label: 'The integral', text: t`With $\psi_{200} = R_{20}Y_0^0$ and $\psi_{210} = R_{21}Y_1^0$: the angular part $\int Y_0^0\cos\theta\,Y_1^0\,d\Omega = 1/\sqrt3$, and the radial part $\int_0^\infty R_{20}R_{21}\,r^3\,dr = \dfrac{a}{\sqrt{48}}\displaystyle\int_0^\infty\big(1 - \tfrac u2\big)u^4e^{-u}du = \dfrac{a}{\sqrt{48}}(24 - 60) = -\dfrac{9a}{\sqrt3}$. So $W_{200,210} = -3ea\mathcal E$.` },
+      { label: 'The integral', text: t`With $\psi_{200} = R_{20}Y_0^0$ and $\psi_{210} = R_{21}Y_1^0$: the angular part $\int Y_0^0\cos\theta\,Y_1^0\,d\Omega = 1/\sqrt3$, and the radial part $$\begin{gathered} \int_0^\infty R_{20}R_{21}\,r^3\,dr = \frac{a}{\sqrt{48}}\int_0^\infty\big(1 - \tfrac u2\big)u^4e^{-u}du \\ = \frac{a}{\sqrt{48}}(24 - 60) = -\frac{9a}{\sqrt3}. \end{gathered}$$ So $W_{200,210} = -3ea\mathcal E$.` },
       { label: 'Diagonalize', text: t`In the $\{\psi_{200}, \psi_{210}\}$ block $W = -3ea\mathcal E\begin{pmatrix}0 & 1\\ 1 & 0\end{pmatrix}$, with eigenvalues $\mp3ea\mathcal E$ for $(\psi_{200} \pm \psi_{210})/\sqrt2$. $\psi_{211}$ and $\psi_{21-1}$ stay at zero. $\hat L_z$ commutes with $\hat H^0$ and $z$, which is why $m$ stays a good label.` },
       { label: 'Numbers', text: t`$ea\mathcal E$ is $a = ${fmt(A0 * 1e9, 6)}$ nm times $\mathcal E$: at $${EX_F}$ kV/cm, $3ea\mathcal E = ${fmt(EX_SHIFT, 4)}\ \mu$eV, or $${fmt((EX_SHIFT * 1e-6 * QE) / H / 1e9, 4)}$ GHz. That swamps the Lamb shift between 2s and 2p ($${fmt(LAMB_UEV, 2)}\ \mu$eV), which the “degenerate” model ignores — so the linear Stark effect holds above a few hundred V/cm, and below that the shift is quadratic.` },
     ],
@@ -156,7 +156,7 @@ The eigenvalues are the first-order shifts; the eigenvectors are the good states
           errors: [{ value: ans / 2, feedback: t`That is one component’s shift, $3ea\mathcal E$. The outer components are $+3ea\mathcal E$ and $-3ea\mathcal E$: $6ea\mathcal E$ apart.` }, { value: ans / 3, feedback: t`The matrix element is $3ea\mathcal E$, not $ea\mathcal E$.` }],
           hints: [t`The outer pair are $\pm3ea\mathcal E$, so they are $6ea\mathcal E$ apart.`, t`$ea\mathcal E$ in eV is $a$ in metres times $\mathcal E$ in V/m: $${tex(A0, 6)}\times${F}\times10^{5}$. Then multiply by $e/h$ for hertz.`],
           teach: 'The linear Stark effect of n = 2 hydrogen spreads the level over ±3eaℰ.',
-          explain: t`$6ea\mathcal E = 6(${tex(A0, 6)})(${F}\times10^{5})\ \text{eV} = ${tex(dE, 4)}$ eV, so $\Delta E/h = ${fmt(ans, 4)}$ GHz. Linear in the field: a hallmark of degeneracy, since a non-degenerate level can only shift quadratically.`,
+          explain: t`$6ea\mathcal E = 6(${tex(A0, 6)})(${F}\times10^{5})\ \text{eV}$ $= ${tex(dE, 4)}$ eV, so $\Delta E/h = ${fmt(ans, 4)}$ GHz. Linear in the field: a hallmark of degeneracy, since a non-degenerate level can only shift quadratically.`,
         };
       },
     }),
@@ -215,7 +215,7 @@ The eigenvalues are the first-order shifts; the eigenvectors are the good states
       errors: [{ value: (QE * A0) / 1e-30, feedback: t`The displacement is $3a$, not $a$.` }],
       hints: [t`$p = e\times|\langle z\rangle| = 3ea$.`],
       teach: 'Degenerate mixing gives n = 2 hydrogen a permanent dipole moment, which is why its Stark shift is linear.',
-      explain: t`$p = 3(${tex(QE, 4)})(${tex(A0, 4)}) = ${tex(3 * QE * A0, 4)}$ C m — about 7.6 debye, larger than the dipole moment of a water molecule (1.85 debye). The energy $-\vec p\cdot\vec{\mathcal E} = \mp3ea\mathcal E$ is the linear Stark shift.`,
+      explain: t`$p = 3(${tex(QE, 4)})(${tex(A0, 4)})$ $= ${tex(3 * QE * A0, 4)}$ C m — about 7.6 debye, larger than the dipole moment of a water molecule (1.85 debye). The energy $-\vec p\cdot\vec{\mathcal E} = \mp3ea\mathcal E$ is the linear Stark shift.`,
     }),
   ],
   checkpoint: [
@@ -265,7 +265,7 @@ The eigenvalues are the first-order shifts; the eigenvectors are the good states
           visual: squarePic({ fn: true, caption: t`The box with the perturbation $V_0xy/a^2$ spread over it, strongest in the corner $x = y = a$, and the nodal lines of the two degenerate states.` }),
           answer: ans, units: 'meV', tol: { rel: 0.005 },
           errors: [{ value: w12, feedback: t`The shifts are $W_{11} \pm W_{12}$: they are $2W_{12}$ apart.` }, { value: 2 * V * (16 / (9 * Math.PI ** 2)), feedback: t`$W_{12} = V_0\langle1|x|2\rangle\langle2|y|1\rangle/a^2$: both factors carry $16/9\pi^2$, so it is squared.` }],
-          hints: [t`$W_{11} = \langle12|xy|12\rangle V_0/a^2 = V_0\langle1|x|1\rangle\langle2|y|2\rangle/a^2 = V_0/4$, and $W_{22}$ is the same.`, t`$W_{12} = \langle12|\hat H'|21\rangle = V_0\langle1|x|2\rangle\langle2|y|1\rangle/a^2 = V_0\big(\tfrac{16}{9\pi^2}\big)^2$.`],
+          hints: [t`$W_{11} = \langle12|xy|12\rangle V_0/a^2$ $= V_0\langle1|x|1\rangle\langle2|y|2\rangle/a^2 = V_0/4$, and $W_{22}$ is the same.`, t`$W_{12} = \langle12|\hat H'|21\rangle$ $= V_0\langle1|x|2\rangle\langle2|y|1\rangle/a^2 = V_0\big(\tfrac{16}{9\pi^2}\big)^2$.`],
           teach: 'For a separable perturbation the matrix elements factor into one-dimensional integrals.',
           explain: t`$W_{12} = V_0\big(\tfrac{16}{9\pi^2}\big)^2 = ${fmt(w12, 4)}$ meV, so the energies $\tfrac14V_0 \pm W_{12}$ are $${fmt(ans, 4)}$ meV apart, with good states $(\psi_{12} \pm \psi_{21})/\sqrt2$. The perturbation is symmetric under $x \leftrightarrow y$, and so are the good states (or antisymmetric).`,
         };
