@@ -194,7 +194,7 @@ That one curve sets the ignition of a diesel, the temperature behind a jet engin
           hints: [t`$T \propto P^{(\gamma-1)/\gamma}$ along an adiabat.`, t`$(\gamma - 1)/\gamma = ${fmt((g - 1) / g, 3)}$ and $P_e/P_c = ${fmt(Pe / Pc, 3)}$.`],
           teach: 'A nozzle turns the gas’s internal energy into directed kinetic energy, and the adiabat says how much the gas cools.',
           explain: t`$T_e = ${Tc}\times(${fmt(Pe / Pc, 3)})^{${fmt((g - 1) / g, 3)}} = ${Math.round(Te)}$ K. The energy lost as the gas cools is what accelerates it. Real exhaust also recombines chemically as it cools, so its composition and $\gamma$ shift along the nozzle; constant $\gamma$ is a first estimate.`,
-          visual: { type: 'therm-pv', params: { mode: 'process', gas: 'exhaust', n: 1, start: { P: Pc * 1000, T: Tc }, process: 'adiabatic', end: { P: 100 }, drag: false, readouts: [], isotherms: false, areaLabel: '', punit: 'kPa', vunit: 'L' }, caption: 'The nozzle expansion as an adiabat on a PV diagram (1 mol of gas with γ = 1.2; the area under it is the work the expanding gas can do).' },
+          visual: { type: 'therm-pv', params: { mode: 'process', gas: 'exhaust', n: 1, start: { P: Pc * 1000, T: Tc }, process: 'adiabatic', end: { P: 100 }, drag: false, readouts: [], isotherms: false, areaLabel: '', punit: 'kPa', vunit: 'L' }, caption: 'The nozzle expansion as an adiabat on a PV diagram, drawn for 1 mol of gas with γ = 1.2 (close to the value in the question). The shaded area is the work the expanding gas does.' },
         };
       },
     }),

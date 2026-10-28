@@ -20,6 +20,7 @@
 //       play: true, speed: 1,         // Play advances t at `speed` units per second
 //       fixed: false,                 // true: a still picture of the point at `at` — no slider, no Play
 //       x, y,                         // 2D window (default: fitted); range, yaw, pitch, dist, target for 3D
+//       vectors: 'arrow',             // vector notation in labels: 'arrow' (\vec T) or 'bold' (\mathbf T)
 //       labels: true } }
 //
 // The geometry lives in model/c3-curve.js, tested in test/c3-curve.test.mjs.
@@ -50,6 +51,8 @@ const cssColor = (n) => `var(${CSSVAR[n] || '--ink'})`;
 const keysOf = (P) => [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
 
 export function mount(F, P) {
+  // \vec T → \mathbf{T} when the lesson writes vectors in bold
+  const vn = (str) => (P.vectors === 'bold' ? str.replace(/\\vec\s*(\\[A-Za-z]+|[A-Za-z])/g, '\\mathbf{$1}') : str);
   const flat = P.plane === 'xy' || P.plane === 'xz';
   const { canvas, overlay } = F.canvas({ aspect: P.aspect || (flat ? 'wide' : ''), label: P.alt || 'A curve with a point moving along it' });
   for (const s of P.sliders || []) F.slider(s);
@@ -71,7 +74,7 @@ export function mount(F, P) {
   else F.slider({ key: 'tp', label: `$${P.pointLabel}$`, min: T0, max: T1, step: +((T1 - T0) / 400).toPrecision(2), value: P.at ?? T0 + 0.3 * (T1 - T0), unit: P.units.t || '', explain: 'Moves the point along the curve.' });
   const on = {};
   for (const k of SHOW) on[k] = (P.show || []).includes(k);
-  for (const k of P.toggles || []) F.toggle({ key: `show_${k}`, label: TOGGLE_LABEL[k], value: on[k] });
+  for (const k of P.toggles || []) F.toggle({ key: `show_${k}`, label: vn(TOGGLE_LABEL[k]), value: on[k] });
   if (P.play && !P.fixed) {
     let anim = null;
     const btn = F.button({ label: 'Play ▶', onClick: () => {
@@ -181,7 +184,7 @@ export function mount(F, P) {
     for (const [a, b, color, label, dashed] of vecs) {
       view.arrow(a, b, { color, width: 2.6, dash: dashed ? [6, 4] : [], bias: 0.08 });
       const d = M.sub(b, a), L = M.len(d);
-      if (L > 1e-9 && P.labels !== false) marks.push([M.add(b, M.mul(d, (0.12 * R) / L)), label, color]);
+      if (L > 1e-9 && P.labels !== false) marks.push([M.add(b, M.mul(d, (0.12 * R) / L)), vn(label), color]);
     }
     view.point(p, { color: 'gold', r: 5 });
     view.end();
@@ -219,7 +222,7 @@ export function mount(F, P) {
         rows.push(['arc length $s$', `${fmtNum(M.arcLengthAt(arc, t))}${u(U.len)}`]);
       }
     }
-    F.readout(rows);
+    F.readout(rows.map((r) => [vn(r[0]), ...r.slice(1)]));
   }
 
   F.draw(draw);
@@ -237,6 +240,7 @@ function fmtNum(v) {
 export function validate(P) {
   const problems = [];
   const keys = keysOf(P);
+  if (P.vectors !== undefined && P.vectors !== 'arrow' && P.vectors !== 'bold') problems.push("c3-curve: vectors is 'arrow' or 'bold'");
   const tryParse = (src, vars, where) => {
     if (typeof src === 'number') return;
     if (typeof src !== 'string') { problems.push(`c3-curve ${where}: expected a number or an expression`); return; }
