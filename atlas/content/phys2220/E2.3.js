@@ -107,7 +107,7 @@ Write $dq$ from a **charge density** — $dq = \lambda\,dl$ along a line, $\sigm
           answer: E, units: 'N/C', tol: { rel: 0.01 },
           errors: [{ value: (K * Q * 1e-9) / ((x / 100) ** 2 + (a / 100) ** 2), feedback: t`That adds the pieces' whole fields. Only the part along the axis survives: multiply by $x/r$.` }, { value: (K * Q * 1e-9) / (x / 100) ** 2, feedback: 'That treats the ring as a point charge at its centre — fine only far away.' }],
           hints: [t`Every piece is the same distance $r = \sqrt{x^2 + a^2}$ from P, and its field's component along the axis is $\dfrac{k\,dq}{r^2}\cdot\dfrac{x}{r}$.`, t`$E = \dfrac{kQx}{(x^2 + a^2)^{3/2}}$ with $x = ${x / 100}$ m and $a = ${a / 100}$ m.`],
-          teach: 'On a ring’s axis every piece is the same distance away, so the integral is just a sum: E = kQx/(x² + a²)^{3/2}.',
+          teach: 'On a ring’s axis every piece is the same distance away, so the integral is just a sum: $E = kQx/(x^2 + a^2)^{3/2}$.',
           explain: t`$E = \dfrac{(8.988\times10^{9})(${Q}\times10^{-9})(${x / 100})}{(${x / 100}^2 + ${a / 100}^2)^{3/2}} = ${tn(E)}$ N/C, along the axis, away from the ring.`,
           visual: ringPic({ pair: false, caption: `The charged ring (radius ${a} cm) and the point P on its axis, ${x} cm from the centre. Not to scale; drag to turn it.` }),
         };
@@ -218,7 +218,7 @@ Write $dq$ from a **charge density** — $dq = \lambda\,dl$ along a line, $\sigm
           prompt: t`A ring of radius ${a} cm carries $${Q}$ nC. How strong is the field on its axis ${x} cm from the centre?`,
           answer: E, units: 'N/C', tol: { rel: 0.01 },
           hints: [t`$E = kQx/(x^2 + a^2)^{3/2}$.`],
-          teach: 'On a ring’s axis only the axial components survive: E = kQx/(x² + a²)^{3/2}.',
+          teach: 'On a ring’s axis only the axial components survive: $E = kQx/(x^2 + a^2)^{3/2}$.',
           explain: t`$E = \dfrac{(8.988\times10^{9})(${Q}\times10^{-9})(${x / 100})}{(${x / 100}^2 + ${a / 100}^2)^{3/2}} = ${tn(E)}$ N/C.`,
           visual: ringPic({ pair: false, caption: `The ring (radius ${a} cm) and the point P on its axis. Not to scale.` }),
         };

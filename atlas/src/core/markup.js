@@ -131,6 +131,9 @@ export function escapeDamage(text, { prose = true } = {}) {
     // names like kinetic_energy are identifiers and print as written)
     const sub = /(?<![\w\\/.-])([A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))(?![\w/])/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
     if (sub) return `“${sub[1]}” is a subscript or power outside $…$ and would print literally — write $${sub[1]}$`;
+    // …and after a bracket: (∂P/∂T)_V, (a + b)^2
+    const after = /\)([_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
+    if (after) return `“)${after[1]}” is a subscript or power outside $…$ and would print literally — put the whole expression in math`;
     if (/\{,\}/.test(g.v)) return 'a “{,}” sits outside $…$ and would print literally — a TeX thousands separator belongs in math';
   }
   return null;

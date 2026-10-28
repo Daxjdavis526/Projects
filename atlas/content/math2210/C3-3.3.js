@@ -1,5 +1,5 @@
 // Tangent planes and linear approximation: close up, a smooth surface is a
-// plane; the linearization and the total differential, error propagation,
+// plane; the linearisation and the total differential, error propagation,
 // and why "the partials exist" is not enough.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
@@ -23,7 +23,7 @@ export default lesson({
 
 $$z = f(a, b) + f_x(a, b)\,(x - a) + f_y(a, b)\,(y - b)$$
 
-Its right-hand side, the **linearization** $L(x, y)$, is the best linear stand-in for $f$ near the point. Written for small changes it becomes the **total differential** $df = f_x\,dx + f_y\,dy$ — the rule every experimentalist uses to carry measurement uncertainties through a formula, and every engineer uses to ask “what if this grows by 1 %?”.`,
+Its right-hand side, the **linearisation** $L(x, y)$, is the best linear stand-in for $f$ near the point. Written for small changes it becomes the **total differential** $df = f_x\,dx + f_y\,dy$ — the rule every experimentalist uses to carry measurement uncertainties through a formula, and every engineer uses to ask “what if this grows by 1 %?”.`,
   symbols: [
     { tex: 'z', text: 'the height of the tangent plane above the point $(x, y)$' },
     { tex: 'f(a, b)', text: 'the height of the surface at the point of tangency' },
@@ -51,14 +51,14 @@ Its right-hand side, the **linearization** $L(x, y)$, is the best linear stand-i
     caption: t`The hill is $f = 2.5\,e^{-(x^2 + 1.5y^2)/4}$, the cone $f = 2.5 - 1.1\sqrt{x^2 + y^2}$. The slopes are computed numerically, so at the cone’s tip they come out as $0$ and the gold plane sits flat on the point — which shows exactly why it is not tangent. Drag to rotate.`,
   },
   example: {
-    prompt: t`A drone’s horizontal distance from its launch point is $r = \sqrt{x^2 + y^2}$. GPS puts it at $(3.00, 4.00)$ km; a moment later it is at $(3.02, 3.97)$ km. Estimate its new distance with the linearization of $r$ at $(3, 4)$, and compare with the exact value.`,
+    prompt: t`A drone’s horizontal distance from its launch point is $r = \sqrt{x^2 + y^2}$. GPS puts it at $(3.00, 4.00)$ km; a moment later it is at $(3.02, 3.97)$ km. Estimate its new distance with the linearisation of $r$ at $(3, 4)$, and compare with the exact value.`,
     visual: boxSurf((X, Y) => `sqrt(${X}^2 + ${Y}^2)`, [2, 4], [3, 5], { zr: [3.5, 6.5], top: 3, labels: ['x', 'y', 'r'], tangentAt: [3, 4], caption: t`The graph of $r = \sqrt{x^2 + y^2}$ over $2 \le x \le 4$, $3 \le y \le 5$ (km; heights from 3.5 km), with its tangent plane at $(3, 4)$. Away from the origin the cone is nearly flat. Drag to rotate.` }),
     steps: [
       { label: 'The point', text: t`$r(3, 4) = \sqrt{9 + 16} = 5.00$ km.` },
       { label: 'The slopes', text: t`$r_x = \dfrac{x}{\sqrt{x^2 + y^2}} = \dfrac35 = 0.6$ and $r_y = \dfrac{y}{\sqrt{x^2 + y^2}} = \dfrac45 = 0.8$ — kilometres of distance per kilometre moved.` },
-      { label: 'Linearize', text: t`$L(x, y) = 5 + 0.6\,(x - 3) + 0.8\,(y - 4)$.` },
+      { label: 'Linearise', text: t`$L(x, y) = 5 + 0.6\,(x - 3) + 0.8\,(y - 4)$.` },
       { label: 'Estimate', text: t`$L(3.02, 3.97) = 5 + 0.6(0.02) + 0.8(-0.03) = 5 + 0.012 - 0.024 = 4.988$ km.` },
-      { label: 'Sense check', text: t`Exactly, $\sqrt{3.02^2 + 3.97^2} = \sqrt{24.8813} = 4.98812$ km: the estimate is off by about 0.1 m. The error of a linearization shrinks like the **square** of the step, so a step ten times smaller would be about a hundred times more accurate.` },
+      { label: 'Sense check', text: t`Exactly, $\sqrt{3.02^2 + 3.97^2} = \sqrt{24.8813} = 4.98812$ km: the estimate is off by about 0.1 m. The error of a linearisation shrinks like the **square** of the step, so a step ten times smaller would be about a hundred times more accurate.` },
     ],
     answer: t`$L(3.02, 3.97) = 4.988$ km; the exact distance is $4.98812$ km.`,
   },
@@ -131,7 +131,7 @@ Its right-hand side, the **linearization** $L(x, y)$, is the best linear stand-i
         const f = (x, y) => x * x * y + y ** 3;
         const fx = 2 * a * b, fy = a * a + 3 * b * b, L = f(a, b) + fx * dx + fy * dy;
         return {
-          prompt: t`Use the linearization of $f(x, y) = x^2 y + y^3$ at $(${a}, ${b})$ to estimate $f(${nice(a + dx)}, ${nice(b + dy)})$.`,
+          prompt: t`Use the linearisation of $f(x, y) = x^2 y + y^3$ at $(${a}, ${b})$ to estimate $f(${nice(a + dx)}, ${nice(b + dy)})$.`,
           visual: withPlane((x, y) => `${x}^2*${y} + ${y}^3`, a, b, { domain: [[a - 1.2, a + 1.2], [b - 1.2, b + 1.2]], zscale: r6(2.2 / f(a + 1.2, b + 1.2)), target: [a, b, 1.2], axes: false, dist: 7.5, caption: t`The graph of $f$ near $(${a}, ${b})$, heights scaled, with its tangent plane in gold. Drag to rotate.` }),
           answer: L, tol: { rel: 2e-3 },
           errors: [{ value: f(a, b), feedback: t`That is $f(${a}, ${b})$ itself. Add the corrections $f_x\,\Delta x + f_y\,\Delta y$.` }, { value: f(a, b) + fy * dx + fx * dy, feedback: t`The slopes are swapped: $f_x$ multiplies the change in $x$.` }].filter((e) => Math.abs(e.value - L) > 0.01 * Math.abs(L)),
@@ -211,11 +211,11 @@ Its right-hand side, the **linearization** $L(x, y)$, is the best linear stand-i
         // f = x e^{y} at (2, 0)
         const L = 2 + 1 * dx + 2 * dy, exact = (2 + dx) * Math.exp(dy);
         return {
-          prompt: t`Use the linearization of $f(x, y) = x\,e^{y}$ at $(2, 0)$ to estimate $f(${nice(2 + dx)}, ${nice(dy)})$.`,
+          prompt: t`Use the linearisation of $f(x, y) = x\,e^{y}$ at $(2, 0)$ to estimate $f(${nice(2 + dx)}, ${nice(dy)})$.`,
           visual: withPlane((x, y) => `${x}*e^(${y})`, 2, 0, { domain: [[0.8, 3.2], [-1.2, 1.2]], zscale: 0.3, target: [2, 0, 0.8], axes: false, dist: 7, caption: t`The graph of $x e^y$ near $(2, 0)$ (heights scaled by 0.3), with its tangent plane in gold. Drag to rotate.` }),
           answer: L, tol: { rel: 1e-3 },
           hints: [t`$f(2, 0) = 2$, $f_x = e^y$, $f_y = x e^y$.`],
-          teach: t`The linearization is $L(x, y) = f(a, b) + f_x(a, b)(x - a) + f_y(a, b)(y - b)$.`,
+          teach: t`The linearisation is $L(x, y) = f(a, b) + f_x(a, b)(x - a) + f_y(a, b)(y - b)$.`,
           explain: t`$f_x(2, 0) = 1$ and $f_y(2, 0) = 2$, so $L = 2 + 1(${nice(dx)}) + 2(${nice(dy)}) = ${nice(L)}$. The exact value is $${exact.toFixed(5)}$.`,
         };
       },

@@ -3,11 +3,13 @@
 // potential's level curves, and a draggable probe that reads out the field,
 // its divergence and its curl (computed numerically). An optional closed loop
 // shows the circulation ∮F·dr against the flux of the curl (Green's theorem).
+// readout: false hides every number (so a problem's picture does not print its
+// answer); probe: false also removes the probe and its arrow.
 
 import { Plot, themeColors } from '../plot.js';
 import { fn } from '../model/exprfn.js';
 
-export const defaults = { P: '-y', Q: 'x', x: [-3, 3], y: [-3, 3], density: 15, particles: true, loop: null };
+export const defaults = { P: '-y', Q: 'x', x: [-3, 3], y: [-3, 3], density: 15, particles: true, loop: null, readout: true, probe: undefined };
 
 export function mount(F, Pp) {
   const { canvas } = F.canvas({ aspect: 'square', label: Pp.alt || 'A vector field with a movable probe' });
@@ -16,7 +18,8 @@ export function mount(F, Pp) {
   const keys = [...(Pp.sliders || []).map((s) => s.key), ...(Pp.choices || []).map((c) => c.key)];
   const plot = new Plot(canvas, { x: Pp.x, y: Pp.y, equal: true, xlabel: 'x', ylabel: 'y' });
   const probe = { x: Pp.probe?.[0] ?? 1, y: Pp.probe?.[1] ?? 0.5 };
-  plot.handle(() => [probe.x, probe.y], (x, y) => { probe.x = x; probe.y = y; });
+  const showProbe = Pp.probe !== false;
+  if (showProbe) plot.handle(() => [probe.x, probe.y], (x, y) => { probe.x = x; probe.y = y; });
   plot.onDrag = () => draw();
   const vars = ['x', 'y', ...keys];
   const env = () => { const e = {}; for (const k of keys) e[k] = F.params[k]; return e; };
@@ -107,8 +110,9 @@ export function mount(F, Pp) {
     }
     // probe
     const [u, v] = f(probe.x, probe.y);
-    plot.arrow(probe.x, probe.y, probe.x + u * len / Math.max(1e-9, maxM) * 1.6, probe.y + v * len / Math.max(1e-9, maxM) * 1.6, { color: 'gold', width: 2.6 });
+    if (showProbe) plot.arrow(probe.x, probe.y, probe.x + u * len / Math.max(1e-9, maxM) * 1.6, probe.y + v * len / Math.max(1e-9, maxM) * 1.6, { color: 'gold', width: 2.6 });
     plot.drawHandles();
+    if (Pp.readout === false) { F.readout([]); return; }
     const h = 1e-4;
     const div = (f(probe.x + h, probe.y)[0] - f(probe.x - h, probe.y)[0]) / (2 * h) + (f(probe.x, probe.y + h)[1] - f(probe.x, probe.y - h)[1]) / (2 * h);
     F.readout([['probe', `(${probe.x.toFixed(2)}, ${probe.y.toFixed(2)})`], ['$\\vec F$', `(${u.toFixed(3)}, ${v.toFixed(3)})`], ['$\\nabla\\cdot\\vec F$', div.toFixed(3)], ['$(\\nabla\\times\\vec F)_z$', curlAt(f, probe.x, probe.y).toFixed(3)], ...rows]);

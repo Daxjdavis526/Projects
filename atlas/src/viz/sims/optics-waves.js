@@ -22,7 +22,7 @@
 //       mode: 'slits',
 //       controls: true,            // or false, or a list of the control keys to show
 //       readout: true, labels: true, hide: [],
-//       // slits:     N 2, a 20 (µm, slit width; 0: very narrow), d 100 (µm, centre spacing), lambda 633 (nm), L 1 (m),
+//       // slits:     N 2, a 20 (µm, slit width; 0: very narrow), d 100 (µm, centre spacing, 0.4–1000), lambda 633 (nm), L 1 (m),
 //       //            axis 'y' (screen position, mm) | 'angle' (°), range null (half-width shown, in axis units),
 //       //            light 'laser' | 'white', phasors true, envelope true, marks null | 'bright' | 'dark' | 'single',
 //       //            probe null (axis units); hide: spacing (no fringe-spacing readout), probe
@@ -119,7 +119,7 @@ export async function mount(F, P0) {
   if (mode === 'slits') {
     slider({ key: 'N', label: 'Number of slits $N$', min: 1, max: 20, step: 1, value: P.N, explain: '1: a single slit. 2: Young’s double slit. More: a grating.' });
     slider({ key: 'a', label: 'Slit width $a$', min: 0, max: 200, step: 1, value: P.a, unit: '\\mu\\mathrm{m}', explain: 'Each slit’s own width. 0 means very narrow (no diffraction envelope).' });
-    slider({ key: 'd', label: 'Slit spacing $d$', min: 1, max: 1000, value: P.d, logScale: true, fmt: (v) => trim(v, 3), unit: '\\mu\\mathrm{m}', explain: 'Centre to centre (only matters for two or more slits). A grating’s lines are 1–3 µm apart.' });
+    slider({ key: 'd', label: 'Slit spacing $d$', min: 0.4, max: 1000, value: P.d, logScale: true, fmt: (v) => trim(v, 3), unit: '\\mu\\mathrm{m}', explain: 'Centre to centre (only matters for two or more slits). A grating’s lines are 0.4–3 µm apart: 2500 to 300 lines per millimetre.' });
     slider({ key: 'lambda', label: 'Wavelength $\\lambda$', min: 380, max: 750, step: 1, value: P.lambda, unit: '\\mathrm{nm}', explain: 'The laser’s colour.' });
     if (P.axis === 'y') slider({ key: 'L', label: 'Screen distance $L$', min: 0.2, max: 5, step: 0.05, value: P.L, unit: '\\mathrm{m}', explain: 'From the slits to the screen.' });
     choice({ key: 'light', label: 'Light', options: [['laser', 'Laser'], ['white', 'White']], value: P.light, explain: 'White light: every colour at once, each making its own pattern.' });
@@ -652,7 +652,7 @@ export function validate(P0) {
   if (!Array.isArray(P.hide)) problems.push('optics-waves: hide must be a list');
   if (mode === 'slits') {
     if (!(Number.isInteger(P.N) && P.N >= 1 && P.N <= 20)) problems.push('optics-waves: N must be a whole number from 1 to 20');
-    num('a', 0, 200); num('d', 1, 1000); num('lambda', 380, 750); num('L', 0.2, 5);
+    num('a', 0, 200); num('d', 0.4, 1000); num('lambda', 380, 750); num('L', 0.2, 5);
     if (P.N === 1 && !(P.a > 0)) problems.push('optics-waves: a single slit needs a width a > 0');
     if (P.N >= 2 && P.a > P.d) problems.push('optics-waves: slits cannot be wider than their spacing');
     if (!['y', 'angle'].includes(P.axis)) problems.push('optics-waves: axis must be y or angle');

@@ -168,7 +168,7 @@ $$|\vec A\times\vec B| = AB\sin\theta, \qquad \vec A\times\vec B = (A_yB_z - A_z
           answer: C[k], tol: { rel: 0, abs: 0.01 },
           errors: [{ value: -C[k], feedback: 'The sign is flipped: that is a component of B × A. Keep the cyclic order.' }],
           hints: [t`$(\vec A\times\vec B)_x = A_yB_z - A_zB_y$; shift $x \to y \to z \to x$ for the others.`, ['x', 'y', 'z'][k] === 'x' ? t`$(${A[1]})(${B[2]}) - (${A[2]})(${B[1]})$.` : ['x', 'y', 'z'][k] === 'y' ? t`$(${A[2]})(${B[0]}) - (${A[0]})(${B[2]})$.` : t`$(${A[0]})(${B[1]}) - (${A[1]})(${B[0]})$.`],
-          teach: 'Each component of A × B uses the other two axes, in cyclic order: (A×B)_x = A_yB_z − A_zB_y, and so on.',
+          teach: 'Each component of $\\vec A \\times \\vec B$ uses the other two axes, in cyclic order: $(\\vec A\\times\\vec B)_x = A_yB_z - A_zB_y$, and so on.',
           visual: crossScene(A, B, { showC: false, caption: 'A, B and the parallelogram they span; A × B is perpendicular to it. Drag to rotate.' }),
           explain: t`$\vec A\times\vec B = ${vecTeX(C)}$, so the $${axis}$-component is $${C[k]}$.`,
         };

@@ -22,6 +22,8 @@ const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶',
 const sup = (s) => String(s).replace(/[-\d]/g, (d) => SUP[d]);
 const sym = (name) => { const [el, A] = name.split('-'); return sup(A) + el; };          // ⁵⁶Fe, for canvas labels
 const texSym = (name) => { const [el, A] = name.split('-'); return `{}^{${A}}\\text{${el}}`; };
+/** 'a' or 'an' before a nuclide's name (an iron-56, a uranium-238). */
+const an = (name) => (/^[aeio]/.test(NAMES[name]) ? 'an' : 'a');
 const NAMES = { 'He-4': 'helium-4', 'C-12': 'carbon-12', 'O-16': 'oxygen-16', 'Ca-40': 'calcium-40', 'Fe-56': 'iron-56', 'Ni-62': 'nickel-62', 'Sn-120': 'tin-120', 'Pb-208': 'lead-208', 'Au-197': 'gold-197', 'U-235': 'uranium-235', 'U-238': 'uranium-238' };
 /** 8.2 × 10¹³, for canvas labels. */
 const pow10 = (v, n = 2) => { const [m, e] = v.toExponential(n - 1).split('e'); return `${m} × 10${sup(parseInt(e, 10))}`; };
@@ -204,7 +206,7 @@ Divided by $A$, it makes the most important graph in nuclear physics. Binding en
         const [a, b] = r.pick([['U-238', 'He-4'], ['Pb-208', 'O-16'], ['Fe-56', 'He-4'], ['Au-197', 'C-12']]);
         const A1 = Nu.byName[a].A, A2 = Nu.byName[b].A, ratio = Math.cbrt(A1 / A2);
         return {
-          prompt: t`Nuclear radii follow $R = R_0A^{1/3}$ with $R_0 = 1.2$ fm. How many times larger is the radius of a ${NAMES[a]} nucleus ($A = ${A1}$) than that of a ${NAMES[b]} nucleus ($A = ${A2}$)?`,
+          prompt: t`Nuclear radii follow $R = R_0A^{1/3}$ with $R_0 = 1.2$ fm. How many times larger is the radius of ${an(a)} ${NAMES[a]} nucleus ($A = ${A1}$) than that of ${an(b)} ${NAMES[b]} nucleus ($A = ${A2}$)?`,
           answer: ratio, tol: { rel: 0.005 },
           errors: [
             { value: A1 / A2, feedback: t`That is the ratio of the mass numbers — and so of the *volumes*. The radius grows only as the cube root, $A^{1/3}$.` },
@@ -213,7 +215,7 @@ Divided by $A$, it makes the most important graph in nuclear physics. Binding en
           hints: [t`The $R_0$ cancels: $R_1/R_2 = (A_1/A_2)^{1/3}$.`],
           teach: 'A nucleus’s volume is proportional to its number of nucleons, so its radius grows only as the cube root of A.',
           explain: t`$\dfrac{R_1}{R_2} = \left(\dfrac{${A1}}{${A2}}\right)^{1/3} = ${fmt(ratio, 3)}$ — radii of ${fmt(Nu.radiusFm(A1), 2)} fm and ${fmt(Nu.radiusFm(A2), 2)} fm. ${fmt(A1 / A2, 3)} times the nucleons need ${fmt(A1 / A2, 3)} times the volume, but only ${fmt(ratio, 3)} times the radius.`,
-          visual: discs([b, a], { caption: `A ${NAMES[b]} nucleus and a ${NAMES[a]} nucleus, drawn to scale. Real nuclei have soft edges rather than a sharp surface.` }),
+          visual: discs([b, a], { caption: `${an(b) === 'an' ? 'An' : 'A'} ${NAMES[b]} nucleus and ${an(a)} ${NAMES[a]} nucleus, drawn to scale. Real nuclei have soft edges rather than a sharp surface.` }),
         };
       },
     }),
@@ -288,7 +290,7 @@ Divided by $A$, it makes the most important graph in nuclear physics. Binding en
       errors: [{ value: (2.014102 + 3.016049 - 4.002603) * UC2, feedback: 'The neutron is a product too: include its mass on the right-hand side.' }],
       hints: [t`Mass before: $2.014102 + 3.016049$ u. Mass after: $4.002603 + 1.008665$ u.`, 'The energy released is (mass before − mass after) × 931.5 MeV per u.'],
       teach: 'A reaction’s energy release is the mass that disappears, times c².',
-      explain: t`$\Delta m = 5.030151 - 5.011268 = 0.018883$ u, so $Q = 0.018883\times931.5 = ${fmt(Q_DT, 4)}$ MeV. Sharing momentum gives the light neutron ${fmt(100 * (4.002603 / 5.011268), 2)}% of it, ${fmt(Q_DT * (4.002603 / 5.011268), 3)} MeV — so a fusion plant must catch fast neutrons in a thick blanket to collect its heat.`,
+      explain: t`$\Delta m = 5.030151 - 5.011268 = 0.018883$ u, so $Q = 0.018883\times931.5 = ${fmt(Q_DT, 4)}$ MeV. The two products fly apart with equal and opposite momenta, so the light neutron takes ${fmt(100 * (4.002603 / 5.011268), 2)}% of the energy, about 14 MeV — which is why a fusion plant must catch fast neutrons in a thick blanket to collect its heat.`,
       visual: curve('H-3', { zoom: [0, 20, 0, 8.7], semf: false }, 'The light end of the curve: deuterium (²H) and tritium (³H) are loosely bound, helium-4 far more tightly.'),
     }),
     mcq({

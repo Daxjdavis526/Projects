@@ -370,6 +370,10 @@ disagree. Never type a computed answer by hand. `r` is a seeded RNG:
 | `r.sign()`, `r.bool(p)` | ±1; true with probability p |
 | `r.shuffle(array)`, `r.perm(n)` | a shuffled copy; a permutation of 0…n−1 |
 
+When a generator builds an expression or TeX from pieces, bracket each
+piece: with `HX = '1 + x'`, `${HX}^2` reads as `1 + x^2`, so write
+`(${HX})^2`. The same goes for a negative number spliced after an operator.
+
 A generator always returns an object — never `null` or `undefined` to mean
 "try another seed"; pick parameters that cannot fail instead. It must vary
 the prompt or the answer, not only the picture (the test checks that its
@@ -407,7 +411,7 @@ The library (read the header comment of a sim's file for its full options):
 |---|---|---|
 | `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks` (about how many ticks; `0` hides them and their numbers), `xlog`, `ylog` (the coordinates are log₁₀ of the quantity and the axis is labelled 1, 10, 10², …), `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, labelDx, labelDy, color, r, when }]`, `arrows: [{ from: [x, y], to: [x, y], color, width, dash, label, labelDx, labelDy, labelAlign }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` (on curves, points, shade, lines and arrows — drawn while nonzero; use `step(a - b)` for a ≥ b — `step` is 0 below its jump, 1 above and ½ at it; `min`/`max` clamp) may be expressions; `axesAt: 'edge'` keeps the axes on the frame; point labels sit about 9 px right of and above the point (`labelDx`, `labelDy`, `labelAlign` move them — screen pixels, with `labelDy` positive *downward*); an arrow's label sits at its tip; `equal: true` keeps one unit the same length on both axes by widening one range, so labels near a nominal edge move; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
 | `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b] }]`, `colorBy`, `zscale`, `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` |
-| `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }` |
+| `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }`, `probe: [x, y]` (or `false`), `readout: false` (hides the numbers) |
 | `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h`, `hRange: [min, max]` (the Euler-step slider; default [0.05, 1]) |
 | `diagram` | static force diagrams: a block with labelled force arrows, a block on an incline | `kind: 'block' \| 'incline'`, `mass`, `forces: [{ dir (deg), label, size (0–1) }]`, `angle` |
 | `force-cart` | a cart pushed by a force with friction; v–t graph | `F`, `m`, `mu` |
@@ -430,6 +434,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
 | `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
 | `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders (readouts below 10⁻¹² show as 0: work in units where the numbers are ordinary) |
+| `c3-contour` | a contour map of z = f(x, y) with labelled levels, a highlighted level on a slider, a probe, and the 3D surface sliced by the plane z = c |
+| `c3-roots` | a constant-coefficient second-order equation: its characteristic roots in the complex plane beside the motion they make; forced mode with the resonance curve |
 | `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
 | `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
 | `mech-frames` | Newton's first law seen from the ground and from an accelerating train car |

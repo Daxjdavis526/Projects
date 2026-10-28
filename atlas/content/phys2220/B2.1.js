@@ -177,7 +177,7 @@ It is an inverse-square law, like Coulomb’s — but with a **cross product**, 
           answer: B * 1e6, units: 'uT', tol: { rel: 0.01 },
           errors: [{ value: ((N * MU0 * I) / (2 * Rc / 100)) * 1e6, feedback: t`That is the field at the centre. Off-centre, use $\dfrac{\mu_0 IR^2}{2(R^2 + z^2)^{3/2}}$.` }, { value: ((N * MU0 * I) / (2 * PI * Math.sqrt((Rc / 100) ** 2 + (z / 100) ** 2))) * 1e6, feedback: 'A coil is not a long straight wire: only the axial parts of the pieces’ fields survive.' }],
           hints: [t`On the axis, $B = N\dfrac{\mu_0 IR^2}{2(R^2 + z^2)^{3/2}}$.`, t`Here $z = ${k}R$, so $(R^2 + z^2)^{3/2} = R^3(1 + ${k}^2)^{3/2}$ and $B = B_{\text{centre}}/(1 + ${k}^2)^{3/2}$.`],
-          teach: 'Along a coil’s axis the field is Nμ₀IR²/(2(R² + z²)^{3/2}): the centre value, shrunk as P moves away.',
+          teach: 'Along a coil’s axis the field is $N\\mu_0IR^2/\\big(2(R^2 + z^2)^{3/2}\\big)$: the centre value, shrunk as P moves away.',
           explain: t`$B_{\text{centre}} = N\mu_0I/(2R) = ${tn((N * MU0 * I) / (2 * Rc / 100))}$ T and $(1 + ${k}^2)^{3/2} = ${tn((1 + k * k) ** 1.5)}$, so $B = ${tn(B)}$ T $= ${tn(B * 1e6)}\ \mu\text{T}$.`,
         };
       },

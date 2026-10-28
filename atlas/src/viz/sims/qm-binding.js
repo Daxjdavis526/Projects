@@ -53,24 +53,37 @@ export function mount(F, P0) {
       const v = Nu.bindingPerNucleon(n);
       plot.point(n.A, v, { color: 'accent', r: 3.4 });
     }
+    // the highlighted nuclide's label: below and to the right of a light nucleus, above a middling
+    // one (clear of the fission arrows), below and to the left of a heavy one
+    const n = sel(), shown = n && n.A >= x0 && n.A <= x1;
+    let gold = null;
+    if (shown) {
+      const v = Nu.bindingPerNucleon(n), text = hide.has('B') ? `${nice(n.name)}: ?` : `${nice(n.name)}: ${v.toFixed(3)} MeV`;
+      const [dx, dy, align] = n.A <= 30 ? [12, 18, 'left'] : n.A <= 180 ? [10, -16, 'left'] : [-12, 18, 'right'];
+      const w = text.length * 7.4, x = plot.X(n.A) + dx, y = plot.Y(v) + dy;
+      const px = plot.X(n.A), py = plot.Y(v);
+      gold = { v, text, dx, dy, align, box: [align === 'left' ? x : x - w, align === 'left' ? x + w : x, y - 8, y + 8], dot: [px - 8, px + 8, py - 8, py + 8] };
+    }
+    const overlaps = (a, b) => a[0] < b[1] && b[0] < a[1] && a[2] < b[3] && b[2] < a[3];
     if (P.labels) for (const name of LANDMARKS) {
-      const n = Nu.byName[name], v = Nu.bindingPerNucleon(n);
-      if (n.A < x0 || n.A > x1 || v < y0 || v > y1) continue;
+      const m = Nu.byName[name], v = Nu.bindingPerNucleon(m);
+      if (m.A < x0 || m.A > x1 || v < y0 || v > y1 || (shown && m === n)) continue;
       const below = ['Ni-62', 'U-238', 'Kr-84', 'Ba-138', 'Li-6'].includes(name);
-      plot.text(nice(name), n.A, v, { color: 'ink2', dx: name === 'H-2' ? 8 : 0, dy: below ? 14 : -12, align: name === 'H-2' ? 'left' : 'center', size: 11 });
+      const dx = name === 'H-2' ? 8 : 0, dy = below ? 14 : -12, w = nice(name).length * 6.6;
+      const x = plot.X(m.A) + dx, y = plot.Y(v) + dy, box = name === 'H-2' ? [x, x + w, y - 7, y + 7] : [x - w / 2, x + w / 2, y - 7, y + 7];
+      if (gold && (overlaps(box, gold.box) || overlaps(box, gold.dot))) continue;      // the highlighted nuclide wins
+      plot.text(nice(name), m.A, v, { color: 'ink2', dx, dy, align: name === 'H-2' ? 'left' : 'center', size: 11 });
     }
     if (F.params.reactions) {
       plot.arrow(4, 2.0, 4, 6.6, { color: 'good', width: 2.4 });
       plot.text('fusion: light nuclei join', 9, 3.4, { color: 'good', align: 'left', size: 12 });
       plot.arrow(232, 7.45, 150, 8.18, { color: 'warn', width: 2.4 });
       plot.arrow(232, 7.45, 100, 8.45, { color: 'warn', width: 2.4 });
-      plot.text('fission: a heavy nucleus splits', 236, 6.9, { color: 'warn', align: 'right', size: 12 });
+      plot.text('fission: a heavy nucleus splits', 236, 6.2, { color: 'warn', align: 'right', size: 12 });
     }
-    const n = sel();
-    if (n && n.A >= x0 && n.A <= x1) {
-      const v = Nu.bindingPerNucleon(n);
-      plot.point(n.A, v, { color: 'gold', r: 6.5 });
-      plot.text(hide.has('B') ? `${nice(n.name)}: ?` : `${nice(n.name)}: ${v.toFixed(3)} MeV`, n.A, v, { color: 'gold', dx: n.A > 180 ? -12 : 12, dy: 18, align: n.A > 180 ? 'right' : 'left', size: 12.5, weight: 700 });
+    if (gold) {
+      plot.point(n.A, gold.v, { color: 'gold', r: 6.5 });
+      plot.text(gold.text, n.A, gold.v, { color: 'gold', dx: gold.dx, dy: gold.dy, align: gold.align, size: 12.5, weight: 700 });
     }
     readout(n);
   }
