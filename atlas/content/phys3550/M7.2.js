@@ -25,7 +25,7 @@ const [IXX, IYY, IZZ, IYZ] = [SAT.I[0][0], SAT.I[1][1], SAT.I[2][2], SAT.I[1][2]
 const EX = (() => {
   const tr = IYY + IZZ, det = IYY * IZZ - IYZ * IYZ, disc = Math.sqrt((tr / 2) ** 2 - det);
   const l1 = tr / 2 - disc, l2 = tr / 2 + disc;
-  const th = (0.5 * Math.atan2(2 * IYZ, IYY - IZZ)) / DEG;   // angle of the l1 axis from +y toward +z
+  const v = SAT.vecs[0], sg = Math.sign(v[1]), th = Math.atan2(sg * v[2], sg * v[1]) / DEG;   // angle of the l1 axis from +y toward +z
   const e1 = [0, Math.cos(th * DEG), Math.sin(th * DEG)], e2 = [0, -Math.sin(th * DEG), Math.cos(th * DEG)];
   return { tr, det, l1, l2, th, e1, e2, Ie1: mvec(SAT.I, e1) };
 })();

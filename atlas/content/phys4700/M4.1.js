@@ -45,7 +45,7 @@ which gives every function a length $\|f\| = \sqrt{\langle f|f\rangle}$ and ever
     lead: t`A function expanded in an orthonormal basis of sines and cosines. Top: the function and its partial sum $S_N$. Middle: three errors against $N$ — the length of the error $\|f - S_N\|$ (blue), the error at one point (gold) and the largest error anywhere (red). Bottom: each basis component’s share of $\|f\|^2$.`,
     tasks: [
       'Square wave: raise N. The blue error, the length of f minus the partial sum, falls steadily to zero — convergence in Hilbert space.',
-      'Still on the square wave, watch the red error: next to the jump the partial sum overshoots by about 9% of the jump forever (Gibbs). Pointwise and in-the-mean convergence are different things.',
+      'Still on the square wave, watch the red error: the largest error never falls, and beside each jump the partial sum overshoots the gold Gibbs lines’ level, about 9% of the jump, however large N gets. Pointwise and in-the-mean convergence are different things.',
       'Switch to the smooth function: all three errors plunge together, and nearly all of ‖f‖² sits in the first few components.',
     ],
     params: { wave: 'square', waves: ['square', 'triangle', 'smooth'], N: 5, Nmax: 60, panels: ['x', 'err', 'spec'], gibbs: true },
@@ -68,7 +68,7 @@ which gives every function a length $\|f\| = \sqrt{\langle f|f\rangle}$ and ever
     multi({
       id: 'in-L2', difficulty: 2,
       prompt: t`Which of these functions are in Hilbert space on the interval given? Select all that are.`,
-      visual: { type: 'graph', params: { x: [0, 1], y: [0, 12], aspect: 'wide', xlabel: 'x', ylabel: '|f|²', xticks: 5, yticks: 4, axesAt: 'edge', curves: [{ fn: 'x^(-2/3)', color: 'accent', width: 2.4, domain: [0.002, 1], label: 'square of x to the −1/3', labelAt: 0.2, labelDy: -14 }, { fn: '1/x', color: 'warn', width: 2.4, dash: [6, 4], domain: [0.08, 1], label: 'square of x to the −1/2', labelAt: 0.5, labelDy: -12 }], shade: [{ fn: 'x^(-2/3)', from: 0.002, to: 1, color: 'accent', alpha: 0.15 }] }, caption: 'Two squared functions on (0, 1). Both blow up at 0; only one has a finite area.' },
+      visual: { type: 'graph', params: { x: [0, 1], y: [0, 12], aspect: 'wide', xlabel: 'x', ylabel: '|f|²', xticks: 5, yticks: 4, axesAt: 'edge', curves: [{ fn: 'x^(-2/3)', color: 'accent', width: 2.4, domain: [0.002, 1], label: 'square of x to the −1/3', labelAt: 0.3, labelDy: 16 }, { fn: '1/x', color: 'warn', width: 2.4, dash: [6, 4], domain: [0.08, 1], label: 'square of x to the −1/2', labelAt: 0.5, labelDy: -12 }], shade: [{ fn: 'x^(-2/3)', from: 0.002, to: 1, color: 'accent', alpha: 0.15 }] }, caption: 'Two squared functions on (0, 1). Both blow up at 0; only one has a finite area.' },
       choices: [t`$e^{-x^2}$ on $-\infty < x < \infty$`, t`$x^{-1/3}$ on $(0, 1)$`, t`$1/\sqrt{1 + x^2}$ on $-\infty < x < \infty$`, t`$\sin x$ on $-\infty < x < \infty$`, t`$x^{-1/2}$ on $(0, 1)$`, t`$e^{ikx}$ on $-\infty < x < \infty$`],
       answer: [0, 1, 2],
       why: {

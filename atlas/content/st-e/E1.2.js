@@ -66,7 +66,7 @@ $$x^2 \sim \frac{\pi^2}{3} + 4\sum_{n=1}^{\infty}\frac{(-1)^n}{n^2}\cos nx .$$` 
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: -ans, feedback: t`The sign: $|x|$ is largest at $\pm\pi$, where $\cos ${n}x = -1$, so the projection is negative.` }, { value: ans / 2, feedback: t`Using evenness, $a_n = \frac2\pi\int_0^\pi x\cos nx\,dx$ — the factor is $\frac2\pi$, not $\frac1\pi$.` }],
           hints: [t`$|x|$ is even, so $a_n = \dfrac2\pi\displaystyle\int_0^\pi x\cos nx\,dx$.`, t`By parts: $\int_0^\pi x\cos nx\,dx = \Big[\frac{x\sin nx}{n}\Big]_0^\pi + \Big[\frac{\cos nx}{n^2}\Big]_0^\pi = \frac{(-1)^n - 1}{n^2}$.`],
-          teach: 'For an even function, a_n is twice the integral over half the period; integration by parts does the rest.',
+          teach: t`For an even function, $a_n$ is twice the integral over half the period; integration by parts does the rest.`,
           explain: t`$a_n = \frac2\pi\cdot\frac{(-1)^n - 1}{n^2}$, which is $-\frac{4}{\pi n^2}$ for odd $n$ and 0 for even $n$: $a_{${n}} = ${r4(ans)}$. A corner function: the coefficients fall like $1/n^2$.`,
         };
       },
@@ -186,7 +186,7 @@ print("x^2,     M = 64:  a1 error", abs(a[1] + 4))
         2: 'A pure sinusoid has no harmonics at all.',
         3: 'Narrow spikes have harmonics nearly as strong as the fundamental out to n ~ 1/(spike width).',
       },
-      hints: [t`Compare $0.11$ with $1/3$ and with $1/9$, and $0.04$ with $1/5$ and $1/25$.`],
+      hints: ['Jumps make amplitudes fall like 1/n, corners like 1/n². Which law do the measured ratios follow?', t`Compare $0.11$ with $1/3$ and with $1/9$, and $0.04$ with $1/5$ and $1/25$.`],
       teach: 'The ratio of harmonics measures smoothness: 1/n for a jump, 1/n² for a corner.',
       explain: t`$1/3^2 \approx 0.111$ and $1/5^2 = 0.04$: the harmonics fall like $1/n^2$, the signature of a waveform with corners but no jumps (missing even harmonics mean half-wave symmetry, $p(t + T/2) = -p(t)$, as a triangle has). A steepening wave that formed a shock would show $1/n$ instead.`,
     }),
