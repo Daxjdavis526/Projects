@@ -355,6 +355,19 @@ for (const [P, why] of bad) check(`validate rejects ${why}`, validate(P).length 
   check('grating: 300 lines/mm sends order 4 of 632.8 nm out at 49.41°', Math.abs(Math.asin(4 * 632.8e-9 * 300e3) * 180 / Math.PI - 49.408) < 0.002);
   for (const Q of [{ exp: ['doubleslit', 'grating'] }, { exp: 'grating', axes: 'raw', view: 'plot', fit: false }, { exp: 'doubleslit', view: 'apparatus', sys: true, at: 7 }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
 }
+{
+  // L.8 — standing waves on a string
+  const P = B.EXPERIMENTS.string.defaults, v0 = Math.sqrt(4.9 / 1.3e-3);
+  check('string: v = √(T/μ) = 61.39 m/s at 4.90 N and 1.30 g/m; f₁ = v/2L = 25.58 Hz', near(B.stringV(P, 0.5 * 9.8), v0, 1e-12) && Math.abs(v0 / 2.4 - 25.58) < 0.01);
+  check('string: stretched 4 % at 4.90 N, μ falls by 1.04 and v rises by √1.04', near(B.stringV(P, 4.9, true), v0 * Math.sqrt(1.04), 1e-12));
+  const r = exact('string'), s = exact('string', { sys: 'stretch' });
+  check('string: f against n is a line through the origin with slope v/2L', near(r.results[0].value, v0, 1e-9) && Math.abs(r.series[0].fit.a) < 1e-9);
+  check('string: the stretching string keeps f against n straight but v 2 % high', near(s.results[0].value, v0 * Math.sqrt(1.04), 1e-9) && s.series[0].fit.chi2 < 1e-9);
+  const t = exact('string-T'), ts = exact('string-T', { sys: 'stretch' });
+  check('string-T: f² against T at three loops gives μ = 1.30 g/m exactly', near(t.results[0].value, 1.3, 1e-9) && Math.abs(t.series[0].fit.a) < 1e-6);
+  check('string-T: the stretch bends f² against T upward and lowers μ', ts.series[0].fit.chi2 > 10 && ts.results[0].value < 1.25 && ts.series[0].fit.residuals.at(-1) > 0, `${ts.series[0].fit.chi2} ${ts.results[0].value}`);
+  for (const Q of [{ exp: ['string', 'string-T'] }, { exp: 'string-T', axes: 'fT', view: 'plot', fit: false }, { exp: 'string', view: 'apparatus', sys: true, at: 5 }]) check(`validate accepts ${JSON.stringify(Q)}`, validate(Q).length === 0, validate(Q).join('; '));
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

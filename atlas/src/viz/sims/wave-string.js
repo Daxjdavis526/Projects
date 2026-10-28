@@ -87,7 +87,7 @@ export async function mount(F, P0) {
   } else {
     if (P.show === 'drive') slider({ key: 'fd', label: 'Driving frequency $f$', min: 0, max: P.fmax, step: 0.5, value: P.fd, unit: '\\mathrm{Hz}', explain: 'How fast the left end is shaken, by a tiny amount.' });
     else slider({ key: 'n', label: 'Mode $n$', min: 1, max: 8, step: 1, value: P.n, unit: '', explain: 'The number of loops: $n$ half-wavelengths fit on the string.' });
-    slider({ key: 'FT', label: 'Tension $F_T$', min: 10, max: 200, step: 1, value: P.FT, unit: '\\mathrm{N}', explain: 'Tighten the string to raise every mode’s frequency.' });
+    slider({ key: 'FT', label: 'Tension $F_T$', min: 1, max: 200, step: 1, value: P.FT, unit: '\\mathrm{N}', explain: 'Tighten the string to raise every mode’s frequency.' });
   }
   // show only the sliders that belong to the current sub-choice
   const groups = { pulse: ['h', 'dur'], wave: ['fw', 'Aw'], pulses: ['h1', 'h2', 'time'], waves: ['A1', 'A2', 'phase'] };
@@ -342,7 +342,7 @@ export function validate(P0) {
     if (!['none', 'velocity', 'acceleration'].includes(P.arrows)) problems.push('arrows must be none, velocity or acceleration');
     if (P.tag !== null && !(P.tag >= 0 && P.tag <= P.view)) problems.push('tag must lie on the string (or be null)');
   } else if (mode === 'medium') {
-    inr('FT', 5, 200); inr('mu', 0.1, 2); inr('h', 0.05, 0.5); inr('dur', 0.1, 1); inr('fw', 0.2, 4); inr('Aw', 0.05, 0.4); pos('L');
+    inr('FT', 1, 200); inr('mu', 0.1, 2); inr('h', 0.05, 0.5); inr('dur', 0.1, 1); inr('fw', 0.2, 4); inr('Aw', 0.05, 0.4); pos('L');
     if (!['pulse', 'wave'].includes(P.drive)) problems.push('drive must be pulse or wave');
     for (const q of P.pulses || []) if (!(Number.isFinite(q.t0) && Math.abs(q.h) <= 0.6 && q.dur > 0)) problems.push('each pulse needs t0, h (|h| ≤ 0.6 m) and dur > 0');
   } else if (mode === 'two') {

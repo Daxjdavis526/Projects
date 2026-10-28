@@ -8,6 +8,7 @@
 // experiments and all the statistics are model/lab-bench.js (tested
 // headlessly with seeded noise). Readings repeated at one setting are shown as
 // a dot histogram with the mean, the standard deviation and the standard error.
+// Twenty-eight experiments serve the PHYS 2215 and 2225 lab lessons.
 //
 //   { type: 'lab-bench', params: {
 //       exp: 'freefall',            // an experiment of model/lab-bench.js, or a list: a “Method” switch
@@ -169,8 +170,12 @@ export function mount(F, P0) {
     }
     for (const op of E0.options || []) F.choice({ key: op.key, label: op.label, options: op.choices, value: P.params[op.key] ?? E0.defaults[op.key], explain: op.explain });
     if (P.toggle && E0.systematics) {
-      const sk = sysKind(ids[0]), S = E0.systematics[sk];
-      F.toggle({ key: 'sys', label: `Systematic error: ${S.label}`, value: !!P.sys, explain: `${S.explain} Switching re-runs the same readings — same random scatter — so only the fault’s effect changes.` });
+      // with a Method switch each method may have its own fault: name each one
+      const faults = [...new Map(ids.filter((id) => B.EXPERIMENTS[id].systematics).map((id) => { const S = B.EXPERIMENTS[id].systematics[sysKind(id)]; return [S.label, S]; })).values()];
+      const S = faults[0];
+      const label = faults.length > 1 ? 'Systematic error (each method’s own fault)' : `Systematic error: ${S.label}`;
+      const explain = faults.length > 1 ? faults.map((f) => `${f.label}: ${f.explain}`).join(' ') : S.explain;
+      F.toggle({ key: 'sys', label, value: !!P.sys, explain: `${explain} Switching re-runs the same readings — same random scatter — so only the fault’s effect changes.` });
     }
     const axKeys = E0.axes ? Object.keys(E0.axes) : [];
     if (!isRepeat(ids[0]) && P.axesChoice && axKeys.length > 1) {
@@ -382,14 +387,16 @@ export function mount(F, P0) {
   // the data table: raw readings, then the plotted quantities
   function drawTable(box, E, PP, rows, rep, an) {
     const head = ['#'];
-    if (E.setting && !rep) head.push(`${E.setting.sym} (${E.setting.unit})`);
-    E.series.forEach((q) => head.push(`${q.sym} (${q.unit})`));
+    if (E.setting && !rep) head.push(axisLabel(E.setting.sym, E.setting.unit));
+    E.series.forEach((q) => head.push(axisLabel(q.sym, q.unit)));
     const A = !rep && E.axes ? (an?.A) : null;
     const showX = A && A.x.sym !== E.setting?.sym && !E.series.some((q) => q.sym === A.x.sym);
-    const showY = A && A.ys.some((Y, k) => Y.sym !== E.series[k]?.sym);
+    // the plotted quantities that are not already a column of raw readings
+    const extraY = A ? A.ys.filter((Y) => !E.series.some((q) => q.sym === Y.sym)) : [];
+    const showY = extraY.length > 0;
     if (rep && E.repeat.sym !== E.series[0].sym) head.push(E.repeat.unit ? `${E.repeat.sym} (${E.repeat.unit})` : E.repeat.sym);
     if (showX) head.push(`${A.x.sym.split(' = ')[0]}${A.x.unit ? ` (${A.x.unit})` : ''}`);
-    if (showY) A.ys.forEach((Y) => head.push(`${Y.sym.split(' = ')[0]}${Y.unit ? ` (${Y.unit})` : ''}`));
+    if (showY) extraY.forEach((Y) => head.push(`${Y.sym.split(' = ')[0]}${Y.unit ? ` (${Y.unit})` : ''}`));
     const tr = (cells, th = false) => h('tr', cells.map((c) => h(th ? 'th' : 'td', { style: { padding: '.32rem .6rem', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', ...(th ? { textTransform: 'none', letterSpacing: 'normal', fontSize: '.78rem' } : {}) } }, c)));
     const body = rows.map((r, i) => {
       const cells = [String(i + 1)];
@@ -397,7 +404,7 @@ export function mount(F, P0) {
       r.R.forEach((v, k) => cells.push(readTxt(v, E.series[k].res)));
       if (rep && E.repeat.sym !== E.series[0].sym) cells.push(keepTxt(E.repeat.of(r.s, r.R, PP), 4));
       if (showX) cells.push(keepTxt(A.x.of(r.s, r.R, PP, sysOn()), 4));
-      if (showY) A.ys.forEach((Y) => cells.push(keepTxt(Y.of(r.s, r.R, PP, sysOn()), 4)));
+      if (showY) extraY.forEach((Y) => cells.push(keepTxt(Y.of(r.s, r.R, PP, sysOn()), 4)));
       return tr(cells);
     });
     const table = h('table.t', { 'aria-label': 'Data table' }, h('thead', tr(head, true)), h('tbody', body.length ? body : [tr([h('span', { style: { color: 'var(--ink-3)' } }, 'No readings yet.')])]));
@@ -1212,7 +1219,7 @@ const APPARATUS = {
     const x0 = 2.4, x1 = 15.6, ys = 5.6, A = 0.95, r = st.row?.R?.[0];
     block(pl, 0.4, ys - 1.1, 1.7, 2.2, 'ink3', 0.75);
     pl.line(x0 - 0.15, ys - 0.7, x0 - 0.15, ys + 0.7, { color: 'ink2', width: 3 });
-    pl.arrow(1.25, ys + 1.45, 1.25, ys + 1.95, { color: 'ink3', width: 1.2, head: 5 }); pl.arrow(1.25, ys + 1.45, 1.25, ys + 0.95, { color: 'ink3', width: 1.2, head: 5 });
+    pl.text('↕', x0 - 0.15, ys + 1.05, { color: 'ink2', size: 14, weight: 700, align: 'center' });
     // the standing wave: the string's two extremes (its blur) and the nodes
     for (const s of [1, -1]) pl.curve((u) => x0 + u * (x1 - x0), (u) => ys + s * A * Math.sin(n * Math.PI * u), 0, 1, { color: sys === 'stretch' ? 'warn' : 'accent', width: 1.8, alpha: s > 0 ? 1 : 0.55 });
     for (let k = 0; k <= n; k++) pl.circle(x0 + (k * (x1 - x0)) / n, ys, 0.09, { fill: 'ink', stroke: false });

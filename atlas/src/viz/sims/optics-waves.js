@@ -235,7 +235,6 @@ export async function mount(F, P0) {
     const lams = white ? Array.from({ length: 31 }, (_, i) => 400 + i * 10) : [F.params.lambda];
     const cols = lams.map((l) => W.wavelengthRGB(l) || [0, 0, 0]);
     let norm = 0;
-    if (white) { for (let k = 0; k < lams.length; k++) for (let c = 0; c < 3; c++) norm = Math.max(norm, 0); }
     const acc = new Float64Array(n * 3);
     for (let i = 0; i < n; i++) {
       const s = sinOf(-range + (2 * range * (i + 0.5)) / n);
@@ -266,15 +265,15 @@ export async function mount(F, P0) {
     if (P.marks) {
       for (let m = -12; m <= 12; m++) {
         let s = NaN, lab = '';
-        if (P.marks === 'bright' && p.N >= 2) { s = W.brightSin(m, p.d, lam); lab = `m = ${m}`; }
+        if (P.marks === 'bright' && p.N >= 2) { s = W.brightSin(m, p.d, lam); lab = `m = ${m < 0 ? '−' + -m : m}`; }
         if (P.marks === 'dark' && p.N === 2) { s = W.darkSinTwo(m, p.d, lam); lab = ''; }
-        if (P.marks === 'single' && m !== 0 && p.a > 0) { s = W.darkSinSingle(m, p.a, lam); lab = `m = ${m}`; }
+        if (P.marks === 'single' && m !== 0 && p.a > 0) { s = W.darkSinSingle(m, p.a, lam); lab = `m = ${m < 0 ? '−' + -m : m}`; }
         if (Number.isNaN(s)) continue;
         const u = uOfSin(s);
         if (Math.abs(u) > range) continue;
         B.line(u, 0, u, 1.05, { color: 'ink3', width: 1, dash: [2, 3] });
         const gap = Math.abs(B.X(uOfSin(P.marks === 'single' ? W.darkSinSingle(1, p.a, lam) : W.brightSin(1, p.d, lam))) - B.X(0));
-        if (lab && (gap > 44 || (gap > 20 && m % 2 === 0) || m === 0)) B.text(gap > 44 ? lab : String(m), u, 1.08, { align: 'center', color: 'ink3', size: 10.5 });
+        if (lab && (gap > 44 || (gap > 20 && m % 2 === 0) || m === 0)) B.text(gap > 44 ? lab : (m < 0 ? '−' + -m : String(m)), u, 1.08, { align: 'center', color: 'ink3', size: 10.5 });
       }
     }
     // the probe

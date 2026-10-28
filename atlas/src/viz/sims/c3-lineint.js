@@ -60,16 +60,16 @@ export function mount(F, P) {
   for (const s of P.sliders || []) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
   const paths = P.paths || [];
-  if (paths.length > 1) F.choice({ key: '__path', label: 'Path', options: paths.map((p, k) => [k, p.label || `Path ${k + 1}`]), value: P.path ?? 0, explain: P.compare ? 'The bead rides the chosen path; every path is drawn, and the readout gives the total along each.' : 'Each runs through the same field.' });
+  const beadOn = P.bead !== false;
+  if (paths.length > 1 && (beadOn || !P.compare)) F.choice({ key: '__path', label: 'Path', options: paths.map((p, k) => [k, p.label || `Path ${k + 1}`]), value: P.path ?? 0, explain: P.compare ? 'The bead rides the chosen path; every path is drawn, and the readout gives the total along each.' : 'Each runs through the same field.' });
   if (P.reverseToggle ?? !compact) F.toggle({ key: '__rev', label: 'Reverse the direction', value: !!P.reverse, explain: 'Walk the same curve from its end back to its start.' });
   else F.params.__rev = !!P.reverse;
   if (P.reparam) F.choice({ key: '__rep', label: 'Pace along the curve', options: [['steady', 'Steady'], ['faster', 'Speeding up'], ['startstop', 'Slow at both ends']], value: 'steady', explain: 'The same curve traced at a different pace: the parameter becomes $s$, from 0 to 1.' });
-  const beadOn = P.bead !== false;
   if (beadOn && (P.atSlider ?? !compact)) F.slider({ key: '__s', label: 'Bead position', min: 0, max: 1, step: 0.005, value: P.at ?? 0.35, explain: 'How far through the parameter range the bead is: 0 at the start, 1 at the end.', fmt: (v) => v.toFixed(2) });
   else F.params.__s = P.at ?? 0.35;
 
   const plot = new Plot(canvas, { x: P.x, y: P.y, equal: true, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y' });
-  const gplot = lower ? new Plot(lower, { x: [0, 1], y: [-1, 1], xlabel: '', ylabel: '', xticks: 6, yticks: 4, pad: { l: 46, r: 16, t: 10, b: 26 } }) : null;
+  const gplot = lower ? new Plot(lower, { x: [0, 1], y: [-1, 1], xlabel: '', ylabel: '', xticks: 6, yticks: 4, pad: { l: 46, r: 16, t: 10, b: 34 } }) : null;
 
   // Play: run the bead from where it is to the end
   const S = { running: false };

@@ -13,6 +13,7 @@
 //                view: { x: [-2.4, 2.4], y: [-0.3, 2.4] }, cell: [1.2, 0.9] }, …],   // the x–y window; the cell's start
 //       map: 0,                                                    // the one shown first; several → a choice
 //       size: 0.18, sizeSlider: true,                              // the cell's size, as a fraction of each range
+//       sliders: true,                                             // false: no sliders for the cell (it stays at the map's cell)
 //       grid: [8, 8],                                              // grid cells along u and along v
 //       tint: true, vectors: true,                                 // stretch tint; the arrows r_u du, r_v dv
 //       readout: true } }                                          // false hides every number
@@ -24,7 +25,7 @@ import { Plot } from '../plot.js';
 import { fn } from '../model/exprfn.js';
 import * as M from '../model/c3-integrals.js';
 
-export const defaults = { map: 0, size: 0.18, sizeSlider: true, grid: [8, 8], tint: true, vectors: true, readout: true };
+export const defaults = { map: 0, size: 0.18, sizeSlider: true, sliders: true, grid: [8, 8], tint: true, vectors: true, readout: true };
 
 const val = (s) => (typeof s === 'number' ? s : fn(s, [])({}));
 function compile(m) {
@@ -49,14 +50,15 @@ export function mount(F, P) {
   const { canvas: cUV } = F.canvas({ aspect: 'wide', label: P.alt || 'The (u, v) plane: a rectangle ruled into equal cells' });
   const { canvas: cXY } = F.canvas({ aspect: P.aspect || 'wide', label: 'The x–y plane: the image of the grid under the change of variables' });
   if (maps.length > 1) F.choice({ key: '__map', label: 'Change of variables', options: maps.map((m, k) => [k, m.label || `Map ${k + 1}`]), value: P.map ?? 0, explain: P.mapExplain || 'Each one turns the rectangle of (u, v) values into a region of the plane.' });
-  const ctl = maps.map((m, k) => {
-    const [u0, u1] = m.ur, [v0, v1] = m.vr, start = m.cell || [u0 + 0.5 * (u1 - u0), v0 + 0.4 * (v1 - v0)];
+  const startOf = (m) => m.cell || [m.ur[0] + 0.5 * (m.ur[1] - m.ur[0]), m.vr[0] + 0.4 * (m.vr[1] - m.vr[0])];
+  const ctl = P.sliders === false ? [] : maps.map((m, k) => {
+    const [u0, u1] = m.ur, [v0, v1] = m.vr, start = startOf(m);
     return [
       F.slider({ key: `__u${k}`, label: `Cell at $${m.uTeX || 'u'}$`, min: u0, max: u1, step: (u1 - u0) / 100, value: start[0], explain: `Where the gold cell starts in $${m.uTeX || 'u'}$.` }),
       F.slider({ key: `__v${k}`, label: `Cell at $${m.vTeX || 'v'}$`, min: v0, max: v1, step: (v1 - v0) / 100, value: start[1], explain: `Where it starts in $${m.vTeX || 'v'}$.` }),
     ];
   });
-  if (P.sizeSlider !== false) F.slider({ key: '__size', label: 'Cell size', min: 0.02, max: 0.3, step: 0.01, value: P.size ?? 0.18, explain: 'As a fraction of each range: shrink it and the area ratio settles on $|J|$.' });
+  if (P.sizeSlider !== false && P.sliders !== false) F.slider({ key: '__size', label: 'Cell size', min: 0.02, max: 0.3, step: 0.01, value: P.size ?? 0.18, explain: 'As a fraction of each range: shrink it and the area ratio settles on $|J|$.' });
   const current = () => (maps.length > 1 ? +F.params.__map : 0);
   const show = () => ctl.forEach((pair, k) => pair.forEach((c) => { c.node.style.display = k === current() ? '' : 'none'; }));
   show();
@@ -67,9 +69,10 @@ export function mount(F, P) {
   function draw() {
     const k = current(), m = maps[k];
     const [u0, u1] = m.ur, [v0, v1] = m.vr, du0 = u1 - u0, dv0 = v1 - v0;
-    const size = P.sizeSlider !== false ? F.params.__size : P.size ?? 0.18;
+    const size = P.sizeSlider !== false && P.sliders !== false ? F.params.__size : P.size ?? 0.18;
     const du = size * du0, dv = size * dv0;
-    const cu = Math.min(F.params[`__u${k}`], u1 - du), cv = Math.min(F.params[`__v${k}`], v1 - dv);
+    const [su, sv] = P.sliders === false ? startOf(m) : [F.params[`__u${k}`], F.params[`__v${k}`]];
+    const cu = Math.min(su, u1 - du), cv = Math.min(sv, v1 - dv);
     const [gu, gv] = P.grid || [8, 8];
 
     // (u, v) plane

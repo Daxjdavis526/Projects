@@ -109,7 +109,8 @@ export function bars(items, { unit = '', caption, max } = {}) {
   };
 }
 
-const lab = (x, y, text, color = 'ink2', align = 'left', dy = 0) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: 0, labelDy: dy, labelAlign: align });
+/** A text label at (x, y) on a graph, aligned 'left' (starting there), 'center' or 'right' (ending there). */
+export const tag = (x, y, text, color = 'ink2', align = 'left', dy = 0) => ({ x: r6(x), y: r6(y), r: 0.01, color, label: text, labelDx: 0, labelDy: dy, labelAlign: align });
 
 /**
  * A Michelson interferometer from above as a graph (not to scale): laser, beam splitter, two arms, end mirrors and a
@@ -127,29 +128,29 @@ export function michelsonPlan({ kind = 'cell', caption } = {}) {
     seg([3.7, -0.6], [3.7, 0.6], mirror), seg([-0.6, 3.7], [0.6, 3.7], mirror),        // end mirrors
     ...box(0, -2.75, 0.45, 0.3, 'good'),                                                 // detector
   ];
-  const points = [lab(-0.55, -0.62, 'beam splitter', 'ink2', 'right')];
+  const points = [tag(-0.55, -0.62, 'beam splitter', 'ink2', 'right')];
   const arrows = [];
   let x = [-4.6, 6.6];
   if (kind === 'cell') {
     curves.push(...box(2.0, 0, 0.8, 0.42, 'accent'), seg([2.0, -0.42], [2.0, -1.6], { color: 'ink3', width: 2 }));
-    points.push(lab(-4.0, 0.62, 'laser', 'bad'), lab(2.0, 0.85, 'gas cell, length L', 'accent', 'center'), lab(2.0, -1.9, 'to a vacuum pump', 'ink3', 'center'),
-      lab(0.85, 3.7, 'mirror'), lab(3.95, 0.85, 'mirror'), lab(0.6, -2.75, 'detector', 'good'));
+    points.push(tag(-4.0, 0.62, 'laser', 'bad'), tag(2.0, 0.85, 'gas cell, length L', 'accent', 'center'), tag(2.0, -1.9, 'to a vacuum pump', 'ink3', 'center'),
+      tag(0.85, 3.7, 'mirror'), tag(3.95, 0.85, 'mirror'), tag(0.6, -2.75, 'detector', 'good'));
   } else if (kind === 'mm') {
     curves.push(seg([-4.25, -3.3], [4.35, -3.3], { color: 'ink3', width: 1.6, dash: true }), seg([4.35, -3.3], [4.35, 4.2], { color: 'ink3', width: 1.6, dash: true }),
       seg([4.35, 4.2], [-4.25, 4.2], { color: 'ink3', width: 1.6, dash: true }), seg([-4.25, 4.2], [-4.25, -3.3], { color: 'ink3', width: 1.6, dash: true }),
       { param: ['5*cos(t)', '0.4 + 5*sin(t)'], t: [-0.32, 0.3], color: 'gold', width: 2 });
     arrows.push({ from: [r6(5 * Math.cos(0.26)), r6(0.4 + 5 * Math.sin(0.26))], to: [r6(5 * Math.cos(0.34)), r6(0.4 + 5 * Math.sin(0.34))], color: 'gold', width: 2 },
       { from: [4.75, -2.95], to: [6.55, -2.95], color: 'accent', width: 2.2, label: 'Earth’s motion', labelDx: 0, labelDy: -14, labelAlign: 'right' });
-    points.push(lab(-4.0, 0.62, 'source', 'bad'), lab(2.3, 0.4, 'arm 1', 'ink2', 'center'), lab(0.2, 2.3, 'arm 2'), lab(5.15, 0.4, 'slab turns', 'gold'),
-      lab(0.6, -2.75, 'telescope', 'good'));
+    points.push(tag(-4.0, 0.62, 'source', 'bad'), tag(2.3, 0.4, 'arm 1', 'ink2', 'center'), tag(0.2, 2.3, 'arm 2'), tag(5.15, 0.4, 'slab turns', 'gold'),
+      tag(0.6, -2.75, 'telescope', 'good'));
     x = [-4.6, 7.0];
   } else if (kind === 'ligo') {
     curves.push(seg([1.0, -0.6], [1.0, 0.6], mirror), seg([-0.6, 1.0], [0.6, 1.0], mirror),
       seg([1.0, 0.13], [3.7, 0.13], { color: 'bad', width: 1 }), seg([1.0, -0.13], [3.7, -0.13], { color: 'bad', width: 1 }),
       seg([0.13, 1.0], [0.13, 3.7], { color: 'bad', width: 1 }), seg([-0.13, 1.0], [-0.13, 3.7], { color: 'bad', width: 1 }));
-    points.push(lab(-4.0, 0.62, '1064 nm laser', 'bad'), lab(1.0, -0.95, 'input mirror', 'ink2', 'center'), lab(3.7, -0.95, 'end mirror', 'ink2', 'center'),
-      lab(2.35, 0.5, '4 km', 'gold', 'center'), lab(-0.8, 1.0, 'input mirror', 'ink2', 'right'), lab(-0.8, 3.7, 'end mirror', 'ink2', 'right'), lab(0.35, 2.35, '4 km', 'gold'),
-      lab(0.6, -2.75, 'photodetector', 'good'));
+    points.push(tag(-4.0, 0.62, '1064 nm laser', 'bad'), tag(1.0, -0.95, 'input mirror', 'ink2', 'center'), tag(3.7, -0.95, 'end mirror', 'ink2', 'center'),
+      tag(2.35, 0.5, '4 km', 'gold', 'center'), tag(-0.8, 1.0, 'input mirror', 'ink2', 'right'), tag(-0.8, 3.7, 'end mirror', 'ink2', 'right'), tag(0.35, 2.35, '4 km', 'gold'),
+      tag(0.6, -2.75, 'photodetector', 'good'));
   }
   return {
     type: 'graph',

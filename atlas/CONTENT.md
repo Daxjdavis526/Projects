@@ -371,7 +371,9 @@ disagree. Never type a computed answer by hand. `r` is a seeded RNG:
 | `r.shuffle(array)`, `r.perm(n)` | a shuffled copy; a permutation of 0…n−1 |
 
 A generator always returns an object — never `null` or `undefined` to mean
-"try another seed"; pick parameters that cannot fail instead.
+"try another seed"; pick parameters that cannot fail instead. It must vary
+the prompt or the answer, not only the picture (the test checks that its
+variants differ).
 
 Pick parameters so every variant is clean and sensible: avoid answers of 0,
 degenerate cases, and huge or ugly numbers unless the lesson is about them.
@@ -450,7 +452,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `therm-pv` | PV diagrams: processes with work as area, cycles (Carnot, Otto, Brayton) and refrigerators, energy flows, a T–S panel |
 | `em-circuit` | nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
 | `em-capacitor` | a parallel-plate capacitor with a sliding dielectric, battery connected or not: Q, V, C and stored energy |
-| `lab-bench` | fourteen virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
+| `lab-bench` | twenty-eight virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry; field mapping, Ohm's law and resistivity, RC decay, a coil's field, induction, refraction and lenses, slits and gratings, string resonance…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
 | `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
 | `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |
 | `wave-doppler` | wavefronts from a moving source and a moving observer: crowding ahead, stretching behind, the Mach cone past Mach 1 |

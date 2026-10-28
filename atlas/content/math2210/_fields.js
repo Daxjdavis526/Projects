@@ -10,6 +10,9 @@ import { fn } from '../../src/viz/model/exprfn.js';
 /** Round for an expression string or a picture, so a parameter never carries 17 digits. */
 export const r6 = (v) => +(+v).toPrecision(6);
 
+/** c·v as TeX with the coefficient tidied: (1, 't') → 't', (−1, 't') → '-t', (2.5, 't') → '2.5t'. */
+export const co = (c, v) => (c === 1 ? v : c === -1 ? `-${v}` : `${+(+c).toPrecision(6)}${v}`);
+
 /** A field given as expression strings (or functions) → (x, y) => [P, Q]. */
 export function fieldFn(P, Q) {
   const p = typeof P === 'function' ? P : ((g) => (x, y) => g({ x, y }))(fn(P, ['x', 'y']));
@@ -71,7 +74,7 @@ export function path(X, Y, [t0, t1], { color = 'gold', width = 3, at = [0.5], la
   const fx = fn(X, ['t']), fy = fn(Y, ['t']);
   const P = (t) => [fx({ t }), fy({ t })];
   const arrows = at.map((f) => {
-    const t = t0 + (t1 - t0) * f, dt = (t1 - t0) * 0.02;
+    const t = t0 + (t1 - t0) * f, dt = (t1 - t0) * 0.035;
     const a = P(t - dt), b = P(t + dt);
     return { from: [r6(a[0]), r6(a[1])], to: [r6(b[0]), r6(b[1])], color, width };
   });

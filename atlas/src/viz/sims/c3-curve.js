@@ -18,6 +18,7 @@
 //       readouts: ['t', 'speed', 'kappa'],   // any of t s speed kappa R tau aT aN a x y z
 //       units: { t: '\\text{s}', len: '\\text{km}', speed: '\\text{km/s}', acc: '\\text{m/s}^2', accScale: 1000 },
 //       play: true, speed: 1,         // Play advances t at `speed` units per second
+//       fixed: false,                 // true: a still picture of the point at `at` — no slider, no Play
 //       x, y,                         // 2D window (default: fitted); range, yaw, pitch, dist, target for 3D
 //       labels: true } }
 //
@@ -33,7 +34,7 @@ import * as M from '../model/c3-curve.js';
 
 export const defaults = {
   curve: null, at: null, pointLabel: 't', show: ['T', 'N'], toggles: [], secant: null, scale: {}, plane: null,
-  readouts: ['t', 'speed', 'kappa'], units: {}, play: true, speed: 1, labels: true, range: 3,
+  readouts: ['t', 'speed', 'kappa'], units: {}, play: true, speed: 1, labels: true, range: 3, fixed: false,
 };
 
 const SHOW = ['T', 'N', 'B', 'circle', 'v', 'a', 'split', 'secant', 'shadows', 'trail'];
@@ -66,11 +67,12 @@ export function mount(F, P) {
     return (t) => f.map((g) => g({ ...E, t }));
   };
   const [T0, T1] = span(env());
-  F.slider({ key: 'tp', label: `$${P.pointLabel}$`, min: T0, max: T1, step: +((T1 - T0) / 400).toPrecision(2), value: P.at ?? T0 + 0.3 * (T1 - T0), unit: P.units.t || '', explain: 'Moves the point along the curve.' });
+  if (P.fixed) F.params.tp = P.at ?? T0 + 0.3 * (T1 - T0);   // a still picture: no slider, no Play
+  else F.slider({ key: 'tp', label: `$${P.pointLabel}$`, min: T0, max: T1, step: +((T1 - T0) / 400).toPrecision(2), value: P.at ?? T0 + 0.3 * (T1 - T0), unit: P.units.t || '', explain: 'Moves the point along the curve.' });
   const on = {};
   for (const k of SHOW) on[k] = (P.show || []).includes(k);
   for (const k of P.toggles || []) F.toggle({ key: `show_${k}`, label: TOGGLE_LABEL[k], value: on[k] });
-  if (P.play) {
+  if (P.play && !P.fixed) {
     let anim = null;
     const btn = F.button({ label: 'Play ▶', onClick: () => {
       if (anim) { anim.stop(); anim = null; btn.textContent = 'Play ▶'; return; }
@@ -134,7 +136,7 @@ export function mount(F, P) {
     const marks = [];
     if (flat) draw2d(pts, p, t, t0, t1, r, vecs, circ, sec, marks);
     else draw3d(pts, p, t, t0, t1, r, vecs, circ, sec, marks);
-    readouts(t, t0, r, Fr, p, d2);
+    readouts(t, r, Fr, p, d2);
   }
 
   function draw2d(pts, p, t, t0, t1, r, vecs, circ, sec) {
@@ -150,7 +152,7 @@ export function mount(F, P) {
     if (on.trail) plot.path(pts.filter((_, k) => t0 + ((t1 - t0) * k) / 240 <= t).map(P2), { color: 'accent', width: 2.6 });
     if (circ) { plot.path(circ.pts.map(P2), { color: 'gold', width: 1.6, dash: [6, 5] }); plot.point(...P2(circ.centre), { color: 'gold', r: 3 }); }
     if (sec) { plot.line(...P2(p), ...P2(sec.q), { color: 'warn', width: 1.2, dash: [4, 4] }); plot.point(...P2(sec.q), { color: 'warn', r: 3.5 }); }
-    const plain = { '\\vec v': 'v', '\\vec a': 'a', 'a_T\\vec T': 'a_T T', 'a_N\\vec N': 'a_N N', '\\vec T': 'T', '\\vec N': 'N', '\\vec B': 'B', '\\frac{\\Delta\\vec r}{h}': 'Δr/h' };
+    const plain = { '\\vec v': 'v', '\\vec a': 'a', 'a_T\\vec T': 'tangential', 'a_N\\vec N': 'normal', '\\vec T': 'T', '\\vec N': 'N', '\\vec B': 'B', '\\frac{\\Delta\\vec r}{h}': 'Δr/h' };
     for (const [a, b, color, label, dashed] of vecs) {
       plot.arrow(...P2(a), ...P2(b), { color, width: 2.4, dash: dashed ? [6, 4] : [], label: P.labels === false ? undefined : plain[label] });
     }
@@ -196,7 +198,7 @@ export function mount(F, P) {
   }
 
   let arc = null, arcKey = '';
-  function readouts(t, t0, r, Fr, p, d2) {
+  function readouts(t, r, Fr, p, d2) {
     if (!P.readouts?.length) return;
     const U = P.units || {}, accScale = U.accScale ?? 1;
     const u = (s) => (s ? `\\,${s}` : '');
@@ -217,7 +219,6 @@ export function mount(F, P) {
         rows.push(['arc length $s$', `${fmtNum(M.arcLengthAt(arc, t))}${u(U.len)}`]);
       }
     }
-    void t0;
     F.readout(rows);
   }
 

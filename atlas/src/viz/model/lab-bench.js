@@ -1,5 +1,6 @@
-// The virtual lab bench behind sims/lab-bench.js and the PHYS 2215 lab
-// lessons: simulated experiments that hand back noisy readings, and the
+// The virtual lab bench behind sims/lab-bench.js and the PHYS 2215 and 2225
+// lab lessons (mechanics and heat; fields, circuits, coils, induction, optics
+// and waves): simulated experiments that hand back noisy readings, and the
 // analysis a real lab does with them — mean, standard deviation and standard
 // error; a weighted least-squares straight line with the uncertainties of its
 // slope and intercept and χ²; and the quantity the slope stands for (g, k, I…)
