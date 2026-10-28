@@ -139,7 +139,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
     num({
       id: 'thermoneutral', difficulty: 2,
       gen(r) {
-        const n = r.pick([1, 2, 3]), [Vcell] = [r.pick([1.6, 1.8, 2.0])];
+        const Vcell = r.pick([1.6, 1.8, 2.0]);
         const Etn = -LIQ.dH / (2 * F), heat = (Vcell - Etn) * 2 * F / 1000;
         return {
           prompt: t`An electrolyser splits liquid water at 25 °C. Its minimum voltage is $${fmt(EX.E, 4)}$ V (set by $\Delta G$); at the **thermoneutral voltage** $-\Delta H/(2F)$ it needs no heat from outside. If it runs at $${Vcell}$ V, how much heat does it release per mole of water split? ($\Delta H = ${fmt(LIQ.dH / 1000, 5)}$ kJ/mol.)`,
@@ -200,7 +200,7 @@ Run it backwards: when a system is destroyed — fuel burned, a battery discharg
       gen(r) {
         const V = r.pick([0.8, 0.85, 0.9]), m = (3.6e6 / (2 * F * V)) * M_H2O;
         return {
-          prompt: t`Spacecraft fuel cells (on Gemini, Apollo and the Space Shuttle) gave the crew drinking water as a by-product. A cell running at $${V}$ V delivers 1 kWh of electricity. How much water does it make? (Two electrons per water molecule; molar mass 18.02 g/mol.)`,
+          prompt: t`Spacecraft fuel cells (on Apollo and the Space Shuttle) gave the crew drinking water as a by-product. A cell running at $${V}$ V delivers 1 kWh of electricity. How much water does it make? (Two electrons per water molecule; molar mass 18.02 g/mol.)`,
           answer: m, units: 'kg', tol: { rel: 0.01 },
           errors: apart([{ value: (3.6e6 / (2 * F * EX.E)) * M_H2O, feedback: `Use the actual cell voltage, ${V} V, not the ideal 1.23 V.` }, { value: (3.6e6 / (F * V)) * M_H2O, feedback: 'Each water molecule carries two electrons through the circuit: divide by 2F.' }], m),
           hints: [t`Charge delivered: $Q = (3.6\times10^6\ \text{J})/(${V}\ \text{V})$.`, t`Moles of water $= Q/(2F)$.`],
