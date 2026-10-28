@@ -819,6 +819,7 @@ export const LESSONS = {
   'phys4700.M8.2': () => import('./phys4700/M8.2.js'),
   'phys4710.M0.1': () => import('./phys4710/M0.1.js'),
   'phys4710.M1.1': () => import('./phys4710/M1.1.js'),
+  'phys4710.M1.2': () => import('./phys4710/M1.2.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
   'prog.P0.2': () => import('./prog/P0.2.js'),
   'prog.P1.1': () => import('./prog/P1.1.js'),

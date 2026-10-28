@@ -31,13 +31,21 @@ const x2 = (n) => 1 / 3 - 1 / (2 * n * n * Math.PI ** 2);
 const xab = (a, b) => ((a + b) % 2 ? (-8 * a * b) / (Math.PI ** 2 * (a * a - b * b) ** 2) : 0);
 const sep2 = (a, b, s) => x2(a) + x2(b) - 0.5 - 2 * s * xab(a, b) ** 2;
 
-/** Helium's measured levels in two columns (singlet left, triplet right), optional model levels. */
-function hePic({ caption, models = false, arrows = [], hideLabels = false, extra = {} } = {}) {
-  const L = (E, x0, color, text, when) => ({ E, x0, x1: x0 + 1.2, color, label: hideLabels ? undefined : text, ...(when ? { when } : {}) });
-  const levels = [L(LV.g, 0.4, 'accent', '1¹S'), L(LV.s1, 0.4, 'accent', '2¹S'), L(LV.p1, 0.4, 'accent', '2¹P'), L(LV.s3, 2.4, 'gold', '2³S'), L(LV.p3, 2.4, 'gold', '2³P')];
-  const pic = levelPic(levels, { y: [-81, -52], x: [0, 4.4], ylabel: 'energy (eV)', caption, arrows, yticks: 6, extra });
+/**
+ * Helium's measured levels in two columns (singlet left, triplet right), in eV
+ * below He²⁺ + 2e. zoom: only the n = 2 levels and the ionization limit (the
+ * ground state is far below); otherwise everything, with the crowded n = 2
+ * labels split left and right of their bars.
+ */
+function hePic({ caption, models = false, arrows = [], zoom = true, extra = {} } = {}) {
+  const L = (E, x0, color, text, side) => ({ E, x0, x1: x0 + 1.2, color, label: text, ...(side === 'l' ? { lx: x0, dx: -6, align: 'right' } : {}) });
+  const levels = [L(LV.s1, 0.4, 'accent', '2¹S', zoom ? 'r' : 'l'), L(LV.p1, 0.4, 'accent', '2¹P'), L(LV.s3, 2.4, 'gold', '2³S', zoom ? 'r' : 'l'), L(LV.p3, 2.4, 'gold', '2³P')];
+  if (!zoom) levels.unshift(L(LV.g, 0.4, 'accent', '1¹S'));
+  const y = zoom ? [-60.2, -53] : [-81.5, -52];
+  const pic = levelPic(levels, { y, x: [0, 4.4], ylabel: 'energy (eV)', caption, arrows, yticks: zoom ? 7 : 6, extra });
   pic.params.curves.push({ ...seg(0.2, LIM, 4.2, LIM, 'ink3', 1.4), dash: [6, 4] });
-  pic.params.points.push(label(2.2, LIM, 'He⁺ + e⁻', 'ink3', 0, -10, 'center'), label(1, -80.4, 'singlet (para)', 'accent', 0, 0, 'center'), label(3, -80.4, 'triplet (ortho)', 'gold', 0, 0, 'center'));
+  pic.params.points.push(label(2.2, LIM, 'He⁺ + e⁻', 'ink3', 0, -10, 'center'), label(1, y[0] + (zoom ? 0.35 : 1), 'singlet (para)', 'accent', 0, 0, 'center'), label(3, y[0] + (zoom ? 0.35 : 1), 'triplet (ortho)', 'gold', 0, 0, 'center'));
+  if (zoom) pic.params.points.push(label(2.2, y[0] + 1.1, 'ground state 1¹S: −79.0 eV, far below', 'ink3', 0, 0, 'center'));
   if (models) {
     const m = [[E0X + J2S + K2S, 0.4, 'step(0.5 - abs(model - 1))'], [E0X + J2S - K2S, 2.4, 'step(0.5 - abs(model - 1))'], [E0X + J2P + K2P, 0.4, 'step(0.5 - abs(model - 1))'], [E0X + J2P - K2P, 2.4, 'step(0.5 - abs(model - 1))'], [SCR, 0.4, 'step(model - 1.5)'], [SCR, 2.4, 'step(model - 1.5)']];
     for (const [E, x0, when] of m) pic.params.curves.push({ ...seg(x0, E, x0 + 1.2, E, 'good', 2), dash: [5, 4], when });
@@ -76,7 +84,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
       ...hePic({ models: true }).params,
       choices: [{ key: 'model', label: 'Model', options: [[0, 'measured only'], [1, 'first order, Z = 2 orbitals'], [2, 'screened outer electron']], value: 0, explain: 'Dashed green levels: a model’s prediction for the n = 2 levels, drawn beside the measured ones.' }],
     },
-    caption: 'Measured levels from the NIST Atomic Spectra Database; the triplet P levels’ fine-structure splitting (0.000 13 eV) is far too small to show. First order: E⁽⁰⁾ + J ± K with hydrogenic orbitals for Z = 2. Screened: the outer electron as hydrogen (Z = 1) outside He⁺, with no exchange term. Energy scale broken by nothing: the gap to the ground state is real.',
+    caption: 'Measured levels from the NIST Atomic Spectra Database; the triplet P levels’ fine-structure splitting (0.000 13 eV) is far too small to show. First order: E⁽⁰⁾ + J ± K with hydrogenic orbitals for Z = 2. Screened: the outer electron as hydrogen (Z = 1) outside He⁺, with no exchange term. The ground state lies 20 eV below this window.',
   },
   example: {
     prompt: t`Two electrons in a 1D infinite well of width $L = 1$ nm occupy states $a = 1$ and $b = 2$. Compute the rms separation $\sqrt{\langle(x_1 - x_2)^2\rangle}$ for a spatial wave function that is symmetric (spin singlet), antisymmetric (spin triplet), and for distinguishable particles, and say what it means for the Coulomb repulsion.`,
@@ -152,7 +160,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
         const ans = lam(up - lo);
         return {
           prompt: t`Helium’s measured levels lie, above the ground state, at $2^3S$: $${fmt(HE.s3, 6)}$ eV, $2^1S$: $${fmt(HE.s1, 6)}$ eV, $2^3P$: $${fmt(HE.p3, 6)}$ eV, $2^1P$: $${fmt(HE.p1, 6)}$ eV. What is the vacuum wavelength of ${name}, in nm? ($hc = ${fmt(HC_EVNM, 9)}$ eV nm.)`,
-          visual: hePic({ caption: 'The measured levels (singlets left, triplets right).', arrows: [{ from: [up === HE.p3 ? 3 : 1, r6(upl)], to: [up === HE.p3 ? 3 : 1, r6(lol)], color: 'warn', width: 2.4 }] }),
+          visual: hePic({ zoom: false, caption: 'The measured levels (singlets left, triplets right), to scale.', arrows: [{ from: [up === HE.p3 ? 3 : 1, r6(upl)], to: [up === HE.p3 ? 3 : 1, r6(lol)], color: 'warn', width: 2.4 }] }),
           answer: ans, units: 'nm', tol: { rel: 0.001 },
           errors: [{ value: lam(up), feedback: 'Use the difference between the two levels, not the upper level’s height above the ground state.' }].filter((e) => Math.abs(e.value - ans) > 0.002 * ans),
           hints: [t`$\lambda = hc/\Delta E$ with $\Delta E$ the difference of the two levels.`],
@@ -209,7 +217,7 @@ The upper sign belongs to the symmetric spatial state, whose spins form a single
         const v = r.pick([-25, -15, -8, 6, 12]);
         const l0 = lam(HE.p3 - HE.s3), ans = (l0 * v * 1e3) / C * 1000;     // pm
         return {
-          prompt: t`Metastable orthohelium ($2^3S$, lifetime about 2 hours) absorbs starlight at the $2^3S \to 2^3P$ line, at $${fmt(l0, 6)}$ nm in vacuum. The James Webb and ground-based telescopes use this line to catch helium escaping from hot exoplanets such as WASP-107b. Gas streaming with a line-of-sight velocity of $${v}$ km/s (positive = away from us) shifts the absorption by $\Delta\lambda = \lambda v/c$. What is $\Delta\lambda$, in pm?`,
+          prompt: t`Metastable orthohelium ($2^3S$, lifetime about 2 hours) absorbs starlight at the $2^3S \to 2^3P$ line, at $${fmt(l0, 6)}$ nm in vacuum. Telescopes use this line to catch helium escaping from hot exoplanets such as WASP-107b. Gas streaming with a line-of-sight velocity of $${v}$ km/s (positive = away from us) shifts the absorption by $\Delta\lambda = \lambda v/c$. What is $\Delta\lambda$, in pm?`,
           visual: hePic({ caption: 'Helium’s levels; the triplet line from 2³S, a level that cannot decay to the singlet ground state by an electric-dipole photon.', arrows: [{ from: [3, r6(LV.s3)], to: [3, r6(LV.p3)], color: 'warn', width: 2.4 }] }),
           answer: ans, units: 'pm', tol: { rel: 0.005 },
           errors: [{ value: -ans, feedback: 'Motion away from us stretches the wavelength (redshift): Δλ has the sign of v.' }],
