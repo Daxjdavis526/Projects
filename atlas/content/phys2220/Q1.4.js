@@ -182,7 +182,7 @@ This is Heisenberg’s uncertainty principle (1927). **It is not about clumsy in
     num({
       id: 'linewidth', difficulty: 3,
       gen(r) {
-        const [tau, what] = r.pick([[1.596e-9, 'the 2p state of hydrogen, which emits Lyman-α, lives 1.60 ns'], [16.2e-9, 'the 3p state of sodium, which emits the yellow D lines, lives 16.2 ns'], [26.2e-9, 'the 2p state of lithium, which emits its red 671 nm line, lives 27 ns']]);
+        const [tau, what] = r.pick([[1.596e-9, 'the 2p state of hydrogen, which emits Lyman-α, lives 1.60 ns'], [16.2e-9, 'the 3p state of sodium, which emits the yellow D lines, lives 16.2 ns'], [27.1e-9, 'the 2p state of lithium, which emits its red 671 nm line, lives 27.1 ns']]);
         const G = HBAR / tau / QE;
         return {
           prompt: t`An excited state that lasts a time $\tau$ on average has an energy spread — its natural linewidth — of $\Gamma = \hbar/\tau$. ${what[0].toUpperCase() + what.slice(1)}. What is its natural linewidth, in eV?`,

@@ -300,10 +300,11 @@ print(f"M = {M:.2f} uH; assuming 500 mA: {M_assumed:.2f} uH")
               type: 'graph',
               params: {
                 aspect: 'wide', equal: true, x: [-2, r2(Rc + 14)], y: [-2, r2(Math.max(X, 8) + 3)], axes: false, grid: false,
-                arrows: [
-                  { from: [0, 0], to: [Rc, 0], label: `R = ${Rc} Ω`, labelDx: -50, labelDy: 14 },
-                  { from: [Rc, 0], to: [Rc, r2(X)], label: 'X = 2πfL', labelDx: 8, labelDy: 0 },
-                  { from: [0, 0], to: [Rc, r2(X)], label: '|Z|', labelDx: -40, labelDy: -20 },
+                arrows: [{ from: [0, 0], to: [Rc, 0] }, { from: [Rc, 0], to: [Rc, r2(X)] }, { from: [0, 0], to: [Rc, r2(X)] }],
+                points: [
+                  { x: r2(Rc / 2), y: 0, r: 0.01, color: 'ink2', label: `R = ${Rc} Ω`, labelDx: -24, labelDy: 16 },
+                  { x: Rc, y: r2(X / 2), r: 0.01, color: 'ink2', label: 'X = 2πfL', labelDx: 8, labelDy: 0 },
+                  { x: r2(Rc / 2), y: r2(X / 2), r: 0.01, color: 'ink2', label: '|Z|', labelDx: -30, labelDy: -12 },
                 ],
               },
               caption: 'The impedance triangle: resistance and reactance add at right angles. Lengths to scale for this problem, but no numbers for X or |Z|.',

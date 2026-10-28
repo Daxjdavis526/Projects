@@ -133,7 +133,7 @@ So $\nabla f$ points in the direction of **steepest ascent**, its length is that
     mcq({
       id: 'trap-force', difficulty: 2,
       prompt: t`An ion in a trap has potential energy $U(x, y) = \tfrac12(k_x x^2 + k_y y^2)$ with $k_y = 4k_x$, so its equipotentials are ellipses. The force on it is $\vec F = -\nabla U$. At the point $P(1, 1)$, which statement is true?`,
-      visual: { type: 'field2d', params: { P: '-x', Q: '-4*y', potential: '0.5*(x^2 + 4*y^2)', x: [-2.2, 2.2], y: [-2.2, 2.2], particles: false, probe: [1, 1], density: 13 }, caption: t`Arrows: the force field $-\nabla U$ (lengths compressed, colour shows strength). Violet: equipotentials of $U$. The ring is at $P(1, 1)$, with the force there in gold.` },
+      visual: map('0.5*(x^2 + 4*y^2)', { x: [-2.6, 2.6], y: [-1.8, 1.8], levels: [0.5, 1, 1.5, 2.5, 3.5, 5], labels: false, points: [{ x: 1, y: 1, color: 'ink', label: 'P' }, { x: 0, y: 0, color: 'gold', label: 'centre', labelDx: 8, labelDy: 12 }], curves: [{ param: ['t', 't'], t: [0, 1], color: 'ink3', width: 1.4, dash: true }], caption: t`Equipotentials of $U$ (with $k_x = 1$), more closely spaced in $y$ because the trap is four times stiffer that way. The dashed line runs from $P$ to the centre.` }),
       choices: [
         t`$\vec F$ is perpendicular to the equipotential through $P$, so it does **not** point at the centre`,
         t`$\vec F$ points straight at the centre, like every restoring force`,
@@ -191,7 +191,7 @@ So $\nabla f$ points in the direction of **steepest ascent**, its length is that
     mcq({
       id: 'where-grad', difficulty: 2,
       prompt: t`For a function $z = f(x, y)$ with a hill-shaped graph, where does the gradient $\nabla f$ live?`,
-      visual: surf((x, y) => `2.4*exp(-(${x}^2 + ${y}^2)/3)`, { tangentAt: [1, -0.6], readouts: [], planeSize: 0.6, dist: 8.5, caption: t`A hill $z = f(x, y)$ with its tangent plane at one point (gold) and, on the floor below, the gradient there (red). Drag to rotate.` }),
+      visual: surf((x, y) => `2.4*exp(-(${x}^2 + ${y}^2)/3)`, { tangentAt: [1, -0.6], readouts: [], planeSize: 0.6, dist: 8.5, alpha: 0.5, pitch: 0.35, caption: t`A hill $z = f(x, y)$ (drawn see-through) with its tangent plane at one point (gold) and, on the floor below, the gradient there (red). Drag to rotate.` }),
       choices: [
         t`In the $xy$-plane: a 2D vector at $(x, y)$ pointing in the uphill direction`,
         t`On the surface: a 3D arrow tangent to the graph, pointing up the slope`,
@@ -234,7 +234,7 @@ So $\nabla f$ points in the direction of **steepest ascent**, its length is that
         const gx = 2 * A * x0, gy = -B, q = k * Math.hypot(gx, gy);
         return {
           prompt: t`Across an aluminium radiator panel on a satellite ($k = ${k}$ W/(m·K)) the temperature is $T(x, y) = 300 + ${A}x^2 - ${B}y$ K, with $x$ and $y$ in metres. Fourier’s law says the heat flux is $\vec q = -k\nabla T$. Find its magnitude at $(${x0},\ 0.2)$ m, in W/m².`,
-          visual: { type: 'field2d', params: { P: `${-2 * A}*x/40`, Q: `${B}/40`, potential: `${A}*x^2 - ${B}*y`, x: [-0.5, 0.5], y: [-0.5, 0.5], particles: false, probe: [x0, 0.2], density: 11 }, caption: t`Heat-flux arrows $-\nabla T$ (lengths compressed, colour shows strength) and isotherms (violet) across a 1 m square of panel. The ring marks the point.` },
+          visual: map(`300 + ${A}*x^2 - ${B}*y`, { x: [-0.5, 0.5], y: [-0.42, 0.42], levels: 8, xlabel: 'x (m)', ylabel: 'y (m)', points: [{ x: x0, y: 0.2, color: 'ink', label: 'P' }], caption: t`Isotherms (K) across a 1 m wide piece of the panel, and the point $P$. Heat flows across the isotherms, from hot to cold.` }),
           answer: q, units: 'W/m^2', tol: { rel: 0.01 },
           errors: [{ value: Math.hypot(gx, gy), feedback: t`That is $|\nabla T|$ in K/m. Multiply by the conductivity $k$.` }, { value: k * (Math.abs(gx) + Math.abs(gy)), feedback: 'Add the components as a vector: the magnitude is the square root of the sum of squares.' }],
           hints: [t`$\nabla T = (${2 * A}x,\ -${B})$ K/m.`, t`$|\vec q| = k\,|\nabla T| = k\sqrt{T_x^2 + T_y^2}$.`],
