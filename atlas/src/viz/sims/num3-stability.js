@@ -67,7 +67,7 @@ export function mount(F, P0) {
   ctl('r', () => F.slider({ key: 'r', label: 'Mesh ratio $r = D\\,\\Delta t/\\Delta x^2$', min: 0.02, max: P.rmax, step: 0.01, value: P.r, explain: `The time step measured against $\\Delta x^2/D$. The ${P.mol} grid modes sit at $z = -4r\\sin^2(\\cdot)$, spread over $[-4r, 0]$.` }));
   if (!wanted.includes('method')) F.params.method = P.method;
 
-  let z = P.z ? [...P.z] : null;
+  let z = mode === 'point' && P.z ? [...P.z] : null;
   const panels = P.panels;
   const cvA = panels.includes('plane') ? F.canvas({ aspect: '', label: P.alt || 'The stability region of the method in the complex plane of z = hλ' }) : null;
   const cvB = panels.includes('run') ? F.canvas({ aspect: 'wide', label: 'The size of the numerical solution after n steps against the exact one, on a log scale' }) : null;
@@ -194,7 +194,11 @@ export function mount(F, P0) {
     const q = (k, v) => (hide.has(k) ? '?' : v);
     if (!W) { F.readout([]); return; }
     if (mode === 'point') rows.push(['$z = h\\lambda$', zTeX(W.z)]);
-    else rows.push([mode === 'mol' ? 'stiffest mode $z$' : 'worst $z = h\\lambda$', zTeX(W.z)]);
+    else {
+      // the stiffest (leftmost) point, and separately the largest multiplier among all of them
+      const st = zs().reduce((a, b) => (b[0] < a[0] ? b : a));
+      rows.push([mode === 'mol' ? 'stiffest mode $z$' : 'fastest $z = h\\lambda$', zTeX(st)]);
+    }
     rows.push([mode === 'point' ? '$|R(z)|$' : 'largest $|R(z)|$', q('R', texNum(W.a, 4))]);
     rows.push(['verdict', q('verdict', W.a > 1 + 1e-12 ? '\\text{grows: unstable}' : W.a > 1 - 1e-9 ? '\\text{neutral}' : '\\text{decays: stable}')]);
     F.readout(rows);

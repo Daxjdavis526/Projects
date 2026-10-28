@@ -76,6 +76,7 @@ const FUNCS = {
   ceil: { f: Math.ceil, tex: 'ceil' },
   gamma: { f: gammaFn, tex: '\\Gamma' },
   erf: { f: erf, tex: '\\operatorname{erf}' },
+  erfc: { f: erfc, tex: '\\operatorname{erfc}' },
   atan2: { f: Math.atan2, tex: '\\operatorname{atan2}', arity: 2 },
   // Bessel function of the first kind of integer order: besselj(n, x) = Jₙ(x)
   besselj: { f: besselJ, tex: '\\operatorname{J}', arity: 2 },
@@ -152,6 +153,21 @@ export function erf(x) {
     if (Math.abs(delta - 1) < 1e-16) break;
   }
   return s * (1 - Math.exp(-x * x) / Math.sqrt(Math.PI) / f);
+}
+
+/** erfc(x) = 1 − erf(x), keeping its digits in the far tail (erfc(6) ≈ 2.15×10⁻¹⁷, not 0). */
+export function erfc(x) {
+  if (x < 0) return 2 - erfc(-x);
+  if (x < 3) return 1 - erf(x);
+  let f = x, C = x, D = 0;
+  for (let n = 1; n < 300; n++) {
+    const an = n / 2;
+    D = x + an * D; D = D === 0 ? 1e-300 : 1 / D;
+    C = x + an / C; if (C === 0) C = 1e-300;
+    const delta = C * D; f *= delta;
+    if (Math.abs(delta - 1) < 1e-16) break;
+  }
+  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f;
 }
 
 // ─── normalisation and tokens ──────────────────────────────────────────────

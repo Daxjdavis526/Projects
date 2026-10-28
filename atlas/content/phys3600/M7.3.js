@@ -154,7 +154,7 @@ export default lesson({
             { value: (B / MU0) * g * 1e-3, feedback: t`That is the gap alone. With $\mu_r = ${mur}$ the iron’s ${l * 100} cm adds $B\ell/\mu_0\mu_r$ — here not negligible.` },
           ].filter((e) => Math.abs(e.value - NI) > 0.03 * NI),
           hints: [t`$\oint\vec H\cdot d\vec l = H_{\text{Fe}}\ell + H_gg = NI$, with the same $B$ in both parts.`, t`$H_g = B/\mu_0$ and $H_{\text{Fe}} = B/\mu_0\mu_r$, so $NI = \dfrac{B}{\mu_0}\left(g + \dfrac{\ell}{\mu_r}\right)$.`],
-          teach: 'In a magnetic circuit the ampere-turns split between iron and gap in the ratio ℓ/μ_r to g: a small gap usually dominates.',
+          teach: t`In a magnetic circuit the ampere-turns split between iron and gap in the ratio $\ell/\mu_r$ to $g$: a small gap usually dominates.`,
           explain: t`$NI = \dfrac{${B}}{\mu_0}\left(${g / 1000} + \dfrac{${l}}{${mur}}\right) \approx ${nice(sf(NI, 3))}$ A. The iron behaves like ${nice(sf((l / mur) * 1000, 2))} mm of extra gap: the “reluctance” picture, in which $\ell/\mu$ plays resistance and $NI$ an emf.`,
         };
       },

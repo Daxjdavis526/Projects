@@ -157,6 +157,7 @@ export function validate(P) {
   if (P.legend && !(Array.isArray(P.legend) && P.legend.every((it) => typeof it.label === 'string'))) problems.push('graph: legend must be [{ label, color, dash, point }]');
   if (P.legendAt && !['tl', 'tr', 'bl', 'br'].includes(P.legendAt)) problems.push('graph: legendAt must be tl, tr, bl or br');
   const keys = [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
+  for (const k of ['x', 'y']) if (P[k] !== undefined && !(Array.isArray(P[k]) && P[k].length === 2 && P[k].every(Number.isFinite) && P[k][0] < P[k][1])) problems.push(`graph: ${k} is a window [lo, hi] of two numbers, lo < hi (got ${JSON.stringify(P[k])})`);
   // label offsets are screen pixels, numbers: a string would be concatenated, not added
   for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || [])]) for (const k of ['labelDx', 'labelDy']) if (o[k] !== undefined && typeof o[k] !== 'number') problems.push(`graph: ${k} is a number of screen pixels (got ${JSON.stringify(o[k])})`);
   // names the graph itself uses: a slider by one of them would be shadowed or would shadow it

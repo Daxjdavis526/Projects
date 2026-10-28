@@ -142,7 +142,7 @@ $A$ stretches the heights (the **amplitude**), $D$ lifts the midline, $\omega$ s
           hints: [t`One period is $T = ${sig(win * 1000, 4)}\ \text{ms} / ${n}$.`, t`$f = 1/T$ and $\omega = 2\pi f$.`],
           teach: t`Count cycles in a known time to get $f$; then $\omega = 2\pi f$.`,
           explain: t`$T = ${sig((win * 1000) / n, 4)}$ ms, $f = ${f}$ Hz, $\omega = 2\pi \times ${f} = ${sig(ans, 4)}$ rad/s.`,
-          visual: { type: 'graph', params: { x: [0, N(win * 1000)], y: [-1.4, 1.4], aspect: 'wide', xlabel: 't (ms)', ylabel: 'signal', yticks: 4, curves: [{ fn: `sin(2*pi*${f}*x/1000)`, color: 'good' }] }, caption: t`The oscilloscope trace across the whole window.` },
+          visual: { type: 'graph', params: { x: [0, +N(win * 1000)], y: [-1.4, 1.4], aspect: 'wide', xlabel: 't (ms)', ylabel: 'signal', yticks: 4, curves: [{ fn: `sin(2*pi*${f}*x/1000)`, color: 'good' }] }, caption: t`The oscilloscope trace across the whole window.` },
         };
       },
     }),
@@ -200,7 +200,7 @@ $A$ stretches the heights (the **amplitude**), $D$ lifts the midline, $\omega$ s
           hints: [t`The second signal reaches each angle when $2\pi \cdot ${f}\,t - ${d}$ equals what the first had at $t$: a delay of $\Delta t$ with $\omega\,\Delta t = ${d}$.`, t`$\Delta t = \dfrac{${d}}{2\pi \times ${f}}$ s.`],
           teach: t`A phase difference $\Delta\varphi$ is a time difference $\Delta\varphi/\omega$.`,
           explain: t`$\Delta t = \dfrac{${d}}{2\pi \times ${f}} = ${sig(ans / 1000, 3)}$ s $= ${sig(ans, 3)}$ ms — $${sig((d / (2 * PI)) * 100, 3)}\%$ of a period.`,
-          visual: { type: 'graph', params: { x: [0, N(2 / f)], y: [-1.4, 1.4], aspect: 'wide', xlabel: 't (s)', ylabel: 'a / a₀', yticks: 4, curves: [{ fn: `sin(2*pi*${f}*x)`, color: 'accent', label: 'a₁', labelAt: N(0.25 / f), labelDx: -6, labelDy: -12 }, { fn: `sin(2*pi*${f}*x - ${d})`, color: 'warn', label: 'a₂', labelAt: N(0.25 / f + d / (2 * PI * f)), labelDx: 4, labelDy: -12 }] }, caption: t`Two periods of both signals; the orange one reaches every peak later.` },
+          visual: { type: 'graph', params: { x: [0, +N(2 / f)], y: [-1.4, 1.4], aspect: 'wide', xlabel: 't (s)', ylabel: 'a / a₀', yticks: 4, curves: [{ fn: `sin(2*pi*${f}*x)`, color: 'accent', label: 'a₁', labelAt: N(0.25 / f), labelDx: -6, labelDy: -12 }, { fn: `sin(2*pi*${f}*x - ${d})`, color: 'warn', label: 'a₂', labelAt: N(0.25 / f + d / (2 * PI * f)), labelDx: 4, labelDy: -12 }] }, caption: t`Two periods of both signals; the orange one reaches every peak later.` },
         };
       },
     }),

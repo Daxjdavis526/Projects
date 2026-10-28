@@ -86,7 +86,7 @@ const SCENES = [
   {
     method: 2,
     text: t`the charge induced on Kestrel’s spherical, conducting Langmuir-probe sensor by a uniform electric field`,
-    visual: field({ x: [-9, 9], y: [-5, 5], conductor: { x: 0, y: 0, R: 2.5 }, uniform: [20000, 0], fieldLines: true, density: 14 }, 'A conducting sphere in a uniform field: the field lines bend to meet it at right angles. Exact.'),
+    visual: field({ x: [-9, 9], y: [-5, 5], conductor: { x: 0, y: 0, R: 2.5 }, uniform: [20000, 0], fieldLines: true, density: 14, grid: false }, 'A conducting sphere in a uniform field: the field lines bend to meet it at right angles. Exact.'),
     why: { 0: 'A single image does not make a sphere an equipotential in a uniform field (it takes a dipole at the centre — which is what the Legendre series finds).', 1: 'The boundary is a sphere, so the coordinates must be spherical.', 3: 'The answer is wanted on the sphere itself, not far away.' },
   },
   {
@@ -186,19 +186,28 @@ const gaussPic = (C) => {
     params: bare([-2.6, 2.6], [-1.25, 1.25], {
       shade: [0.95, 0.75, 0.55, 0.35].map((rr, i) => ({ fn: `sqrt(max(${rr * rr} - x^2, 0))`, lower: `-sqrt(max(${rr * rr} - x^2, 0))`, from: -rr, to: rr, color: 'violet', alpha: 0.12 + 0.02 * i })),
       curves: [circle(1, 'ink2'), circle(g, 'gold', { dash: [5, 4] })],
-      points: [{ x: 1.05, y: 0.6, r: 0, label: 'ρ = kr: densest at the edge', color: 'violet' }, { x: g * 0.71, y: -g * 0.71, r: 0, label: `Gaussian sphere, r = ${C.rc} cm`, labelDx: 8, labelDy: 12, color: 'gold' }],
+      points: [{ x: 0, y: 1.14, r: 0, label: 'ρ = kr, densest at the edge', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'violet' }, { x: 0, y: -1.14, r: 0, label: `Gaussian sphere, r = ${C.rc} cm (gold)`, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'gold' }],
     }),
     caption: 'The block modelled as a sphere of radius 10 cm with trapped charge growing toward its surface (shading), and a Gaussian sphere (gold, dashed). Not to scale.',
   };
 };
 
-const chargePic = (C) => field({ x: [-9, 9], y: [-5, 5], balls: [{ x: 0, y: 0, R: 2.4, Q: -5, shell: true }], fieldLines: true, density: 14 }, `Kestrel’s hull modelled as a conducting sphere of radius ${C.R} m carrying negative charge on its surface; its field lines run inward. Not to scale.`);
+const chargePic = (C) => ({
+  type: 'graph',
+  params: bare([-2.6, 2.6], [-1.25, 1.25], {
+    shade: [{ fn: 'sqrt(max(0.36 - x^2, 0))', lower: '-sqrt(max(0.36 - x^2, 0))', from: -0.6, to: 0.6, color: 'ink3', alpha: 0.3 }],
+    curves: [circle(0.6, 'accent', { width: 3 })],
+    arrows: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((k) => { const a = (k * PI) / 6 + 0.26; return { from: [1.3 * Math.cos(a), 1.3 * Math.sin(a)], to: [0.7 * Math.cos(a), 0.7 * Math.sin(a)], color: 'warn', width: 1.6 }; }),
+    points: [{ x: 0, y: 0, r: 0, label: `R = ${C.R} m`, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'accent' }],
+  }),
+  caption: 'Kestrel’s hull modelled as a conducting sphere (blue), its negative charge on the surface and its field (orange) pointing inward, falling as 1/r². Not to scale.',
+});
 
-const slotPic = (C) => relaxPic({ n: 24, aspect: 2, walls: { left: 0, right: 0, bottom: C.V0, top: 0 }, probe: false, labels: false, levels: 7 }, 'The slot’s cross-section: its end (bottom) held at V₀, its long sides grounded. The box is cut off at twice the width; the real slot runs on, so this relaxation picture is close but not exact.');
+const slotPic = (C) => relaxPic({ n: 24, aspect: 1.5, walls: { left: 0, right: 0, bottom: C.V0, top: 0 }, probe: false, labels: false, levels: 7 }, 'The slot’s cross-section: its end (bottom) held at V₀, its long sides grounded. The box is cut off at one and a half widths; the real slot runs on, so this relaxation picture is close but not exact.');
 
 const quadPic = (C) => ({
   type: 'graph',
-  params: bare([-2.6, 2.6], [-1.25, 1.25], {
+  params: bare([-2.6, 2.6], [-0.7, 0.7], {
     curves: [{ fn: '0', domain: [-2.5, 2.5], color: 'ink4', width: 1, dash: [3, 5] }],
     points: [{ x: -2, y: 0, r: 6, color: 'warn', label: '+q', labelDx: -6, labelDy: -14, labelAlign: 'center' }, { x: -1.6, y: 0, r: 7, color: 'accent', label: '−2q', labelDx: 0, labelDy: -14, labelAlign: 'center' }, { x: -1.2, y: 0, r: 6, color: 'warn', label: '+q', labelDx: 6, labelDy: -14, labelAlign: 'center' }, { x: 2.2, y: 0, r: 5, color: 'good', label: `${C.k}d away`, labelDx: 0, labelDy: -14, labelAlign: 'center' }],
   }),
@@ -216,7 +225,7 @@ const boomPic = (C, what) => ({
   type: 'graph',
   params: bare([-2.6, 2.6], [-1.25, 1.25], {
     shade: [{ fn: '0.45', lower: '-0.45', from: -2.4, to: -1.5, color: 'ink3', alpha: 0.35 }],
-    curves: [{ fn: '0', domain: [-1.5, 2.1], color: 'ink2', width: 2 }, ...(what === 'coil' ? polygon([[-2.25, -0.3], [-1.65, -0.3], [-1.65, 0.3], [-2.25, 0.3]], 'warn') : [])],
+    curves: [{ fn: '0', domain: [-1.5, 2.1], color: 'ink2', width: 2 }, ...(what === 'coil' ? polygon([[-2.25, -0.05], [-1.65, -0.05], [-1.65, 0.05], [-2.25, 0.05]], 'warn') : [])],
     arrows: what === 'coil' ? [{ from: [-1.95, -0.05], to: [-1.95, 0.42], color: 'gold', width: 2.4, label: 'm', labelDx: 6 }] : [{ from: [-1.95, -0.2], to: [-1.6, -0.2], color: 'gold', width: 2.4, label: 'm', labelDx: 4, labelDy: 10 }],
     points: [{ x: 2.15, y: 0, r: 6, color: 'good', label: 'magnetometer', labelDx: 0, labelDy: -14, labelAlign: 'center' }, { x: 0.3, y: 0, r: 0, label: what === 'coil' ? `boom, ${C.d} m` : 'boom', labelDx: 0, labelDy: 14, labelAlign: 'center', color: 'ink2' }, { x: -1.95, y: -0.62, r: 0, label: what === 'coil' ? 'torquer coil' : 'valve magnet', labelAlign: 'center', labelDx: 0, labelDy: 0, color: what === 'coil' ? 'warn' : 'gold' }],
   }),
@@ -382,7 +391,7 @@ export default boss({
             const C = sphereCase(r);
             return {
               prompt: t`In a ground-test chamber, Kestrel’s uncharged spherical conducting probe sits in a uniform field $E_0 = ${C.E0}$ kV/m. Solving Laplace’s equation with Legendre polynomials gives the induced charge as a function of the angle $\theta$ from the field. What is the surface charge density at $\theta = ${C.th}°$?`,
-              visual: field({ x: [-9, 9], y: [-5, 5], conductor: { x: 0, y: 0, R: 2.5 }, uniform: [20000, 0], fieldLines: true, density: 14 }, 'The probe in the chamber’s field (along +x): the field lines bend to meet the conductor at right angles. Exact.'),
+              visual: field({ x: [-9, 9], y: [-5, 5], conductor: { x: 0, y: 0, R: 2.5 }, uniform: [20000, 0], fieldLines: true, density: 14, grid: false }, 'The probe in the chamber’s field (along +x): the field lines bend to meet the conductor at right angles. Exact.'),
               answer: C.sigma * 1e9, units: 'nC/m^2', tol: { rel: 0.01 },
               errors: apart([
                 { value: EPS0 * C.E0 * 1e3 * Math.cos(C.th * DEG) * 1e9, feedback: t`The sphere concentrates the field: $\sigma = 3\varepsilon_0E_0\cos\theta$, not $\varepsilon_0E_0\cos\theta$.` },
@@ -491,7 +500,7 @@ export default boss({
                 { value: C.B * 1e-3 * (C.g * 1e-3 + C.l / C.mur), feedback: t`$\oint\vec H\cdot d\vec l = NI$, and $H = B/\mu_0$ in the gap: divide by $\mu_0$.` },
               ], C.NI),
               hints: [t`$\oint\vec H\cdot d\vec l = H_gg + H_{\text{Fe}}\ell = NI$, with the same $B$ throughout.`, t`$NI = \dfrac{B}{\mu_0}\left(g + \dfrac{\ell}{\mu_r}\right)$.`],
-              teach: 'In a magnetic circuit Ampère’s law for H splits the ampere-turns between iron and gap as ℓ/μ_r to g.',
+              teach: t`In a magnetic circuit Ampère’s law for $\vec H$ splits the ampere-turns between iron and gap as $\ell/\mu_r$ to $g$.`,
               explain: t`$NI = \dfrac{${C.B}\times10^{-3}}{\mu_0}\left(${C.g / 1000} + \dfrac{${C.l}}{${C.mur}}\right) \approx ${nice(sf(C.NI, 3))}$ A: the channel takes ${nice(sf((100 * C.g * 1e-3) / (C.g * 1e-3 + C.l / C.mur), 3))}% of it. The iron’s $\mu_r$ hardly matters — unless it saturates.`,
             };
           },

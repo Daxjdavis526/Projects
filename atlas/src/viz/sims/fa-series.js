@@ -97,7 +97,7 @@ export function mount(F, P0) {
         px.point(x0, M.f(wave, x0), { color: 'bg', ring: 'gold', r: 4.5 });
         px.point(x0, M.partial(C, x0, N, method), { color: 'gold', r: 3.5 });
       }
-      if (P.mark && pk && pk.x >= win[0] && pk.x <= win[1]) px.point(pk.x, pk.y, { color: 'bad', r: 4, label: 'peak', ldx: 7, ldy: -9 });
+      if (P.mark && pk && pk.x >= win[0] && pk.x <= win[1]) px.point(pk.x, pk.y, { color: 'bad', r: 4, label: 'peak', ldx: 8, ldy: 12 });
       if (P.labels !== false) {
         px.text(`partial sum, N = ${N}`, win[1], hi + pad, { color: 'accent', align: 'right', size: fs, dx: -6, dy: 12, weight: 650 });
         px.text('f (dashed)', win[1], hi + pad, { color: 'ink3', align: 'right', size: fs, dx: -6, dy: 28, weight: 650 });

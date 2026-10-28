@@ -266,6 +266,8 @@ export function mount(F, P) {
       if (c.label) { const p = c.labelAt ?? Math.floor(c.pts.length / 2), q = c.pts[Math.min(c.pts.length - 1, p)]; plot.text(c.label, q[0], toY(q[1]), { color: c.color || 'violet', size: 12, dx: c.labelDx ?? 6, dy: c.labelDy ?? -10 }); }
     }
 
+    for (const q of P.points || []) plot.point(q.a, toY(q.b), { color: q.color || 'ink', r: q.r ?? 4, label: q.label || '', ldx: 8, ldy: -10 });
+
     const rows = [];
     const want = (key) => (P.readout === true ? ['P', 'g', 'gamma', 'K', 'conserved', 'norm', 'length', 'turn', 'area', 'F'].includes(key) : Array.isArray(P.readout) && P.readout.includes(key));
     const [a0, b0] = Pp;

@@ -77,7 +77,7 @@ The commonest misreading is to take the graph for a picture of the path. A curve
         const F = flight(r.pick([20, 25, 30]), r.pick([5, 6, 8]));
         return {
           prompt: t`A sounding rocket’s altitude is graphed below (burn for $${F.tb}$ s, then a coast with no drag). Mark its **apogee**, the highest point of the flight.`,
-          visual: { type: 'graph', params: { x: [-2, N(F.T + 3)], y: [-0.2, N(F.hMax / 1000 * 1.18)], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (km)', curves: flightCurves(F, 1000), drag: [{ key: 'q', x: 0, y: N(F.hMax / 1000 * 1.1), snap: 0.05 }] } },
+          visual: { type: 'graph', params: { x: [-2, +N(F.T + 3)], y: [-0.2, +N(F.hMax / 1000 * 1.18)], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (km)', curves: flightCurves(F, 1000), drag: [{ key: 'q', x: 0, y: N(F.hMax / 1000 * 1.1), snap: 0.05 }] } },
           answer: { x: F.tApo, y: F.hMax / 1000 }, tol: { x: 1.2, y: 0.12 },
           instruction: 'Drag the point to the apogee, then check.',
           hints: [t`At apogee the rocket is momentarily at rest: the curve is flat there.`],
@@ -204,7 +204,7 @@ The commonest misreading is to take the graph for a picture of the path. A curve
     match({
       id: 'cp-phases', difficulty: 2,
       prompt: t`The graph is a rocket’s altitude through a whole flight: burn, coast, fall, and descent under a parachute. Match each phase with the shape of its part of the graph.`,
-      visual: { type: 'graph', params: { x: [-3, N(tLand + 5)], y: [-80, 1800], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (m)',
+      visual: { type: 'graph', params: { x: [-3, +N(tLand + 5)], y: [-80, 1800], aspect: 'wide', xlabel: 't (s)', ylabel: 'h (m)',
         curves: [{ fn: '12.5x^2', color: 'accent', domain: [0, 6] }, { fn: `450 + 150(x - 6) - 4.9(x - 6)^2`, color: 'accent', domain: [6, N(tChute)] }, { fn: `${N(hChute)} - 15(x - ${N(tChute)})`, color: 'accent', domain: [N(tChute), N(tLand)] }] },
         caption: t`An idealized flight: no drag, and a parachute that slows the rocket to a steady $15$ m/s at once. Real parachutes take seconds to do that.` },
       left: ['engine burning', 'coasting upward', 'falling freely after apogee', 'descending under the parachute'],

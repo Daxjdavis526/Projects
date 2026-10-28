@@ -123,3 +123,13 @@ export function rigidPic(params, caption) {
 }
 
 export { sci, r6 };
+
+/** A still cm4-modes picture: no controls, no Play, no numbers. */
+export function modesPic(params, caption) {
+  return { type: 'cm4-modes', params: { controls: [], play: false, readout: false, labels: false, ...params }, caption };
+}
+
+/** A still de-plane phase portrait (no clicking, no readout, no labels on equilibria). */
+export function planePic(params, caption) {
+  return { type: 'de-plane', params: { click: false, readout: false, equal: false, aspect: 'wide', ...params }, caption };
+}

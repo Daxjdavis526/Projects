@@ -179,7 +179,8 @@ export function validateItem(item, tex) {
     if (item.type === 'order') need(item.items?.length >= 3, 'ordering needs 3+ steps');
     if (item.type === 'match' || item.type === 'label') {
       need(item.left?.length >= 2, 'matching needs 2+ items on the left');
-      need(item.right?.length >= item.left?.length, `matching needs at least as many options on the right (${item.right?.length}) as items on the left (${item.left?.length}) — list a repeated answer once per left item that uses it`);
+      need(item.right?.length >= item.left?.length, `matching needs at least as many options on the right (${item.right?.length}) as items on the left (${item.left?.length}) — each option answers one left item`);
+      need(new Set((item.right || []).map(String)).size === (item.right || []).length, 'two matching options are identical: the grader matches by position, so one correct pick would read as wrong — reword one');
       if (item.type === 'match') for (const r of item.right || []) {
         const plain = texToPlain(r);
         need(!/[\\{}$]/.test(plain), `a matching option is shown in a drop-down as plain text, and “${String(r).slice(0, 40)}” comes out as “${plain.slice(0, 40)}” — keep its math simple (Unicode, or TeX the drop-down can spell: x², √x, θ, ∫, fractions)`);

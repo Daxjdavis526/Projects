@@ -70,7 +70,7 @@ export function mount(F, P0) {
 
   const cvP = panels.includes('profile') ? F.canvas({ aspect: 'wide', label: P.alt || 'Grid values of the numerical solution over the exact solution' }) : null;
   const cvC = panels.includes('cone') ? F.canvas({ aspect: 'wide', label: 'The grid in the x–t plane: the numerical and physical domains of dependence of one point' }) : null;
-  const cvG = panels.includes('gain') ? F.canvas({ aspect: 'wide', label: 'The amplification factor G(θ) against the unit circle' }) : null;
+  const cvG = panels.includes('gain') ? F.canvas({ aspect: P.gain === 'abs' || (globalThis.innerWidth || 1280) >= 600 ? 'wide' : '', label: 'The amplification factor G(θ) against the unit circle' }) : null;
   const pP = cvP && new Plot(cvP.canvas, { x: [0, L], y: P.ylim, xlabel: 'x (m)', ylabel: 'u', axesAt: 'edge', xticks: 10 });
   const pC = cvC && new Plot(cvC.canvas, { x: [-10, 10], y: [-0.7, P.levels + 0.9], axes: false, grid: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
   const pG = cvG && (P.gain === 'abs'
@@ -166,11 +166,11 @@ export function mount(F, P0) {
       pG.path(pts, { color: 'accent', width: 2.4 });
       pG.path(pts.map((z) => (M.cabs(z) > 1 + 1e-9 ? z : [NaN, NaN])), { color: 'bad', width: 3.2 });
       const zpi = M.gain(key, Math.PI, nu)[r];
-      pG.point(zpi[0], zpi[1], { color: M.cabs(zpi) > 1 + 1e-9 ? 'bad' : 'gold', r: 4.5, label: r ? '' : 'θ = π (sawtooth)', ldx: zpi[0] > 0.8 ? -8 : 8, ldy: 14, lalign: zpi[0] > 0.8 ? 'right' : 'left', lsize: fs });
+      pG.point(zpi[0], zpi[1], { color: M.cabs(zpi) > 1 + 1e-9 ? 'bad' : 'gold', r: 4.5, label: r ? '' : narrow ? 'θ = π' : 'θ = π (sawtooth)', ldx: zpi[0] > 0.8 ? -8 : 8, ldy: 14, lalign: zpi[0] > 0.8 ? 'right' : 'left', lsize: fs });
     }
     const z0 = M.gain(key, 0, nu)[0];
     pG.point(z0[0], z0[1], { color: 'good', r: 4, label: 'θ = 0', ldx: 6, ldy: -10, lsize: fs });
-    pG.text('unit circle', -0.78, 0.78, { dx: -6, dy: -6, align: 'right', size: fs, color: 'ink3' });
+    if (!narrow) pG.text('unit circle', -0.78, 0.78, { dx: -6, dy: -6, align: 'right', size: fs, color: 'ink3' });
   }
 
   function readout() {

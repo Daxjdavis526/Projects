@@ -320,7 +320,7 @@ given a key, `keys: [['Δv', 'Δv']]`, so the learner can type it. `ħ` cannot b
 `answer`): `+ - * / ^`, brackets, implicit multiplication (`2x`, `x(x+1)`,
 `mgh` = m·g·h when m, g, h are declared), functions with or without brackets
 (`sin x`, `sin^2 x`, `sin^-1 x`), `sqrt cbrt abs exp ln log log2 log10
-sin cos tan sec csc cot asin acos atan sinh cosh tanh gamma erf min max
+sin cos tan sec csc cot asin acos atan sinh cosh tanh gamma erf erfc min max
 step round floor ceil atan2`, `besselj(n, x)` (Jₙ, integer n)
 (and `arcsin` etc.), constants `pi`, `e` (unless declared as a variable),
 Greek names (`omega`, `theta`, `Delta`…) or the Unicode letters, and
@@ -371,6 +371,10 @@ Optional `diagram`: an inline SVG string shown above the rows. The `left`
 entries are markup (TeX works); the `right` options appear in a drop-down,
 which cannot show TeX — write them as plain text (Unicode is fine: x², √x,
 π, θ, ∫).
+
+It grades by position, so every right-hand option must be distinct (the test
+fails identical options): two identical options would make one correct pick read
+as wrong. If two left items share an answer, reword one or use `mcq` instead.
 
 ### Slider and point (answer *in* the picture)
 
@@ -599,6 +603,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `pde2-membrane` | modes of a rectangular or circular membrane from above (nodal lines) or in 3D, a frequency ladder against whole multiples, two modes mixed into Chladni-like patterns | `shape`, `aspect`, `m`, `n`, `mix`, `view`, `toggle`, `nodal`, `ladder`, `count`, `harmonics`, `c`, `L`, `play`, `controls`, `readout`, `hide` |
 | `pde2-fourier` | linked x-space and k-space panels: each equation's multiplier G(k) for heat, waves, Laplace in a half-plane and a dispersive Schrödinger-type equation | `eq`, `eqs`, `profile`, `w`, `D`, `c`, `beta`, `t`, `tmax`, `x`, `k`, `mult`, `labels`, `controls`, `play`, `readout`, `hide` |
 | `pde3-burgers` | Burgers' equation solved exactly (Lax–Oleinik): u(x, t) with the folded three-valued profile and its shocks, and the x–t plane with characteristics stopping at shocks, the first crossing t*, shock paths and fans; bump, sine, square, step and N-wave profiles; optional conservative or non-conservative upwind dots | see the file header |
+| `pde4-scheme` | a finite-difference lab: upwind, FTCS, Lax–Wendroff and leapfrog against the exact solution, the stencil's domain of dependence against the characteristic, G(θ) against the unit circle | see the file header |
+| `pde4-constraint` | Gauss's law kept (staggered) or drifting (collocated) on a grid, and a damped constraint violation decaying as e^(−γt) | see the file header |
 | `dg-frenet` | the fundamental theorem of curves: a space curve built from κ(s) and τ(s) by integrating the Frenet–Serret equations, a point riding it with its frame | `kappa`, `tau` (expressions of `s` and slider keys), `length`, `sliders`, `choices`, `constants`, `ghost`, `at`, `show`, `readouts`, `play`, `speed`, `fixed`, `yaw`, `pitch` |
 | `cm-polar` | plane-polar kinematics: the rotating r̂ and θ̂ and the acceleration split into r̈, −rθ̇², rθ̈ and 2ṙθ̇, head to tail and as bars | `r`, `theta` (expressions of t), `T`, `at`, `presets`, `sliders`, `show`, `bars`, `values`, `scale`, `x`, `y`, `fixed`, `readouts`, `labels` |
 | `cm-resonance` | a driven damped oscillator: amplitude (or A² with its Lorentzian and 2β width) against drive frequency, the phase lag, and drive and response in time | `w0`, `beta`, `w`, `f0`, `wmax`, `panels`, `y`, `lorentz`, `width`, `sliders`, `ranges`, `marks`, `readouts`, `cycles` |
@@ -613,6 +619,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `wv3-kdv` | exact KdV solutions: one soliton (taller is faster), two solitons colliding with dashed "never met" ghosts showing the phase shift, and the equation taken apart (dispersion only, nonlinearity only, both) | see the file header |
 | `em3-relax` | Laplace's equation in a box solved by relaxation (Jacobi, Gauss–Seidel, SOR), walls at set voltages and an optional electrode, a second guess converging alongside, a log convergence panel and a probe against the exact series | `n`, `aspect`, `walls`, `top`, `electrode`, `init`, `method`, `sweeps`, `compare`, `exact`, `probe`, `levels`, `labels`, `history`, `controls`, `play`, `readout`, `hide` |
 | `em3-images` | a draggable charge beside a grounded plane or a grounded or neutral sphere: the image charge, equal-flux field lines, induced-charge shading, a σ panel, force and induced-charge readouts | `geometry`, `q`, `pos`, `R`, `ground`, `x`, `image`, `lines`, `equip`, `shade`, `force`, `panel`, `drag`, `controls`, `readout`, `hide` |
+| `em3h-magnet` | B, H and M of a uniformly magnetized cylinder or sphere (or the same body as an electret): bound currents and poles, from disk to rod | see the file header |
+| `em3h-loop` | B–H hysteresis loops of soft iron, Alnico 5 and NdFeB (a smooth model fitted to typical values) and a permanent magnet's operating point on its load line | see the file header |
 | `cm2-vary` | a true path, a family of varied paths, and the functional (length, bead travel time or action) against the variation — flat at the true path | `preset`, `n`, `alpha`, `T`, `sliders`, `modes`, `panels`, `ghosts`, `marks`, `readouts`, `labels` |
 | `cm2-race` | beads racing downhill on a line, a circular arc, a cycloid, a steep curve and a drop; a tautochrone mode | `mode`, `x1`, `curves`, `p`, `sliders`, `a`, `times`, `play`, `at`, `slow`, `labels` |
 | `cm2-noether` | a puck over potential contours beside its conserved quantities in time, with a slider that breaks a rotation, translation or time symmetry | `kind`, `kinds`, `eps`, `sliders`, `show`, `panels`, `play`, `labels`, `readout` |

@@ -43,7 +43,7 @@ export const UNITS = {
   Msun: [1.98841e30, D(0, 1)], 'M☉': [1.98841e30, D(0, 1)], Mearth: [5.9722e24, D(0, 1)],
   G: [1e-4, D(0, 1, -2, -1)],   // gauss; only reached as a whole token ("G"), never as a prefix
   c: [299792458, D(1, 0, -1)],  // "c" as a speed unit: 0.6 c
-  mph: [0.44704, D(1, 0, -1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
+  mph: [0.44704, D(1, 0, -1)], kn: [1852 / 3600, D(1, 0, -1)], knot: [1852 / 3600, D(1, 0, -1)], nmi: [1852, D(1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
   mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], t: [1000, D(0, 1)],   // tonne (kt, Mt)
    lbf: [4.4482216152605, D(1, 1, -2)],
   b: [1e-28, D(2)], barn: [1e-28, D(2)],
@@ -56,7 +56,7 @@ export const UNITS = {
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
 const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
-  'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
+  'atm', 'mmHg', 'psi', 'mph', 'kn', 'knot', 'nmi', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB']);
 
 export const PREFIXES = {
@@ -126,10 +126,11 @@ export function parseUnit(src) {
     }
     if (peek() === '^') {
       i++;
-      const e = /^\(?(-?\d+(?:\/\d+)?)\)?/.exec(s.slice(i));
+      // m^3, m^-2, or a bracketed fraction m^(1/2) — a ")" is the power's own only if a "(" opened it
+      const e = /^(?:\((-?\d+(?:\/\d+)?)\)|(-?\d+(?:\/\d+)?))/.exec(s.slice(i));
       if (!e) throw new UnitError('A unit power must be a whole number');
       i += e[0].length;
-      const [n, d = '1'] = e[1].split('/');
+      const [n, d = '1'] = (e[1] ?? e[2]).split('/');
       base = pow(base, parseInt(n, 10) / parseInt(d, 10));
     } else {
       // m2, s-1 style powers written without a caret

@@ -125,7 +125,7 @@ export function peak(wave, N, method = 'dirichlet') {
   const C = coeffs(wave, N);
   const G = Math.max(2000, 40 * N);
   let best = -Infinity, bx = 0;
-  for (let g = 0; g < G; g++) { const x = -PI + (2 * PI * (g + 0.5)) / G, y = partial(C, x, N, method); if (y > best) { best = y; bx = x; } }
+  for (let g = 0; g < G; g++) { const x = -PI + (2 * PI * (g + 0.5)) / G, y = partial(C, x, N, method); if (y > best + 1e-9) { best = y; bx = x; } }   // ties keep the first (leftmost) peak
   let lo = bx - (2 * PI) / G, hi = bx + (2 * PI) / G;
   const r = (Math.sqrt(5) - 1) / 2;
   for (let i = 0; i < 60; i++) {

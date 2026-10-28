@@ -242,5 +242,7 @@ check('arcsec graded against a degree answer', grade({ type: 'numeric', answer: 
   check('texToPlain: subscripts', texToPlain('$\\omega_0$ and $T_{\\text{cold}}$') === 'ω₀ and T_cold');
 }
 
+check('a power just before a closing bracket: J/(K m^3)', describeDims(parseUnit('J/(K m^3)').dims) === describeDims(parseUnit('J K^-1 m^-3').dims) && parseUnit('m^(1/2)').dims[0] === 0.5);
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

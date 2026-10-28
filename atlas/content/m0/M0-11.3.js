@@ -2,7 +2,7 @@
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { sig } from '../../src/core/format.js';
 import { N, thou } from './_m0kit.js';
-import { seg, ell, plane, dot, note } from './_m0geo.js';
+import { seg, ell, plane, dot, note, fit } from './_m0geo.js';
 
 const t = String.raw;
 const MU = 398600.4;   // Earth's GM, km³/s²
@@ -133,8 +133,8 @@ $e = 0$ is a circle (the foci merge at the centre), $0 < e < 1$ an ellipse, $e =
           teach: t`Every point of a conic has $PF/PD = e$: less than $1$ for ellipses, $1$ for parabolas, more for hyperbolas.`,
           explain: t`$e = ${pf}/${pd} = ${sig(ans, 3)}$: ${ans < 1 ? 'an ellipse' : ans === 1 ? 'a parabola' : 'a hyperbola'}.`,
           visual: (() => {
-            const xd = 3, P = [xd - pd, 0.9 * pf], F = [P[0] + Math.sqrt(Math.max(pf * pf - (0.9 * pf) ** 2, 0)), 0];
-            return plane({ x: [F[0] - 6, F[0] + 6], y: [-3, 3], ticks: false, curves: [seg(P, F, { color: 'warn', width: 2.2 }), seg(P, [xd, P[1]], { color: 'teal', width: 2.2, dash: true })], points: [dot(F, 'F', { color: 'gold' }), dot(P, 'P'), note([(P[0] + F[0]) / 2 - 0.3, P[1] / 2], `${pf}`, { color: 'warn' }), note([(P[0] + xd) / 2, P[1] + 0.3], `${pd}`, { color: 'teal' })], extra: { vlines: [{ x: xd, color: 'teal', label: 'directrix' }] }, caption: t`The point, its distance to the focus (orange) and to the directrix (teal dashed). Schematic: lengths as labelled, not to scale.` });
+            const k = 4 / Math.max(pf, pd), P = [-k * pd, 1], F = [P[0] - 0.6 * k * pf, 1 - 0.8 * k * pf];
+            return plane({ ...fit([P, F, [0, 1], [0, F[1]]], 1.2, 2), ticks: false, curves: [seg(P, F, { color: 'warn', width: 2.4 }), seg(P, [0, 1], { color: 'teal', width: 2.4, dash: true })], points: [dot(F, 'F', { color: 'gold', labelDx: -16 }), dot(P, 'P'), note([(P[0] + F[0]) / 2 - 0.5, (P[1] + F[1]) / 2], `${pf} AU`, { color: 'warn', labelAlign: 'right' }), note([P[0] / 2, 1.45], `${pd} AU`, { color: 'teal' })], extra: { vlines: [{ x: 0, color: 'teal', label: 'directrix' }] }, caption: t`The point, its distance to the focus (orange) and to the directrix (teal dashed), to scale. The rest of the conic is not drawn.` });
           })(),
         };
       },
