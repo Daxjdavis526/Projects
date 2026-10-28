@@ -194,8 +194,7 @@ export default boss({
               errors: apart([
                 { value: key * 2, feedback: t`Each fibre carries a quarter of the weight, $T = Mg/4$. With the whole weight the speed, and the frequency, come out twice as large.` },
                 { value: v / L, feedback: t`Fixed at both ends, the fundamental fits half a wavelength: $\lambda = 2L$ and $f_1 = v/2L$.` },
-                { value: key * 2 * Math.sqrt(1), feedback: '' },
-              ].filter((e) => e.feedback), key),
+              ], key),
               hints: [t`Tension per fibre: $T = Mg/4$. Mass per length: $\mu = \rho\pi(d/2)^2$.`, t`Wave speed $v = \sqrt{T/\mu}$; fundamental $f_1 = v/2L$.`, t`$T = ${tn(T)}$ N and $\mu = ${tn(mu)}$ kg/m.`],
               teach: t`A fibre clamped at both ends rings at $f_n = \tfrac{n}{2L}\sqrt{T/\mu}$, like any string.`,
               explain: t`$T = ${M}(9.81)/4 = ${tn(T)}$ N, $\mu = 2200\,\pi(${tn(d / 2000)})^2 = ${tn(mu)}$ kg/m, $v = ${tn(v)}$ m/s, and $f_1 = v/2L = ${tn(key)}$ Hz. Real LIGO suspensions have violin modes near 500 Hz; they are built so the modes ring very sharply, confining their noise to narrow lines.`,

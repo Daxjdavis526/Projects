@@ -10,7 +10,6 @@ const t = String.raw;
 const PI = Math.PI;
 // modified Bessel I_n(1), for e^(cos x) = I₀(1) + 2Σ Iₙ(1) cos nx
 const I1 = (n) => { let s = 0, term = 1; for (let j = 1; j <= n; j++) term *= 0.5 / j; for (let k = 0; k < 40; k++) { s += term; term *= 0.25 / ((k + 1) * (k + 1 + n)); } return s; };
-const per = (e) => `(${e})`;   // the periodic variable (x wrapped into −π…π) is spliced into expressions
 const XW = 'x - 2*pi*floor((x + pi)/(2*pi))';
 
 export default lesson({
@@ -43,7 +42,7 @@ Integrate by parts and a pattern appears: every time $f$ can be differentiated o
   },
   example: {
     prompt: t`Find the Fourier series of $f(x) = x^2$ on $-\pi < x < \pi$, repeated with period $2\pi$. How fast do its coefficients fall, and why?`,
-    visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-1.5, 11.5], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: `(${XW})^2`, color: 'ink3', dash: [5, 4], width: 1.5 }, { sum: '4*(-1)^k/k^2*cos(k*x)', k: [1, 3], color: 'accent', width: 2.3 }], constants: {}, hlines: [{ y: PI * PI / 3, label: 'mean π²/3' }] }, caption: 'x² repeated with period 2π (dashed) and the partial sum with three cosines — the constant π²/3 is added in the step below.' },
+    visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-1.5, 11.5], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: `(${XW})^2`, color: 'ink3', dash: [5, 4], width: 1.5 }, { sum: 'pi^2/3*step(1.5 - k) + 4*(-1)^k/k^2*cos(k*x)', k: [1, 3], color: 'accent', width: 2.3 }], hlines: [{ y: PI * PI / 3, label: 'mean π²/3' }] }, caption: 'x² repeated with period 2π (dashed) and its partial sum: the mean π²/3 plus three cosines. It already misses only at the corners x = ±π.' },
     steps: [
       { label: 'Use the symmetry', text: t`$x^2$ is even and $\sin nx$ is odd, so every $b_n = 0$: a pure cosine series.` },
       { label: 'The constant', text: t`$a_0 = \dfrac1\pi\displaystyle\int_{-\pi}^{\pi} x^2\,dx = \dfrac{2\pi^2}{3}$, so the mean is $a_0/2 = \pi^2/3 \approx ${r4(PI * PI / 3)}$.` },
@@ -90,7 +89,7 @@ $$x^2 \sim \frac{\pi^2}{3} + 4\sum_{n=1}^{\infty}\frac{(-1)^n}{n^2}\cos nx .$$` 
         const ans = -2 / (PI * (n * n - 1));
         return {
           prompt: t`A half-wave rectifier passes only the positive half of $\sin x$: $f(x) = \max(\sin x, 0)$. Compute $a_{${n}} = \dfrac1\pi\displaystyle\int_0^{\pi}\sin x\cos ${n}x\,dx$. Give a decimal.`,
-          visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-0.4, 1.3], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'max(sin(x), 0)', color: 'accent', width: 2.2 }, { sum: `${1 / PI} + 0.5*sin(x)*step(1.5 - k) - 2/(pi*((2k)^2 - 1))*cos(2k*x)*step(k - 1.5)`, k: [1, 4], color: 'gold', width: 1.4, dash: [5, 4] }] }, caption: 'The rectified wave (blue) and a few-term partial sum (dashed): the mean 1/π, the fundamental ½ sin x, and even cosines.' },
+          visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-0.4, 1.3], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'max(sin(x), 0)', color: 'accent', width: 2.2 }, { sum: `(${1 / PI} + 0.5*sin(x))*step(1.5 - k) - 2/(pi*((2k)^2 - 1))*cos(2k*x)`, k: [1, 4], color: 'gold', width: 1.4, dash: [5, 4] }] }, caption: 'The rectified wave (blue) and a few-term partial sum (dashed): the mean 1/π, the fundamental ½ sin x, and even cosines.' },
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: -ans, feedback: 'Check the sign of the product-to-sum terms: sin x cos nx = ½[sin(1 + n)x + sin(1 − n)x].' }],
           hints: [t`$\sin x\cos nx = \tfrac12\big[\sin(n + 1)x - \sin(n - 1)x\big]$.`, t`$\int_0^\pi \sin mx\,dx = \dfrac{1 - (-1)^m}{m}$, which is $\dfrac{2}{m}$ for odd $m$.`],
