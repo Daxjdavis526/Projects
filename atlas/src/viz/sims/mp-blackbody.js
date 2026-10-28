@@ -18,6 +18,7 @@
 //       peak: true,            // mark the peak
 //       swatch: true,          // the approximate colour of the glow
 //       numbers: true,         // false hides the wavelength (or frequency) numbers on the axis
+//       window: 'all',         // log–log only: 'all' (10 nm–10 cm, every temperature) or 'fit' (zoom to the curves drawn)
 //       controls: null,        // true, false, or a list of: T object axis curves
 //       readout: true,
 //       hide: [],              // any of: T (the temperature), peak (λ_max and ν_max), power (σT⁴), visible (the visible share)
@@ -27,7 +28,7 @@ import { Plot, pow10Label, themeColors } from '../plot.js';
 import * as B from '../model/mp-blackbody.js';
 import { wavelengthToRGB } from '../model/qm-light.js';
 
-export const defaults = { T: 5772, axis: 'lambda', curves: ['planck'], compare: [], band: true, peak: true, swatch: true, numbers: true, controls: null, readout: true, hide: [] };
+export const defaults = { T: 5772, axis: 'lambda', curves: ['planck'], compare: [], band: true, peak: true, swatch: true, numbers: true, window: 'all', controls: null, readout: true, hide: [] };
 const CONTROLS = ['T', 'object', 'axis', 'curves'];
 const AXES = ['lambda', 'nu', 'log'];
 const CURVES = ['planck', 'rj', 'wien'];
@@ -86,7 +87,7 @@ export function mount(F, P0) {
   } else { F.params.rj = curvesOn.has('rj'); F.params.wien = curvesOn.has('wien'); }
 
   const { canvas, box } = F.canvas({ aspect: 'wide', label: P.alt || 'The spectrum of blackbody radiation at a chosen temperature' });
-  const plot = new Plot(canvas, { x: [0, 1], y: [0, 1], pad: { l: 52, r: 16, t: 14, b: 36 } });
+  const plot = new Plot(canvas, { x: [0, 1], y: [0, 1], axesAt: 'edge', pad: { l: 52, r: 16, t: 14, b: 36 } });
   const compare = (P.compare || []).map(resolve).filter(Boolean);
 
   F.onChange((key) => {
@@ -121,7 +122,12 @@ export function mount(F, P0) {
     if (axis === 'log') {
       plot.o.xfmt = pow10Label; plot.o.yfmt = pow10Label; plot.o.xticks = P.numbers === false ? 0 : 8; plot.o.yticks = 6;
       plot.o.xlabel = 'wavelength (m)'; plot.o.ylabel = 'Bλ (W sr⁻¹ m⁻³)';
-      plot.setView([-8, -1], [-8, 18]);
+      if (P.window === 'fit') {
+        // zoom to the curves drawn: from a little short of the hottest peak to well past the coolest
+        const temps = [T, ...compare.map((c) => c.T)];
+        const lx = temps.map((tt) => Math.log10(B.peakLambda(tt))), ly = temps.map((tt) => Math.log10(B.peakBLambda(tt)));
+        plot.setView([Math.max(-9, Math.min(...lx) - 1.2), Math.min(0, Math.max(...lx) + 2.5)], [Math.min(...ly) - 9, Math.max(...ly) + 1.6]);
+      } else plot.setView([-8, -1], [-8, 18]);
       plot.clear();
       const lg = (f) => (x) => { const v = f(10 ** x); return v > 0 ? Math.log10(v) : NaN; };
       if (P.band !== false) {
@@ -133,25 +139,30 @@ export function mount(F, P0) {
       const k5 = Math.log10(B.peakBLambda(1) * B.WIEN_B ** 5);
       if (P.peak !== false) {
         plot.fn((x) => k5 - 5 * x, { color: 'ink3', width: 1.2, dash: [5, 5] });
-        const xl = -6.9, yl = k5 - 5 * xl;
-        if (yl < 17 && yl > -7) plot.text('peaks: λmax T = b', xl, yl, { color: 'ink3', dx: 8, dy: -2, size: fs - 1 });
+        // label the locus a little past the middle of the stretch that is in view
+        const xa = Math.max(plot.vx0, (k5 - plot.vy1) / 5), xb = Math.min(plot.vx1, (k5 - plot.vy0) / 5);
+        const xl = xa + 0.55 * (xb - xa), yl = k5 - 5 * xl;
+        if (xb > xa) plot.text('peaks: λmax T = b', xl, yl, { color: 'ink3', dx: 10, dy: 2, size: fs - 1 });
       }
       for (const c of compare) {
         plot.fn(lg((l) => B.planckLambda(l, c.T)), { color: 'ink3', width: 1.6 });
         const px = Math.log10(B.peakLambda(c.T)), py = Math.log10(B.peakBLambda(c.T));
-        if (px > -8 && px < -1.2 && py < 17.5 && py > -7.5) plot.text(c.name, px, py, { color: 'ink2', dy: -11, align: 'center', size: fs - 1 });
+        if (px > plot.vx0 && px < plot.vx1 - 0.2 && py < plot.vy1 - 0.5 && py > plot.vy0) plot.text(c.name, px, py, { color: 'ink2', dx: 6, dy: 14, align: 'left', size: fs - 1 });
       }
       if (F.params.rj) plot.fn(lg((l) => B.rjLambda(l, T)), { color: 'bad', width: 2, dash: [7, 5] });
       if (F.params.wien) plot.fn(lg((l) => B.wienLambda(l, T)), { color: 'violet', width: 2, dash: [3, 4] });
       plot.fn(lg((l) => B.planckLambda(l, T)), { color: 'warn', width: 2.8 });
       if (F.params.rj) {
-        const xr = Math.min(-1.6, Math.max(-7.6, Math.log10(B.peakLambda(T)) - 0.9));
+        // where the classical line comes down through the top of the frame (log B = log 2ckT − 4 log λ)
+        const top = plot.vy1 - 0.08 * (plot.vy1 - plot.vy0);
+        const xr = Math.min(plot.vx1 - 0.25 * (plot.vx1 - plot.vx0), Math.max(plot.vx0, (Math.log10(2 * B.C * B.KB * T) - top) / 4));
         const yr = Math.log10(B.rjLambda(10 ** xr, T));
-        if (yr < 17) plot.text('Rayleigh–Jeans', xr, yr, { color: 'bad', dx: 6, dy: -10, size: fs });
+        if (yr < plot.vy1 && yr > plot.vy0) plot.text('Rayleigh–Jeans', xr, yr, { color: 'bad', dx: 10, dy: 0, size: fs });
       }
       peakX = Math.log10(B.peakLambda(T)); peakY = Math.log10(B.peakBLambda(T));
       peakLabel = hide.has('peak') ? 'peak' : `λmax = ${plainLen(B.peakLambda(T))}`;
-      if (P.peak !== false && peakX > -8 && peakX < -1 && peakY < 18) plot.point(peakX, peakY, { color: 'gold', r: 4.5, label: peakLabel, ldx: peakX > -2.6 ? -10 : 10, ldy: -12, lalign: peakX > -2.6 ? 'right' : 'left' });
+      const nearRight = peakX > plot.vx1 - 0.3 * (plot.vx1 - plot.vx0);
+      if (P.peak !== false && peakX > plot.vx0 && peakX < plot.vx1 && peakY < plot.vy1) plot.point(peakX, peakY, { color: 'gold', r: 4.5, label: peakLabel, ldx: nearRight ? -10 : 10, ldy: -12, lalign: nearRight ? 'right' : 'left' });
     } else {
       const isNu = axis === 'nu';
       const pk = isNu ? B.peakNu(T) : B.peakLambda(T);
@@ -173,7 +184,7 @@ export function mount(F, P0) {
         const xa = plot.X(ends[0] / uf), xb = plot.X(ends[1] / uf);
         if (xb > plot.L && xa < plot.R) {
           rainbow(xa, xb, plot.Y(0), plot.Y(0) - 8, nmAt);
-          if (Math.abs(Math.min(xb, plot.R) - Math.max(xa, plot.L)) > 34) plot.text('visible', (Math.max(xa, plot.L) + Math.min(xb, plot.R)) / 2, plot.Y(0) - 16, { screen: true, align: 'center', color: 'ink3', size: fs - 1.5 });
+          if (Math.abs(Math.min(xb, plot.R) - Math.max(xa, plot.L)) > 34) plot.text('visible', (Math.max(xa, plot.L) + Math.min(xb, plot.R)) / 2, plot.Y(0) - 20, { screen: true, align: 'center', color: 'ink3', size: fs - 1.5 });
         }
       }
       for (const c of compare) {
@@ -247,6 +258,7 @@ export function validate(P) {
   const p = [];
   if (!(P.T >= TMIN && P.T <= TMAX)) p.push(`mp-blackbody: T must lie in ${TMIN}–${TMAX} K`);
   if (!AXES.includes(P.axis)) p.push(`mp-blackbody: unknown axis “${P.axis}”`);
+  if (!['all', 'fit'].includes(P.window)) p.push(`mp-blackbody: window must be 'all' or 'fit'`);
   for (const c of P.curves || []) if (!CURVES.includes(c)) p.push(`mp-blackbody: unknown curve “${c}”`);
   for (const c of P.compare || []) if (!resolve(c)) p.push(`mp-blackbody: compare entry “${c}” is neither a temperature nor an object`);
   for (const h of P.hide || []) if (!HIDE.includes(h)) p.push(`mp-blackbody: unknown hide “${h}”`);

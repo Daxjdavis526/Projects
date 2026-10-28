@@ -40,6 +40,14 @@ const STAGE_COLOR = ['violet', 'teal', 'good', 'accent2'];
 const SUB = ['₁', '₂', '₃', '₄'];
 const VIEW_NAMES = { run: 'Whole run', stage: 'One step' };
 
+// a polyline kept inside the plotting frame
+function framed(plot, pts, o) {
+  plot.ctx.save();
+  plot._clip();
+  plot.path(pts, o);
+  plot.ctx.restore();
+}
+
 export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
   const methods = (P.methods || METHODS).filter((m) => METHODS.includes(m));
@@ -84,7 +92,7 @@ export function mount(F, P0) {
 
   function trueCurve(Y, truth, o) {
     if (Y) plot.fn(Y, { domain: [P.t0, P.T], ...o });
-    else plot.path(truth, o);
+    else framed(plot, truth, o);
   }
 
   function drawRun(f, Y, truth, run, m, h, n, exactEnd) {
@@ -99,8 +107,8 @@ export function mount(F, P0) {
     }
     plot.clear();
     trueCurve(Y, truth, { color: 'accent', width: 2.6 });
-    for (const [q, pts] of runs) { plot.path(pts, { color: COLOR[q], width: 1.6, alpha: 0.75 }); for (const [a, b] of pts) plot.point(a, b, { color: COLOR[q], r: 2.4 }); }
-    plot.path(run, { color: COLOR[m], width: 2.2 });
+    for (const [q, pts] of runs) { framed(plot, pts, { color: COLOR[q], width: 1.6, alpha: 0.75 }); for (const [a, b] of pts) plot.point(a, b, { color: COLOR[q], r: 2.4 }); }
+    framed(plot, run, { color: COLOR[m], width: 2.2 });
     for (const [a, b] of run) plot.point(a, b, { color: COLOR[m], r: n <= 40 ? 3.4 : 2.2 });
     const last = run[run.length - 1];
     plot.text(METHOD_NAMES[m], last[0], last[1], { color: COLOR[m], dx: -8, dy: last[1] > exactEnd ? -14 : 14, align: 'right', weight: 650 });
@@ -129,7 +137,7 @@ export function mount(F, P0) {
     const lo = Math.min(...ys), hi = Math.max(...ys), pad = 0.22 * (hi - lo || Math.abs(yk) || 1);
     plot.setView([tk - 0.2 * h, tk + 1.35 * h], [lo - pad, hi + pad]);
     plot.clear();
-    plot.path(local, { color: 'accent', width: 2, dash: [7, 5] });
+    framed(plot, local, { color: 'accent', width: 2, dash: [7, 5] });
     const seg = 0.22 * h;
     // trial lines: from the start of the step, along a slope, to the next stage point
     S.stages.forEach((s, i) => { if (i > 0) plot.line(tk, yk, s.t, s.y, { color: STAGE_COLOR[i], width: 1.2, dash: [3, 4] }); });
@@ -205,7 +213,7 @@ export function validate(P) {
     if (!s.label) problems.push(`slider ${s.key} needs a label`);
   }
   for (const L of [P.xlabel, P.ylabel]) {
-    if (typeof L === 'string' && /\$|\\[A-Za-z]|(?<![\w])[A-Za-z]{1,2}[_^](?:\{|[A-Za-z0-9])/.test(L)) problems.push(`de-stepper axis title “${L}” must be plain text`);
+    if (typeof L === 'string' && /\$|\\[A-Za-z]|(?<![\w])[A-Za-z]{1,2}[_^](?:\{|\(|[A-Za-z0-9])|\)[_^]/.test(L)) problems.push(`de-stepper axis title “${L}” must be plain text`);
   }
   return problems;
 }

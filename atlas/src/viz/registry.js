@@ -120,7 +120,8 @@ function makeFrame(el, spec, opts) {
       readout.hidden = !live.length;
       readout.replaceChildren(...live.map(([k, v]) => h('span', h('span', { html: renderLabel(k) }), ' ', h('b', { html: tex(String(v)) }))));
     },
-    caption(text) { caption.replaceChildren(mdi(text)); },
+    // a lesson's own caption wins: a sim that re-captions as it draws must not overwrite it
+    caption(text) { if (!spec.caption) { caption.replaceChildren(mdi(text)); if (spec.note) caption.append(h('span.note', ' ', mdi(spec.note))); } },
     /**
      * Animation loop: fn(dt, t) each frame while visible. With reduced motion,
      * it runs only when `force` is set (e.g. the user pressed Play).

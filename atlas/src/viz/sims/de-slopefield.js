@@ -46,6 +46,14 @@ export const defaults = {
 };
 
 const SEED_COLORS = ['accent2', 'good', 'violet', 'teal', 'warn', 'bad'];
+
+// a polyline kept inside the plotting frame (a traced solution may run past it)
+function framed(plot, pts, o) {
+  plot.ctx.save();
+  plot._clip();
+  plot.path(pts, o);
+  plot.ctx.restore();
+}
 const EQ_COLOR = { stable: 'good', unstable: 'bad', semi: 'warn' };
 
 export function mount(F, P0) {
@@ -117,10 +125,10 @@ export function mount(F, P0) {
       ...added.map(([t, y], i) => ({ t, y, color: SEED_COLORS[(i + 1) % SEED_COLORS.length] }))];
     for (const s of seeds) {
       const t0 = ev(s.t), y0 = ev(s.y);
-      plot.path(traceCurve(f, t0, y0, ...win), { color: s.color, width: 2 });
+      framed(plot, traceCurve(f, t0, y0, ...win), { color: s.color, width: 2 });
       plot.point(t0, y0, { color: s.color, r: 3.5, label: s.label, ldx: s.labelDx, ldy: s.labelDy });
     }
-    if (start) plot.path(traceCurve(f, start.t, start.y, ...win), { color: 'accent', width: 2.8 });
+    if (start) framed(plot, traceCurve(f, start.t, start.y, ...win), { color: 'accent', width: 2.8 });
 
     for (const p of P.points || []) {
       if (!shown(p)) continue;
@@ -163,7 +171,7 @@ export function mount(F, P0) {
     for (const c of P.isoclines) {
       const color = c === 0 ? 'gold' : 'violet';
       const lines = joinSegments(contourSegments(grid, c));
-      for (const line of lines) plot.path(line, { color, width: c === 0 ? 2 : 1.5, dash: [7, 5], alpha: 0.9 });
+      for (const line of lines) framed(plot, line, { color, width: c === 0 ? 2 : 1.5, dash: [7, 5], alpha: 0.9 });
       // one label per isocline, on its longest piece
       const longest = lines.reduce((best, l) => (l.length > (best?.length || 0) ? l : best), null);
       const spot = longest && labelSpot(longest, { at: 0.62, inside, taken, gap: 46, dist });
@@ -248,7 +256,7 @@ export function validate(P) {
   for (const o of [...(P.curves || []), ...(P.points || []), ...(P.hlines || []), ...(P.vlines || []), ...(P.seeds || []).filter((s) => !Array.isArray(s)), { label: P.xlabel }, { label: P.ylabel }]) {
     const L = o && o.label;
     if (typeof L !== 'string') continue;
-    const bad = /\$|\\[A-Za-z]|(?<![\w])[A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{|[A-Za-z0-9α-ωΑ-Ω])/.exec(L);
+    const bad = /\$|\\[A-Za-z]|(?<![\w])[A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{|\(|[A-Za-z0-9α-ωΑ-Ω])|\)[_^]/.exec(L);
     if (bad) problems.push(`de-slopefield label “${L}”: “${bad[0]}” would print literally on the canvas — use Unicode (², ₀, θ) and plain words`);
   }
   return problems;

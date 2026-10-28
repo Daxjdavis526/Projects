@@ -86,8 +86,9 @@ export function mount(F, P0) {
     line(B.x0, B.y1, B.x1, B.y1, C.ink3, 1.2); line(B.x0, B.y0, B.x0, B.y1, C.ink3, 1.2);
     for (let k = 1; k <= tmax; k++) {
       line(X(k), B.y0, X(k), B.y1, C.line2 || C.ink4, 1, [4, 4]);
+      const last = k === tmax, x = last ? X(k) + 3 : X(k), align = last ? 'right' : 'center';     // the last label stays inside the canvas
       txt(`${k}`, X(k), B.y1 + 10, { color: C.ink3, w: 500, size: fs - 1 });
-      txt(`${fmtT(k * iso.T)} ${iso.unit}`, X(k), B.y1 + 23, { color: C.ink3, w: 500, size: fs - 2.5 });
+      txt(`${fmtT(k * iso.T)} ${iso.unit}`, x, B.y1 + 23, { color: C.ink3, w: 500, size: fs - 2.5, align });
     }
     txt('0', X(0), B.y1 + 10, { color: C.ink3, w: 500, size: fs - 1 });
     [[1, 'N₀'], [0.5, '½'], [0.25, '¼'], [0.125, '⅛']].forEach(([f, s]) => { line(B.x0, Y(N0 * f), B.x1, Y(N0 * f), C.ink4, 1, [2, 4]); txt(s, B.x0 - 8, Y(N0 * f), { color: C.ink3, align: 'right', size: fs - 0.5 }); });

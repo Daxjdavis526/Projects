@@ -319,10 +319,10 @@ with no $m = 0$: straight ahead, everything arrives in step, so the centre is br
       id: 'cp-sound', difficulty: 2, transfer: true,
       prompt: 'Through an open doorway 0.9 m wide you can hear someone talking in the next room even when you stand well to one side, but you cannot see them. Why does sound spread round the doorway when light does not?',
       choices: [
-        'Speech’s wavelengths (around a metre for its lower notes) match the doorway’s width, so it spreads widely; light’s are a million times smaller than the doorway',
-        'Sound waves are longitudinal, and only longitudinal waves diffract',
-        'Light travels in straight lines because it is made of particles',
-        'Sound reflects off the walls; diffraction plays no part',
+        'Speech’s wavelengths, around a metre, match the doorway’s width; light’s are a million times smaller',
+        'Sound waves are longitudinal, and only longitudinal waves can diffract round edges',
+        'Light travels in straight lines because it is a stream of particles',
+        'Sound reflects off the walls and ceiling; diffraction plays no part',
       ],
       answer: 0,
       why: {

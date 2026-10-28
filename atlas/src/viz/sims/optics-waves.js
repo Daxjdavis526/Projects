@@ -134,7 +134,7 @@ export async function mount(F, P0) {
   } else if (mode === 'airy') {
     choice({ key: 'preset', label: 'Telescope', options: [['eye', 'Eye'], ['hubble', 'Hubble'], ['jwst', 'JWST'], ['eht', 'EHT'], ['custom', 'Custom']], value: P.preset, explain: 'Sets the aperture and the wavelength.' });
     var dCtl = slider({ key: 'D', label: 'Aperture $D$', min: 1e-3, max: 1.3e7, value: P.D, logScale: true, fmt: (v) => lengthText(v, true), explain: 'The diameter of the lens, mirror — or the distance between radio dishes.' });
-    var lCtl = slider({ key: 'lambda', label: 'Wavelength $\\lambda$', min: 1e-7, max: 1e-2, value: P.lambda, logScale: true, fmt: (v) => lengthText(v, true), explain: 'Visible light is 400–700 nm; radio waves are millimetres and more.' });
+    var lCtl = slider({ key: 'lambda', label: 'Wavelength $\\lambda$', min: 1e-7, max: 1, value: P.lambda, logScale: true, fmt: (v) => lengthText(v, true), explain: 'Visible light is 400–700 nm; radio waves are millimetres to metres.' });
     var sCtl = slider({ key: 'sep', label: 'Separation of the two stars', min: 4.8e-12, max: 5e-3, value: P.sep, logScale: true, fmt: (v) => angleText(v, true), explain: 'The angle between them on the sky.' });
     choice({ key: 'zoom', label: 'Magnify the picture', options: [[1, '×1'], [4, '×4'], [16, '×16']], value: P.zoom, explain: 'Enlarges the image — blur and all.' });
   } else if (mode === 'polar') {
@@ -530,15 +530,18 @@ export async function mount(F, P0) {
     // a cut through both stars
     const gx = narrow ? 30 : ix + size + 46;
     frame(B, { l: gx, r: 12, t: narrow ? size + 34 : 24, b: 40 });
-    B.o.xticks = narrow ? 4 : 7;
-    B.o.xlabel = 'angle along the line through both stars'; B.o.ylabel = ''; B.o.yfmt = () => '';
-    B.o.xfmt = (v) => (v < 0 ? '−' : '') + angleText(rad(v / 3600), false);
     const halfAs = half * RAD2AS;
-    B.setView([-halfAs, halfAs], [0, 1.25]);
+    // one unit for the whole axis, named in its label, so the tick labels stay short
+    const [uf, un] = halfAs < 2e-3 ? [1e6, 'µas'] : halfAs < 2 ? [1e3, 'mas'] : halfAs < 120 ? [1, 'arcsec'] : halfAs < 7200 ? [1 / 60, 'arcmin'] : [1 / 3600, '°'];
+    B.o.xticks = Math.max(3, Math.min(8, Math.floor((W0 - gx - 12) / 50)));
+    B.o.xlabel = `angle along the line through both stars (${un})`; B.o.ylabel = ''; B.o.yfmt = () => '';
+    B.o.xfmt = (v) => (v < 0 ? '−' : '') + trim(Math.abs(v), 3);
+    B.setView([-halfAs * uf, halfAs * uf], [0, 1.25]);             // the axis runs in the display unit
     B.grid(); B.axes();
-    const f1 = (u) => W.airyX(k * Math.abs(rad(u / 3600) - s1));
+    const toRad = (u) => u / uf / RAD2AS;
+    const f1 = (u) => W.airyX(k * Math.abs(toRad(u) - s1));
     if (s2 !== null) {
-      const f2 = (u) => W.airyX(k * Math.abs(rad(u / 3600) - s2));
+      const f2 = (u) => W.airyX(k * Math.abs(toRad(u) - s2));
       B.fn(f1, { color: 'ink3', width: 1.2, dash: [4, 4], samples: 700 });
       B.fn(f2, { color: 'ink3', width: 1.2, dash: [4, 4], samples: 700 });
       B.fn((u) => f1(u) + f2(u), { color: visible ? lineColor(A.col, lam * 1e9) : 'gold', width: 2.2, samples: 700 });
@@ -666,7 +669,7 @@ export function validate(P0) {
     num('maxL', 100, 20000); num('dL', 0, P.maxL); num('lambda', 400, 700); num('d0', 10, 5000);
   } else if (mode === 'airy') {
     if (!PRESETS[P.preset]) problems.push('optics-waves: preset must be eye, hubble, jwst, eht or custom');
-    for (const [k, lo, hi] of [['D', 1e-3, 1.3e7], ['lambda', 1e-7, 1e-2], ['sep', 4.8e-12, 5e-3]]) if (P[k] !== null) num(k, lo, hi);
+    for (const [k, lo, hi] of [['D', 1e-3, 1.3e7], ['lambda', 1e-7, 1], ['sep', 4.8e-12, 5e-3]]) if (P[k] !== null) num(k, lo, hi);
     if (![1, 4, 16].includes(P.zoom)) problems.push('optics-waves: zoom must be 1, 4 or 16');
   } else if (mode === 'polar') {
     if (![1, 2, 3].includes(P.n)) problems.push('optics-waves: n must be 1, 2 or 3');

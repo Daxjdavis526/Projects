@@ -21,6 +21,7 @@
   --good:#38d39f; --good-bg:rgba(56,211,159,.12); --warn:#f3b74f; --warn-bg:rgba(243,183,79,.12);
   --bad:#ff6b7d; --bad-bg:rgba(255,107,125,.12); --violet:#b38cff; --violet-bg:rgba(179,140,255,.13);
   --gold:#f2c14e; --teal:#33c4b4;
+  --plot-warn:#f7924a;  /* pictures: an orange that stays apart from gold (the UI's amber warn is too close) */
   --st-0:#3b4763; --st-1:#7083a8; --st-2:#4d8fff; --st-3:#33c4b4; --st-4:#f2c14e;
   --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 12px 32px -18px rgba(0,0,0,.8);
   --radius:14px; --radius-s:9px;
@@ -38,6 +39,7 @@
   --good:#0f9b6c; --good-bg:rgba(15,155,108,.1); --warn:#b7791f; --warn-bg:rgba(183,121,31,.1);
   --bad:#d6334a; --bad-bg:rgba(214,51,74,.09); --violet:#7c4dd9; --violet-bg:rgba(124,77,217,.1);
   --gold:#b8860b; --teal:#0f8f83;
+  --plot-warn:#c8530f;
   --st-0:#c3cbd9; --st-1:#8d9ab3; --st-2:#2f6fe0; --st-3:#0f8f83; --st-4:#c4920f;
   --shadow:0 1px 2px rgba(15,30,60,.06), 0 10px 30px -18px rgba(15,30,60,.25);
   color-scheme:light;
@@ -51,6 +53,7 @@
     --good:#0f9b6c; --good-bg:rgba(15,155,108,.1); --warn:#b7791f; --warn-bg:rgba(183,121,31,.1);
     --bad:#d6334a; --bad-bg:rgba(214,51,74,.09); --violet:#7c4dd9; --violet-bg:rgba(124,77,217,.1);
     --gold:#b8860b; --teal:#0f8f83;
+    --plot-warn:#c8530f;
     --st-0:#c3cbd9; --st-1:#8d9ab3; --st-2:#2f6fe0; --st-3:#0f8f83; --st-4:#c4920f;
     --shadow:0 1px 2px rgba(15,30,60,.06), 0 10px 30px -18px rgba(15,30,60,.25);
     color-scheme:light;

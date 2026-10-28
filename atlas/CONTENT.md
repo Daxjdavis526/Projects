@@ -471,6 +471,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `em-generator` | a 3D coil turning between magnet poles, as a generator (slip rings or commutator) or a motor |
 | `em-ac` | a coil answering back, RL growth and decay, LC oscillation with its energy sloshing, phasors beside their waves, the series RLC circuit, resonance curves |
 | `em-wave`, `em-gap`, `em-spectrum` | a 3D plane light wave (E ⟂ B ⟂ travel); Ampère's loop round a charging capacitor with two surfaces (displacement current); the electromagnetic spectrum on one log scale |
+| `optics-rays` | rays traced exactly or paraxially: Snell's law, total internal reflection, Brewster's angle and Fresnel reflection, prisms with dispersion, fibres, a single refracting surface, thin lenses and mirrors with principal rays, telescopes and microscopes |
+| `optics-waves` | interference and diffraction from sums of phasors: single and double slits, gratings, thin-film colours, a Michelson interferometer, Airy patterns and Rayleigh's limit, polarizers |
 | `gr-surface` | curvature measured from inside a surface (sphere, torus, cone, catenoid, cylinder): coordinate basis vectors and Christoffel symbols, geodesics with Clairaut's constant, holonomy of small loops |
 
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
@@ -483,7 +485,8 @@ them in the Explore step or a problem. Symbols such as ⊗ and ⊙ (into and out
 of the page) belong in math — `$\otimes$`, `$\odot$` — where KaTeX draws
 them; as plain text they fall back to another font.
 
-A visual's `caption` replaces the simulation's default caption.
+A visual's `caption` replaces the simulation's default caption — for good: a
+sim that calls `F.caption` again as it draws cannot overwrite it.
 **Captions must say what is simplified or not to scale.** "Arrows show
 direction only." "Drag is quadratic with a fixed coefficient; real drag
 varies with speed." That honesty is the house style.

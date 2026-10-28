@@ -147,7 +147,8 @@ export function mount(F, P) {
       const pts = Array.from({ length: 121 }, (_, k) => [e.X(k / 120), e.Y(k / 120)]);
       plot.path(pts, { color: 'gold', width: 2.6 });
       const marks = C.R.kind === 'rect' ? [0.55] : [0.13, 0.38, 0.63, 0.88];
-      for (const f of marks) plot.arrow(e.X(f - 0.03), e.Y(f - 0.03), e.X(f), e.Y(f), { color: 'gold', width: 2.6, head: 10 });
+      const back = C.R.kind === 'rect' ? 0.08 : 0.03;
+      for (const f of marks) plot.arrow(e.X(f - back), e.Y(f - back), e.X(f), e.Y(f), { color: 'gold', width: 2.6, head: 10 });
     }
     // the probe's cell
     const rows = [];

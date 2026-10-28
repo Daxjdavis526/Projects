@@ -84,3 +84,37 @@ export function path(X, Y, [t0, t1], { color = 'gold', width = 3, at = [0.5], la
 
 /** Merge several paths' curves and arrows into graph params. */
 export const paths = (...ps) => ({ curves: ps.map((p) => p.curve), arrows: ps.flatMap((p) => p.arrows) });
+
+/**
+ * The surface of the box [x0, x1] × [y0, y1] × [z0, z1] as six c3-flux pieces,
+ * each parametrized so that r_u × r_v points out of the box.
+ */
+export function boxSurface([x0, x1], [y0, y1], [z0, z1], label = 'Box') {
+  return {
+    label,
+    pieces: [
+      { x: `${x1}`, y: 'u', z: 'v', u: [y0, y1], v: [z0, z1] },
+      { x: `${x0}`, y: 'v', z: 'u', u: [z0, z1], v: [y0, y1] },
+      { x: 'v', y: `${y1}`, z: 'u', u: [z0, z1], v: [x0, x1] },
+      { x: 'u', y: `${y0}`, z: 'v', u: [x0, x1], v: [z0, z1] },
+      { x: 'u', y: 'v', z: `${z1}`, u: [x0, x1], v: [y0, y1] },
+      { x: 'v', y: 'u', z: `${z0}`, u: [y0, y1], v: [x0, x1] },
+    ],
+    volume: { kind: 'box', x: [x0, x1], y: [y0, y1], z: [z0, z1] },
+  };
+}
+
+/**
+ * The sphere of radius R about c as one c3-flux surface, in this course's
+ * physics convention: u = θ (polar angle from +z), v = φ (azimuth), so that
+ * r_θ × r_φ = R² sin θ r̂ points outward.
+ */
+export function sphereSurface(R, [cx, cy, cz] = [0, 0, 0], label = 'Sphere', thetaMax = 'pi') {
+  const p = (c, s) => (c ? `${c} + ${s}` : s);
+  return {
+    label,
+    x: p(cx, `${R}*sin(u)*cos(v)`), y: p(cy, `${R}*sin(u)*sin(v)`), z: p(cz, `${R}*cos(u)`),
+    u: [0, thetaMax], v: [0, '2*pi'],
+    ...(thetaMax === 'pi' ? { volume: { kind: 'ball', c: [cx, cy, cz], r: R } } : {}),
+  };
+}

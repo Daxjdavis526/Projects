@@ -54,7 +54,8 @@ async function checkVisual(where, spec) {
     for (const o of [...(P.curves || []), ...(P.points || []), ...(P.arrows || []), ...(P.vlines || []), ...(P.hlines || []), { label: P.xlabel }, { label: P.ylabel }]) {
       const L = o && o.label;
       if (typeof L !== 'string') continue;
-      const bad = /\$|\\[A-Za-z]|(?<![\w])[A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{|[A-Za-z0-9α-ωΑ-Ω])/.exec(L);
+      // (calculator-style powers such as e^(−x/3) read well enough, and Unicode has no better form)
+      const bad = /\$|\\[A-Za-z]|(?<![\w])[A-Za-zα-ωΑ-Ω]{1,2}[_^](?:\{|[A-Za-z0-9α-ωΑ-Ω])|\)[_^](?:\{|[A-Za-z0-9])/.exec(L);
       if (bad) check(`${where}: graph label “${L}” is plain text`, false, `“${bad[0]}” would print literally on the canvas — use Unicode (², ₀, θ) and plain words`);
     }
   }
