@@ -162,6 +162,7 @@ check('expr: form expanded accepts the expansion', grade({ type: 'expression', a
 check('expr: form expanded rejects the bracket typed back', !grade({ type: 'expression', answer: 'x^2 + 2x + 1', vars: ['x'], form: 'expanded' }, '(x + 1)^2').correct && !grade({ type: 'expression', answer: 'x^2 - 1', vars: ['x'], form: 'expanded' }, 'x(x + 1) - (x + 1)').correct);
 check('expr: form factored accepts a product in any order and sign', grade({ type: 'expression', answer: '(x - 2)(x - 3)', vars: ['x'], form: 'factored' }, '-(3 - x)(x - 2)').correct);
 check('expr: form factored rejects the polynomial typed back', !grade({ type: 'expression', answer: '(x - 2)(x - 3)', vars: ['x'], form: 'factored' }, 'x^2 - 5x + 6').correct);
+check('expr: form expanded rejects an undone division', !grade({ type: 'expression', answer: 'x^2 + 2x + 4', vars: ['x'], form: 'expanded' }, '(x^3 - 8)/(x - 2)').correct);
 check('expr: undefined where key is defined', /undefined/.test(grade({ type: 'expression', answer: 'x', vars: { x: [-2, 2] } }, 'sqrt(x)^2').feedback));
 check('expr: compareExpr ratio', compareExpr({ f: (e) => 3 * e.x }, { f: (e) => e.x }, { x: [1, 2] }).ratio === 3);
 

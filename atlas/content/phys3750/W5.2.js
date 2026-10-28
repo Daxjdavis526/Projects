@@ -96,7 +96,7 @@ A **fixed** end holds $y = 0$; a **free** end feels no sideways force, so the sl
     mcq({
       id: 'free-reflect', difficulty: 2,
       prompt: t`An upward pulse runs toward the end of a string whose end ring slides freely on a smooth vertical rod (a free end). What comes back?`,
-      visual: curvesPic([{ fn: '1.2*exp(-((x - 6)/0.8)^2)', color: 'accent', label: 'pulse →', labelAt: 6, labelDy: -14 }], [0, 10.5], [-1.6, 1.8], 'An upward pulse heading right toward a free end at x = 10 (vertical line).', { xlabel: 'x', ylabel: '', vlines: [{ x: 10, label: 'free end', color: 'ink3' }], yticks: 0 }),
+      visual: curvesPic([{ fn: '1.2*exp(-((x - 6)/0.8)^2)', color: 'accent', label: 'pulse →', labelAt: 6, labelDy: -14 }], [0, 12], [-1.6, 1.8], 'An upward pulse heading right toward a free end at x = 10 (vertical line).', { xlabel: 'x', ylabel: '', vlines: [{ x: 10, label: 'free end', color: 'ink3' }], yticks: 0 }),
       choices: ['An upward pulse: a free end reflects without inverting', 'A downward pulse: every end inverts the pulse it reflects', 'Nothing: a free end lets the pulse slide off the string', 'A pulse of twice the height, travelling on the rod'],
       answer: 0,
       why: {

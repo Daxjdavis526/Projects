@@ -90,7 +90,7 @@ check('… and a clear one is not', !C.hitsSingularity(C.compile('1/z'), circle(
 check('defaults validate', validate(defaults).length === 0, validate(defaults).join('; '));
 check('an unknown function is caught', validate({ ...defaults, f: 'foo(z)' }).length > 0);
 check('a bad contour kind is caught', validate({ ...defaults, contour: { kind: 'blob' } }).length > 0);
-check('a draggable contour must be numbers', validate({ ...defaults, sliders: [{ key: 'r', label: 'r', min: 0, max: 2, value: 1, explain: 'radius' }], contour: { kind: 'circle', c: [0, 0], r: 'r' } }).length > 0);
+check('a draggable contour must be numbers', validate({ ...defaults, drag: true, sliders: [{ key: 'r', label: 'r', min: 0, max: 2, value: 1, explain: 'radius' }], contour: { kind: 'circle', c: [0, 0], r: 'r' } }).length > 0);
 check('… which is fine when not dragged', validate({ ...defaults, drag: false, sliders: [{ key: 'r', label: 'r', min: 0.1, max: 2, value: 1, explain: 'radius' }], contour: { kind: 'circle', c: [0, 0], r: 'r' } }).length === 0);
 check('TeX in a mark label is caught', validate({ ...defaults, marks: [{ x: 0, y: 0, label: 'z_0' }] }).length > 0);
 check('fns validate', validate({ ...defaults, fns: [{ f: 'z^2', label: '$z^2$' }, { f: 'conj(z)', label: 'z̄' }] }).length === 0);

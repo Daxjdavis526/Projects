@@ -70,7 +70,7 @@ export default lesson({
   },
   example: {
     prompt: t`Find the capacitance of two concentric metal spheres, radii $a = 5$ cm and $b = 6$ cm, and the energy stored at 1 kV. Then let $b \to \infty$.`,
-    visual: concentric(5, 6, t`Inner sphere (red, $+Q$) and outer shell (blue, $-Q$), to scale. The field lives only in the gap.`),
+    visual: concentric(5, 6, t`Inner sphere (orange, $+Q$) and outer shell (blue, $-Q$), to scale. The field lives only in the gap.`),
     steps: [
       { label: 'Field', text: t`Between the spheres a Gaussian sphere encloses $Q$: $E = \dfrac{Q}{4\pi\varepsilon_0r^2}$, outward. Inside the inner one and outside the outer one, $E = 0$.` },
       { label: 'Potential difference', text: t`$V = -\displaystyle\int_b^a E\,dr = \dfrac{Q}{4\pi\varepsilon_0}\left(\dfrac1a - \dfrac1b\right) = \dfrac{Q}{4\pi\varepsilon_0}\dfrac{b - a}{ab}$.` },
@@ -104,7 +104,7 @@ export default lesson({
         const c = (2 * Math.PI * EPS0) / Math.log(b / a);
         return {
           prompt: t`A long air-filled coaxial line has an inner conductor of radius ${a} mm and an outer one of inner radius ${b} mm. What is its capacitance per metre?`,
-          visual: concentric(a, b, t`The coaxial pair in cross-section, to scale: the inner conductor (red) carries $+\lambda$ per length, the outer (blue) $-\lambda$.`, { coax: true }),
+          visual: concentric(a, b, t`The coaxial pair in cross-section, to scale: the inner conductor (orange) carries $+\lambda$ per length, the outer (blue) $-\lambda$.`, { coax: true }),
           answer: c * 1e12, units: 'pF/m', tol: { rel: 0.01 },
           errors: [{ value: ((2 * Math.PI * EPS0) / Math.log10(b / a)) * 1e12, feedback: t`The logarithm is natural: $\int dr/r = \ln r$.` }, { value: ((2 * Math.PI * EPS0 * a) / (b - a)) * 1e12, feedback: 'That is the parallel-plate estimate (inner area over gap). The gap here is not thin compared with the radius, so it is badly off.' }],
           hints: [t`Gauss: $E = \lambda/(2\pi\varepsilon_0s)$ between the conductors.`, t`$V = \dfrac{\lambda}{2\pi\varepsilon_0}\ln\dfrac ba$, so $\dfrac{C}{L} = \dfrac{2\pi\varepsilon_0}{\ln(b/a)}$.`],

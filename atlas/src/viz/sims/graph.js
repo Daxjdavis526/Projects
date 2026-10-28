@@ -91,15 +91,15 @@ export function mount(F, P) {
     // curves
     (P.curves || []).forEach((c, k) => {
       const color = c.color || PALETTE[k % PALETTE.length];
-      const style = { color, width: c.width || 2.4, dash: dashOf(c.dash) };
+      const style = { color, width: c.width || 2.4, dash: dashOf(c.dash), samples: c.samples };
       if (!shown(c)) return;
       if (c.fn) { const f = fn(c.fn, vars); plot.fn((x) => f({ ...E, x }), { ...style, domain: c.domain ? [ev(c.domain[0], E, vars), ev(c.domain[1], E, vars)] : undefined }); }
       else if (c.param) {
         const fx = fn(c.param[0], ['t', ...vars]), fy = fn(c.param[1], ['t', ...vars]);
-        plot.curve((t) => fx({ ...E, t }), (t) => fy({ ...E, t }), ev(c.t[0], E, vars), ev(c.t[1], E, vars), style);
+        plot.curve((t) => fx({ ...E, t }), (t) => fy({ ...E, t }), ev(c.t[0], E, vars), ev(c.t[1], E, vars), { ...style, samples: c.samples || 1000 });
       } else if (c.polar) {
         const r = fn(c.polar, ['theta', ...vars]);
-        plot.curve((th) => r({ ...E, theta: th }) * Math.cos(th), (th) => r({ ...E, theta: th }) * Math.sin(th), ev(c.theta[0], E, vars), ev(c.theta[1], E, vars), style);
+        plot.curve((th) => r({ ...E, theta: th }) * Math.cos(th), (th) => r({ ...E, theta: th }) * Math.sin(th), ev(c.theta[0], E, vars), ev(c.theta[1], E, vars), { ...style, samples: c.samples || 1000 });
       } else if (c.sum) {
         const term = fn(c.sum, ['k', ...vars]);
         const k0 = ev(c.k[0], E, vars), k1 = Math.round(ev(c.k[1], E, vars));
@@ -144,7 +144,7 @@ export function mount(F, P) {
     for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: a.width || 2.2, dash: dashOf(a.dash), label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
     if (P.legend?.length) drawLegend(plot, P.legend, P.legendAt || 'tr');
-    if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
+    if (P.readouts) F.readout(P.readouts.filter(shown).map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
   }
   F.draw(draw);
   if (P.caption) F.caption(P.caption);
@@ -157,6 +157,13 @@ export function validate(P) {
   if (P.legend && !(Array.isArray(P.legend) && P.legend.every((it) => typeof it.label === 'string'))) problems.push('graph: legend must be [{ label, color, dash, point }]');
   if (P.legendAt && !['tl', 'tr', 'bl', 'br'].includes(P.legendAt)) problems.push('graph: legendAt must be tl, tr, bl or br');
   const keys = [...(P.sliders || []).map((s) => s.key), ...(P.choices || []).map((c) => c.key), ...Object.keys(P.constants || {})];
+  // names the graph itself uses: a slider by one of them would be shadowed or would shadow it
+  // (t only beside a parametric curve, theta a polar one, k a series, x0 a tangent)
+  const cs = P.curves || [];
+  const RESERVED = ['x', 'slope', 'secant', 'riemann', 'integral',
+    ...(cs.some((c) => c.param) ? ['t'] : []), ...(cs.some((c) => c.polar) ? ['theta'] : []), ...(cs.some((c) => c.sum) ? ['k'] : []), ...(P.tangent ? ['x0'] : [])];
+  for (const k of keys) if (RESERVED.includes(k)) problems.push(`graph: “${k}” is a name this graph uses itself — give the slider another key`);
+  for (const c of P.curves || []) if (c.samples !== undefined && !(Number.isInteger(c.samples) && c.samples >= 10 && c.samples <= 5000)) problems.push(`graph: curve samples is a whole number from 10 to 5000 (got ${c.samples})`);
   const drag = (P.drag || []).flatMap((d) => [d.key + 'x', d.key + 'y']);
   const base = ['x', 'x0', ...keys, ...drag];
   const tryParse = (src, extra = [], where = '') => {
@@ -185,6 +192,7 @@ export function validate(P) {
   for (const c of P.curves || []) { if (c.when) tryParse(c.when, [], 'curve when'); (c.domain || []).forEach((v) => tryParse(v, [], 'curve domain')); if (c.labelAt !== undefined) tryParse(c.labelAt, [], 'curve labelAt'); }
   for (const r of P.readouts || []) {
     tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
+    if (r.when) tryParse(r.when, [], 'readout when');
     if (r.digits !== undefined && !(Number.isInteger(r.digits) && r.digits >= 1 && r.digits <= 15)) problems.push(`graph: readout digits are significant figures, a whole number from 1 to 15 (got ${r.digits})`);
     if (r.zero !== undefined && !(r.zero >= 0)) problems.push(`graph: readout zero is a threshold, a number ≥ 0 (got ${r.zero})`);
   }

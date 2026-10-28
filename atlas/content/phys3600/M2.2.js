@@ -87,7 +87,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
   },
   example: {
     prompt: t`A sphere of radius $R = 5$ cm carries a surface charge with no charge anywhere else. The potential is $V = A\,r\cos\theta$ inside and $V = A\dfrac{R^3}{r^2}\cos\theta$ outside, with $A = 2000$ V/m. Check the boundary conditions and find $\sigma(\theta)$.`,
-    visual: spherePic(t`Equipotentials of this $V$ (low blue, high gold) with the sphere in red and the polar axis vertical. Inside they are flat planes — a uniform field; outside they curve like a dipole’s.`),
+    visual: spherePic(t`Equipotentials of this $V$ (low blue, high gold) with the sphere in orange and the polar axis vertical. Inside they are flat planes — a uniform field; outside they curve like a dipole’s.`),
     steps: [
       { label: 'V is continuous', text: t`At $r = R$: inside gives $AR\cos\theta$, outside gives $A\dfrac{R^3}{R^2}\cos\theta = AR\cos\theta$ ✓. Equal for every $\theta$, so the tangential field $-\frac1r\partial V/\partial\theta$ matches too.` },
       { label: 'Normal derivatives', text: t`Here $\hat n = \hat r$. Outside: $\partial V/\partial r = -2A\dfrac{R^3}{r^3}\cos\theta \to -2A\cos\theta$ at $r = R$. Inside: $\partial V/\partial r = A\cos\theta$.` },
@@ -105,7 +105,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
         const ans = (EPS0 * (up + down)) / 1e-9;
         return {
           prompt: t`Just above a charged surface the field is ${up} V/m pointing straight up, away from the surface. Just below it the field is ${down} V/m pointing straight down, also away from it. What is the surface charge density?`,
-          visual: jumpPic(up, -down, 'The surface edge-on (red) and the field just above and just below it, to scale. The normal n̂ points up.'),
+          visual: jumpPic(up, -down, 'The surface edge-on (orange) and the field just above and just below it, to scale. The normal n̂ points up.'),
           answer: ans, units: 'nC/m^2', tol: { rel: 0.01 },
           errors: [{ value: (EPS0 * Math.abs(up - down)) / 1e-9, feedback: t`You subtracted the magnitudes. Use components along $\hat n$ (up): above $+${up}$, below $-${down}$ V/m, so the jump is ${up + down} V/m.` }],
           hints: [t`$\sigma = \varepsilon_0\left(E^\perp_{\text{above}} - E^\perp_{\text{below}}\right)$, with both components measured along the same $\hat n$ (up).`, t`$E^\perp_{\text{above}} = +${up}$, $E^\perp_{\text{below}} = -${down}$ V/m.`],
@@ -117,7 +117,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
     mcq({
       id: 'tangential', difficulty: 2,
       prompt: t`Why is the tangential component of $\vec E$ continuous across a sheet of charge?`,
-      visual: { type: 'graph', params: { x: [-3.2, 3.2], y: [-1.6, 1.6], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ fn: '0', domain: [-9, 9], color: 'warn', width: 4 }, { param: ['-1.6 + 3.2*t', '0.25'], t: [0, 1], color: 'violet', width: 2 }, { param: ['1.6 - 3.2*t', '-0.25'], t: [0, 1], color: 'violet', width: 2 }, { param: ['1.6', '-0.25 + 0.5*t'], t: [0, 1], color: 'violet', width: 2 }, { param: ['-1.6', '0.25 - 0.5*t'], t: [0, 1], color: 'violet', width: 2 }], arrows: [{ from: [-0.3, 0.25], to: [0.3, 0.25], color: 'violet', width: 2 }, { from: [0.3, -0.25], to: [-0.3, -0.25], color: 'violet', width: 2 }], points: [{ x: 1.7, y: 0, r: 0, label: 'width → 0', labelDx: 4 }, { x: 0, y: 0.25, r: 0, label: 'length ℓ', labelDy: -10, labelDx: -20 }] }, caption: 'A thin rectangular loop (violet) straddling the charged sheet (red), seen edge-on.' },
+      visual: { type: 'graph', params: { x: [-3.2, 3.2], y: [-1.6, 1.6], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', curves: [{ fn: '0', domain: [-9, 9], color: 'warn', width: 4 }, { param: ['-1.6 + 3.2*t', '0.25'], t: [0, 1], color: 'violet', width: 2 }, { param: ['1.6 - 3.2*t', '-0.25'], t: [0, 1], color: 'violet', width: 2 }, { param: ['1.6', '-0.25 + 0.5*t'], t: [0, 1], color: 'violet', width: 2 }, { param: ['-1.6', '0.25 - 0.5*t'], t: [0, 1], color: 'violet', width: 2 }], arrows: [{ from: [-0.3, 0.25], to: [0.3, 0.25], color: 'violet', width: 2 }, { from: [0.3, -0.25], to: [-0.3, -0.25], color: 'violet', width: 2 }], points: [{ x: 1.7, y: 0, r: 0, label: 'width → 0', labelDx: 4 }, { x: 0, y: 0.25, r: 0, label: 'length ℓ', labelDy: -10, labelDx: -20 }] }, caption: 'A thin rectangular loop (violet) straddling the charged sheet (orange), seen edge-on.' },
       choices: [
         t`$\oint\vec E\cdot d\vec l = 0$ round a thin loop straddling the sheet, so $E^\parallel_{\text{above}}\ell - E^\parallel_{\text{below}}\ell = 0$`,
         t`The pillbox encloses no charge sideways`,
@@ -191,7 +191,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
         const A = (k * 1e-9) / (3 * EPS0);
         return {
           prompt: t`A sphere carries $\sigma = k\cos\theta$ with $k = ${k}$ nC/m² and no other charge. Try $V = Ar\cos\theta$ inside and $V = AR^3\cos\theta/r^2$ outside (this already makes $V$ continuous). Use the jump in $\partial V/\partial r$ to find $A$, which is also the size of the uniform field inside.`,
-          visual: spherePic(t`Equipotentials of the trial solution, with the sphere in red. Inside: parallel planes, a uniform field. Not to any particular scale.`),
+          visual: spherePic(t`Equipotentials of the trial solution, with the sphere in orange. Inside: parallel planes, a uniform field. Not to any particular scale.`),
           answer: A, units: 'V/m', tol: { rel: 0.01 },
           errors: [{ value: (k * 1e-9) / EPS0, feedback: t`The jump in $\partial V/\partial r$ at $r = R$ is $-2A\cos\theta - A\cos\theta = -3A\cos\theta$, not $-A\cos\theta$.` }, { value: (k * 1e-9) / (2 * EPS0), feedback: t`Differentiate the outside solution: $\partial_r(R^3/r^2) = -2R^3/r^3$, which is $-2$ at $r = R$. Then add the inside slope.` }],
           hints: [t`$\sigma = -\varepsilon_0\left(\partial_rV_{\text{out}} - \partial_rV_{\text{in}}\right)$ at $r = R$.`, t`$\partial_rV_{\text{out}} = -2A\cos\theta$, $\partial_rV_{\text{in}} = A\cos\theta$, so $\sigma = 3\varepsilon_0A\cos\theta$.`],
@@ -209,7 +209,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
         const sig = -EPS0 * E, Q = sig * 4 * Math.PI * RE * RE;
         return {
           prompt: t`On a calm day the atmospheric electric field at the ground is about ${E} V/m, pointing straight **down**. The ground conducts, so the field just below its surface is zero. If the same field held all over the Earth (radius 6 371 km), what would the Earth’s total charge be, in kilocoulombs?`,
-          visual: jumpPic(-E, 0, 'The ground (red) edge-on, the fair-weather field just above it pointing down, and no field inside the conducting ground. The normal n̂ points up, out of the Earth.', { show: true }),
+          visual: jumpPic(-E, 0, 'The ground (orange) edge-on, the fair-weather field just above it pointing down, and no field inside the conducting ground. The normal n̂ points up, out of the Earth.', { show: true }),
           answer: Q / 1000, units: 'kC', tol: { rel: 0.01 },
           errors: [{ value: -Q / 1000, feedback: 'The field points down, into the ground: field lines end on the surface, so the charge there is negative.' }, { value: (sig * 2 * Math.PI * RE * RE) / 1000, feedback: t`The area of a sphere is $4\pi R^2$.` }],
           hints: [t`$\sigma = \varepsilon_0\left(E^\perp_{\text{above}} - E^\perp_{\text{below}}\right)$ with $\hat n$ up: $E^\perp_{\text{above}} = -${E}$ V/m, $E^\perp_{\text{below}} = 0$.`, t`Then $Q = \sigma\cdot4\pi R^2$ with $R = 6.371\times10^6$ m. Give the answer in kC, with its sign.`],
@@ -237,7 +237,7 @@ These two lines are the glue of every boundary-value problem ahead: solve Laplac
     mcq({
       id: 'cp-glue', difficulty: 3,
       prompt: t`You have solved Laplace’s equation inside and outside a sphere that carries a known $\sigma(\theta)$, each with unknown coefficients. Which two conditions at $r = R$ fix them?`,
-      visual: spherePic('A sphere (red) with a solution inside and another outside, to be stitched together at its surface.'),
+      visual: spherePic('A sphere (orange) with a solution inside and another outside, to be stitched together at its surface.'),
       choices: [
         t`$V_{\text{in}} = V_{\text{out}}$, and $\partial_rV_{\text{out}} - \partial_rV_{\text{in}} = -\sigma/\varepsilon_0$`,
         t`$V_{\text{in}} = V_{\text{out}}$, and $\partial_rV_{\text{out}} = \partial_rV_{\text{in}}$`,

@@ -362,7 +362,7 @@ for n in [5, 10, 15, 20]:
   sources: [
     { label: 'Trefethen & Bau (1997), Numerical Linear Algebra, SIAM, lectures 12–15 (conditioning, stability, backward stability)', url: 'https://doi.org/10.1137/1.9780898719574' },
     { label: 'Higham (2002), Accuracy and Stability of Numerical Algorithms, 2nd ed., SIAM, ch. 1', url: 'https://doi.org/10.1137/1.9780898718027' },
-    { label: 'Wilkinson (1984), The perfidious polynomial, in Studies in Numerical Analysis, MAA', url: 'https://www.maa.org/press/ebooks/studies-in-numerical-analysis' },
+    { label: 'Wilkinson (1984), The perfidious polynomial, in Studies in Numerical Analysis, MAA', url: 'https://openlibrary.org/search?q=Studies+in+Numerical+Analysis+Golub' },
     { label: 'Gautschi (1967), Computational aspects of three-term recurrence relations, SIAM Review 9, 24', url: 'https://doi.org/10.1137/1009002' },
   ],
 });

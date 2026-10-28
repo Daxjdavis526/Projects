@@ -150,7 +150,7 @@ export function mount(F, P0) {
     }
     if (plane) plot.line(plot.vx0, 0, plot.vx1, 0, { color: 'ink2', width: 1.5 });
     else plot.circle(0, 0, R, { color: 'ink2', width: 1.5 });
-    plot.text(plane ? 'grounded conducting plane, V = 0' : (S.ground === 'grounded' ? 'grounded sphere, V = 0' : 'isolated neutral sphere'), plane ? plot.vx0 : 0, plane ? 0 : -R, { dx: plane ? 8 : 0, dy: 16, align: plane ? 'left' : 'center', size: fs - 0.5, color: 'ink2' });
+    plot.text(plane ? (narrow ? 'grounded plane' : 'grounded conducting plane, V = 0') : (S.ground === 'grounded' ? (narrow ? 'grounded' : 'grounded sphere, V = 0') : (narrow ? 'neutral' : 'isolated neutral sphere')), plane ? plot.vx0 : 0, plane ? 0 : -R, { dx: plane ? 8 : 0, dy: 16, align: plane ? 'left' : 'center', size: fs - 0.5, color: 'ink2' });
     // the images
     if (showImg) for (const im of S.images) {
       const X = im.x / CM, Y = im.y / CM, r = 7 + 5 * Math.sqrt(Math.min(1, Math.abs(im.q / S.q)));

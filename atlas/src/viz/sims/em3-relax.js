@@ -170,7 +170,7 @@ export function mount(F, P0) {
     if (B2) hplot.path(hist.map(([, gg], k) => [k + 1, Math.log10(Math.max(gg, sc * 1e-12))]), { color: 'gold', width: 2, dash: [6, 4] });
     const fs = (hplot.c.clientWidth || 600) < 520 ? 10 : 11.5;
     hplot.text('largest change in a sweep', n, Math.log10(sc) + 0.2, { align: 'right', color: 'accent', size: fs, dx: -6 });
-    if (B2) hplot.text('largest gap between the two runs', n, Math.log10(sc) - 0.5, { align: 'right', color: 'gold', size: fs, dx: -6 });
+    if (B2) hplot.text('largest gap between the two runs', n, Math.log10(sc) + 0.2, { align: 'right', color: 'gold', size: fs, dx: -6, dy: fs + 4 });
   }
 
   function readouts() {

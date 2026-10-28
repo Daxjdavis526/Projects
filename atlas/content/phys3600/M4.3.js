@@ -139,7 +139,7 @@ export default lesson({
     mcq({
       id: 'why-sum', difficulty: 2,
       prompt: t`Why can a single term $C\,e^{-\pi x/a}\sin(\pi y/a)$ not solve the slot problem when the end is held at a constant $V_0$?`,
-      visual: { type: 'graph', params: { x: [0, 1], y: [-0.05, 1.35], aspect: 'wide', xlabel: 'y / a', ylabel: 'V / V₀', curves: [{ fn: '1', color: 'warn', width: 2.6, label: 'required: V₀', labelAt: 0.4, labelDy: -8 }, { fn: '4/pi*sin(pi*x)', color: 'accent', width: 2, dash: [5, 4], label: 'best single sine', labelAt: 0.12, labelDy: 14 }] }, caption: 'The boundary value across the end (red) and the best single sine.' },
+      visual: { type: 'graph', params: { x: [0, 1], y: [-0.05, 1.35], aspect: 'wide', xlabel: 'y / a', ylabel: 'V / V₀', curves: [{ fn: '1', color: 'warn', width: 2.6, label: 'required: V₀', labelAt: 0.4, labelDy: -8 }, { fn: '4/pi*sin(pi*x)', color: 'accent', width: 2, dash: [5, 4], label: 'best single sine', labelAt: 0.12, labelDy: 14 }] }, caption: 'The boundary value across the end (orange) and the best single sine.' },
       choices: [
         'At x = 0 it gives a sine across the end, not a constant: it fails the boundary condition there',
         'It does not satisfy Laplace’s equation',
@@ -197,7 +197,7 @@ export default lesson({
         const ans = ((2 * V0) / (n * PI)) * (1 - Math.cos((n * PI) / 2));
         return {
           prompt: t`The end of a slot is held at $V_0 = ${V0}$ V on its lower half ($0 < y < a/2$) and at 0 V on its upper half. Find $C_{${n}}$.`,
-          visual: { type: 'graph', params: { x: [0, 1], y: [-0.2, 1.4], aspect: 'wide', xlabel: 'y / a', ylabel: 'V / V₀', curves: [{ fn: '1', domain: [0, 0.5], color: 'warn', width: 2.6 }, { fn: '0', domain: [0.5, 1], color: 'warn', width: 2.6 }, { fn: `sin(${n}*pi*x)`, color: 'accent', width: 2, dash: [5, 4] }] }, caption: t`The end’s potential (red) and the sine $\sin(${n}\pi y/a)$ (dashed).` },
+          visual: { type: 'graph', params: { x: [0, 1], y: [-0.2, 1.4], aspect: 'wide', xlabel: 'y / a', ylabel: 'V / V₀', curves: [{ fn: '1', domain: [0, 0.5], color: 'warn', width: 2.6 }, { fn: '0', domain: [0.5, 1], color: 'warn', width: 2.6 }, { fn: `sin(${n}*pi*x)`, color: 'accent', width: 2, dash: [5, 4] }] }, caption: t`The end’s potential (orange) and the sine $\sin(${n}\pi y/a)$ (dashed).` },
           answer: ans, units: 'V', tol: { rel: 0.01 },
           integrand: `2*${V0}*sin(${n}*pi*x)`, limits: [0, 0.5], vars: { x: [0, 1] },
           errors: [{ value: ((2 * V0) / (n * PI)) * (1 - Math.cos(n * PI)), feedback: 'That integrates over the whole width. The upper half is at 0 V and contributes nothing.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * Math.abs(ans)),

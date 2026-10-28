@@ -202,7 +202,7 @@ function sigfigNote(numberText, want) {
  *            (a potential function, defined up to one number)
  *   errors   [{ answer, feedback }] known wrong forms
  *   forbid   function names the learner may not use (e.g. ['abs'])
- *   form     'expanded' (no bracketed sum multiplied, raised to a power or negated)
+ *   form     'expanded' (no bracketed sum multiplied, divided by, raised to a power or negated)
  *            | 'factored' (a product, not a sum, at the top level): checked once the
  *            value is right, so "expand" and "factor" tasks can't be answered by
  *            typing the question back
@@ -215,6 +215,7 @@ function unexpanded(n) {
   if (n.t === '*' && (isSum(n.a) || isSum(n.b))) return true;
   if (n.t === '^' && isSum(n.a)) return true;
   if (n.t === 'neg' && isSum(n.a)) return true;
+  if (n.t === '/' && isSum(n.b)) return true;   // a quotient by a sum: the division is still to be done
   return [n.a, n.b, ...(n.args || [])].some(unexpanded);
 }
 function formProblem(ast, form) {

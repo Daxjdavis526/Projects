@@ -21,8 +21,9 @@ const dispPic = (caption, more = {}) => ({
   type: 'graph',
   params: {
     x: [0, 3.45], y: [0, 2.45], aspect: 'wide', xlabel: 'q a (rad)', ylabel: 'ω/√(k/m)', xticks: 7, yticks: 5,
-    curves: [{ fn: '2*abs(sin(x/2))', color: 'accent', width: 2 }, { fn: 'x', color: 'ink3', dash: [6, 5], width: 1.2, domain: [0, 2.3], label: 'ω = v q', labelAt: 1.9, labelDx: -46, labelDy: -6 }],
-    hlines: [{ y: 2, label: 'cutoff', color: 'warn' }], vlines: [{ x: 'pi', label: 'q a = π', color: 'ink3' }],
+    curves: [{ fn: '2*abs(sin(x/2))', color: 'accent', width: 2 }, { fn: 'x', color: 'ink3', dash: [6, 5], width: 1.2, domain: [0, 2.3], label: 'ω = v q', labelAt: 1.1, labelDx: -50, labelDy: -4 }],
+    hlines: [{ y: 2, label: 'cutoff', color: 'warn' }], vlines: [{ x: 'pi', color: 'ink3' }],
+    points: [{ x: Math.PI, y: 0.18, r: 0, label: 'q a = π', labelDx: -52, labelDy: 0, color: 'ink3' }],
     ...more,
   },
   caption,

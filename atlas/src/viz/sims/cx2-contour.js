@@ -19,7 +19,7 @@
 //       sliders: [], constants: {}, choices: [],
 //       contour: { kind: 'circle', c: [0, 0], r: 1 },   // or arc { c, r, from, to }, segment { from, to }, poly { pts, closed }, rect { x, y }, param { param: [x(t), y(t)], t: [a, b] }; numbers or expressions of slider keys; null: no contour
 //       ccw: true,                // circle and rect: anticlockwise
-//       drag: true,               // circle: centre and rim handles; segment, poly: every vertex; rect: two corners
+//       drag: false,              // true: circle: centre and rim handles; segment, poly: every vertex; rect: two corners
 //       snap: 0,                  // round dragged positions to this step
 //       marks: [],                // [{ x, y, label, kind: 'pole' | 'zero' | 'point', color }] — × for a pole, ○ for a zero
 //       x: [-2, 2], y: [-2, 2],   // the z window (equal axes)
@@ -34,7 +34,7 @@
 //       rings: [],                // [{ c, r0, r1, color, label }] shaded annuli (r0 = 0: a disc)
 //       circles: [],              // [{ c, r, color, dash, label }] reference circles
 //       ticks: true, sumTicks: null,   // numbers on the axes (sumTicks for the sum panel; default ticks)
-//       readout: true,            // or false, or a list: 'I' 'I2' 'sum' 'wind' 'L' 'M' 'ML'
+//       readout: true,            // or false, or a list: 'I' 'I2' 'sum' 'wind' 'L' 'M' 'ML', or { label, value } (a complex expression of the slider keys)
 //       zname: 'z-plane', wname: null,  // panel titles (plain text)
 //   } }
 //
@@ -48,7 +48,7 @@ import { phaseColor } from '../model/cx-map.js';
 
 export const defaults = {
   f: '1/z', fns: null, sliders: [], constants: {}, choices: [],
-  contour: { kind: 'circle', c: [0, 0], r: 1 }, ccw: true, drag: true, snap: 0, marks: [],
+  contour: { kind: 'circle', c: [0, 0], r: 1 }, ccw: true, drag: false, snap: 0, marks: [],
   x: [-2, 2], y: [-2, 2], view: 'plain', showChoice: false, panel: 'sum', wx: null, wy: null,
   n: 24, nSlider: false, arrowsOn: 'fdz', walk: false, play: false, scaleBy: 'one',
   rings: [], circles: [], ticks: true, sumTicks: null, readout: true, zname: 'z-plane', wname: null,
@@ -243,12 +243,6 @@ export function mount(F, P) {
       zp.path(pts, { color: ink, width: 2, alpha: walk < 1 ? 0.45 : 1 });
       if (walk < 1 && walk > 0) zp.path(pts.slice(0, Math.max(2, Math.round(walk * pts.length))), { color: ink, width: 3 });
       g.restore();
-      // direction chevrons
-      const PS = C.pieces(spec);
-      for (const Pc of PS) for (const u of PS.length > 2 ? [0.5] : [0.2, 0.45, 0.7, 0.95]) {
-        const a = Pc.z(u - 0.01), b = Pc.z(u);
-        zp.arrow(a[0], a[1], b[0], b[1], { color: ink, width: 2, head: 10 });
-      }
       if (!broken) {
         R = C.riemann(f, spec, N);
         const raw = C.integrate(f, spec);
@@ -262,13 +256,15 @@ export function mount(F, P) {
           const vec = (A) => (P.arrowsOn === 'f' ? A.fz : C.scale(A.a, 1 / Math.max(1e-12, C.abs(A.dz))));
           const lens = R.arrows.map((A) => C.abs(vec(A))).filter(Number.isFinite).sort((a, b) => a - b);
           const ref = lens[Math.floor(0.8 * (lens.length - 1))] || 1;
-          const target = 0.11 * (zp.vx1 - zp.vx0);
+          const target = 0.1 * Math.min(zp.vx1 - zp.vx0, zp.vy1 - zp.vy0);
+          g.save(); zp._clip();
           R.arrows.forEach((A, k) => {
             let v = C.scale(vec(A), target / ref);
             const L = C.abs(v);
             if (L > 1.6 * target) v = C.scale(v, (1.6 * target) / L);
             zp.arrow(A.z[0], A.z[1], A.z[0] + v[0], A.z[1] + v[1], { color: hue(k, R.arrows.length), width: 2, head: 7, alpha: k < shown ? 1 : 0.25 });
           });
+          g.restore();
         }
         if (walk < 1) { const zw = C.sample(spec, 240)[Math.min(pts.length - 1, Math.round(walk * (pts.length - 1)))]; zp.point(zw[0], zw[1], { color: 'gold', r: 5 }); }
         // the chain
@@ -298,12 +294,21 @@ export function mount(F, P) {
         wp.text('The contour runs through a singularity:', (wp.L + wp.R) / 2, (wp.T + wp.B) / 2 - 10, { screen: true, align: 'center', color: 'bad', weight: 650 });
         wp.text('the integral is not defined.', (wp.L + wp.R) / 2, (wp.T + wp.B) / 2 + 10, { screen: true, align: 'center', color: 'bad', weight: 650 });
       }
+      // direction chevrons
+      const PS = C.pieces(spec);
+      for (const Pc of PS) for (const u of PS.length > 2 ? [0.5] : PS.length === 2 ? [0.35, 0.8] : [0.13, 0.38, 0.63, 0.88]) {
+        // a chevron of fixed screen size at z(u), pointing along the path
+        const z = Pc.z(u), d = Pc.dz(u), X = zp.X(z[0]), Y = zp.Y(z[1]);
+        const dx = zp.X(z[0] + d[0]) - X, dy = zp.Y(z[1] + d[1]) - Y, L = Math.hypot(dx, dy) || 1;
+        const ux = dx / L, uy = dy / L;
+        zp.arrow(zp.ix(X - 9 * ux), zp.iy(Y - 9 * uy), zp.ix(X + 9 * ux), zp.iy(Y + 9 * uy), { color: ink, width: 2.4, head: 12 });
+      }
     } else if (split) { wp.grid(); wp.axes(); }
     if (split) frame(wp, P.wname || (P.scaleBy === 'twopii' ? 'the arrows ÷ 2πi, head to tail' : 'the arrows f·Δz, head to tail'));
 
     // marks
     for (const m of marks) {
-      const [x, y] = m.z, color = m.color || (m.kind === 'zero' ? 'teal' : m.kind === 'point' ? 'gold' : 'bad');
+      const [x, y] = m.z, color = m.color || (colour ? 'ink' : m.kind === 'zero' ? 'teal' : m.kind === 'point' ? 'gold' : 'bad');
       if (m.kind === 'zero') zp.circle(x, y, (zp.vx1 - zp.vx0) * 0.012, { color, width: 2.4 });
       else if (m.kind === 'point') zp.point(x, y, { color, r: 4.5 });
       else {
@@ -332,8 +337,9 @@ export function mount(F, P) {
       if (want('L')) rows.push(['length $L$', n3(L)]);
       if (want('M')) rows.push(['largest $|f|$ on it, $M$', n3(Mx.M)]);
       if (want('ML')) rows.push(['bound $ML$', Number.isFinite(Mx.M) ? n3(L * Mx.M) : '\\infty']);
-      if (want('M') && Mx.at && Number.isFinite(Mx.M)) zp.point(Mx.at[0], Mx.at[1], { color: 'gold', r: 5, label: 'M', ldx: 8, ldy: 12 });
+      if (want('M') && Mx.at && Number.isFinite(Mx.M)) zp.point(Mx.at[0], Mx.at[1], { color: 'gold', r: 5, label: 'M', ldx: 8, ldy: -12 });
     }
+    for (const r of Array.isArray(P.readout) ? P.readout : []) if (r && typeof r === 'object') rows.push([r.label, cTeX(C.compile(r.value, keys)([0, 0], E))]);
     lastI = Iv;
     F.readout(P.readout === false ? [] : rows);
     F.caption(split
@@ -401,7 +407,12 @@ export function validate(P) {
   if (![false, 'fdz', 'f'].includes(P.arrowsOn)) problems.push('cx2-contour arrowsOn must be fdz, f or false');
   if (!(Number.isInteger(P.n) && P.n >= 1 && P.n <= 400)) problems.push('cx2-contour n must be a whole number from 1 to 400');
   if (P.play && !P.walk) problems.push('cx2-contour play needs walk');
-  if (Array.isArray(P.readout)) { for (const r of P.readout) if (!['I', 'I2', 'sum', 'wind', 'L', 'M', 'ML'].includes(r)) problems.push(`cx2-contour readout: unknown entry “${r}”`); }
+  if (Array.isArray(P.readout)) {
+    for (const r of P.readout) {
+      if (r && typeof r === 'object') { if (!r.label) problems.push('cx2-contour readout entries need a label'); cexpr(r.value, 'readout value'); }
+      else if (!['I', 'I2', 'sum', 'wind', 'L', 'M', 'ML'].includes(r)) problems.push(`cx2-contour readout: unknown entry “${r}”`);
+    }
+  }
   else if (typeof P.readout !== 'boolean') problems.push('cx2-contour readout must be true, false or a list');
   const plain = [P.zname, P.wname, ...(P.marks || []).map((m) => m.label), ...(P.fns || []).flatMap((o) => (o.marks || []).map((m) => m.label)), ...(P.rings || []).map((r) => r.label), ...(P.circles || []).map((r) => r.label)];
   for (const s of plain) if (s && /[$\\]|(?<![\w])[A-Za-z]{1,2}[_^](?:\{|[A-Za-z0-9])/.test(String(s))) problems.push(`cx2-contour label “${s}” is plain text: use Unicode (z₀, w², θ), not TeX`);
