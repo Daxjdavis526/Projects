@@ -54,7 +54,7 @@ export function mount(F, P0) {
 
   const a = F.canvas({ aspect: 'wide', label: P.alt || 'A membrane vibrating in one of its normal modes' });
   const plot = new Plot(a.canvas, { x: [-1.2, 1.2], y: [-1.1, 1.1], equal: true, xlabel: '', ylabel: '', axes: false, grid: false });
-  const view = new View3D(a.canvas, { yaw: -0.6, pitch: 0.62, dist: 8.5 });
+  const view = new View3D(a.canvas, { yaw: -0.6, pitch: 0.62, dist: 6.4 });
   view.onChange = () => { if (F.params.__view === '3d') draw(); };
   const lad = P.ladder !== false ? F.canvas({ label: 'The frequency ladder: each mode’s frequency divided by the fundamental’s', height: F.compact ? '120px' : '160px' }) : null;
   const lp = lad ? new Plot(lad.canvas, { x: [0, 4], y: [0, 1], xlabel: 'frequency ÷ fundamental', ylabel: '', yticks: 0, grid: false, axesAt: 'edge' }) : null;
@@ -135,7 +135,7 @@ export function mount(F, P0) {
 
   function draw3d(g, sh, w, hgt, amp) {
     view.begin();
-    const S = 2.2, Z = 1.1, K = 44;
+    const S = sh === 'disk' ? 2.0 : 1.6, Z = 1.0, K = 44;
     let grid;
     if (sh === 'disk') {
       grid = Array.from({ length: K + 1 }, (_, i) => Array.from({ length: 2 * K + 1 }, (_, j) => {

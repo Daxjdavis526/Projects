@@ -86,11 +86,11 @@ The two shapes are fixed by the starting data: the displacement $y_0(x)$ and the
         const A = r.pick([2, 3, 4, 6]), b = r.pick([0.2, 0.4, 0.6, -0.4, -0.2]), w = 1;
         const left = ((1 - b) / 2) * A;
         return {
-          prompt: t`A long string starts with $y_0 = ${A}\,e^{-x^2}$ cm and velocity $u_0 = -${tn(b, 2)}\,v\,y_0'(x)$. What is the height of the part that runs toward $-x$, in cm?`,
+          prompt: t`A long string starts with $y_0 = ${A}\,e^{-x^2}$ cm and velocity $u_0 = ${b < 0 ? '+' : '-'}${tn(Math.abs(b), 2)}\,v\,y_0'(x)$. What is the height of the part that runs toward $-x$, in cm?`,
           visual: bumps(A, w, b, 'The starting displacement (blue) and the starting velocity divided by v (gold, dashed), x in m, y in cm.', { ylabel: '' }),
           answer: left, units: 'cm', tol: { rel: 0.01 },
           errors: [{ value: ((1 + b) / 2) * A, feedback: t`That is the right-moving part. $g = \tfrac12[y_0 + U/v]$ runs toward $-x$.` }, { value: A / 2, feedback: 'Half and half is the split for a release from rest; this string is already moving.' }],
-          hints: [t`$U = -${tn(b, 2)}\,v\,y_0$, so $U/v = -${tn(b, 2)}\,y_0$.`, t`$g = \tfrac12[y_0 + U/v] = \tfrac12(1 - ${tn(b, 2)})\,y_0$.`],
+          hints: [t`$U = ${b < 0 ? '+' : '-'}${tn(Math.abs(b), 2)}\,v\,y_0$, so $U/v = ${b < 0 ? '+' : '-'}${tn(Math.abs(b), 2)}\,y_0$.`, t`$g = \tfrac12[y_0 + U/v] = ${tn((1 - b) / 2, 2)}\,y_0$.`],
           teach: t`Initial velocity tips the split: $f = \tfrac12[y_0 - U/v]$ runs right, $g = \tfrac12[y_0 + U/v]$ runs left.`,
           explain: t`$g = \tfrac12(1 - (${tn(b, 2)}))\,y_0$, a bump $${tn(left)}$ cm high moving toward $-x$; the other $${tn(((1 + b) / 2) * A)}$ cm moves toward $+x$.`,
         };
