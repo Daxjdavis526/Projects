@@ -69,7 +69,7 @@ export function mount(F, P0) {
   }
   const showHist = P.history ?? !F.compact;
   const asp = P.aspect;
-  const a = F.canvas({ aspect: asp <= 0.62 ? 'wide' : asp >= 0.9 ? 'square' : '', label: P.alt || 'A box whose walls are held at set potentials, coloured by the potential inside' });
+  const a = F.canvas({ aspect: asp <= 0.62 ? 'wide' : asp >= 1.3 ? 'square' : '', label: P.alt || 'A box whose walls are held at set potentials, coloured by the potential inside' });
   const padX = 0.2, padY = 0.13;
   const plot = new Plot(a.canvas, { x: [-padX, 1 + padX], y: [-padY, asp + padY], equal: true, axes: false, grid: false });
   let hplot = null;
@@ -154,7 +154,7 @@ export function mount(F, P0) {
       plot.rect(e.i0 * h, e.j0 * h, (e.i1 - e.i0) * h, (e.j1 - e.j0) * h, { fill: 'ink3', alpha: 0.85, stroke: 'ink', width: 1.5 });
       plot.text(wl(e.V), ((e.i0 + e.i1) / 2) * h, ((e.j0 + e.j1) / 2) * h, { align: 'center', size: fs, color: 'ink', weight: 700 });
     }
-    plot.text(done ? `${A.sweeps} sweeps — settled` : `${A.sweeps} sweeps`, 1, A.b, { align: 'right', dy: -13, dx: 0, size: fs - 1, color: 'ink2', screen: false, halo: true, ...(narrow ? { dy: -26 } : {}) });
+    plot.text(done ? `${A.sweeps} sweeps — settled` : `${A.sweeps} sweeps`, 1, 0, { align: 'right', dy: narrow ? 26 : 13, size: fs - 1, color: 'ink2' });
     plot.drawHandles();
     drawHistory();
     readouts();

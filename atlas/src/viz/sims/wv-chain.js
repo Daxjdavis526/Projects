@@ -57,6 +57,7 @@ const trim = (x, d = 3) => {
 
 export async function mount(F, P0) {
   const P = { ...defaults, ...P0 };
+  P.maxN = Math.max(P.maxN, P.N);
   let reduced = false;
   try { reduced = (await import('../../ui/state.js')).reducedMotion(); } catch { reduced = true; }
   const panels = (P.panels || PANELS).filter((p) => PANELS.includes(p));
@@ -74,7 +75,7 @@ export async function mount(F, P0) {
   const put = (k, v) => { F.params[k] = v; };
   if (C0.has('bc')) F.choice({ key: 'bc', label: 'Ends', options: [['fixed', 'Fixed'], ['free', 'Free'], ['periodic', 'Ring']], value: P.bc, explain: 'Fixed: walls beyond the end masses. Free: the end masses are tied on one side only. Ring: the last mass is joined to the first.' });
   else put('bc', P.bc);
-  if (C0.has('N')) F.slider({ key: 'N', label: 'Masses $N$', min: 1, max: P.maxN, step: 1, value: P.N, explain: 'More masses, closer together, on a chain of the same length per mass: the string is the limit $N \\to \\infty$.' });
+  if (C0.has('N')) F.slider({ key: 'N', label: 'Masses $N$', min: 1, max: P.maxN, step: 1, value: P.N, explain: 'More masses at the same spacing make a longer chain: its modes crowd closer together along the same dispersion curve.' });
   else put('N', P.N);
   if (C0.has('start')) F.choice({ key: 'start', label: 'Start', options: [['mode', 'One mode'], ['pluck', 'Pluck one mass'], ['pulse', 'A pulse']], value: P.start === 'custom' ? 'mode' : P.start, explain: 'A normal mode keeps its shape; anything else is a mixture of modes, each at its own frequency.' });
   else put('start', P.start);
@@ -122,7 +123,7 @@ export async function mount(F, P0) {
   F.onChange(() => { B = build(); S.t = still ? P.time || 0 : 0; draw(); });
 
   const pc = chainCv && new Plot(chainCv.canvas, { x: [0, 1], y: [-1, 1], grid: false, axes: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
-  const pg = galCv && new Plot(galCv.canvas, { x: [0, 1], y: [0, 1], grid: false, axes: false, pad: { l: 8, r: 8, t: 6, b: 6 } });
+  const pg = galCv && new Plot(galCv.canvas, { x: [0, 1], y: [0, 1], grid: false, axes: false, pad: { l: P.bc === 'periodic' ? 78 : 50, r: P.labels ? 108 : 12, t: 6, b: 6 } });
   const pd = dispCv && new Plot(dispCv.canvas, { x: [0, 1], y: [0, 1], xlabel: 'q (rad/m)', ylabel: 'ω (rad/s)', pad: { l: 52, r: 18, t: 16, b: 36 } });
 
   // a beaded string: masses at world (s, y) with lines between, walls or ring copies at the ends
@@ -236,8 +237,8 @@ export async function mount(F, P0) {
         pg.fn((s) => y0 + 0.36 * c * f(s), { domain: [0, B.bc === 'periodic' ? L + 1 : L], color: 'ink4', width: 1, dash: [2, 4] });
       }
       const lab = B.bc === 'periodic' ? `p = ${m.n}${m.part === 'sin' ? ' (sin)' : ''}` : `n = ${m.n}`;
-      pg.text(lab, pg.L + 4, pg.Y(y0 + 0.4), { screen: true, color: 'ink2', size: 11, weight: 650 });
-      if (P.labels) pg.text(`ω = ${(+(m.w * w0).toPrecision(3))} rad/s`, pg.R - 4, pg.Y(y0 + 0.4), { screen: true, align: 'right', color: 'ink3', size: 11 });
+      pg.text(lab, pg.L - 12, pg.Y(y0), { screen: true, align: 'right', color: 'ink2', size: 11, weight: 650 });
+      if (P.labels) pg.text(`ω = ${(+(m.w * w0).toPrecision(3))} rad/s`, pg.R + 12, pg.Y(y0), { screen: true, color: 'ink3', size: 11 });
     });
     B.scale = save;
   }
@@ -280,7 +281,8 @@ export async function mount(F, P0) {
       ratio: ['$\\omega_n / vq_n$', q > 0 ? trim(w / (v * q), 4) : '\\text{—}'], cutoff: ['cutoff $2\\sqrt{k/m}$', `${trim(2 * w0)}\\ \\mathrm{rad/s}`],
       v: ['$v = a\\sqrt{k/m}$', `${trim(v)}\\ \\mathrm{m/s}`], t: ['$t$', `${trim(S.t, 2)}\\ \\mathrm{s}`],
     };
-    F.readout(want.filter((k) => val[k]).map((k) => [val[k][0], hide.has(k) ? '?' : val[k][1]]));
+    const modal = new Set(['n', 'q', 'omega', 'f', 'vq', 'ratio']);
+    F.readout(want.filter((k) => val[k] && (B.st === 'mode' || !modal.has(k))).map((k) => [val[k][0], hide.has(k) ? '?' : val[k][1]]));
   }
 
   function draw() {
@@ -315,7 +317,7 @@ export function validate(P) {
   if (!Array.isArray(P.panels) || !P.panels.length || P.panels.some((p) => !PANELS.includes(p))) out.push(`wv-chain: panels must be a list of ${PANELS.join(', ')}`);
   if (Array.isArray(P.panels) && P.panels.includes('gallery') && P.N > 8) out.push('wv-chain: the gallery shows at most 8 modes (N ≤ 8)');
   for (const r of [...(P.hide || []), ...(P.readouts || [])]) if (!ROWS.includes(r)) out.push(`wv-chain: unknown readout “${r}”`);
-  if (!(P.maxN >= P.N && P.maxN <= 60)) out.push('wv-chain: maxN must be at least N and at most 60');
+  if (!(P.maxN >= 1 && P.maxN <= 60)) out.push('wv-chain: maxN must be from 1 to 60');
   if (![true, false, 'never'].includes(P.play)) out.push('wv-chain: play must be true, false or “never”');
   if (!(P.time >= 0)) out.push('wv-chain: time must be zero or positive');
   return out;

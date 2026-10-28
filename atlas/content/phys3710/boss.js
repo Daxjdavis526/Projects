@@ -21,6 +21,7 @@ import { st, seg, label, r6 } from './_geom.js';
 import { AME, binding, tn, uni } from './_nuclear.js';
 
 const t = String.raw;
+const NB = '\u00a0';   // a no-break space, between a number and its unit in prose
 const LN2 = Math.LN2;
 const r4 = (v) => +(+v).toFixed(4);
 
@@ -68,12 +69,12 @@ export function fissionCase(r) {
 const ZV = '(x/(1.98 + 0.0155*x^(2/3)))';
 const SEMF_BA = `15.75 - 17.8*x^(-1/3) - 0.711*${ZV}*(${ZV} - 1)*x^(-4/3) - 23.7*(x - 2*${ZV})^2/x^2`;
 function bindingPic(C) {
-  const pts = [['U-235', C.bU, 'warn', -10, 4, 'right'], ['Xe-140', C.bXe, 'accent', 8, 16], ['Sr-94', C.bSr, 'accent', 8, 16]];
+  const pts = [['U-235', C.bU, 'warn', -8, 14, 'right'], ['Xe-140', C.bXe, 'accent', 8, 16], ['Sr-94', C.bSr, 'accent', 8, 16]];
   return {
     type: 'graph',
     params: {
       x: [0, 250], y: [7.2, 9.0], aspect: 'wide', axesAt: 'edge', xlabel: 'mass number A', ylabel: 'B/A (MeV per nucleon)', yticks: 4,
-      curves: [{ fn: SEMF_BA, domain: [24, 250], color: 'ink3', width: 2, label: 'liquid drop', labelAt: 200, labelDx: -10, labelDy: -16 }],
+      curves: [{ fn: SEMF_BA, domain: [24, 250], color: 'ink3', width: 2 }],
       points: pts.map(([n, b, col, dx, dy, al]) => ({ x: +n.split('-')[1], y: b, r: 5, color: col, label: uni(n), labelDx: dx, labelDy: dy, ...(al ? { labelAlign: al } : {}) })),
       alt: 'Binding energy per nucleon against mass number, with uranium-235 low on the right and the two fission fragments higher in the middle',
     },
@@ -204,21 +205,21 @@ function chamberPic(L) {
   ];
   const arrows = [{ from: [-6.4, 0], to: [-0.25, 0], color: 'violet', width: 2.4 }];
   const points = [
-    { x: 0, y: 0, r: 5, color: 'ink' }, label(-6.4, 0, 'antiprotons from the trap', 'violet', 0, -12, 'left'), label(0, 0, 'hydrogen', 'ink2', -8, 18, 'right'),
+    { x: 0, y: 0, r: 5, color: 'ink' }, label(-6.4, 0, 'antiprotons', 'violet', 0, -12, 'left'),
     label(5.4, 2.3, 'magnetic nozzle', 'ink3', 0, -6, 'center'), label(11, 0.6, 'π⁺', 'warn', 8, 0, 'left'), label(10.6, -1.3, 'π⁻', 'accent', 8, 0, 'left'),
     label(-2.6, -2.6, 'γ (from a π⁰)', 'gold', -6, 0, 'right'), label(-1.8, 2.6, 'π⁺', 'warn', -8, 0, 'right'),
   ];
   if (L) {
-    arrows.push({ from: [1.4, -3.0], to: [11.2, -3.0], color: 'ink2', width: 1.6 });
-    points.push(label(6.3, -3.0, `nozzle, ${L} m`, 'ink2', 0, -10, 'center'));
+    arrows.push({ from: [1.4, -3.3], to: [11.2, -3.3], color: 'ink2', width: 1.6 });
+    points.push(label(6.3, -3.3, `nozzle, ${L} m`, 'ink2', 0, 14, 'center'));
   }
   return {
     type: 'graph',
-    params: { x: [-7.5, 13], y: [-3.6, 3.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, curves, arrows, points,
+    params: { x: [-7.5, 13], y: [-4.1, 3.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', xticks: 0, yticks: 0, curves, arrows, points,
       alt: 'An antiproton beam meets a hydrogen target; charged pion tracks spiral away along a flared magnetic nozzle, and photons from neutral pions fly off straight' },
     caption: L === undefined
-      ? 'The antimatter stage’s reaction chamber, schematic and not to scale. Charged particles spiral along the nozzle’s magnetic field; neutral pions decay at once into photons, which no field can steer.'
-      : 'The reaction chamber and nozzle, schematic and not to scale: tracks are drawn as gentle spirals, and the field coils are left out. The neutral pions’ photons fly off in every direction and are lost as thrust.',
+      ? 'The antimatter stage’s reaction chamber, schematic and not to scale; the dot where the tracks meet is the hydrogen target. Charged particles spiral along the nozzle’s magnetic field; neutral pions decay at once into photons, which no field can steer.'
+      : 'The reaction chamber and nozzle, schematic and not to scale (the dot where the tracks meet is the hydrogen target): tracks are drawn as gentle spirals, and the field coils are left out. The neutral pions’ photons fly off in every direction and are lost as thrust.',
   };
 }
 
@@ -289,7 +290,7 @@ function mapPic(C) {
   return {
     type: 'graph',
     params: {
-      x: [-7, 7], y: [-7, 7], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x (light-years)', ylabel: 'y (light-years)', grid: true,
+      x: [-7, 7], y: [-7, 7], equal: true, aspect: '', axesAt: 'edge', xlabel: 'x (light-years)', ylabel: 'y (light-years)', grid: true,
       curves: [seg(C.xP, C.yP, C.xQ, C.yQ, 'ink3', 1.4, true)],
       points: [
         { x: 0, y: 0, r: 6, color: 'gold', label: 'Sun', labelDx: 8, labelDy: 14 },
@@ -413,7 +414,7 @@ export default boss({
             ];
             if (R < 1) errs.push({ value: -Math.log(1 - R) / l2, feedback: t`$A_2/A_1 = 1 - e^{-\lambda_2t}$ is secular equilibrium’s ingrowth, for a parent that barely decays. Zirconium-95 lives only twice as long as niobium-95, so the ratio heads for $T_1/(T_1 - T_2) = ${tex(Req, 4)}$, not 1.` });
             return {
-              prompt: t`To prove its reactor, Gannet’s team ran it at full power for one day and then shut it down. Fission makes zirconium-95 ($T_{1/2} = 64.03$ d), which beta-decays to niobium-95 ($T_{1/2} = 34.99$ d); almost no niobium-95 is made directly, so at shutdown its activity was close to zero. On launch day a gamma-ray spectrometer on the reactor reads the activity ratio $A_{\text{Nb}}/A_{\text{Zr}} = ${R}$. Treating the one-day run as an instant, how many days before launch was the reactor shut down?`,
+              prompt: t`To prove its reactor, Gannet’s team ran it at full power for one day and then shut it down. Fission makes zirconium-95 ($T_{1/2} = 64.03\ \text{d}$), which beta-decays to niobium-95 ($T_{1/2} = 34.99\ \text{d}$); almost no niobium-95 is made directly, so at shutdown its activity was close to zero. On launch day a gamma-ray spectrometer on the reactor reads the activity ratio $A_{\text{Nb}}/A_{\text{Zr}} = ${R}$. Treating the one-day run as an instant, how many days before launch was the reactor shut down?`,
               answer: key, units: 'd', tol: { rel: 0.01 },
               errors: apart(errs, key),
               hints: [
@@ -433,7 +434,7 @@ export default boss({
             const C = fuelCase(r);
             const { F, m, Q, Mc2, beta, v, mAlpha } = C;
             const names = [...new Set([...F.react, ...F.prod])];
-            const list = names.map((n) => t`$${tn(n)}$ ${sig(AME[n][1], 10)} u`).join(', ');
+            const list = names.map((n) => t`$${tn(n)}$ $${sig(AME[n][1], 10)}\ \text{u}$`).join(', ');
             return {
               prompt: t`Gannet’s first stage would burn ${F.name}: $$${F.eq}.$$ Atomic masses (AME2020): ${list}. Suppose all the energy released went into the products’ kinetic energy, and every product flew straight out of the back at one common speed — the fuel’s ideal exhaust speed. What is that speed, in km/s? ($1\ \text{u} = 931.494$ MeV/$c^2$, $c = 2.998\times10^{5}$ km/s; it is slow enough for $K = \tfrac12 Mv^2$, with $M$ the products’ mass.)`,
               answer: v, units: 'km/s', tol: { rel: 0.01 },
@@ -499,7 +500,11 @@ export default boss({
                 'Three records each fail exactly one test. The survivor is the one that conserves charge, baryon number, each lepton number, energy and momentum.',
               ],
               teach: 'Charge, baryon number and each lepton family number are conserved in every process ever observed; energy and momentum forbid the rest.',
-              explain: t`${ok.tex} is allowed: ${ok.why} The others: ${bad.map((b) => `${b.tex} — ${b.why}`).join(' ')}`,
+              explain: t`${ok.tex} is allowed. ${ok.why}
+
+The other three each break one law:
+
+${bad.map((b) => `- ${b.tex}: ${b.why}`).join('\n')}`,
               visual: chamberPic(),
             };
           },
@@ -520,7 +525,7 @@ export default boss({
             const errs = lens.map((x) => ({ value: val(x.l), feedback: x.fb }));
             if (mode === 'frac') errs.push({ value: (100 * C.L) / ell, feedback: t`$L/\ell$ is only the first term of $1 - e^{-L/\ell}$: decays thin out the beam as it goes, so the fraction decayed grows more slowly than the length.` });
             else errs.push({ value: (ell * C.f) / 100, feedback: t`$L = f\ell$ assumes the decays are spread evenly. The survivors fall off as $e^{-L/\ell}$, so set $1 - e^{-L/\ell} = f$.` });
-            const setup = t`An antiproton annihilating at rest with a proton turns $2m_pc^2 = 1876.5$ MeV into pions — on average five: three charged ($\pi^\pm$: $m_\pi c^2 = 139.57$ MeV, mean life $\tau = 26.03$ ns) and two neutral. As a model, give each of the five pions an equal share of that energy as its total energy $E$. The charged pions fly straight down Gannet’s magnetic nozzle and must leave it before they decay to muons.`;
+            const setup = t`An antiproton annihilating at rest with a proton turns $2m_pc^2 = 1876.5\ \text{MeV}$ into pions — on average five: three charged ($\pi^\pm$: $m_\pi c^2 = 139.57\ \text{MeV}$, mean life $\tau = 26.03\ \text{ns}$) and two neutral. As a model, give each of the five pions an equal share of that energy as its total energy $E$. The charged pions fly straight down Gannet’s magnetic nozzle and must leave it before they decay to muons.`;
             return {
               prompt: mode === 'frac'
                 ? t`${setup} The nozzle is ${C.L} m long. What percentage of the charged pions decay inside it? ($c = 2.998\times10^{8}$ m/s)`
@@ -557,7 +562,7 @@ export default boss({
             const errs = ask === 'beta'
               ? [{ value: bOf(Kd), feedback: fbD }, { value: bOf(Kc), feedback: fbC }, { value: Math.sqrt((2 * K) / MP), feedback: t`The kinetic energy at threshold is right, but $K = \tfrac12mv^2$ is Newton’s. At these energies use $K = (\gamma - 1)m_pc^2$.` }]
               : [{ value: Kd, feedback: fbD }, { value: Kc, feedback: fbC }];
-            const masses = t`$m_pc^2 = 938.27$ MeV, $m_nc^2 = 939.57$ MeV, $m_{\pi^\pm}c^2 = 139.57$ MeV, $m_{\pi^0}c^2 = 134.98$ MeV`;
+            const masses = t`$m_pc^2 = 938.27\ \text{MeV}$, $m_nc^2 = 939.57\ \text{MeV}$, $m_{\pi^\pm}c^2 = 139.57\ \text{MeV}$, $m_{\pi^0}c^2 = 134.98\ \text{MeV}$`;
             return {
               prompt: t`Interstellar hydrogen is nearly at rest in the Galaxy, so in Gannet’s frame it streams onto the forward shield at the ship’s own speed: a proton beam striking the protons in the shield’s hydrogen-rich plastic, which are at rest. The radiation team worries about collisions that make ${R.what}, $$${R.tex}.$$ ${ask === 'beta' ? 'Above what cruise speed can this happen? Give the speed as a fraction of $c$, and treat the shield’s protons as free and at rest.' : 'What is the least kinetic energy, in Gannet’s frame, an interstellar proton needs to make it happen, in MeV? Treat the shield’s protons as free and at rest.'} (${masses})`,
               answer: key, ...(ask === 'K' ? { units: 'MeV' } : {}), tol: { rel: ask === 'beta' ? 0.004 : 0.005 },
@@ -569,7 +574,7 @@ export default boss({
               ],
               teach: 'A threshold comes from the invariant mass: the collision must supply s = (Σm)² in its centre-of-momentum frame, and a target at rest makes that expensive.',
               explain: t`The products’ total rest energy is $\sum mc^2 = ${tex(M, 6)}$ MeV. With the target at rest, $s = 2m_p^2 + 2m_pE$ (with $c = 1$), so $$K_{\text{th}} = \frac{(${tex(M, 6)})^2 - (${tex(2 * MP, 5)})^2}{${tex(2 * MP, 5)}} = ${tex(K, 4)}\ \text{MeV},$$ ${ask === 'beta' ? t`which needs $\gamma = 1 + ${tex(K, 4)}/938.27 = ${tex(g, 5)}$, so $\beta = ${tex(beta, 4)}$.` : t`about $${tex(K / Kd, 3)}$ times the $${tex(Kd, 4)}$ MeV of new rest energy: the rest goes into moving the products along.`} Gannet’s cruise speed of about half the speed of light keeps it below this threshold, but not far below. Real shield protons sit inside carbon nuclei and jiggle about with their Fermi motion, which lets a few pions appear somewhat below the free-proton threshold. At any cruise speed the bigger hazard is interstellar dust: a grain of a microgram at $0.5c$ hits with the energy of a few kilograms of TNT.`,
-              visual: { type: 'mp-collide', params: { scenario: 'pion', products: R.products, K: 145.2, controls: false, readout: false }, caption: t`An interstellar proton at $0.5c$ ($K = 145$ MeV) on a shield proton at rest, in Gannet’s frame, on the energy–momentum diagram. The total (gold) must reach the red hyperbola, the products’ total mass, to make them; at this energy it falls short. Drawn to scale.` },
+              visual: { type: 'mp-collide', params: { scenario: 'pion', products: R.products, K: 40, controls: false, readout: false, hide: ['mass'] }, caption: t`An interstellar proton at $0.28c$ ($K = 40\ \text{MeV}$) on a shield proton at rest, in Gannet’s frame, on the energy–momentum diagram. The total (gold) must reach the red hyperbola, the products’ total mass, to make them; at this energy it falls short. Drawn to scale.` },
             };
           },
         }),
@@ -581,11 +586,11 @@ export default boss({
             const up = mode === 'up';
             return {
               prompt: up
-                ? t`Coasting, Gannet moves straight away from the Sun with rapidity $\varphi = ${phi}$. Its laser receiver is built around detectors for ${lam} nm light. At what wavelength must mission control’s transmitter shine so that the light arrives at ${lam} nm in Gannet’s frame, in nm?`
-                : t`Coasting, Gannet moves straight away from the Sun with rapidity $\varphi = ${phi}$. Its laser transmitter shines at ${lam} nm in its own frame. At what wavelength does mission control receive it, in nm?`,
+                ? t`Coasting, Gannet moves straight away from the Sun with rapidity $\varphi = ${phi}$. Its laser receiver is built around detectors for ${lam}${NB}nm light. At what wavelength must mission control’s transmitter shine so that the light arrives at ${lam}${NB}nm in Gannet’s frame, in nm?`
+                : t`Coasting, Gannet moves straight away from the Sun with rapidity $\varphi = ${phi}$. Its laser transmitter shines at ${lam}${NB}nm in its own frame. At what wavelength does mission control receive it, in nm?`,
               answer: key, units: 'nm', tol: { rel: 0.005 },
               errors: apart([
-                { value: up ? lam * D : lam / D, feedback: up ? t`Light from home arrives *stretched* (redshifted) at a receding ship, so mission control must send a *shorter* wavelength: $\lambda_{\text{sent}} = \lambda_{\text{received}}\,e^{-\varphi}$.` : t`Light from a receding source arrives *stretched*: $\lambda_{\text{received}} = \lambda_{\text{sent}}\,e^{\varphi}$, longer than ${lam} nm.` },
+                { value: up ? lam * D : lam / D, feedback: up ? t`Light from home arrives *stretched* (redshifted) at a receding ship, so mission control must send a *shorter* wavelength: $\lambda_{\text{sent}} = \lambda_{\text{received}}\,e^{-\varphi}$.` : t`Light from a receding source arrives *stretched*: $\lambda_{\text{received}} = \lambda_{\text{sent}}\,e^{\varphi}$, longer than ${lam}${NB}nm.` },
                 { value: up ? lam / g : lam * g, feedback: t`$\gamma = \cosh\varphi$ is only the time-dilation part, the transverse Doppler effect. Along the line of sight the growing distance stretches the waves too: the factor is $\gamma(1 + \beta) = e^{\varphi}$.` },
                 { value: up ? lam / (1 + beta) : lam * (1 + beta), feedback: t`$1 + \beta$ is the classical Doppler factor, which leaves out time dilation. The relativistic factor is $\gamma(1 + \beta) = e^{\varphi}$.` },
                 { value: up ? lam / (D * D) : lam * D * D, feedback: t`$e^{2\varphi}$ is the factor for a radar echo, which is shifted twice — going out and coming back. A one-way link is shifted once.` },
@@ -653,7 +658,7 @@ export default boss({
               teach: 'A moving observer’s “now” is a line tilted toward the light cone: t′ = γ(t − βx), so events farther along +x happen earlier for them.',
               explain: t`With $\gamma = ${tex(g, 4)}$, $t' = \gamma(t - ${beta}x)$ gives ${byG.map((e) => t`$t'_${e.name} = ${tex(g * wv(e), 3)}$`).join(', ')} years. So Gannet’s order is ${byG.map((e) => e.name).join(', ')}, while the Sun’s frame has ${byS.map((e) => e.name).join(', ')}. Only pairs separated by a spacelike interval can swap: Gannet’s lines of simultaneity tilt by the same angle as its time axis, toward the light cone, so events far along $+x$ slide earlier.`,
               visual: st({
-                x: [-4.4, 5.4], t: [-0.8, 5.4], aspect: 'square', boosted: { beta, ticks: 0, names: ['Gannet’s t′', 'Gannet’s x′'] }, cones: [[0, 0, 'future']],
+                x: [-4.4, 5.4], t: [-0.8, 5.4], aspect: 'wide', boosted: { beta, ticks: 0, names: ['Gannet’s t′', 'Gannet’s x′'] }, cones: [[0, 0, 'future']],
                 events: ev.map((e) => [e.x, e.t, e.name, 'accent2', 9, -9]),
                 caption: t`The Sun’s frame ($c = 1$, years and light-years), its light cone from the origin dashed, and Gannet’s axes for $\beta = ${beta}$ in gold. Gannet’s lines of simultaneity are parallel to its gold $x'$ axis.`,
               }),

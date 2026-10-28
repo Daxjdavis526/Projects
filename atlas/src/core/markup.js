@@ -98,7 +98,7 @@ export const renderInline = (text, math) => inline(String(text ?? ''), math);
 
 // TeX command names that never appear in math without their backslash: in an
 // ordinary JS string '\int' silently becomes 'int' and '\sqrt' 'sqrt'
-const BARE_COMMAND = /(?<![\\A-Za-z])(frac|dfrac|tfrac|sqrt|int|iint|oint|sum|prod|lim|vec|hat|cdot|times|infty|partial|nabla|alpha|beta|gamma|delta|epsilon|varepsilon|theta|lambda|sigma|omega|Omega|Delta|Gamma|Sigma|Lambda|displaystyle|left|right|mathrm|mathbf|approx|equiv|propto|rightarrow|Rightarrow|leq|geq|neq|quad|qquad)(?![A-Za-z])/;
+const BARE_COMMAND = /(?<![\\A-Za-z])(frac|dfrac|tfrac|sqrt|int|iint|oint|sum|prod|lim|vec|hat|cdot|times|infty|partial|nabla|alpha|beta|gamma|delta|epsilon|varepsilon|theta|lambda|sigma|omega|Omega|Delta|Gamma|Sigma|Lambda|displaystyle|left|right|mathrm|mathbf|approx|equiv|propto|rightarrow|Rightarrow|leq|geq|neq|quad|qquad|circ|pm|mp|cdots|ldots|rho|tau|phi|varphi|psi|chi|eta|zeta|kappa|xi|pi|ell|hbar|langle|rangle)(?![A-Za-z])/;
 
 /**
  * Characters that betray a TeX command eaten by a JS string escape (\theta → TAB + "heta"),

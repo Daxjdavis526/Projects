@@ -335,7 +335,7 @@ export default lesson({
           errors: [{ value: ((d * 180) / Math.PI) * k, feedback: 'That is per orbit. A year holds about 1130 orbits of 7.75 hours.' }],
           hints: [t`Per orbit: $\Delta\phi = 6\pi GM/[c^2 a(1 - e^2)]$ with $GM/c^2 = ${sci(mLen(M))}$ m.`, t`Per orbit that is $${sci((d * 180) / Math.PI)}^\circ$; there are $${sci(YEAR / Pb)}$ orbits in a year.`],
           teach: 'In a compact binary pulsar the same precession formula gives degrees per year — 35 000 times Mercury’s rate.',
-          explain: t`Per orbit $${sci((d * 180) / Math.PI)}^\circ$, times $${sci(YEAR / Pb)}$ orbits a year: $${sci(perYear)}^\circ$ per year${k === 10 ? `, or $${sci(perYear * 10)}^\circ$ per decade` : ''}. The measured value is about 4.2° per year — gravity far stronger than in the Solar System, still as general relativity says.`,
+          explain: t`Per orbit $${sci((d * 180) / Math.PI)}^\circ$, times $${sci(YEAR / Pb)}$ orbits a year: $${sci(perYear)}^\circ$ per year${k === 10 ? t`, or $${sci(perYear * 10)}^\circ$ per decade` : ''}. The measured value is about 4.2° per year — gravity far stronger than in the Solar System, still as general relativity says.`,
         };
       },
     }),

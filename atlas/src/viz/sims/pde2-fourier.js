@@ -19,6 +19,7 @@
 //       t: 0, tmax: 4,         // the time (s) — for laplace, the height y (m) — and its slider's top
 //       x: 8, k: 8,            // the windows: −x … x (m) and −k … k (rad/m)
 //       mult: true,            // draw the multiplier G(k)
+//       labels: true,          // the text inside the panels (false hides it, so a picture does not name its equation)
 //       controls: null,        // true, false, or a list of: eq profile w D c beta t
 //       play: null, readout: true,
 //       hide: [],              // readouts shown as “?”: peak spread
@@ -27,7 +28,7 @@
 import { Plot } from '../plot.js';
 import * as M from '../model/pde2-fourier.js';
 
-export const defaults = { eq: 'heat', eqs: null, profile: 'gauss', w: 1, D: 0.5, c: 1, beta: 0.5, t: 0, tmax: 4, x: 8, k: 8, mult: true, controls: null, play: null, readout: true, hide: [] };
+export const defaults = { eq: 'heat', eqs: null, profile: 'gauss', w: 1, D: 0.5, c: 1, beta: 0.5, t: 0, tmax: 4, x: 8, k: 8, mult: true, labels: true, controls: null, play: null, readout: true, hide: [] };
 const CONTROLS = ['eq', 'profile', 'w', 'D', 'c', 'beta', 't'];
 const HIDE = ['peak', 'spread'];
 const LABEL = { heat: 'heat  uₜ = D uₓₓ', wave: 'wave  uₜₜ = c² uₓₓ', laplace: 'Laplace in y > 0', schrod: 'dispersive  uₜ = iβ uₓₓ' };
@@ -71,10 +72,10 @@ export function mount(F, P0) {
     px.fn((x) => M.f0(pr, w, x), { color: 'ink3', width: 1.4, dash: [5, 4], samples: 600 });
     if (eq === 'schrod') {
       px.path(xs.map((x, i) => [x, ab[i]]), { color: 'gold', width: 2 });
-      px.text('|u|', xs[Math.round(N * 0.5)], ab[Math.round(N * 0.5)], { color: 'gold', size: fs, dx: 8, dy: -10 });
+      if (P.labels !== false) px.text('|u|', xs[Math.round(N * 0.5)], ab[Math.round(N * 0.5)], { color: 'gold', size: fs, dx: 8, dy: -10 });
     }
     px.path(xs.map((x, i) => [x, re[i]]), { color: 'accent', width: 2.4 });
-    px.text(eq === 'schrod' ? 'Re u (blue), |u| (gold)' : eq === 'laplace' ? `u along the line y = ${f3(s)} m` : `u at t = ${f3(s)} s`, P.x, top, { color: 'ink2', align: 'right', size: fs, dx: -6, dy: 12 });
+    if (P.labels !== false) px.text(eq === 'schrod' ? 'Re u (blue), |u| (gold)' : eq === 'laplace' ? `u along the line y = ${f3(s)} m` : `u at t = ${f3(s)} s`, P.x, top, { color: 'ink2', align: 'right', size: fs, dx: -6, dy: 12 });
     // k-space
     const F0 = M.fhat(pr, w, 0);
     pk.setView([-P.k, P.k], [-0.45 * F0, 1.25 * F0]);
@@ -83,8 +84,8 @@ export function mount(F, P0) {
     if (P.mult !== false) pk.fn((k) => F0 * M.multiplier(eq, k, s, p)[0], { color: 'gold', width: 1.8, samples: 800 });
     pk.fn((k) => M.fhat(pr, w, k) * M.multiplier(eq, k, s, p)[0], { color: 'accent', width: 2.4, samples: 800 });
     if (eq === 'schrod') pk.fn((k) => M.fhat(pr, w, k) * M.multiplier(eq, k, s, p)[1], { color: 'violet', width: 1.4, dash: [3, 3], samples: 800 });
-    pk.text(`gold: multiplier ${eq === 'schrod' ? '(real part) ' : ''}× f̂(0)`, P.k, 1.25 * F0, { color: 'gold', align: 'right', size: fs, dx: -6, dy: 12 });
-    pk.text(eq === 'schrod' ? 'blue, violet: Re û, Im û' : 'blue: û = f̂ G', P.k, 1.25 * F0, { color: 'accent', align: 'right', size: fs, dx: -6, dy: 28 });
+    if (P.labels !== false) pk.text(`gold: multiplier ${eq === 'schrod' ? '(real part) ' : ''}× f̂(0)`, P.k, 1.25 * F0, { color: 'gold', align: 'right', size: fs, dx: -6, dy: 12 });
+    if (P.labels !== false) pk.text(eq === 'schrod' ? 'blue, violet: Re û, Im û' : 'blue: û = f̂ G', P.k, 1.25 * F0, { color: 'accent', align: 'right', size: fs, dx: -6, dy: 28 });
     if (P.readout !== false) {
       const q = (k, v) => (hide.has(k) ? '?' : v);
       F.readout([

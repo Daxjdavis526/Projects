@@ -45,8 +45,8 @@ export function mount(F, P0) {
   const ctl = (key, make) => (wanted.includes(key) ? make() : (F.params[key] = P[key]));
   ctl('shape', () => F.choice({ key: 'shape', label: 'Membrane', options: [['disk', 'circular drumhead'], ['rect', 'rectangular panel']], value: P.shape, explain: 'The same wave equation, fixed along a different edge.' }));
   const disk = () => F.params.shape === 'disk';
-  ctl('m', () => F.slider({ key: 'm', label: 'Mode number $m$', min: P.shape === 'rect' && !wanted.includes('shape') ? 1 : 0, max: 6, step: 1, value: P.m, unit: '', explain: 'Drumhead: the number of nodal diameters (straight lines through the centre). Panel: half-waves along $x$ (at least 1).' }));
-  ctl('n', () => F.slider({ key: 'n', label: 'Mode number $n$', min: 1, max: 5, step: 1, value: P.n, unit: '', explain: 'Drumhead: the $n$-th zero of $J_m$ sits on the rim, so $n - 1$ nodal circles lie inside. Panel: half-waves along $y$.' }));
+  ctl('m', () => F.slider({ key: 'm', label: 'Mode number $m$', min: P.shape === 'rect' && !wanted.includes('shape') ? 1 : 0, max: 6, step: 1, value: P.m, unit: '', explain: P.shape === 'disk' ? 'The number of nodal diameters: straight nodal lines through the centre.' : 'The number of half-waves across $x$ (at least 1).' }));
+  ctl('n', () => F.slider({ key: 'n', label: 'Mode number $n$', min: 1, max: 5, step: 1, value: P.n, unit: '', explain: P.shape === 'disk' ? 'The $n$-th zero of $J_m$ sits on the rim, so $n - 1$ nodal circles lie inside.' : 'The number of half-waves along $y$.' }));
   ctl('aspect', () => F.slider({ key: 'aspect', label: 'Side ratio $b/a$', min: 0.4, max: 2, step: 0.05, value: P.aspect, unit: '', explain: 'Panel only: a square ($b/a = 1$) has pairs of modes sharing one frequency; stretch it and the pairs split.' }));
   const toggle = P.toggle ?? !F.compact;
   if (toggle) F.choice({ key: '__view', label: 'View', options: [['top', 'from above'], ['3d', 'in 3D']], value: P.view, explain: 'Shading from above shows the nodal lines; the 3D view shows the shape.' });
@@ -56,7 +56,7 @@ export function mount(F, P0) {
   const plot = new Plot(a.canvas, { x: [-1.2, 1.2], y: [-1.1, 1.1], equal: true, xlabel: '', ylabel: '', axes: false, grid: false });
   const view = new View3D(a.canvas, { yaw: -0.6, pitch: 0.62, dist: 8.5 });
   view.onChange = () => { if (F.params.__view === '3d') draw(); };
-  const lad = P.ladder !== false ? F.canvas({ label: 'The frequency ladder: each mode’s frequency divided by the fundamental’s', height: F.compact ? '92px' : '118px' }) : null;
+  const lad = P.ladder !== false ? F.canvas({ label: 'The frequency ladder: each mode’s frequency divided by the fundamental’s', height: F.compact ? '120px' : '160px' }) : null;
   const lp = lad ? new Plot(lad.canvas, { x: [0, 4], y: [0, 1], xlabel: 'frequency ÷ fundamental', ylabel: '', yticks: 0, grid: false, axesAt: 'edge' }) : null;
   const off = document.createElement('canvas');
 
@@ -162,28 +162,38 @@ export function mount(F, P0) {
   function drawLadder(sh, m, n, asp) {
     const list = M.modeList(sh, P.count, asp);
     const top = Math.max(4, Math.ceil(list[list.length - 1].ratio + 0.3));
-    lp.setView([0, top], [0, 1]);
+    lp.setView([0, top], [0, 1.45]);
     lp.clear();
     const narrow = (lad.canvas.clientWidth || 600) < 520, fs = narrow ? 9.5 : 11;
     if (P.harmonics !== false) for (let k = 1; k <= top; k++) {
-      lp.line(k, 0, k, 0.92, { color: 'ink4', width: 1, dash: [4, 4] });
-      lp.text(`${k}×`, k, 0.92, { color: 'ink3', align: 'center', size: fs, dy: -2 });
+      lp.line(k, 0, k, 1.22, { color: 'ink4', width: 1, dash: [4, 4] });
+      lp.text(`${k}×`, k, 1.33, { color: 'ink3', align: 'center', size: fs });
     }
     const cur = M.modeK(sh, m, n, asp) / M.fundamental(sh, asp);
-    const seen = [];
+    // modes sharing a frequency share one stem; their labels stack
+    const groups = [];
     for (const o of list) {
-      const isCur = o.m === m && o.n === n;
-      if (isCur) continue;
-      lp.line(o.ratio, 0, o.ratio, 0.55, { color: 'accent', width: 2.2 });
-      if (P.labels !== false && !narrow) {
-        const near = seen.filter((r) => Math.abs(r - o.ratio) < 0.12).length;
-        lp.text(`${o.m},${o.n}`, o.ratio, 0.55 + 0.17 * near, { color: 'ink2', align: 'center', size: fs - 1, dy: -3 });
-        seen.push(o.ratio);
-      }
+      const g = groups.find((q) => Math.abs(q.r - o.ratio) < 1e-7);
+      if (g) g.items.push(o); else groups.push({ r: o.ratio, items: [o] });
     }
-    if (cur <= top) {
-      lp.line(cur, 0, cur, 0.78, { color: 'gold', width: 3.2 });
-      lp.text(`(${m},${n})`, cur, 0.78, { color: 'gold', align: 'center', size: fs, dy: -3 });
+    let curDrawn = false;
+    const placed = [];
+    for (const g of groups) {
+      const isCur = Math.abs(g.r - cur) < 1e-7;
+      lp.line(g.r, 0, g.r, 0.45, { color: isCur ? 'gold' : 'accent', width: isCur ? 3.2 : 2.2 });
+      const labels = g.items.filter((o) => !(o.m === m && o.n === n)).map((o) => `${o.m},${o.n}`);
+      // stems closer than about 30 px start their labels one row higher
+      const near = (lad.canvas.clientWidth ? 30 / (lp.X(1) - lp.X(0)) : 0.12);
+      let lvl = 0;
+      while (placed.some((q) => q.l === lvl && Math.abs(q.x - g.r) < near)) lvl++;
+      const rows = labels.length + (isCur ? 1 : 0);
+      for (let i = 0; i < rows; i++) placed.push({ x: g.r, l: lvl + i });
+      if (P.labels !== false && !narrow) labels.forEach((L, i) => lp.text(L, g.r, 0.55 + 0.2 * (lvl + i), { color: 'ink2', align: 'center', size: fs - 1 }));
+      if (isCur) { lp.text(`(${m},${n})`, g.r, 0.55 + 0.2 * (narrow ? 0 : lvl + labels.length), { color: 'gold', align: 'center', size: fs, weight: 700 }); curDrawn = true; }
+    }
+    if (!curDrawn && cur <= top) {
+      lp.line(cur, 0, cur, 0.45, { color: 'gold', width: 3.2 });
+      lp.text(`(${m},${n})`, cur, 0.55, { color: 'gold', align: 'center', size: fs, weight: 700 });
     }
   }
 

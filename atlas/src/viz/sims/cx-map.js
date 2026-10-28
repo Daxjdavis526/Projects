@@ -336,7 +336,7 @@ export function mount(F, P) {
       if (want('twist')) rows.push(['twist $\\arg f\'(z)$', at ? `${n3((at.twist * 180) / Math.PI)}^\\circ` : '\\text{none}']);
       if (want('jac')) rows.push(['Jacobian', `\\begin{bmatrix} ${n3(J[0][0])} & ${n3(J[0][1])} \\\\ ${n3(J[1][0])} & ${n3(J[1][1])} \\end{bmatrix}`]);
       if (want('cr')) { const [r1, r2] = M.crResidual(J); rows.push(['$u_x - v_y$', n3(r1)], ['$u_y + v_x$', n3(r2)]); }
-      if (want('branch') && multi) rows.push(['turns round 0', String(M.branchOf(z0, th))]);
+      if (want('branch') && multi) rows.push(['laps round 0 (branch)', String(M.branchOf(z0, th))]);
     }
     for (const r of Array.isArray(P.readout) ? P.readout : []) {
       if (typeof r !== 'object') continue;

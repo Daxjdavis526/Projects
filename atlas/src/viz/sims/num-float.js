@@ -84,7 +84,7 @@ export function mount(F, P) {
   if (P.controls !== false) {
     if (P.formats !== false) F.choice({ key: 'format', label: 'Format', options: [['f64', 'float64'], ['f32', 'float32']], value: fmt0, explain: 'float64 (Python’s `float`): 1 sign, 11 exponent and 52 fraction bits. float32: 1, 8 and 23.' });
     F.choice({ key: 'preset', label: 'Start from', options: presets.map(([k, label]) => [k, label]), value: P.preset || '', explain: 'Each is rounded to the nearest float; where its true value is known, the red tick on the number line marks it.' });
-    F.slider({ key: 'mag', label: 'Or slide the value', min: 1e-3, max: 1e9, value: Math.min(1e9, Math.max(1e-3, Math.abs(S.value) || 1)), logScale: true, explain: 'Any positive number from $10^{-3}$ to $10^{9}$ (logarithmic slider). Watch the exponent field count powers of two.' });
+    F.slider({ key: 'mag', label: 'Or slide the value', min: 1e-3, max: 1e9, value: Math.min(1e9, Math.max(1e-3, Math.abs(S.value) || 1)), logScale: true, fmt: (v) => texNum(v, 3), explain: 'Any positive number from $10^{-3}$ to $10^{9}$ (logarithmic slider). Watch the exponent field count powers of two.' });
     F.button({ label: '◀ next float down', onClick: () => { S.value = M.nextDown(S.value, F.params.format); S.exact = null; draw(); } });
     F.button({ label: 'next float up ▶', onClick: () => { S.value = M.nextUp(S.value, F.params.format); S.exact = null; draw(); } });
   }
@@ -169,7 +169,8 @@ export function mount(F, P) {
 
     // ── the microscope: neighbouring floats on a number line ──
     if (P.microscope !== false && Number.isFinite(x)) {
-      const yL = top + (oneRow ? ch : 2 * ch + rowGap) + Math.max(48, (H - top - (oneRow ? ch : 2 * ch + rowGap)) * 0.55);
+      const bitsBottom = top + (oneRow ? ch : 2 * ch + rowGap);
+      const yL = bitsBottom + Math.max(48, (H - 18 - bitsBottom) * 0.5);
       const L = 28, R = W - 28;
       const lo2 = M.nextDown(M.nextDown(x, fmt), fmt), hi2 = M.nextUp(M.nextUp(x, fmt), fmt);
       const pts = [lo2, M.nextDown(x, fmt), x, M.nextUp(x, fmt), hi2].filter(Number.isFinite);
@@ -200,10 +201,15 @@ export function mount(F, P) {
     // ── the readout ──
     if (!show) { F.readout([]); return; }
     const ex = M.exactDecimal(x, 24);
-    const exTeX = !Number.isFinite(x) ? texNum(x) : ex.sig.length <= 1 && !ex.cut
-      ? (ex.exp10 >= -4 && ex.exp10 < 16 ? ex.text : `${ex.neg ? '-' : ''}${ex.sig}\\times 10^{${ex.exp10}}`)
-      : ex.exp10 >= -4 && ex.exp10 < 16 && !ex.cut ? ex.text
-        : `${ex.neg ? '-' : ''}${ex.sig[0]}.${ex.sig.slice(1)}${ex.cut ? '\\ldots' : ''}\\times 10^{${ex.exp10}}`;
+    // the exact stored value: plain digits when moderate (cut with …), else d.ddd… × 10ⁿ
+    let exTeX;
+    if (!Number.isFinite(x)) exTeX = texNum(x);
+    else if (x === 0) exTeX = '0';
+    else if (ex.exp10 >= -4 && ex.exp10 < 16) {
+      const sg = ex.sig, k = ex.exp10;
+      const body = k < 0 ? `0.${'0'.repeat(-k - 1)}${sg}` : sg.length > k + 1 ? `${sg.slice(0, k + 1)}.${sg.slice(k + 1)}` : sg + '0'.repeat(k + 1 - sg.length);
+      exTeX = `${ex.neg ? '-' : ''}${body}${ex.cut ? '\ldots' : ''}`;
+    } else exTeX = `${ex.neg ? '-' : ''}${ex.sig[0]}${ex.sig.length > 1 ? '.' + ex.sig.slice(1) : ''}${ex.cut ? '\ldots' : ''}\times 10^{${ex.exp10}}`;
     const fracShown = d.fracBits.slice(0, 12) + (d.fracBits.length > 12 ? '\\ldots' : '');
     const rows = [
       ['value', texNum(x, 17)],

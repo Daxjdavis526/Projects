@@ -29,7 +29,7 @@ export default lesson({
   id: 'st-d.D1.2',
   title: 'Euler’s formula revisited',
   minutes: 11, difficulty: 2,
-  intro: t`You have used $e^{i\theta} = \cos\theta + i\sin\theta$ as a shorthand. Here is why it is not a coincidence but the **only sensible meaning** of an exponential with an imaginary exponent. Ask for the one property that defines $e^{kt}$ — its rate of change is $k$ times itself — with $k = i$:
+  intro: t`You have used $e^{i\theta} = \cos\theta + i\sin\theta$ as a shorthand — for complex roots of oscillator equations ([constant-coefficient equations](#/lesson/math2280.DE-3.2), [complex eigenvalues](#/lesson/math2280.DE-4.3)) and, in disguise, as the turning arrows of [AC phasors](#/lesson/phys2220.B5.1). Here is why it is not a coincidence but the **only sensible meaning** of an exponential with an imaginary exponent. Ask for the one property that defines $e^{kt}$ — its rate of change is $k$ times itself — with $k = i$:
 
 $$\frac{d}{d\theta}\,e^{i\theta} = i\,e^{i\theta}$$
 

@@ -17,7 +17,7 @@ $$\frac{d}{dx}\sin x = \cos x, \qquad \frac{d}{dx}\cos x = -\sin x$$
 
 Both rules rest on two limits, $\dfrac{\sin h}{h} \to 1$ and $\dfrac{\cos h - 1}{h} \to 0$ as $h \to 0$, and both limits hold only in radians. The other four trigonometric functions follow from these two by the quotient rule. Every oscillation in physics — a mass on a spring, an alternating current, a light wave — is built from sines and cosines, and these two rules are why its velocity runs a quarter of a cycle ahead of its position.`,
   symbols: [
-    { tex: 'x', text: 'the angle, in **radians** (one radian is the angle whose arc equals the radius, about $57.3^\circ$)' },
+    { tex: 'x', text: 'the angle, in **radians** (one radian is the angle whose arc equals the radius, about $57.3^\\circ$)' },
     { tex: '\\sin x,\\ \\cos x', text: 'the vertical and horizontal coordinates of the point at angle $x$ on a circle of radius 1 — pure numbers' },
     { tex: '\\frac{d}{dx}', text: 'the derivative with respect to $x$: the slope of the graph, here per radian' },
     { tex: 'h', text: 'a small change in the angle, in radians, used in the limits that prove the rules' },

@@ -143,8 +143,11 @@ export function mount(F, P0) {
       const what = sc.products.map((k) => PLAIN[k] || k).join(' + ');
       const txt = `${what} at rest: ${sig(S.Mth / uf, 4)} ${un}`;
       plot.ctx.font = `500 ${fs - 1}px Inter, system-ui, sans-serif`;
-      const w = plot.ctx.measureText(txt).width, xr = Math.max(plot.X(pl / uf) - 10, plot.L + 6 + w);   // keep it inside the frame
-      plot.text(txt, xr, plot.Y(Math.hypot(S.Mth, pl) / uf) + 6, { screen: true, color: 'bad', align: 'right', size: fs - 1 });
+      const w = plot.ctx.measureText(txt).width, x0 = plot.X(pl / uf) - 10;
+      // beside the left branch when it fits; on a narrow frame that would push it onto the
+      // curve and the total's label, so it goes to the frame's top-left corner instead
+      if (x0 >= plot.L + 6 + w) plot.text(txt, x0, plot.Y(Math.hypot(S.Mth, pl) / uf) + 6, { screen: true, color: 'bad', align: 'right', size: fs - 1 });
+      else plot.text(txt, plot.L + 6, plot.T + 10, { screen: true, color: 'bad', align: 'left', size: fs - 1 });
     }
     hyper(S.M, { color: 'gold', width: 1.3, alpha: 0.7 });
 

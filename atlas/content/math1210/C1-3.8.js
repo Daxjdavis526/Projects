@@ -20,7 +20,7 @@ $$\frac{d}{dx}e^{x} = e^{x}, \qquad \frac{d}{dx}\ln x = \frac{1}{x}$$
 
 Any other base costs a constant factor: $\dfrac{d}{dx}a^{x} = a^{x}\ln a$ and $\dfrac{d}{dx}\log_a x = \dfrac{1}{x\ln a}$. Whatever grows or decays in proportion to its own size — charge leaking off a capacitor, a radioactive sample, the pressure of the atmosphere with height — is an exponential, and its rate of change is proportional to the quantity itself.`,
   symbols: [
-    { tex: 'e', text: 'Euler’s number, $2.71828\ldots$, the base whose exponential has slope $1$ at $x = 0$' },
+    { tex: 'e', text: 'Euler’s number, $2.71828\\ldots$, the base whose exponential has slope $1$ at $x = 0$' },
     { tex: '\\ln x', text: 'the natural logarithm, $\\log_e x$, defined for $x > 0$' },
     { tex: 'a', text: 'any other positive base ($a \\ne 1$), such as $2$ or $10$' },
     { tex: '\\ln a', text: 'the constant factor a base $a$ costs: $\\ln 2 \\approx 0.693$, $\\ln 10 \\approx 2.303$' },

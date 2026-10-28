@@ -50,7 +50,7 @@ export function phasorPic(a, b, caption, o = {}) {
 
 /** The linear chain as a still picture (no controls, no numbers) unless params say otherwise. */
 export function chainPic(params, caption) {
-  return { type: 'wv-chain', params: { controls: [], play: false, readout: false, ...params }, caption };
+  return { type: 'wv-chain', params: { controls: [], panels: ['chain'], play: false, readout: false, ...params }, caption };
 }
 
 /** A plain graph of curves y = f(x). */

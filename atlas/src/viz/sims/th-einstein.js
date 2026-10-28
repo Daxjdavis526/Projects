@@ -233,7 +233,7 @@ function mountPair(F, P) {
     const lp10 = D.lnPeak / LN10;
     const k = !frac && !log && lp10 > 9 ? Math.floor(lp10) : 0;
     const yOf = (lnv) => (frac ? Math.exp(lnv - D.lnPeak) : log ? lnv / LN10 : Math.exp(lnv - k * LN10));
-    const ymax = frac ? 1.08 : log ? Math.max(1, lp10 * 1.08) : yOf(D.lnPeak) * 1.12;
+    const ymax = frac ? 1.08 : log ? Math.max(1, lp10 * 1.08) : yOf(D.lnPeak) * (q <= 10 && P.numbers !== false ? 1.3 : 1.15);
     const ymin = log ? Math.min(0, (D.lnW[0] / LN10) * 0) : 0;
     const pad = frac ? 0.02 : 0.6;
     pb.o.yfmt = log ? pow10Label : undefined;

@@ -212,7 +212,7 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       let item;
       try { item = instantiate(L, def, v); } catch (e) { firstProblem = `variant ${v} threw: ${e.message}`; break; }
       instances++;
-      seen.add(JSON.stringify([item.prompt, item.answer]));
+      seen.add(JSON.stringify([item.prompt, item.answer, item.choices, item.visual]));   // a variant differs in any of what the learner sees
       // a picture; or, for programming, the code itself: an exercise's editor and output,
       // or a listing to read in the prompt (counted before validation, so a broken item
       // does not also read as one without a picture)
