@@ -84,12 +84,12 @@ indistinguishable from a real signal at $f_a$. No processing after sampling can 
         const ans = alias(f, fs);
         return {
           prompt: t`A ${f} Hz vibration is sampled at ${fs} samples per second. At what frequency does it appear in the record?`,
-          visual: { type: 'graph', params: { aspect: 'wide', x: [0, 3 * fs], y: [0, fs / 2 * 1.15], xlabel: 'true frequency (Hz)', ylabel: 'apparent (Hz)', axesAt: 'edge', curves: [{ fn: `abs(x - ${fs}*round(x/${fs}))`, color: 'accent', samples: 3000 }], vlines: [{ x: f, label: `${f} Hz`, color: 'warn' }, { x: fs / 2, label: 'Nyquist', color: 'ink3' }] }, caption: 'The folding diagram: apparent frequency against true frequency. Above Nyquist it zigzags back and forth.' },
+          visual: sampled(f, fs, 16, `A ${f} Hz sine (grey) and its samples at ${fs} per second (gold).`, { showAlias: false }),
           answer: ans, units: 'Hz', tol: { rel: 0, abs: 0.5 },
           errors: [{ value: f - fs, feedback: 'Subtract the *nearest* multiple of the sampling rate, so the result lands between 0 and fs/2.' }, { value: f % fs, feedback: 'The remainder is not always the alias: if it is above fs/2, the alias is fs minus it.' }, { value: fs / 2, feedback: 'The Nyquist frequency is the upper limit, not where everything lands.' }].filter((e) => Math.abs(e.value - ans) > 0.5 && e.value >= 0),
           hints: [t`Find the multiple of ${fs} Hz nearest to ${f} Hz.`, t`$f_a = |f - kf_s|$, which must come out between 0 and $f_s/2 = ${fs / 2}$ Hz.`],
           teach: t`An alias is the distance from $f$ to the nearest multiple of $f_s$ — always between 0 and $f_s/2$.`,
-          explain: t`The nearest multiple is $${Math.round(f / fs)} \times ${fs} = ${Math.round(f / fs) * fs}$ Hz, so $f_a = |${f} - ${Math.round(f / fs) * fs}| = ${ans}$ Hz. On the folding diagram, read up from ${f} Hz.`,
+          explain: t`The nearest multiple is $${Math.round(f / fs)} \times ${fs} = ${Math.round(f / fs) * fs}$ Hz, so $f_a = |${f} - ${Math.round(f / fs) * fs}| = ${ans}$ Hz. The gold dots trace that slower sine.`,
         };
       },
     }),
@@ -99,7 +99,7 @@ indistinguishable from a real signal at $f_a$. No processing after sampling can 
         const B = r.pick([20, 100, 440, 5000, 22050]);
         return {
           prompt: t`What is the lowest sampling rate that can, in principle, represent signals up to ${B} Hz without aliasing?`,
-          visual: sampled(3, 6, 12, 'A 3 Hz sine sampled at exactly 6 Hz: right at the limit, the samples can fall anywhere on the wave — here they land near its zero crossings.', { showAlias: false, T: 2 }),
+          visual: sampled(3, 6, 12, 'A 3 Hz sine sampled at exactly 6 Hz: right at the limit, the samples can fall anywhere on the wave — here they land exactly on its zero crossings.', { showAlias: false, T: 2 }),
           answer: 2 * B, units: 'Hz', tol: { rel: 0, abs: 0.5 },
           errors: [{ value: B, feedback: 'Sampling at the signal’s own frequency catches it at the same phase every time: it looks constant. You need more than two samples per cycle.' }],
           hints: ['The Nyquist frequency is half the sampling rate.'],

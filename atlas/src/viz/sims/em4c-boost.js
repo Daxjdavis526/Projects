@@ -115,7 +115,7 @@ export function mount(F, P0) {
       const [ux, uy] = proj([1, 0, 0]), L = 2 * b;
       const cx = pf.vx1 - 0.18 * (pf.vx1 - pf.vx0), cy = pf.vy0 + 0.3 * (pf.vy1 - pf.vy0);
       pf.arrow(cx - (ux * L) / 2, cy - (uy * L) / 2, cx + (ux * L) / 2, cy + (uy * L) / 2, { color: 'ink2', width: 2.4 });
-      if (P.labels !== false) pf.text(`observer, β = ${b.toFixed(2).replace("-", "−")}`, cx, cy, { color: 'ink2', size: 11.5, dy: 24, align: 'center' });
+      if (P.labels !== false) pf.text(`observer, β = ${b.toFixed(2).replace("-", "−")}`, cx, cy - Math.abs((uy * L) / 2), { color: 'ink2', size: 11.5, dy: 14, align: 'center' });
     }
     const arrow = (v, col, label, ghost) => {
       if (Math.hypot(...v) * s < 0.02) return;

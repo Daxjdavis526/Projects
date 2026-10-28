@@ -108,13 +108,12 @@ export function mount(F, P0) {
     p.setView([-0.7, L + 0.7], [0, ymax]);
     p.clear();
     for (let l = 0; l <= L; l++) {
-      const c = Math.min(ceil(l), ymax * 0.98);
-      p.rect(l - 0.32, 0, 0.64, c, { fill: false, color: 'ink3', width: 1 });
+      if (ceil(l) <= ymax) p.rect(l - 0.32, 0, 0.64, ceil(l), { fill: false, color: 'ink3', width: 1 });
       if (shown[l] > 0) p.rect(l - 0.32, 0, 0.64, shown[l], { color: 'accent', alpha: 0.75, stroke: false });
       p.text(String(l), l, 0, { align: 'center', dy: 10, color: 'ink3', size: 11 });
       if (!hide.has('phases') && l < st.d.length && shown[l] > ymax * 0.02) p.text(`${(st.d[l] * DEG).toFixed(0)}°`, l, shown[l], { align: 'center', dy: -9, color: 'accent', size: narrow(cv.partials) ? 9.5 : 10.5 });
     }
-    p.text('bars: σₗ · outlines: the ceiling 4π(2l + 1)/k², reached when δₗ = 90°', L + 0.6, ymax, { align: 'right', dy: 10, color: 'ink3', size: narrow(cv.partials) ? 10 : 11 });
+    p.text('bars: σₗ · outlines (where in range): the ceiling 4π(2l + 1)/k², reached when δₗ = 90°', L + 0.6, ymax, { align: 'right', dy: 10, color: 'ink3', size: narrow(cv.partials) ? 9.5 : 11 });
   }
 
   function drawSigma(st) {

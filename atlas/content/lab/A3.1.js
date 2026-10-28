@@ -53,7 +53,7 @@ Quadrature, because independent errors rarely push the same way at once. Two tra
       { label: 'Value', text: t`In cm: $\rho = \dfrac{4 \times ${EX.m}}{\pi \times ${EX.d}^2 \times ${EX.h}} = ${EX.rho.toFixed(4)}\ \text{g/cm}^3$.` },
       { label: 'Relative uncertainties', text: t`$\sigma_m/m = ${(100 * EX.rm).toFixed(3)}\%$; $\sigma_d/d = ${(50 * EX.rd).toFixed(3)}\%$; $\sigma_h/h = ${(100 * EX.rh).toFixed(3)}\%$.` },
       { label: 'Powers', text: t`$\rho \propto m^{1} d^{-2} h^{-1}$, so the diameter’s relative uncertainty counts **twice**: $2 \times ${(50 * EX.rd).toFixed(3)}\% = ${(100 * EX.rd).toFixed(3)}\%$. The minus signs do not matter in quadrature.` },
-      { label: 'Combine', text: t`$\sigma_\rho/\rho = \sqrt{${(100 * EX.rm).toFixed(3)}^2 + ${(100 * EX.rd).toFixed(3)}^2 + ${(100 * EX.rh).toFixed(3)}^2}\,\% = ${(100 * EX.rel).toFixed(3)}\%$.` },
+      { label: 'Combine', text: t`$\sigma_\rho/\rho = \sqrt{${(100 * EX.rm).toFixed(3)}^2 + ${(100 * EX.rd).toFixed(3)}^2 + ${(100 * EX.rh).toFixed(3)}^2}\,\%$ $= ${(100 * EX.rel).toFixed(3)}\%$.` },
       { label: 'Absolute', text: t`$\sigma_\rho = ${(100 * EX.rel).toFixed(3)}\% \times ${EX.rho.toFixed(4)} = ${EX.s.toFixed(4)}\ \text{g/cm}^3$.` },
       { label: 'Sense check', text: t`Handbook aluminium alloys are near $2.70\ \text{g/cm}^3$. To do better, measure the diameter better: it supplies ${Math.round((100 * EX.rd ** 2) / EX.rel ** 2)}% of the variance.` },
     ],

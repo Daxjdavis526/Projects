@@ -79,14 +79,18 @@ export function mount(F, P0) {
   function drawEnergy(S) {
     const p = pl.energy; if (!p) return;
     const vmin = S.V(0);
-    const Etop = W.exactLevel(S.pot, S.nodes + 2, S.slope);
-    const top = vmin + Math.max(Etop - vmin, (S.E - vmin) * 1.25) * 1.14;
+    // the levels to draw: up to two above the chosen one, as long as they fit in the window
+    const fits = (k) => { const Tk = W.turning(S.pot, W.exactLevel(S.pot, k, S.slope), S.slope); return Tk.x1 >= S.xa - 1e-9 && Tk.x2 <= S.xb + 1e-9; };
+    let kTop = S.nodes;
+    while (kTop < S.nodes + 2 && fits(kTop + 1)) kTop++;
+    const Etop = W.exactLevel(S.pot, kTop, S.slope);
+    const top = vmin + Math.max(Etop - vmin, (S.E - vmin) * 1.2) * 1.14;
     p.setView([S.xa, S.xb], [vmin - 0.05 * (top - vmin), top]);
     p.clear();
     if (S.D.wallL) { p.rect(S.xa, vmin - top, S.D.xa - S.xa, 3 * top, { color: 'ink4', alpha: 0.35, stroke: false }); p.line(S.D.xa, vmin - top, S.D.xa, 2 * top, { color: 'ink2', width: 2.5 }); }
     if (S.D.wallR) p.line(S.D.xb, vmin - top, S.D.xb, 2 * top, { color: 'ink2', width: 2.5 });
     p.fn((x) => (x < S.D.xa || x > S.D.xb ? NaN : S.V(x)), { color: 'ink2', width: 2.2, samples: 600 });
-    for (let k = 0; k <= S.nodes + 2; k++) {
+    for (let k = 0; k <= kTop; k++) {
       const Ek = W.exactLevel(S.pot, k, S.slope), Tk = W.turning(S.pot, Ek, S.slope);
       if (Ek > top) break;
       const on = k === S.nodes;
@@ -168,7 +172,7 @@ export function mount(F, P0) {
 
 function mountAiry(F, P, ctl) {
   ctl('wkb', () => F.toggle({ key: 'wkb', label: 'WKB forms', value: P.wkb, explain: 'The two WKB solutions on either side of the turning point.' }));
-  ctl('z', () => F.slider({ key: 'z', label: 'Probe $z$', min: -10, max: 4, step: 0.05, value: P.z, explain: 'Distance from the turning point in the natural length (ħ²/2mF)^{1/3}: negative is the allowed side.' }));
+  ctl('z', () => F.slider({ key: 'z', label: 'Probe $z$', min: -10, max: 4, step: 0.05, value: P.z, explain: 'Distance from the turning point in units of the natural length $\\ell = (\\hbar^2/2mF)^{1/3}$; negative is the allowed side.' }));
   const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'The Airy function and its WKB forms near a turning point' });
   const p = new Plot(canvas, { x: [-10, 4], y: [-0.62, 0.8], xlabel: 'z', ylabel: '', axesAt: 'edge', yticks: 4 });
   function draw() {

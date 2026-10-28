@@ -74,11 +74,11 @@ The generators form the group’s **Lie algebra**, a vector space closed under t
       x: [-4, 4], y: [-2.2, 2.2], equal: true, aspect: 'wide', xlabel: 'x', ylabel: 'y',
       choices: [{ key: 'k', label: t`Generator $X$`, options: [[0, t`rotation $\begin{pmatrix}0 & -1 \\ 1 & 0\end{pmatrix}$`], [1, t`boost $\begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}$`], [2, t`dilation $I$`], [3, t`shear $\begin{pmatrix}0 & 1 \\ 0 & 0\end{pmatrix}$`]], value: 0, explain: 'Four one-parameter groups of linear maps of the plane.' }],
       sliders: [{ key: 's', label: t`Parameter $s$`, min: -1.5, max: 1.5, step: 0.05, value: 0.6, explain: t`How far along the one-parameter group: the dot is $e^{sX}p$.` }, { key: 'px', label: t`$p_x$`, min: -1.5, max: 1.5, step: 0.1, value: 1.0, explain: 'The starting point’s x.' }, { key: 'py', label: t`$p_y$`, min: -1.5, max: 1.5, step: 0.1, value: 0.4, explain: 'The starting point’s y.' }],
-      curves: ORBITS.map(([x, y], k) => ({ param: [sub(x, 't'), sub(y, 't')], t: [-2.5, 2.5], color: 'accent', width: 2, when: `step(0.5 - abs(k - ${k}))` })),
+      curves: ORBITS.map(([x, y], k) => ({ param: [sub(x, 't'), sub(y, 't')], t: k === 0 ? [-3.15, 3.15] : [-2.5, 2.5], color: 'accent', width: 2, when: `step(0.5 - abs(k - ${k}))` })),
       points: [{ x: 'px', y: 'py', r: 5, color: 'ink', label: 'p', labelDx: -14 }, ...ORBITS.map(([x, y], k) => ({ x: sub(x, 's'), y: sub(y, 's'), r: 7, color: 'gold', when: `step(0.5 - abs(k - ${k}))` }))],
       arrows: XP.map(([x, y], k) => ({ from: ['px', 'py'], to: [`px + 0.6*(${x})`, `py + 0.6*(${y})`], color: 'bad', width: 2.4, label: 'Xp', when: `step(0.5 - abs(k - ${k}))` })),
     },
-    caption: t`Exact orbits, drawn for $-2.5 \le \tau \le 2.5$. The arrow $Xp$ is drawn at $0.6$ times its length.`,
+    caption: t`Exact orbits, drawn for $-2.5 \le \tau \le 2.5$ (a full turn for the rotation). The arrow $Xp$ is drawn at $0.6$ times its length.`,
   },
   example: {
     prompt: t`Find the Lie algebra of $SO(3)$, choose a basis, and compute $[J_1, J_2]$. Then translate to the physicists’ Hermitian generators $\mathcal J_k = iJ_k$.`,
@@ -122,7 +122,7 @@ The generators form the group’s **Lie algebra**, a vector space closed under t
         const m = (M) => t`\begin{pmatrix}${M[0][0]} & ${M[0][1]} \\ ${M[1][0]} & ${M[1][1]}\end{pmatrix}`;
         return {
           prompt: t`For $X = ${m(A)}$ and $Y = ${m(B)}$, find the top-right entry of $[X, Y] = XY - YX$.`,
-          visual: loopPic(scale(0.4, A), scale(0.4, B), 1, [1, 0.5], t`The loop $e^{-\varepsilon Y}$, $e^{-\varepsilon X}$, $e^{\varepsilon Y}$, $e^{\varepsilon X}$ applied to a point (here $\varepsilon = 0.4$): it fails to close, by roughly $\varepsilon^2[X, Y]$ applied to the point.`),
+          visual: loopPic(scale(0.25, A), scale(0.25, B), 1, [1, 0.5], t`The loop $e^{-\varepsilon Y}$, $e^{-\varepsilon X}$, $e^{\varepsilon Y}$, $e^{\varepsilon X}$ applied to a point (here $\varepsilon = 0.25$): it fails to close, by roughly $\varepsilon^2[X, Y]$ applied to the point.`),
           answer: ans, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: AB[0][1], feedback: t`That is the entry of $XY$ alone; subtract $YX$.` }, { value: -ans, feedback: t`Order: $XY - YX$, not $YX - XY$.` }, { value: AB[0][1] + BA[0][1], feedback: 'The commutator subtracts the products.' }].filter((e) => e.value !== ans),
           hints: [t`$(XY)_{12} = X_{11}Y_{12} + X_{12}Y_{22}$.`, t`$(XY)_{12} = ${AB[0][1]}$ and $(YX)_{12} = ${BA[0][1]}$.`],
@@ -142,7 +142,7 @@ The generators form the group’s **Lie algebra**, a vector space closed under t
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: Math.exp(a * tt), feedback: t`Matrix exponentials are not entrywise: $e^{tN} = I + tN + \tfrac{t^2}{2}N^2 + \dots$, and $N^2 = 0$.` }, { value: Math.exp(a * tt) - 1, feedback: 'The series stops after the linear term: no higher powers survive.' }].filter((e) => Math.abs(e.value - ans) > 0.005 * Math.abs(ans)),
           hints: [t`$e^{tN} = I + tN + \tfrac{t^2}{2}N^2 + \dots$`, t`With $N^2 = 0$ every term after $tN$ vanishes.`],
-          teach: 'For a nilpotent generator the exponential series stops: e^{tN} = I + tN.',
+          teach: t`For a nilpotent generator the exponential series stops: $e^{tN} = I + tN$.`,
           explain: t`$e^{${tt}N} = I + ${tt}N$, top-right entry $${tt}\times${a} = ${nice(ans)}$. Translations of a line, written as $2\times2$ matrices acting on $(x, 1)$, are exactly this: shears.`,
         };
       },
@@ -227,7 +227,7 @@ for eps in (0.1, 0.01, 0.001):
         { name: t`the group-commutator gap is within $0.002$ of $[J_x, J_y]$ at $\varepsilon = 0.001$`, code: 'np.abs(gap(Jx, Jy, 1e-3) - comm(Jx, Jy)).max() < 2e-3' },
       ],
       hints: [t`\`generators\`: a list of three arrays, the $i$-th with entries \`-levi(i, j, k)\` in row \`j\`, column \`k\`.`, t`\`gap\`: multiply the four \`expm\` factors in the order written, subtract \`np.eye(3)\`, divide by \`eps**2\`.`],
-      teach: 'The commutator is what the group commutator looks like up close: (e^{εX}e^{εY}e^{−εX}e^{−εY} − I)/ε² → [X, Y].',
+      teach: t`The commutator is what the group commutator looks like up close: $(e^{\varepsilon X}e^{\varepsilon Y}e^{-\varepsilon X}e^{-\varepsilon Y} - I)/\varepsilon^2 \to [X, Y]$.`,
       explain: t`The printed error shrinks in proportion to $\varepsilon$ — the $O(\varepsilon^3)$ term divided by $\varepsilon^2$. The numbers confirm $[J_x, J_y] = J_z$ and, with $\mathcal J = iJ$, $[\mathcal J_x, \mathcal J_y] = i\mathcal J_z$.`,
     }),
   ],
@@ -239,14 +239,16 @@ for eps in (0.1, 0.01, 0.001):
         const Rx = (a) => expm(scale(a, J3[0])), Ry = (a) => expm(scale(a, J3[1]));
         const G = mul(mul(Rx(e), Ry(e)), mul(Rx(-e), Ry(-e)));
         const ans = Math.acos((trace(G) - 1) / 2) / DEG;
-        // the nose (body x-axis) after each of the four moves, applied right to left
+        // the nose direction (azimuth, elevation in degrees) after each of the four moves, applied right to left
         const steps = [Ry(-e), Rx(-e), Ry(e), Rx(e)];
         let M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-        const noses = [[1.3, 0, 0]];
-        for (const S of steps) { M = mul(S, M); noses.push(apply(M, [1.3, 0, 0]).map(r6)); }
+        const ang = (v) => [r6(Math.atan2(v[1], v[0]) / DEG), r6(Math.asin(v[2]) / DEG)];
+        const noses = [ang([1, 0, 0])];
+        for (const S of steps) { M = mul(S, M); noses.push(ang(apply(M, [1, 0, 0]))); }
+        const W = 1.6 * d;
         return {
           prompt: t`A spacecraft makes four small attitude moves, each by $\varepsilon = ${d}^\circ$: pitch $-\varepsilon$ (about $y$), roll $-\varepsilon$ (about $x$), pitch $+\varepsilon$, roll $+\varepsilon$ — the group commutator $R_x(\varepsilon)R_y(\varepsilon)R_x(-\varepsilon)R_y(-\varepsilon)$. Every move is undone, yet the craft ends up turned. By how many degrees, to about $1\%$?`,
-          visual: { type: 'calc-vectors3d', params: { range: 1.5, vectors: [{ to: [1.3, 0, 0], color: 'ink3', label: '\\text{start}' }, { to: noses[4], color: 'gold', label: '\\text{end}' }], segments: noses.slice(0, 4).map((p, i) => ({ from: p, to: noses[i + 1], color: 'accent' })), yaw: 0.35, pitch: 0.25 }, caption: 'The tip of the nose axis after each move (blue path; true positions, not exaggerated). It does not come home.' },
+          visual: { type: 'graph', params: { x: [r6(-1.8 * W), r6(1.8 * W)], y: [-W, W], equal: true, aspect: 'wide', xlabel: 'azimuth of the nose (°)', ylabel: 'elevation (°)', curves: noses.slice(0, 4).map((p, i) => ({ param: [`${p[0]} + t*${r6(noses[i + 1][0] - p[0])}`, `${p[1]} + t*${r6(noses[i + 1][1] - p[1])}`], t: [0, 1], color: 'accent', width: 2 })), points: [{ x: noses[0][0], y: noses[0][1], r: 6, color: 'gold', label: 'start', labelDx: -40, labelDy: -10 }, ...noses.slice(1, 4).map(([x, y]) => ({ x, y, r: 3.5, color: 'accent' })), { x: noses[4][0], y: noses[4][1], r: 6, color: 'bad', hollow: true, label: 'end', labelDx: 8, labelDy: 12 }] }, caption: 'Where the nose points after each move (true values, moves about axes fixed in space). It does not come home.' },
           answer: ans, units: 'deg', tol: { rel: 0.012 },
           errors: [{ value: d, feedback: t`The net turn is second order in $\varepsilon$: about $\varepsilon^2$ in radians.` }, { value: 0, feedback: 'Rotations about different axes do not commute, so the four moves do not cancel.' }, { value: (e * e) / 2 / DEG, feedback: t`The group commutator is $I + \varepsilon^2[J_x, J_y]$, with no factor $\tfrac12$.` }],
           hints: [t`$R_x(\varepsilon)R_y(\varepsilon)R_x(-\varepsilon)R_y(-\varepsilon) \approx I + \varepsilon^2[J_x, J_y] = I + \varepsilon^2J_z$: a rotation by $\varepsilon^2$ radians about $z$.`, t`$\varepsilon = ${d}^\circ = ${nice(e, 4)}$ rad, so $\varepsilon^2 = ${nice(e * e, 4)}$ rad; convert to degrees.`],

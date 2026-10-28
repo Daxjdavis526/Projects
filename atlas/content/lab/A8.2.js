@@ -45,7 +45,7 @@ For white noise it falls as $1/\sqrt\tau$, exactly like $\sigma/\sqrt N$; for fl
       'Watch where the curve leaves the dashed line and flattens: that is the flicker (1/f) noise. Raise it to 0.1 K and the floor rises; beyond it, averaging longer buys nothing.',
       'Add some random-walk drift: the curve turns up at long times, and the gold dot (the optimum) moves to shorter averages.',
     ],
-    params: { mode: 'allan', sw: 0.3, flick: 0.05, walk: 0, fs: 10, n: 32768, unit: 'K', seed: 4 },
+    params: { mode: 'allan', sw: 0.3, flick: 0.08, walk: 0, fs: 10, n: 32768, unit: 'K', seed: 4 },
     caption: t`Simulated readings: white noise of the chosen size per reading, a teaching model of 1/f noise (a sum of slow random processes) and a random walk. At the longest averaging times the curve rests on only a few averages and is itself noisy. Simulated data: a browser cannot replace bench work.`,
   },
   example: {

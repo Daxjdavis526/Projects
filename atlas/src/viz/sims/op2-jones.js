@@ -38,7 +38,7 @@ export const defaults = { input: { angle: 0 }, elements: [], view: 'chain', cont
 const KINDS = ['pol', 'qwp', 'hwp', 'ret', 'rot'];
 const ROWS = ['jones', 'I', 'psi', 'chi', 'hand', 'stokes'];
 const HIDES = [...ROWS, 'states', 'out', 'intensity'];
-const trim = (x, n = 3) => String(+(+x).toPrecision(n)).replace('-', '−');
+const trim = (x, n = 3) => String(+(Math.abs(+x) < 1e-9 ? 0 : +x).toPrecision(n)).replace('-', '−');
 const D = J.DEG;
 const STATE_COL = ['gold', 'teal', 'violet', 'warn', 'good', 'accent2', 'bad'];
 
@@ -59,7 +59,7 @@ export async function mount(F, P0) {
   let inAngle = P.input && typeof P.input === 'object' && 'angle' in P.input ? P.input.angle : 0;
   for (const c of P.controls || []) F.slider({ key: c.key, label: c.label, min: c.min, max: c.max, step: c.step ?? 1, value: c.value, unit: c.unit ?? '^\\circ', explain: c.explain || '' });
   const both = P.view === 'both';
-  const { canvas } = F.canvas({ aspect: both ? '' : 'wide', label: P.alt || 'Polarization states through a chain of polarizers and wave plates' });
+  const { canvas, box } = F.canvas({ aspect: both ? '' : 'wide', label: P.alt || 'Polarization states through a chain of polarizers and wave plates' });
   const pl = new Plot(canvas, { x: [0, 1], y: [0, 1], grid: false, axes: false, pad: { l: 0, r: 0, t: 0, b: 0 } });
   const st = { ph: 0, running: !!P.play && !reduced };
   const anim = F.animate((dt) => { if (!st.running) return; st.ph += dt * 2 * Math.PI * 0.35; draw(); }, { force: true });
@@ -78,6 +78,8 @@ export async function mount(F, P0) {
   function draw() {
     sync();
     pl.resize();
+    // the chain above the sphere needs more height on a narrow screen
+    if (both) { const want = pl.w < 520 ? '0.95' : ''; if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; pl.resize(); } }
     const W = pl.w, H = pl.h;
     pl.setView([0, W], [0, H]);
     pl.clear();
@@ -91,7 +93,7 @@ export async function mount(F, P0) {
   // world coordinates are pixels with y up (Plot's view is set to [0, W] × [0, H])
   function drawChain(res, x0, y0, w, h) {
     const n = els.length, cols = 2 * n + 1, cw = w / cols, fs = cw < 70 ? 9.5 : 11;
-    const r = Math.min(cw * 0.4, h * 0.3), cy = y0 + h * 0.55;
+    const r = Math.min(cw * 0.4, h * 0.28), cy = y0 + h * 0.5;
     // the beam axis
     pl.line(x0 + cw * 0.15, cy, x0 + w - cw * 0.15, cy, { color: 'ink4', width: 1, dash: [4, 4] });
     for (let j = 0; j <= n; j++) {

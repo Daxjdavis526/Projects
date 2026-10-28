@@ -266,7 +266,8 @@ num({ id: 'f-over-m', difficulty: 1,
   densities take `'Jy'` (10⁻²⁶ W m⁻² Hz⁻¹, with prefixes: mJy, μJy); cross-sections `'b'` (barns: mb, fb).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
-  makes typing a unit compulsory. Omit `units` for pure numbers. Angles take
+  makes typing a unit compulsory. Omit `units` for pure numbers. Every SI
+  prefix works (`'uV'`, `'nV'`, `'mV'`; `u` and `μ` are both micro). Angles take
   `'deg'` or `'rad'`, rotation rates `'rpm'`. (A slider's `unit` is TeX, so it
   may be words: `'\\mathrm{thousand\\ km}'`.)
 - A generator whose prompt and answer cannot vary is a fixed item: write it
@@ -587,6 +588,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `em-circuit` | (a compact picture — a worked example's — hides the currents unless `show: { I: true }`) nine fixed DC layouts (series, parallel, ladder, bridge, two-loop, RC, a firing circuit) solved by nodal analysis: moving charge, voltage colouring, bulb brightness, RC V(t) |
 | `em-capacitor` | a parallel-plate capacitor with a sliding dielectric, battery connected or not: Q, V, C and stored energy |
 | `lab-bench` | twenty-eight virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry; field mapping, Ohm's law and resistivity, RC decay, a coil's field, induction, refraction and lenses, slits and gratings, string resonance…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
+| `labf-signal` | `lockin`: a 1 kHz signal under hum and noise ~1000× its amplitude recovered as X and Y with a ±1σ band; `allan`: the Allan deviation of white, 1/f and drift noise; `strobe`: a wheel under a strobe (aliasing) | see the file header |
 | `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
 | `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |
 | `wave-doppler` | wavefronts from a moving source and a moving observer: crowding ahead, stretching behind, the Mach cone past Mach 1 |

@@ -58,7 +58,13 @@ const KINDS = ['thin', 'surf', 'mirror', 'stop', 'screen'];
 const MARKS = ['F', 'F2', 'H', 'H2', 'image'];
 const ROWS = ['matrix', 'f', 'bfd', 'ffd', 'H', 'H2', 'image', 'm', 'lsa', 'colour'];
 const MATS = ['crown', 'flint', 'denseflint', 'silica', 'water', 'diamond', 'sapphire', 'mgf2'];
-const trim = (x, n = 4) => (Number.isFinite(x) ? String(+(+x).toPrecision(n)) : '\\text{—}');
+function trim(x, n = 4) {
+  if (!Number.isFinite(x)) return '\\text{—}';
+  if (Math.abs(x) < 1e-12) return '0';
+  const a = Math.abs(x);
+  if (a >= 1e5 || a < 1e-4) { const e = Math.floor(Math.log10(a)); return `${+(x / 10 ** e).toPrecision(n)}\\times10^{${e}}`; }
+  return String(+(+x).toPrecision(n));
+}
 const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
 /** Is the theme light? */

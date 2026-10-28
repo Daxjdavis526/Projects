@@ -62,7 +62,9 @@ It is the matrix method of [O4.2](#/lesson/phys4650.O4.2) again, with complex nu
     steps: [
       { label: 'Input', text: t`$\tilde{\mathbf E}_{\text{in}} = \dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ 1\end{pmatrix}$, irradiance $\tfrac12 + \tfrac12 = 1$.` },
       { label: 'Wave plate', text: t`$\begin{pmatrix}1 & 0 \\ 0 & i\end{pmatrix}\dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ 1\end{pmatrix} = \dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ i\end{pmatrix}$: equal amplitudes, $E_y$ a quarter cycle ahead in phase — circular, turning counterclockwise as you face the wave.` },
-      { label: 'Polarizer', text: t`At $\theta = ${EX.th}^\circ$: $\begin{pmatrix}\cos^2\theta & \sin\theta\cos\theta \\ \sin\theta\cos\theta & \sin^2\theta\end{pmatrix}\dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ i\end{pmatrix} = \dfrac{\cos\theta + i\sin\theta}{\sqrt2}\begin{pmatrix}\cos\theta \\ \sin\theta\end{pmatrix}$.` },
+      { label: 'Polarizer', text: t`At $\theta = ${EX.th}^\circ$ the polarizer’s matrix (in the symbols table) acts on that vector:
+
+$$\begin{gathered}\frac{1}{\sqrt2}\begin{pmatrix}\cos^2\theta + i\sin\theta\cos\theta \\ \sin\theta\cos\theta + i\sin^2\theta\end{pmatrix}\\ = \frac{\cos\theta + i\sin\theta}{\sqrt2}\begin{pmatrix}\cos\theta \\ \sin\theta\end{pmatrix}\end{gathered}$$` },
       { label: 'Irradiance', text: t`$|E_x|^2 + |E_y|^2 = \tfrac12(\cos^2\theta + \sin^2\theta) = ${sf(EX.I, 3)}$ — for **any** $\theta$: circular light sends half through every analyser, just as unpolarized light does.` },
       { label: 'Order matters', text: t`The product is $\mathbf M_{\text{pol}}\mathbf M_{\text{QWP}}\tilde{\mathbf E}$. In the other order, polarizer first, the polarizer would pass $\cos^2(45^\circ - ${EX.th}^\circ) = ${sf(Math.cos(15 * DEG) ** 2, 3)}$ and the plate would not change the irradiance at all.` },
     ],

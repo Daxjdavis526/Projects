@@ -72,3 +72,31 @@ export function endInt(f, a, b, n = 2000) {
 }
 
 void t;
+
+/**
+ * A scattering experiment seen from above: a beam (parallel arrows) from the
+ * left, a target at the origin, outgoing spherical wavefronts, and a detector
+ * at angle θ (degrees) subtending a small solid angle.
+ */
+export function geomPic(thetaDeg = 40, caption, { waves = true, detector = true } = {}) {
+  const th = (thetaDeg * Math.PI) / 180, c = Math.cos(th), s = Math.sin(th);
+  const arrows = [-0.45, -0.15, 0.15, 0.45].map((y) => ({ from: [-2.6, y], to: [-1.0, y], color: 'accent', width: 2 }));
+  const curves = [];
+  if (waves) for (const R of [0.55, 0.95, 1.35]) curves.push({ param: [`${R}*cos(t)`, `${R}*sin(t)`], t: [0, 6.2832], color: 'gold', width: 1.2, dash: [3, 4] });
+  if (waves) for (const x of [-2.4, -2.0, -1.6, -1.2]) curves.push(seg(x, -0.65, x, 0.65, 'accent', 1));
+  const points = [{ x: 0, y: 0, r: 6, color: 'ink', label: 'target', labelDx: 8, labelDy: 14 }, label(-2.6, 0.62, 'incident beam', 'accent', 0, -8)];
+  if (detector) {
+    const d = 2.0, w = 0.18;
+    curves.push(seg(d * c - w * s, d * s + w * c, d * c + w * s, d * s - w * c, 'violet', 6));
+    arrows.push({ from: [0.1 * c, 0.1 * s], to: [(d - 0.12) * c, (d - 0.12) * s], color: 'violet', width: 1.6, dash: [5, 4] });
+    points.push(label(d * c, d * s, `detector at θ = ${thetaDeg}°`, 'violet', 10, -10));
+    curves.push({ param: ['0.45*cos(t)', '0.45*sin(t)'], t: [0, r6(th)], color: 'ink3', width: 1.4 });
+    points.push(label(0.5 * Math.cos(th / 2), 0.5 * Math.sin(th / 2), 'θ', 'ink2', 6, 0));
+  }
+  curves.push(seg(0, 0, 2.6, 0, 'ink4', 1));
+  return {
+    type: 'graph',
+    params: { x: [-2.8, 3.2], y: [-1.5, 2.3], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves, arrows, points },
+    caption: caption || 'A scattering experiment seen from above (schematic): a plane wave arrives from the left, the target sends out a spherical wave, and a detector at angle θ catches the part of it inside its small solid angle.',
+  };
+}

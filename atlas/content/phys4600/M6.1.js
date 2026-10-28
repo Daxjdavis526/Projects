@@ -193,7 +193,7 @@ export default lesson({
         const v = E / B;
         return {
           prompt: t`In a Hall thruster’s channel an axial electric field of $${tex(E, 2)}$ V/m crosses a radial magnetic field of ${B * 1e3} mT. In a frame moving along $\vec E\times\vec B$ at the right speed the electric field vanishes, and the electrons there simply circle the field lines. How fast is that frame, in km/s?`,
-          visual: boostPic({ preset: 'crossedB', beta: 0, panels: ['fields'] }, t`Crossed fields with $E < cB$ ($c = 1$; in the thruster $E$ is about $10^{-4}$ of $cB$). The frame that removes $\vec E$ moves along $\vec E\times\vec B$.`),
+          visual: boostPic({ preset: 'crossedB', beta: 0, panels: ['fields'] }, t`Crossed fields with $E < cB$ ($c = 1$; in the thruster $E$ is a hundredth of $cB$ or less). The frame that removes $\vec E$ moves along $\vec E\times\vec B$.`),
           answer: v / 1e3, units: 'km/s', tol: { rel: 0.01 },
           errors: [{ value: (B / E) / 1e3, feedback: t`The drift speed is $E/B$ (V/m over T gives m/s).` }, { value: (C * C * B) / E / 1e3, feedback: t`$c^2B/E$ is the speed that removes $\vec B$ when $E > cB$ — impossible here, since it exceeds $c$.` }],
           hints: [t`$\vec E' = \gamma(\vec E + \vec v\times\vec B)_\perp = 0$ needs $\vec v\times\vec B = -\vec E$.`, t`With $\vec v \perp \vec B$, that is $vB = E$.`],
