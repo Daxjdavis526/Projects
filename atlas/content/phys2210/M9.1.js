@@ -148,7 +148,7 @@ The same change of momentum can come from **a big force for a short time or a sm
           ],
           hints: ['Two forces act during the landing: the ground’s push N upward and her weight mg downward.', 'The net force supplies the impulse: (N − mg)Δt = Δp = mv.', 'So N = mv/Δt + mg.'],
           teach: 'The ground must both stop you and hold up your weight: the impulse comes from the net force, N − mg.',
-          explain: t`$(N - mg)\Delta t = mv \Rightarrow N = \dfrac{${m}\times${v}}{${dt}} + ${m}\times9.8 = ${s3(net)} + ${s3(m * G)} = ${s3(N)}$ N — about ${fmt(N / (m * G), 2)} times her weight. Landing stiff-legged, in a fiftieth of a second, would multiply the first term by ten or more.`,
+          explain: t`$(N - mg)\Delta t = mv \Rightarrow N = \dfrac{${m}\times${v}}{${dt}} + ${m}\times9.8 = ${s3(net)} + ${s3(m * G)} = ${s3(N)}$ N — about ${fmt(N / (m * G), 2)} times her weight. Landing stiff-legged, in a fiftieth of a second, would multiply the first term by about ${Math.round(dt / 0.02)}.`,
           visual: { type: 'mech-fbd', params: { scene: 'body', icon: 'person', ground: true, v: [0, -1], forces: [{ label: 'N (ground)', mag: +N.toFixed(1), dir: 90, kind: 'normal' }, { label: 'mg', mag: +(m * G).toFixed(1), dir: 270, kind: 'weight' }] }, caption: 'The parachutist during the landing (still moving down) and her free-body diagram, to scale.' },
         };
       },

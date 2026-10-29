@@ -98,7 +98,7 @@ $$\frac{1}{(${den})^2}.$$`,
             { answer: geo.text, feedback: t`That is the series of $\frac{1}{${den}}$ itself. Differentiating it produces the square — and the factors $n + 1$.` },
             { answer: `${k}*(${key.text})`, feedback: t`Watch the chain rule: $\frac{d}{dx}\frac{1}{${den}} = \frac{${k}}{(${den})^2}$, so divide the derivative’s series by $${k}$.` },
           ],
-          hints: [t`$\frac{1}{${den}} = \sum_{n=0}^{\infty} (${k}x)^n$.`, t`Differentiate both sides: $\frac{${k}}{(${den})^2} = \sum_{n=1}^\infty n\,${k}^n x^{n-1}$. Divide by $${k}$.`, t`The coefficient of $x^n$ is $(n+1)\,${k < 0 ? `(${k})` : k}^n$.`],
+          hints: [t`$\frac{1}{${den}} = \sum_{n=0}^{\infty} (${k}x)^n$.`, t`Differentiate both sides: $\frac{${k}}{(${den})^2} = \sum_{n=1}^\infty n\,${k < 0 ? `(${k})` : k}^n x^{n-1}$. Divide by $${k}$.`, t`The coefficient of $x^n$ is $(n+1)\,${k < 0 ? `(${k})` : k}^n$.`],
           teach: t`Differentiating $\frac{1}{1-kx}$ gives $\frac{k}{(1-kx)^2}$, so its series is $\sum (n+1)k^n x^n$.`,
           visual: {
             type: 'graph',

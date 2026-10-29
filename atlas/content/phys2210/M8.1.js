@@ -225,7 +225,7 @@ $U_g$ belongs to the object–Earth system and is measured from a level $y = 0$ 
           errors: [{ value: (m * G * d) / 1000, feedback: t`Below the zero level, $y$ is negative — and so is $U_g = mgy$.` }],
           hints: ['Where is the caver relative to the zero level: above or below?', t`$y = -${d}$ m, so $U_g = mgy$ is negative.`],
           teach: 'Below the zero level, gravitational potential energy is negative.',
-          explain: t`$U_g = mgy = (${m})(9.8)(-${d}) = -${thou(Math.round(m * G * d))}$ J $\approx ${fmt(U / 1000, 3)}$ kJ. Negative just means “less than at the entrance”: climbing back out takes ${fmt(-U / 1000, 3)} kJ of work.`,
+          explain: t`$U_g = mgy = (${m})(9.8)(-${d}) = -${thou(Math.round(m * G * d))}$ J $\approx -${fmt(-U / 1000, 3)}$ kJ. Negative just means “less than at the entrance”: climbing back out takes ${fmt(-U / 1000, 3)} kJ of work.`,
           visual: profile({ fn: `-${d}*exp(-((x - 6)/1.6)^2)`, x: [0, 12], y: [-d * 1.3, d * 0.35], pts: [{ x: 1, y: 0, color: 'accent', label: 'entrance', labelDy: -14 }, { x: 6, y: -d, color: 'warn', r: 6, label: 'chamber', labelDy: 14 }], caption: 'The cave in profile, with y = 0 at the entrance (gold). Horizontal distance not to scale.' }),
         };
       },

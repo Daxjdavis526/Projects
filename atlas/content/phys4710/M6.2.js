@@ -115,7 +115,7 @@ At low energy only a few channels matter — roughly $l \lesssim ka$ for a targe
       why: {
         1: 'All channels have the same energy; the centrifugal barrier keeps the high-l parts of the wave away from the target, but energy is not absorbed.',
         2: t`$P_l(\cos\theta)$ is never identically zero; the suppression is in $\delta_l$.`,
-        3: 'There is no selection rule: δₗ falls off smoothly, as (ka)^(2l+1) at low energy.',
+        3: t`There is no selection rule: $\delta_l$ falls off smoothly, as $(ka)^{2l+1}$ at low energy.`,
       },
       hints: [t`Classically $L = pb$: what is $b$ for $L = \hbar l$ and $p = \hbar k$?`],
       teach: 'Partial waves are angular-momentum channels: channel l passes at impact parameter about l/k, so the target only affects l up to about ka.',

@@ -154,7 +154,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
           vars: { x: [-1.2, 1.2] }, mode: 'constant',
           errors: [{ answer: `sec(x)^${n + 2}/${n + 2} + sec(x)^${n}/${n}`, feedback: t`$\tan^2 x = \sec^2 x - 1$: the second term carries a minus sign.` }],
           hints: [
-            t`The secant’s power is odd, so save $\sec x\tan x$ and use $u = \sec x$.`,
+            t`The secant’s power is odd, so $u = \tan x$ will not work; the tangent’s power, 3, is odd, so save $\sec x\tan x$ and use $u = \sec x$.`,
             n === 1 ? t`What is left is $\tan^2 x = \sec^2 x - 1$.` : t`What is left is $\tan^2 x\,\sec^{${n - 1}} x = (\sec^2 x - 1)\sec^{${n - 1}} x$.`,
             n === 1 ? t`So the integral is $\int (u^2 - 1)\,du$.` : t`So the integral is $\int (u^2 - 1)\,u^{${n - 1}}\,du$.`,
           ],

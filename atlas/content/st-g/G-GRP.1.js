@@ -103,7 +103,7 @@ The kernel is always a subgroup. **Lagrange’s theorem**: the order (number of 
     visual: { type: 'graph', params: triangle(1, 3), caption: t`$f\circ r$: first $r$, then $f$. Corner 1 lands bottom right, where $r^2\circ f$ also sends it.` },
     steps: [
       { label: 'Track angles', text: t`Label points by angle $\theta$ round the centre. $r$: $\theta \mapsto \theta + 120^\circ$; $f$: $\theta \mapsto 180^\circ - \theta$.` },
-      { label: 'Compose', text: t`$f\circ r$: $\theta \mapsto 180^\circ - (\theta + 120^\circ) = 60^\circ - \theta$. And $r^2\circ f$: $\theta \mapsto (180^\circ - \theta) + 240^\circ = 420^\circ - \theta \equiv 60^\circ - \theta$. Equal: $f\circ r = r^2\circ f = r^{-1}\circ f$.` },
+      { label: 'Compose', text: t`$f\circ r$: $\theta \mapsto 180^\circ - (\theta + 120^\circ) = 60^\circ - \theta$. And $r^2\circ f$: $\theta \mapsto (180^\circ - \theta) + 240^\circ$, $= 420^\circ - \theta \equiv 60^\circ - \theta$. Equal: $f\circ r = r^2\circ f = r^{-1}\circ f$.` },
       { label: 'Subgroup', text: t`Rotations compose to rotations ($r^a\circ r^b = r^{a+b}$, exponents mod 3), contain $e = r^0$, and $r^{-1} = r^2$. So $C_3 = \{e, r, r^2\}$ is a subgroup, of order $3$, which divides $6$ as Lagrange says.` },
       { label: 'Homomorphism', text: t`$\varphi$ counts reflections mod 2: an element is $r^af^b$ and $\varphi = (-1)^b$. Composing adds the $b$’s (a reflection reverses handedness, two restore it), so $\varphi(g\circ h) = \varphi(g)\varphi(h)$. In matrices, $\varphi$ is the determinant: $\det R = +1$, $\det F = -1$.` },
       { label: 'Kernel', text: t`$\ker\varphi$ = the elements with $b = 0$ = the rotations. A kernel is always a subgroup, and here it has index $2$ — exactly how the proper Lorentz transformations sit inside the full Lorentz group, as the kernel of $\det$.` },
@@ -212,7 +212,7 @@ The kernel is always a subgroup. **Lagrange’s theorem**: the order (number of 
           ['a regular-tetrahedron probe', tetraEdges(), 12, 'any of 4 faces at the bottom, then 3 turns'],
         ]);
         return {
-          prompt: t`An attitude-control engineer counts how many rotations bring ${what} back onto its own outline (sensors and markings ignored). Use orbit–stabilizer: $|G| = |\text{orbit of a face}| \times |\text{stabilizer of that face}|$. How many rotations are there, the identity included?`,
+          prompt: t`An attitude-control engineer counts how many rotations bring ${what} back onto its own outline (sensors and markings ignored). Use orbit–stabilizer: the size of the group is (the number of places a face can be carried to) $\times$ (the number of rotations that keep that face in place). How many rotations are there, the identity included?`,
           visual: { type: 'calc-vectors3d', params: { range: 1.8, segments: edges, yaw: 0.55, pitch: 0.45 }, caption: 'The body’s outline; reflections are not rotations and are not counted.' },
           answer: ans, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: 2 * ans, feedback: 'That counts reflections too. A spacecraft can only be rotated, not mirrored.' }, { value: ans / 2, feedback: 'Count every face in the orbit: each can be brought to the reference position, in each of its stabilizer’s turns.' }],

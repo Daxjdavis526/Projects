@@ -222,7 +222,7 @@ The rate needs two things: the coupling to a typical final state, and **how many
     }),
   ],
   sources: [
-    { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics, 3rd ed., §11.3', url: 'https://www.cambridge.org/9781316995433' },
+    { label: 'Griffiths & Schroeter, Introduction to Quantum Mechanics, 3rd ed., §11.4', url: 'https://www.cambridge.org/9781316995433' },
     { label: 'Steck, Sodium, Rubidium 87 and Cesium D Line Data (natural lifetimes)', url: 'https://steck.us/alkalidata/' },
   ],
 });

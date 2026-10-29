@@ -202,7 +202,7 @@ function blackbody(o) {
   }
   out.raw = {
     x: [350, 1050], y: [-0.8, 1000 * bbV(1000) * 1.12], xlabel: 'T read by the thermocouple (K)', ylabel: 'V (mV)',
-    points: rows.map((r, i) => ({ x: r.Tr, y: mV[i], sy: smV[i] })), curve: (T) => 1000 * out.rawFit(T),
+    points: rows.map((r, i) => ({ x: r.Tr, y: mV[i], sy: smV[i] })), curve: out.rawFit,
   };
   return out;
 }
@@ -243,7 +243,7 @@ function zeeman(o) {
   const fit = fitLine(x, y, sy);
   fit.f = (t) => fit.a + fit.b * t;
   const rel = Math.hypot(ZM.uProbe, o.analysis === 'mapped' ? ZM.uMap : 0);
-  const at = Math.max(0, Math.min(ZM.fields.length - 1, o.at ?? 3));
+  const at = Math.max(0, Math.min(ZM.fields.length - 1, o.at ?? 1));
   const r0 = rows[at];
   const pts = [];
   for (let k = 0; k <= 600; k++) { const r2 = (3.3 * D * k) / 600; const v = 0.5 * zmAiry(r2, r0.dv) + 0.5 * zmAiry(r2, -r0.dv) + 0.012 * z[2 * ZM.fields.length + (k % 400)]; pts.push([r6(r2), r6(v)]); }
@@ -254,7 +254,7 @@ function zeeman(o) {
   return {
     rows, fit, line: true, results: res,
     data: { x, y, sy, xlabel: o.analysis === 'mapped' ? 'B at the lamp (T)' : 'B read at the gap centre (T)', ylabel: 'shift of each σ line (GHz)', zeroX: true, zeroY: true },
-    raw: { x: [0, r6(3.3 * D)], y: [0, 1.12], xlabel: 'ring radius squared, r² (mm²)', ylabel: 'intensity', paths: [{ pts, color: 'teal', width: 1.4 }], texts: [{ s: `B = ${ZM.fields[at].toFixed(2)} T (probe)`, x: r6(3.3 * D), y: 1.1, align: 'right', color: 'ink2', dy: 4 }] },
+    raw: { x: [0, r6(3.3 * D)], y: [0, 0.66], xlabel: 'ring radius squared, r² (mm²)', ylabel: 'intensity', paths: [{ pts, color: 'teal', width: 1.4 }], texts: [{ s: `B = ${ZM.fields[at].toFixed(2)} T (probe)`, x: r6(3.3 * D), y: 0.64, align: 'right', color: 'ink2', dy: 4 }] },
   };
 }
 
@@ -328,7 +328,7 @@ export const GS = {
     na22: { label: 'Na-22', lines: [[LINES.na22a, 15000], [LINES.na22b, 3500]] },
     cs137: { label: 'Cs-137', lines: [[LINES.cs137, 20000]] },
     co60: { label: 'Co-60', lines: [[LINES.co60a, 8000], [LINES.co60b, 7000]] },
-    unknown: { label: 'unknown', lines: [[LINES.mn54, 9000]], k40: 1500 },
+    unknown: { label: 'unknown', lines: [[LINES.mn54, 9000]], k40: 3000 },
   },
   k40: 450,                                       // counts in the K-40 background line in a calibration run
   cal: [['am241', 0], ['na22', 0], ['cs137', 0], ['co60', 0], ['co60', 1], ['na22', 1]],
@@ -360,18 +360,21 @@ export function gsExpect(src, gain = 1) {
 
 /**
  * A peak's centroid by the region-of-interest method: ±1 FWHM about a guess,
- * a straight background through the mean of three channels at each edge,
- * the net counts' first moment, and its Poisson uncertainty.
+ * a straight background through the mean of four channels at each edge,
+ * the net counts' first moment, and its uncertainty (Poisson, with the
+ * background line's own error).
  */
-export function roiCentroid(counts, guess, fwhm) {
-  const lo = Math.max(3, Math.round(guess - fwhm)), hi = Math.min(counts.length - 4, Math.round(guess + fwhm));
-  const bl = (counts[lo - 1] + counts[lo - 2] + counts[lo - 3]) / 3, bh = (counts[hi + 1] + counts[hi + 2] + counts[hi + 3]) / 3;
+export function roiCentroid(counts, guess, fwhm, ne = 4) {
+  const lo = Math.max(ne, Math.round(guess - fwhm)), hi = Math.min(counts.length - 1 - ne, Math.round(guess + fwhm));
+  let bl = 0, bh = 0;
+  for (let k = 1; k <= ne; k++) { bl += counts[lo - k] / ne; bh += counts[hi + k] / ne; }
   let S = 0, S1 = 0;
-  const net = [];
-  for (let ch = lo; ch <= hi; ch++) { const bg = bl + ((bh - bl) * (ch - lo)) / (hi - lo); const nn = counts[ch] - bg; net.push([ch, nn]); S += nn; S1 += ch * nn; }
+  for (let ch = lo; ch <= hi; ch++) { const bg = bl + ((bh - bl) * (ch - lo)) / (hi - lo); const nn = counts[ch] - bg; S += nn; S1 += ch * nn; }
   const c = S1 / S;
-  let v = 0;
-  for (let ch = lo; ch <= hi; ch++) v += (ch - c) ** 2 * Math.max(counts[ch], 1);
+  // Poisson variance of the channels, plus the error of the background line through the edge averages
+  let v = 0, dl = 0, dh = 0;
+  for (let ch = lo; ch <= hi; ch++) { const tt = (ch - lo) / (hi - lo); v += (ch - c) ** 2 * Math.max(counts[ch], 1); dl -= (1 - tt) * (ch - c); dh -= tt * (ch - c); }
+  v += dl * dl * Math.max(bl, 1) / ne + dh * dh * Math.max(bh, 1) / ne;
   return { c, sc: Math.sqrt(v) / S, net: S, lo, hi };
 }
 
@@ -401,7 +404,11 @@ function gammaRun(o) {
   const pk = roiCentroid(U, gsChannel(LINES.k40, o.flags.drift ? 1 + GS.gainShift : 1), naiFWHM(LINES.k40) / GS.b);
   let Eu = Eof(pu.c), sEu = sEof(pu.c, pu.sc);
   const Ek = Eof(pk.c), sEk = sEof(pk.c, pk.sc);
-  if (o.analysis === 'k40') { const fK = LINES.k40 / Ek; sEu = Math.hypot(fK * sEu, (Eu * fK * sEk) / Ek); Eu *= fK; }
+  if (o.analysis === 'k40') {
+    // rescale the unknown's channels so its K-40 line sits where the calibration puts 1460.8 keV
+    const fK = (LINES.k40 - fit.a) / fit.b / pk.c, cu = pu.c * fK;
+    Eu = Eof(cu); sEu = sEof(cu, cu * Math.hypot(pu.sc / pu.c, pk.sc / pk.c));
+  }
   const src = GS.sources[o.src] ? o.src : 'unknown';
   const S = spectra[src];
   const lg = Array.from(S, (v) => (v > 0 ? Math.log10(v) : NaN));
@@ -411,8 +418,8 @@ function gammaRun(o) {
     spectra, cal, fit, line: true, peak: pu, k40: pk, Ek, sEk,
     data: { x: cal.map((c) => c.c), y: cal.map((c) => c.E), sy: cal.map((c) => Math.hypot(fit.b * c.sc, GS.uLin * c.E)), xlabel: 'peak centroid (channel)', ylabel: 'E (keV)', zeroX: true },
     results: [
-      result('E', 'unknown’s line', Eu, sEu, { unit: '\\mathrm{keV}', accepted: LINES.mn54 }),
-      result('k40', 'K-40 background line', Ek, sEk, { unit: '\\mathrm{keV}', accepted: LINES.k40 }),
+      result('E', 'unknown’s line', Eu, sEu, { rel: GS.uLin, unit: '\\mathrm{keV}', accepted: LINES.mn54 }),
+      result('k40', 'K-40 background line', Ek, sEk, { rel: GS.uLin, unit: '\\mathrm{keV}', accepted: LINES.k40 }),
     ],
     raw: { x: [0, GS.nch], y: [0, Math.ceil(Math.max(...lg.filter(Number.isFinite)) + 0.3)], xlabel: 'channel', ylabel: 'counts per channel', ylog: true, paths: [{ pts, color: 'accent', width: 1.1 }], texts: [{ s: GS.sources[src].label, x: GS.nch - 10, y: Math.max(...lg.filter(Number.isFinite)), align: 'right', color: 'ink2' }] },
   };
@@ -689,14 +696,14 @@ export const RIGS = {
     note: 'Transverse view through a polarizer that passes only the σ components; the etalon is ideal and the field uniform across the lamp unless the gradient is switched on.',
     flags: [{ key: 'gradient', label: 'Lamp off the gap centre', value: true, explain: 'The probe was calibrated at the centre of the gap; the lamp’s glowing column sits where the field is 3 % weaker.' }],
     analyses: [['centre', 'B as read at the gap centre'], ['mapped', 'B corrected by a field map']],
-    at: { label: 'Profile shown at $B$', values: ZM.fields, unit: '\\mathrm{T}', explain: 'Which field’s ring profile the top panel shows (the probe’s reading).' },
+    at: { label: 'Profile shown at $B$', values: ZM.fields, value: 1, unit: '\\mathrm{T}', explain: 'Which field’s ring profile the top panel shows (the probe’s reading).' },
   },
   compton: {
     title: 'Cs-137 gammas scattered by an aluminium rod into a NaI(Tl) detector', run: compton,
     note: 'Each angle is an hour of counting; the scattered photopeak sits on a smooth background, and the detector’s angular acceptance is taken as a point.',
     flags: [{ key: 'drift', label: 'Photomultiplier gain drifts', value: true, explain: 'As the tube and the room warm through the day, the gain falls by 2.5 % between the first angle and the last.' }],
     analyses: [['once', 'Calibrate once, at the start'], ['each', 'Recalibrate on Cs-137 at each angle']],
-    at: { label: 'Spectrum shown at $\\theta$', values: CP.angles, unit: '^\\circ', explain: 'Which angle’s spectrum the top panel shows.' },
+    at: { label: 'Spectrum shown at $\\theta$', values: CP.angles, value: 6, unit: '^\\circ', explain: 'Which angle’s spectrum the top panel shows.' },
   },
   gamma: {
     title: 'A NaI(Tl) spectrometer: calibration sources and an unknown', run: gammaRun,
@@ -710,7 +717,7 @@ export const RIGS = {
     note: 'Quadrature detection with the phase set, so the signal keeps its sign; relaxation is a single exponential.',
     flags: [{ key: 'angle', label: 'The “180°” pulse is really 160°', value: true, explain: 'The pulse length was set by eye on a weak signal: the magnetization is tipped by 160°, not 180°, so it starts at −0.94 M₀, not −M₀.' }],
     analyses: [['fit3', 'Three-parameter fit'], ['semilog', '$\\ln(M_\\infty - M)$ against $\\tau$'], ['null', 'Null point: $T_1 = \\tau_0/\\ln 2$']],
-    at: { label: 'FID shown at delay $\\tau$', values: NM.delays, unit: '\\mathrm{ms}', explain: 'The receiver’s output after the 90° read pulse, for one delay: its starting height is M(τ).' },
+    at: { label: 'FID shown at delay $\\tau$', values: NM.delays, value: 4, unit: '\\mathrm{ms}', explain: 'The receiver’s output after the 90° read pulse, for one delay: its starting height is M(τ).' },
   },
   muon: {
     title: 'Cosmic-ray muons stopping and decaying in a plastic scintillator', run: muon,

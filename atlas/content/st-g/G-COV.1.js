@@ -105,7 +105,7 @@ so the pairing $\omega_\mu V^\mu$ comes out the same in every chart: it is **inv
           errors: [{ value: Math.cos(th), feedback: t`That is $V^r$ itself; differentiate it with respect to $\theta$.` }, { value: 0, feedback: t`The *field* is constant, but its *components* in a turning basis are not: $\partial_\theta\cos\theta \ne 0$. That is why $\partial_\mu V^\nu$ is not a tensor.` }].filter((e) => Math.abs(e.value - ans) > 0.005 * Math.abs(ans)),
           hints: [t`$V^r = \cos\theta$ depends on $\theta$ even though the arrows do not change: differentiate it.`, t`$\partial_\theta\cos\theta = -\sin\theta$.`],
           teach: 'Partial derivatives of components mix up change of the field with change of the basis; ∇ subtracts the second with Christoffel symbols.',
-          explain: t`$\partial_\theta V^r = -\sin${thDeg}^\circ = ${nice(ans, 4)}$, yet $\nabla_\theta V^r = \partial_\theta V^r + \Gamma^r{}_{\theta\theta}V^\theta = -\sin\theta + (-r)(-\sin\theta/r) = 0$, as it must for a constant field.`,
+          explain: t`$\partial_\theta V^r = -\sin${thDeg}^\circ = ${nice(ans, 4)}$, yet $\nabla_\theta V^r = \partial_\theta V^r + \Gamma^r{}_{\theta\theta}V^\theta$, $= -\sin\theta + (-r)(-\sin\theta/r) = 0$, as it must for a constant field.`,
         };
       },
     }),

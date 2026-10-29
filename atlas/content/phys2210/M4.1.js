@@ -188,7 +188,7 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           prompt: t`A tracked survey drone flies from $(${x1},\ ${y1})$ m to $(${x1 + dx},\ ${y1 + dy})$ m in ${dt} s. What is the size of its average velocity?`,
           answer: vavg, units: 'm/s', tol: { rel: 0.01 },
           errors: [{ value: (Math.abs(dx) + Math.abs(dy)) / dt, feedback: 'Combine the components with Pythagoras before dividing by the time.' }],
-          hints: [t`$\vec v_\text{avg} = \Delta\vec r/\Delta t$: find $\Delta\vec r$ first.`, t`$|\Delta\vec r| = \sqrt{${dx}^2 + ${dy}^2}$.`],
+          hints: [t`$\vec v_\text{avg} = \Delta\vec r/\Delta t$: find $\Delta\vec r$ first.`, t`$|\Delta\vec r| = \sqrt{(${dx})^2 + (${dy})^2}$.`],
           teach: 'Average velocity is the displacement vector divided by the elapsed time.',
           explain: t`$\Delta\vec r = (${dx},\ ${dy})$ m, of size $${nice(Math.hypot(dx, dy))}$ m, so $|\vec v_\text{avg}| = ${nice(Math.hypot(dx, dy))}/${dt} = ${s3(vavg)}$ m/s.`,
           visual: {
@@ -212,7 +212,7 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           prompt: t`An aircraft’s velocity has components $v_x = ${vx}$ m/s (east) and $v_y = ${vy}$ m/s (north) relative to the ground, as seen from above. At what angle is it moving, measured from east toward north? (Give a negative angle if it is south of east.)`,
           answer: th, units: 'deg', tol: { rel: 0.01, abs: 0.2 },
           errors: [{ value: Math.atan2(vx, Math.abs(vy)) / D2R * Math.sign(vy), feedback: t`That angle is measured from the north–south line. From east, $\theta = \arctan(v_y/v_x)$.` }].filter((e) => Math.abs(e.value - th) > 1),
-          hints: [t`$\tan\theta = v_y/v_x$.`, t`$\theta = \arctan(${vy}/${vx})$ — negative because the motion is ${vy < 0 ? 'south' : 'north'} of east.`],
+          hints: [t`$\tan\theta = v_y/v_x$.`, t`$\theta = \arctan(${vy}/${vx})$ — ${vy < 0 ? 'negative' : 'positive'} because the motion is ${vy < 0 ? 'south' : 'north'} of east.`],
           teach: t`The direction of a velocity follows from its components: $\tan\theta = v_y / v_x$.`,
           explain: t`$\theta = \arctan\dfrac{${vy}}{${vx}} = ${nice(Math.round(th * 10) / 10)}^\circ$${th < 0 ? ', south of east' : ', north of east'}.`,
           visual: {

@@ -218,7 +218,7 @@ The square root makes most arc-length integrals impossible in closed form — th
       why: {
         1: t`That is the area under the curve, not its length.`,
         2: t`The other way round: $\sqrt{1 + (f')^2} \ge 1$, so $L \ge b - a$.`,
-        3: t`That is the length of a path that goes across and then straight up — an overestimate for any slanted curve.`,
+        3: t`That is the length of a path that goes across and then straight up. It is too long for a straight slanted line, and a curve that wiggles up and down can be longer still, so it is not the length in general.`,
       },
       hints: ['What is the shortest path between two points?'],
       teach: 'A curve is never shorter than the straight chord joining its ends.',

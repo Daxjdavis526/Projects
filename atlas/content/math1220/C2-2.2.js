@@ -200,7 +200,7 @@ Swapping roles here (taking $u = e^{x}$) would simply undo round one.` },
           integrand: `e^(${kx(a)})*cos(${kx(b)})`,
           vars: { x: [-1.5, 1.5] }, mode: 'constant',
           errors: [
-            { answer: `e^(${kx(a)})*((${a})*cos(${kx(b)}) - (${b})*sin(${kx(b)}))/${D}`, feedback: t`Check the sign of the sine term: $\int ${E}\sin(${kx(b)})\,dx$ enters round one with a plus sign, because $du = -${b === 1 ? '' : b}\sin(${kx(b)})\,dx$.` },
+            { answer: `e^(${kx(a)})*((${a})*cos(${kx(b)}) - (${b})*sin(${kx(b)}))/${D}`, feedback: t`Check the sign of the sine term: in round one the minus sign of $-\int v\,du$ and the one in $du = -${b === 1 ? '' : b}\sin(${kx(b)})\,dx$ cancel, so $\int ${E}\sin(${kx(b)})\,dx$ enters with the sign of $v = ${E}/(${a})$.` },
             { answer: `e^(${kx(a)})*((${a})*cos(${kx(b)}) + (${b})*sin(${kx(b)}))/${a * a}`, feedback: t`That is two rounds with the returning $-\tfrac{${b * b}}{${a * a}}I$ term dropped. Move it to the left-hand side and solve for $I$.` },
           ],
           hints: [

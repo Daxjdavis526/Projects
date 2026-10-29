@@ -5,6 +5,8 @@
 // hyperbolae of constant interval can be switched on.
 // signature: '+---' (default) reads out Δt² − Δx²; '-+++' (Hartle, Carroll,
 // MTW, and PHYS 3710) reads out Δs² = −Δt² + Δx², negative when timelike.
+// readout: false hides the coordinates and interval (a question's picture
+// must not print its answer).
 
 import { Plot } from '../plot.js';
 import { gamma, boost } from '../model/relativity.js';
@@ -60,7 +62,7 @@ export function mount(F, P) {
     }
     rows.push(['$\\gamma$', g.toFixed(4)]);
     plot.drawHandles();
-    F.readout(rows);
+    if (P.readout !== false) F.readout(rows);
   }
   F.draw(draw);
   F.caption('Units with $c = 1$: light travels at 45°. Gold dots mark one unit of the moving observer’s own time and distance — they sit on the hyperbolae, which is why moving rulers look short and moving clocks look slow.');

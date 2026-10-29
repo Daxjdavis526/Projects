@@ -206,7 +206,7 @@ What is wrong?`,
           answer: dv * 1000, units: 'mm/s', tol: { rel: 0.01 },
           errors: [
             { value: ((m * v) / M) * 1000, feedback: 'After latching, capsule and station move together: divide the momentum by their combined mass.' },
-            { value: v * 1000, feedback: 'The station is 30 or more times heavier: the shared velocity is far smaller than the capsule’s approach speed.' },
+            { value: v * 1000, feedback: `The station is ${Math.round(M / m)} times heavier: the shared velocity is far smaller than the capsule’s approach speed.` },
           ],
           hints: ['Work in the station’s frame: before docking only the capsule moves.', t`They move off together: $(m + M)\,v' = m v$.`],
           teach: 'A docking is a perfectly inelastic collision: the pair shares the capsule’s momentum.',

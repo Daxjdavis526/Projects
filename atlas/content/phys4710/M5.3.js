@@ -105,9 +105,9 @@ The $-\pi/4$ is the point: **each soft turning point costs a quarter wavelength*
           prompt: t`Near a turning point where the potential rises with slope $F = V'(x_2)$, the wave function is $\mathrm{Ai}(z)$ with $z = (x - x_2)/\ell$ and $\ell = (\hbar^2/2mF)^{1/3}$. Find $\ell$, in nm, for an electron where $F = ${F}$ eV/nm. ($\hbar^2/2m_e = ${fmt(HB2M_EVNM2, 5)}$ eV nm².)`,
           visual: wkbPic({ view: 'airy', z: -1, wkb: false }, 'The Airy function in the scaled distance z: one unit of z is one Airy length ℓ.'),
           answer: ans, units: 'nm', tol: { rel: 0.01 },
-          errors: [{ value: Math.sqrt(HB2M_EVNM2 / F), feedback: 'The Airy length is a cube root: (ħ²/2mF)^(1/3) has units of (eV nm² ÷ eV/nm)^(1/3) = nm.' }, { value: HB2M_EVNM2 / F, feedback: 'Take the cube root.' }],
+          errors: [{ value: Math.sqrt(HB2M_EVNM2 / F), feedback: t`The Airy length is a cube root: $(\hbar^2/2mF)^{1/3}$ has units of $(\text{eV nm}^2 \div \text{eV/nm})^{1/3} = \text{nm}$.` }, { value: HB2M_EVNM2 / F, feedback: 'Take the cube root.' }],
           hints: [t`$\ell^3 = \dfrac{\hbar^2}{2mF}$, in nm³ when $\hbar^2/2m$ is in eV nm² and $F$ in eV/nm.`],
-          teach: 'The turning-point region has a natural width (ħ²/2mF)^(1/3): WKB needs the potential to stay linear over several of these lengths.',
+          teach: t`The turning-point region has a natural width $(\hbar^2/2mF)^{1/3}$: WKB needs the potential to stay linear over several of these lengths.`,
           explain: t`$\ell = (${fmt(HB2M_EVNM2, 4)}/${F})^{1/3} = ${fmt(ans, 3)}$ nm. The connection works when $V$ stays close to linear over a few $\ell$ on each side, so that the Airy solution and the WKB forms overlap.`,
         };
       },
@@ -229,7 +229,7 @@ The $-\pi/4$ is the point: **each soft turning point costs a quarter wavelength*
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: ((n2 + 0.5) / (n1 + 0.5)) ** (2 / 3), feedback: t`$E^{3/4} \propto n + \tfrac12$ means $E \propto (n + \tfrac12)^{4/3}$.` }, { value: (n2 / n1) ** (4 / 3), feedback: t`Keep the $\tfrac12$: $E \propto (n + \tfrac12)^{4/3}$.` }],
           hints: [t`$p = \sqrt{2m(E - \beta x^4)}$ and the turning point is at $(E/\beta)^{1/4}$: substituting $x = (E/\beta)^{1/4}u$ shows $\int p\,dx \propto E^{1/2}E^{1/4}$.`, t`So $E_n \propto (n + \tfrac12)^{4/3}$.`],
-          teach: 'Scaling the WKB integral gives how levels grow with n for any power-law well: E ∝ (n + ½)^(2k/(k+2)) for V ∝ |x|^k.',
+          teach: t`Scaling the WKB integral gives how levels grow with $n$ for any power-law well: $E \propto (n + \tfrac12)^{2k/(k+2)}$ for $V \propto |x|^k$.`,
           explain: t`$E_{${n2}}/E_{${n1}} = (${n2 + 0.5}/${n1 + 0.5})^{4/3} = ${fmt(ans, 4)}$. The exact ratio is ${fmt(ex, 4)}. For $V \propto |x|^k$ the rule gives $E \propto (n + \tfrac12)^{2k/(k + 2)}$: linear in $n$ for $k = 2$, and $n^2$ for a box ($k \to \infty$).`,
         };
       },

@@ -236,6 +236,11 @@ Distractors must be **plausible wrong answers** — the result of a real slip
 Set `fixedOrder: true` only when the order is meaningful ("all of the above"
 style is banned anyway).
 
+An `mcq` (or `multi`) may have a `gen(r)` like any item: it returns the
+fields that vary — `prompt`, `choices`, `answer`, `why`, `visual` — computed
+together so each distractor's number and its `why` agree. The player still
+shuffles the choices, so the generator can put the right one first.
+
 ### Several correct — `multi`
 
 `choices` (4+), `answer: [0, 2]`, optional `why` per wrong choice.
@@ -534,7 +539,7 @@ The library (read the header comment of a sim's file for its full options):
 | `projectile` | projectile motion with optional quadratic drag | `v0`, `angle`, `h0`, `g`, `drag`, `k` |
 | `oscillator` | spring or pendulum; damping, driving, energy bars; exact vs small-angle pendulum | `kind: 'spring' \| 'pendulum'`, `m`, `k`, `b`, `F0`, `wd`, `x0`, `L`, `theta0` |
 | `wave` | travelling, superposed and standing waves on a string | `mode: 'travel' \| 'super' \| 'standing'`, `A`, `lambda`, `f`, `n` |
-| `spacetime` | a Minkowski diagram with a boosted frame, draggable events, light cone, simultaneity lines, invariant hyperbolae | `beta`, `events: [[t, x], …]`, `names` (event labels; default A, B …), `range`, `signature` (`'+---'` default, reading Δt² − Δx²; `'-+++'` reads Δs² = −Δt² + Δx², the convention of PHYS 3710 and the GR lessons) |
+| `spacetime` | a Minkowski diagram with a boosted frame, draggable events, light cone, simultaneity lines, invariant hyperbolae | `beta`, `events: [[t, x], …]`, `names` (event labels; default A, B …), `range`, `readout` (`false` hides the coordinates and interval, for a question's picture), `signature` (`'+---'` default, reading Δt² − Δx²; `'-+++'` reads Δs² = −Δt² + Δx², the convention of PHYS 3710 and the GR lessons) |
 | `worldlines` | proper time along two worldlines between the same events (twin paradox) | `T`, `tx`, `tt` |
 | `orbit` | Newtonian vs Schwarzschild orbits, effective potential, ISCO, plunge | `mode`, `r0`, `L`, `turns`, `compare` |
 | `ibp-area` | integration by parts as two areas | `pair: 'xcos' \| 'ln'` |

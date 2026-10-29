@@ -62,7 +62,7 @@ Green’s, Kelvin–Stokes’, Gauss’s and the fundamental theorem of calculus
     prompt: t`Use $\omega = \tfrac12(x\,dy - y\,dx)$ and Stokes’ theorem to find the area of the ellipse $x = a\cos s$, $y = b\sin s$, and turn the result into Kepler’s third law.`,
     visual: { type: 'graph', params: { x: [-3.6, 3.6], y: [-1.8, 1.8], equal: true, aspect: 'wide', xlabel: 'x', ylabel: 'y', curves: [{ param: ['2.4*cos(t)', '1.6*sin(t)'], t: [0, 6.2832], color: 'accent', width: 2.2 }], shade: [{ fn: '1.6*sqrt(max(0, 1 - x^2/5.76))', lower: '-1.6*sqrt(max(0, 1 - x^2/5.76))', from: -2.4, to: 2.4, color: 'accent', alpha: 0.14 }], points: [{ x: r6(Math.sqrt(2.4 ** 2 - 1.6 ** 2)), y: 0, r: 6, color: 'gold', label: 'focus (planet)' }] }, caption: 'An orbit-shaped ellipse, a = 2.4, b = 1.6, with the focus where the central body sits.' },
     steps: [
-      { label: 'Compute d', text: t`$d\omega = \tfrac12(dx\wedge dy - dy\wedge dx) = \tfrac12(dx\wedge dy + dx\wedge dy) = dx\wedge dy$. So $\int_M d\omega$ is the area of $M$.` },
+      { label: 'Compute d', text: t`$d\omega = \tfrac12(dx\wedge dy - dy\wedge dx)$, $= \tfrac12(dx\wedge dy + dx\wedge dy)$, $= dx\wedge dy$. So $\int_M d\omega$ is the area of $M$.` },
       { label: 'Pull back', text: t`On the boundary, $dx = -a\sin s\,ds$ and $dy = b\cos s\,ds$, so $\omega = \tfrac12(ab\cos^2s + ab\sin^2s)\,ds = \tfrac12ab\,ds$.` },
       { label: 'Integrate', text: t`$\oint\omega = \int_0^{2\pi}\tfrac12ab\,ds = \pi ab$. Stokes: the area is $\pi ab$.` },
       { label: 'Kepler’s second law', text: t`Along an orbit, measured from the focus, $\omega$ fed the velocity gives $\tfrac{dA}{dt} = \tfrac12(x\dot y - y\dot x) = \tfrac12h$, half the specific angular momentum — constant. So equal areas in equal times.` },

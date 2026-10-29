@@ -194,7 +194,7 @@ The left side then becomes the derivative of a single product, $(\mu y)' = \mu\,
         const a = r.int(2, 5), b = a * r.int(2, 5);
         return {
           prompt: t`As $t \to \infty$, what does every solution of $y' + ${a}y = ${b}$ approach?`,
-          choices: [t`$y = ${b / a}$`, t`$y = ${b}$`, 't = 0 — every solution decays to zero', 'It depends on the initial value'],
+          choices: [t`$y = ${b / a}$`, t`$y = ${b}$`, t`$y = 0$ — every solution decays to zero`, 'It depends on the initial value'],
           answer: 0,
           why: { 1: t`At the steady state $y' = 0$, so $${a}y = ${b}$: divide by ${a}.`, 2: t`The transient $Ce^{-${a}t}$ decays, but the source ${b} keeps $y$ away from zero.`, 3: t`The initial value only sets $C$ in the transient $Ce^{-${a}t}$, which dies away.` },
           hints: [t`The general solution is a steady value plus $Ce^{-${a}t}$.`],

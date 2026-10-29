@@ -483,7 +483,7 @@ export const EXPERIMENTS = {
         const a = F.mfp ? P.Ea * P.lam : 0, b = P.Ea, c = P.Vc - V;
         return a > 0 ? (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a) : -c / b;
       };
-      const I = (V) => { const n = nOf(V); if (n < 0) return 0.02 * Math.max(0, V) / P.Vc; const u = n - Math.floor(n); const saw = u < 0.82 ? Math.sin((Math.PI / 2) * (u / 0.82)) ** 2 : Math.cos((Math.PI / 2) * ((u - 0.82) / 0.18)) ** 2; return (V / 40) ** 1.4 * (0.35 + 0.65 * saw) + 0.02; };
+      const I = (V) => { const n = nOf(V); if (n < 0) return 0.02 * Math.max(0, V) / P.Vc; const u = n - Math.floor(n); const saw = u < 0.18 ? Math.cos((Math.PI / 2) * (u / 0.18)) ** 2 : Math.sin((Math.PI / 2) * ((u - 0.18) / 0.82)) ** 2; /* a maximum at each whole n, a sharp drop just after */ return (V / 40) ** 1.4 * (0.35 + 0.65 * saw) + 0.02; };
       const pts = []; for (let k = 0; k <= 800; k++) { const V = (42 * k) / 800; pts.push([V, I(V)]); }
       const marks = R.map((r, j) => ({ x: r.V, y: I(fhPeak(P, r.n, F.mfp)), color: j === i ? 'gold' : 'accent', r: j === i ? 5 : 3.5 }));
       return {
@@ -524,12 +524,13 @@ export const EXPERIMENTS = {
     raw(R, P, F, i) {
       const q = R[i];
       if (!q) return null;
-      const pts = []; const n = 3000;
-      for (let k = 0; k <= n; k++) { const x = (q.dTrue * k) / n; pts.push([q.d * k / n, Math.cos((TAU * 2 * x * 1000) / q.lam) ** 2]); }
+      // the last 3 μm of the travel, so single fringes can be seen
+      const w = Math.min(3, q.d), x0 = q.d - w, pts = [], n = 600;
+      for (let k = 0; k <= n; k++) { const xd = x0 + (w * k) / n; pts.push([xd, Math.cos((TAU * 2 * xd * (q.dTrue / q.d) * 1000) / q.lam) ** 2]); }
       return {
-        x: [0, q.d], y: [-0.05, 1.3], xlabel: 'mirror travel from the dial (μm)', ylabel: 'detector',
-        paths: [{ pts, color: q.lam > 600 ? 'bad' : 'gold', width: 1 }],
-        texts: [{ s: `${q.N} fringes counted over ${d1(q.d)} μm`, x: 0, y: 1.3, color: 'ink', size: 12, dx: 4, dy: 10 }],
+        x: [x0, q.d], y: [-0.05, 1.35], xlabel: 'mirror travel from the dial (μm)', ylabel: 'detector',
+        paths: [{ pts, color: q.lam > 600 ? 'bad' : 'gold', width: 1.8 }],
+        texts: [{ s: `${q.N} fringes counted over ${d1(q.d)} μm (the last ${w} μm shown)`, x: x0, y: 1.35, color: 'ink', size: 12, dx: 4, dy: 10 }],
       };
     },
   },
@@ -567,7 +568,7 @@ export const EXPERIMENTS = {
     raw(R, P, F, i) {
       const q = R[i];
       const rings = []; for (let p = 1; p <= 10; p++) rings.push(1000 * fpRing(P, p).r);
-      const Fc = (4 * P.R) / (1 - P.R) ** 2, fin = (Math.PI * Math.sqrt(P.R)) / (1 - P.R);
+      const fin = (Math.PI * Math.sqrt(P.R)) / (1 - P.R);
       const circles = rings.map((r, k) => ({ x: 0, y: 0, r, color: 'bad', width: Math.max(1.2, 6 / fin * 4), alpha: 0.85 - 0.04 * k }));
       const cx = F.centre ? P.delta : 0;
       const paths = [{ pts: [[cx - 0.5, 0], [cx + 0.5, 0]], color: 'ink', width: 1.5 }, { pts: [[cx, -0.5], [cx, 0.5]], color: 'ink', width: 1.5 }];
@@ -577,7 +578,7 @@ export const EXPERIMENTS = {
         texts: [
           { s: F.centre ? 'centre as marked (0.25 mm off)' : 'centre', x: cx, y: -0.6, color: 'ink2', size: 10.5, align: 'center', dy: 10 },
           q ? { s: `ring ${q.p}: r = ${d2(q.r)} mm`, x: 12.5, y: 11.5, align: 'right', color: 'gold', size: 12 } : null,
-          { s: `finesse ${fin.toFixed(1)} (R = ${P.R}) · F = ${Fc.toFixed(0)}`, x: -12.5, y: -11.5, color: 'ink3', size: 10.5 },
+          { s: `finesse ${fin.toFixed(1)} (mirrors R = ${P.R}); ring widths not to scale`, x: -12.5, y: -11.5, color: 'ink3', size: 10.5 },
         ].filter(Boolean),
       };
     },
@@ -623,22 +624,22 @@ export const EXPERIMENTS = {
       // top view: the beam turned by the latest reading's angle (exaggerated), small and large spheres
       const q = R[i];
       const S2 = P.S1 - 400 * P.L * cavTheta(P);
-      const th = q ? ((q.S - (P.S1 + S2) / 2) / 100 / (4 * P.L)) * 40 : 0;   // ×40 so it shows
+      const th = q ? ((q.S - (P.S1 + S2) / 2) / 100 / (4 * P.L)) * 10 : 0;   // ×10 so it shows
       const c = Math.cos(th), s = Math.sin(th), L = 5;
       const ends = [[L * c, L * s], [-L * c, -L * s]];
       return {
-        x: [-9, 9], y: [-4.6, 4.6], equal: true, axes: false,
+        x: [-9, 9], y: [-4.8, 4.8], equal: true, axes: false,
         paths: [{ pts: [ends[1], ends[0]], color: 'ink2', width: 2.5 }],
         circles: [
-          ...ends.map(([x, y]) => ({ x, y, r: 0.55, color: 'gold', fill: 'gold', alpha: 0.9 })),
-          { x: L, y: -2.1, r: 1.7, color: 'accent', fill: 'accent', alpha: 0.55 }, { x: -L, y: 2.1, r: 1.7, color: 'accent', fill: 'accent', alpha: 0.55 },
+          ...ends.map(([x, y]) => ({ x, y, r: 0.45, color: 'gold', fill: 'gold', alpha: 0.95 })),
+          { x: L, y: -2.6, r: 1.6, color: 'accent', fill: 'accent', alpha: 0.55 }, { x: -L, y: 2.6, r: 1.6, color: 'accent', fill: 'accent', alpha: 0.55 },
           { x: 0, y: 0, r: 0.25, color: 'ink', fill: 'ink' },
         ],
         texts: [
           { s: 'fibre and mirror', x: 0, y: 0, color: 'ink2', size: 10.5, dx: 8, dy: 14 },
-          { s: 'large sphere', x: L + 1.9, y: -2.1, color: 'accent', size: 10.5 },
-          { s: 'small sphere', x: L + 0.8, y: 0.9, color: 'gold', size: 10.5 },
-          { s: 'top view; the turn drawn ×40', x: -8.8, y: -4.2, color: 'ink3', size: 10.5 },
+          { s: 'large sphere', x: L + 1.8, y: -2.6, color: 'accent', size: 10.5 },
+          { s: 'small sphere', x: ends[0][0] + 0.7, y: ends[0][1] + 0.5, color: 'gold', size: 10.5 },
+          { s: 'top view, not to scale; the turn drawn ×10', x: -8.8, y: -4.4, color: 'ink3', size: 10.5 },
         ],
       };
     },

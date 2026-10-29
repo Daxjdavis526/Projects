@@ -53,7 +53,7 @@ export function mount(F, P0) {
   if (ctl && P.analysisChoice && R.analyses.length > 1) F.choice({ key: 'analysis', label: 'Analysis', options: R.analyses, value: P.analysis || R.analyses[0][0], explain: 'The same data, analysed the ways a lab would argue about.' });
   if (ctl && R.at) {
     const vals = R.at.values;
-    F.slider({ key: 'at', label: R.at.label, min: 0, max: vals.length - 1, step: 1, value: P.at ?? Math.min(vals.length - 1, 3), unit: R.at.unit, fmt: (i) => String(vals[Math.round(i)]), explain: R.at.explain });
+    F.slider({ key: 'at', label: R.at.label, min: 0, max: vals.length - 1, step: 1, value: P.at ?? R.at.value ?? 0, unit: R.at.unit, fmt: (i) => String(vals[Math.round(i)]), explain: R.at.explain });
   }
   if (ctl && R.src) F.choice({ key: 'src', label: R.src.label, options: R.src.options, value: P.src, explain: R.src.explain });
   if (ctl && R.N) F.slider({ key: 'N', label: R.N.label, min: R.N.min, max: R.N.max, value: P.N ?? R.N.value, logScale: true, fmt: (v) => String(Math.round(v)), explain: R.N.explain });
@@ -141,7 +141,7 @@ export function mount(F, P0) {
     if (fit && Number.isFinite(fit.chi2) && fit.dof > 0) rows.push([P.exp === 'muon' ? 'Poisson $\\chi^2/\\nu$' : '$\\chi^2/\\nu$', q('chi2', `${num(fit.chi2 / fit.dof, 3)}\\ (\\nu = ${fit.dof})`)]);
     for (const r of out.results) {
       rows.push([r.label, q('result', `${pmT(r.value / r.scale, r.sigma / r.scale)}${r.unit ? `\\ ${r.unit}` : ''}`)]);
-      if (r.accepted !== null) rows.push([r.note ? 'true value (simulated)' : 'accepted', q('accepted', `${num(r.accepted / r.scale, 6)}${r.unit ? `\\ ${r.unit}` : ''}${r.z !== null && !hide.has('result') ? `\\ \\ (z = ${r.z.toFixed(1)})` : ''}`)]);
+      if (r.accepted !== null) rows.push([r.note ? 'true value (simulated)' : 'accepted', q('accepted', `${num(r.accepted / r.scale, 6)}${r.unit ? `\\ ${r.unit}` : ''}${r.z !== null && !hide.has('result') ? `\\ \\ (z = ${Math.abs(r.z) < 0.05 ? '0.0' : r.z.toFixed(1)})` : ''}`)]);
     }
     if (P.exp === 'muon') rows.push(['expected for the $\\mu^+/\\mu^-$ mix', q('accepted', `${num(out.mixTau, 4)}\\ \\mu\\mathrm{s}`)]);
     if (P.exp === 'tc') rows.push(['typical for YBa₂Cu₃O₇', '\\approx 92\\ \\mathrm{K}']);
