@@ -327,7 +327,7 @@ print(orders)`,
           answer: ans, tol: { rel: 0, abs: 1 },
           errors: [{ value: Math.ceil(100 / (H * Math.pow(10 ** -k, 0.25))), feedback: t`Keep the constant: solve $\tfrac{5}{384}(h/H)^4 \le 10^{-${k}}$ for $h$.` }],
           hints: [t`$h \le H\left(\dfrac{384}{5}\times10^{-${k}}\right)^{1/4}$.`, t`That gives $h = ${h.toFixed(3)}$ km; divide 100 km by it and round up.`],
-          teach: 'An h⁴ error bound turns an accuracy target into a table size: each extra factor of 10 in accuracy costs only a factor 10^(1/4) ≈ 1.8 in entries.',
+          teach: 'An h⁴ error bound turns an accuracy target into a table size: each extra factor of 10 in accuracy costs only a factor $10^{1/4} \\approx 1.8$ in entries.',
           explain: t`$h = 7\ \text{km}\times(76.8\times10^{-${k}})^{1/4} = ${h.toFixed(3)}$ km, so $${ans}$ intervals. Linear interpolation, with error $h^2/(8H^2)$ relative, would need about $${Math.ceil(100 / (H * Math.sqrt(8 * 10 ** -k)))}$ for the same target.`,
         };
       },

@@ -302,7 +302,7 @@ Choose **harmonic coordinates**, $\Box x^\lambda = 0$ — equivalently $\Gamma^\
           answer: x, tol: { rel: 0.005 },
           errors: [{ value: f ** (2 * (lam - 1)), feedback: t`That is $C$ alone. The relative violation divides by $H^2 \propto a^{-3}$, adding 3 to the exponent.` }, ...(lam !== -1 ? [{ value: f ** (2 * lam - 1), feedback: t`Dividing by $H^2 \propto a^{-3}$ multiplies by $a^{+3}$: the exponent is $2(\lambda - 1) + 3 = 2\lambda + 1$.` }] : [])],
           hints: [t`$\dot C = 2H\dot H - \dot q$; substitute both equations and collect $C = H^2 - q$.`, t`$C \propto a^{2(\lambda - 1)}$ and $C/H^2 \propto a^{2(\lambda - 1) + 3} = a^{2\lambda + 1}$.`],
-          teach: 'Adding multiples of the constraints changes how a violation evolves: here the relative violation scales as a^(2λ+1), growing for λ > −½ and decaying below.',
+          teach: 'Adding multiples of the constraints changes how a violation evolves: here the relative violation scales as $a^{2\\lambda+1}$, growing for $\\lambda > -\\tfrac12$ and decaying below.',
           explain: t`$C/H^2 \propto a^{2\lambda + 1} = a^{${2 * lam + 1}}$, so a ${f}-fold expansion changes it by $${f}^{${2 * lam + 1}} = ${sci(x, 3)}$. Every $\lambda$ has the same exact solutions — $C = 0$ stays $0$ — but a computer is never exactly on them, and the sign of $2\lambda + 1$ decides whether its errors grow or die.`,
           visual: violation,
         };

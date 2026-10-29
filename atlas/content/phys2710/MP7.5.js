@@ -67,7 +67,7 @@ The spreads are standard deviations, $\Delta x = \sqrt{\langle x^2\rangle - \lan
     { tex: '\\langle x\\rangle', text: 'the expectation value of position: the average of many position measurements, in m' },
     { tex: '\\langle p\\rangle', text: 'the expectation value of momentum, in kg m/s' },
     { tex: '\\psi^*', text: t`the complex conjugate of $\psi$ (change $i$ to $-i$); $\psi^*\psi = |\psi|^2$` },
-    { tex: '-i\\hbar\\,\\partial/\\partial x', text: 'the momentum operator: momentum is set by how fast ψ’s phase turns along x, p = ħk for e^(ikx)' },
+    { tex: '-i\\hbar\\,\\partial/\\partial x', text: 'the momentum operator: momentum is set by how fast ψ’s phase turns along x, p = ħk for $e^{ikx}$' },
     { tex: '\\Delta x,\\ \\Delta p', text: 'the spreads (standard deviations) of position and momentum measurements' },
   ],
   why: 'Expectation values are how quantum mechanics meets the laboratory: every averaged reading — a dipole moment, a mean radius, a clock’s frequency — is one.',

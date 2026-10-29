@@ -93,7 +93,7 @@ Apply it to any energy that is **quadratic** in a continuous variable, $E = cq^2
         return {
           prompt: t`A two-level system has states at $0$ and $\varepsilon$, with $\varepsilon/kT = ${x}$. What is its average energy, $\bar E/\varepsilon$?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: 1 / Math.expm1(x), feedback: 'That is the oscillator’s formula (minus sign): a two-level system has only one excited state, so Z = 1 + e^(−βε).' }, { value: 1 / (2 * x), feedback: 'Equipartition (½kT) does not apply to a system with two discrete states.' }, { value: Math.exp(-x), feedback: 'Divide by Z: Ē = ε e^(−βε)/(1 + e^(−βε)).' }], v),
+          errors: apart([{ value: 1 / Math.expm1(x), feedback: 'That is the oscillator’s formula (minus sign): a two-level system has only one excited state, so $Z = 1 + e^{-\\beta\\varepsilon}$.' }, { value: 1 / (2 * x), feedback: 'Equipartition (½kT) does not apply to a system with two discrete states.' }, { value: Math.exp(-x), feedback: 'Divide by Z: $\\bar E = \\varepsilon e^{-\\beta\\varepsilon}/(1 + e^{-\\beta\\varepsilon})$.' }], v),
           hints: [t`$Z = 1 + e^{-\beta\varepsilon}$, so $\bar E = -\partial\ln Z/\partial\beta = \dfrac{\varepsilon e^{-\beta\varepsilon}}{1 + e^{-\beta\varepsilon}}$.`, t`$\bar E/\varepsilon = 1/(e^{\varepsilon/kT} + 1) = 1/(e^{${x}} + 1)$.`],
           teach: t`$\bar E = -\partial\ln Z/\partial\beta$; for two levels that is $\varepsilon/(e^{\varepsilon/kT} + 1)$.`,
           explain: t`$\bar E/\varepsilon = 1/(e^{${x}} + 1) = ${fmt(v, 3)}$ — the upper state’s probability, as it must be: only that state carries energy.`,
@@ -123,7 +123,7 @@ Apply it to any energy that is **quadratic** in a continuous variable, $E = cq^2
         return {
           prompt: t`A degree of freedom has energy $E = c|q|^{${n}}$ with $q$ continuous and classical. Repeat the equipartition argument: what is $\bar E/kT$?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: 0.5, feedback: 'One half belongs to quadratic energies only. Substitute u = β^(1/n) q in the integral.' }, { value: n / 2, feedback: t`$Z \propto \beta^{-1/${n}}$, so $\bar E = \tfrac1${n}\,kT$.` }], v),
+          errors: apart([{ value: 0.5, feedback: 'One half belongs to quadratic energies only. Substitute $u = \\beta^{1/n} q$ in the integral.' }, { value: n / 2, feedback: t`$Z \propto \beta^{-1/${n}}$, so $\bar E = \tfrac1${n}\,kT$.` }], v),
           hints: [t`Substitute $u = (\beta c)^{1/${n}}q$: $Z = \int e^{-\beta c|q|^${n}}dq \propto \beta^{-1/${n}}$.`, t`$\bar E = -\partial\ln Z/\partial\beta = \dfrac{1}{${n}\beta}$.`],
           teach: t`For $E \propto |q|^n$, $Z \propto \beta^{-1/n}$ and $\bar E = kT/n$: equipartition’s ½ is the $n = 2$ case.`,
           explain: t`$\ln Z = -\tfrac1${n}\ln\beta + \text{const}$, so $\bar E = kT/${n}$. ${n === 1 ? 'A linear potential is gravity: a molecule in an isothermal atmosphere has average potential energy mgh = kT.' : 'Steeper walls confine the particle more tightly as it heats, so each kT buys less energy in this coordinate.'}`,
@@ -138,7 +138,7 @@ Apply it to any energy that is **quadratic** in a continuous variable, $E = cq^2
         return {
           prompt: t`Treat ${pick[0]}, with quantum $\varepsilon/k = ${pick[1]}$ K, as a harmonic oscillator. At $${T}$ K, what fraction of the equipartition energy $kT$ does it hold on average (above its ground state)?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: Math.exp(-x), feedback: 'Close at low temperature only. The full result is (ε/kT)/(e^(ε/kT) − 1).' }, { value: 1 / Math.expm1(x), feedback: 'That is the mean number of quanta. Multiply by ε/kT to get Ē/kT.' }], v),
+          errors: apart([{ value: Math.exp(-x), feedback: 'Close at low temperature only. The full result is $(\\varepsilon/kT)/(e^{\\varepsilon/kT} - 1)$.' }, { value: 1 / Math.expm1(x), feedback: 'That is the mean number of quanta. Multiply by ε/kT to get Ē/kT.' }], v),
           hints: [t`$\bar E/kT = \dfrac{x}{e^x - 1}$ with $x = \varepsilon/kT = ${fmt(x, 3)}$.`],
           teach: t`An oscillator holds $\bar E = \varepsilon/(e^{\varepsilon/kT} - 1)$: $kT$ when hot, exponentially little when cold.`,
           explain: t`$x = ${fmt(x, 3)}$: $\bar E/kT = ${fmt(x, 3)}/(e^{${fmt(x, 3)}} - 1) = ${texNum(v, 3)}$.`,
@@ -215,7 +215,7 @@ Apply it to any energy that is **quadratic** in a continuous variable, $E = cq^2
         return {
           prompt: t`Over some range of temperature a system’s partition function is $Z = AT^{${n}}$, with $A$ a constant. What is $\bar E/kT$?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: 1 / n, feedback: 'With β = 1/kT, Z ∝ β^(−n), and Ē = −∂ln Z/∂β = n/β.' }, { value: n / 2, feedback: 'There is no factor ½ here: the power of T is the count directly.' }], v),
+          errors: apart([{ value: 1 / n, feedback: 'With β = 1/kT, $Z \\propto \\beta^{-n}$, and $\\bar E = -\\partial \\ln Z/\\partial\\beta = n/\\beta$.' }, { value: n / 2, feedback: 'There is no factor ½ here: the power of T is the count directly.' }], v),
           hints: [t`In terms of $\beta$: $Z \propto \beta^{-${n}}$.`, t`$\bar E = -\partial\ln Z/\partial\beta = ${n}/\beta$.`],
           teach: t`$\bar E = kT^2\,\partial\ln Z/\partial T$: a power law $Z \propto T^n$ gives $\bar E = nkT$.`,
           explain: t`$\ln Z = ${n}\ln T + \ln A$, and $\bar E = kT^2\dfrac{\partial\ln Z}{\partial T} = ${n}\,kT$. Each quadratic term contributes $T^{1/2}$ to $Z$; ${n} corresponds to ${2 * n} of them.`,

@@ -106,7 +106,7 @@ converging in the weighted mean square, with Parseval’s identity $\int|f|^2w =
         const ans = 4 / (n * PI);
         return {
           prompt: t`The eigenfunctions $\phi_n = e^{-x}\sin nx$ of $u'' + 2u' + \lambda u = 0$, $u(0) = u(\pi) = 0$, are orthogonal with weight $w = e^{2x}$. Expand $f(x) = e^{-x}$ in them: what is $c_{${n}}$?`,
-          visual: { type: 'graph', params: { x: [0, 3.1416], y: [-0.15, 1.15], aspect: 'wide', xlabel: 'x', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-x)', color: 'ink3', width: 1.5, dash: [6, 4] }, { fn: 'e^(-x)*(4/pi)*(sin(x) + sin(3x)/3 + sin(5x)/5 + sin(7x)/7)', color: 'accent', width: 2.2 }] }, caption: 'e^(−x) (dashed) and its expansion with four terms.' },
+          visual: { type: 'graph', params: { x: [0, 3.1416], y: [-0.15, 1.15], aspect: 'wide', xlabel: 'x', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-x)', color: 'ink3', width: 1.5, dash: [6, 4] }, { fn: 'e^(-x)*(4/pi)*(sin(x) + sin(3x)/3 + sin(5x)/5 + sin(7x)/7)', color: 'accent', width: 2.2 }] }, caption: '$e^{-x}$ (dashed) and its expansion with four terms.' },
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 2 / (n * PI), feedback: t`Divide by $\int_0^\pi\phi_n^2w\,dx = \int_0^\pi\sin^2nx\,dx = \pi/2$, not $\pi$.` }],
           hints: [t`$c_n = \dfrac{\int_0^\pi e^{-x}\,e^{-x}\sin nx\,e^{2x}dx}{\int_0^\pi e^{-2x}\sin^2nx\,e^{2x}dx}$ — the exponentials cancel.`, t`$= \dfrac{\int_0^\pi\sin nx\,dx}{\pi/2} = \dfrac{2(1 - \cos n\pi)}{n\pi}$.`],
@@ -173,7 +173,7 @@ print("Rayleigh quotient of x(1 − x):  ", rayleigh_parabola())
         { name: 'eigenvalues come out sorted and real', code: 'np.all(np.diff(sl_eigs(50)) > 0)' },
       ],
       hints: ['`A * d[:, None] * d[None, :]` multiplies row i by dᵢ and column j by dⱼ: that is D A D.', t`$\int_0^1(1 + x)x^2(1 - x)^2dx = \frac1{30} + \frac1{60}$.`],
-      teach: 'A weighted Sturm–Liouville problem discretizes to a symmetric generalized eigenproblem; symmetrizing with W^(−1/2) keeps the eigenvalues real.',
+      teach: 'A weighted Sturm–Liouville problem discretizes to a symmetric generalized eigenproblem; symmetrizing with $W^{-1/2}$ keeps the eigenvalues real.',
       explain: t`$\lambda_1 \approx 6.548$, $\lambda_2 \approx 26.46$: the extra mass density $1 + x$ lowers them below $\pi^2$ and $4\pi^2$. The parabola’s quotient $20/3 \approx 6.667$ is 1.8% above $\lambda_1$, as the minimum principle demands. Symmetrizing reflects self-adjointness: the discrete operator is symmetric in the weighted inner product.`,
     }),
   ],

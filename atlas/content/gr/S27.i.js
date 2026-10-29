@@ -197,7 +197,7 @@ $$\mathcal{M} = \frac{(m_1 m_2)^{3/5}}{(m_1 + m_2)^{1/5}} \qquad \frac{df}{dt} =
             { value: x * (256 / 5), feedback: 'Keep the factor 5/256 in front.' },
           ],
           hints: [t`$G\mathcal{M}/c^3 = ${Mc}\times4.926\times10^{-6}$ s $= ${sci(T, 4)}$ s; raise it to the power $-5/3$.`, t`$(G\mathcal{M}/c^3)^{-5/3} = ${sci(T ** (-5 / 3), 4)}$ and $(\pi\cdot${f})^{-8/3} = ${sci((Math.PI * f) ** (-8 / 3), 4)}$; multiply them by $5/256$.`],
-          teach: 'Lighter binaries sweep more slowly: the time left goes as 𝓜^(−5/3) f^(−8/3).',
+          teach: 'Lighter binaries sweep more slowly: the time left goes as $\\mathcal{M}^{-5/3} f^{-8/3}$.',
           explain: t`$\tau = \tfrac{5}{256}\times${sci(T ** (-5 / 3), 4)}\times${sci((Math.PI * f) ** (-8 / 3), 4)} = ${sci(x)}$ s${x > 120 ? ` — about ${Math.round(x / 60)} minutes` : ''}. ${Mc < 2 ? 'GW170817’s neutron stars were tracked for about 100 seconds; heavy black-hole pairs give a fraction of a second.' : 'Heavy black holes give a short chirp; neutron stars sweep through the band for minutes.'}`,
           visual: {
             type: 'graph',

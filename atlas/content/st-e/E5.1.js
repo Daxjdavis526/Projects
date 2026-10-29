@@ -103,7 +103,7 @@ $L$ is **self-adjoint** on a space of functions when that bracket vanishes for e
     mcq({
       id: 'momentum', difficulty: 3,
       prompt: t`On $2\pi$-periodic functions with $\langle u, v\rangle = \int_0^{2\pi}u\bar v\,dx$, which operator is self-adjoint?`,
-      visual: { type: 'graph', params: { x: [0, 6.2832], y: [-1.2, 1.2], aspect: 'wide', xlabel: 'x', ylabel: '', axesAt: 'edge', curves: [{ fn: 'cos(3x)', color: 'accent', width: 2, label: 'Re e^(3ix)', labelAt: 0.4, labelDy: -10 }, { fn: 'sin(3x)', color: 'warn', width: 1.8, dash: [6, 4], label: 'Im', labelAt: 1.3, labelDy: -10 }] }, caption: 'e^(3ix), an eigenfunction of d/dx with eigenvalue 3i.' },
+      visual: { type: 'graph', params: { x: [0, 6.2832], y: [-1.2, 1.2], aspect: 'wide', xlabel: 'x', ylabel: '', axesAt: 'edge', curves: [{ fn: 'cos(3x)', color: 'accent', width: 2, label: 'Re e^(3ix)', labelAt: 0.4, labelDy: -10 }, { fn: 'sin(3x)', color: 'warn', width: 1.8, dash: [6, 4], label: 'Im', labelAt: 1.3, labelDy: -10 }] }, caption: '$e^{3ix}$, an eigenfunction of d/dx with eigenvalue 3i.' },
       choices: [t`$-i\dfrac{d}{dx}$`, t`$\dfrac{d}{dx}$`, t`$x\dfrac{d}{dx}$`, t`$\dfrac{d}{dx} + 1$`],
       answer: 0,
       why: {

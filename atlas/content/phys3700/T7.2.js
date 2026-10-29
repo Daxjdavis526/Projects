@@ -121,7 +121,7 @@ with $+$ for fermions (the **Fermi–Dirac** distribution) and $-$ for bosons (*
       prompt: 'When do Fermi–Dirac and Bose–Einstein statistics both reduce to the Boltzmann distribution?',
       choices: ['When every state’s occupancy is much less than 1, i.e. ε − μ ≫ kT for all states (V/N ≫ v(Q))', 'Whenever the temperature is low', 'Whenever the particles are heavy, whatever the density', 'When μ is above the energies of the occupied states'],
       answer: 0,
-      why: { 1: 'Cooling at fixed density makes quantum effects stronger: v(Q) grows, and the particles start to compete for states.', 2: 'Mass helps (v(Q) ∝ m^(−3/2)), but a dense enough or cold enough gas of heavy atoms still turns quantum — that is how rubidium is condensed.', 3: 'That is the degenerate regime: fermion states below μ are nearly full, the opposite of classical.' },
+      why: { 1: 'Cooling at fixed density makes quantum effects stronger: v(Q) grows, and the particles start to compete for states.', 2: 'Mass helps ($v_Q \\propto m^{-3/2}$), but a dense enough or cold enough gas of heavy atoms still turns quantum — that is how rubidium is condensed.', 3: 'That is the degenerate regime: fermion states below μ are nearly full, the opposite of classical.' },
       hints: [t`Compare $1/(e^x \pm 1)$ with $e^{-x}$: when is the $\pm1$ negligible?`],
       teach: 'Quantum statistics matters only when occupancies approach 1; otherwise everything is Boltzmann.',
       explain: t`If $x = (\varepsilon - \mu)/kT \gg 1$ then $e^x \gg 1$ and $1/(e^x \pm 1) \approx e^{-x}$. For an ideal gas, $e^{\mu/kT} = Nv_Q/VZ_\text{int}$, so that condition is $V/N \gg v_Q$ — T6.5’s test for a classical gas.`,
@@ -176,7 +176,7 @@ with $+$ for fermions (the **Fermi–Dirac** distribution) and $-$ for bosons (*
           errors: apart([{ value: (KB * T) / ((H * CL) / (lam * 1e-6)), feedback: 'kT/hf is the classical limit, valid only when hf ≪ kT. Here hf is comparable to or larger than kT.' }, { value: nFD(x), feedback: t`Photons are bosons: $1/(e^x - 1)$.` }], v),
           hints: [t`$hf = hc/\lambda$; $x = hc/(\lambda kT)$, with $hc/k = 1.4388\times10^{-2}$ m·K.`, t`$x = ${fmt(x, 4)}$, so $\bar n = 1/(e^{${fmt(x, 3)}} - 1)$.`],
           teach: 'Thermal infrared modes are sparsely filled: n̄ ≪ 1 once hf exceeds a few kT.',
-          explain: t`$x = ${fmt(x, 4)}$, $\bar n = ${texNum(v, 3)}$. ${v < 0.1 ? 'Far below one photon per mode: here the radiation is nearly classical-Boltzmann, e^(−x).' : 'Comparable to one: quantum statistics matters.'} The emitted power comes from the enormous number of modes, not from their occupancy.`,
+          explain: t`$x = ${fmt(x, 4)}$, $\bar n = ${texNum(v, 3)}$. ${v < 0.1 ? 'Far below one photon per mode: here the radiation is nearly classical-Boltzmann, $e^{-x}$.' : 'Comparable to one: quantum statistics matters.'} The emitted power comes from the enormous number of modes, not from their occupancy.`,
           visual: { type: 'graph', params: { x: [0, 8], y: [0, 1.2], aspect: 'wide', axesAt: 'edge', xlabel: 'hf / kT', ylabel: 'n̄', curves: [{ fn: '1/(e^x - 1)', domain: [0.5, 8], color: 'warn' }, { fn: 'e^(-x)', domain: [0, 8], color: 'ink3', dash: true }] }, caption: 'Photon occupancy (solid) and the Boltzmann factor (dashed) against hf/kT.' },
         };
       },

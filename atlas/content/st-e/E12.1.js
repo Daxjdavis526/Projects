@@ -111,13 +111,13 @@ $$f(x) = \frac{a_0}{2} + \sum_{n \ge 1}a_nT_n(x), \qquad a_n = \frac2\pi\int_0^\
       gen(r) {
         const b = r.pick([0.1, 0.3, 0.5, 1, 2]), ans = SF.bernsteinRho(0, b);
         return {
-          prompt: t`$f(x) = \dfrac{1}{x^2 + ${b * b}}$ has poles at $x = \pm${b}i$. Find the Bernstein parameter $\rho$ of the largest ellipse about $[-1, 1]$ free of them.`,
+          prompt: t`$f(x) = \dfrac{1}{x^2 + ${r4(b * b)}}$ has poles at $x = \pm${b}i$. Find the Bernstein parameter $\rho$ of the largest ellipse about $[-1, 1]$ free of them.`,
           visual: gpic({ x: [-1.8, 1.8], y: [-Math.max(1.2, 1.3 * b), Math.max(1.2, 1.3 * b)], equal: true, xlabel: 'Re z', ylabel: 'Im z', points: [{ x: 0, y: b, color: 'bad', r: 5, label: 'pole', labelDx: 8 }, { x: 0, y: -b, color: 'bad', r: 5 }, { x: -1, y: 0, color: 'gold', r: 4 }, { x: 1, y: 0, color: 'gold', r: 4 }], arrows: [{ from: [-1, 0], to: [1, 0], color: 'accent', width: 3 }] }, 'The interval and the two poles on the imaginary axis.'),
           answer: ans, tol: { rel: 0.003 },
           errors: [{ value: 1 + b, feedback: t`An ellipse with foci $\pm1$ through $ib$ has semi-minor axis $b$ and semi-major $\sqrt{1 + b^2}$; $\rho$ is their sum.` }, { value: b + Math.sqrt(b * b - 1 + 2), feedback: 'Recheck: the semi-axes satisfy (major)² − (minor)² = 1 (focal distance 1).' }].filter((e) => Math.abs(e.value - ans) > 0.004 * ans),
-          hints: [t`Semi-axes $A$ and $B$ of an ellipse with foci $\pm1$ satisfy $A^2 - B^2 = 1$, and $\rho = A + B$.`, t`Through $\pm${b}i$: $B = ${b}$, $A = \sqrt{1 + ${b * b}}$.`],
+          hints: [t`Semi-axes $A$ and $B$ of an ellipse with foci $\pm1$ satisfy $A^2 - B^2 = 1$, and $\rho = A + B$.`, t`Through $\pm${b}i$: $B = ${b}$, $A = \sqrt{1 + ${r4(b * b)}}$.`],
           teach: 'Poles near the interval in the imaginary direction choke convergence: ρ = β + √(1 + β²) is close to 1 when β is small.',
-          explain: t`$\rho = ${b} + \sqrt{1 + ${b * b}} = ${r4(ans)}$. Small $\beta$ (a sharp but smooth feature of width $\beta$) means $\rho \approx 1 + \beta$: about $2.3/\beta$ terms per factor of 10.`,
+          explain: t`$\rho = ${b} + \sqrt{1 + ${r4(b * b)}} = ${r4(ans)}$. Small $\beta$ (a sharp but smooth feature of width $\beta$) means $\rho \approx 1 + \beta$: about $2.3/\beta$ terms per factor of 10.`,
         };
       },
     }),
@@ -144,8 +144,8 @@ $$f(x) = \frac{a_0}{2} + \sum_{n \ge 1}a_nT_n(x), \qquad a_n = \frac2\pi\int_0^\
       choices: [t`Like $n^{-4}$`, t`Like $n^{-2}$`, t`Like $\rho^{-n}$ for some $\rho > 1$`, t`Like $n^{-3}$`],
       answer: 0,
       why: { 1: t`$n^{-2}$ is the rate for $|x|$, whose first derivative jumps.`, 2: t`Geometric decay needs analyticity in an ellipse; $|x|^3$ is not analytic at 0.`, 3: t`Each extra derivative of smoothness gains one power of $n$: a jump in the $k$-th derivative gives $n^{-k-1}$.` },
-      hints: ['Integrate by parts in θ: each integration gains a factor 1/n until the jump stops you.', 'A jump in the k-th derivative gives coefficients like n^(−k−1).'],
-      teach: 'Limited smoothness gives algebraic decay: a jump in the k-th derivative means coefficients ~ n^(−k−1).',
+      hints: ['Integrate by parts in θ: each integration gains a factor 1/n until the jump stops you.', 'A jump in the k-th derivative gives coefficients like $n^{-k-1}$.'],
+      teach: 'Limited smoothness gives algebraic decay: a jump in the k-th derivative means coefficients $\\sim n^{-k-1}$.',
       explain: t`The third derivative jumps, so $a_n = O(n^{-4})$ (only even $n$ are nonzero). Compare $|x|$: $n^{-2}$. Analyticity is what turns algebraic into geometric convergence.`,
     }),
     mcq({
@@ -153,7 +153,7 @@ $$f(x) = \frac{a_0}{2} + \sum_{n \ge 1}a_nT_n(x), \qquad a_n = \frac2\pi\int_0^\
       prompt: t`Expand $f(x) = e^x$ on $[-1, 1]$ two ways: as a Fourier series of period 2, and as a Chebyshev series. Why does only the Fourier series ring (Gibbs) near $x = \pm1$?`,
       visual: gpic({ x: [-1, 1], y: [0, 3.2], xlabel: 'x', curves: [{ fn: 'e^x', color: 'ink3', width: 1.6, dash: [5, 4] }, { sum: '2*(-1)^k*sinh(1)*(cos(k*pi*x) - k*pi*sin(k*pi*x))/(1 + (k*pi)^2) + sinh(1)*step(1.5 - k)', k: [1, 8], color: 'warn', width: 1.8 }] }, 'eˣ (dashed) and its Fourier partial sum of period 2 through k = 8 (orange), ringing at the ends.'),
       choices: [
-        'The periodic extension of eˣ jumps at x = ±1, but g(θ) = e^(cos θ) is smooth and periodic — Chebyshev series see no jump',
+        'The periodic extension of eˣ jumps at x = ±1, but $g(\\theta) = e^{\\cos\\theta}$ is smooth and periodic — Chebyshev series see no jump',
         'Chebyshev polynomials are bounded by 1 while sines are not',
         'Chebyshev series use more terms near the ends',
         'Gibbs ringing appears for Chebyshev series too, but only for even functions',

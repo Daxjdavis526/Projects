@@ -240,9 +240,9 @@ print(np.gradient(y, 1.0))
           },
           answer: est, units: 'm/s^2', tol: { rel: 0.01 },
           errors: [{ value: (hs[2] - 2 * hs[1] + hs[0]) / dt, feedback: 'Divide by Δt squared.' }, { value: (hs[2] - hs[0]) / (2 * dt), feedback: 'That is the velocity (central first difference). The acceleration needs the second difference.' }],
-          hints: [t`Numerator: $${hs[2]} - 2(${hs[1]}) + ${hs[0]}$.`, t`Divide by $\Delta t^2 = ${dt * dt}$ s².`],
+          hints: [t`Numerator: $${hs[2]} - 2(${hs[1]}) + ${hs[0]}$.`, t`Divide by $\Delta t^2 = ${+(dt * dt).toFixed(4)}$ s².`],
           teach: 'The central second difference (f₊ − 2f₀ + f₋)/h² estimates f″ with an error of order h²; it is how accelerations are taken from position data.',
-          explain: t`$(${hs[2]} - ${2 * hs[1]} + ${hs[0]})/${dt * dt} = ${est.toFixed(2)}$ m/s², about ${(est / 9.81).toFixed(1)} g of acceleration relative to the ground. A second difference divides tiny differences by $\Delta t^2$, so it amplifies measurement noise even more than a first difference: real radar data are smoothed or fitted first.`,
+          explain: t`$(${hs[2]} - ${2 * hs[1]} + ${hs[0]})/${+(dt * dt).toFixed(4)} = ${est.toFixed(2)}$ m/s², about ${(est / 9.81).toFixed(1)} g of acceleration relative to the ground. A second difference divides tiny differences by $\Delta t^2$, so it amplifies measurement noise even more than a first difference: real radar data are smoothed or fitted first.`,
         };
       },
     }),

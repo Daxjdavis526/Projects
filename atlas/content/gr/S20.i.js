@@ -331,10 +331,10 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
     num({
       id: 'cp-s2', difficulty: 3, transfer: true,
       gen(r) {
-        const au = r.pick([120, 150, 200]);
+        const [star, au] = r.pick([['S2', 120], ['S29', 90], ['S4716', 100]]);
         const ratio = (au * AU) / rs(SGR * M_SUN);
         return {
-          prompt: t`The star S2 swings past Sagittarius A* (4.30 million solar masses) at about ${au} AU from it. How many Schwarzschild radii is that? (1 AU $= 1.496\times10^{11}$ m)`,
+          prompt: t`The star ${star} swings past Sagittarius A* (4.30 million solar masses) at about ${au} AU from it. How many Schwarzschild radii is that? (1 AU $= 1.496\times10^{11}$ m)`,
           answer: ratio, tol: { rel: 0.01 },
           errors: [{ value: (au * AU) / ((G * SGR * M_SUN) / (C * C)), feedback: 'Use rₛ = 2GM/c², with the factor 2.' }],
           hints: [t`First $r_s = 2GM/c^2$ for $M = 4.30\times10^{6}\times1.989\times10^{30}$ kg.`, t`$r_s = ${sci(rs(SGR * M_SUN))}$ m; divide ${au} AU in metres by it.`],
@@ -344,12 +344,12 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
             params: {
               x: [0, 4.3], y: [0, 1.12], xlabel: 'log₁₀(r / rₛ)', ylabel: 'clock rate',
               curves: [{ fn: 'sqrt(1 - 10^(-x))', domain: [0, 4.3], color: 'gold' }],
-              points: [{ x: 0, y: 0, color: 'ink', label: 'horizon' }, { x: round(log(ratio), 4), y: round(Math.sqrt(1 - 1 / ratio), 6), color: 'accent', label: 'S2 at its closest' }],
+              points: [{ x: 0, y: 0, color: 'ink', label: 'horizon' }, { x: round(log(ratio), 4), y: round(Math.sqrt(1 - 1 / ratio), 6), color: 'accent', label: `${star} at its closest` }],
               hlines: [{ y: 1 }],
             },
-            caption: 'The clock-rate map √(1 − rₛ/r), with distance in powers of ten; the dashed line is the far-away rate. Even at its closest, S2 sits where clocks run at almost the far-away rate: the weak field.',
+            caption: 'The clock-rate map √(1 − rₛ/r), with distance in powers of ten; the dashed line is the far-away rate. Even at its closest, the star sits where clocks run at almost the far-away rate: the weak field.',
           },
-          explain: t`$r_s = ${sci(rs(SGR * M_SUN))}$ m $= ${sci(rs(SGR * M_SUN) / AU, 2)}$ AU, so ${au} AU is $${sci(ratio)}\,r_s$. There $r_s/2r = ${sci(1 / (2 * ratio), 2)}$: S2's light is redshifted by about that fraction by gravity — and the GRAVITY collaboration detected it, together with the slowing of S2's clock by its speed, in 2018.`,
+          explain: t`$r_s = ${sci(rs(SGR * M_SUN))}$ m $= ${sci(rs(SGR * M_SUN) / AU, 2)}$ AU, so ${au} AU is $${sci(ratio)}\,r_s$. There $r_s/2r = ${sci(1 / (2 * ratio), 2)}$: the star's light is redshifted by about that fraction by gravity — for S2 the GRAVITY collaboration detected it, together with the slowing of S2's clock by its speed, in 2018.`,
         };
       },
     }),

@@ -57,7 +57,7 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
   },
   example: {
     prompt: t`Prove $\int_{-\infty}^\infty e^{-ax^2}dx = \sqrt{\pi/a}$, then get $\int x^2e^{-ax^2}dx$ and $\int x^4e^{-ax^2}dx$ without integrating by parts.`,
-    visual: gpic({ x: [-2.5, 2.5], y: [-2.5, 2.5], equal: true, xlabel: 'x', ylabel: 'y', curves: [0.5, 1, 1.5, 2].map((r0, i) => ({ param: [`${r0}*cos(t)`, `${r0}*sin(t)`], t: [0, 6.2832], color: 'accent', width: 2.4 - 0.4 * i })) }, 'Level circles of e^(−(x² + y²)): in polar coordinates the area element r dr dθ supplies exactly the factor needed to integrate it.'),
+    visual: gpic({ x: [-2.5, 2.5], y: [-2.5, 2.5], equal: true, xlabel: 'x', ylabel: 'y', curves: [0.5, 1, 1.5, 2].map((r0, i) => ({ param: [`${r0}*cos(t)`, `${r0}*sin(t)`], t: [0, 6.2832], color: 'accent', width: 2.4 - 0.4 * i })) }, 'Level circles of $e^{-(x^2 + y^2)}$: in polar coordinates the area element r dr dθ supplies exactly the factor needed to integrate it.'),
     steps: [
       { label: 'Square it', text: t`$I^2 = \displaystyle\int e^{-ax^2}dx\int e^{-ay^2}dy = \iint_{\mathbb R^2}e^{-a(x^2 + y^2)}dx\,dy$.` },
       { label: 'Polar coordinates', text: t`$I^2 = \displaystyle\int_0^{2\pi}\!\!\int_0^\infty e^{-ar^2}\,r\,dr\,d\theta = 2\pi\cdot\frac{1}{2a} = \frac\pi a$ — the $r$ from $dA = r\,dr\,d\theta$ makes it elementary. So $I = \sqrt{\pi/a}$.` },
@@ -94,7 +94,7 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
         const f = `e^(-${a}*x^2 + ${b}*x)`;
         return {
           prompt: t`Evaluate $\displaystyle\int_{-\infty}^{\infty}e^{-${a}x^2 ${b < 0 ? '-' : '+'} ${Math.abs(b)}x}\,dx$ by completing the square.`,
-          visual: gpic({ x: [-6, 6], y: [0, 1.15 * Math.exp((b * b) / (4 * a))], xlabel: 'x', curves: [{ fn: f, color: 'accent', width: 2.2 }, { fn: `e^(-${a}*x^2)`, color: 'ink3', width: 1.4, dash: [5, 4] }], shade: [{ fn: f, from: -6, to: 6, alpha: 0.15 }] }, 'The shifted, raised Gaussian (blue) against e^(−ax²) (dashed).'),
+          visual: gpic({ x: [-6, 6], y: [0, 1.15 * Math.exp((b * b) / (4 * a))], xlabel: 'x', curves: [{ fn: f, color: 'accent', width: 2.2 }, { fn: `e^(-${a}*x^2)`, color: 'ink3', width: 1.4, dash: [5, 4] }], shade: [{ fn: f, from: -6, to: 6, alpha: 0.15 }] }, 'The shifted, raised Gaussian (blue) against $e^{-ax^2}$ (dashed).'),
           answer: ans, tol: { rel: 0.002 },
           integrand: f, limits: ['-inf', 'inf'], vars: { x: [-2, 2] },
           errors: [{ value: Math.sqrt(PI / a), feedback: t`The shift does not change the area, but the factor $e^{b^2/4a}$ does: the peak is higher.` }, { value: Math.sqrt(PI / a) * Math.exp(-(b * b) / (4 * a)), feedback: t`Sign: $-ax^2 + bx = -a(x - \frac{b}{2a})^2 + \frac{b^2}{4a}$.` }, { value: Math.sqrt(PI / a) * Math.exp((b * b) / (2 * a)), feedback: t`The constant is $b^2/4a$, not $b^2/2a$.` }],
@@ -116,7 +116,7 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
           integrand: f, limits: [0, 'inf'], vars: { x: [0.2, 2] },
           errors: [{ value: 0, feedback: 'Zero is the whole-line value; on the half-line every bit of area is positive.' }, { value: SF.fact(n), feedback: t`With $u = x^2$, $x\,dx = \tfrac12du$: there is a factor ½.` }],
           hints: [t`Put $u = x^2$: $x^{${2 * n + 1}}dx = \tfrac12u^{${n}}du$.`, t`$\int_0^\infty u^{${n}}e^{-u}du = ${n}!$.`],
-          teach: 'Odd half-line Gaussian moments are factorials: ∫₀^∞ x^(2n+1) e^(−x²) dx = n!/2.',
+          teach: 'Odd half-line Gaussian moments are factorials: $\\int_0^\\infty x^{2n+1} e^{-x^2}\\, dx = n!/2$.',
           explain: t`$\tfrac12\Gamma(${n + 1}) = \tfrac12\cdot${n}! = ${ans}$.`,
         };
       },
@@ -147,7 +147,7 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
           answer: ans, tol: { rel: 0.002 },
           errors: [{ value: PI / Math.sqrt(a * c - 4 * b * b), feedback: t`The off-diagonal entries of $A$ are half the $xy$ coefficient: $A_{12} = ${b}$.` }, { value: PI / Math.sqrt(a * c), feedback: t`The cross term matters: $\det A = ${a}\cdot${c} - (${b})^2$.` }].filter((e) => Number.isFinite(e.value) && Math.abs(e.value - ans) > 0.003 * ans),
           hints: [t`$A = \begin{pmatrix}${a} & ${b}\\ ${b} & ${c}\end{pmatrix}$, $\det A = ${det}$.`, t`Diagonalize: $\mathbf x^{\mathsf T}A\mathbf x = \lambda_1u^2 + \lambda_2v^2$ and the rotation has Jacobian 1, so the integral is $\sqrt{\pi/\lambda_1}\sqrt{\pi/\lambda_2}$.`],
-          teach: 'A multidimensional Gaussian integral is π^(n/2) divided by the square root of the determinant.',
+          teach: 'A multidimensional Gaussian integral is $\\pi^{n/2}$ divided by the square root of the determinant.',
           explain: t`$\pi/\sqrt{${det}} = ${r4(ans)}$. This is why Gaussian path integrals produce determinants of operators.`,
         };
       },
@@ -192,7 +192,7 @@ Odd moments vanish by symmetry; on the half-line they are elementary, $\int_0^\i
         const n = r.int(3, 6), ans = (2 * PI ** (n / 2)) / G(n / 2);
         return {
           prompt: t`Compute $\int_{\mathbb R^{${n}}}e^{-|\mathbf x|^2}d^{${n}}x$ two ways: as a product of ${n} one-dimensional Gaussians, and in spherical coordinates as $S_{${n - 1}}\int_0^\infty r^{${n - 1}}e^{-r^2}dr$, where $S_{${n - 1}}$ is the area of the unit sphere in $${n}$ dimensions. What is $S_{${n - 1}}$?`,
-          visual: gpic({ x: [0, 4], y: [0, 1.2 * Math.max(...Array.from({ length: 80 }, (_, i) => (0.05 * i) ** (n - 1) * Math.exp(-((0.05 * i) ** 2))))], xlabel: 'r', curves: [{ fn: `x^${n - 1}*e^(-x^2)`, color: 'accent', width: 2.2 }], shade: [{ fn: `x^${n - 1}*e^(-x^2)`, from: 0, to: 4, alpha: 0.15 }] }, `The radial integrand r${'⁰¹²³⁴⁵⁶'[n - 1]}e^(−r²): shells of radius r weighted by their area.`),
+          visual: gpic({ x: [0, 4], y: [0, 1.2 * Math.max(...Array.from({ length: 80 }, (_, i) => (0.05 * i) ** (n - 1) * Math.exp(-((0.05 * i) ** 2))))], xlabel: 'r', curves: [{ fn: `x^${n - 1}*e^(-x^2)`, color: 'accent', width: 2.2 }], shade: [{ fn: `x^${n - 1}*e^(-x^2)`, from: 0, to: 4, alpha: 0.15 }] }, `The radial integrand $r^{${n - 1}}e^{-r^2}$: shells of radius r weighted by their area.`),
           answer: ans, tol: { rel: 0.002 },
           errors: [{ value: PI ** (n / 2) / G(n / 2 + 1), feedback: 'That is the volume of the unit ball; the question asks for the area of its boundary.' }, { value: PI ** (n / 2) / G(n / 2), feedback: t`$\int_0^\infty r^{n-1}e^{-r^2}dr = \tfrac12\Gamma(n/2)$: keep the ½.` }],
           hints: [t`The product is $\big(\sqrt\pi\big)^{${n}} = \pi^{${n}/2}$.`, t`$\int_0^\infty r^{${n - 1}}e^{-r^2}dr = \tfrac12\Gamma\big(\tfrac{${n}}{2}\big)$, so $S_{${n - 1}} = 2\pi^{${n}/2}/\Gamma(${n}/2)$.`],

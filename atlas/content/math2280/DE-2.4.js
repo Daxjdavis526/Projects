@@ -79,7 +79,7 @@ A **homogeneous** equation $y' = F(y/x)$ depends only on the ratio $y/x$; writin
         3: t`$v = y/t$ is for homogeneous equations, whose right side depends on $y/t$ alone; here $e^t y^3$ does not.`,
       },
       hints: [t`This is Bernoulli with $n = 3$.`, t`Use $v = y^{1-n}$.`],
-      teach: 'For a Bernoulli equation y′ + p y = q yⁿ, the substitution v = y^(1−n) gives a linear equation.',
+      teach: 'For a Bernoulli equation y′ + p y = q yⁿ, the substitution $v = y^{1-n}$ gives a linear equation.',
       explain: t`$n = 3$, so $v = y^{-2}$. Then $v' = -2y^{-3}y'$; multiplying the equation by $-2y^{-3}$ gives $v' - 4v = -2e^t$, which is linear.`,
       visual: { type: 'de-slopefield', params: { f: 'exp(t)*y^3 - 2*y', x: [-1, 2], y: [-2, 2], grid: [17, 14], seeds: [[-1, 1.2], [-1, 0.5], [-1, -1]], seedColor: 'accent2' }, caption: t`The slope field of $y' = e^t y^3 - 2y$ with three solutions. The cube makes it nonlinear: some solutions blow up, others decay.` },
     }),
@@ -214,7 +214,7 @@ A **homogeneous** equation $y' = F(y/x)$ depends only on the ratio $y/x$; writin
           integrand: `(${ans}) - (${ans})^3`,
           errors: [{ answer: `(1 + ${C}*exp(-t))^(-1/2)`, feedback: t`With $v = y^{-2}$, $v' = -2y^{-3}y'$, so $v' + 2v = 2$: the rate is $2$, not 1.` }],
           hints: [t`Bernoulli with $n = 3$: $v = y^{-2}$ gives $v' = -2y^{-3}y' = -2y^{-2} + 2 = -2v + 2$.`, t`$v = 1 + Ce^{-2t}$ with $v(0) = 1/y(0)^2$; then $y = v^{-1/2}$.`],
-          teach: 'A cubic Bernoulli equation becomes linear in v = y^(−2); translate back with y = v^(−1/2).',
+          teach: 'A cubic Bernoulli equation becomes linear in $v = y^{-2}$; translate back with $y = v^{-1/2}$.',
           explain: t`$v = 1 + Ce^{-2t}$ with $C = ${frac(C)}$, so $y = \left(1 ${C < 0 ? '-' : '+'} ${frac(Math.abs(C))}e^{-2t}\right)^{-1/2} \to 1$: every positive solution settles at the stable equilibrium $y = 1$.`,
           visual: { type: 'de-slopefield', params: { f: 'y - y^3', x: [0, 3], y: [0, 2.2], grid: [17, 13], points: [{ x: 0, y: y0, color: 'gold', label: 'start' }] }, caption: t`The slope field of $y' = y - y^3$ for $y \ge 0$, with the starting point.` },
         };

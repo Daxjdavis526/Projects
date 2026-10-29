@@ -165,7 +165,7 @@ The circuit **is** a forced, damped spring, term for term: inductance is inertia
           answer: V, units: 'V', tol: { rel: 0.005 },
           errors: [{ value: E, feedback: 'The capacitor does not stop at the supply voltage: the coil keeps the current flowing, so it overshoots, like a spring released under a sudden constant load.' }, { value: 2 * E, feedback: t`Twice the supply is the undamped limit. With $\zeta = ${tex(z, 2)}$ the overshoot is $e^{-\pi\zeta/\sqrt{1 - \zeta^2}}$ of the supply.` }],
           hints: [t`$\zeta = \dfrac{R}{2}\sqrt{C/L}$; the capacitor voltage is $\mathcal{E}$ minus a free transient that starts at $-\mathcal{E}$ with zero current.`, t`The first peak overshoots $\mathcal{E}$ by $\mathcal{E}\,e^{-\pi\zeta/\sqrt{1 - \zeta^2}}$.`],
-          teach: 'Switched onto a constant voltage, an underdamped RLC overshoots by the fraction e^(−πζ/√(1−ζ²)) — up to twice the supply.',
+          teach: t`Switched onto a constant voltage, an underdamped RLC overshoots by the fraction $e^{-\pi\zeta/\sqrt{1-\zeta^2}}$ — up to twice the supply.`,
           explain: t`$\zeta = \dfrac{${R}}{2}\sqrt{\dfrac{${CuF}}{${LuH}}} = ${tex(z, 3)}$, overshoot $e^{-\pi\zeta/\sqrt{1 - \zeta^2}} = ${tex(os, 3)}$, so $v_{\max} = ${E}(1 + ${tex(os, 3)}) = ${tex(V, 3)}$ V.`,
           visual: {
             type: 'graph',
@@ -255,7 +255,7 @@ The circuit **is** a forced, damped spring, term for term: inductance is inertia
           answer: R, units: 'Ω', tol: { rel: 0.01 },
           errors: [{ value: R / 2, feedback: t`The amplitude decays like $e^{-\alpha t}$ with $\alpha = R/2L$, so $R = 2L\alpha$.` }, { value: (LmH * 1e-3 * f * 1e3 * Math.log(2)) / n, feedback: t`The decay rate is $\alpha = \dfrac{\ln 2}{t_{1/2}}$ with $t_{1/2} = ${n}/f$; then $R = 2L\alpha$.` }].filter((e) => Math.abs(e.value - R) > 0.01 * R),
           hints: [t`Halving every ${n} cycles takes $t_{1/2} = ${n}/(${f}\times10^3)$ s, and the envelope is $e^{-Rt/2L}$.`, t`$\dfrac{R}{2L}\,t_{1/2} = \ln 2$, so $R = \dfrac{2L\ln 2}{t_{1/2}}$.`],
-          teach: 'A circuit’s ring-down measures its resistance: the envelope is e^(−Rt/2L), the twin of e^(−bt/2m).',
+          teach: 'A circuit’s ring-down measures its resistance: the envelope is $e^{-Rt/2L}$, the twin of $e^{-bt/2m}$.',
           explain: t`$t_{1/2} = ${n}/${f * 1000} = ${tex(n / (f * 1e3), 3)}$ s, so $R = \dfrac{2(${LmH}\times10^{-3})\ln 2}{${tex(n / (f * 1e3), 3)}} = ${tex(R, 3)}\ \Omega$.`,
           visual: {
             type: 'graph',

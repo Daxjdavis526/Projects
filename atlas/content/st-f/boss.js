@@ -159,7 +159,7 @@ export default boss({
               answer: C.key, tol: { rel: 0.001 },
               errors: apart([{ value: 2 ** -52, feedback: t`$2^{-52}$ is the gap just above 1. The gap scales with the number: $2^{e - 52}$ where $2^e \le \tau < 2^{e+1}$.` }, { value: C.T * 2 ** -52, feedback: t`Close, but the gap is a power of two: $2^{e-52}$ with $e = \lfloor\log_2\tau\rfloor$, not $\tau\times2^{-52}$.` }, { value: C.T * 2 ** -53, feedback: t`That is a bound on the rounding error, half a gap at most, and only roughly; the gap itself is $2^{e-52}$.` }], C.key),
               hints: [t`Float64 numbers between $2^e$ and $2^{e+1}$ are spaced $2^{e-52}$ apart.`, t`$\log_2 ${tex(C.T)} = ${Math.log2(C.T).toFixed(3)}$, so $e = ${C.e}$.`, t`The gap is $2^{${C.e} - 52} = 2^{${C.e - 52}}$.`],
-              teach: 'Float64 numbers are spaced 2^(e−52) apart between 2ᵉ and 2ᵉ⁺¹: the absolute precision of a clock falls as it runs.',
+              teach: 'Float64 numbers are spaced $2^{e-52}$ apart between $2^e$ and $2^{e+1}$: the absolute precision of a clock falls as it runs.',
               explain: t`$2^{${C.e}} \le ${tex(C.T)} < 2^{${C.e + 1}}$, so the gap is $2^{${C.e - 52}} = ${tex(C.key, 4)}M$. Each addition $\tau + h$ is rounded to that grid: a step of $h = 0.5M$ is now carried with a relative error up to $${tex(C.key / 2 / 0.5, 2)}$, and a step smaller than half the gap would not move the clock at all. Long runs count steps in an integer and compute $\tau = n h$, or keep the clock in two parts.`,
             };
           },

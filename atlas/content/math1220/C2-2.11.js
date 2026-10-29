@@ -187,7 +187,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
         2: t`The area integrand is at least $\frac1x$, whose integral to infinity diverges.`,
         3: t`It is the other way round: $\int \frac{dx}{x^2}$ converges while $\int \frac{dx}{x}$ diverges.`,
       },
-      hints: ['Compare each integrand with x^(−p) and read off p.', t`$\sqrt{1 + 1/x^4} \ge 1$, so the area integrand is at least $\frac1x$.`],
+      hints: [t`Compare each integrand with $x^{-p}$ and read off $p$.`, t`$\sqrt{1 + 1/x^4} \ge 1$, so the area integrand is at least $\frac1x$.`],
       teach: t`The same curve can enclose a convergent integral ($1/x^2$) and a divergent one ($1/x$) — the horn holds finite paint but cannot be painted.`,
       explain: t`$V = \pi\int_1^\infty x^{-2}dx = \pi$ converges, but $S \ge 2\pi\int_1^\infty \frac{dx}{x} = \infty$. The “paradox” is a fact about $p$-integrals, not a contradiction.`,
       visual: ({ type: 'graph', params: { x: [0, 10], y: [-1.25, 1.25], curves: [{ fn: '1/x', color: 'accent', width: 2.4, domain: [1, 10] }, { fn: '-1/x', color: 'accent', width: 2.4, domain: [1, 10] }], vlines: [{ x: 1 }] }, caption: t`The horn’s profile $y = \pm 1/x$ from $x = 1$ to $10$ (it goes on for ever). Its cross-sections have area $\pi/x^2$, but its rim has length $2\pi/x$.` }),

@@ -98,7 +98,7 @@ and about any axis $\hat n$ by $e^{-i\phi\,\hat n\cdot\hat{\vec J}/\hbar}$, wher
           answer: ans, units: 'deg', tol: { rel: 0.001 },
           errors: [{ value: 360, feedback: m < 1 ? t`For half-integer $m$, a $360^\circ$ turn gives $e^{-i\pi\cdot2m} = -1$, not $+1$.` : t`$e^{-im\phi} = 1$ already at $\phi = 360^\circ/m$.` }].filter((e) => Math.abs(e.value - ans) > 1),
           hints: [t`$\hat R_z(\phi)|j\,m\rangle = e^{-im\phi}|j\,m\rangle$.`, t`You need $m\phi = 2\pi$.`],
-          teach: 'A state with quantum number m picks up the phase e^(−imφ) when rotated about z; it is unchanged when mφ is a multiple of 2π.',
+          teach: 'A state with quantum number m picks up the phase $e^{-im\\phi}$ when rotated about z; it is unchanged when mφ is a multiple of 2π.',
           explain: t`$m\phi = 2\pi$ gives $\phi = 360^\circ/${mTeX} = ${fmt(ans, 4)}^\circ$. ${m % 1 ? 'Half-integer m needs more than a full turn: the spinor’s sign flip.' : 'An integer m state has m-fold symmetry about z, as the picture shows.'}`,
         };
       },
@@ -130,7 +130,7 @@ and about any axis $\hat n$ by $e^{-i\phi\,\hat n\cdot\hat{\vec J}/\hbar}$, wher
         3: t`$p_x$ is a superposition of $m = +1$ and $m = -1$, which pick up opposite phases $e^{\mp i\pi/2}$. A single overall phase would apply only to a state of definite $m$.`,
       },
       hints: [t`The lobe pointing along $+x$ ends up pointing along $+y$.`, t`Equivalently, $p_x \propto (Y_1^{-1} - Y_1^1)$; apply $e^{-im\pi/2}$ to each part.`],
-      teach: 'Rotations act on each m-component with its own phase e^(−imφ); real orbitals, being mixtures of ±m, are carried into one another.',
+      teach: 'Rotations act on each m-component with its own phase $e^{-im\\phi}$; real orbitals, being mixtures of ±m, are carried into one another.',
       explain: t`The lobe along $+x$ turns to $+y$: $p_x \to p_y$. In the $|l\,m\rangle$ basis, $p_x \propto Y_1^{-1} - Y_1^{1}$ and the rotation multiplies these by $e^{+i\pi/2}$ and $e^{-i\pi/2}$, giving $\propto i(Y_1^{-1} + Y_1^{1}) \propto p_y$. The three p orbitals form a set that rotations mix among themselves — an $l = 1$ multiplet.`,
     }),
     multi({

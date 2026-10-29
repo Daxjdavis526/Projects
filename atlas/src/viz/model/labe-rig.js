@@ -337,7 +337,7 @@ export const EXPERIMENTS = {
       return { a, n, tf, tr, sf: ff * tf, sr: fr * tr, q: C1.q, sq: sq(true), aC: C1.a, qU: C0.q, sqU: sq(false), aU: C0.a, brown: Math.sqrt(2 * D * tf0) };
     },
     columns: [
-      { head: 'fall time (s)', get: (q) => d2(q.tf) }, { head: 'rise time (s)', get: (q) => d2(q.tr) },
+      { head: 'fall (s)', get: (q) => d2(q.tf) }, { head: 'rise (s)', get: (q) => d2(q.tr) },
       { head: 'q (10⁻¹⁹ C)', get: (q, F) => d3((F.slip ? q.q : q.qU) / 1e-19) },
     ],
     defaultAxes: 'qn',

@@ -50,7 +50,7 @@ The answer always has the same shape: a particular solution plus $C/\mu$, a solu
     tasks: [
       'The defaults are the hospital generator: molybdenum-99 (66 h) feeding technetium-99m (6.0 h). The daughter peaks after about 23 h, then rides on its parent’s decay.',
       'Switch to activities: once the daughter has peaked its activity runs just above its parent’s (transient equilibrium).',
-      'Make the half-lives equal: the formula’s 0/0 turns into λt e^(−λt), the shape the integrating factor gives directly.',
+      t`Make the half-lives equal: the formula’s 0/0 turns into $\lambda t\, e^{-\lambda t}$, the shape the integrating factor gives directly.`,
     ],
     params: {
       x: [0, 120], y: [0, 1.05], xlabel: 't (hours)', ylabel: 'fraction of starting value',

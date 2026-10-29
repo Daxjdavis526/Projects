@@ -187,7 +187,7 @@ With $p = w\rho c^2$ the solution is $\rho \propto a^{-3(1+w)}$: matter as $a^{-
           answer: n, tol: { rel: 0.001, abs: 0.001 },
           errors: [...(w !== 0 ? [{ value: 3 * w, feedback: 'Keep the 1: n = 3(1 + w), so dust (w = 0) gives 3.' }] : []), { value: 3 + w, feedback: 'Multiply out: 3(1 + w) = 3 + 3w.' }],
           hints: [t`$\dot\rho/\rho = -3(1 + w)\,\dot a/a$, i.e. $d\ln\rho = -3(1 + w)\,d\ln a$.`, t`So $\rho \propto a^{-3(1+w)}$.`],
-          teach: 'A fluid with p = wρc² dilutes as a^(−3(1+w)): the pressure term adds to or subtracts from plain volume dilution.',
+          teach: 'A fluid with $p = w\\rho c^2$ dilutes as $a^{-3(1+w)}$: the pressure term adds to or subtracts from plain volume dilution.',
           explain: t`$n = 3(1 + ${wTeX}) = ${fmt(n, 3)}$. ${w > 0 ? 'Positive pressure does work as the volume grows, so the density falls faster than for dust.' : 'Negative pressure means the expansion does work on the fluid, so its density falls more slowly than dust’s — at $w = -1$ not at all.'}`,
           visual: scaling(),
         };

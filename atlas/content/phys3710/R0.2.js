@@ -144,7 +144,7 @@ The identity $\cosh^2\varphi - \sinh^2\varphi = 1$ is just $\gamma^2 - \gamma^2\
             caption: t`The two rapidities laid end to end along the axis (gold, then violet). The combined speed is read from the curve above their sum.`,
           }),
           answer: ans, units: 'GHz', tol: { rel: 0.005 },
-          errors: [{ value: f0 * Math.sqrt((1 - beta) / (1 + beta)) * K * K, feedback: 'Receding lowers the frequency: multiply by e^(−φ), which is less than 1.' }, { value: f0 / (k1 + k2), feedback: 'Doppler factors do not add: the relay passes on a frequency already reduced by its own factor, so the two factors multiply.' }],
+          errors: [{ value: f0 * Math.sqrt((1 - beta) / (1 + beta)) * K * K, feedback: 'Receding lowers the frequency: multiply by $e^{-\\phi}$, which is less than 1.' }, { value: f0 / (k1 + k2), feedback: 'Doppler factors do not add: the relay passes on a frequency already reduced by its own factor, so the two factors multiply.' }],
           hints: [t`$e^{\varphi_1} = \sqrt{\dfrac{1 + \beta_1}{1 - \beta_1}} = ${nice(k1, 4)}$ and $e^{\varphi_2} = ${nice(k2, 4)}$.`, t`The rapidities add, so the factors multiply: $f = f_0\,e^{-(\varphi_1 + \varphi_2)} = ${f0}/(${nice(k1, 4)}\times${nice(k2, 4)})$.`],
           teach: t`Doppler factors are $e^{\varphi}$, so when rapidities add along a line, Doppler factors multiply.`,
           explain: t`$f = ${f0}\ \text{GHz}/${nice(K, 4)} = ${nice(ans, 4)}$ GHz. The probe recedes from Earth with rapidity $\ln${nice(K, 4)}$, i.e. at $\beta = (K^2 - 1)/(K^2 + 1) = ${fmt(beta, 4)}$, and a single direct link at that speed gives the same frequency — the relay changes nothing.`,

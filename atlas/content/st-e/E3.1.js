@@ -48,7 +48,7 @@ Parseval passes to the limit as **Plancherel’s theorem**, $\int|f|^2\,dt = \fr
   },
   example: {
     prompt: t`Find the Fourier transform of the two-sided decay $f(t) = e^{-a|t|}$ ($a > 0$). Check Plancherel’s theorem, and find the angular frequency at which $|\hat f|^2$ has fallen to half its peak.`,
-    visual: { type: 'graph', params: { x: [-5, 5], y: [-0.2, 2.3], aspect: 'wide', xlabel: 't (s) or ω (rad/s), a = 1', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-abs(x))', color: 'warn', width: 2, label: 'f(t)', labelAt: 1.6, labelDy: -10 }, { fn: '2/(1 + x^2)', color: 'accent', width: 2.3, label: 'f̂(ω)', labelAt: -2.6, labelDy: -12 }] }, caption: 'For a = 1: the pulse e^(−|t|) (orange) and its transform 2/(1 + ω²) (blue), a Lorentzian.' },
+    visual: { type: 'graph', params: { x: [-5, 5], y: [-0.2, 2.3], aspect: 'wide', xlabel: 't (s) or ω (rad/s), a = 1', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-abs(x))', color: 'warn', width: 2, label: 'f(t)', labelAt: 1.6, labelDy: -10 }, { fn: '2/(1 + x^2)', color: 'accent', width: 2.3, label: 'f̂(ω)', labelAt: -2.6, labelDy: -12 }] }, caption: 'For a = 1: the pulse $e^{-|t|}$ (orange) and its transform 2/(1 + ω²) (blue), a Lorentzian.' },
     steps: [
       { label: 'Split', text: t`$\hat f(\omega) = \displaystyle\int_{-\infty}^{0}e^{(a - i\omega)t}\,dt + \int_0^\infty e^{-(a + i\omega)t}\,dt = \frac{1}{a - i\omega} + \frac{1}{a + i\omega}$.` },
       { label: 'Combine', text: t`$\hat f(\omega) = \dfrac{2a}{a^2 + \omega^2}$: real (because $f$ is even) and positive, with $\hat f(0) = 2/a = \int f\,dt$, the area.` },

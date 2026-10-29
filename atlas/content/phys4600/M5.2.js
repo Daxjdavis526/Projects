@@ -211,7 +211,7 @@ export default lesson({
       gen(r) {
         const k = r.pick(['vela', 'b1509']), p = PULSARS[k], s = spin(p.P, p.Pd);
         return {
-          prompt: t`${p.name[0].toUpperCase() + p.name.slice(1)} has period $P = ${p.P * 1e3}$ ms and $\dot P = ${tex(p.Pd)}$. In the vacuum-dipole model (moment of inertia $10^{38}\ \text{kg·m}^2$, radius 10 km, dipole at right angles to the spin, $\langle P\rangle = \mu_0m^2\omega^4/6\pi c^3$), what is the field at its magnetic equator? Give it in units of $10^8$ T.`,
+          prompt: t`${p.name[0].toUpperCase() + p.name.slice(1)} has period $P = ${nice(p.P * 1e3)}$ ms and $\dot P = ${tex(p.Pd)}$. In the vacuum-dipole model (moment of inertia $10^{38}\ \text{kg·m}^2$, radius 10 km, dipole at right angles to the spin, $\langle P\rangle = \mu_0m^2\omega^4/6\pi c^3$), what is the field at its magnetic equator? Give it in units of $10^8$ T.`,
           visual: pulsarPic('A pulsar seen side-on: spin axis vertical, magnetic moment tilted (here drawn at 70°; the model takes 90°). Not to scale.', 70),
           answer: s.B / 1e8, units: '', tol: { rel: 0.02 },
           errors: [{ value: (2 * s.B) / 1e8, feedback: t`At the magnetic **equator** a dipole’s field is $\mu_0m/4\pi R^3$; $\mu_0m/2\pi R^3$ is the value at the pole.` }, { value: (s.B * Math.SQRT2) / 1e8, feedback: t`A rotating dipole radiates twice an oscillating one’s power: $\mu_0m^2\omega^4/6\pi c^3$.` }],
@@ -226,7 +226,7 @@ export default lesson({
       gen(r) {
         const k = r.pick(['crab', 'vela', 'b1509']), p = PULSARS[k], s = spin(p.P, p.Pd);
         return {
-          prompt: t`For pure magnetic dipole braking, $\dot E \propto \omega^4$ makes $\dot\omega \propto -\omega^3$. If a pulsar was born spinning much faster than now, its age is then $\tau = P/2\dot P$. Estimate it for ${p.name} ($P = ${p.P * 1e3}$ ms, $\dot P = ${tex(p.Pd)}$), in years.`,
+          prompt: t`For pure magnetic dipole braking, $\dot E \propto \omega^4$ makes $\dot\omega \propto -\omega^3$. If a pulsar was born spinning much faster than now, its age is then $\tau = P/2\dot P$. Estimate it for ${p.name} ($P = ${nice(p.P * 1e3)}$ ms, $\dot P = ${tex(p.Pd)}$), in years.`,
           visual: { type: 'graph', params: { x: [0, 2.2], y: [0, 1.6], aspect: 'wide', axesAt: 'edge', xlabel: 'time ÷ τ', ylabel: 'period ÷ period now', yticks: 3, curves: [{ fn: 'sqrt(x)', domain: [0, 2.2], color: 'accent', width: 2.4 }], points: [{ x: 1, y: 1, r: 5, color: 'gold', label: 'now', labelDx: 8, labelDy: 12 }] }, caption: t`The period of a pulsar braked as $\dot\omega \propto -\omega^3$ and born spinning very fast: it grows as $\sqrt t$. The tangent at “now” reaches back to half the age — hence the 2 in $P/2\dot P$.` },
           answer: s.age, units: 'yr', tol: { rel: 0.01 },
           errors: [{ value: 2 * s.age, feedback: t`For braking index 3, $\tau = P/2\dot P$ — half of $P/\dot P$.` }],

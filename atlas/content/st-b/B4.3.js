@@ -129,7 +129,7 @@ at a rate $Dk^2$ that grows with the **square** of the wavenumber. Halve the wav
           answer: g, tol: { rel: 0.01 },
           errors: [{ value: Math.exp(-n * n * T), feedback: 'Backward in time the sign of the exponent flips: the mode grows.' }, { value: Math.exp(n * T), feedback: t`The rate is $k^2$, not $k$: $e^{${n * n}\times${T}}$.` }],
           hints: [t`Forward, $\sin(kx)$ decays as $e^{-k^2t}$. Backward by $T$, it grows as $e^{+k^2T}$.`, t`Here $k = ${n}$ and $T = ${T}$: the factor is $e^{${n * n}\times${T}}$.`],
-          teach: 'The backward heat equation amplifies a mode of wavenumber k by e^(k²t): it is ill-posed.',
+          teach: 'The backward heat equation amplifies a mode of wavenumber k by $e^{k^2t}$: it is ill-posed.',
           explain: t`$e^{${n}^2\times${T}} = e^{${tex(n * n * T)}} \approx ${tex(g)}$. Higher modes are amplified even more, without bound: no stable recovery of the past is possible (module B12, Hadamard’s criteria).`,
         };
       },

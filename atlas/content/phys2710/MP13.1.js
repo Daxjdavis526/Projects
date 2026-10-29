@@ -179,7 +179,7 @@ With $a_V = 15.75$, $a_S = 17.8$, $a_C = 0.711$ and $a_A = 23.7$ MeV it matches 
       left: [t`$a_VA$`, t`$-a_SA^{2/3}$`, t`$-a_CZ(Z-1)/A^{1/3}$`, t`$-a_A(A - 2Z)^2/A$`],
       right: ['each nucleon is bound to its nearest neighbours only', 'nucleons at the surface have fewer neighbours', 'every proton repels every other proton', 'the exclusion principle fills proton and neutron levels separately', 'the nucleus spins faster when it is heavier'],
       answer: [0, 1, 2, 3],
-      hints: ['How does each term grow with A? A total that grows as A means each nucleon contributes the same amount.', 'A^(2/3) is how a sphere’s surface area grows; Z(Z − 1)/2 counts the pairs of protons.'],
+      hints: ['How does each term grow with A? A total that grows as A means each nucleon contributes the same amount.', '$A^{2/3}$ is how a sphere’s surface area grows; Z(Z − 1)/2 counts the pairs of protons.'],
       teach: 'The liquid drop: volume binding, minus surface, Coulomb and asymmetry costs — each term a piece of physics.',
       explain: t`A short-range force saturates, so the binding grows as $A$ — like a liquid’s heat of vaporization. Surface nucleons miss neighbours, in proportion to the area $\propto A^{2/3}$. The $Z(Z-1)/2$ pairs of protons repel across a radius $\propto A^{1/3}$. And because protons and neutrons each obey the exclusion principle, an excess of either must sit in higher levels — the asymmetry term.`,
       visual: semfTerms({ caption: 'The liquid-drop terms per nucleon along the valley of stability, against measured nuclei (gold). A model: pairing is left out of the curves.' }),
@@ -193,7 +193,7 @@ With $a_V = 15.75$, $a_S = 17.8$, $a_C = 0.711$ and $a_A = 23.7$ MeV it matches 
           answer: E, units: 'MeV', tol: { rel: 0.005 },
           errors: [{ value: (0.711 * n.Z * n.Z) / Math.cbrt(n.A), feedback: t`A proton does not repel itself: count $Z(Z-1)$, not $Z^2$ (a small difference here, but the formula says $Z(Z-1)$).` }, { value: (0.711 * n.Z * (n.Z - 1)) / n.A, feedback: t`The radius grows as $A^{1/3}$: divide by the cube root of $A$.` }].filter((e) => Math.abs(e.value / E - 1) > 0.004),
           hints: [t`$E_C = a_C\,Z(Z-1)/A^{1/3}$.`, t`$A^{1/3} = ${fmt(Math.cbrt(n.A), 4)}$.`],
-          teach: 'The protons’ repulsion grows as Z²/A^(1/3): in heavy nuclei it eats up half the binding, which is why they fission and alpha-decay.',
+          teach: 'The protons’ repulsion grows as $Z^2/A^{1/3}$: in heavy nuclei it eats up half the binding, which is why they fission and alpha-decay.',
           explain: t`$E_C = 0.711\times${n.Z}\times${n.Z - 1}/${fmt(Math.cbrt(n.A), 4)} = ${fmt(E, 4)}$ MeV — ${fmt((E / Nu.binding(n)) * 100, 2)}% of the binding energy that holds the nucleus together. Pushing Z higher soon makes nuclei that come apart within seconds; the heaviest known elements live for milliseconds.`,
           visual: { type: 'qm-binding', params: { nuclide: key, controls: false, readout: false, semf: true, labels: false }, caption: 'Binding energy per nucleon against mass number (AME2020 masses; dashed: the liquid drop). The highlighted nucleus is the one in the question; the curve’s fall at large A is the Coulomb term at work.' },
         };

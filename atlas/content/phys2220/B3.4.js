@@ -83,9 +83,9 @@ For a long solenoid of radius $R$ whose field changes, symmetry makes E circle t
             { value: (Rc / 100 / 2) * dB * 1e3, feedback: 'Use the distance of the point from the axis, not the solenoid’s radius: inside, E grows with r.' },
             { value: (rc / 2) * dB * 1e3, feedback: 'Convert the distance to metres.' },
           ],
-          hints: [t`Take a circle of radius $r$ round the axis: $E(2\pi r) = \pi r^2\,\dfrac{dB}{dt}$.`, t`So $E = \dfrac{r}{2}\,\dfrac{dB}{dt}$, with $r = ${rc / 100}$ m.`],
+          hints: [t`Take a circle of radius $r$ round the axis: $E(2\pi r) = \pi r^2\,\dfrac{dB}{dt}$.`, t`So $E = \dfrac{r}{2}\,\dfrac{dB}{dt}$, with $r = ${r6(rc / 100)}$ m.`],
           teach: 'Inside a long solenoid whose field changes, the induced E circles the axis with E = (r/2) dB/dt.',
-          explain: t`$E = \dfrac{r}{2}\dfrac{dB}{dt} = \dfrac{${rc / 100}}{2}(${dB}) = ${tn(E)}$ V/m $= ${tn(E * 1e3)}$ mV/m, circling the axis.`,
+          explain: t`$E = \dfrac{r}{2}\dfrac{dB}{dt} = \dfrac{${r6(rc / 100)}}{2}(${dB}) = ${tn(E)}$ V/m $= ${tn(E * 1e3)}$ mV/m, circling the axis.`,
         };
       },
     }),
@@ -104,7 +104,7 @@ For a long solenoid of radius $R$ whose field changes, symmetry makes E circle t
           ],
           hints: [t`A circle of radius $r$ outside encloses the solenoid’s whole flux, $\pi R^2B$, and no more.`, t`$E(2\pi r) = \pi R^2\,\dfrac{dB}{dt}$.`],
           teach: 'Outside a long solenoid E = (R²/2r) dB/dt: the induced field reaches where the magnetic field does not.',
-          explain: t`$E = \dfrac{R^2}{2r}\dfrac{dB}{dt} = \dfrac{(${Rc / 100})^2}{2(${rc / 100})}(${dB}) = ${tn(E)}$ V/m $= ${tn(E * 1e3)}$ mV/m. B is zero here; the changing flux inside the solenoid still drives E round every circle that encloses it.`,
+          explain: t`$E = \dfrac{R^2}{2r}\dfrac{dB}{dt} = \dfrac{(${Rc / 100})^2}{2(${r6(rc / 100)})}(${dB}) = ${tn(E)}$ V/m $= ${tn(E * 1e3)}$ mV/m. B is zero here; the changing flux inside the solenoid still drives E round every circle that encloses it.`,
         };
       },
     }),
@@ -184,7 +184,7 @@ For a long solenoid of radius $R$ whose field changes, symmetry makes E circle t
           answer: [r6(rc - 0.3), r6(rc + 0.3)],
           hints: [t`Outside, $E = \dfrac{R^2}{2r}\dfrac{dB}{dt}$. Solve for $r$.`],
           teach: 'Outside a solenoid the induced field falls as 1/r: halve E and the radius doubles.',
-          explain: t`$r = \dfrac{R^2}{2E}\dfrac{dB}{dt} = \dfrac{(0.050)^2(${dB})}{2(${tn(Em / 1000)})} = ${rc / 100}$ m $= ${rc}$ cm.`,
+          explain: t`$r = \dfrac{R^2}{2E}\dfrac{dB}{dt} = \dfrac{(0.050)^2(${dB})}{2(${tn(Em / 1000)})} = ${r6(rc / 100)}$ m $= ${rc}$ cm.`,
           visual: solPic({ Rf: R, r: 0.01, B0: dB, tr: 1, caption: 'The solenoid end on, its field rising; the grey dashed circle is the path whose radius you set. Gold: the induced E.', extra: { sliders: ['r'] } }),
         };
       },

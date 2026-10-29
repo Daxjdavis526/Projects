@@ -195,7 +195,7 @@ $$\sum F_\text{in} = \frac{m v^2}{r}$$
           ],
           hints: ['The radius of the orbit is measured from Earth’s centre.', t`$a = v^2/r$ with $r = (6371 + ${h})$ km.`],
           teach: 'An orbit is circular motion with gravity as the inward force: a = v²/r.',
-          explain: t`$a = \dfrac{v^2}{r} = \dfrac{(${v})^2}{${t3(rr, 4)}\ \text{m}} = ${s3(a)}\ \text{m/s}^2$ — just what gravity provides at that height, about 89% of its surface value. The station falls toward Earth at that rate while moving sideways fast enough to keep missing it.`,
+          explain: t`$a = \dfrac{v^2}{r} = \dfrac{(${v})^2}{${t3(rr, 4)}\ \text{m}} = ${s3(a)}\ \text{m/s}^2$ — just what gravity provides at that height, about ${Math.round(100 * a / G)}% of its surface value. The station falls toward Earth at that rate while moving sideways fast enough to keep missing it.`,
         };
       },
     }),

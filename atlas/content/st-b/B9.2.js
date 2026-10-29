@@ -80,7 +80,7 @@ For gravity, $\nabla^2\Phi = 4\pi G\rho$, so $\Phi(\mathbf x) = -G\displaystyle\
       right: ['|x| / 2', '(1/2π) ln r', '−1/(4π r)', '−1/(2π r)'],
       answer: [0, 1, 2],
       hints: [t`In $n$ dimensions the flux argument gives $\mathcal G'(r)\times(\text{area of a sphere of radius } r) = 1$.`, t`The “sphere” has area 2 (two end points) in 1D, $2\pi r$ in 2D and $4\pi r^2$ in 3D.`],
-      teach: 'The flux of ∇𝒢 through any surface around the source is 1; spreading it over a surface of area ∝ r^(n−1) gives the kernel in n dimensions.',
+      teach: 'The flux of ∇𝒢 through any surface around the source is 1; spreading it over a surface of area $\\propto r^{n-1}$ gives the kernel in n dimensions.',
       explain: t`1D: $\mathcal G' = \tfrac12$ (half the flux out of each end) so $\mathcal G = |x|/2$ — the tent of lesson B9.1 without its ends. 2D: $2\pi r\,\mathcal G' = 1$, $\mathcal G = \frac{1}{2\pi}\ln r$ — the potential of a long rod. 3D: $-\frac{1}{4\pi r}$. Only the 3D kernel vanishes at infinity; in 1D and 2D the potential keeps growing with distance.`,
     }),
     num({

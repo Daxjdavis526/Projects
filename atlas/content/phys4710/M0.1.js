@@ -97,7 +97,7 @@ Without $\hat H'$ the equation separates and the answer is a product of hydrogen
       legend: [{ label: 'exact (numerical)', color: 'gold' }, { label: 'Gaussian variational', color: 'good', dash: [6, 4] }, { label: 'perturbation series', color: 'accent' }],
       legendAt: 'tl',
     },
-    caption: 'Exact: the lowest eigenvalue of H in the first 60 oscillator states (converged to better than 10⁻⁸ here). Variational: ψ ∝ e^(−bx²) with b chosen to minimise ⟨H⟩. Perturbation coefficients from Bender & Wu (1969). Dimensionless units.',
+    caption: 'Exact: the lowest eigenvalue of H in the first 60 oscillator states (converged to better than 10⁻⁸ here). Variational: $\\psi \\propto e^{-bx^2}$ with b chosen to minimise ⟨H⟩. Perturbation coefficients from Bender & Wu (1969). Dimensionless units.',
   },
   example: {
     prompt: t`An ultracold $^{87}$Rb atom sits in one well of an optical lattice, $V(x) = V_0\sin^2 kx$, made by a $1064$ nm laser ($k = 2\pi/\lambda$), with depth $V_0 = ${V0X}E_R$, where $E_R = \hbar^2k^2/2m$ is the recoil energy. Treat each well as a harmonic oscillator plus a small quartic correction. Find the ground-state energy to first order, judge the small parameter, and compare with the exact answer.`,

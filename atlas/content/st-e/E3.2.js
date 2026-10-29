@@ -114,7 +114,7 @@ Its proof is two lines: swap the order of integration (Fubini — fine for integ
     expr({
       id: 'deriv-rule', difficulty: 3,
       prompt: t`Given $\widehat{e^{-t^2/2}} = \sqrt{2\pi}\,e^{-\omega^2/2}$, find the Fourier transform of $g(t) = (t^2 - 1)\,e^{-t^2/2}$.`,
-      visual: { type: 'graph', params: { x: [-4, 4], y: [-1.2, 0.6], aspect: 'wide', xlabel: 't', ylabel: '', axesAt: 'edge', curves: [{ fn: '(x^2 - 1)*e^(-x^2/2)', color: 'accent', width: 2.2 }] }, caption: 'g(t) = (t² − 1)e^(−t²/2): a “Mexican hat” turned upside down, with zero area.' },
+      visual: { type: 'graph', params: { x: [-4, 4], y: [-1.2, 0.6], aspect: 'wide', xlabel: 't', ylabel: '', axesAt: 'edge', curves: [{ fn: '(x^2 - 1)*e^(-x^2/2)', color: 'accent', width: 2.2 }] }, caption: '$g(t) = (t^2 - 1)e^{-t^2/2}$: a “Mexican hat” turned upside down, with zero area.' },
       answer: '-omega^2*sqrt(2*pi)*e^(-omega^2/2)', answerTeX: t`-\sqrt{2\pi}\,\omega^2e^{-\omega^2/2}`,
       vars: { omega: [-3, 3] }, keys: [['ω', 'omega']],
       errors: [{ answer: 'omega^2*sqrt(2*pi)*e^(-omega^2/2)', feedback: t`Two derivatives give $(i\omega)^2 = -\omega^2$: a minus sign.` }, { answer: '-omega^2*e^(-omega^2/2)', feedback: t`Keep the factor $\sqrt{2\pi}$ from the Gaussian’s transform.` }],

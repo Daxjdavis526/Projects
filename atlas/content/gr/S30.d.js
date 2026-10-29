@@ -286,7 +286,7 @@ Its null geodesics give the redshift, $1 + z = 1/a(t_\text{emit})$; proper dista
           hints: [t`$2c/H_0 = 2\times299\,792/${H0} = ${sci(TWO_C_H, 4)}$ Mpc.`, t`$(1 + ${z})^{-1/2} = ${sci(1 / Math.sqrt(1 + z), 4)}$.`],
           teach: t`Comoving distances come from integrating $c\,dt/a$ along the light ray; in Einstein–de Sitter the integral has a closed form.`,
           explain: t`$\chi = ${sci(TWO_C_H, 4)}\times${sci(1 - 1 / Math.sqrt(1 + z), 4)} = ${sci(x, 4)}$ Mpc. Our universe, with $\Lambda$, gives ${sci(comovingDistance(z, { Om: 0.315, OL: 0.685 }, H0, 4000), 3)} Mpc: its expansion was slower in the past, so light had longer to travel.`,
-          visual: edsCurve('The Einstein–de Sitter scale factor, a ∝ t^(2/3), passing through today with the measured expansion rate. A teaching model: our universe also has Λ.'),
+          visual: edsCurve('The Einstein–de Sitter scale factor, $a \\propto t^{2/3}$, passing through today with the measured expansion rate. A teaching model: our universe also has Λ.'),
         };
       },
     }),

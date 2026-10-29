@@ -136,7 +136,7 @@ export default lesson({
         const I0 = r.pick([2, 5, 20]), s = r.pick([1, 2, 5]), tt = r.pick([10, 20, 50]) * 1e-9;
         const w = wire(I0, s, tt);
         return {
-          prompt: t`A long straight wire’s current jumps from 0 to ${I0} A at $t = 0$. What is the vector potential ${s} m from it at $t = ${tt * 1e9}$ ns, in μT·m? Use $A = \dfrac{\mu_0I_0}{2\pi}\ln\dfrac{ct + \sqrt{c^2t^2 - s^2}}{s}$.`,
+          prompt: t`A long straight wire’s current jumps from 0 to ${I0} A at $t = 0$. What is the vector potential ${s} m from it at $t = ${nice(tt * 1e9)}$ ns, in μT·m? Use $A = \dfrac{\mu_0I_0}{2\pi}\ln\dfrac{ct + \sqrt{c^2t^2 - s^2}}{s}$.`,
           visual: wirePic((C * tt) / s, t`$A$ and $B$ against distance (in units of ${s} m) at this moment; the gold line is the light front.`, { showB: false }),
           answer: w.A * 1e6, units: 'μT m', tol: { rel: 0.01 },
           errors: [{ value: ((MU0 * I0) / (2 * PI)) * Math.log((2 * C * tt) / s) * 1e6, feedback: t`That is the long-time approximation $\ln(2ct/s)$; here $ct$ is not much larger than $s$, so use the full formula.` }].filter((e) => Math.abs(e.value - w.A * 1e6) > 0.02 * w.A * 1e6),

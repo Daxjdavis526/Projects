@@ -125,7 +125,7 @@ Below $\zeta = 1$ the roots are complex: it rings at $\omega_d = \omega_0\sqrt{1
           answer: z, tol: { rel: 0.005 },
           errors: [{ value: L / Math.PI, feedback: t`That drops the $\sqrt{1 - \zeta^2}$, which is not small here. Solve $\dfrac{\pi\zeta}{\sqrt{1 - \zeta^2}} = \ln\dfrac{100}{${P}}$ exactly: $\zeta = \dfrac{L}{\sqrt{\pi^2 + L^2}}$.` }].filter((e) => Math.abs(e.value - z) > 0.01 * z),
           hints: [t`The first overshoot is half a damped period after release, where the envelope has fallen to $e^{-\zeta\omega_0\cdot\pi/\omega_d} = e^{-\pi\zeta/\sqrt{1 - \zeta^2}}$.`, t`Set $\dfrac{\pi\zeta}{\sqrt{1 - \zeta^2}} = L = \ln\dfrac{100}{${P}}$ and solve: $\zeta = \dfrac{L}{\sqrt{\pi^2 + L^2}}$.`],
-          teach: 'Released from rest, an underdamped system overshoots by the fraction e^(−πζ/√(1−ζ²)) — measure the overshoot and you know ζ.',
+          teach: t`Released from rest, an underdamped system overshoots by the fraction $e^{-\pi\zeta/\sqrt{1-\zeta^2}}$ — measure the overshoot and you know ζ.`,
           explain: t`$L = \ln(100/${P}) = ${fmt(L, 3)}$, so $\zeta = \dfrac{${fmt(L, 3)}}{\sqrt{\pi^2 + ${fmt(L * L, 3)}}} = ${fmt(z, 3)}$.`,
           visual: {
             type: 'graph',

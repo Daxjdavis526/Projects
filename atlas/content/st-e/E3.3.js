@@ -126,7 +126,7 @@ with equality **only** for a Gaussian, $f(t) = Ce^{-(t - t_0)^2/4\sigma_t^2}e^{i
     mcq({
       id: 'equality', difficulty: 2,
       prompt: t`Which of these signals attains $\sigma_t\sigma_\omega = \tfrac12$ exactly?`,
-      visual: { type: 'graph', params: { x: [-4, 4], y: [-1.15, 1.15], aspect: 'wide', xlabel: 't', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-(x - 1)^2/2)*cos(6x)', color: 'accent', width: 1.8, samples: 1500 }, { fn: 'e^(-(x - 1)^2/2)', color: 'ink3', width: 1.2, dash: [5, 4] }] }, caption: 'The real part of e^(−(t − 1)²/2) e^(6it), with its envelope.' },
+      visual: { type: 'graph', params: { x: [-4, 4], y: [-1.15, 1.15], aspect: 'wide', xlabel: 't', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(-(x - 1)^2/2)*cos(6x)', color: 'accent', width: 1.8, samples: 1500 }, { fn: 'e^(-(x - 1)^2/2)', color: 'ink3', width: 1.2, dash: [5, 4] }] }, caption: 'The real part of $e^{-(t - 1)^2/2}\\, e^{6it}$, with its envelope.' },
       choices: [t`$e^{-(t - 1)^2/2}\,e^{6it}$: a shifted Gaussian on a carrier`, t`$\operatorname{sech}t$`, t`$e^{-(1 - i)t^2/2}$, a chirped Gaussian`, t`$e^{-t^4}$`],
       answer: 0,
       why: {
@@ -134,7 +134,7 @@ with equality **only** for a Gaussian, $f(t) = Ce^{-(t - t_0)^2/4\sigma_t^2}e^{i
         2: t`The chirp widens the spectrum: its product is $\tfrac12\sqrt2$.`,
         3: 'Flatter than a Gaussian, it needs extra bandwidth; only the Gaussian is optimal.',
       },
-      hints: ['Shifting in time and multiplying by e^(iω₀t) move a pulse without changing either width.', t`Equality requires $f' = -\lambda(t - t_0)f$ (after removing the carrier) with real $\lambda > 0$.`],
+      hints: ['Shifting in time and multiplying by $e^{i\\omega_0t}$ move a pulse without changing either width.', t`Equality requires $f' = -\lambda(t - t_0)f$ (after removing the carrier) with real $\lambda > 0$.`],
       teach: 'Only Gaussians — shifted in time and frequency, but not chirped — sit on the bound.',
       explain: t`A delay and a carrier move $|f|^2$ and $|\hat f|^2$ without changing their widths, so $e^{-(t-1)^2/2}e^{6it}$ has the Gaussian’s product, $\tfrac12$. The others have a $f'/f$ that is not real-linear in $t$, and sit above the bound.`,
     }),

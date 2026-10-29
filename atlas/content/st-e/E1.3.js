@@ -69,7 +69,7 @@ $$c_n = \frac{(-1)^n\sinh(\pi/2)}{\pi\,(\frac12 - in)} .$$` },
         const ans = 0.5 * Math.hypot(a, b);
         return {
           prompt: t`A real signal has the harmonic $${a}\cos ${n}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}\sin ${n}x$. What is $|c_{${n}}|$, the magnitude of its complex coefficient?`,
-          visual: { type: 'graph', params: { x: [-3.1416, 3.1416], y: [-6.2, 6.2], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: `${a}*cos(${n}x) + ${b}*sin(${n}x)`, color: 'accent', width: 2.2 }] }, caption: 'The real harmonic: one sinusoid, made of the pair cₙe^(inx) + c₋ₙe^(−inx).' },
+          visual: { type: 'graph', params: { x: [-3.1416, 3.1416], y: [-6.2, 6.2], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: `${a}*cos(${n}x) + ${b}*sin(${n}x)`, color: 'accent', width: 2.2 }] }, caption: 'The real harmonic: one sinusoid, made of the pair $c_ne^{inx} + c_{-n}e^{-inx}$.' },
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 2 * ans, feedback: t`That is the amplitude of the real sinusoid, $\sqrt{a_n^2 + b_n^2}$. It is shared equally between $c_n$ and $c_{-n}$: $c_n = \tfrac12(a_n - ib_n)$.` }],
           hints: [t`$c_n = \tfrac12(a_n - ib_n)$.`, t`$|c_n| = \tfrac12\sqrt{a_n^2 + b_n^2}$.`],
@@ -106,7 +106,7 @@ $$c_n = \frac{(-1)^n\sinh(\pi/2)}{\pi\,(\frac12 - in)} .$$` },
         3: t`Only if $f$ has period $\pi$, so that $f(x - \pi) = f(x)$ — that is, only even harmonics to start with.`,
       },
       hints: [t`Shifting by $s$ multiplies $c_n$ by $e^{-ins}$.`, t`So $g$ has coefficients $c_n\big(1 - e^{-in\pi}\big) = c_n\big(1 - (-1)^n\big)$.`],
-      teach: 'A shift by s multiplies cₙ by e^(−ins); sums of shifted copies keep only the harmonics whose phases line up.',
+      teach: 'A shift by s multiplies cₙ by $e^{-ins}$; sums of shifted copies keep only the harmonics whose phases line up.',
       explain: t`$g$ has coefficients $c_n(1 - (-1)^n)$: $0$ for even $n$, $2c_n$ for odd $n$. The result satisfies $g(x - \pi) = -g(x)$ — half-wave symmetry — which is exactly the condition for odd harmonics only.`,
     }),
     expr({

@@ -757,7 +757,7 @@ export const EXPERIMENTS = {
           { s: q ? `L₂ = ${q.L2} mm` : 'second resonance', x: w + 0.02, y: -L2, color: 'teal', size: 11 },
           { s: q ? `L₁ = ${q.L1} mm` : 'first resonance', x: -w - 0.06, y: -(lam / 4 - e), color: 'warn', size: 11, align: 'right' },
           { s: 'water', x: 0, y: -L2, color: 'teal', size: 10, align: 'center', dy: 14 },
-          { s: 'gold: air’s motion (antinodes wide)', x: 0.34, y: -H + 0.04, color: 'ink3', size: 10, align: 'right' },
+          { s: 'gold: how far the air moves', x: -0.345, y: -H + 0.04, color: 'ink3', size: 10 },
         ],
       };
     },

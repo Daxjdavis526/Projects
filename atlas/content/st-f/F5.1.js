@@ -91,7 +91,7 @@ The trapezoid rule has $d = 1$ and order 2. Simpson’s rule, though built on a 
     tasks: [
       'For 1/(1 + x): trapezoid and midpoint fall with slope −2 (ratio 4), Simpson with slope −4 (ratio 16).',
       'Switch to √x: all three rules fall with slope about −1.5. Simpson has lost its advantage — √x has no bounded derivatives at 0.',
-      'Switch to e^(cos x) over one period: the trapezoid rule reaches round-off by n = 14, far faster than any power of h — and Simpson is worse than the trapezoid rule it is built from.',
+      'Switch to $e^{\\cos x}$ over one period: the trapezoid rule reaches round-off by n = 14, far faster than any power of h — and Simpson is worse than the trapezoid rule it is built from.',
     ],
     params: {
       functions: [
@@ -269,13 +269,13 @@ The trapezoid rule has $d = 1$ and order 2. Simpson’s rule, though built on a 
       },
       choices: [
         t`For a smooth periodic integrand over a full period, every endpoint term $f^{(k)}(b) - f^{(k)}(a)$ in the error expansion vanishes; Simpson, $\tfrac13(4T_n - T_{n/2})$, inherits the much larger error of $T_{n/2}$`,
-        'e^(cos x) is a polynomial in disguise, which the trapezoid rule integrates exactly',
+        '$e^{\\cos x}$ is a polynomial in disguise, which the trapezoid rule integrates exactly',
         'The trapezoid rule has degree of exactness 3 on symmetric intervals',
         'The integrand is even, so half of the samples cancel',
       ],
       answer: 0,
       why: {
-        1: 'e^(cos x) is no polynomial; its error is small but nonzero at every n shown.',
+        1: '$e^{\\cos x}$ is no polynomial; its error is small but nonzero at every n shown.',
         2: 'The trapezoid rule is exact only for degree 1 on any interval; x² already defeats it.',
         3: 'Evenness alone does not help: x² is even, yet the trapezoid rule on [−1, 1] integrates it with an error of order h².',
       },

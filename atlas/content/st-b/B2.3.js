@@ -141,7 +141,7 @@ and $u$ is constant along each of them. They are curves, not lines; solve the OD
         3: t`The flow speed at $x = 2$ is 1 m/s, not zero: the bump moves.`,
       },
       hints: [t`Characteristics: $x = x_0e^{0.5t}$. Where does $x_0 = 2$ go at $t = 2$?`, 'Two points 1 m apart end up e times farther apart; values ride unchanged.'],
-      teach: 'Under c = a x every distance from the origin grows by e^(at), and values are carried unchanged.',
+      teach: 'Under c = a x every distance from the origin grows by $e^{at}$, and values are carried unchanged.',
       explain: t`$x = 2e^{0.5\cdot2} = 2e \approx 5.44$. All distances from the origin scale by $e$, so the bump is $e$ times wider; $u$ is constant along characteristics, so the peak is still the initial peak.`,
     }),
   ],

@@ -203,7 +203,7 @@ Each integral is the area under the graph above it — what you read off by eye 
             { value: v0 * Math.exp(-t1 / k), feedback: t`Check the exponent: it is $-kt$, not $-t/k$.` },
           ].filter((e) => Math.abs(e.value - v) > 0.02 * v),
           hints: [t`Write $\dfrac{dv}{dt} = -kv$ and separate: $\dfrac{dv}{v} = -k\,dt$.`, t`Integrate both sides: $\ln\dfrac{v}{v_0} = -kt$, so $v = v_0 e^{-kt}$.`],
-          teach: 'When the acceleration depends on the velocity, separate variables: a = −kv gives exponential decay, v = v₀e^(−kt).',
+          teach: 'When the acceleration depends on the velocity, separate variables: a = −kv gives exponential decay, $v = v_0e^{-kt}$.',
           explain: t`$\ln(v/v_0) = -kt$, so $v = ${v0}\,e^{-${nice(k)} \times ${t1}} = ${s3(v)}$ m/s. Holding the first second’s braking constant would predict $${nice(v0 - k * v0 * t1)}$ m/s — wrong, because the drag eases off.`,
           visual: {
             type: 'graph',

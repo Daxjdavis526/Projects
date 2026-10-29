@@ -179,7 +179,7 @@ The summed index ($j$) is a **dummy**: it is used up by the sum, so you may rena
           answer: ans, tol: { rel: 0, abs: 0.5 },
           errors: other !== ans ? [{ value: other, feedback: askEq ? 'That counts the terms in each sum. Equations come from the free indices.' : 'That counts the equations. Terms come from the summed indices.' }] : [],
           hints: [askEq ? 'Each free index can take any of its values independently; each choice is one equation.' : 'Each summed index runs over all its values; with two summed indices every pair of values gives a term.', t`Count the ${askEq ? 'free' : 'dummy'} indices, then raise ${n} to that power.`],
-          teach: 'n values per index: the free indices give n^(free) equations and the dummies n^(dummy) terms in each.',
+          teach: 'n values per index: the free indices give $n^{\\text{free}}$ equations and the dummies $n^{\\text{dummy}}$ terms in each.',
           explain: t`Free indices: ${F.f}; summed: ${F.d}. So the line is $${n}^{${F.f}} = ${n ** F.f}$ equation${n ** F.f === 1 ? '' : 's'}, each a sum of $${n}^{${F.d}} = ${n ** F.d}$ term${n ** F.d === 1 ? '' : 's'}.`,
         };
       },

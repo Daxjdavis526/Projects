@@ -62,7 +62,7 @@ Proof in one line: expand $\psi = \sum c_n\psi_n$ in eigenstates; then $\langle\
     lead: t`The trial function $\psi_b(x) = (2b/\pi)^{1/4}e^{-bx^2}$ (units $\hbar = m = 1$) in four potentials. Blue: its energy $\langle\hat H\rangle$ against the width parameter $b$. Gold: the true ground-state energy. Move $b$ to find the minimum.`,
     tasks: [
       'Oscillator: the minimum, at b = ½, touches the gold line exactly — the true ground state is a Gaussian.',
-      'Delta well: the best Gaussian gets −1/π ≈ −0.318 against −0.5. It never dips below; the kink of the true e^(−|x|) cannot be made from a Gaussian.',
+      'Delta well: the best Gaussian gets −1/π ≈ −0.318 against −0.5. It never dips below; the kink of the true $e^{-|x|}$ cannot be made from a Gaussian.',
       'V-shaped and quartic wells: the minima land within 0.5% and 2% of the truth. However b is chosen, no point of the blue curve goes below gold.',
     ],
     params: {

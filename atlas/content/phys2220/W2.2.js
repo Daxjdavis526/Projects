@@ -88,7 +88,7 @@ So ratios become differences: every **factor of 10** in intensity adds **10 dB**
           answer: I, units: 'W/m^2', tol: { rel: 0.01 },
           errors: [{ value: b / 10 * I0, feedback: t`Undo the logarithm with a power of ten: $I = I_0\,10^{\beta/10}$.` }, { value: 10 ** (b / 10), feedback: t`Multiply by $I_0 = 10^{-12}$ W/m²: the ratio $10^{\beta/10}$ is $I/I_0$, not $I$.` }],
           hints: [t`Solve $\beta = 10\log_{10}(I/I_0)$ for $I$.`, t`$I = I_0 \times 10^{\beta/10}$.`],
-          teach: 'To go back from decibels: I = I₀ × 10^(β/10).',
+          teach: t`To go back from decibels: $I = I_0 \times 10^{\beta/10}$.`,
           explain: t`$I = 10^{-12} \times 10^{${b / 10}} = ${tn(I)}$ W/m².`,
           visual: dbLadder({ marks: [{ b, label: `${b} dB` }] }),
         };
@@ -121,9 +121,9 @@ So ratios become differences: every **factor of 10** in intensity adds **10 dB**
         return {
           prompt: t`How many times more intense is a ${hi} dB sound than a ${lo} dB sound?`,
           answer: ratio, tol: { rel: 0.01 },
-          errors: [{ value: d / 10, feedback: t`Each 10 dB is a factor of 10, multiplied — not added: the ratio is $10^{\Delta\beta/10}$.` }, { value: d, feedback: 'The difference in decibels is not the ratio of intensities: convert with 10^(Δβ/10).' }, { value: hi / lo, feedback: 'Decibels are logarithms: their ratio means nothing. Their difference gives the ratio of intensities.' }].filter((e) => Math.abs(e.value - ratio) > 0.02 * ratio),
+          errors: [{ value: d / 10, feedback: t`Each 10 dB is a factor of 10, multiplied — not added: the ratio is $10^{\Delta\beta/10}$.` }, { value: d, feedback: 'The difference in decibels is not the ratio of intensities: convert with $10^{\\Delta\\beta/10}$.' }, { value: hi / lo, feedback: 'Decibels are logarithms: their ratio means nothing. Their difference gives the ratio of intensities.' }].filter((e) => Math.abs(e.value - ratio) > 0.02 * ratio),
           hints: [t`$\Delta\beta = 10\log_{10}(I_2/I_1)$.`, t`$I_2/I_1 = 10^{\Delta\beta/10}$.`],
-          teach: 'A difference of Δβ decibels is an intensity ratio of 10^(Δβ/10).',
+          teach: t`A difference of Δβ decibels is an intensity ratio of $10^{\Delta\beta/10}$.`,
           explain: t`$\Delta\beta = ${d}$ dB, so $I_2/I_1 = 10^{${d / 10}} = ${tn(ratio)}$.`,
           visual: dbLadder({ marks: [{ b: hi, label: `${hi} dB` }, { b: lo, label: `${lo} dB` }] }),
         };
@@ -184,9 +184,9 @@ So ratios become differences: every **factor of 10** in intensity adds **10 dB**
         return {
           prompt: t`Ear defenders rated to cut ${d} dB are worn on a launch pad. What percentage of the sound intensity gets through to the ear?`,
           answer: pct, units: '%', tol: { rel: 0.01 },
-          errors: [{ value: 100 - d, feedback: 'Decibels are not percentages: −d dB is an intensity factor of 10^(−d/10).' }, { value: 100 * 10 ** (-d / 20), feedback: t`That would be the *pressure amplitude* factor. Intensity uses $10^{-\Delta\beta/10}$.` }],
+          errors: [{ value: 100 - d, feedback: 'Decibels are not percentages: −d dB is an intensity factor of $10^{-d/10}$.' }, { value: 100 * 10 ** (-d / 20), feedback: t`That would be the *pressure amplitude* factor. Intensity uses $10^{-\Delta\beta/10}$.` }],
           hints: [t`A drop of $\Delta\beta$ dB multiplies the intensity by $10^{-\Delta\beta/10}$.`],
-          teach: 'Cutting Δβ decibels multiplies the intensity by 10^(−Δβ/10).',
+          teach: t`Cutting Δβ decibels multiplies the intensity by $10^{-\Delta\beta/10}$.`,
           explain: t`$10^{-${d}/10} = ${tn(pct / 100)}$, so ${tn(pct)}% of the intensity gets through: a ${d} dB cut removes all but a sliver of the energy, though the ear judges it as a much smaller change in loudness.`,
           visual: dbLadder({ caption: 'Typical sound levels (rough). Ear defenders lower every level by the same number of decibels.' }),
         };

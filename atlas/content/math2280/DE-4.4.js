@@ -313,7 +313,7 @@ print(x)
           curves: [{ fn: 'exp(x)', color: 'accent', width: 2.2, label: 'eᵗ', labelAt: 0.2, labelDx: 6, labelDy: -12 }, { fn: 'cos(x)^2 - sin(x)^2', color: 'violet', width: 2.2, label: 'cos²t − sin²t', labelAt: 1.1, labelDx: 6, labelDy: -10 }],
           hlines: [{ y: 0, color: 'ink3' }],
         },
-        caption: 'Determinants of two of the candidates against time: a true matrix exponential has determinant e^(τt), which never touches zero.',
+        caption: t`Determinants of two of the candidates against time: a true matrix exponential has determinant $e^{\tau t}$, which never touches zero.`,
       },
     }),
   ],

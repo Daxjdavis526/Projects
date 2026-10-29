@@ -195,7 +195,7 @@ The nodes turn out to be the zeros of the Legendre polynomial $P_n$, and every w
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 0, feedback: t`The rule is exact only up to degree $${2 * n - 1}$; $x^{${p}}$ is one beyond.` }, { value: 2 / (p + 1), feedback: 'That is the integral itself; subtract what the rule returns.' }].filter((e) => Math.abs(e.value - ans) > 0.01 * ans),
           hints: [t`$\int_{-1}^1 x^{${p}}\,dx = \tfrac{2}{${p + 1}}$.`, `Add up $w_i x_i^{${p}}$ over the ${n} node${n > 1 ? 's' : ''}.`],
-          teach: 'The first monomial a rule misses, x^(2n) for Gauss, measures its error constant: the error of any smooth f is that constant times f⁽²ⁿ⁾/(2n)!.',
+          teach: 'The first monomial a rule misses, $x^{2n}$ for Gauss, measures its error constant: the error of any smooth f is that constant times f⁽²ⁿ⁾/(2n)!.',
           explain: t`The integral is $\tfrac{2}{${p + 1}}$, the rule gives $${tex(2 / (p + 1) - ans, 4)}$, so the error is $${tex(ans, 4)}$${n === 2 ? t` $= \tfrac{8}{45}$` : n === 3 ? t` $= \tfrac{8}{175}$` : t` $= \tfrac23$`}. It shrinks fast with $n$, roughly like $\pi\cdot 4^{-n}$; for a general $f$, divide by $(2n)!$ and multiply by $f^{(2n)}(\xi)$.`,
         };
       },

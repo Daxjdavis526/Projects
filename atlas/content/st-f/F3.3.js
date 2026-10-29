@@ -179,7 +179,7 @@ plt.show()`,
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: p / k, feedback: 'Orders compound multiplicatively: k evaluations give one step of order p, so one evaluation is worth the k-th root of p, not p/k.' }].filter((e) => Math.abs(e.value - ans) > 0.01 * ans),
           hints: ['Per step the number of correct digits is multiplied by p.', t`Spread that over $k$ evaluations: each one multiplies the digits by $p^{1/k}$.`],
-          teach: 'Order per step is not speed: dividing the order’s logarithm by the cost per step (the efficiency index p^(1/k)) is the fair comparison.',
+          teach: 'Order per step is not speed: dividing the order’s logarithm by the cost per step (the efficiency index $p^{1/k}$) is the fair comparison.',
           explain: t`$${pTeX}^{1/${k}} = ${ans.toFixed(3)}$, against the secant method’s $1.618$ and Newton’s $1.414$. ${ans > PHI ? 'This one beats the secant method per evaluation.' : 'The plain secant method is still the more efficient.'}`,
         };
       },

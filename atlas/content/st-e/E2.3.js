@@ -78,8 +78,8 @@ Half of it is easy. Expanding $0 \le \int|f - S_Nf|^2$ and using orthogonality g
     mcq({
       id: 'bessel', difficulty: 3,
       prompt: t`You expand $f(x) = e^{x/2}$ on $(-\pi, \pi)$ using only the functions $1, \cos x, \cos 2x, \dots$ (no sines), computing $a_n$ in the usual way. How does $\big(\frac{a_0}{2}\big)^2 + \tfrac12\sum a_n^2$ compare with $\langle f^2\rangle$?`,
-      visual: { type: 'graph', params: { x: [-3.1416, 3.1416], y: [-1.5, 5.2], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(x/2)', color: 'ink3', dash: [5, 4], width: 1.5, label: 'f', labelAt: 2.4, labelDy: -10 }, { fn: 'cosh(x/2)', color: 'accent', width: 2.2, label: 'even part', labelAt: -2.6, labelDy: -12 }, { fn: 'sinh(x/2)', color: 'warn', width: 1.8, label: 'odd part', labelAt: -2.2, labelDy: 14 }] }, caption: 'f = e^(x/2) is its even part cosh(x/2) plus its odd part sinh(x/2).' },
-      choices: ['strictly less: the cosines miss the odd part sinh(x/2), whose power is lost', 'equal: Parseval holds for any orthogonal set', 'strictly greater, because the cosines overlap', 'equal, because e^(x/2) is positive'],
+      visual: { type: 'graph', params: { x: [-3.1416, 3.1416], y: [-1.5, 5.2], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^(x/2)', color: 'ink3', dash: [5, 4], width: 1.5, label: 'f', labelAt: 2.4, labelDy: -10 }, { fn: 'cosh(x/2)', color: 'accent', width: 2.2, label: 'even part', labelAt: -2.6, labelDy: -12 }, { fn: 'sinh(x/2)', color: 'warn', width: 1.8, label: 'odd part', labelAt: -2.2, labelDy: 14 }] }, caption: '$f = e^{x/2}$ is its even part cosh(x/2) plus its odd part sinh(x/2).' },
+      choices: ['strictly less: the cosines miss the odd part sinh(x/2), whose power is lost', 'equal: Parseval holds for any orthogonal set', 'strictly greater, because the cosines overlap', 'equal, because $e^{x/2}$ is positive'],
       answer: 0,
       why: {
         1: 'Parseval needs a complete set. The cosines alone are orthogonal but not complete: they cannot represent odd functions.',

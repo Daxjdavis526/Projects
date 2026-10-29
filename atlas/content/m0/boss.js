@@ -322,7 +322,7 @@ export default boss({
                 { value: 100 * (1 - 1 / (1 + C.dv / C.ve)), feedback: t`$m_0/m_f = e^{\Delta v/v_e}$, not $1 + \Delta v/v_e$.` },
               ], C.key),
               hints: [t`Solve for the mass ratio: $\dfrac{m_0}{m_f} = e^{\Delta v/v_e}$.`, t`The propellant share is $1 - \dfrac{m_f}{m_0} = 1 - e^{-\Delta v/v_e}$.`],
-              teach: 'The natural log in the rocket equation is undone by e: the mass ratio is e^(Δv/vₑ).',
+              teach: t`The natural log in the rocket equation is undone by e: the mass ratio is $e^{\Delta v/v_e}$.`,
               explain: t`$\dfrac{m_0}{m_f} = e^{${C.dv}/${C.ve}} = ${nice(sig(Math.exp(C.dv / C.ve), 4))}$, so the propellant is $1 - e^{-${C.dv}/${C.ve}} = ${nice(sig(C.key, 3))}\%$ of the stack. A faster exhaust (hydrogen–oxygen engines reach about $4.4$ km/s) makes a big difference, because $v_e$ sits in the exponent.`,
               visual: rocketPic(C.ve),
             };
@@ -427,7 +427,7 @@ export default boss({
                 { value: Math.hypot(C.a, C.b) * Math.cos(C.th * D2R), feedback: t`$|z|\cos\theta$ forgets $z$’s own angle: the new angle is $\arg z + ${C.th}^\circ$.` },
               ], C.key),
               hints: [t`$e^{i\theta} = \cos\theta + i\sin\theta$. Multiply out $(a + bi)(\cos\theta + i\sin\theta)$.`, t`The real part is $a\cos\theta - b\sin\theta$.`],
-              teach: 'Multiplying by e^(iθ) rotates a point by θ about the origin.',
+              teach: t`Multiplying by $e^{i\theta}$ rotates a point by θ about the origin.`,
               explain: t`$\mathrm{Re}\bigl[(${zt})(\cos ${C.th}^\circ + i\sin ${C.th}^\circ)\bigr] = ${C.a}\cos ${C.th}^\circ - (${C.b})\sin ${C.th}^\circ = ${nice(sig(C.key, 4))}$ pixels. The star tracker compares such positions with its catalogue to work out how the spacecraft has turned.`,
               visual: rotPic(C),
             };

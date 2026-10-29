@@ -91,7 +91,7 @@ A step is accepted when $\text{err} \le 1$. Because the local error of the order
         points: R6.hs.map((h, i) => ({ x: n12(R6.ts[i]), y: n12(lg(h)), r: 3.5, color: 'accent' })),
         curves: R6.ys.slice(1).map((y, i) => seg(R6.ts[i], lg(CFIT * R6r[i] ** 1.5), R6.ts[i + 1], lg(CFIT * Math.hypot(y[0], y[1]) ** 1.5), { color: 'gold', width: 1.6, samples: 10 })),
         legend: [{ label: 'accepted step h', color: 'accent', point: true }, { label: 'C r³ᐟ² (matched at apoapsis)', color: 'gold' }], legendAt: 'br' },
-      caption: 'Every accepted step of the 10⁻⁶ run against time, on a log axis, and the local orbital time scale r^(3/2) scaled to meet it at apoapsis. The first and last steps are set by the starting guess and the end of the interval.',
+      caption: 'Every accepted step of the 10⁻⁶ run against time, on a log axis, and the local orbital time scale $r^{3/2}$ scaled to meet it at apoapsis. The first and last steps are set by the starting guess and the end of the interval.',
     },
     steps: [
       { label: 'First try', text: t`At periapsis the speed is $${Y0[3].toFixed(2)}$ and the path turns sharply. The first step gives $\text{err} = ${tex(TR[0].err, 3)}$ — four orders of magnitude over. **Reject.** $0.9\,\text{err}^{-1/5}$ would be tiny, so the controller cuts by its limit, 0.2: $h = ${TR[1].h.toFixed(5)}$.` },

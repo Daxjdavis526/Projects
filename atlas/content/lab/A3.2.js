@@ -78,7 +78,7 @@ This is the GUM’s **law of propagation of uncertainty**; the rules for sums, p
           answer: cases.ans, answerTeX: cases.ansTeX, vars: cases.vars, wrt: cases.wrt, derivativeOf: cases.f,
           keys: cases.wrt === 'mu' ? [['μ', 'mu']] : [],
           errors: [{ answer: cases.wrong, feedback: 'Check the sign: the result falls as this input grows.' }],
-          hints: ['Differentiate with respect to that one variable, treating every other symbol as a constant.', 'Write the variable as a power (1/R = R⁻¹, 1/g^½ = g^(−½)) and use the power or chain rule.'],
+          hints: ['Differentiate with respect to that one variable, treating every other symbol as a constant.', 'Write the variable as a power ($1/R = R^{-1}$, $1/g^{1/2} = g^{-1/2}$) and use the power or chain rule.'],
           teach: 'A sensitivity coefficient is the partial derivative of the result with respect to one input, the others held fixed.',
           explain: t`$\partial f/\partial ${label} = ${cases.ansTeX}$. Its size times $\sigma_{${label}}$ is that input’s contribution to $\sigma_f$.`,
         };

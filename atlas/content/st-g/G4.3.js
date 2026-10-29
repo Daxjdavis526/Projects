@@ -255,7 +255,7 @@ print("optimal SNR", round(0.5 * np.linalg.norm(h), 2))
           answer: ans, tol: { rel: 0.02 },
           errors: [{ value: Math.exp(-x), feedback: t`The exponent is $-x^2/2$, not $-x$.` }],
           hints: [t`$\rho^2$ with two Gaussian components is exponentially distributed with mean $2$.`, t`$e^{-${x * x}/2}$.`],
-          teach: 'Maximizing over phase makes noise-only ρ Rayleigh-distributed: P(ρ > x) = e^(−x²/2), heavier than one Gaussian’s tail.',
+          teach: 'Maximizing over phase makes noise-only ρ Rayleigh-distributed: $P(\\rho > x) = e^{-x^2/2}$, heavier than one Gaussian’s tail.',
           explain: t`$e^{-${x * x / 2}} = ${tex(ans, 2)}$. Compare one quadrature’s one-sided tail at $${x}$: smaller, because maximizing over phase gives the noise two chances.`,
         };
       },

@@ -123,7 +123,7 @@ This is the [functional derivative](#/lesson/st-g.G5.1) $\delta S/\delta\phi = 0
           answer: ans, units: 'fm', tol: { rel: 0.005 },
           errors: [{ value: m / HBARC_MEV_FM, feedback: t`Inverted: $\lambda = \hbar c/(mc^2)$, a length.` }, { value: (2 * Math.PI * HBARC_MEV_FM) / m, feedback: t`That is the Compton wavelength $h/(mc)$. The Yukawa range is the reduced one, $\hbar/(mc)$.` }],
           hints: [t`$\lambda = \dfrac{\hbar c}{mc^2}$.`, t`$197.327/${m}$.`],
-          teach: 'A mass term makes a static field fall off as e^(−r/λ)/r with range ħ/mc: heavier carriers, shorter forces.',
+          teach: 'A mass term makes a static field fall off as $e^{-r/\\lambda}/r$ with range ħ/mc: heavier carriers, shorter forces.',
           explain: t`$\lambda = 197.327/${m} = ${nice(ans, 4)}\ \text{fm}$. Yukawa predicted the pion in 1935 from the nuclear force’s range of about $1.4$ fm. A massless carrier — the photon, and as far as anyone can tell the graviton — gives the $1/r$ of Coulomb and Newton.`,
         };
       },

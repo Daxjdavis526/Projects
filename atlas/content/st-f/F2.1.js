@@ -186,7 +186,7 @@ The first falls with $h$, the second rises, so there is a **best step** $h^*$ an
           answer: ans, tol: { rel: 0.02 },
           errors: [{ value: 2 ** 29, feedback: t`That is the ratio of the unit roundoffs. Only the fraction $p/(p+1)$ of it carries over to the best error.` }, { value: 2 ** (29 / (p + 1)), feedback: t`That is how much the best *step* changes ($u^{1/(p+1)}$). The best error goes as $u^{p/(p+1)}$.` }].filter((e) => Math.abs(e.value - ans) > 0.03 * ans),
           hints: [t`The ratio of unit roundoffs is $2^{-24}/2^{-53} = 2^{29}$.`, t`$E^*$ scales as $u^{p/(p+1)}$, so the factor is $(2^{29})^{${p}/${p + 1}}$.`],
-          teach: 'Balancing hᵖ against u/h gives a best error proportional to u^(p/(p+1)): the higher the order, the more of the arithmetic’s precision the method can use.',
+          teach: 'Balancing hᵖ against u/h gives a best error proportional to $u^{p/(p+1)}$: the higher the order, the more of the arithmetic’s precision the method can use.',
           explain: t`$(2^{29})^{${p}/${p + 1}} = 2^{${(29 * p / (p + 1)).toFixed(2)}} \approx ${tex(ans, 3)}$. A first-order formula turns the 29 extra bits into only $14.5$ bits of accuracy; a fourth-order one into $23.2$.`,
         };
       },
@@ -236,7 +236,7 @@ The first falls with $h$, the second rises, so there is a **best step** $h^*$ an
           answer: ans, units: 's', tol: { rel: 0.02 },
           errors: [{ value: Math.cbrt(3 * U) / w, feedback: t`That balances $h^2$ against $1/h$ — the first-derivative rule. A second difference divides by $h^2$, so round-off grows as $1/h^2$.` }, { value: Math.pow(48 * U, 0.25), feedback: 'That is ωh*, a phase. Divide by ω to get seconds.' }],
           hints: [t`Minimise $E(h) = \dfrac{\omega^4Ah^2}{12} + \dfrac{4uA}{h^2}$: set $dE/dh = 0$.`, t`$\dfrac{\omega^4Ah}{6} = \dfrac{8uA}{h^3}$ gives $h^{*4} = \dfrac{48u}{\omega^4}$, so $h^* = (48u)^{1/4}/\omega$, with $\omega = 2\pi/T$.`],
-          teach: 'For a k-th derivative round-off grows as u/hᵏ, so the best step grows to u^(1/(p+k)): for the second difference (p = 2, k = 2), the fourth root of u.',
+          teach: 'For a k-th derivative round-off grows as u/hᵏ, so the best step grows to $u^{1/(p+k)}$: for the second difference (p = 2, k = 2), the fourth root of u.',
           explain: t`$\omega = 2\pi/(${Pmin}\times60\ \text{s}) = ${tex(w, 3)}\ \text{s}^{-1}$ and $(48u)^{1/4} = ${tex(Math.pow(48 * U, 0.25), 3)}$, so $h^* = ${tex(ans, 3)}$ s. The best error, about $u^{1/2}$ relative, keeps only half the digits: second derivatives from samples are expensive in precision.`,
         };
       },

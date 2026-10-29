@@ -89,7 +89,7 @@ with $\gamma = C_P/C_V$. Because the temperature changes along the way, an adiab
             { value: T1 * k ** -(g - 1), feedback: t`That is an *expansion* by the same ratio. Compression means $V_1/V_2 = ${k}$, so the temperature rises.` },
           ],
           hints: [t`$T_1V_1^{\gamma-1} = T_2V_2^{\gamma-1}$.`, t`$T_2 = T_1\,(V_1/V_2)^{\gamma-1} = ${T1}\times${k}^{${gas === 'air' ? '0.4' : t`2/3`}}$.`],
-          teach: 'An adiabatic compression by a volume ratio r multiplies the absolute temperature by r^(γ−1).',
+          teach: t`An adiabatic compression by a volume ratio r multiplies the absolute temperature by $r^{\gamma - 1}$.`,
           explain: t`$T_2 = ${T1}\times${k}^{${gas === 'air' ? '0.4' : t`2/3`}} = ${fmt(T2, 3)}$ K — with no heat added. ${gas === 'He' ? 'Helium, with γ = 5/3, heats more than air would for the same squeeze.' : ''}`,
           visual: pvPic({ gas, n: molesOf(100, 1, T1), states: { A: { P: 100, V: 1 }, B: { P: 100 * k ** g, V: 1 / k } }, paths: one('A', ['adiabatic', 'B']), shade: false, vrange: [0, 1.4], prange: [0, Math.ceil((100 * k ** g) / 500) * 500 + 200], caption: `An adiabatic compression of ${NAME[gas]} by ${k}:1 (sketch starting at 100 kPa and 1 L).` }),
         };
@@ -163,7 +163,7 @@ with $\gamma = C_P/C_V$. Because the temperature changes along the way, an adiab
             { value: T1 * (P2 / P1), feedback: t`That would hold if the volume stayed fixed. The gas inside expands as the rest leaves: use $T \propto P^{(\gamma-1)/\gamma}$.` },
           ],
           hints: [t`Combine $PV^\gamma = $ constant with $PV = nRT$: $T \propto P^{(\gamma-1)/\gamma}$.`, t`$T_2 = ${T1}\times(${P2}/${P1})^{0.4}$.`],
-          teach: 'For an adiabatic change of pressure, T₂/T₁ = (P₂/P₁)^((γ−1)/γ).',
+          teach: t`For an adiabatic change of pressure, $T_2/T_1 = (P_2/P_1)^{(\gamma - 1)/\gamma}$.`,
           explain: t`$T_2 = ${T1}\times(${P2}/${P1})^{0.4} = ${fmt(T2, 3)}$ K. Real bottles cool less, because their walls feed heat back into the gas, but the ideal figure is the one designers check seals and wrap materials against. (At 30 MPa helium is also about 15 % off ideal; the estimate is rough.)`,
           visual: pvPic({ gas: 'He', n: molesOf(P1 * 1000, 10, T1), punit: 'MPa', heat: true, states: { A: { P: P1, V: 10 }, B: { P: P2, V: 10 * (P1 / P2) ** (1 / G.He) } }, paths: one('A', ['adiabatic', 'B']), shade: false, vrange: [0, Math.ceil(10 * (P1 / P2) ** (1 / G.He) * 1.25)], prange: [0, 35], caption: 'The gas that stays in the bottle expands adiabatically as the rest leaves. Here 10 L of it at the start grows to fill more of the bottle.' }),
         };
@@ -240,7 +240,7 @@ What is wrong?`,
           answer: T2, units: 'K', tol: { rel: 0.02 },
           errors: [{ value: T1 * (P2 / P1), feedback: t`That treats the gas as staying at fixed volume. It is compressed: $T \propto P^{(\gamma-1)/\gamma}$.` }, { value: T1 * (P2 / P1) ** 0.4, feedback: t`With pressures the exponent is $(\gamma-1)/\gamma = 0.286$.` }],
           hints: [t`$T_2 = T_1(P_2/P_1)^{(\gamma-1)/\gamma}$ with $(\gamma-1)/\gamma = 0.4/1.4$.`, t`$P_2/P_1 = ${P2 / P1}$.`],
-          teach: 'Rapid compression of a gas into a dead end heats it adiabatically, by the factor (P₂/P₁)^((γ−1)/γ).',
+          teach: t`Rapid compression of a gas into a dead end heats it adiabatically, by the factor $(P_2/P_1)^{(\gamma - 1)/\gamma}$.`,
           explain: t`$T_2 = ${T1}\times${P2 / P1}^{0.286} = ${fmt(T2, 3)}$ K. Real peaks are lower, because heat flows into the metal, but still hot enough to ignite polymer valve seats and lubricants in pure oxygen. That is why oxygen systems use slow-opening valves and avoid dead-ended lines, and why their parts are tested by exactly this kind of pressure surge.`,
           visual: pvPic({ gas: 'O2', n: 1, punit: 'MPa', vunit: 'L', heat: true, states: { A: { P: P1, T: T1, label: 'line, before' }, B: { P: P2, T: T2, label: 'after the surge' } }, paths: one('A', ['adiabatic', 'B']), shade: false, prange: [0, P2 * 1.2], caption: 'One mole of the oxygen in the line, compressed adiabatically (sketch: an ideal gas with γ = 1.4).' }),
         };

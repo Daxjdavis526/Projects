@@ -292,7 +292,7 @@ Each half-life halves whatever is left: after one, half remains; after two, a qu
             { value: 800 * Math.exp(-h / T), feedback: t`With base $e$ the exponent is $-\lambda t = -t\ln 2/T_{1/2}$, not $-t/T_{1/2}$. Or use base 2: $R = R_0\,2^{-t/T_{1/2}}$.` },
           ],
           hints: [t`$R = 800\ \text{MBq}\times2^{-${h}/${T}}$.`],
-          teach: 'The activity falls by the same factor in every equal interval, so R = R₀ 2^(−t/T½) works for any time, not only whole half-lives.',
+          teach: 'The activity falls by the same factor in every equal interval, so $R = R_0\\, 2^{-t/T_{1/2}}$ works for any time, not only whole half-lives.',
           explain: t`$R = 800\times2^{-${h}/${T}} = 800\times${fmt(2 ** (-h / T), 3)} = ${fmt(R, 3)}$ MBq. Technetium-99m’s six-hour half-life is long enough to prepare, inject and scan, and short enough that the dose has mostly decayed within a day.`,
           visual: sample('tc99m', h / T, `A model sample of technetium-99m, ${h} hours (${fmt(h / T, 2)} half-lives) after preparation.`, { hide: ['count'] }),
         };

@@ -92,7 +92,7 @@ export default lesson({
           errors: [{ value: Math.sqrt((9 * P0.eta * vfx) / (P0.rho * P0.g)) * 1e6, feedback: t`Stokes drag $6\pi\eta a v$ against the weight $\tfrac43\pi a^3\rho g$ gives $a^2 = 9\eta v/(2\rho g)$ — you lost the 2.` }, { value: (9 * P0.eta * vfx) / (2 * P0.rho * P0.g) * 1e12, feedback: 'That is a² in μm². Take the square root.' }],
           hints: [t`At terminal speed, $\tfrac43\pi a^3\rho g = 6\pi\eta a v_f$.`, t`$a = \sqrt{9\eta v_f/(2\rho g)}$ with $v_f = 0.500\ \text{mm}/t_f$.`],
           teach: t`At terminal speed weight equals drag, so the fall speed alone fixes the radius: $a = \sqrt{9\eta v_f/2\rho g}$.`,
-          explain: t`$v_f = ${um(vfx)}\ \mu\text{m/s}$, so $a = \sqrt{9(1.83\times10^{-5})(${tex(vfx, 4)})/(2 \times 886 \times 9.80)} = ${ans.toFixed(3)}\ \mu\text{m}$. The slip correction then shrinks it a few per cent.`,
+          explain: t`$v_f = ${um(vfx)}\ \mu\text{m/s}$, so $a = \sqrt{9\eta v_f/2\rho g}$ $= ${ans.toFixed(3)}\ \mu\text{m}$. The slip correction then shrinks it a few per cent.`,
         };
       },
     }),
@@ -109,7 +109,7 @@ export default lesson({
           errors: [{ value: 100 * (C - 1), feedback: t`That is the drag error alone. The radius is wrong too ($a_0 = a\sqrt{C}$), and $q \propto a/C$ from the drag… together $q_0 = qC^{3/2}$.` }, { value: 100 * (C ** 2 - 1), feedback: t`The power is $3/2$, not 2: one $C$ from the drag, and $\sqrt C$ from the radius.` }],
           hints: [t`$C = 1 + b/(pa)$ with $p$ in Pa and $a$ in m.`, t`Overestimate $= C^{3/2} - 1$, as a percentage.`],
           teach: t`Ignoring slip overstates a drop’s charge by $(1 + b/pa)^{3/2}$ — most for the smallest drops and the thinnest air.`,
-          explain: t`$C = 1 + 8.20\times10^{-3}/(${tex(pk * 1e3, 4)} \times ${tex(a * 1e-6, 2)}) = ${C.toFixed(4)}$, and $C^{3/2} = ${(C ** 1.5).toFixed(4)}$: ${ans.toFixed(1)}% too high. Because the error differs from drop to drop, it does not cancel in a ratio: it smears the whole-number pattern.`,
+          explain: t`$C = 1 + 8.20\times10^{-3}/(${tex(pk * 1e3, 4)} \times ${tex(a * 1e-6, 2)})$ $= ${C.toFixed(4)}$, and $C^{3/2} = ${(C ** 1.5).toFixed(4)}$: ${ans.toFixed(1)}% too high. Because the error differs from drop to drop, it does not cancel in a ratio: it smears the whole-number pattern.`,
         };
       },
     }),

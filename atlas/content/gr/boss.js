@@ -384,7 +384,7 @@ export default boss({
                 t`The waves come at twice the orbital frequency: $f = 2/P$, with $P$ in seconds.`,
                 t`Evaluate $\tau$ in seconds, then divide by $3.156\times10^7$.`,
               ],
-              teach: 'Gravitational waves come at twice the orbital frequency, and the time left to merge grows as f^(−8/3): wide binaries outlast the universe many times over.',
+              teach: 'Gravitational waves come at twice the orbital frequency, and the time left to merge grows as $f^{-8/3}$: wide binaries outlast the universe many times over.',
               explain: t`$\mathcal{M} = ${fmt(Mc, 4)}\,M_\odot$ and $f = 2/P = ${sci(f)}$ Hz, so $\tau = ${sci(tau)}$ s $= ${sci(yr)}$ years — about $${sci(yr / 13.8e9, 2)}$ times the age of the universe. The orbit's real eccentricity, ${e}, shortens this roughly ${Math.round(ecc)}-fold, nowhere near enough to matter. The two are ${fmt(aAU, 3)} AU apart; the binaries LIGO hears are a few hundred kilometres apart in their last second.`,
               visual: binaryPicture(S),
             };

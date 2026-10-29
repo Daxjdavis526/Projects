@@ -33,7 +33,7 @@ The **method of characteristics**: (1) find the characteristic curves; (2) solve
     tasks: [
       'Set λ = 0: plain transport, the bump keeps its height.',
       'Raise λ: the shading fades as it climbs — each characteristic carries a decaying value.',
-      'Drag the probe up its characteristic: the foot stays put while u(probe) falls as e^(−λt).',
+      'Drag the probe up its characteristic: the foot stays put while u(probe) falls as $e^{-\\lambda t}$.',
     ],
     params: { mode: 'transport', profile: 'gauss', c: 1.5, lambda: 0.3, x: [-10, 10], x0: -5, w: 1, tmax: 6, probe: [1, 4], controls: ['profile', 'c', 'lambda', 't'] },
     caption: t`Exact solution $u = e^{-\lambda t} f(x - ct)$ on an infinite line; the window is a piece of it.`,
@@ -62,7 +62,7 @@ The **method of characteristics**: (1) find the characteristic curves; (2) solve
           vars: { x: [-3, 3], t: [0, 1.5] },
           errors: [{ answer: `1/(${a} + (x - ${c}t)^2)`, feedback: t`That solves the equation without the decay. Along each characteristic $du/dt = -${lam}u$: multiply by $e^{-${lam}t}$.` }, { answer: `e^(${lam}t)/(${a} + (x - ${c}t)^2)`, feedback: t`$du/dt = -${lam}u$ gives decay, $e^{-${lam}t}$.` }],
           hints: [t`Characteristics: $x = x_0 + ${c}t$. Along them, $du/dt = -${lam}u$.`, t`So $u = f(x_0)\,e^{-${lam}t}$ with $x_0 = x - ${c}t$.`],
-          teach: 'Along a characteristic a decay term is an ODE: u = f(foot) × e^(−λt).',
+          teach: 'Along a characteristic a decay term is an ODE: u = f(foot) × $e^{-\\lambda t}$.',
           explain: t`$u = f(x - ${c}t)\,e^{-${lam}t} = \dfrac{e^{-${lam}t}}{${a} + (x - ${c}t)^2}$.`,
         };
       },

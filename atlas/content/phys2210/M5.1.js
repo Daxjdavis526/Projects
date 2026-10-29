@@ -211,7 +211,7 @@ A **free-body diagram** isolates one object, shrinks it to a dot and draws every
       id: 'cp-tug', difficulty: 3,
       gen(r) {
         const T = r.pick([8, 10, 12, 15]), th = r.pick([20, 25, 30, 35]), C = r.pick([3, 4, 5, 6]);
-        const fx = T * cos(th), fy = T * sin(th) - C, ans = Math.hypot(fx, fy);
+        const fx = T * cos(th), fy0 = T * sin(th) - C, fy = Math.abs(fy0) < 1e-9 ? 0 : fy0, ans = Math.hypot(fx, fy);
         return {
           prompt: t`A tugboat’s cable pulls a barge with ${T} kN at ${th}° north of east, while the river current pushes the barge with ${C} kN due south. What is the magnitude of the net horizontal force on the barge?`,
           visual: bodyFBD([force('cable', T * 1000, th, 'tension'), force('current', C * 1000, 270, 'drag')], { name: 'Horizontal forces on the barge, seen from above', caption: 'Top view, to scale; east is to the right, north is up.' }),

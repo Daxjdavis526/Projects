@@ -55,7 +55,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
     title: 'Parabolas beat straight lines',
     lead: t`With Simpson selected, the gold dashed arcs are the parabolas through each pair of strips, and the small labels are the weights $1, 4, 2, \ldots$. The lower panel shows all three rules’ errors against $n$ on logarithmic scales: Simpson’s line falls twice as steeply, and its error ratio $E_n/E_{2n}$ settles near 16. The readout also compares the actual error with its guaranteed bound.`,
     tasks: [
-      'On e^(−x²), compare the rules at n = 4 and then at n = 16: Simpson’s lead grows from about 5 times to about 100 times.',
+      'On $e^{-x^2}$, compare the rules at n = 4 and then at n = 16: Simpson’s lead grows from about 5 times to about 100 times.',
       'Pick 1/(1 + x²) at n = 4: Simpson is worse than both other rules! Its 1/n⁴ advantage only takes over once the strips resolve the peak — by about n = 12 here.',
       'Pick x³: Simpson’s error is exactly zero for every n, and so is its bound, because f⁗ = 0.',
     ],

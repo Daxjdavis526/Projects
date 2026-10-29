@@ -67,7 +67,7 @@ const transferPicture = {
     ],
     points: [{ x: 0, y: 0, color: 'gold', r: 7 }, { x: 1, y: 0, color: 'teal', label: 'Earth at launch' }, { x: -1.524, y: 0, color: 'bad', label: 'Mars at arrival' }],
   },
-  caption: 'A transfer from Earth’s orbit to Mars’s (schematic): half an ellipse around the Sun, about 2 × 10⁸ km of travel.',
+  caption: 'A transfer from Earth’s orbit to Mars’s (schematic): half an ellipse around the Sun, about 6 × 10⁸ km of travel.',
 };
 
 // gravitational waves and light leaving a merger together (separation hugely exaggerated)
@@ -250,7 +250,7 @@ Matching the two fixes the $8\pi$ in Einstein's coupling. The same three conditi
     num({
       id: 'cp-probe', difficulty: 2, transfer: true,
       gen(r) {
-        const [v, Lkm] = r.pick([[30, 2e8], [25, 3e8], [35, 1.5e8]]);
+        const [v, Lkm] = r.pick([[30, 6e8], [25, 7e8], [35, 5e8]]);
         const d = (v * 1e3 / C) ** 2 * Lkm;
         return {
           prompt: t`A rough rule of thumb: over a journey, Newton’s predicted position drifts from Einstein’s by about $(v/c)^2$ of the distance travelled. For a probe cruising at ${v} km/s on a $${sci(Lkm, 2)}$ km transfer to Mars, about how large is that drift, in kilometres?`,

@@ -160,7 +160,7 @@ So $f$ need only tend to zero on the arc — even as slowly as $1/R$ — and $\i
             { value: (PI / (b * b - a * a)) * (1 / a - 1 / b), feedback: t`That is the $k = 0$ value: each residue carries $e^{-k\cdot\text{height}}$.` },
           ]),
           hints: [t`Close $e^{ikz}$ above; poles $${iPlain(a)}$ and $${iPlain(b)}$.`, t`$\operatorname{Res}_{${iPlain(a)}} = \dfrac{e^{-${nm(k * a, 3)}}}{${2 * a}i\,(${b * b} - ${a * a})}$ and $\operatorname{Res}_{${iPlain(b)}} = \dfrac{e^{-${nm(k * b, 3)}}}{${2 * b}i\,(${a * a} - ${b * b})}$.`],
-          teach: 'Each upper pole contributes its own exponential e^(−k·height): the nearest one dominates at large k.',
+          teach: 'Each upper pole contributes its own exponential $e^{-k\\cdot\\text{height}}$: the nearest one dominates at large k.',
           explain: t`$2\pi i(\operatorname{Res}_1 + \operatorname{Res}_2) = \dfrac{\pi}{${b * b - a * a}}\left(\dfrac{e^{-${nm(k * a, 3)}}}{${a}} - \dfrac{e^{-${nm(k * b, 3)}}}{${b}}\right) = ${nm(ans, 4)}$. Checked by quadrature in the course’s check script.`,
         };
       },
@@ -177,7 +177,7 @@ So $f$ need only tend to zero on the arc — even as slowly as $1/R$ — and $\i
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: (PI / q) * E(-k * q), feedback: t`The pole is at $${c} + ${q === 1 ? '' : q}i$, and $e^{ik(${c} + ${q === 1 ? '' : q}i)}$ carries the phase $e^{${nm(k * c, 3)}i}$: take its real part.` }, { value: (PI / q) * E(-k * q) * Math.sin(k * c), feedback: 'That is the imaginary part — the integral with sin in place of cos.' }]),
           hints: [t`Poles at $${c} \pm ${q === 1 ? '' : q}i$; close $e^{ikz}$ above. $\operatorname{Res} = \dfrac{e^{ik(${c} + ${q === 1 ? '' : q}i)}}{${2 * q}i}$.`, t`$2\pi i\cdot\operatorname{Res} = \dfrac{\pi}{${q}}e^{-${nm(k * q, 3)}}e^{${nm(k * c, 3)}i}$; the cosine integral is its real part.`],
-          teach: 'A pole off the imaginary axis adds a phase e^(ikc): the cosine and sine integrals are its real and imaginary parts.',
+          teach: 'A pole off the imaginary axis adds a phase $e^{ikc}$: the cosine and sine integrals are its real and imaginary parts.',
           explain: t`$\dfrac{\pi}{${q}}e^{-${nm(k * q, 3)}}\cos(${nm(k * c, 3)}) = ${nm(ans, 4)}$. Shifting the bell by $${c}$ multiplies its Fourier transform by the phase $e^{${nm(k * c, 3)}i}$ — the shift theorem.`,
         };
       },
@@ -250,7 +250,7 @@ So $f$ need only tend to zero on the arc — even as slowly as $1/R$ — and $\i
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: (PI / q) * E(-k * q) * Math.cos(k * c), feedback: 'That is the real part — the cosine integral. The sine integral is the imaginary part.' }, { value: 0, feedback: 'The integrand is not odd: the bell is centred at c, not 0.' }]),
           hints: [t`Close $e^{ikz}$ above; the upper pole is $${c} + ${q === 1 ? '' : q}i$.`, t`$2\pi i\operatorname{Res} = \dfrac{\pi}{q}e^{-kq}e^{ikc}$; take the imaginary part.`],
-          teach: 'The sine integral is the imaginary part of the e^(ikx) integral.',
+          teach: 'The sine integral is the imaginary part of the $e^{ikx}$ integral.',
           explain: t`$\dfrac{\pi}{${q}}e^{-${nm(k * q, 3)}}\sin(${nm(k * c, 3)}) = ${nm(ans, 4)}$.`,
         };
       },

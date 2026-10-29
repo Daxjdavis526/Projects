@@ -147,7 +147,7 @@ Try $y = e^{rt}$. Each derivative just multiplies it by $r$, so the equation bec
         2: t`The imaginary part $3$ is the angular frequency: ignore it and the oscillation disappears.`,
         3: t`Nothing is approximated here: the solutions are exact.`,
       },
-      hints: ['Write e^(−1+3i)t with Euler’s formula.', t`If $L[u + iv] = 0$ for a linear $L$ with real coefficients, what are $L[u]$ and $L[v]$?`],
+      hints: ['Write $e^{(-1+3i)t}$ with Euler’s formula.', t`If $L[u + iv] = 0$ for a linear $L$ with real coefficients, what are $L[u]$ and $L[v]$?`],
       teach: 'For real coefficients, the real and imaginary parts of a complex solution are real solutions.',
       explain: t`Write $L[y] = y'' + 2y' + 10y$. Then $L[e^{rt}] = 0$ for $r = -1 + 3i$, and $e^{rt} = u + iv$ with $u = e^{-t}\cos 3t$, $v = e^{-t}\sin 3t$. Since $L$ has real coefficients, $L[u] + iL[v] = 0$ forces $L[u] = 0$ and $L[v] = 0$. The same trick is behind phasors in AC circuits.`,
     }),

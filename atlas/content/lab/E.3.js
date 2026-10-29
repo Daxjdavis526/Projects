@@ -187,7 +187,7 @@ Each $V_0$ has $\sigma = 0.020$ V. Find $h/e$ and $h$ with their uncertainties, 
           errors: [{ value: (100 * (hv - H)) / H, feedback: 'That is the percentage difference; divide the difference by σ instead.' }].filter((x) => Math.abs(x.value - ans) > 0.3),
           hints: [t`$h = e \times (h/e)$ and $\sigma_h = e\,\sigma_{h/e}$, since $e$ is exact.`, t`$z = (h - h_\text{exact})/\sigma_h$ — the same as working with $h/e$ throughout.`],
           teach: 'Multiplying by an exact constant leaves z unchanged: compare in whichever quantity is convenient.',
-          explain: t`$z = (${tex(he.value, 5)} - ${tex(HE, 6)})/${tex(he.sigma, 2)} = ${ans.toFixed(2)}$.`,
+          explain: t`$z = (${tex(he.value, 5)} - ${tex(HE, 6)})/(${tex(he.sigma, 2)})$, $= ${ans.toFixed(2)}$.`,
         };
       },
     }),

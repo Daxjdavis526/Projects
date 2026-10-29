@@ -218,7 +218,7 @@ with the radius $r$ measured in units of the wavelength over $2\pi$. Show that $
             { value: Math.exp(-b * T), feedback: t`Divide by $m$ first: in standard form $p = b/m$, not $b$.` },
           ].filter((x) => Math.abs(x.value - ratio) > 0.01 * ratio),
           hints: [t`Standard form: $x'' + \dfrac{b}{m}x' + \dfrac{k}{m}x = 0$, so $p = b/m$.`, t`Abel’s formula: $W(t) = W(0)\,e^{-\int_0^t p\,ds} = W(0)\,e^{-bt/m}$ — the spring constant never enters.`],
-          teach: 'Abel’s formula W(t) = W(t₀) e^(−∫p dt) gives the Wronskian without solving — for a damped oscillator it shrinks like e^(−bt/m).',
+          teach: t`Abel’s formula $W(t) = W(t_0)\, e^{-\int p\,dt}$ gives the Wronskian without solving — for a damped oscillator it shrinks like $e^{-bt/m}$.`,
           explain: t`$p = b/m = ${nice(bm)}$ s⁻¹, so $W(${T})/W(0) = e^{-${nice(bm)}\times${T}} = ${fmt(ratio, 3)}$, whatever the two solutions and whatever $k$. The Wronskian is the area of the parallelogram spanned by the two solutions’ vectors $(x, x')$; each side shrinks like $e^{-bt/2m}$, so the area shrinks like their product.`,
           visual: {
             type: 'graph',

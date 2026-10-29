@@ -208,7 +208,7 @@ print(f"K/U = {K_over_U:.4f}")
           ],
           hints: [t`\`v2 = (w / dt)**2\` — NumPy squares every element.`, t`\`slope = np.polyfit(h, v2, 1)[0]\`, then divide by \`2 * g\`.`],
           teach: 'Linearize first (here, square the speeds), then fit: the slope carries the physics.',
-          explain: t`$K/U = ${(f.b / (2 * G)).toFixed(4)}$ — a couple of percent below 1, the rolling-friction loss.`,
+          explain: t`$K/U = ${(f.b / (2 * G)).toFixed(4)}$ — ${(100 * (1 - f.b / (2 * G))).toFixed(1)} % below 1: the rolling-friction loss, give or take the scatter of six releases.`,
           visual: plot('energy', rows, { fit: false, caption: 'The releases your program fits.' }),
         };
       },

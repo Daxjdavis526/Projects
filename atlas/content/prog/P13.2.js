@@ -249,7 +249,7 @@ dv = Isp * g0 * np.log(m0 / mf)
         2: 'The histogram is wider on the high side, not narrower.',
         3: 'The nominal value (all inputs at their means) is the same in both; the Monte Carlo mean differs from it because of the curvature.',
       },
-      hints: ['Is the histogram symmetric about the nominal value?', `How does the mass ratio e^(Δv/Isp g₀) change for Isp 15 s low, compared with 15 s high?`],
+      hints: ['Is the histogram symmetric about the nominal value?', `How does the mass ratio $e^{\\Delta v/I_{\\text{sp}} g_0}$ change for Isp 15 s low, compared with 15 s high?`],
       teach: 'When a formula curves appreciably over the input spread, the output is skewed: report Monte Carlo percentiles, not mean ± σ from linearization.',
       explain: t`A low $I_{sp}$ raises the mass ratio $e^{\Delta v/(I_{sp}g_0)}$ far more than a high one lowers it. With $10^6$ draws the mean is $${thou(MC_NEED.mean)}$ kg against a nominal $${thou(NEED)}$ kg, and the 95th percentile is $${thou(MC_NEED.p95)}$ kg — linear propagation's mean $+ 1.645\sigma$ says $${thou(NEED + 1.645 * NEED_SD)}$ kg, $${thou(MC_NEED.p95 - (NEED + 1.645 * NEED_SD))}$ kg short. For a vehicle sized to the 95th percentile, that is the difference between reaching orbit and not.`,
     }),

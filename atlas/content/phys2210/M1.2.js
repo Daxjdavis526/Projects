@@ -32,7 +32,7 @@ That makes dimensions a free check on every formula you write — and, used clev
     tasks: [
       'Start with the mass: only c = 0 puts the M bar on its mark. The period cannot depend on the mass at all.',
       'Gravity alone brings time, as T⁻² per power of g: you need b = −½ to end with T¹.',
-      'That leaves a length of L^(−½) from g. Cancel it with a = +½: P = C√(L/g).',
+      t`That leaves a length of $L^{-1/2}$ from g. Cancel it with a = +½: P = C√(L/g).`,
     ],
     params: {
       x: [0.3, 3.7], y: [-2.6, 2.6], xticks: 0.001, xlabel: ' ', ylabel: 'power',

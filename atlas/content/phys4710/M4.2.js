@@ -59,7 +59,7 @@ For helium ($Z = 2$) that is $\zeta = \tfrac{27}{16}$ and $E = -(27/16)^2E_h = $
       points: [{ x: 'zz', y: `${r6(EH)}*(zz^2 - 2*Zc*zz + 0.625*zz)`, r: 6, color: 'warn' }],
       readouts: [{ label: t`$\langle\hat H\rangle$ (eV)`, expr: `${r6(EH)}*(zz^2 - 2*Zc*zz + 0.625*zz)`, digits: 5 }, { label: 'measured (eV)', expr: [1, 2, 3].map((Z) => `step(0.5 - abs(Zc - ${Z}))*${r6(-MEAS[Z])}`).join(' + '), digits: 5 }],
     },
-    caption: 'One-parameter trial ψ ∝ e^(−ζ(r₁ + r₂)), infinite nuclear mass, no relativity. Measured: sums of ionization energies (NIST; for H⁻, hydrogen’s 13.598 eV plus its electron affinity 0.754 eV). Dashed grey (H⁻ only): hydrogen plus a free electron.',
+    caption: t`One-parameter trial $\psi \propto e^{-\zeta(r_1 + r_2)}$, infinite nuclear mass, no relativity. Measured: sums of ionization energies (NIST; for H⁻, hydrogen’s 13.598 eV plus its electron affinity 0.754 eV). Dashed grey (H⁻ only): hydrogen plus a free electron.`,
   },
   example: {
     prompt: t`Derive $\langle\hat H\rangle(\zeta)$ for helium, minimize it, and compare the result with the independent-electron model, first-order perturbation theory and experiment.`,

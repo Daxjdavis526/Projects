@@ -167,7 +167,7 @@ The trap it guards against is everywhere in physics: a test that is rarely foole
           answer: ans, tol: { rel: 0.02 },
           errors: [{ value: 2 * ans, feedback: t`That is the **two-sided** probability $P(|Z| > ${z})$. A signal excess only counts in one direction.` }, { value: 1 - ans, feedback: t`That is $P(Z < ${z})$. You want the tail beyond $${z}$.` }],
           hints: [t`$P(Z > z) = \tfrac12\operatorname{erfc}(z/\sqrt2)$.`, t`A calculator or \`scipy.stats.norm.sf(${z})\` gives it; for $z = 5$ the answer is about $3\times10^{-7}$.`],
-          teach: 'Gaussian tails fall off like e^(−z²/2): each extra standard deviation buys a large factor in rarity.',
+          teach: 'Gaussian tails fall off like $e^{-z^2/2}$: each extra standard deviation buys a large factor in rarity.',
           explain: t`$P(Z > ${z}) = ${tex(ans, 2)}$. The famous $5\sigma$ is $2.87\times10^{-7}$, one-sided. It is the probability of noise doing this — not the probability that the result is noise (see the next problems). The lab version: [hypothesis tests and p-values](#/lesson/lab.A4.2).`,
         };
       },

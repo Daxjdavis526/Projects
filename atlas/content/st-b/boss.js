@@ -420,7 +420,7 @@ print(rate, predicted)`,
               choices, answer: H.type, why,
               hints: [t`The speeds are $0$ and $\pm\sqrt{1 - q}$.`, t`Real and distinct: strong. All equal: check the eigenvectors (rows 1 and 3 of $\mathsf M$ coincide when $q = 1$). Imaginary: not hyperbolic.`],
               teach: 'How much of a constraint is added decides the characteristic structure: strong, weak, or not hyperbolic at all.',
-              explain: t`At $q = ${H.q}$ the speeds are ${speeds}: **${['strongly hyperbolic', 'weakly hyperbolic only', 'not hyperbolic'][H.type]}**. ${H.type === 0 ? 'Errors propagate away at finite speeds — the BSSN-like behaviour.' : H.type === 1 ? 'This is the ADM-like system in disguise: violations sit still and feed growth ∝ kt.' : 'Imaginary speeds mean growth like e^(k t √(q − 1)): worse than ADM.'}`,
+              explain: t`At $q = ${H.q}$ the speeds are ${speeds}: **${['strongly hyperbolic', 'weakly hyperbolic only', 'not hyperbolic'][H.type]}**. ${H.type === 0 ? 'Errors propagate away at finite speeds — the BSSN-like behaviour.' : H.type === 1 ? 'This is the ADM-like system in disguise: violations sit still and feed growth ∝ kt.' : 'Imaginary speeds mean growth like $e^{kt\\sqrt{q - 1}}$: worse than ADM.'}`,
               visual: { type: 'graph', params: { x: [0, 2.2], y: [-1.2, 1.2], aspect: 'wide', axesAt: 'edge', xlabel: 'q', ylabel: 'real speeds', curves: [{ fn: '0*x', color: 'ink3', width: 2 }], vlines: [{ x: H.q, color: 'gold', label: `q = ${H.q}` }] }, caption: 'The zero speed exists for every q; whether the other two are real is the question.' },
             };
           },

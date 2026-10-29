@@ -132,7 +132,7 @@ The whole sky glows with microwaves, a near-perfect blackbody at 2.725 K: the **
       },
       hints: ['How many photons are there for each atom? (About 1.6 × 10⁹.)', 'A blackbody at 3000 K has only a tiny fraction of its photons above 13.6 eV — but a tiny fraction of a billion per atom can still be several per atom.'],
       teach: 'With about a billion photons per atom, the hot tail of the radiation kept hydrogen ionized until about 3000 K — when the universe became transparent.',
-      explain: 'The share of a blackbody’s photons above 13.6 eV falls as e^(−13.6 eV/kT). With 1.6 billion photons per baryon, that share must drop below about one in a billion before atoms survive: that happens near kT ≈ 0.26 eV, about 3000 K, some 380 000 years after the Big Bang. The light released then is the microwave background.',
+      explain: 'The share of a blackbody’s photons above 13.6 eV falls as $e^{-13.6\\ \\text{eV}/kT}$. With 1.6 billion photons per baryon, that share must drop below about one in a billion before atoms survive: that happens near kT ≈ 0.26 eV, about 3000 K, some 380 000 years after the Big Bang. The light released then is the microwave background.',
       visual: { type: 'mp-blackbody', params: { T: T_REL, axis: 'log', controls: false, readout: false }, caption: 'A 3000 K blackbody on log–log axes: almost all its photons have far less than the 13.6 eV (91 nm) needed to ionize hydrogen, but there are about 1.6 billion photons per atom.' },
     }),
     num({

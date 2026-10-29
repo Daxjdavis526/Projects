@@ -279,7 +279,7 @@ Laid across two rails and closed through a resistor, the rod drives a current. F
         3: 'By Lenz’s law the force on the induced current opposes the motion — it never helps it along.',
       },
       hints: ['How does the magnetic force on the bar depend on its speed?'],
-      teach: 'A coasting bar is braked by a force proportional to its speed, so its speed decays exponentially, v₀e^(−t/τ).',
+      teach: 'A coasting bar is braked by a force proportional to its speed, so its speed decays exponentially, $v_0e^{-t/\\tau}$.',
       explain: t`The braking force $B^2L^2v/R$ shrinks as the bar slows, so $v = v_0e^{-t/\tau}$ with $\tau = mR/(B^2L^2)$: it approaches rest without ever quite stopping, gliding a total of $v_0\tau$. Its kinetic energy all ends up heating the resistor.`,
     }),
   ],

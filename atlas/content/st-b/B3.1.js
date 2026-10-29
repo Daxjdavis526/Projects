@@ -171,7 +171,7 @@ $$u_{tt} = c^2\,u_{xx}, \qquad c^2 = \frac{F_T}{\mu}$$
         const th = (2 * Math.log(2)) / g;
         return {
           prompt: t`With air drag the string obeys $u_{tt} + \gamma\,u_t = c^2u_{xx}$, $\gamma = ${g}\ \text{s}^{-1}$. A mode $u = T(t)\sin(kx)$ then has $T'' + \gamma T' + c^2k^2T = 0$, and for light damping its amplitude falls as $e^{-\gamma t/2}$. After how many seconds has a plucked mode lost half its amplitude?`,
-          visual: { type: 'graph', params: { x: [0, 3 * th], y: [-1.1, 1.1], aspect: 'wide', xlabel: 't (s)', ylabel: 'T(t)', curves: [{ fn: `e^(-${g / 2}x)*cos(${(12 * Math.PI) / (3 * th)}x)`, color: 'accent', width: 1.6 }, { fn: `e^(-${g / 2}x)`, color: 'gold', dash: [5, 4] }, { fn: `-e^(-${g / 2}x)`, color: 'gold', dash: [5, 4] }] }, caption: 'One mode ringing down inside its envelope e^(−γt/2) (gold). The oscillation frequency is drawn far lower than a real string’s.' },
+          visual: { type: 'graph', params: { x: [0, 3 * th], y: [-1.1, 1.1], aspect: 'wide', xlabel: 't (s)', ylabel: 'T(t)', curves: [{ fn: `e^(-${g / 2}x)*cos(${(12 * Math.PI) / (3 * th)}x)`, color: 'accent', width: 1.6 }, { fn: `e^(-${g / 2}x)`, color: 'gold', dash: [5, 4] }, { fn: `-e^(-${g / 2}x)`, color: 'gold', dash: [5, 4] }] }, caption: 'One mode ringing down inside its envelope $e^{-\\gamma t/2}$ (gold). The oscillation frequency is drawn far lower than a real string’s.' },
           answer: th, units: 's', tol: { rel: 0.01 },
           errors: [{ value: Math.log(2) / g, feedback: t`The amplitude decays as $e^{-\gamma t/2}$, not $e^{-\gamma t}$: the half-life is $2\ln2/\gamma$.` }],
           hints: [t`Solve $e^{-\gamma t/2} = \tfrac12$.`],

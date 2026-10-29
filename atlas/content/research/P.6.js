@@ -129,7 +129,7 @@ $$R = I_V\,A\int \cos^2\theta\,\cos\theta\;d\Omega = \frac{\pi}{2}\,I_V\,A$$
     visual: telPic('The telescope’s counts in 60 minutes at each angle, with √N error bars, and a cos²θ curve. The zero at 90° is a real count.'),
     steps: [
       { label: 'Poisson?', text: t`Mean $${OUT.mean}$, variance $${OUT.varc}$ counts per minute. The dispersion statistic $\sum (n_i - \bar n)^2/\bar n = ${OUT.chi2}$ for 599 degrees of freedom; a Poisson process gives $599 \pm \sqrt{2\times599} = 599 \pm 35$. Consistent.` },
-      { label: 'Intensity', text: t`$N$ counts in $t$ seconds: $I_V = (N/t)/(\tfrac{\pi}{2}A) = ${OUT.I} \pm ${OUT.sI}\ \text{m}^{-2}\,\text{s}^{-1}\,\text{sr}^{-1}$, against the PDG’s about 70.` },
+      { label: 'Intensity', text: t`$N$ counts in $t$ seconds: $I_V = (N/t)/(\tfrac{\pi}{2}A)$, $= ${OUT.I} \pm ${OUT.sI}\ \text{m}^{-2}\,\text{s}^{-1}\,\text{sr}^{-1}$, against the PDG’s about 70.` },
       { label: 'Angle', text: t`Maximizing the Poisson likelihood of the seven counts over $n$ gives $n = ${OUT.n}$, with the 68% range ${OUT.nlo} to ${OUT.nhi} (where $\ln L$ drops by $\tfrac12$). The PDG’s $\cos^2\theta$: consistent.` },
       { label: 'Why likelihood', text: t`The count at $90^\circ$ is 0. Least squares with $\sigma = \sqrt N$ would give that point zero uncertainty and infinite weight; the Poisson likelihood treats it exactly — zero is simply an unlikely outcome when the expectation is large.` },
       { label: 'What it shows', text: t`All three agree with the values the data were made from: the pipeline works. On a real detector, the same pipeline would test dead time and afterpulsing (dispersion above 1) and the local altitude (intensity).` },

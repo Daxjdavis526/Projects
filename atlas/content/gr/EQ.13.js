@@ -343,7 +343,7 @@ Removing the trace makes $Q_{ij}$ zero for any spherical body, however it moves:
           prompt: t`For two stars on a circular orbit, $\dddot Q_{ij} \sim \mu a^2\omega^3$ ($\mu$ the reduced mass, $a$ the separation, $\omega$ the orbital angular frequency), so the power is $P \propto a^4\omega^6$. Kepler's third law says $\omega^2 = GM/a^3$. As radiation shrinks the orbit by a factor of ${k}, by what factor does the power radiated grow?`,
           answer: k ** 5, tol: { rel: 0.01 },
           errors: [
-            { value: k ** 4, feedback: 'The orbital frequency changes too: a tighter orbit is faster, ω ∝ a^(−3/2).' },
+            { value: k ** 4, feedback: 'The orbital frequency changes too: a tighter orbit is faster, $\\omega \\propto a^{-3/2}$.' },
             { value: k ** 9, feedback: 'ω⁶ ∝ a⁻⁹, but a⁴ shrinks: P ∝ a⁴ · a⁻⁹.' },
             { value: k ** -5, feedback: 'The power grows as the orbit shrinks — upside down.' },
           ],

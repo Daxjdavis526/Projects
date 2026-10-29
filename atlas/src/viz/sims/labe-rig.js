@@ -198,7 +198,7 @@ export function mount(F, P0) {
     const cols = E.columns;
     const tr = (cells, th = false) => h('tr', cells.map((c) => h(th ? 'th' : 'td', { style: { padding: '.3rem .6rem', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', ...(th ? { textTransform: 'none', letterSpacing: 'normal', fontSize: '.78rem' } : {}) } }, c)));
     const extra = P.exp === 'millikan' && an.d.x.length === an.R.length && (F.params.axes || P.axes || E.defaultAxes) === 'qn';
-    const head = ['#', ...cols.map((c) => c.head), ...(extra ? ['n (assigned)'] : [])];
+    const head = ['#', ...cols.map((c) => c.head), ...(extra ? ['n'] : [])];
     const body = an.R.map((r, i) => tr([String(i + 1), ...cols.map((c) => c.get(r, an.F)), ...(extra ? [String(an.d.x[i])] : [])]));
     tableBox.replaceChildren(h('table.t', { 'aria-label': 'Data table' }, h('thead', tr(head, true)), h('tbody', body.length ? body : [tr([h('span', { style: { color: 'var(--ink-3)' } }, 'No readings yet.')])])));
     tableBox.scrollTop = tableBox.scrollHeight;

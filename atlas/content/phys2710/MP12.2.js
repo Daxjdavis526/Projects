@@ -76,7 +76,7 @@ function efChart({ x = [27.9, 29.6], y = [0.3, 1.25], mark = true, only = null, 
       points: mark ? metals : [],
       ...extra,
     },
-    caption: caption ?? 'The Fermi energy grows as n^(2/3): the more electrons are packed in, the higher the exclusion principle stacks them. Log scales; dots are free-electron values for real metals.',
+    caption: caption ?? 'The Fermi energy grows as $n^{2/3}$: the more electrons are packed in, the higher the exclusion principle stacks them. Log scales; dots are free-electron values for real metals.',
   };
 }
 

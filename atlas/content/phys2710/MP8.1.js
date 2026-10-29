@@ -58,7 +58,7 @@ const singleValued = {
     ],
     points: [label(-1.8, -1.45, 'm = 2: joins itself after 2π', 'accent', 0, 0, 'center'), label(1.8, -1.45, 'm = 1.5: a jump where φ = 0 meets 2π', 'bad', 0, 0, 'center'), { x: 3.15, y: 0, r: 4, color: 'bad' }, { x: 2.45, y: 0, r: 4, color: 'bad' }],
   },
-  caption: 'The real part of Φ = e^(imφ), drawn as a ripple around a circle (radius 1 + 0.35 cos mφ, dashed: radius 1). Going once around, φ returns to the same place: Φ must return to the same value.',
+  caption: t`The real part of $\Phi = e^{im\phi}$, drawn as a ripple around a circle (radius 1 + 0.35 cos mφ, dashed: radius 1). Going once around, φ returns to the same place: Φ must return to the same value.`,
 };
 
 /** The radial effective potential −27.2/r + 13.6·l(l+1)/r² (eV, r in a₀). */

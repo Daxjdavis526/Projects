@@ -90,9 +90,9 @@ Chains of these equations — solved by Bateman in 1910 — explain why uranium 
           prompt: t`${p[0].toUpperCase() + p.slice(1)} has a half-life of $${show(T)}$ ${unit}. ${a.pct}% of its decays are ${a.mode} to ${a.to}, ${b.pct}% ${b.mode} to ${b.to}. What is the **partial half-life** for the ${which.mode} branch alone — the half-life it would have if that were its only way to decay — in ${unit}?`,
           answer: Tp, units: unit, tol: { rel: 0.003 },
           errors: [{ value: T * (which.pct / 100), feedback: t`A rarer branch means a *longer* partial half-life: the partial decay constant is $\lambda_i = f_i\lambda$, so $T_i = T/f_i$.` }],
-          hints: [t`Decay constants of competing branches add: $\lambda = \lambda_a + \lambda_b$, and $\lambda_i = f_i\lambda$ for a branch taking a fraction $f_i$.`, t`$T_i = \dfrac{\ln 2}{\lambda_i} = \dfrac{T_{1/2}}{f_i} = \dfrac{${show(T)}}{${which.pct / 100}}$.`],
+          hints: [t`Decay constants of competing branches add: $\lambda = \lambda_a + \lambda_b$, and $\lambda_i = f_i\lambda$ for a branch taking a fraction $f_i$.`, t`$T_i = \dfrac{\ln 2}{\lambda_i} = \dfrac{T_{1/2}}{f_i} = \dfrac{${show(T)}}{${r6(which.pct / 100)}}$.`],
           teach: 'Competing decays add their rates, not their half-lives: each branch has λᵢ = fᵢλ and a partial half-life T½/fᵢ.',
-          explain: t`$T_i = ${show(T)}/${which.pct / 100} = ${show(Tp)}$ ${unit}. The nucleus still has only one half-life, $${show(T)}$ ${unit}: every branch’s products appear with that same time dependence, in fixed proportions.${p === 'potassium-40' ? ' The argon branch is what K–Ar dating counts.' : ''}`,
+          explain: t`$T_i = ${show(T)}/${r6(which.pct / 100)} = ${show(Tp)}$ ${unit}. The nucleus still has only one half-life, $${show(T)}$ ${unit}: every branch’s products appear with that same time dependence, in fixed proportions.${p === 'potassium-40' ? ' The argon branch is what K–Ar dating counts.' : ''}`,
           visual: scheme(p, `${T >= 1e5 ? `${fmt(T / 1e9, 4)} billion` : fmt(T, 4)} ${unit}`, [{ to: a.to, mode: a.mode, pct: `${a.pct}%` }, { to: b.to, mode: b.mode, pct: `${b.pct}%` }]),
         };
       },

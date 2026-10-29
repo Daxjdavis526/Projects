@@ -56,7 +56,7 @@ That is **Richardson extrapolation**: a higher-order answer from lower-order run
     title: 'Romberg’s columns',
     lead: t`Error of each column of the Romberg table against the number of function evaluations, log–log. Blue: the trapezoid rule; each further colour is one more Richardson step. Choose the integrand.`,
     tasks: [
-      'For e^(−x²) the columns fall with slopes 2, 4, 6, 8 (against the panel width): each extrapolation adds two orders, as Euler–Maclaurin promises — until round-off near 10⁻¹⁴.',
+      'For $e^{-x^2}$ the columns fall with slopes 2, 4, 6, 8 (against the panel width): each extrapolation adds two orders, as Euler–Maclaurin promises — until round-off near 10⁻¹⁴.',
       'For √x every column falls at the same slow rate: the error is not a series in h², so the extrapolation removes nothing useful.',
       'For the pendulum’s period integral the trapezoid rule (blue) is already at round-off with 9 points; extrapolating makes it worse. Romberg assumes an h² error that is not there.',
     ],
@@ -163,7 +163,7 @@ That is **Richardson extrapolation**: a higher-order answer from lower-order run
         params: { x: [-0.1, 2.25], y: [-16.5, 0], xlog: true, ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'function evaluations', ylabel: '|error|',
           points: TAB[0].flatMap((row, i) => row.slice(0, 4).map((v, j) => ({ x: n12(lg(2 ** i + 1)), y: n12(lg(Math.max(Math.abs(v - ERFI), 1e-16))), r: 4.5 - 0.5 * j, color: COLS[j][0] }))),
           legend: COLS.map(([c, l]) => ({ label: l, color: c, point: true })), legendAt: 'bl' },
-        caption: 'Romberg columns for ∫₀¹ e^(−x²) dx.',
+        caption: 'Romberg columns for $\\int_0^1 e^{-x^2}\\, dx$.',
       },
       choices: [
         'By the Euler–Maclaurin formula the trapezoid error is a series in h², h⁴, h⁶ … with no odd powers, so removing one term jumps two orders',

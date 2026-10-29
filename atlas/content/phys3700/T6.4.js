@@ -52,7 +52,7 @@ The $v^2$ wins at low speeds and the exponential at high ones, so $D$ peaks at $
     tasks: [
       'Earth’s exobase (10.8 km/s) at 1000 K: atomic hydrogen leaks at a rate you can read; oxygen’s tail is smaller than 10⁻⁴⁰.',
       'Switch to the Moon (2.38 km/s) at 390 K, its daytime high: water and nitrogen have tails millions of times fatter than on Earth.',
-      'Watch the Jeans parameter λ = (v(esc)/vₚ)²: the tail falls roughly like e^(−λ), so a factor of 2 in λ is an enormous factor in escape.',
+      'Watch the Jeans parameter λ = (v(esc)/vₚ)²: the tail falls roughly like $e^{-\\lambda}$, so a factor of 2 in λ is an enormous factor in escape.',
     ],
     params: {
       x: [0, 12], y: [0, 1], aspect: 'wide', axesAt: 'edge', xlabel: 'speed v (km/s)', ylabel: 'D(v) × vₚ',
@@ -139,9 +139,9 @@ The $v^2$ wins at low speeds and the exponential at high ones, so $D$ peaks at $
         return {
           prompt: t`What fraction of a gas’s molecules move faster than $${x}$ times the most probable speed?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: Math.exp(-x * x), feedback: 'e^(−x²) is the Boltzmann factor alone. The tail fraction is erfc(x) + (2/√π) x e^(−x²).' }, { value: 1 - (tailFrac(x)), feedback: 'That is the fraction slower than this speed.' }], v),
+          errors: apart([{ value: Math.exp(-x * x), feedback: '$e^{-x^2}$ is the Boltzmann factor alone. The tail fraction is $\\operatorname{erfc}(x) + (2/\\sqrt{\\pi})\\, x e^{-x^2}$.' }, { value: 1 - (tailFrac(x)), feedback: 'That is the fraction slower than this speed.' }], v),
           hints: [t`Fraction above $x\,v_p$: $\operatorname{erfc}(x) + \tfrac{2}{\sqrt\pi}xe^{-x^2}$.`, t`$\operatorname{erfc}(${x}) = ${texNum(tailFrac(x) - (2 / Math.sqrt(Math.PI)) * x * Math.exp(-x * x), 3)}$.`],
-          teach: 'The Maxwell tail falls off roughly like x e^(−x²): doubling x shrinks it enormously.',
+          teach: 'The Maxwell tail falls off roughly like $x e^{-x^2}$: doubling x shrinks it enormously.',
           explain: t`$\operatorname{erfc}(${x}) + \tfrac{2}{\sqrt\pi}(${x})e^{-${x * x}} = ${texNum(v, 3)}$.`,
           visual: uPic({ from: x, caption: 'The universal Maxwell curve; the shaded tail beyond the given speed is the fraction asked for.' }),
         };
@@ -182,7 +182,7 @@ The $v^2$ wins at low speeds and the exponential at high ones, so $D$ peaks at $
         return {
           prompt: t`Mars lost most of its early water, partly as hydrogen escaping from its exobase, about 200 km up, where the escape speed is $${fmt(ve / 1000, 3)}$ km/s. If the exobase is at $${T}$ K, what fraction of hydrogen atoms there move faster than escape speed?`,
           answer: v, tol: { rel: 0.02 },
-          errors: apart([{ value: Math.exp(-x * x), feedback: 'Use the full tail fraction, erfc(x) + (2/√π) x e^(−x²); e^(−x²) alone undercounts.' }, { value: tailFrac(ve / vRms(MASS.H, T)), feedback: 'Measure the escape speed in units of the most probable speed √(2kT/m).' }], v),
+          errors: apart([{ value: Math.exp(-x * x), feedback: 'Use the full tail fraction, $\\operatorname{erfc}(x) + (2/\\sqrt{\\pi})\\, x e^{-x^2}$; $e^{-x^2}$ alone undercounts.' }, { value: tailFrac(ve / vRms(MASS.H, T)), feedback: 'Measure the escape speed in units of the most probable speed √(2kT/m).' }], v),
           hints: [t`$v_p = \sqrt{2kT/m_\text{H}}$, $x = v_\text{esc}/v_p$.`, t`Fraction $= \operatorname{erfc}(x) + \tfrac{2}{\sqrt\pi}xe^{-x^2}$ with $x = ${fmt(x, 3)}$.`],
           teach: 'Escape is set by the tail beyond x = v(esc)/vₚ, which is exquisitely sensitive to temperature.',
           explain: t`$v_p = ${fmt(vMostProbable(MASS.H, T) / 1000, 3)}$ km/s, $x = ${fmt(x, 3)}$, fraction $= ${texNum(v, 3)}$. Compared with Earth’s exobase, Mars is colder but its gravity much weaker — and hydrogen leaves Mars easily. MAVEN measures that loss today.`,

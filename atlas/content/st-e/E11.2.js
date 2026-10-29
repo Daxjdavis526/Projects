@@ -189,7 +189,7 @@ The multiplier $\lambda$ is a single **number** (one constraint, one multiplier)
           errors: [{ value: PI * (1 + e * e), feedback: t`The weight is $k$, not 1: the term $${e}e^{${k}it}$ contributes $\pi(${k})(${e})^2$.` }, { value: PI * (1 + k * k * e * e), feedback: t`That is the length-type sum with $k^2$; area uses $k$.` }].filter((e2) => Math.abs(e2.value - ans) > 0.004 * ans),
           hints: [t`Only two coefficients are nonzero: $c_1 = 1$ and $c_{${k}} = ${e}$.`, t`$A = \pi\big(1\cdot1^2 + (${k})\cdot${e}^2\big)$.`],
           teach: 'In Fourier form the enclosed area is π Σ k|cₖ|²: harmonics turning backwards (k < 0) subtract area.',
-          explain: t`$A = \pi(1 ${k < 0 ? '-' : '+'} ${Math.abs(k)}\times${e * e}) = ${r4(ans)}$.${k < 0 ? ' The backward-turning harmonic pinches the curve inward, and costs area.' : ' A forward harmonic adds area — but more length, so the quotient 4πA/L² still drops below 1.'}`,
+          explain: t`$A = \pi(1 ${k < 0 ? '-' : '+'} ${Math.abs(k)}\times${r4(e * e)}) = ${r4(ans)}$.${k < 0 ? ' The backward-turning harmonic pinches the curve inward, and costs area.' : ' A forward harmonic adds area — but more length, so the quotient 4πA/L² still drops below 1.'}`,
         };
       },
     }),

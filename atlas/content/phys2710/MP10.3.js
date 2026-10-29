@@ -131,7 +131,7 @@ In thermal equilibrium $N_2 < N_1$ always, so light is absorbed. A **laser** —
           hints: [t`$h\nu/k_BT = hc/(\lambda k_BT)$.`, t`$hc/(\lambda k_BT) = ${fmt(x, 4)}$; then $\bar n = 1/(e^{${fmt(x, 4)}} - 1)$.`],
           teach: 'In thermal light, stimulated emission matters only where photons are plentiful per mode: hν ≲ kT.',
           explain: t`$h\nu/k_BT = ${fmt(x, 4)}$, so $\bar n = ${x > 5 ? tex(ans, 3) : fmt(ans, 3)}$. ${x > 20 ? 'Stimulated emission of visible light is utterly negligible in thermal light: a laser must create its own crowd of photons.' : x < 1 ? 'At long wavelengths stimulated emission dominates — which is why the first device, Townes’s 1954 ammonia maser, worked in microwaves.' : 'Even at the Sun’s surface spontaneous emission dominates visible light.'}`,
-          visual: { type: 'graph', params: { x: [-2, 2.5], y: [-4, 2.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'hν / kT', ylabel: 'stimulated ÷ spontaneous', axesAt: 'edge', curves: [{ fn: '-log(exp(10^x) - 1)', domain: [-2, 2.2], color: 'warn', width: 2.6 }] }, caption: 'Stimulated over spontaneous emission in thermal light, 1/(e^(hν/kT) − 1), on log scales: above 1 only where hν < 0.7 kT.' },
+          visual: { type: 'graph', params: { x: [-2, 2.5], y: [-4, 2.5], xlog: true, ylog: true, aspect: 'wide', xlabel: 'hν / kT', ylabel: 'stimulated ÷ spontaneous', axesAt: 'edge', curves: [{ fn: '-log(exp(10^x) - 1)', domain: [-2, 2.2], color: 'warn', width: 2.6 }] }, caption: 'Stimulated over spontaneous emission in thermal light, $1/(e^{h\\nu/kT} - 1)$, on log scales: above 1 only where hν < 0.7 kT.' },
         };
       },
     }),

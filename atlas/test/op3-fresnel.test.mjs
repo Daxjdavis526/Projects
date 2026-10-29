@@ -18,7 +18,7 @@ function check(name, ok, detail = '') {
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
 // Fresnel integrals: Abramowitz & Stegun Table 7.7 values
-for (const [x, C, S] of [[0.5, 0.4923442, 0.0647324], [1, 0.7798934, 0.4382591], [1.5, 0.4452612, 0.6975050], [2, 0.4882534, 0.3433776], [3, 0.6057208, 0.4963130], [5, 0.5636312, 0.4991914]]) {
+for (const [x, C, S] of [[0.5, 0.4923442, 0.0647324], [1, 0.7798934, 0.4382591], [1.5, 0.4452612, 0.6975050], [2, 0.4882534, 0.3434157], [3, 0.6057208, 0.4963130], [5, 0.5636312, 0.4991914]]) {
   const [c, s] = M.fresnelCS(x);
   check(`C(${x}), S(${x}) match the table`, near(c, C, 2e-7) && near(s, S, 2e-7), `${c}, ${s}`);
 }

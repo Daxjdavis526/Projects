@@ -55,7 +55,7 @@ $$F = -kT\ln Z.$$
     tasks: [
       'At room temperature and 1 atm every gas has (V/N)/v(Q) near 10⁵–10⁷: wildly classical.',
       'Follow helium down: near 4 K (where it liquefies anyway) its ratio is only about 7 — on the edge of quantum behaviour.',
-      'Raise the pressure: every curve slides down by the same amount. Lighter gases hit the quantum line first, because v(Q) grows as m^(−3/2).',
+      'Raise the pressure: every curve slides down by the same amount. Lighter gases hit the quantum line first, because v(Q) grows as $m^{-3/2}$.',
     ],
     params: {
       x: [0, 3.5], y: [-2, 10], aspect: 'wide', axesAt: 'edge', xlog: true, xlabel: 'temperature (K)', ylabel: 'log₁₀ [(V/N) / v(Q)]',
@@ -95,7 +95,7 @@ $$F = -kT\ln Z.$$
         return {
           prompt: t`$N$ independent two-level systems each have states at $0$ and $\varepsilon$. At $kT = ${tau}\,\varepsilon$, what is the free energy per system, $F/N\varepsilon$?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: tau * Math.log(1 + Math.exp(-1 / tau)), feedback: 'Sign: F = −kT ln Z, and ln Z > 0 here, so F is negative.' }, { value: -tau * Math.log(2), feedback: 'That is the infinite-temperature limit, Z = 2. Use Z = 1 + e^(−ε/kT).' }, { value: -Math.log(1 + Math.exp(-1 / tau)), feedback: t`Multiply by $kT/\varepsilon = ${tau}$.` }], v),
+          errors: apart([{ value: tau * Math.log(1 + Math.exp(-1 / tau)), feedback: 'Sign: F = −kT ln Z, and ln Z > 0 here, so F is negative.' }, { value: -tau * Math.log(2), feedback: 'That is the infinite-temperature limit, Z = 2. Use $Z = 1 + e^{-\\varepsilon/kT}$.' }, { value: -Math.log(1 + Math.exp(-1 / tau)), feedback: t`Multiply by $kT/\varepsilon = ${tau}$.` }], v),
           hints: [t`Independent systems: $Z = Z_1^N$, so $F = -NkT\ln Z_1$.`, t`$F/N\varepsilon = -(kT/\varepsilon)\ln(1 + e^{-\varepsilon/kT}) = -${tau}\ln(1 + e^{-${fmt(1 / tau, 3)}})$.`],
           teach: t`$F = -kT\ln Z$, and independent parts add their $\ln Z$’s.`,
           explain: t`$\ln(1 + e^{-${fmt(1 / tau, 3)}}) = ${fmt(Math.log(1 + Math.exp(-1 / tau)), 4)}$, so $F/N\varepsilon = ${fmt(v, 3)}$. The free energy is below the ground-state energy (0): it is $U - TS$, and the entropy term wins as $T$ rises.`,
@@ -119,7 +119,7 @@ $$F = -kT\ln Z.$$
       prompt: t`Why does $Z = Z_1^N/N!$ hold for $N$ molecules of a gas, while an Einstein solid of $N$ oscillators uses $Z = Z_1^N$ with no $N!$?`,
       choices: ['The solid’s oscillators sit at fixed lattice sites, so they are distinguishable by position; gas molecules roam, and swapping two identical ones gives the same state', 'Solids are cold, so the N! is close to 1', 'Gas molecules interact and solid atoms do not', 'The N! is a classical correction that quantum oscillators do not need'],
       answer: 0,
-      why: { 1: 'N! is enormous for any N — about 10^(10^24) for a mole — whatever the temperature.', 2: 'Both are treated as non-interacting here; the difference is about labelling, not forces.', 3: 'It is the other way round: the N! is a quantum statement (identical particles cannot be labelled). The oscillators are distinguishable because their sites are.' },
+      why: { 1: 'N! is enormous for any N — about $10^{10^{24}}$ for a mole — whatever the temperature.', 2: 'Both are treated as non-interacting here; the difference is about labelling, not forces.', 3: 'It is the other way round: the N! is a quantum statement (identical particles cannot be labelled). The oscillators are distinguishable because their sites are.' },
       hints: ['Ask: if you swap two particles, is that a different microstate?', 'Atom 7 of a crystal is “the atom at site 7” — you can name it.'],
       teach: 'Divide by N! for identical, freely moving particles; not for particles labelled by their place.',
       explain: t`$Z_1^N$ counts every assignment of states to labelled particles. For a gas of identical molecules each physical state is counted $N!$ times (once per relabelling), provided the molecules are almost never in the same state — the dilute limit $V/N \gg v_Q$. A crystal’s atoms are labelled by their sites, so nothing is overcounted.`,

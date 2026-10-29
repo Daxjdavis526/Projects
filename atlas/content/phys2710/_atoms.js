@@ -245,6 +245,6 @@ export function mbEnergy({ marks = ['peak', 'mean'], caption, parts = true } = {
   return {
     type: 'graph',
     params: { x: [0, 6], y: [0, 1.1], aspect: 'wide', xlabel: 'kinetic energy E / kT', ylabel: 'share per unit of E/kT', axesAt: 'edge', curves, points },
-    caption: caption ?? 'The Maxwell–Boltzmann distribution of kinetic energies, the same for every ideal gas at a given temperature: the number of states rises as √E, the Boltzmann factor falls as e^(−E/kT), and their product peaks at kT/2.',
+    caption: caption ?? 'The Maxwell–Boltzmann distribution of kinetic energies, the same for every ideal gas at a given temperature: the number of states rises as √E, the Boltzmann factor falls as $e^{-E/kT}$, and their product peaks at kT/2.',
   };
 }

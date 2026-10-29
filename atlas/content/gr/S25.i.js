@@ -34,7 +34,7 @@ const centuryGraph = (only) => ({
     points: PLANETS.filter((pl) => !only || pl === MERC).map((pl, k) => ({ x: round(pl[1] / AU, 4), y: round(perCentury(pl), 4), color: ['gold', 'teal', 'good', 'bad'][k], label: `${pl[0]}: ${round(perCentury(pl), 3)}″` })),
     vlines: only ? [{ x: round(only[1] / AU, 4), label: only[0], color: 'violet' }] : [],
   },
-  caption: 'Relativistic advance per century. Curve: circular orbits — per orbit the advance falls as 1/a, and farther orbits are also slower, so per century it falls as a^(−5/2). Dots: the planets’ real orbits.',
+  caption: 'Relativistic advance per century. Curve: circular orbits — per orbit the advance falls as 1/a, and farther orbits are also slower, so per century it falls as $a^{-5/2}$. Dots: the planets’ real orbits.',
 });
 
 // an orbit and a later one, turned by an (exaggerated) angle w about the focus, with their long axes

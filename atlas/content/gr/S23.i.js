@@ -159,7 +159,7 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
     num({
       id: 'gnss', difficulty: 3,
       gen(r) {
-        const [name, alt] = r.pick([['Galileo (Europe)', 23222], ['GLONASS (Russia)', 19100], ['BeiDou’s medium orbits (China)', 21528], ['GPS (USA)', 20184]]);
+        const [name, alt] = r.pick([['Galileo (Europe)', 23222], ['GLONASS (Russia)', 19100], ['BeiDou (China) medium-orbit', 21528], ['GPS (USA)', 20184]]);
         const o = orbit(alt);
         return {
           prompt: t`${name} satellites orbit ${alt.toLocaleString('en-US')} km above the ground. Taking both effects into account, how many microseconds per day do their clocks gain on ground clocks? ($GM/c^2 = ${sci(K * 1e3, 4)}$ mm for Earth, $R = 6371$ km.)`,
@@ -311,7 +311,7 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
             },
             caption: 'The gravitational well outside the Sun and outside this white dwarf, each drawn from its surface outward. The white dwarf has about the Sun’s mass, but its surface sits far closer to the centre, so light leaving it climbs out of a far deeper well.',
           },
-          prompt: t`A white dwarf packs ${m} solar masses into a radius of ${rk.toLocaleString('en-US')} km — about the size of Earth. Astronomers quote its gravitational redshift as a Doppler speed, $zc$. What is $zc$, in km/s?`,
+          prompt: t`A white dwarf packs ${m} solar mass${m === 1 ? '' : 'es'} into a radius of ${rk.toLocaleString('en-US')} km — about the size of Earth. Astronomers quote its gravitational redshift as a Doppler speed, $zc$. What is $zc$, in km/s?`,
           answer: v, units: 'km/s', tol: { rel: 0.01 },
           errors: [{ value: 2 * v, feedback: 'z ≈ GM/(Rc²), which is rₛ/(2R), not rₛ/R.' }],
           hints: [t`In this weak field $z \approx GM/(Rc^2)$, so $zc \approx GM/(Rc)$.`, t`$GM/(Rc) = (6.674\times10^{-11})(${sci(m * M_SUN)})/((${sci(rk * 1e3)})(2.998\times10^{8}))$ m/s.`],

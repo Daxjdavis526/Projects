@@ -127,9 +127,9 @@ with the **grand partition function** $\mathcal Z = \sum_s e^{-[E(s) - \mu N(s)]
         return {
           prompt: t`A cryopump panel at $${T}$ K holds H₂ on sites with binding energy $${B}$ eV. For H₂ (2.016 u, no rotation this cold), $P_0 = kT/v_Q = ${texNum(P0(T), 3)}$ Pa at this temperature, and the gas’s $\mu = kT\ln(P/P_0)$. What fraction of sites is filled when the hydrogen pressure is $${texNum(P, 1)}$ Pa?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: 1 / (1 + (P0(T) / P) * Math.exp(B / (KEV * T))), feedback: 'A bound molecule has energy −B: the occupied Gibbs factor is e^(+B/kT) × e^(μ/kT).' }, { value: (P / P0(T)) * Math.exp(B / (KEV * T)), feedback: 'That is the ratio filled : empty. Divide by 1 + that ratio.' }], v),
+          errors: apart([{ value: 1 / (1 + (P0(T) / P) * Math.exp(B / (KEV * T))), feedback: 'A bound molecule has energy −B: the occupied Gibbs factor is $e^{+B/kT} \\times e^{\\mu/kT}$.' }, { value: (P / P0(T)) * Math.exp(B / (KEV * T)), feedback: 'That is the ratio filled : empty. Divide by 1 + that ratio.' }], v),
           hints: [t`Filled : empty $= e^{(B + \mu)/kT} = \dfrac{P}{P_0}e^{B/kT}$.`, t`$e^{B/kT} = e^{${fmt(B / (KEV * T), 3)}}$; fraction $= \dfrac{\text{ratio}}{1 + \text{ratio}}$.`],
-          teach: 'Langmuir’s isotherm is the Gibbs factor of a one-molecule site: coverage = P/(P + P₀e^(−B/kT)).',
+          teach: 'Langmuir’s isotherm is the Gibbs factor of a one-molecule site: coverage = $P/(P + P_0e^{-B/kT})$.',
           explain: t`Ratio $= \dfrac{${texNum(P, 1)}}{${texNum(P0(T), 3)}}e^{${fmt(B / (KEV * T), 3)}} = ${texNum((P / P0(T)) * Math.exp(B / (KEV * T)), 3)}$, so the coverage is $${texNum(v, 3)}$.`,
           visual: langPic({ T, B, caption: 'Langmuir isotherm for these sites and this panel temperature (log pressure scale).' }),
         };
@@ -200,9 +200,9 @@ with the **grand partition function** $\mathcal Z = \sum_s e^{-[E(s) - \mu N(s)]
         return {
           prompt: t`A cryopump’s H₂ sites (binding $${B}$ eV) are exposed to $10^{-5}$ Pa of hydrogen. At $${T1}$ K they are ${fmt(100 * cover(P, T1, B), 3)}% full. If the panel warms to $${T2}$ K at the same pressure, what fraction stays filled? ($P_0 = kT/v_Q$ is $${texNum(P0(T2), 3)}$ Pa at $${T2}$ K.)`,
           answer: v, tol: { rel: 0.02 },
-          errors: apart([{ value: cover(P, T1, B) * (T1 / T2), feedback: 'Coverage is not inversely proportional to T: the exponential e^(B/kT) dominates.' }, { value: (P / P0(T2)) * Math.exp(-B / (KEV * T2)), feedback: 'The bound state’s factor is e^(+B/kT).' }], v),
+          errors: apart([{ value: cover(P, T1, B) * (T1 / T2), feedback: 'Coverage is not inversely proportional to T: the exponential $e^{B/kT}$ dominates.' }, { value: (P / P0(T2)) * Math.exp(-B / (KEV * T2)), feedback: 'The bound state’s factor is $e^{+B/kT}$.' }], v),
           hints: [t`Filled : empty $= \dfrac{P}{P_0}e^{B/kT}$ at the new temperature.`, t`$B/kT = ${fmt(B / (KEV * T2), 3)}$ at $${T2}$ K.`],
-          teach: 'Warming a few kelvin collapses the coverage: the factor e^(B/kT) is what holds the gas.',
+          teach: 'Warming a few kelvin collapses the coverage: the factor $e^{B/kT}$ is what holds the gas.',
           explain: t`Ratio $= \dfrac{10^{-5}}{${texNum(P0(T2), 3)}}e^{${fmt(B / (KEV * T2), 3)}} = ${texNum((P / P0(T2)) * Math.exp(B / (KEV * T2)), 3)}$, so the fraction is $${texNum(v, 3)}$. Regeneration — warming the panel — releases nearly all the stored hydrogen to be pumped away.`,
           visual: { type: 'graph', params: { x: [-9, 3], y: [0, 1.05], aspect: 'wide', axesAt: 'edge', xlog: true, xlabel: 'hydrogen pressure (Pa)', ylabel: 'fraction of sites filled', curves: [{ fn: `1/(1 + ${P0(T1)}/10^x*e^(-${B}/(${KEV}*${T1})))`, domain: [-9, 3], color: 'accent', label: `${T1} K`, labelAt: -5.6, labelDx: -40 }, { fn: `1/(1 + ${P0(T2)}/10^x*e^(-${B}/(${KEV}*${T2})))`, domain: [-9, 3], color: 'warn', label: `${T2} K`, labelAt: 0, labelDx: 8 }], vlines: [{ x: -5, color: 'gold' }] }, caption: 'Langmuir isotherms at the two panel temperatures; gold: the pressure in the pump.' },
         };
@@ -211,9 +211,9 @@ with the **grand partition function** $\mathcal Z = \sum_s e^{-[E(s) - \mu N(s)]
     mcq({
       id: 'cp-why-ionized', difficulty: 3,
       prompt: t`At 10 000 K, $kT$ is under a tenth of hydrogen’s 13.6 eV ionization energy, yet in a star’s atmosphere most of the hydrogen is ionized. Why?`,
-      choices: ['A free electron has vastly more states available (1/(n v(Q)) ≫ 1), so entropy outweighs the energy cost', 'Collisions at 10 000 K regularly carry 13.6 eV', 'The Boltzmann factor e^(−13.6 eV/kT) is close to 1 at that temperature', 'Radiation pressure pushes electrons off the atoms'],
+      choices: ['A free electron has vastly more states available (1/(n v(Q)) ≫ 1), so entropy outweighs the energy cost', 'Collisions at 10 000 K regularly carry 13.6 eV', 'The Boltzmann factor $e^{-13.6\\ \\text{eV}/kT}$ is close to 1 at that temperature', 'Radiation pressure pushes electrons off the atoms'],
       answer: 0,
-      why: { 1: 'Some collisions do, but rarely: e^(−I/kT) ~ 10⁻⁷. What wins is how many ways the freed electron can be placed.', 2: t`$e^{-15.8} \approx 10^{-7}$: tiny.`, 3: 'Pressure plays no part in this balance; the Gibbs factor already accounts for everything that matters at equilibrium.' },
+      why: { 1: 'Some collisions do, but rarely: $e^{-I/kT} \\sim 10^{-7}$. What wins is how many ways the freed electron can be placed.', 2: t`$e^{-15.8} \approx 10^{-7}$: tiny.`, 3: 'Pressure plays no part in this balance; the Gibbs factor already accounts for everything that matters at equilibrium.' },
       hints: [t`Write the ratio as $e^{-I/kT}$ times $1/(n_ev_Q)$ and estimate each.`, t`At $10^{20}$ electrons per m³ and 10 000 K, $v_Q \approx 4\times10^{-28}\ \text{m}^3$.`],
       teach: 'Ionization is decided by free energy: the energy cost I against the entropy gain k ln(1/n v(Q)).',
       explain: t`$e^{-I/kT} \approx 10^{-7}$, but $1/(n_ev_Q) \approx 10^{7}$–$10^{8}$ at stellar densities: they are comparable, so ionization happens at temperatures where $kT \approx I/15$. At lower densities (the early universe) the entropy factor is larger still.`,

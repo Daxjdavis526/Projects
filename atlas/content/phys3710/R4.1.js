@@ -127,7 +127,7 @@ A clock moving at $v$ through an inertial frame records less time than that fram
       prompt: t`Frisch and Smith counted $563$ muons per hour on the summit and $408$ per hour at sea level, for muons in the same narrow speed band. A muon’s internal clock decays it with mean life $\tau_0 = 2.197\ \mu\text{s}$, so the surviving fraction is $e^{-\tau/\tau_0}$, where $\tau$ is the time on the muons’ own clocks. How much time passed on their clocks during the descent, in μs?`,
       visual: survival({ g: 9, caption: t`The two counts (gold), normalized to the summit, on the survival curve for $\gamma = 9$. The red curve is what absolute time would predict.` }),
       answer: FS.own * 1e6, units: 'us', tol: { rel: 0.005 },
-      errors: [{ value: FS.lab * 1e6, feedback: 'That is the time in the Earth’s frame. The counts measure the muons’ own clock: solve 408/563 = e^(−τ/τ₀) for τ.' }],
+      errors: [{ value: FS.lab * 1e6, feedback: 'That is the time in the Earth’s frame. The counts measure the muons’ own clock: solve $408/563 = e^{-\\tau/\\tau_0}$ for τ.' }],
       hints: [t`$\tau = \tau_0\ln(563/408)$.`, t`$\ln(563/408) = ${nice(Math.log(FS.top / FS.bottom), 4)}$.`],
       teach: 'Decay is a clock: the fraction of muons surviving tells you how much proper time they experienced.',
       explain: t`$\tau = 2.197\ \mu\text{s}\times${nice(Math.log(FS.top / FS.bottom), 4)} = ${nice(FS.own * 1e6, 3)}\ \mu\text{s}$. In the Earth’s frame the descent took $1907\ \text{m}/(0.995c) = ${nice(FS.lab * 1e6, 3)}\ \mu\text{s}$: the muons’ clocks ran about $${nice(FS.lab / FS.own, 2)}$ times slow.`,

@@ -35,7 +35,7 @@ Integrate by parts and a pattern appears: every time $f$ can be differentiated o
     tasks: [
       'Square wave (a jump): the dots fall slowly, like 1/n. N = 15 still looks rough.',
       'Triangle (corners only): the dots fall like 1/n² — two decades by n = 15, and the sum looks right early.',
-      'Smooth e^(cos x − 1): the dots fall on a straight line — exponential decay — and are below 10⁻¹² by n = 12.',
+      'Smooth $e^{\\cos x - 1}$: the dots fall on a straight line — exponential decay — and are below 10⁻¹² by n = 12.',
     ],
     params: { wave: 'square', waves: ['square', 'triangle', 'parabola', 'smooth'], N: 5, Nmax: 30, panels: ['x', 'spec'], spec: 'log', nshow: 15, readouts: [] },
     caption: 'Amplitudes √(aₙ² + bₙ²) on a log scale (zeros, such as the even harmonics of the square wave, are not drawn). Exact coefficients; each function has period 2π.',
@@ -112,7 +112,7 @@ $$x^2 \sim \frac{\pi^2}{3} + 4\sum_{n=1}^{\infty}\frac{(-1)^n}{n^2}\cos nx .$$` 
       right: ['like 1/n', 'like 1/n²', 'like 1/n³', 'faster than any power of n', 'they do not fall'],
       answer: [0, 1, 2, 3],
       hints: ['Count how many derivatives the repeated function has before the first jump appears.', 'A jump in f gives 1/n; a jump in f′ gives 1/n²; a jump in f″ gives 1/n³.'],
-      teach: 'If f and its first k − 1 derivatives are continuous and periodic but the k-th jumps, the coefficients fall like 1/n^(k+1).',
+      teach: 'If f and its first k − 1 derivatives are continuous and periodic but the k-th jumps, the coefficients fall like $1/n^{k+1}$.',
       explain: t`Each integration by parts moves one derivative onto $f$ and gains a $1/n$; the first jump stops the process. P jumps ($1/n$); Q is continuous with a jumping slope ($1/n^2$); R has a continuous slope and a jumping $f''$ ($1/n^3$: $b_n = 8/(\pi n^3)$ for odd $n$); S is analytic, and its coefficients fall exponentially.`,
     }),
     mcq({
@@ -164,13 +164,13 @@ a, b = coeffs_fft(parab, 64, 5)
 print("x^2,     M = 64:  a1 error", abs(a[1] + 4))
 `,
       tests: [
-        { name: 'e^(cos x): a₁ correct to round-off with only 64 points', code: 'abs(coeffs_fft(lambda x: np.exp(np.cos(x)), 64, 5)[0][1] - 1.1303182079849700) < 1e-13' },
-        { name: 'e^(cos x): a₀ is 2I₀(1) = 2.5321317555', code: 'abs(coeffs_fft(lambda x: np.exp(np.cos(x)), 64, 5)[0][0] - 2.532131755504017) < 1e-12' },
+        { name: '$e^{\\cos x}$: a₁ correct to round-off with only 64 points', code: 'abs(coeffs_fft(lambda x: np.exp(np.cos(x)), 64, 5)[0][1] - 1.1303182079849700) < 1e-13' },
+        { name: '$e^{\\cos x}$: $a_0$ is $2I_0(1) = 2.5321317555$', code: 'abs(coeffs_fft(lambda x: np.exp(np.cos(x)), 64, 5)[0][0] - 2.532131755504017) < 1e-12' },
         { name: 'x²: a₁ ≈ −4 and a₂ ≈ 1 with 1024 points', code: 'abs(coeffs_fft(lambda x: ((x + np.pi) % (2*np.pi) - np.pi)**2, 1024, 5)[0][1] + 4) < 1e-4 and abs(coeffs_fft(lambda x: ((x + np.pi) % (2*np.pi) - np.pi)**2, 1024, 5)[0][2] - 1) < 1e-4' },
         { name: 'sin 3x: b₃ = 1 and every a is 0', code: 'abs(coeffs_fft(lambda x: np.sin(3*x), 32, 5)[1][3] - 1) < 1e-12 and np.allclose(coeffs_fft(lambda x: np.sin(3*x), 32, 5)[0], 0, atol=1e-12)' },
         { name: 'returns N + 1 values of each', code: 'len(coeffs_fft(lambda x: np.cos(x), 16, 4)[0]) == 5 and len(coeffs_fft(lambda x: np.cos(x), 16, 4)[1]) == 5' },
       ],
-      hints: ['`X = np.fft.rfft(f(x))` gives the complex sums Σ f(xⱼ) e^(−2πi jn/M) for n = 0 … M/2.', 'Then `a = 2 * X.real[:N + 1] / M` and `b = -2 * X.imag[:N + 1] / M`.'],
+      hints: ['`X = np.fft.rfft(f(x))` gives the complex sums $\\sum_j f(x_j)\\, e^{-2\\pi i jn/M}$ for n = 0 … M/2.', 'Then `a = 2 * X.real[:N + 1] / M` and `b = -2 * X.imag[:N + 1] / M`.'],
       teach: 'On an evenly spaced periodic grid the trapezoid rule for Fourier coefficients is the discrete Fourier transform — and the FFT computes it.',
       explain: t`For the analytic $e^{\cos x}$, 64 points give $a_1$ to $10^{-16}$; for the cornered parabola, 64 points miss by about $3\times10^{-3}$ and 1024 by $1.3\times10^{-5}$. The error of the sampled coefficient is **aliasing**: harmonics $M \pm n$, $2M \pm n, \dots$ look identical to $n$ on the grid and are added in. They are tiny for a smooth function and fall only like $1/M^2$ for one with corners.`,
     }),

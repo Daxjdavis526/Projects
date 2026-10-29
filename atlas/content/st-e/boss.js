@@ -219,7 +219,7 @@ export default boss({
           gen(r) {
             const C = polesCase(r);
             return {
-              prompt: t`After a thruster pulse, Kestrel’s attitude error obeys a loop with transfer function $H(s) = \dfrac{${C.w * C.w}}{s^2 + ${r4(2 * C.z * C.w)}s + ${r4(C.w * C.w)}}$. From its poles, how long does the oscillation’s envelope take to fall to 1% of its initial size, in seconds?`,
+              prompt: t`After a thruster pulse, Kestrel’s attitude error obeys a loop with transfer function $H(s) = \dfrac{${r4(C.w * C.w)}}{s^2 + ${r4(2 * C.z * C.w)}s + ${r4(C.w * C.w)}}$. From its poles, how long does the oscillation’s envelope take to fall to 1% of its initial size, in seconds?`,
               answer: C.key, units: 's', tol: { rel: 0.005 },
               errors: apart([
                 { value: Math.log(100) / C.w, feedback: t`The decay rate is the poles’ real part, $\zeta\omega = ${r4(C.z * C.w)}$ s⁻¹, not their distance from the origin.` },
@@ -227,7 +227,7 @@ export default boss({
                 { value: 1 / (C.z * C.w), feedback: t`$1/(\zeta\omega)$ is one e-folding. Falling to 1% takes $\ln 100 \approx 4.6$ of them.` },
               ], C.key),
               hints: [t`Poles: $s = -\zeta\omega \pm i\omega\sqrt{1 - \zeta^2}$ with $\omega^2 = ${r4(C.w * C.w)}$ and $2\zeta\omega = ${r4(2 * C.z * C.w)}$.`, t`The envelope is $e^{\operatorname{Re}(s)\,t}$; solve $e^{-\zeta\omega t} = 0.01$.`],
-              teach: 'Each pole contributes e^(st): its real part sets the decay rate, its imaginary part the oscillation.',
+              teach: 'Each pole contributes $e^{st}$: its real part sets the decay rate, its imaginary part the oscillation.',
               explain: t`The poles are $${r4(C.re)} \pm ${r4(C.im)}i$ s⁻¹, so the envelope is $e^{${r4(C.re)}t}$ and $t = \ln 100/${r4(-C.re)} = ${r4(C.key)}$ s. Both poles in the left half-plane: the loop is stable.`,
               visual: gpic({ x: [-2.5, 0.6], y: [-2.3, 2.3], equal: true, xlabel: 'Re s (1/s)', ylabel: 'Im s', points: [{ x: C.re, y: C.im, color: 'bad', r: 6 }, { x: C.re, y: -C.im, color: 'bad', r: 6 }] }, 'The two poles of H(s) in the s-plane.'),
             };

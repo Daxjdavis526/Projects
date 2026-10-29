@@ -75,7 +75,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
       { label: 'e over m', text: t`Square the slope: $e/m = 2Vb^2/k^2 = ${tex(EXem.value, 4)}$ C/kg. A square doubles a relative uncertainty, so $\sigma_{e/m}/(e/m) = 2\sigma_b/b = ${(100 * relStat).toFixed(1)}\%$: $e/m = (${resT(EXem)})\times10^{11}$ C/kg.` },
       { label: 'Ambient field', text: t`$B_a = ka/b = ${resT(EXB)}\ \mu\text{T}$. Its uncertainty is as big as the field itself: the intercept is an extrapolation from 1 A down to 0, far outside the data. Reversing the coil current measures it far better (below).` },
       { label: 'Type B', text: t`The coils’ radius is known to $\pm 1$ mm (a standard uncertainty, say). Since $e/m \propto 1/k^2 \propto R^2$, that adds $2 \times 1/150 = ${(100 * relR).toFixed(1)}\%$ in quadrature: $${(100 * relTot).toFixed(1)}\%$ in all, $\sigma = ${tex(relTot * EXem.value, 2)}$ C/kg.` },
-      { label: 'Compare', text: t`$z = (${tex(EXem.value, 4)} - ${tex(CODATA, 6)})/${tex(relTot * EXem.value, 2)} = ${((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(2)}$: agreement ([agreement within uncertainty](#/lesson/lab.A4.1)). A result good to about 4% is typical of this apparatus — and the slope did not need the ambient field to be known at all.` },
+      { label: 'Compare', text: t`$z = (e/m - \text{CODATA})/\sigma$, $= (${tex(EXem.value, 4)} - ${tex(CODATA, 6)})/(${tex(relTot * EXem.value, 2)})$, $= ${((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(2)}$: agreement ([agreement within uncertainty](#/lesson/lab.A4.1)). A result good to about 4% is typical of this apparatus — and the slope did not need the ambient field to be known at all.` },
     ],
     answer: t`$e/m = (${pmT(EXem.value / 1e11, (relTot * EXem.value) / 1e11)})\times10^{11}$ C/kg (statistical and coil radius combined), within $${Math.abs((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(1)}\sigma$ of CODATA; ambient field $${resT(EXB)}\ \mu\text{T}$.`,
   },
@@ -260,7 +260,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
           errors: [{ value: (100 * (em - CODATA)) / CODATA, feedback: 'That is the percentage difference. A difference only means something in units of its uncertainty: divide by σ.' }].filter((e) => Math.abs(e.value - ans) > 0.2),
           hints: ['Subtract CODATA from your value.', t`$z = (x - x_\text{ref})/\sigma$; CODATA’s own uncertainty is negligible here.`],
           teach: t`Agreement is judged by $z = \Delta/\sigma$, not by a percentage.`,
-          explain: t`$z = (${tex(em, 4)} - ${tex(CODATA, 6)})/${tex(s, 2)} = ${ans.toFixed(2)}$. ${Math.abs(ans) < 2 ? 'Within 2σ: consistent.' : 'Beyond 2σ: look for a systematic before believing it.'}`,
+          explain: t`$z = (${tex(em, 4)} - ${tex(CODATA, 6)})/(${tex(s, 2)})$, $= ${ans.toFixed(2)}$. ${Math.abs(ans) < 2 ? 'Within 2σ: consistent.' : 'Beyond 2σ: look for a systematic before believing it.'}`,
         };
       },
     }),

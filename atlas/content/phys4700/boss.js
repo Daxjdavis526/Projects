@@ -403,8 +403,8 @@ def P2(t):
                 { name: t`$P_2(0.5) = ${fmt(P2(0.5), 5)}$ and $P_2(1) = ${fmt(P2(1), 5)}$ (Rabi’s formula)`, code: `abs(P2(0.5) - ${P2(0.5)}) < 1e-9 and abs(P2(1.0) - ${P2(1)}) < 1e-9` },
                 { name: t`the largest transfer is $4\Delta^2/\Omega^2 = ${fmt(pmax, 4)}$, at $t = \pi/\Omega = ${fmt(tmax, 4)}$ ns`, code: `abs(P2(${tmax}) - ${pmax}) < 1e-9 and max(P2(t) for t in np.linspace(0, 5, 2001)) < ${pmax} + 1e-9` },
               ],
-              hints: ['E, V = np.linalg.eigh(H) gives eigenvalues and eigenvectors (columns).', 'U(t) = V diag(e^(−iEt)) V†: in the eigenbasis, evolution is just a phase on each component.', 'P2(t) is |second component of U(t) @ psi0|².'],
-              teach: 'For a time-independent Ĥ, evolution is a phase e^(−iEt/ħ) on each energy eigenstate: diagonalize, phase, transform back.',
+              hints: ['E, V = np.linalg.eigh(H) gives eigenvalues and eigenvectors (columns).', t`$U(t) = V\,\operatorname{diag}(e^{-iEt})\,V^\dagger$: in the eigenbasis, evolution is just a phase on each component.`, 'P2(t) is |second component of U(t) @ psi0|².'],
+              teach: t`For a time-independent Ĥ, evolution is a phase $e^{-iEt/\hbar}$ on each energy eigenstate: diagonalize, phase, transform back.`,
               explain: t`With $\Omega = \sqrt{\varepsilon^2 + 4\Delta^2} = ${fmt(Om, 4)}$ rad/ns, $P_2(t) = \dfrac{4\Delta^2}{\Omega^2}\sin^2\dfrac{\Omega t}{2}$: never full transfer while $\varepsilon \ne 0$, peaking at $${fmt(pmax, 3)}$. The same three lines evolve any finite system — a qubit, a molecule, the $n = 2$ level of hydrogen in a field.`,
             };
           },

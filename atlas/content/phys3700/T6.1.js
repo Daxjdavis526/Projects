@@ -114,7 +114,7 @@ The exponential is the **Boltzmann factor**. It is the probability of one *state
         return {
           prompt: t`Two nondegenerate states are $${dE}$ eV apart. In equilibrium the upper one is occupied $${ratio}$ times as often as the lower. What is the temperature?`,
           answer: T, units: 'K', tol: { rel: 0.01 },
-          errors: apart([{ value: dE / (KEV * ratio), feedback: 'Solve with a logarithm: ratio = e^(−ΔE/kT), so kT = ΔE / ln(1/ratio).' }, { value: dE / (KEV * Math.log10(1 / ratio)), feedback: 'Use the natural logarithm.' }], T),
+          errors: apart([{ value: dE / (KEV * ratio), feedback: 'Solve with a logarithm: ratio = $e^{-\\Delta E/kT}$, so kT = ΔE / ln(1/ratio).' }, { value: dE / (KEV * Math.log10(1 / ratio)), feedback: 'Use the natural logarithm.' }], T),
           hints: [t`$e^{-\Delta E/kT} = ${ratio}$, so $\Delta E/kT = \ln(1/${ratio})$.`, t`$T = \dfrac{${dE}\ \text{eV}}{(8.617\times10^{-5}\ \text{eV/K})\ln(1/${ratio})}$.`],
           teach: t`A population ratio is a thermometer: $kT = \Delta E/\ln(N_\text{lower}/N_\text{upper})$.`,
           explain: t`$\ln(1/${ratio}) = ${fmt(Math.log(1 / ratio), 3)}$, so $kT = ${fmt(dE / Math.log(1 / ratio), 3)}$ eV and $T = ${fmt(T, 3)}$ K.`,
@@ -127,8 +127,8 @@ The exponential is the **Boltzmann factor**. It is the probability of one *state
       prompt: t`A molecule in a gas at temperature $T$ can be in any of an enormous number of quantum states. Which **single state** is the most probable?`,
       choices: ['The ground state, at every positive temperature', 'A state with energy near kT', 'A state with energy near (3/2)kT, the average kinetic energy', 'All states are equally likely once T is high enough'],
       answer: 0,
-      why: { 1: 'That confuses one state with a band of energies. Near kT there are many more states than near zero, so the *energy* kT can be likelier — but each of those states is less likely than the ground state.', 2: 'The average energy is set by many states together; the probability of any one state still falls as e^(−E/kT).', 3: 'Only when kT is far above every energy considered: the factor e^(−E/kT) is then close to 1, but it is still largest for the lowest state.' },
-      hints: ['The Boltzmann factor is the probability of one state. Where is e^(−E/kT) largest?'],
+      why: { 1: 'That confuses one state with a band of energies. Near kT there are many more states than near zero, so the *energy* kT can be likelier — but each of those states is less likely than the ground state.', 2: 'The average energy is set by many states together; the probability of any one state still falls as $e^{-E/kT}$.', 3: 'Only when kT is far above every energy considered: the factor $e^{-E/kT}$ is then close to 1, but it is still largest for the lowest state.' },
+      hints: ['The Boltzmann factor is the probability of one state. Where is $e^{-E/kT}$ largest?'],
       teach: 'The ground state is always the single most probable state; the most probable energy can be higher because many states share it.',
       explain: t`$e^{-E/kT}$ falls with $E$, so the lowest state wins at any positive $T$. A gas’s most probable *energy* is not zero because the number of states grows with energy (the Maxwell distribution, T6.4, is that product).`,
       visual: boltzPic({ Ts: [300, 1000], Emax: 200, caption: 'The Boltzmann factor at two temperatures. Hotter flattens the curve, but it still falls from its largest value at E = 0.' }),
@@ -201,7 +201,7 @@ The exponential is the **Boltzmann factor**. It is the probability of one *state
         return {
           prompt: t`A molecule has a nondegenerate ground state and, $\varepsilon$ above it, a level of $${g}$ states; every other level is far too high to matter. At a temperature where $\varepsilon/kT = ${x}$, what fraction of the molecules is in the upper level?`,
           answer: v, tol: { rel: 0.01 },
-          errors: apart([{ value: Math.exp(-x) / (1 + Math.exp(-x)), feedback: 'Count all the upper states: each carries its own Boltzmann factor.' }, { value: g * Math.exp(-x), feedback: 'That is the ratio upper : lower. The fraction divides by the total, 1 + g e^(−ε/kT).' }, { value: 1 / (1 + g * Math.exp(-x)), feedback: 'That is the ground state’s share.' }], v),
+          errors: apart([{ value: Math.exp(-x) / (1 + Math.exp(-x)), feedback: 'Count all the upper states: each carries its own Boltzmann factor.' }, { value: g * Math.exp(-x), feedback: 'That is the ratio upper : lower. The fraction divides by the total, $1 + g\\,e^{-\\varepsilon/kT}$.' }, { value: 1 / (1 + g * Math.exp(-x)), feedback: 'That is the ground state’s share.' }], v),
           hints: [t`Weights: ground $1$, upper level $${g}e^{-${x}}$.`, t`Fraction $= \dfrac{${g}e^{-${x}}}{1 + ${g}e^{-${x}}}$.`],
           teach: 'Probabilities are Boltzmann weights divided by their sum — the partition function.',
           explain: t`$${g}e^{-${x}} = ${fmt(g * Math.exp(-x), 3)}$, so the upper share is $${fmt(g * Math.exp(-x), 3)}/(1 + ${fmt(g * Math.exp(-x), 3)}) = ${fmt(v, 3)}$.`,

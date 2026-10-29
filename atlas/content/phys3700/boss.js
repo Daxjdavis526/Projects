@@ -118,7 +118,7 @@ export default boss({
           prompt: t`If Ember swallowed enough matter to **double** its mass, by what factor would its multiplicity $\Omega = e^{S/k}$ change?`,
           choices: [t`It would be raised to the 4th power: $\Omega \to \Omega^4$`, t`It would double: $\Omega \to 2\Omega$`, t`It would be multiplied by 4: $\Omega \to 4\Omega$`, t`It would be squared: $\Omega \to \Omega^2$`],
           answer: 0,
-          why: { 1: 'Ω is exponential in S. Doubling M quadruples S, and e^(4S/k) = (e^(S/k))⁴.', 2: 'That would be true if S grew by k ln 4. It grows by a factor of 4, which multiplies Ω by e^(3S/k).', 3: 'S ∝ M², so doubling M quadruples S (not doubles it), and Ω goes to the fourth power.' },
+          why: { 1: 'Ω is exponential in S. Doubling M quadruples S, and $e^{4S/k} = (e^{S/k})^4$.', 2: 'That would be true if S grew by k ln 4. It grows by a factor of 4, which multiplies Ω by $e^{3S/k}$.', 3: 'S ∝ M², so doubling M quadruples S (not doubles it), and Ω goes to the fourth power.' },
           hints: [t`$S \propto M^2$, so doubling $M$ multiplies $S$ by 4.`, t`$\Omega = e^{S/k}$: what is $e^{4S/k}$ in terms of $\Omega$?`],
           teach: 'Multiplicity is exponential in entropy: multiplying S by n raises Ω to the n-th power.',
           explain: t`$S \propto M^2$, so $S \to 4S$ and $\Omega = e^{S/k} \to e^{4S/k} = \Omega^4$. For Ember, whose $\Omega$ is already $10^{10^{37}}$ or so, that is a number beyond any picture.`,

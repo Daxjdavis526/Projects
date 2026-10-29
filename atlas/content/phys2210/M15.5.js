@@ -53,7 +53,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
   },
   example: {
     prompt: t`A $0.50$ kg mass on a spring with $k = 50$ N/m is damped with $b = 0.40$ kg/s and released from $0.10$ m. Find $\omega_0$ and $\omega'$, the amplitude after $5.0$ s, the time for the amplitude to halve, and the damping that would make it critical.`,
-    visual: dampedGraph({ A: 0.1, gamma: 0.4, w1: 9.992, tmax: 6, marks: [{ t: 0, label: 'release' }, { t: 5.0, label: 't = 5.0 s' }], caption: 'The motion: x = 0.10 e^(−0.40t) cos(9.99t) m, inside its envelope (dashed).' }),
+    visual: dampedGraph({ A: 0.1, gamma: 0.4, w1: 9.992, tmax: 6, marks: [{ t: 0, label: 'release' }, { t: 5.0, label: 't = 5.0 s' }], caption: t`The motion: $x = 0.10\,e^{-0.40t}\cos(9.99t)$ m, inside its envelope (dashed).` }),
     steps: [
       { label: 'Frequencies', text: t`$\omega_0 = \sqrt{50/0.50} = 10.0$ rad/s; $b/2m = 0.40$ s⁻¹, so $\omega' = \sqrt{10.0^2 - 0.40^2} = 9.992$ rad/s — only 0.08% slower.` },
       { label: 'Amplitude at 5.0 s', text: t`$A = (0.10\ \text{m})\,e^{-0.40\times5.0} = 0.10\,e^{-2.0} = 0.0135\ \text{m}$ — about 14% of the start.` },
@@ -73,7 +73,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
           answer: A, units: 'cm', tol: { rel: 0.005 },
           errors: [{ value: A0 * Math.exp((-b * tt) / m), feedback: t`The amplitude decays as $e^{-bt/2m}$ — the 2 matters. ($e^{-bt/m}$ is how the *energy* decays.)` }, { value: A0 * (1 - (b * tt) / (2 * m)), feedback: 'The decay is exponential, not a straight line.' }],
           hints: [t`$A(t) = A_0\,e^{-bt/2m}$.`],
-          teach: 'With linear damping the amplitude decays exponentially, as e^(−bt/2m).',
+          teach: 'With linear damping the amplitude decays exponentially, as $e^{-bt/2m}$.',
           explain: t`$A = ${A0}\,e^{-${b}\times${tt}/(2\times${m})} = ${A0}\,e^{-${tn((b * tt) / (2 * m))}} = ${tn(A)}\ \text{cm}$.`,
           visual: springPic({ damper: true, m: `${m} kg`, k: 'k', b: `b = ${b} kg/s`, arrow: `${A0} cm` }),
         };
@@ -156,7 +156,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
         3: 'The damping force does negative work on every swing: that energy becomes heat.',
       },
       hints: [t`$E = \tfrac12kA^2$.`],
-      teach: 'Energy goes as A², so it decays twice as fast as the amplitude: as e^(−bt/m).',
+      teach: 'Energy goes as A², so it decays twice as fast as the amplitude: as $e^{-bt/m}$.',
       explain: t`$E \propto A^2$: half the amplitude, a quarter of the energy. The energy envelope is $e^{-bt/m}$, the square of the amplitude’s $e^{-bt/2m}$.`,
       visual: dampedGraph({ A: 1, gamma: 0.25, w1: 5, tmax: 8, numbers: false, hl: [{ y: 0.5, label: 'half the amplitude', color: 'gold' }], caption: 'A damped oscillation and its envelope. No numbers on the axes.' }),
     }),
@@ -170,7 +170,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
           answer: b, units: 'kg/s', tol: { rel: 0.005 },
           errors: [{ value: (m / T) * Math.log(A1 / A2), feedback: t`The envelope is $e^{-bt/2m}$, so $b = \dfrac{2m}{T}\ln\dfrac{A_1}{A_2}$: keep the 2.` }, { value: ((2 * m) / T) * (A1 / A2 - 1), feedback: 'Use the natural log of the ratio, not the ratio minus one.' }],
           hints: [t`Successive peaks are one period apart: $\dfrac{A_2}{A_1} = e^{-bT/2m}$.`, t`So $b = \dfrac{2m}{T}\ln\dfrac{A_1}{A_2}$.`],
-          teach: 'The ratio of successive peaks, e^(bT/2m), measures the damping.',
+          teach: 'The ratio of successive peaks, $e^{bT/2m}$, measures the damping.',
           explain: t`$\ln\dfrac{${A1.toFixed(1)}}{${A2.toFixed(1)}} = ${tn(Math.log(A1 / A2))}$, so $b = \dfrac{2(${m})}{${T}}\times${tn(Math.log(A1 / A2))} = ${tn(b)}\ \text{kg/s}$.`,
           visual: dampedGraph({ A: A1 / 100, gamma: Math.log(A1 / A2) / T, w1: (2 * Math.PI) / T, tmax: 3.2 * T, ylabel: 'x (m)', marks: [{ t: 0, label: `${A1.toFixed(1)} cm` }, { t: T, label: `${A2.toFixed(1)} cm` }], caption: 'The measured motion, with two successive peaks one period apart.' }),
         };
@@ -186,9 +186,9 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
         return {
           prompt: t`A ${m} kg oscillator with $b = ${b}$ kg/s starts with amplitude ${A0} cm. What is its amplitude ${tt} s later?`,
           answer: A, units: 'cm', tol: { rel: 0.005 },
-          errors: [{ value: A0 * Math.exp((-b * tt) / m), feedback: 'Amplitude decays as e^(−bt/2m).' }],
+          errors: [{ value: A0 * Math.exp((-b * tt) / m), feedback: 'Amplitude decays as $e^{-bt/2m}$, not $e^{-bt/m}$.' }],
           hints: [t`$A = A_0e^{-bt/2m}$.`],
-          teach: 'A(t) = A₀ e^(−bt/2m).',
+          teach: '$A(t) = A_0e^{-bt/2m}$.',
           explain: t`$A = ${A0}\,e^{-${tn((b * tt) / (2 * m))}} = ${tn(A)}\ \text{cm}$.`,
           visual: springPic({ damper: true, m: `${m} kg`, k: 'k', b: `b = ${b} kg/s`, arrow: `${A0} cm` }),
         };

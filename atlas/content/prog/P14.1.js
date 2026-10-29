@@ -327,7 +327,7 @@ Why did it fail?`,
         caption: 'The returned curve is 1.2335 at h = 0 and indistinguishable from zero everywhere else. Dashed: an exponential atmosphere with a scale height of 8.5 km.',
       },
       choices: [
-        'With no p0, H starts at 1 m: e^(−h/H) is zero at every altitude but the first, so changing H a little changes nothing and the fit cannot move. Start near the answer: p0=[1.2, 8000]',
+        'With no p0, H starts at 1 m: $e^{-h/H}$ is zero at every altitude but the first, so changing H a little changes nothing and the fit cannot move. Start near the answer: p0=[1.2, 8000]',
         'The atmosphere is not exponential, so no fit can converge',
         'inf in pcov means the parameters are known with infinite precision',
         'Eleven points are too few to determine two parameters',

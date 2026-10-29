@@ -100,7 +100,7 @@ The last line is the **first shift theorem**: $\int_0^\infty e^{-st}e^{at}f\,dt 
           prompt: t`A test-stand actuator pushes with a constant force $f(t) = ${F0}$ N from $t = 0$. From the definition, evaluate its Laplace transform at $s = ${s0}\ \text{s}^{-1}$.`,
           answer: F0 / s0, units: 'N s', tol: { rel: 0.005 },
           integrand: `${F0}*e^(-${s0}x)`, limits: [0, 'inf'],
-          errors: [{ value: F0 * s0, feedback: t`$\int_0^\infty e^{-st}\,dt = 1/s$: divide by $s$, do not multiply.` }, { value: F0, feedback: 'That is the force itself. The transform is the area under the force times the weight e^(−st).' }],
+          errors: [{ value: F0 * s0, feedback: t`$\int_0^\infty e^{-st}\,dt = 1/s$: divide by $s$, do not multiply.` }, { value: F0, feedback: 'That is the force itself. The transform is the area under the force times the weight $e^{-st}$.' }],
           hints: [t`$F(s) = \int_0^\infty e^{-st}\cdot ${F0}\,dt = ${F0}\int_0^\infty e^{-st}\,dt$.`, t`$\int_0^\infty e^{-st}\,dt = \Big[-\tfrac1s e^{-st}\Big]_0^\infty = \tfrac1s$.`],
           teach: t`The transform of a constant $c$ is $c/s$: the area under $c\,e^{-st}$.`,
           explain: t`$F(${s0}) = ${F0}/${s0} = ${nice(F0 / s0)}$ N·s — the area of the shaded region. A larger $s$ discounts the force sooner, so the area shrinks like $1/s$.`,

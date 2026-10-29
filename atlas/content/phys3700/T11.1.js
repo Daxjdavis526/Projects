@@ -75,7 +75,7 @@ Subrahmanyan Chandrasekhar found it in 1931, aged 20; it is quantum mechanics, s
       hlines: [{ y: 0, color: 'ink4' }],
       readouts: [{ label: 'equilibrium radius (model units)', expr: REQ, digits: 3, when: 'step(0.999 - m)' }, { label: 'equilibrium', expr: '0', digits: 1, when: 'step(m - 0.999)', unit: '\\text{none: collapse}' }],
     },
-    caption: 'Landau’s one-zone teaching model: E = √(1 + (p/mₑc)²) − 1 − (gravity), with p ∝ M^(1/3)/R, scaled so the critical mass is 1. It captures R ∝ M^(−1/3) for light white dwarfs and the collapse above the limit; the real coefficient needs the full structure equations.',
+    caption: 'Landau’s one-zone teaching model: E = √(1 + (p/mₑc)²) − 1 − (gravity), with $p \\propto M^{1/3}/R$, scaled so the critical mass is 1. It captures $R \\propto M^{-1/3}$ for light white dwarfs and the collapse above the limit; the real coefficient needs the full structure equations.',
   },
   example: {
     prompt: t`Show by balancing pressures that relativistic electrons can support only one mass, $M \sim (\hbar c/G)^{3/2}/(\mu_em_p)^2$, and evaluate it.`,
@@ -132,7 +132,7 @@ Subrahmanyan Chandrasekhar found it in 1931, aged 20; it is quantum mechanics, s
           answer: v, units: '', tol: { rel: 0.01 },
           errors: apart([{ value: SIRIUS_B.R * 695.7 * (M2 / SIRIUS_B.M) ** (1 / 3), feedback: 'Heavier white dwarfs are smaller: R ∝ M to the −1/3.' }, { value: SIRIUS_B.R * 695.7 * (SIRIUS_B.M / M2), feedback: 'Use the one-third power.' }], v),
           hints: [t`$R_2 = R_1\,(M_1/M_2)^{1/3}$.`, t`$(${SIRIUS_B.M}/${M2})^{1/3} = ${fmt((SIRIUS_B.M / M2) ** (1 / 3), 4)}$.`],
-          teach: 'White dwarfs shrink as they gain mass: R ∝ M^(−1/3) while the electrons are non-relativistic.',
+          teach: 'White dwarfs shrink as they gain mass: $R \\propto M^{-1/3}$ while the electrons are non-relativistic.',
           explain: t`$R \approx ${fmt(v, 3)}$ thousand km — Earth-sized (Earth: 6.37 thousand km). Real ${M2} $M_\odot$ white dwarfs are somewhat larger than this: Sirius B’s electrons are already partly relativistic, which makes it smaller than the pure $M^{-1/3}$ law, so scaling from it undershoots.`,
           visual: { type: 'graph', params: { x: [0, 1.6], y: [0, 2.2], aspect: 'wide', axesAt: 'edge', xlabel: 'mass (M/M(Ch))', ylabel: 'radius (model units)', curves: [{ fn: 'x^(-1/3)', domain: [0.15, 1.6], color: 'ink3', dash: true, label: 'R ∝ M^(−1/3)', labelAt: 1.25, labelDy: -10 }, { fn: 'sqrt(max(0, 1 - x^(4/3)))/x^(1/3)', domain: [0.15, 0.9999], color: 'accent', label: 'with relativity', labelAt: 0.35, labelDy: 14 }], vlines: [{ x: 1, color: 'warn', label: 'limit' }] }, caption: 'Mass–radius relation in Landau’s teaching model: the non-relativistic law (dashed) and the relativistic one (blue), which falls to zero radius at the limit.' },
         };
@@ -146,7 +146,7 @@ Subrahmanyan Chandrasekhar found it in 1931, aged 20; it is quantum mechanics, s
       vars: { hbar: [0.5, 2], c: [0.5, 2], G: [0.5, 2], mu: [1, 3], m: [0.5, 2] },
       keys: [['ħ', 'hbar'], ['μ', 'mu']],
       lhs: 'M',
-      errors: [{ answer: '(hbar*c/G)^(2/3)/(mu*m)^2', feedback: 'M^(2/3) = ħc/(G(μm)^(4/3)): raise both sides to the power 3/2.' }, { answer: '(G/(hbar*c))^(3/2)/(mu*m)^2', feedback: 'Stronger gravity should lower the limit: G belongs in the denominator.' }],
+      errors: [{ answer: '(hbar*c/G)^(2/3)/(mu*m)^2', feedback: '$M^{2/3} = \\hbar c/(G(\\mu m)^{4/3})$: raise both sides to the power 3/2.' }, { answer: '(G/(hbar*c))^(3/2)/(mu*m)^2', feedback: 'Stronger gravity should lower the limit: G belongs in the denominator.' }],
       hints: [t`The $R^4$ cancels. Divide both sides by $M^{4/3}$: $\hbar c/(\mu m)^{4/3} = GM^{2/3}$.`, t`$M^{2/3} = \dfrac{\hbar c}{G(\mu m)^{4/3}}$; raise to the $\tfrac32$.`],
       teach: 'When pressure and gravity scale the same way with radius, the balance fixes a mass instead of a radius.',
       visual: { type: 'graph', params: { x: [-0.5, 1], y: [-1, 4], aspect: 'wide', axesAt: 'edge', xlog: true, ylog: true, xlabel: 'radius (arbitrary units)', ylabel: 'pressure (arbitrary units)', curves: [{ fn: '1 - 4*x', domain: [-0.5, 1], color: 'ink2', label: 'needed by gravity ∝ R⁻⁴', labelAt: 0.55, labelDy: -12 }, { fn: '1.6 - 4*x', domain: [-0.5, 1], color: 'accent', dash: true, label: 'relativistic electrons ∝ R⁻⁴', labelAt: 0.1, labelDx: 10 }, { fn: '1.2 - 5*x', domain: [-0.5, 1], color: 'warn', label: 'non-relativistic ∝ R⁻⁵', labelAt: -0.35, labelDx: 10 }] }, caption: 'Pressures against radius on log axes (vertical offsets arbitrary). Non-relativistic degeneracy pressure is steeper than gravity’s demand, so the lines cross: a balance radius exists. Relativistic pressure runs parallel: it is above or below everywhere, depending on the mass.' },

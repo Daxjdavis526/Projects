@@ -196,7 +196,7 @@ An angle of $1$ rad is the one whose arc is exactly one radius long, about $57.3
       id: 'cp-parallax', difficulty: 3, transfer: true,
       gen(r) {
         const [name, mas] = r.pick([['Proxima Centauri', 768.07], ['Barnard’s Star', 546.98], ['Sirius', 379.21], ['Vega', 130.23]]);
-        const p = mas / 1000, pr = p * AS, dAU = 1 / pr, ans = dAU / AU_PER_LY;
+        const p = sig(mas / 1000, 5), pr = p * AS, dAU = 1 / pr, ans = dAU / AU_PER_LY;
         return {
           prompt: t`As Earth swings round the Sun, ${name} appears to shift back and forth. Its **parallax** — the angle that the $1$ AU radius of Earth’s orbit subtends at the star — is $${p}$ arcseconds ($1'' = 1/3600$ of a degree). Using the small-angle approximation $1\ \text{AU} \approx d\,\theta$, how far away is it, in light-years? ($1$ ly $= 63\,241$ AU.)`,
           answer: ans, units: 'ly', tol: { rel: 0.01 },

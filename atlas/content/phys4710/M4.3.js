@@ -111,7 +111,7 @@ with $R$ in Bohr radii. The **bonding** combination $\psi_+$ has a minimum: the 
           answer: ans, tol: { rel: 0.003 },
           errors: [{ value: Math.exp(-R), feedback: t`Include the polynomial $1 + R + R^2/3$: the overlap of two exponentials is not just $e^{-R}$.` }],
           hints: [t`$e^{-${R}} = ${fmt(Math.exp(-R), 4)}$; multiply by $1 + ${R} + ${R}^2/3$.`],
-          teach: 'The overlap of two 1s orbitals falls from 1 (coincident) toward 0 (far apart) roughly as e^(−R).',
+          teach: 'The overlap of two 1s orbitals falls from 1 (coincident) toward 0 (far apart) roughly as $e^{-R}$.',
           explain: t`$S = ${fmt(Math.exp(-R), 4)}\times${fmt(1 + R + (R * R) / 3, 4)} = ${fmt(ans, 4)}$. Large overlap means the two atomic orbitals are far from independent — and a large difference between bonding and antibonding energies.`,
         };
       },

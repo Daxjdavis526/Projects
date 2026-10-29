@@ -113,7 +113,7 @@ which is just the condition $N/V = 2.612/v_Q$: about one particle per quantum vo
         return {
           prompt: t`A cloud of rubidium-87 atoms ($86.909$ u) has peak density $${texNum(n, 1)}\ \text{m}^{-3}$. Using the uniform-gas formula at that density, at what temperature does it condense? Answer in nanokelvin.`,
           answer: v, units: 'nK', tol: { rel: 0.01 },
-          errors: apart([{ value: ((H * H) / (2 * Math.PI * M.Rb87 * AMU * KB)) * n ** (2 / 3) * 1e9, feedback: 'Include the factor 0.527 = 2.612^(−2/3).' }, { value: becTc(n, M.Rb87 * 1e-3) * 1e9, feedback: 'Convert the mass from u to kg (1 u = 1.6605 × 10⁻²⁷ kg).' }], v),
+          errors: apart([{ value: ((H * H) / (2 * Math.PI * M.Rb87 * AMU * KB)) * n ** (2 / 3) * 1e9, feedback: 'Include the factor $0.527 = 2.612^{-2/3}$.' }, { value: becTc(n, M.Rb87 * 1e-3) * 1e9, feedback: 'Convert the mass from u to kg (1 u = 1.6605 × 10⁻²⁷ kg).' }], v),
           hints: [t`$T_c = 0.527\,\dfrac{h^2}{2\pi mk}\,n^{2/3}$ with $m = 86.909\times1.6605\times10^{-27}$ kg.`, t`$n^{2/3} = ${texNum(n ** (2 / 3), 3)}\ \text{m}^{-2}$.`],
           teach: 'Dilute atomic gases condense at tens to hundreds of nanokelvin: low density demands extreme cold.',
           explain: t`$T_c = ${fmt(v, 3)}$ nK. (Applying the uniform formula at the cloud’s peak density is the local-density approximation; for a trapped cloud it agrees with the trap formula $kT_c = 0.94\,\hbar\bar\omega N^{1/3}$ when the two are compared consistently.)`,

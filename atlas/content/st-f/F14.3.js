@@ -223,7 +223,7 @@ The integrator knows none of this — so these three numbers become **independen
           prompt: t`An orbit is kicked off the unstable circle at $r = ${rc}M$ by $\delta r = ${tex(d0)}M$. The deviation grows like $e^{\lambda\tau}$ with $\lambda^2 = \dfrac{M(6M - r)}{r^3(r - 3M)}$. After how much proper time has it reached $0.5M$?`,
           visual: VeffPic(circular(rc).L, [{ x: rc, y: n12(Veff(rc, circular(rc).L)), r: 5.5, color: 'bad', label: `r = ${rc}M`, labelDy: -14 }], 'The effective potential with the unstable circular orbit at its maximum.', { y: [0.84, 1.0], xmax: 14 }),
           answer: ans, tol: { rel: 0.01 },
-          errors: [{ value: Math.log10(0.5 / d0) / lam, feedback: 'Use the natural logarithm: e^(λτ) = 0.5/δr.' }, { value: Math.log(0.5 / d0) / (lam * lam), feedback: 'Divide by λ, not λ².' }],
+          errors: [{ value: Math.log10(0.5 / d0) / lam, feedback: 'Use the natural logarithm: $e^{\\lambda\\tau} = 0.5/\\delta r$.' }, { value: Math.log(0.5 / d0) / (lam * lam), feedback: 'Divide by λ, not λ².' }],
           hints: [t`$\lambda = \sqrt{(6 - ${rc})/(${rc}^3\times${rc - 3})} = ${tex(lam, 4)}$.`, t`$\tau = \ln(0.5/${tex(d0)})/\lambda$.`],
           teach: 'An exponential instability turns any seed into a departure after a time proportional to ln(1/seed): tiny seeds buy only a little time.',
           explain: t`$\ln(0.5/${tex(d0)}) = ${Math.log(0.5 / d0).toFixed(2)}$ e-folds of $${(1 / lam).toFixed(2)}M$ each: $\tau = ${ans.toFixed(0)}M$. A seed a thousand times smaller adds only $${(Math.log(1000) / lam).toFixed(0)}M$.`,

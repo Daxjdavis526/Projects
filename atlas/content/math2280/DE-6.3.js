@@ -45,7 +45,7 @@ This is the **second shift theorem**: delaying a function by $a$ multiplies its 
     tasks: [
       'Set the burn to one full period, d = 2π ≈ 6.3 s: the cart ends exactly at rest — the switch-off undoes the switch-on.',
       'Set d = π, half a period: the cart is left swinging 2 m each way, twice the 1 m static deflection — the most a burn of this thrust can leave.',
-      'Move the start a: the whole motion slides to the right, unchanged. That is all the factor e^(−as) does.',
+      'Move the start a: the whole motion slides to the right, unchanged. That is all the factor $e^{-as}$ does.',
     ],
     params: {
       x: [0, 20], y: [-2.5, 2.7], xlabel: 't (s)', ylabel: 'x (m)',

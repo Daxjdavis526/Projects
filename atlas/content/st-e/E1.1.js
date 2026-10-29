@@ -92,7 +92,7 @@ $$\cos^3\theta = \tfrac18\big(e^{3i\theta} + 3e^{i\theta} + 3e^{-i\theta} + e^{-
     mcq({
       id: 'parity', difficulty: 2,
       prompt: t`The pictured function $f(x) = e^{\cos x}$ has period $2\pi$. Which of its Fourier coefficients must vanish, before you compute anything?`,
-      visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-0.2, 3], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^cos(x)', color: 'accent', width: 2.3 }], vlines: [{ x: 0, label: 'x = 0' }] }, caption: 'Three periods of e^(cos x): a mirror image of itself about x = 0.' },
+      visual: { type: 'graph', params: { x: [-9.42, 9.42], y: [-0.2, 3], aspect: 'wide', xlabel: 'x (rad)', ylabel: '', axesAt: 'edge', curves: [{ fn: 'e^cos(x)', color: 'accent', width: 2.3 }], vlines: [{ x: 0, label: 'x = 0' }] }, caption: 'Three periods of $e^{\\cos x}$: a mirror image of itself about x = 0.' },
       choices: [t`every $b_n$ (all the sine coefficients)`, t`every $a_n$ with $n \ge 1$`, t`$a_n$ and $b_n$ for even $n$`, 'none of them'],
       answer: 0,
       why: {

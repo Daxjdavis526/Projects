@@ -134,7 +134,7 @@ The product of two sines is $\cos(\varphi - \theta) - \cos(4\pi f_rt + \varphi +
           prompt: t`A single-stage RC output filter has $\tau = ${tau}$ s. After the signal changes, how long until the output is within $${(100 - p).toFixed(1)}\%$ of its new value?`,
           visual: { type: 'graph', params: { aspect: 'wide', x: [0, r6(8 * tau)], y: [0, 1.1], xlabel: 't (s)', ylabel: 'output', axesAt: 'edge', curves: [{ fn: `1 - exp(-x/${tau})`, color: 'accent' }], hlines: [{ y: p / 100, label: `${p}%`, color: 'gold' }] }, caption: 'The output after a step change of the signal.' },
           answer: ans, units: 's', tol: { rel: 0.01 },
-          errors: [{ value: tau, feedback: 'After one τ the output has covered only 63% of the change.' }, { value: 5 * tau, feedback: `5τ is the rule of thumb for 99.3%. For ${p}%, solve e^(−t/τ) = ${(1 - p / 100).toFixed(3)}.` }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
+          errors: [{ value: tau, feedback: 'After one τ the output has covered only 63% of the change.' }, { value: 5 * tau, feedback: `5τ is the rule of thumb for 99.3%. For ${p}%, solve $e^{-t/\\tau} = ${(1 - p / 100).toFixed(3)}$.` }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`The remaining error is $e^{-t/\tau}$.`, t`Solve $e^{-t/\tau} = ${(1 - p / 100).toFixed(3)}$: $t = \tau\ln(${(1 / (1 - p / 100)).toFixed(0)})$.`],
           teach: 'Settling to 1% takes about 4.6τ (one stage), to 0.1% about 6.9τ — the price of a long time constant.',
           explain: t`$t = ${tau}\ln ${(1 / (1 - p / 100)).toFixed(0)} = ${ans.toPrecision(3)}$ s. Sweeping a parameter faster than this distorts every point of the sweep.`,

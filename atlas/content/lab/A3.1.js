@@ -215,7 +215,7 @@ print(rho, s_rho)`,
         const ra = r.pick([0.2, 0.4, 0.6, 1.0]);
         return {
           prompt: t`Kepler’s third law gives an orbital period $T \propto a^{3/2}$. If a planet’s semi-major axis $a$ is known to ${ra}%, what is the relative uncertainty of the predicted period, as a percentage?`,
-          visual: { type: 'graph', params: { aspect: 'wide', x: [0, 2], y: [0, 3], xlabel: 'a (AU)', ylabel: 'T (years)', xticks: 4, yticks: 3, axesAt: 'edge', curves: [{ fn: 'x^1.5', color: 'accent' }] }, caption: 'T = a^(3/2) in years and AU, for orbits around the Sun.' },
+          visual: { type: 'graph', params: { aspect: 'wide', x: [0, 2], y: [0, 3], xlabel: 'a (AU)', ylabel: 'T (years)', xticks: 4, yticks: 3, axesAt: 'edge', curves: [{ fn: 'x^1.5', color: 'accent' }] }, caption: '$T = a^{3/2}$ in years and AU, for orbits around the Sun.' },
           answer: 1.5 * ra, units: '%', tol: { rel: 0.01 },
           errors: [{ value: ra, feedback: 'The power multiplies the relative uncertainty: ×3/2.' }, { value: (2 / 3) * ra, feedback: 'The power is 3/2, not 2/3: T goes as a to the three-halves.' }],
           hints: [t`$\sigma_T/T = \tfrac32\,\sigma_a/a$.`],

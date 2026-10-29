@@ -125,9 +125,9 @@ $$C_V = \frac{f}{2}R$$
             { value: (3 * R) / M, feedback: 'Convert the molar mass to kg/mol first, so the answer comes out per kilogram.' },
             { value: (1.5 * R) / (M / 1000), feedback: t`That counts only the kinetic terms, $\tfrac32R$. The bonds act as springs with potential energy too: $3R$ in all.` },
           ], c),
-          hints: [t`Per mole: $3R = 24.94$ J/(mol·K).`, t`Per kilogram: divide by the molar mass in kg/mol, $${M / 1000}$.`],
+          hints: [t`Per mole: $3R = 24.94$ J/(mol·K).`, t`Per kilogram: divide by the molar mass in kg/mol, $${+(M / 1000).toPrecision(6)}$.`],
           teach: 'Near room temperature most solid elements have molar heat capacity close to 3R.',
-          explain: t`$c = 3R/M = 24.94/${M / 1000} = ${fmt(c, 3)}$ J/(kg·K). The measured value at 25 °C is about ${cm} — within a few per cent.`,
+          explain: t`$c = 3R/M = 24.94/${+(M / 1000).toPrecision(6)} = ${fmt(c, 3)}$ J/(kg·K). The measured value at 25 °C is about ${cm} — within a few per cent.`,
           visual: molarBars(),
         };
       },
