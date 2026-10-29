@@ -413,7 +413,7 @@ export default lesson({
           ],
           hints: [t`$M = \left(\dfrac{\hbar c^4\,t}{5120\pi G^2}\right)^{1/3}$, with $t$ in seconds.`, t`$\hbar c^4/(5120\pi G^2) = ${sci(1 / LIFE, 3)}$ kg³/s.`],
           teach: t`Only black holes lighter than about $10^{11}$ kg — a small asteroid's mass, in a region smaller than a proton — could have evaporated within the age of the universe.`,
-          explain: t`$M = ${sci(m, 3)}$ kg, with a Hawking temperature of $${sci(hawkingT(m), 2)}$ K and a horizon $${sci((2 * G * m) / C ** 2, 2)}$ m across. Including every particle species it can emit raises this mass by a factor of a few (Page's estimate is about $5\times10^{11}$ kg for the present age). Whether primordial black holes exist is unknown; searches for the final bursts of their evaporation have found none.`,
+          explain: t`$M = ${sci(m, 3)}$ kg, with a Hawking temperature of $${sci(hawkingT(m), 2)}$ K and a horizon radius of $${sci((2 * G * m) / C ** 2, 2)}$ m. Including every particle species it can emit raises this mass by a factor of a few (Page's estimate is about $5\times10^{11}$ kg for the present age). Whether primordial black holes exist is unknown; searches for the final bursts of their evaporation have found none.`,
           visual: lifePic,
         };
       },

@@ -122,7 +122,7 @@ The amplifier’s gain is known to 0.5% and the bandwidth to 0.5%. Find $k_B$ wi
           errors: [{ value: (a * 1e-12) / PJ.B * 1e18, feedback: t`$e_n^2\Delta f$ is the intercept; take the square root after dividing by $\Delta f$.` }, { value: Math.sqrt(a * 1e-12) * 1e9, feedback: t`Divide by the bandwidth first: $e_n$ is a density, per $\sqrt{\text{Hz}}$.` }],
           hints: [t`Intercept $= e_n^2\Delta f$.`, t`$e_n = \sqrt{a/\Delta f}$, with $a$ in $\text{V}^2$.`],
           teach: t`The intercept is the amplifier’s own mean square, $e_n^2\Delta f$.`,
-          explain: t`$e_n = \sqrt{${tex(a * 1e-12, 4)}/10^4} = ${tex(ans * 1e-9, 3)}\ \text{V}/\sqrt{\text{Hz}} = ${ans.toFixed(2)}\ \text{nV}/\sqrt{\text{Hz}}$.`,
+          explain: t`$e_n = \sqrt{${tex(a * 1e-12, 4)}/10^4}$ $= ${tex(ans * 1e-9, 3)}\ \text{V}/\sqrt{\text{Hz}}$, or $${ans.toFixed(2)}\ \text{nV}/\sqrt{\text{Hz}}$.`,
         };
       },
     }),

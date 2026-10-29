@@ -128,7 +128,7 @@ Find $\kappa$ and $I_0$. Then, with the wire $0.80 \pm 0.01$ mm in diameter and 
         const ans = (m * R * R / 2 + m * d * d) * 1e4;
         return {
           prompt: t`A solid cylinder of mass $${m}$ kg and radius $${R * 1000}$ mm stands upright with its axis $${d}$ m from the wire (parallel to it). What is its moment of inertia about the wire? Answer in units of $10^{-4}$ kg m².`,
-          visual: { type: 'mech-rotor', params: {}, caption: t`Moment of inertia and the parallel-axis theorem: $I = I_{cm} + Md^2$ for any body about an axis a distance $d$ from its centre.` },
+          visual: rigRaw('torsion', { seed: 1, settings: [d] }, t`Cylinders standing on the bar a distance $d$ from the wire (top view, to scale for 20 mm cylinders). Each turns about the wire *and* about its own axis: $I = I_{cm} + md^2$.`),
           answer: ans, tol: { rel: 0.003 },
           errors: [{ value: m * d * d * 1e4, feedback: t`Add the cylinder’s own $I_{cm} = mR^2/2$: the parallel-axis theorem is $I = I_{cm} + md^2$.` }, { value: (m * R * R + m * d * d) * 1e4, feedback: t`A solid cylinder about its own axis has $I_{cm} = mR^2/2$, not $mR^2$.` }].filter((e) => Math.abs(e.value - ans) > 0.005 * ans),
           hints: [t`$I = I_{cm} + md^2$.`, t`$I_{cm} = mR^2/2$ for a solid cylinder about its axis.`],
@@ -237,7 +237,7 @@ Find $\kappa$ and $I_0$. Then, with the wire $0.80 \pm 0.01$ mm in diameter and 
         const ans = ((k * th * Math.PI / 180) / R) * 1e3;
         return {
           prompt: t`An ion thruster is mounted on a torsion thrust stand, its thrust line $${R}$ m from the pivot. The stand’s moment of inertia is $${I}$ kg m² and it oscillates freely with period $${T}$ s. Switched on, the thruster holds the stand at a steady deflection of $${th}^\circ$. What is the thrust? Answer in mN.`,
-          visual: { type: 'mech-rotor', params: {}, caption: 'A torque is a force times its lever arm: on a thrust stand the thruster’s force twists the arm until the flexure’s torque κθ balances it.' },
+          visual: rigRaw('torsion', { seed: 3, settings: [0.12] }, t`A torsion pendulum from above. A thrust stand is the same physics: the thruster’s torque $FR$ twists the arm until the flexure’s $\kappa\theta$ balances it.`),
           answer: ans, units: 'mN', tol: { rel: 0.005 },
           errors: [{ value: (k * th) / R * 1e3, feedback: 'Put the angle in radians.' }, { value: (((I / T ** 2) * th * Math.PI) / 180 / R) * 1e3, feedback: t`From $T = 2\pi\sqrt{I/\kappa}$, $\kappa = 4\pi^2I/T^2$ — keep the $4\pi^2$.` }],
           hints: [t`Calibrate the stand: $\kappa = 4\pi^2I/T^2$.`, t`At rest the torques balance: $FR = \kappa\theta$, with $\theta$ in radians.`],

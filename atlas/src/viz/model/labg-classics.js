@@ -795,7 +795,7 @@ export const EXPERIMENTS = {
       const Rm = P.Rm;
       return {
         x: [-0.19, 0.19], y: [-0.09, 0.09], equal: true, axes: false,
-        paths: [{ pts: [[-P.Lb / 2, 0], [P.Lb / 2, 0]], color: 'ink2', width: 7 }, { pts: [[-r, -0.075], [r, -0.075]], color: 'gold', width: 1.2, dash: [3, 3] }],
+        paths: [{ pts: [[-P.Lb / 2, 0], [P.Lb / 2, 0]], color: 'ink2', width: 7 }, { pts: [[0, -0.075], [r, -0.075]], color: 'gold', width: 1.2, dash: [3, 3] }, { pts: [[0, -0.07], [0, -0.08]], color: 'gold', width: 1.2 }, { pts: [[r, -0.07], [r, -0.08]], color: 'gold', width: 1.2 }],
         circles: [{ x: 0, y: 0, r: 0.008, color: 'ink', width: 2, fill: 'ink', alpha: 1 }, { x: -r, y: 0, r: Rm, color: 'accent', width: 2, fill: 'accent', alpha: 0.45 }, { x: r, y: 0, r: Rm, color: 'accent', width: 2, fill: 'accent', alpha: 0.45 }],
         texts: [
           { s: 'wire', x: 0, y: 0.012, color: 'ink', size: 10.5, align: 'center', dy: -6 },

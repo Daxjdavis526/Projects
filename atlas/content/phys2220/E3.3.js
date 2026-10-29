@@ -214,7 +214,7 @@ $$E\,A_\text{G} = \frac{Q_\text{enc}}{\varepsilon_0}$$
           errors: [{ value: -Q, feedback: 'The field points down, into the Earth: field lines end on negative charge.' }],
           hints: ['Use a Gaussian sphere just above the ground, enclosing the whole Earth.', t`$E\cdot4\pi R^2 = |Q|/\varepsilon_0$; a field pointing inward means $Q$ is negative.`],
           teach: 'A Gaussian sphere around a planet turns its surface field into its total charge: Q = ε₀E·4πR².',
-          explain: t`$|Q| = \varepsilon_0E\cdot4\pi R^2 = (8.854\times10^{-12})(${E})(4\pi)(6.371\times10^{6})^2 = ${tn(-Q)}$ C, and the field points inward, so $Q = ${tn(Q)}$ C — about half a million coulombs. Thunderstorms keep charging it; the slightly conducting air leaks the charge away again in fair weather, and the positive charge in the atmosphere above nearly balances it.`,
+          explain: t`$|Q| = \varepsilon_0E\cdot4\pi R^2 = (8.854\times10^{-12})(${E})(4\pi)(6.371\times10^{6})^2 = ${tn(-Q)}$ C, and the field points inward, so $Q = ${tn(Q)}$ C — hundreds of thousands of coulombs. Thunderstorms keep charging it; the slightly conducting air leaks the charge away again in fair weather, and the positive charge in the atmosphere above nearly balances it.`,
           visual: {
             type: 'graph',
             params: {
@@ -246,25 +246,25 @@ $$E\,A_\text{G} = \frac{Q_\text{enc}}{\varepsilon_0}$$
     mcq({
       id: 'cp-graph', difficulty: 2,
       prompt: 'Which curve shows the field of a uniformly charged ball (solid, radius R) against distance from its centre?',
-      choices: ['A', 'B', 'C', 'D'],
+      choices: ['P', 'Q', 'R', 'S'],
       answer: 0,
       why: {
-        1: 'B is zero inside: that is a thin charged shell, whose inside encloses no charge.',
-        2: 'C is constant inside: no charge distribution gives that field — inside a ball, the enclosed charge grows as r³.',
-        3: 'D grows without limit at the centre: a point charge, not a ball.',
+        1: 'Q is zero inside: that is a thin charged shell, whose inside encloses no charge.',
+        2: 'R is constant inside: that needs a charge density that falls as 1/r from the centre. In a uniform ball the enclosed charge grows as r³, so E grows as r.',
+        3: 'S grows without limit at the centre: a point charge, not a ball.',
       },
       hints: ['Inside, the enclosed charge grows as r³ and the area as r²: E ∝ r.'],
       teach: 'A uniformly charged ball’s field grows linearly inside and falls as 1/r² outside, peaking at the surface.',
-      explain: 'Inside, E = kQr/R³ grows in a straight line from zero; outside, E = kQ/r². Curve A. (B is a shell; D is a point charge; C matches nothing.)',
+      explain: 'Inside, E = kQr/R³ grows in a straight line from zero; outside, E = kQ/r². Curve P. (Q is a shell; S is a point charge; R would need a density falling as 1/r.)',
       visual: {
         type: 'graph',
         params: {
           x: [0, 3.2], y: [0, 1.6], aspect: 'wide', xlabel: 'r (in units of R)', ylabel: 'E', xticks: 4, yticks: 0.001,
           curves: [
-            { fn: 'min(x, 1/max(x, 0.01)^2)', domain: [0, 3.2], color: 'accent', width: 2.4, label: 'A', labelAt: 0.88, labelDx: -18, labelDy: -6 },
-            { fn: 'step(x - 1)*1.25/max(x, 0.01)^2', domain: [1.001, 3.2], color: 'gold', width: 2.4, label: 'B', labelAt: 1.5, labelDy: -12 },
-            { fn: 'min(0.6, 0.6/max(x, 0.01)^2)', domain: [0, 3.2], color: 'violet', width: 2.4, label: 'C', labelAt: 0.2, labelDy: -12 },
-            { fn: '0.3/x^2', domain: [0.44, 3.2], color: 'teal', width: 2.4, label: 'D', labelAt: 0.6, labelDx: 6 },
+            { fn: 'min(x, 1/max(x, 0.01)^2)', domain: [0, 3.2], color: 'accent', width: 2.4, label: 'P', labelAt: 0.88, labelDx: -18, labelDy: -6 },
+            { fn: 'step(x - 1)*1.25/max(x, 0.01)^2', domain: [1.001, 3.2], color: 'gold', width: 2.4, label: 'Q', labelAt: 1.5, labelDy: -12 },
+            { fn: 'min(0.6, 0.6/max(x, 0.01)^2)', domain: [0, 3.2], color: 'violet', width: 2.4, label: 'R', labelAt: 0.2, labelDy: -12 },
+            { fn: '0.3/x^2', domain: [0.44, 3.2], color: 'teal', width: 2.4, label: 'S', labelAt: 0.6, labelDx: 6 },
           ],
           vlines: [{ x: 1, label: 'R' }],
         },

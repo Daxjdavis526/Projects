@@ -89,7 +89,10 @@ export function geomPic(thetaDeg = 40, caption, { waves = true, detector = true 
     const d = 2.0, w = 0.18;
     curves.push(seg(d * c - w * s, d * s + w * c, d * c + w * s, d * s - w * c, 'violet', 6));
     arrows.push({ from: [0.1 * c, 0.1 * s], to: [(d - 0.12) * c, (d - 0.12) * s], color: 'violet', width: 1.6, dash: [5, 4] });
-    points.push(label(d * c, d * s, `detector at θ = ${thetaDeg}°`, 'violet', 10, -10));
+    // beside the detector when it is near the top or on the left; for small θ that would run off the
+    // right edge at phone width, so the label moves to the top right corner, ending inside the frame
+    const dl = `detector at θ = ${thetaDeg}°`;
+    points.push(thetaDeg >= 75 ? label(d * c, d * s, dl, 'violet', 10, -10) : label(3.1, 2.1, dl, 'violet', 0, 0, 'right'));
     curves.push({ param: ['0.45*cos(t)', '0.45*sin(t)'], t: [0, r6(th)], color: 'ink3', width: 1.4 });
     points.push(label(0.5 * Math.cos(th / 2), 0.5 * Math.sin(th / 2), 'θ', 'ink2', 6, 0));
   }

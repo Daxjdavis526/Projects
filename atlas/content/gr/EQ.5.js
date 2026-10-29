@@ -245,7 +245,7 @@ In empty space with $\Lambda = 0$, $R_{\mu\nu} = 0$: the volume starts out uncha
     num({
       id: 'cp-dust', difficulty: 2,
       gen(r) {
-        const [what, rho] = r.pick([['water', 1000], ['rock of density 2700 kg/m³', 2700], ['the Earth’s mean density, 5514 kg/m³', 5514], ['lead', 11340]]);
+        const [what, rho] = r.pick([['water', 1000], ['rock of density 2700 kg/m³', 2700], ['the Earth’s mean density, 5514 kg/m³', 5514], ['lead (11 340 kg/m³)', 11340]]);
         const R = (8 * Math.PI * G * rho) / (C * C);
         return {
           prompt: t`Taking the trace of Einstein's equations for pressure-free matter (dust) of density $\rho$, with $\Lambda = 0$, gives $R = \dfrac{8\pi G\rho}{c^2}$. What is the Ricci scalar inside ${what}${rho === 1000 ? ' (1000 kg/m³)' : ''}, in $\text{m}^{-2}$?`,

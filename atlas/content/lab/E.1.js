@@ -75,7 +75,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
       { label: 'e over m', text: t`Square the slope: $e/m = 2Vb^2/k^2 = ${tex(EXem.value, 4)}$ C/kg. A square doubles a relative uncertainty, so $\sigma_{e/m}/(e/m) = 2\sigma_b/b = ${(100 * relStat).toFixed(1)}\%$: $e/m = (${resT(EXem)})\times10^{11}$ C/kg.` },
       { label: 'Ambient field', text: t`$B_a = ka/b = ${resT(EXB)}\ \mu\text{T}$. Its uncertainty is as big as the field itself: the intercept is an extrapolation from 1 A down to 0, far outside the data. Reversing the coil current measures it far better (below).` },
       { label: 'Type B', text: t`The coils’ radius is known to $\pm 1$ mm (a standard uncertainty, say). Since $e/m \propto 1/k^2 \propto R^2$, that adds $2 \times 1/150 = ${(100 * relR).toFixed(1)}\%$ in quadrature: $${(100 * relTot).toFixed(1)}\%$ in all, $\sigma = ${tex(relTot * EXem.value, 2)}$ C/kg.` },
-      { label: 'Compare', text: t`$z = (e/m - \text{CODATA})/\sigma$, $= (${tex(EXem.value, 4)} - ${tex(CODATA, 6)})/(${tex(relTot * EXem.value, 2)})$, $= ${((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(2)}$: agreement ([agreement within uncertainty](#/lesson/lab.A4.1)). A result good to about 4% is typical of this apparatus — and the slope did not need the ambient field to be known at all.` },
+      { label: 'Compare', text: t`$z = (e/m - \text{CODATA})/\sigma$, $= (${tex(EXem.value, 4)} - ${tex(CODATA, 6)})$ $/\,(${tex(relTot * EXem.value, 2)})$ $= ${((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(2)}$: agreement ([agreement within uncertainty](#/lesson/lab.A4.1)). A result good to about 4% is typical of this apparatus — and the slope did not need the ambient field to be known at all.` },
     ],
     answer: t`$e/m = (${pmT(EXem.value / 1e11, (relTot * EXem.value) / 1e11)})\times10^{11}$ C/kg (statistical and coil radius combined), within $${Math.abs((EXem.value - CODATA) / (relTot * EXem.value)).toFixed(1)}\sigma$ of CODATA; ambient field $${resT(EXB)}\ \mu\text{T}$.`,
   },
@@ -203,7 +203,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
         type: 'graph',
         params: {
           aspect: 'wide', x: [0, 2.2], y: [0, 40], xlabel: 'I (A)', ylabel: '1/r (m⁻¹)', axesAt: 'edge',
-          curves: [{ fn: '16.35*(x - 0.32)', color: 'accent', label: 'with the ambient field', labelAt: 1.25, labelDx: 10, labelDy: 10 }, { fn: '16.35*(x + 0.32)', color: 'violet', label: 'current reversed', labelAt: 0.35, labelDx: -4, labelDy: -14 }, { fn: '16.35*x', color: 'good', dash: true }],
+          curves: [{ fn: '16.35*(x - 0.32)', color: 'accent', label: 'with the ambient field', labelAt: 0.75, labelDx: 10, labelDy: 12 }, { fn: '16.35*(x + 0.32)', color: 'violet', label: 'current reversed', labelAt: 0.35, labelDx: -4, labelDy: -14 }, { fn: '16.35*x', color: 'good', dash: true }],
         },
         caption: t`Illustrative lines: the two directions straddle the line through the origin (dashed). The gap between them is drawn ten times larger than a 25 μT field would make it.`,
       },

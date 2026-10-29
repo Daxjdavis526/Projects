@@ -98,17 +98,17 @@ Field lines start on positive charges and end on negative ones (or run off to in
     mcq({
       id: 'strongest', difficulty: 2,
       prompt: 'At which of the marked points is the electric field strongest?',
-      choices: ['A', 'B', 'C', 'They are all the same: the field of a charge does not depend on where you are'],
+      choices: ['P', 'Q', 'R', 'They are all the same: the field of a charge does not depend on where you are'],
       answer: 0,
       why: {
-        1: 'At B the lines are farther apart than at A: the field is weaker.',
-        2: 'At C the lines are spread widest: the field is weakest of the three.',
+        1: 'At Q the lines are farther apart than at P: the field is weaker.',
+        2: 'At R the lines are spread widest: the field is weakest of the three.',
         3: 'The field falls off with distance; the spacing of the lines shows it.',
       },
       hints: ['Where are the lines closest together?'],
       teach: 'Where field lines crowd together the field is strong; where they spread apart it is weak.',
-      explain: 'The lines are densest at A, close to the larger charge, so the field is strongest there. (In a flat drawing of a 3D field the spacing is only a rough guide — but crowding still means strength.)',
-      visual: field({ x: [-10, 10], y: [-6, 6], charges: [{ x: -3, y: 0, q: 4 }, { x: 3, y: 0, q: -1 }], fieldLines: true, density: 20, notes: { points: [{ x: -2.2, y: 1.2, color: 'gold', r: 4.5, label: 'A' }, { x: 0.5, y: 3.6, color: 'gold', r: 4.5, label: 'B' }, { x: 7.5, y: 4, color: 'gold', r: 4.5, label: 'C' }] } }, 'The field lines of +4 nC and −1 nC, with three marked points.'),
+      explain: 'The lines are densest at P, close to the larger charge, so the field is strongest there. (In a flat drawing of a 3D field the spacing is only a rough guide — but crowding still means strength.)',
+      visual: field({ x: [-10, 10], y: [-6, 6], charges: [{ x: -3, y: 0, q: 4 }, { x: 3, y: 0, q: -1 }], fieldLines: true, density: 20, notes: { points: [{ x: -2.2, y: 1.2, color: 'gold', r: 4.5, label: 'P' }, { x: 0.5, y: 3.6, color: 'gold', r: 4.5, label: 'Q' }, { x: 7.5, y: 4, color: 'gold', r: 4.5, label: 'R' }] } }, 'The field lines of +4 nC and −1 nC, with three marked points.'),
     }),
     num({
       id: 'to-infinity', difficulty: 2,

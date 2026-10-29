@@ -220,18 +220,18 @@ That energy is not in the copper — it is in the **magnetic field**. For a long
     }),
     mcq({
       id: 'cp-ratio', difficulty: 2,
-      prompt: t`Coil A has inductance $L$ and carries current $2I$. Coil B has inductance $2L$ and carries current $I$. Compare the energies they store.`,
+      prompt: t`Coil 1 has inductance $L$ and carries current $2I$. Coil 2 has inductance $2L$ and carries current $I$. Compare the energies they store.`,
       visual: { type: 'graph', params: { x: [0, 2.4], y: [0, 3.3], aspect: 'wide', axesAt: 'edge', xlabel: 'current (in units of I)', ylabel: 'U (units of LI²)', curves: [{ fn: '0.5*x^2', color: 'teal', width: 2.6, label: 'inductance L', labelAt: 2.2, labelDx: -96, labelDy: -4 }, { fn: 'x^2', color: 'violet', width: 2.6, label: 'inductance 2L', labelAt: 1.62, labelDx: -104, labelDy: -6 }] }, caption: t`Stored energy against current for an inductance $L$ (teal) and $2L$ (violet): each a parabola, $\tfrac12LI^2$.` },
-      choices: ['A stores twice as much as B', 'They store the same', 'B stores twice as much as A', 'A stores four times as much as B'],
+      choices: ['Coil 1 stores twice as much as coil 2', 'They store the same', 'Coil 2 stores twice as much as coil 1', 'Coil 1 stores four times as much as coil 2'],
       answer: 0,
       why: {
         1: t`The current is squared but the inductance is not: doubling $I$ helps more than doubling $L$.`,
-        2: t`$U_B = \tfrac12(2L)I^2 = LI^2$ is less than $U_A = \tfrac12L(2I)^2 = 2LI^2$.`,
-        3: t`$U_A = 2LI^2$ and $U_B = LI^2$: the ratio is 2, not 4.`,
+        2: t`$U_2 = \tfrac12(2L)I^2 = LI^2$ is less than $U_1 = \tfrac12L(2I)^2 = 2LI^2$.`,
+        3: t`$U_1 = 2LI^2$ and $U_2 = LI^2$: the ratio is 2, not 4.`,
       },
       hints: [t`Write $U = \tfrac12LI^2$ for each coil.`],
       teach: 'Stored energy is linear in L but quadratic in I.',
-      explain: t`$U_A = \tfrac12L(2I)^2 = 2LI^2$; $U_B = \tfrac12(2L)I^2 = LI^2$. A holds twice as much.`,
+      explain: t`$U_1 = \tfrac12L(2I)^2 = 2LI^2$; $U_2 = \tfrac12(2L)I^2 = LI^2$. Coil 1 holds twice as much.`,
     }),
     num({
       id: 'cp-mri', difficulty: 3, transfer: true,

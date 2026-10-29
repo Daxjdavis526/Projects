@@ -95,7 +95,7 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
         const kind = r.pick(['future', 'null', 'space', 'past']);
         const [dt, dx] = r.pick(CLASSES[kind].cases);
         return {
-          prompt: t`Event B happens ${Math.abs(dt)} years ${dt >= 0 ? 'after' : 'before'} event A, ${Math.abs(dx)} light-years away from it. Where does B lie relative to A’s light cone?`,
+          prompt: t`Event B happens ${Math.abs(dt)} ${Math.abs(dt) === 1 ? 'year' : 'years'} ${dt >= 0 ? 'after' : 'before'} event A, ${Math.abs(dx)} ${Math.abs(dx) === 1 ? 'light-year' : 'light-years'} away from it. Where does B lie relative to A’s light cone?`,
           answer: CLASSES[kind].answer,
           visual: spacetimeSketch({ events: [[0, 0, 'A'], [dt, dx, 'B']] }),
         };

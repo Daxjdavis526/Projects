@@ -125,24 +125,24 @@ A wire’s resistance comes from its shape and its material: longer wires resist
     mcq({
       id: 'iv', difficulty: 2,
       prompt: t`The graph shows current against voltage for three devices: a carbon resistor, a filament bulb and a diode. Which curve is the filament bulb?`,
-      choices: ['B', 'A', 'C', 'None of them: a bulb is ohmic'],
+      choices: ['Q', 'P', 'R', 'None of them: a bulb is ohmic'],
       answer: 0,
       why: {
-        1: 'A is a straight line through the origin: constant R, an ohmic resistor.',
-        2: 'C carries almost no current until about 0.6 V and then rises steeply — a diode (and it would block the other way).',
+        1: 'P is a straight line through the origin: constant R, an ohmic resistor.',
+        2: 'R carries almost no current until about 0.6 V and then rises steeply — a diode (and it would block the other way).',
         3: 'A filament heats up as the current grows, and hot tungsten has a much higher resistivity, so its I–V curve bends.',
       },
       hints: ['Resistance is V/I. For which curve does V/I grow as the voltage rises?', 'The bulb’s filament gets hotter at higher current.'],
       teach: 'A filament’s resistance rises as it heats, so its I–V curve bends over; an ohmic resistor’s is a straight line.',
-      explain: t`On curve B the current grows ever more slowly: $V/I$ rises with voltage as the filament heats — a tungsten filament’s resistance is over ten times higher when glowing than when cold. A is ohmic; C is a diode.`,
+      explain: t`On curve Q the current grows ever more slowly: $V/I$ rises with voltage as the filament heats — a tungsten filament’s resistance is over ten times higher when glowing than when cold. P is ohmic; R is a diode.`,
       visual: {
         type: 'graph',
         params: {
           x: [0, 6.5], y: [0, 0.65], aspect: 'wide', axesAt: 'edge', xlabel: 'V (V)', ylabel: 'I (A)',
           curves: [
-            { fn: 'x/12', color: 'accent', label: 'A', labelAt: 5.6, labelDy: -10 },
-            { fn: '0.22*x^0.55', color: 'gold', domain: [0, 6.5], label: 'B', labelAt: 4.8, labelDy: -10 },
-            { fn: '1e-9*(e^(x/0.03) - 1)', color: 'violet', domain: [0, 0.608], label: 'C', labelAt: 0.6, labelDx: 8, labelDy: 10 },
+            { fn: 'x/12', color: 'accent', label: 'P', labelAt: 5.6, labelDy: -10 },
+            { fn: '0.22*x^0.55', color: 'gold', domain: [0, 6.5], label: 'Q', labelAt: 4.8, labelDy: -10 },
+            { fn: '1e-9*(e^(x/0.03) - 1)', color: 'violet', domain: [0, 0.608], label: 'R', labelAt: 0.6, labelDx: 8, labelDy: 10 },
           ],
         },
         caption: 'Illustrative I–V curves for the three devices (not real component data).',

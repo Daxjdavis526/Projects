@@ -254,7 +254,7 @@ The pattern slides along at speed $v$ without changing shape: toward $+x$ when $
           ],
           hints: [t`$v = f\lambda$, so $\lambda = c/f$.`, 'Convert metres to kilometres at the end.'],
           teach: 'v = fλ holds for every wave, including gravitational waves travelling at c.',
-          explain: t`$\lambda = c/f = (3.00\times10^8\ \text{m/s})/(${f}\ \text{Hz}) = ${tn(C / f)}$ m $= ${tn(lamKm)}$ km — hundreds of times longer than LIGO’s 4 km arms. The whole instrument sits inside a small fraction of one wavelength, so the wave stretches and squeezes it all at once — each arm’s length changes by a few thousandths of a proton’s width — and the detector records how that stretch changes in time.`,
+          explain: t`$\lambda = c/f = (3.00\times10^8\ \text{m/s})/(${f}\ \text{Hz}) = ${tn(C / f)}$ m $= ${tn(lamKm)}$ km — about ${Math.round(lamKm / 4 / 100) * 100} times longer than LIGO’s 4 km arms. The whole instrument sits inside a small fraction of one wavelength, so the wave stretches and squeezes it all at once — each arm’s length changes by a few thousandths of a proton’s width — and the detector records how that stretch changes in time.`,
           visual: { type: 'gr-chirp', params: { sliders: false, play: false, readout: false }, caption: 'The GW150914 chirp computed at leading order (not the measured data): the wave’s frequency climbs as the black holes spiral in. Left: the stretch it causes, hugely exaggerated.' },
         };
       },

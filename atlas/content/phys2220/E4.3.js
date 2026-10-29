@@ -284,7 +284,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
           errors: [{ value: dV * (ds / 1000), feedback: t`Divide the step in $V$ by the spacing: $E \approx \Delta V/\Delta s$.` }],
           hints: [t`$E \approx \Delta V/\Delta s$, with $\Delta s$ in metres.`],
           teach: 'Crowded equipotentials mark a strong field: E ≈ ΔV/Δs, largest at sharp edges.',
-          explain: t`$E \approx \dfrac{${dV}\ \text{V}}{${ds / 1000}\ \text{m}} = ${tn(E)}$ V/m. ${E >= 3e6 ? 'That is above the breakdown field: the air at the edge would ionise and spark or glow (corona).' : 'That is below the breakdown field, but not by a wide margin.'} Designers round off electrode edges to spread the equipotentials out.`,
+          explain: t`$E \approx \dfrac{${dV}\ \text{V}}{${ds / 1000}\ \text{m}} = ${tn(E)}$ V/m. ${E >= 3e6 ? 'That is above the breakdown field: the air at the edge would ionise and spark or glow (corona).' : E >= 1e6 ? 'That is below the breakdown field, but not by a wide margin.' : 'That is well below the breakdown field — about a fifth of it.'} Designers round off electrode edges to spread the equipotentials out.`,
           visual: field({ unit: 'mm', x: [-10, 10], y: [-6.25, 6.25], sheets: [{ x: 0, y: 1.2, angle: 0, sigma: 20000, width: 10 }, { x: 0, y: -1.2, angle: 0, sigma: -20000, width: 10 }], equip: true, equipLabels: false, levels: Array.from({ length: 11 }, (_, k) => -2500 + 500 * k), fieldLines: false }, 'Two thin electrodes edge-on, with equipotentials (violet) at equal steps: spread evenly between the electrodes, crowded tightly around their edges.'),
         };
       },

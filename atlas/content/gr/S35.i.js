@@ -129,7 +129,7 @@ The **null energy condition must fail**: the throat must be held open by a tensi
           errors: [{ value: r0 * C * C / G, feedback: 'Multiply by π/4.' }, { value: (Math.PI / 4) * r0 * C / G, feedback: 'Use c², not c.' }],
           hints: [t`$c^2/G = (2.998\times10^{8})^2/6.674\times10^{-11} = ${sci((C * C) / G)}$ kg/m.`, t`Multiply by $(\pi/4)\times${sci(r0)}$ m.`],
           teach: 'The negative mass a wormhole needs grows in proportion to its throat: about half a Jupiter per metre.',
-          explain: t`$${sci(x)}$ kg — ${x > M_SUN / 10 ? `$${sci(x / M_SUN, 2)}$ solar masses` : x > M_JUP / 10 ? `$${sci(x / M_JUP, 2)}$ Jupiter masses` : `$${sci(x / M_EARTH, 2)}$ Earth masses`}, of **negative** mass, for a throat ${txt} across.`,
+          explain: t`$${sci(x)}$ kg — ${x > M_SUN / 10 ? `$${sci(x / M_SUN, 2)}$ solar masses` : x > M_JUP / 10 ? `$${sci(x / M_JUP, 2)}$ Jupiter masses` : `$${sci(x / M_EARTH, 2)}$ Earth masses`}, of **negative** mass, for a throat of radius ${txt}.`,
           visual: masses,
         };
       },

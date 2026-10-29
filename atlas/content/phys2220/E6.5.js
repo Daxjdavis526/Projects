@@ -207,7 +207,7 @@ export default lesson({
           errors: apart([{ value: tau * 1e9, feedback: 'That is one time constant, which leaves 37%.' }], T * 1e9),
           hints: [t`$\tau = RC$ — with $C$ in pF it comes out in nanoseconds-scale.`, t`$V = V_0e^{-t/\tau}$; set $V/V_0 = ${pct / 100}$ and solve: $t = \tau\ln(${100 / pct})$.`],
           teach: 'An electrostatic discharge is an RC discharge: tiny capacitance through modest resistance gives a time constant of a fraction of a microsecond.',
-          explain: t`$\tau = (${R})(${C}\times10^{-12}) = ${nice(sf(tau * 1e9))}$ ns, so $t = ${nice(sf(tau * 1e9))}\ln(${100 / pct}) = ${nice(sf(T * 1e9))}$ ns. The whole spark is over in well under a microsecond, so its peak current — kilovolts over 1.5 kΩ, amperes — is what damages circuits.`,
+          explain: t`$\tau = (${R})(${C}\times10^{-12}) = ${nice(sf(tau * 1e9))}$ ns, so $t = ${nice(sf(tau * 1e9))}\ln(${100 / pct}) = ${nice(sf(T * 1e9))}$ ns. The whole spark is over in about a microsecond, so its peak current — kilovolts over 1.5 kΩ, amperes — is what damages circuits.`,
           visual: circuit('rc', { opts: { net: 'single' }, values: { E: 2000, R, C: C * 1e-12 }, switches: { mode: 'discharge' }, graph: 'static', names: { R: 'R', C: 'body' }, caption: 'The Human Body Model as an RC circuit, switched to discharge. Below, the body’s voltage falling over five time constants.' }),
         };
       },
@@ -219,7 +219,7 @@ export default lesson({
         const R = T / (C * 1e-6);
         return {
           prompt: t`An arming-delay circuit charges a ${C} µF capacitor through a resistor; a comparator trips when the capacitor reaches 63% of the supply voltage. What resistance gives a ${T} s delay?`,
-          answer: R / 1e3, units: 'kΩ', tol: { rel: 0.005 },
+          answer: R / 1e3, units: 'kΩ', tol: { rel: 0.01 },
           errors: apart([{ value: T * C * 1e-6 / 1e3, feedback: t`$\tau = RC$, so $R = \tau/C$, not $\tau C$.` }], R / 1e3),
           hints: ['63% of the final voltage is reached after exactly one time constant.', t`So $RC = ${T}$ s: $R = ${T}/(${C}\times10^{-6})$.`],
           teach: 'Reaching 63% takes one time constant, so a delay circuit sets RC equal to the delay it needs.',

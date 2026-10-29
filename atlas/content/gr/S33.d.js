@@ -359,7 +359,7 @@ If some observer sees the stress tensor as diagonal, $\text{diag}(\rho c^2, p_1,
           ],
           hints: [t`$T_{\mu\nu}k^\mu k^\nu = -4A\cos^2\theta$ is most negative for $\theta = 0$: a ray straight across the gap.`, t`$-4A = -\pi^2\hbar c/(180d^4)$, with $d$ in metres.`],
           teach: t`The Casimir vacuum's null energy is $-4A = -\pi^2\hbar c/(180d^4)$ for rays across the gap: real, measurable physics — and absurdly small next to what a wormhole would need.`,
-          explain: t`$-4A = -\pi^2\hbar c/(180d^4) = ${sci(-4 * A)}$ J/m³. The plates attract with pressure $3A = ${sci(3 * A)}$ Pa, which devices of this size do feel. Compare a wormhole throat 1 m across: it needs $|T_{\mu\nu}k^\mu k^\nu|$ near $c^4/(8\pi Gr_0^2) = ${sci(THROAT_1M)}$ J/m³ (step 35) — about $10^{${Math.round(Math.log10(THROAT_1M / (4 * A)))}}$ times more.`,
+          explain: t`$-4A = -\pi^2\hbar c/(180d^4) = ${sci(-4 * A)}$ J/m³. The plates attract with pressure $3A = ${sci(3 * A)}$ Pa, which devices of this size do feel. Compare a wormhole throat of radius 1 m: it needs $|T_{\mu\nu}k^\mu k^\nu|$ near $c^4/(8\pi Gr_0^2) = ${sci(THROAT_1M)}$ J/m³ (step 35) — about $10^{${Math.round(Math.log10(THROAT_1M / (4 * A)))}}$ times more.`,
           visual: platesPic(t`The plates of the actuator, $${dTeX}$ nm apart (not to scale), and a light ray crossing the gap.`),
         };
       },

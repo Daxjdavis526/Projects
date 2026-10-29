@@ -138,7 +138,7 @@ What happens next depends on the battery. **Connected**, the voltage is held fix
           ], sb),
           hints: [t`Inside the slab the field is $E_0/\kappa$, and Gauss’s law ties it to the net charge: $(\sigma - \sigma_b)/\varepsilon_0 = \sigma/(\kappa\varepsilon_0)$.`, t`Solve for $\sigma_b$: $\sigma_b = \sigma(1 - 1/\kappa)$.`],
           teach: t`A dielectric’s bound surface charge is $\sigma_b = \sigma(1 - 1/\kappa)$: it cancels all but $1/\kappa$ of the free charge’s field.`,
-          explain: t`$\sigma_b = ${sig}(1 - 1/${k}) = ${nice(sf(sb))}\ \mu\text{C/m}^2$, of the opposite sign to the plate it faces. The field inside comes from the ${nice(sf(sig / k))}\ µC/m² that is left over.`,
+          explain: t`$\sigma_b = ${sig}(1 - 1/${k}) = ${nice(sf(sb))}\ \mu\text{C/m}^2$, of the opposite sign to the plate it faces. The field inside comes from the ${nice(sf(sig / k))} µC/m² that is left over.`,
           visual: plates({ A: 0.02, d: 2.5e-3, V: 12, material: key, f: 1, Q: 4e-10, connected: false, hide: ['Q'] }, 'Free charge on the plates (large marks) and the bound charge it induces on the slab’s faces (small marks, opposite sign). Marks show density only.'),
         };
       },

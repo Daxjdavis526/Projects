@@ -183,7 +183,7 @@ It is an inverse-square law, like Coulomb’s — but with a **cross product**, 
       },
     }),
     mcq({
-      id: 'which-piece', difficulty: 2,
+      id: 'which-piece', difficulty: 2, fixedOrder: true,
       prompt: t`A wire carrying a current is bent as shown. Which straight piece of it adds **nothing** to the magnetic field at the point P?`,
       visual: page({
         x: [-3.6, 3.2], y: [-1.6, 2.2],

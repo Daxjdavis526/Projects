@@ -139,7 +139,7 @@ Cut the battery out of the loop and the coil keeps the current going, dying away
           prompt: t`An RL circuit has $L = ${LmH}$ mH and $R = ${R}\ \Omega$. After the switch closes, how long does the current take to reach ${p}% of its final value?`,
           visual: rlGraph({ E: R, R, L: LmH * 1e-3, numbers: false, ylabel: 'I / I∞', hlines: [{ y: p / 100, color: 'violet', label: `${p}%` }], caption: `The current as a fraction of its final value, axis numbers hidden; the gold line is one time constant, the violet line ${p}% of the way.` }),
           answer: tt * 1e3, units: 'ms', tol: { rel: 0.01 },
-          errors: apart([{ value: (p / 100) * tau * 1e3, feedback: 'The rise is not linear in time: reaching 90% takes more than 0.9τ.' }, { value: -tau * Math.log(p / 100) * 1e3, feedback: t`Set $1 - e^{-t/\tau} = ${p / 100}$, so $e^{-t/\tau} = ${sf(1 - p / 100, 2)}$ — not $${p / 100}$.` }], tt * 1e3),
+          errors: apart([{ value: (p / 100) * tau * 1e3, feedback: `The rise is not linear in time: reaching ${p}% takes more than ${p / 100}τ.` }, { value: -tau * Math.log(p / 100) * 1e3, feedback: t`Set $1 - e^{-t/\tau} = ${p / 100}$, so $e^{-t/\tau} = ${sf(1 - p / 100, 2)}$ — not $${p / 100}$.` }], tt * 1e3),
           hints: [t`Solve $1 - e^{-t/\tau} = ${p / 100}$ for $t$.`, t`$e^{-t/\tau} = ${sf(1 - p / 100, 2)}$, so $t = -\tau\ln(${sf(1 - p / 100, 2)})$ with $\tau = L/R$.`],
           teach: t`To reach a fraction $f$ of the final current takes $t = -\tau\ln(1 - f)$: 0.69τ for half, 2.3τ for 90%, 4.6τ for 99%.`,
           explain: t`$\tau = ${tn(tau * 1e3)}$ ms; $\;t = -\tau\ln(1 - ${p / 100}) = ${tn(-Math.log(1 - p / 100))}\,\tau = ${tn(tt * 1e3)}$ ms.`,
@@ -165,8 +165,8 @@ Cut the battery out of the loop and the coil keeps the current going, dying away
     mcq({
       id: 'compare-curves', difficulty: 2,
       prompt: t`Two RL circuits have the same battery and the same resistance but different coils. Their currents after the switches close are shown. Which coil has the larger inductance?`,
-      visual: { type: 'graph', params: { x: [0, 100], y: [0, 3.6], aspect: 'wide', axesAt: 'edge', xlabel: 't (ms)', ylabel: 'I (A)', curves: [{ fn: '3*(1 - e^(-x/10))', color: 'accent', width: 2.6, label: 'A', labelAt: 22, labelDy: -14 }, { fn: '3*(1 - e^(-x/30))', color: 'violet', width: 2.6, label: 'B', labelAt: 40, labelDy: 14 }], hlines: [{ y: 3, color: 'ink3', label: 'ℰ/R' }] }, caption: 'The currents in circuits A (blue) and B (violet) after their switches close.' },
-      choices: ['B, the one that rises more slowly', 'A, the one that rises faster', 'Neither: they end at the same current, so their inductances are equal', 'You cannot tell without knowing the battery’s voltage'],
+      visual: { type: 'graph', params: { x: [0, 100], y: [0, 3.6], aspect: 'wide', axesAt: 'edge', xlabel: 't (ms)', ylabel: 'I (A)', curves: [{ fn: '3*(1 - e^(-x/10))', color: 'accent', width: 2.6, label: 'P', labelAt: 22, labelDy: -14 }, { fn: '3*(1 - e^(-x/30))', color: 'violet', width: 2.6, label: 'Q', labelAt: 40, labelDy: 14 }], hlines: [{ y: 3, color: 'ink3', label: 'ℰ/R' }] }, caption: 'The currents in circuits P (blue) and Q (violet) after their switches close.' },
+      choices: ['Q, the one that rises more slowly', 'P, the one that rises faster', 'Neither: they end at the same current, so their inductances are equal', 'You cannot tell without knowing the battery’s voltage'],
       answer: 0,
       why: {
         1: 'A larger inductance opposes the change more strongly, so its current rises more slowly, not faster.',
@@ -175,7 +175,7 @@ Cut the battery out of the loop and the coil keeps the current going, dying away
       },
       hints: [t`With $R$ the same, $\tau = L/R$ grows with $L$. Which curve has the longer time constant?`],
       teach: 'With the same resistance, a larger inductance gives a longer time constant and a slower rise to the same final current.',
-      explain: t`A reaches 63% of 3 A at about 10 ms; B at about 30 ms. Same $R$, so $L_B/L_A = \tau_B/\tau_A \approx 3$.`,
+      explain: t`P reaches 63% of 3 A at about 10 ms; Q at about 30 ms. Same $R$, so $L_Q/L_P = \tau_Q/\tau_P \approx 3$.`,
     }),
     mcq({
       id: 'open-switch', difficulty: 3,

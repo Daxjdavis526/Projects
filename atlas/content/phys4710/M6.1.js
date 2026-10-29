@@ -141,7 +141,7 @@ $$\begin{gathered} \psi \;\xrightarrow{\;r\to\infty\;}\; A\Bigl[e^{ikz} + f(\the
           errors: [{ value: ans * 1e4, feedback: t`Convert the flux to $\text{m}^{-2}\text{s}^{-1}$ (×$10^4$) and $b$ to metres consistently — the units are off by $10^4$.` }, { value: ans * 4 * Math.PI, feedback: t`The detector catches only $d\sigma/d\Omega\times\Delta\Omega$, not the whole $\sigma$.` }],
           hints: [t`$\Delta\Omega = A/L^2$ in steradians.`, t`Rate $= \Phi N\,\dfrac{d\sigma}{d\Omega}\,\Delta\Omega$ with everything in SI.`],
           teach: 'Count rate = flux × number of scatterers × dσ/dΩ × solid angle: the cross section is what turns a flux into a rate.',
-          explain: t`$\Delta\Omega = ${tex(A * 1e-4, 2)}/${L * L} = ${tex(dO, 3)}$ sr and $b^2 = ${tex((b * 1e-15) ** 2, 3)}\ \text{m}^2$, so the rate is $${tex(phi * 1e4, 2)}\times${tex(N, 2)}\times${tex((b * 1e-15) ** 2, 3)}\times${tex(dO, 3)} = ${tex(ans, 3)}\ \text{s}^{-1}$.`,
+          explain: t`$\Delta\Omega = ${tex(A * 1e-4, 2)}/${L * L} = ${tex(dO, 3)}$ sr and $b^2 = ${tex((b * 1e-15) ** 2, 3)}\ \text{m}^2$, so the rate is $${tex(phi * 1e4, 2)}\times${tex(N, 2)}$ $\times\,${tex((b * 1e-15) ** 2, 3)}\times${tex(dO, 3)}$ $= ${tex(ans, 3)}\ \text{s}^{-1}$.`,
         };
       },
     }),
@@ -195,7 +195,7 @@ $$\begin{gathered} \psi \;\xrightarrow{\;r\to\infty\;}\; A\Bigl[e^{ikz} + f(\the
           errors: [{ value: ans * 1e3, feedback: '1 mb = 10⁻³ b = 10⁻³¹ m².' }, { value: ans / 1e4, feedback: 'Convert nuclei per cm² to per m² (×10⁴).' }],
           hints: [t`For a thin target: rate $= \dot N_{\text{beam}}\times n\times\dfrac{d\sigma}{d\Omega}\times\Delta\Omega$, with $n$ the nuclei per unit area.`],
           teach: 'With a thin target the fraction of beam particles scattered into ΔΩ is n·(dσ/dΩ)·ΔΩ.',
-          explain: t`$${tex(Ndot, 1)}\times${tex(n * 1e4, 1)}\ \text{m}^{-2}\times${tex(dsig * 1e-31, 1)}\ \text{m}^2\text{/sr}\times${tex(dO, 1)}\ \text{sr} = ${tex(ans, 3)}\ \text{s}^{-1}$.`,
+          explain: t`$${tex(Ndot, 1)}\times${tex(n * 1e4, 1)}\ \text{m}^{-2}$ $\times\,${tex(dsig * 1e-31, 1)}\ \text{m}^2\text{/sr}\times${tex(dO, 1)}\ \text{sr}$ $= ${tex(ans, 3)}\ \text{s}^{-1}$.`,
         };
       },
     }),

@@ -335,7 +335,7 @@ Faster particles make bigger circles, but **every particle of the same kind take
           errors: [{ value: (m * v) / (QE * B * 1e3), feedback: t`Convert the field to tesla: $${BmT}$ mT $= ${tn(B)}$ T.` }],
           hints: [t`Use $r = mv/(|q|B)$ with $B$ in tesla.`, t`$r = \dfrac{(2.181\times10^{-25})(${tn(v)})}{(1.602\times10^{-19})(${tn(B)})}$.`],
           teach: 'Heavy, slow ions have huge radii in a field that traps light electrons in tiny circles: r = mv/(|q|B).',
-          explain: t`$r = \dfrac{mv}{eB} = ${tn(rad)}$ m — about a hundred times the width of the channel, so the field barely bends the ions: they fly straight out and make the thrust. An electron with a few tens of eV, in the same field, circles with a radius of about a millimetre and stays trapped, drifting round the ring along $\vec E\times\vec B$. That trapped electron cloud is what holds the accelerating voltage across the channel.`,
+          explain: t`$r = \dfrac{mv}{eB} = ${tn(rad)}$ m — about ${Math.round(rad / 0.02 / 10) * 10} times the width of the channel, so the field barely bends the ions: they fly straight out and make the thrust. An electron with a few tens of eV, in the same field, circles with a radius of about a millimetre and stays trapped, drifting round the ring along $\vec E\times\vec B$. That trapped electron cloud is what holds the accelerating voltage across the channel.`,
         };
       },
     }),

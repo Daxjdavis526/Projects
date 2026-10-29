@@ -48,7 +48,7 @@ That energy density holds for any electric field, anywhere — in a capacitor, a
       { label: 'Energy from the circuit', text: t`$U = \tfrac12 CV^2 = \tfrac12(8.85\times10^{-11})(500)^2 = 1.11\times10^{-5}$ J $= 11.1\ \mu$J.` },
       { label: 'The field', text: t`$E = V/d = 500/1.0\times10^{-3} = 5.0\times10^{5}$ V/m, so $u_E = \tfrac12\varepsilon_0E^2 = \tfrac12(8.854\times10^{-12})(5.0\times10^5)^2 = 1.11$ J/m³.` },
       { label: 'Energy from the field', text: t`The field fills the volume $Ad = (0.0100)(1.0\times10^{-3}) = 1.0\times10^{-5}$ m³, so $U = u_E\,Ad = 1.11\times10^{-5}$ J. The same answer, as it must be: the energy is the field’s.` },
-      { label: 'Sense check', text: t`Microjoules: a small air-gap capacitor at a few hundred volts holds about as much energy as a grain of sand dropped a few centimetres. The firing banks and flash capacitors that store joules use far larger capacitance.` },
+      { label: 'Sense check', text: t`Microjoules: a small air-gap capacitor at a few hundred volts holds about as much energy as a 1 g paper clip dropped 1 mm. The firing banks and flash capacitors that store joules use far larger capacitance.` },
     ],
     answer: t`$U = 11\ \mu$J, both ways.`,
   },

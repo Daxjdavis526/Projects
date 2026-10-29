@@ -92,7 +92,7 @@ The gradient $\nabla V$ points the way $V$ climbs fastest, at right angles to th
         return {
           prompt: t`The graph shows the potential along the $x$ axis. What is the field component $E_x$ at $x = ${x}$ cm?`,
           answer: Ex, units: 'V/m', tol: { rel: 0.01, abs: 1 },
-          errors: s === 0 ? [{ value: -20000, feedback: 'That is V divided by the distance. The field depends on how V changes: here V is flat.' }] : [{ value: -Ex, feedback: t`That is the slope itself. The field is minus the slope: $E_x = -dV/dx$.` }],
+          errors: s === 0 ? [{ value: -200 / (x / 100), feedback: 'That is V divided by the distance. The field depends on how V changes: here V is flat.' }] : [{ value: -Ex, feedback: t`That is the slope itself. The field is minus the slope: $E_x = -dV/dx$.` }],
           hints: ['Read the slope of the graph at that point, in volts per centimetre, then convert to V/m.', t`$E_x = -\dfrac{dV}{dx}$.`],
           teach: 'Eₓ is minus the slope of the graph of V against x: zero where V is flat, pointing downhill where it slopes.',
           explain: s === 0 ? t`Between 2 and 4 cm the graph is flat at $-200$ V: $dV/dx = 0$, so $E_x = 0$. The value of $V$ does not matter, only its change.` : t`There the slope is $${s > 0 ? '+' : ''}${s}$ V/cm $= ${tn(s * 100)}$ V/m, so $E_x = -dV/dx = ${tn(Ex)}$ V/m: the field points toward ${Ex > 0 ? '$+x$' : '$-x$'}, down the slope.`,

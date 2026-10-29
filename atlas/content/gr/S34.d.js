@@ -208,7 +208,7 @@ Around a straight **cosmic string** spacetime is flat everywhere except on the s
     }),
     expr({
       id: 'linear-to-cone', difficulty: 3,
-      prompt: t`Step 28's linearized field of a string gives the spatial metric in the plane around it as $\left(1 - 2k\ln r\right)\left(dr^2 + r^2d\phi^2\right) \approx r^{-2k}\left(dr^2 + r^2d\phi^2\right)$, with $k = 4G\mu/c^2$ and $r$ in units of some reference radius. Find a new radial coordinate $R(r)$ that turns it into $dR^2 + (1 - k)^2R^2d\phi^2$.`,
+      prompt: t`Solving step 28's linearized field equations for a string gives the spatial metric in the plane around it as $\left(1 - 2k\ln r\right)\left(dr^2 + r^2d\phi^2\right) \approx r^{-2k}\left(dr^2 + r^2d\phi^2\right)$, with $k = 4G\mu/c^2$ and $r$ in units of some reference radius. Find a new radial coordinate $R(r)$ that turns it into $dR^2 + (1 - k)^2R^2d\phi^2$.`,
       visual: conePic,
       answer: 'r^(1 - k)/(1 - k)', answerTeX: t`\frac{r^{1-k}}{1 - k}`, lhs: 'R(r)',
       vars: { r: [0.5, 3], k: [0.05, 0.3] },

@@ -345,7 +345,7 @@ So a charge at rest feels nothing, and a charge moving along the field feels not
       },
     }),
     multi({
-      id: 'cp-no-force', difficulty: 2,
+      id: 'cp-no-force', difficulty: 2, fixedOrder: true,
       prompt: 'In a uniform magnetic field pointing to the right, six particles are at rest or moving as shown. Which of them feel **no** magnetic force? Select every one.',
       visual: page({
         x: [-3.6, 3.6], y: [-2.3, 2.3],
