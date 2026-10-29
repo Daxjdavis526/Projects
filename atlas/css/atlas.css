@@ -134,7 +134,10 @@ hr{border:0;border-top:1px solid var(--line);margin:1.4rem 0}
   .tabbar a svg{width:21px;height:21px}
   .tabbar a[aria-current="page"]{color:var(--accent-2)}
   .tabbar .count{position:absolute;top:0;left:56%;min-width:1.05rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:.62rem;font-weight:700;line-height:1.05rem;padding:0 .25rem}
-  .main{padding:1.2rem calc(1rem + env(safe-area-inset-right)) 6rem calc(1rem + env(safe-area-inset-left))}
+  /* nothing may widen a phone's page (the browser would zoom it all out): long maths
+     scrolls sideways (fitmath.js); anything else past the edge is clipped */
+  .main{padding:1.2rem calc(1rem + env(safe-area-inset-right)) 6rem calc(1rem + env(safe-area-inset-left));overflow-x:clip}
+  .main p code,.main dd code,.main li code{overflow-wrap:anywhere}
 }
 
 /* ── building blocks ───────────────────────────────────────────────────── */
@@ -280,9 +283,9 @@ a.lesson-row:hover{background:var(--panel-2);text-decoration:none}
 .katex-display.math-scroll{display:block}
 .player-nav{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-top:1.3rem}
 .why{display:flex;gap:.6rem;align-items:flex-start;color:var(--ink-2);font-size:.93rem;margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line-2)}
-.symbols{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;align-items:baseline;margin:.6rem 0 1rem;padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-size:.93rem}
+.symbols{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem 1rem;align-items:baseline;margin:.6rem 0 1rem;padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-size:.93rem}
 .symbols dt{font-weight:600;text-align:right}
-.symbols dd{margin:0;color:var(--ink-2)}
+.symbols dd{margin:0;color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
 
 /* visual frame */
 .viz{border:1px solid var(--line);border-radius:14px;background:var(--bg-2);overflow:hidden}

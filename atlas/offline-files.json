@@ -1799,7 +1799,7 @@
 "vendor/katex-0.19.0/fonts/KaTeX_Size4-Regular.woff2",
 "vendor/katex-0.19.0/fonts/KaTeX_Typewriter-Regular.woff2",
 "vendor/katex-0.19.0/katex.min.css",
-"vendor/katex-0.19.0/katex.min.js"],"bytes":38830752},"python":{"files":["vendor/pyodide-314.0.7/contourpy-1.3.3-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+"vendor/katex-0.19.0/katex.min.js"],"bytes":38831044},"python":{"files":["vendor/pyodide-314.0.7/contourpy-1.3.3-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
 "vendor/pyodide-314.0.7/cycler-0.12.1-py3-none-any.whl",
 "vendor/pyodide-314.0.7/fonttools-4.62.1-py3-none-any.whl",
 "vendor/pyodide-314.0.7/kiwisolver-1.5.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
