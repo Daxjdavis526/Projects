@@ -152,7 +152,28 @@ export function gradeNumeric(item, input) {
   const hit = (item.errors || []).filter((e) => near(value, e.value))
     .sort((p, q) => Math.abs(value - p.value) - Math.abs(value - q.value))[0];
   if (hit) return no(hit.feedback, { value, known: true });
+  // the right number rounded too early: say so, rather than a bare "wrong"
+  const n = countSigFigs(q.numberText);
+  if (n >= 2 && target !== 0 && Math.abs(value - Number(target.toPrecision(n))) <= 1e-9 * Math.abs(target)) {
+    const k = Math.max(figuresNeeded(item), n + 1);
+    return no(`Right to ${n} significant figures, but this answer needs at least ${k}: keep more digits through the working and round only at the end.`, { value, precision: true });
+  }
   return no(genericNumericSlip(value, target, rel, abs), { value });
+}
+
+/**
+ * The significant figures an answer needs to land inside its tolerance, when three
+ * are not enough (0 otherwise, and for whole numbers, which are typed exactly anyway).
+ * The player shows it under the box, so a tight tolerance is never a hidden trap.
+ */
+export function figuresNeeded(item) {
+  const t = item.answer;
+  if (!Number.isFinite(t) || t === 0 || Number.isInteger(t)) return 0;
+  const rel = item.tol?.rel ?? DEFAULT_REL, abs = item.tol?.abs ?? 0;
+  for (let k = 3; k <= 12; k++) {
+    if (Math.abs(Number(t.toPrecision(k)) - t) <= abs + rel * Math.abs(t)) return k === 3 ? 0 : k;
+  }
+  return 12;
 }
 
 function genericNumericSlip(v, t, rel, abs) {

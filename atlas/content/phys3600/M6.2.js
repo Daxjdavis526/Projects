@@ -224,7 +224,7 @@ export default lesson({
           errors: [{ value: (2 * PI * R * dst * 1e-9) / MU0 / 1e6, feedback: t`That is Ampère-style $B = \mu_0I/2\pi s$, the straight-wire field. A ring at its centre gives $\mu_0I/2R$.` }, { value: (2 * RE * dst * 1e-9) / MU0 / 1e6, feedback: t`Use the ring’s radius, ${n} Earth radii, not Earth’s.` }],
           hints: [t`At the centre of a circular loop, $B = \dfrac{\mu_0I}{2R}$ (Biot–Savart: every piece is at distance $R$ and perpendicular to $\hat{\mathcal R}$).`, t`$I = \dfrac{2R\,|\text{Dst}|}{\mu_0}$ with $R = ${n}\times6.371\times10^{6}$ m.`],
           teach: 'At the centre of a loop B = μ₀I/2R, so a field change of tens of nanotesla at Earth means megaamperes circling thousands of kilometres out.',
-          explain: t`$I = \dfrac{2(${tex(R, 3)})(${dst}\times10^{-9})}{${tex(MU0, 5)}} \approx ${nice(sf(I / 1e6, 3))}$ MA. The westward current makes a field pointing south at Earth’s centre — opposite to Earth’s own northward field at the equator — hence the drop. Earth’s surface lies a quarter of the way to the ring, where this one-loop model’s field differs from the centre’s by under 10%.`,
+          explain: t`$I = \dfrac{2(${tex(R, 3)})(${dst}\times10^{-9})}{${tex(MU0, 5)}} \approx ${nice(sf(I / 1e6, 3))}$ MA. The westward current makes a field pointing south at Earth’s centre — opposite to Earth’s own northward field at the equator — hence the drop. Earth’s surface lies ${['', '', '', 'a third', 'a quarter', 'a fifth'][n]} of the way to the ring, where this one-loop model’s field differs from the centre’s by under 10%.`,
         };
       },
     }),

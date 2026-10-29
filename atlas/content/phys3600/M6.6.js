@@ -63,7 +63,7 @@ export default lesson({
     lead: t`Earth (blue) as a centred dipole, seen in a slice through its magnetic axis (dashed); its moment points roughly south, so field lines (violet) leave the southern hemisphere and enter the northern. Move the satellite in magnetic latitude and altitude: the gold arrow shows the field’s direction there.`,
     tasks: [
       t`At the magnetic equator the field is horizontal, pointing north. Slide toward a pole: it tips steeply downward and doubles in strength — the factor $\sqrt{1 + 3\sin^2\lambda}$.`,
-      t`Raise the altitude from 400 km (the ISS) to 6400 km — one Earth radius up: the field falls eightfold, as $1/r^3$.`,
+      t`Raise the altitude from 400 km (the ISS) to 6400 km — one Earth radius up: the field falls about sevenfold, as $1/r^3$ (eightfold from the surface).`,
       t`Read the dip angle: at latitude 45° it is $\arctan 2 \approx 63°$, not 45°. Field lines are steeper than the latitude suggests.`,
     ],
     params: earth({
@@ -206,7 +206,7 @@ export default lesson({
           errors: [{ value: m * B * 1e12, feedback: t`$mB$ has units of torque (N·m), not force. The force needs the field’s **gradient**: $F = m\,dB/dr$.` }, { value: ((m * B) / rr) * 1e12, feedback: t`$B \propto r^{-3}$, so $dB/dr = -3B/r$: a factor of 3.` }],
           hints: [t`$\vec F = \nabla(\vec m\cdot\vec B)$; on the axis $\vec m\cdot\vec B = mB(r)$ with $B = 2B_0(R/r)^3$.`, t`$|dB/dr| = 3B/r$, so $F = 3mB/r$, pointing down toward stronger field.`],
           teach: 'A dipole in Earth’s field feels a useful torque mB but almost no force, because the field changes so slowly over the spacecraft.',
-          explain: t`$B = 2B_0(R/r)^3 \approx ${nice(sf(B * 1e6, 3))}\ \mu\text{T}$, so $F = 3mB/r \approx ${nice(sf(F * 1e12, 3))}$ pN. Turned across the field, the same torquer feels a torque $mB \approx ${nice(sf(m * B * 1e6, 3))}\ \mu\text{N·m}$ — enough to turn a small satellite in minutes — while the force would move it by millimetres a year. That is why magnetorquers steer attitude, never orbits.`,
+          explain: t`$B = 2B_0(R/r)^3 \approx ${nice(sf(B * 1e6, 3))}\ \mu\text{T}$, so $F = 3mB/r \approx ${nice(sf(F * 1e12, 3))}$ pN. Turned across the field, the same torquer feels a torque $mB \approx ${nice(sf(m * B * 1e6, 3))}\ \mu\text{N·m}$ — enough to turn a small satellite in minutes — while the force gives even a 10 kg satellite an acceleration of only $${tex(F / 10, 1)}\ \text{m/s}^2$. That is why magnetorquers steer attitude, never orbits.`,
         };
       },
     }),

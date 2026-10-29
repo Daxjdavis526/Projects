@@ -226,7 +226,7 @@ export default lesson({
       },
       hints: [t`The only restriction on a magnetostatic field is $\nabla\cdot\vec B = 0$; any curl can be supplied by currents $\vec J = (\nabla\times\vec B)/\mu_0$.`, t`Compute each divergence.`],
       teach: 'Any divergence-free field is a possible magnetostatic field: currents J = ∇×B/μ₀ will make it.',
-      explain: t`$\langle -y, x, 0\rangle$ (inside a uniform current), $\langle 0, 0, x\rangle$ (beside a current sheet), and $\langle x, -2y, z\rangle$ (current-free, as its curl is zero) all have zero divergence. The other two do not, and no currents can make them: they would need magnetic charge.`,
+      explain: t`$\langle -y, x, 0\rangle$ (inside a uniform current), $\langle 0, 0, x\rangle$ (inside a thick slab of uniform current), and $\langle x, -2y, z\rangle$ (current-free, as its curl is zero) all have zero divergence. The other two do not, and no currents can make them: they would need magnetic charge.`,
     }),
   ],
   sources: [

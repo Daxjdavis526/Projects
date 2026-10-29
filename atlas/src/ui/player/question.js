@@ -6,7 +6,7 @@ import { texToPlain } from '../../core/markup.js';
 // boss battles and the diagnostic.
 
 import { h, md, mdi, math, icon, tex, difficultyDots } from '../dom.js';
-import { grade } from '../../core/check.js';
+import { grade, figuresNeeded } from '../../core/check.js';
 import { previewExpression } from '../../core/check.js';
 import { parseQuantity, unitTeX } from '../../core/units.js';
 import { app } from '../state.js';
@@ -262,7 +262,9 @@ function numericControl(item, box, changed) {
   const unit = item.units && item.unitMode !== 'typed' ? h('span.unit', { html: tex(unitTeX(item.units)) }) : null;
   const wrap = h('div.answer', input, unit);
   const preview = h('div.preview');
-  box.append(h('div.answer-row', wrap), preview);
+  const figs = figuresNeeded(item);
+  box.append(h('div.answer-row', wrap), preview,
+    figs ? h('div.tiny.faint', { style: { marginTop: '.35rem' } }, `Give at least ${figs} significant figures.`) : null);
   input.addEventListener('input', () => {
     const v = input.value.trim();
     wrap.classList.remove('wrong');

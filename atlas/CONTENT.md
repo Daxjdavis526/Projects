@@ -280,7 +280,11 @@ num({ id: 'f-over-m', difficulty: 1,
 - A generator may `throw` to guard a numerical check while you write it, but
   every seed the test tries must succeed: a throw on any seed fails the item.
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
-  for: "to 3 significant figures" → `rel: 0.005`. The two add: giving only
+  for: "to 3 significant figures" → `rel: 0.005`. When a tolerance is too tight for an
+  answer rounded to three significant figures, the player says under the box how
+  many it needs (`figuresNeeded` in check.js), and a right value rounded too early
+  is told so rather than marked plainly wrong — but say it in the prompt too when
+  the precision is the point (a calibration, a fit). The two add: giving only
   `abs` keeps the default 1% relative part, so an exact integer answer wants
   `tol: { rel: 0, abs: 0.5 }` (or `rel: 1e-9`). Unit symbols are SI's: `'g'` is
   grams (write `'m/s^2'` for an acceleration), `'Gyr'` a billion years.

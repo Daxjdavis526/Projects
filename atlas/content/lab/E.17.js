@@ -36,7 +36,8 @@ const CMID = (() => { for (let i = 1; i < CT.length; i++) if (Cr[i - 1] < 0.5 &&
 const TB0 = 77.355, HV = 5570, RG = 8.314462618;
 const nBoil = (pkPa) => 1 / (1 / TB0 - (RG / HV) * Math.log(pkPa / 101.325));
 
-const sweepPic = (caption, extra = {}) => ({ type: 'graph', params: { aspect: 'wide', x: [86, 98], y: [-0.08, 1.12], xlabel: 'T read by the sensor (K)', ylabel: 'R / R(normal)', axesAt: 'edge', curves: [{ fn: `1/(1 + exp(-(x - ${TC.Tc} - ${r6(LAG)})/${TC.w}))`, color: 'warn', label: 'warming', labelAt: 94.4, labelDy: 14 }, { fn: `1/(1 + exp(-(x - ${TC.Tc} + ${r6(LAG)})/${TC.w}))`, color: 'accent', label: 'cooling', labelAt: 89.5, labelDy: -14 }], hlines: [{ y: 0.5, color: 'ink3' }], ...extra }, caption });
+// mids = [warming, cooling] midpoints to draw at (default: the true Tc ± the lag)
+const sweepPic = (caption, extra = {}, [up, dn] = [TC.Tc + LAG, TC.Tc - LAG]) => ({ type: 'graph', params: { aspect: 'wide', x: [86, 98], y: [-0.08, 1.12], xlabel: 'T read by the sensor (K)', ylabel: 'R / R(normal)', axesAt: 'edge', curves: [{ fn: `1/(1 + exp(-(x - ${r6(up)})/${TC.w}))`, color: 'warn', label: 'warming', labelAt: r6(up + 1.6), labelDy: 14 }, { fn: `1/(1 + exp(-(x - ${r6(dn)})/${TC.w}))`, color: 'accent', label: 'cooling', labelAt: r6(dn - 1.7), labelDy: -14 }], hlines: [{ y: 0.5, color: 'ink3' }], ...extra }, caption });
 
 export default lesson({
   id: 'lab.E.17',
@@ -119,7 +120,7 @@ And **thermal EMFs** of a few microvolts in the leads make zero resistance look 
         const ans = (up + dn) / 2;
         return {
           prompt: t`The warming sweep’s midpoint reads ${up} K and the cooling sweep’s ${dn} K, at the same rate. What is $T_c$?`,
-          visual: sweepPic('Warming and cooling sweeps either side of the transition (illustrative).'),
+          visual: sweepPic('The two sweeps drawn at the midpoints in the question; the dashed line is half the normal resistance.', {}, [up, dn]),
           answer: ans, units: 'K', tol: { rel: 0, abs: 0.006 },
           errors: [{ value: up, feedback: 'The warming sweep reads high by the lag; the cooling sweep low. Average them.' }, { value: dn, feedback: 'The cooling sweep reads low by the lag. Average the two sweeps.' }].filter((e) => Math.abs(e.value - ans) > 0.05),
           hints: ['The lag shifts the two sweeps by the same amount in opposite directions.'],
@@ -252,7 +253,7 @@ print(f"midpoint = {T_mid:.3f} K")`,
         const ans = ((up - dn) / 2) / (rate / 60);
         return {
           prompt: t`Sweeping at ${rate} K/min, the warming midpoint is ${up} K and the cooling one ${dn} K. What is the pellet’s thermal lag, in seconds?`,
-          visual: sweepPic('Warming and cooling sweeps either side of the transition (illustrative).'),
+          visual: sweepPic('The two sweeps drawn at the midpoints in the question; the dashed line is half the normal resistance.', {}, [up, dn]),
           answer: ans, units: 's', tol: { rel: 0.01 },
           errors: [{ value: (up - dn) / (rate / 60), feedback: 'Each sweep is off by τṪ; the gap between them is twice that.' }, { value: ((up - dn) / 2) / rate, feedback: 'That is in minutes.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`Half the gap is $\tau\dot T$.`],

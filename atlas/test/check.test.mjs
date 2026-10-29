@@ -4,7 +4,7 @@
 
 import { parse, evaluate, toTeX, toText, compile, gammaFn, erf, ParseError } from '../src/core/expr.js';
 import { parseUnit, parseQuantity, convert, describeDims, unitTeX } from '../src/core/units.js';
-import { grade, countSigFigs, compareExpr } from '../src/core/check.js';
+import { grade, countSigFigs, compareExpr, figuresNeeded } from '../src/core/check.js';
 import { makeRng, roundTo } from '../src/core/rng.js';
 
 let pass = 0, fail = 0;
@@ -257,6 +257,13 @@ check('a power just before a closing bracket: J/(K m^3)', describeDims(parseUnit
 
 check('decimal unit powers: nV/Hz^0.5 is V Hz^-1/2, typeset whole', Math.abs(convert(1, 'uV/Hz^(1/2)', 'nV/Hz^0.5') - 1000) < 1e-9 && unitTeX('nV/Hz^0.5') === '\\mathrm{nV/Hz^{0.5}}' && unitTeX('m^(1/2)') === '\\mathrm{m^{1/2}}');
 check('dBm is read as its number', convert(-30, 'dBm', 'dBm') === -30);
+
+{
+  const tight = { type: 'numeric', answer: Math.SQRT2, tol: { rel: 0.001 } };
+  check('a tight tolerance asks for its figures: √2 to 0.1% needs 4', figuresNeeded(tight) === 4 && figuresNeeded({ type: 'numeric', answer: Math.SQRT2 }) === 0 && figuresNeeded({ type: 'numeric', answer: 4096, tol: { rel: 0, abs: 0.01 } }) === 0);
+  const r = grade(tight, '1.41');
+  check('rounded too early: a precision message, not a bare wrong', !r.correct && /needs at least 4/.test(r.feedback) && grade(tight, '1.414').correct && !/significant/.test(grade(tight, '1.5').feedback || ''));
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

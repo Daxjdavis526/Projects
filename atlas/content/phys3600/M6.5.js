@@ -106,7 +106,7 @@ export default lesson({
           errors: [{ value: (dn * 1e-6) / MU0, feedback: 'One reading includes Earth’s field. Only the difference between the two sides is the sheet’s doing.' }, { value: ((dn - up) * 1e-6) / (2 * MU0), feedback: t`The jump across the sheet is the whole $\mu_0K$ (it makes $+\tfrac12\mu_0K$ on one side and $-\tfrac12\mu_0K$ on the other).` }],
           hints: [t`Earth’s field is the same on both sides; the sheet’s own field reverses. Subtract the readings.`, t`$|\Delta B^\parallel| = \mu_0K$.`],
           teach: 'The jump in the tangential field across a sheet is μ₀K, whatever other fields are present — they cancel in the difference.',
-          explain: t`$K = \dfrac{(${dn} - ${up})\times10^{-6}}{${tex(MU0, 5)}} \approx ${nice(sf(ans, 3))}$ A/m. The average of the two readings, $${nice(sf((up + dn) / 2, 3))}\ \mu\text{T}$, is the outside field; the current out of the page weakens the field above and strengthens it below, as the right-hand rule says.`,
+          explain: t`$K = \dfrac{(${dn} - ${up < 0 ? `(${up})` : up})\times10^{-6}}{${tex(MU0, 5)}} \approx ${nice(sf(ans, 3))}$ A/m. The average of the two readings, $${nice(sf((up + dn) / 2, 3))}\ \mu\text{T}$, is the outside field; the current out of the page ${up < 0 ? 'reverses' : 'weakens'} the field above and strengthens it below, as the right-hand rule says.`,
         };
       },
     }),
