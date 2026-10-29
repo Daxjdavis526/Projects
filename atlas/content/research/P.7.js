@@ -139,7 +139,7 @@ and the distance modulus $m - M$ carries a calibration from one rung of the ladd
       { label: 'Rung 2', text: t`With that distance every Pleiad gets an absolute magnitude, $M = m - 5\log_{10}(d/10)$; a straight line through them gives $M_G = ${OUT.a} + ${OUT.b.toFixed(2)}\times$ colour.` },
       { label: 'Rung 3', text: t`Cluster B’s stars sit $m - M = ${OUT.DM2} \pm ${OUT.sDM2}$ mag below that line: $d = 10^{(${OUT.DM2} + 5)/5} = ${OUT.d2} \pm ${OUT.sd2}$ pc.` },
       { label: 'B’s parallaxes', text: t`At 2500 pc the parallax is 0.4 mas, comparable with the errors. Their mean gives $${OUT.d2p} \pm ${OUT.sd2p}$ pc — consistent but twenty times less precise. Inverting each and averaging gives ${OUT.inv} pc, because ${OUT.neg} parallaxes are negative.` },
-      { label: 'Compare', text: t`Our $${OUT.d1} \pm ${OUT.sd1}$ pc agrees with Gaia DR2’s 136 pc and VLBI’s $136.2 \pm 1.2$; Hipparcos’s $120.2 \pm 1.5$ is $8\sigma$ away — the controversy Gaia ended. Every rung above inherits whichever is right.` },
+      { label: 'Compare', text: t`Our $${OUT.d1} \pm ${OUT.sd1}$ pc agrees with Gaia DR2’s 136 pc and VLBI’s $136.2 \pm 1.2$; Hipparcos’s $120.2 \pm 1.5$ is $8\sigma$ from VLBI’s value — the controversy Gaia ended. Every rung above inherits whichever is right.` },
     ],
     answer: t`Pleiades $${OUT.d1} \pm ${OUT.sd1}$ pc; cluster B $${OUT.d2} \pm ${OUT.sd2}$ pc by main-sequence fitting, against $${OUT.d2p} \pm ${OUT.sd2p}$ pc from its own parallaxes — the ladder is more precise than direct parallaxes once the parallaxes are noisy.`,
   },
