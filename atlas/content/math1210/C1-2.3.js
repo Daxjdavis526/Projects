@@ -181,7 +181,7 @@ If the values grow without bound we write $\lim f = +\infty$ (or $-\infty$): the
       visual: { type: 'graph', params: { x: [-4, 3], y: [-5, 3], aspect: 'wide', curves: [{ fn: 'x - 2', color: 'accent', label: 'numerator x − 2', labelAt: -3.6, labelDy: 16 }, { fn: 'x + 1', color: 'gold', label: 'denominator x + 1', labelAt: 1.2, labelDx: 10 }], vlines: [{ x: -1, color: 'ink4' }] }, caption: 'The numerator and denominator plotted separately.' },
       choices: [t`$+\infty$`, t`$-\infty$`, t`$-\tfrac32$`, 'It does not exist, even as ±∞'],
       answer: 0,
-      why: { 1: t`To the left of $-1$ the denominator is *negative*: negative over negative is positive.`, 2: t`That is the value at $x = 0$, not near $x = -1$.`, 3: t`The two-sided limit fails, but the one-sided limit asked for is $+\infty$.` },
+      why: { 1: t`To the left of $-1$ the denominator is *negative*: negative over negative is positive.`, 2: t`The numerator is $-3$ there, but the denominator is $-1 + 1 = 0$, not $2$ (a sign slip). Nonzero over something tending to $0$ blows up.`, 3: t`The two-sided limit fails, but the one-sided limit asked for is $+\infty$.` },
       hints: [t`Near $x = -1$ the numerator is about $-3$.`, t`For $x < -1$, $x + 1$ is a tiny *negative* number.`],
       teach: 'Fix the sign of each factor on the side of approach, then read off ±∞.',
       explain: t`$\frac{-3}{0^-} \to +\infty$. (From the right it is $-\infty$.)`,

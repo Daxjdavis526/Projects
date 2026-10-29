@@ -176,9 +176,9 @@ The **half-angle** is why opposite directions in space ($\theta$ and $\theta + 1
       ],
       answer: 0,
       why: {
-        1: t`Its overlap with $|{+n}\rangle$ is $\cos^2\tfrac{\theta}{2} - \sin^2\tfrac{\theta}{2} = \cos\theta$, zero only at $\theta = 90^\circ$. It is the mirror image in the xy-plane, not the opposite point.`,
+        1: t`Its overlap with $|{+n}\rangle$ is $\cos^2\tfrac{\theta}{2} - \sin^2\tfrac{\theta}{2} = \cos\theta$, zero only at $\theta = 90^\circ$. It is the point turned $180^\circ$ about the z-axis, not the opposite point.`,
         2: t`Its overlap is $2\sin\tfrac{\theta}{2}\cos\tfrac{\theta}{2} = \sin\theta$, zero only at the poles.`,
-        3: t`Full angles do not even make a unit vector of the right kind: this is $|{+n'}\rangle$ for the direction at $2\theta$, generally not orthogonal.`,
+        3: t`Full angles make the state $|{+n'}\rangle$ for the direction at $2\theta$, not the opposite one: generally not orthogonal.`,
       },
       hints: [t`Compute $\langle{+n}|\chi\rangle$ for each candidate; the bra conjugates $e^{i\phi}$ to $e^{-i\phi}$.`, t`The opposite point on the sphere is $\theta \to 180^\circ - \theta$, $\phi \to \phi + 180^\circ$.`],
       teach: t`$|{-n}\rangle$, the state opposite $|{+n}\rangle$ on the Bloch sphere, is $\sin\tfrac{\theta}{2}|+\rangle - e^{i\phi}\cos\tfrac{\theta}{2}|-\rangle$.`,

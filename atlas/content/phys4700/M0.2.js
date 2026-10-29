@@ -337,7 +337,7 @@ with $D = ${D_NV}$ GHz and $\gamma = ${fmt(GHZ_T, 4)}$ GHz/T (the free electron�
           errors: [{ value: 2 * B, feedback: t`The two resonances are at $D \pm \gamma B$, so they are $2\gamma B$ apart, not $\gamma B$.` }],
           hints: [t`The eigenvalues are the diagonal entries; the resonances are at $f_\pm = D \pm \gamma B$.`, t`$f_+ - f_- = 2\gamma B$, so $B = \Delta f/(2\gamma)$.`],
           teach: t`The measured frequencies are differences of eigenvalues of the Hamiltonian; read the field off from their splitting.`,
-          explain: t`$B = \dfrac{\Delta f}{2\gamma} = \dfrac{${df}\ \text{MHz}}{2\times${fmt(GHZ_T * 1e3, 5)}\ \text{MHz/mT}} = ${fmt(B, 3)}\ \mu\text{T}$. Earth’s field at the surface is 25–65 μT. $D$ itself cancels from the difference, which helps: it drifts with temperature.`,
+          explain: t`$B = \dfrac{\Delta f}{2\gamma} = \dfrac{${df}\ \text{MHz}}{2\times${fmt(GHZ_T * 1e3, 5)}\ \text{MHz/T}} = ${fmt(B, 3)}\ \mu\text{T}$. Earth’s field at the surface is 25–65 μT. $D$ itself cancels from the difference, which helps: it drifts with temperature.`,
         };
       },
     }),

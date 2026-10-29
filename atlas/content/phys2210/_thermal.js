@@ -416,11 +416,11 @@ export function heatingCurve({ segs, unit = '°C', numbers = true, hi = null, le
 /** One kilogram of water from ice at T0 (°C) to steam at T1 (°C), as heating-curve segments (kJ). */
 export function waterSegs(T0 = -20, T1 = 120, m = 1) {
   return [
-    { dQ: (m * 2.09 * (0 - T0)), T0, T1: 0, label: 'ice warms', letter: '1', dx: 10, dy: 12 },
-    { dQ: m * 334, T0: 0, T1: 0, label: 'melts at 0 °C', letter: '2' },
-    { dQ: m * 4.184 * 100, T0: 0, T1: 100, label: 'water warms', letter: '3', dx: 10, dy: 14 },
-    { dQ: m * 2257, T0: 100, T1: 100, label: 'boils at 100 °C', letter: '4' },
-    { dQ: m * 2.01 * (T1 - 100), T0: 100, T1, label: '', letter: '5' },
+    { dQ: (m * 2.09 * (0 - T0)), T0, T1: 0, label: 'ice warms', letter: '①', dx: 10, dy: 12 },
+    { dQ: m * 334, T0: 0, T1: 0, label: 'melts at 0 °C', letter: '②' },
+    { dQ: m * 4.184 * 100, T0: 0, T1: 100, label: 'water warms', letter: '③', dx: 10, dy: 14 },
+    { dQ: m * 2257, T0: 100, T1: 100, label: 'boils at 100 °C', letter: '④' },
+    { dQ: m * 2.01 * (T1 - 100), T0: 100, T1, label: '', letter: '⑤' },
   ].filter((s) => s.dQ > 0);
 }
 

@@ -166,7 +166,7 @@ export default lesson({
     mcq({
       id: 'curl-error', difficulty: 2, kind: 'error',
       prompt: t`A student tests $\vec F = (x^2y,\ xy^2)$ by computing $\partial_xF_x - \partial_yF_y = 2xy - 2xy = 0$ and concludes "curl zero, so conservative". What is wrong?`,
-      visual: { type: 'field2d', params: { P: 'x^2*y', Q: 'x*y^2', x: [-2, 2], y: [-2, 2], probe: false, readout: false, loop: { r: 0.8, c: [0.9, 0.9] } }, caption: t`The field $(x^2y, xy^2)$ with a loop in the first quadrant.` },
+      visual: { type: 'field2d', params: { P: 'x^2*y', Q: 'x*y^2', x: [-2, 2], y: [-2, 2], probe: false, readout: false, loop: { r: 0.45, c: [1.2, 0.5] } }, caption: t`The field $(x^2y, xy^2)$ with a loop in the first quadrant, below the line $y = x$.` },
       choices: [
         t`The curl's $z$-component is $\partial_xF_y - \partial_yF_x = y^2 - x^2$, which is not zero: not conservative`,
         t`Nothing — and a zero result always proves the force conservative`,
@@ -225,7 +225,7 @@ export default lesson({
     expr({
       id: 'cp-potential', difficulty: 3,
       gen(r) {
-        const k = r.pick([2, 4, 6]), c = r.pick([1, 3, 5]);
+        const k = r.pick([2, 4, 6]), c = r.pick([1, 3, 5].filter((v) => v < k));   // c < k keeps U positive definite (a real spring network)
         const C = c === 1 ? '' : c;
         return {
           prompt: t`Two masses on a frictionless table are joined by springs so that one of them feels $\vec F = \big(-${k}x - ${C}y,\ -${C}x - ${k}y\big)$ N (with $x, y$ in m). Check that this force is conservative and find $U(x, y)$ with $U(0, 0) = 0$.`,

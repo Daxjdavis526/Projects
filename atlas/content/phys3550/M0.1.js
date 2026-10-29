@@ -133,7 +133,7 @@ Differentiate $\vec r = r\,\hat r$ with the product rule and the turning of $\ha
           errors: Math.abs(bad - Math.abs(rd)) > 0.05 ? [{ value: bad, feedback: t`That is the whole speed $|\vec v|$. Only the part of $\vec v$ along $\hat r$ changes the distance: $\dot r = \vec v\cdot\hat r$.` }] : [],
           hints: [t`$\dot r$ is the component of $\vec v$ along $\hat r = \vec r/r$.`, t`$\dot r = \dfrac{x v_x + y v_y}{\sqrt{x^2 + y^2}}$ — or differentiate $r^2 = x^2 + y^2$: $2r\dot r = 2x\dot x + 2y\dot y$.`],
           teach: t`The radial rate is the projection of the velocity on $\hat r$: $\dot r = \vec v\cdot\hat r = (x\dot x + y\dot y)/r$.`,
-          explain: t`$r = \sqrt{${x}^2 + ${y}^2} = ${sci(R)}$ m and $\vec v\cdot\vec r = (${x})(${vx}) + (${y})(${vy}) = ${x * vx + y * vy}$ m²/s, so $\dot r = ${x * vx + y * vy}/${sci(R)} = ${sci(rd)}$ m/s.`,
+          explain: t`$r = \sqrt{${x < 0 ? `(${x})` : x}^2 + ${y < 0 ? `(${y})` : y}^2} = ${sci(R)}$ m and $\vec v\cdot\vec r = (${x})(${vx}) + (${y})(${vy}) = ${x * vx + y * vy}$ m²/s, so $\dot r = ${x * vx + y * vy}/${sci(R)} = ${sci(rd)}$ m/s.`,
           visual: gpic({
             x: [Math.min(-1, x - 2), Math.max(1, x + 2)], y: [-1, y + 3], equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
             curves: [seg([0, 0], [x * 1.6, y * 1.6], 'ink4', 1, true)],

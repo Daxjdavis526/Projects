@@ -129,7 +129,7 @@ The Sun burns at 6 keV, far above its 1.35 keV thermal energy and far below its 
       errors: [{ value: aS / aC, feedback: t`The surface term grows by $\tfrac25\varepsilon^2$ but the Coulomb term falls by only $\tfrac15\varepsilon^2$: the condition is $E_C > 2E_S$.` }, { value: aC / (2 * aS), feedback: t`Invert: $E_C > 2E_S$ means $a_CZ^2/A^{1/3} > 2a_SA^{2/3}$, i.e. $Z^2/A > 2a_S/a_C$.` }],
       hints: [t`The energy changes by $\Delta E = \tfrac15\varepsilon^2(2E_S - E_C)$. It is negative when $E_C > 2E_S$.`, t`$a_C\dfrac{Z^2}{A^{1/3}} > 2a_SA^{2/3} \Rightarrow \dfrac{Z^2}{A} > \dfrac{2a_S}{a_C}$.`],
       teach: t`Bohr and Wheeler’s liquid drop has no fission barrier once $Z^2/A$ exceeds $2a_S/a_C \approx 50$; real heavy nuclei sit well below and must be pushed over.`,
-      explain: t`$Z^2/A > 2\times17.8/0.711 = ${fmt((2 * aS) / aC, 3)}$. Uranium-235 has $Z^2/A = 92^2/235 = ${fmt(92 * 92 / 235, 3)}$, about 72% of the limit: stable against small wobbles, but with a barrier of only about 6 MeV. The heaviest nuclei made, near $Z^2/A \approx 44$, survive at all only thanks to shell effects the liquid drop leaves out.`,
+      explain: t`$Z^2/A > 2\times17.8/0.711 = ${fmt((2 * aS) / aC, 3)}$. Uranium-235 has $Z^2/A = 92^2/235 = ${fmt(92 * 92 / 235, 3)}$, about 72% of the limit: stable against small wobbles, but with a barrier of only about 6 MeV. The heaviest nuclei made, up to $Z^2/A \approx 47$ (oganesson-294), survive at all only thanks to shell effects the liquid drop leaves out.`,
       visual: fissionBarrier(Sn('U-236'), { caption: 'A sketch of the energy against deformation for a heavy nucleus: a barrier, then the long fall as the fragments repel. As $Z^2/A$ approaches $2a_S/a_C$, the barrier shrinks to nothing.' }),
     }),
     num({

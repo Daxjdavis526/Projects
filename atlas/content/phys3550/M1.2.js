@@ -138,7 +138,7 @@ export default lesson({
         const xr = (u * (tb - (mf / k) * Math.log(m0 / mf))) ;         // km
         const xe = (-mf * xr) / (m0 - mf);
         return {
-          prompt: t`Far from any planet, a ${m0} kg rocket starts at rest and burns $${sci(m0 - mf, 3)}$ kg of propellant at a steady rate over ${tb} s, with exhaust speed $u = ${u}$ km/s. At burnout it is $${sci(xr, 4)}$ km from where it started. Where is the centre of mass of all the exhaust it has ejected? (Give its position along the line of flight; negative means behind the start.)`,
+          prompt: t`Far from any planet, a ${m0} kg rocket starts at rest and burns $${sci(m0 - mf, 4)}$ kg of propellant at a steady rate over ${tb} s, with exhaust speed $u = ${u}$ km/s. At burnout it is $${sci(xr, 4)}$ km from where it started. Where is the centre of mass of all the exhaust it has ejected? (Give its position along the line of flight; negative means behind the start.)`,
           answer: xe, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: -xr, feedback: t`Only if the exhaust's mass equals the rocket's. The masses weight the positions: $m_fX_r + (m_0 - m_f)X_e = 0$.` }, { value: (-(m0 - mf) * xr) / mf, feedback: t`The weights are swapped: the burnout mass $m_f$ multiplies the rocket's position.` }].filter((e) => Math.abs(e.value - xe) > 0.02 * Math.abs(xe)),
           hints: [t`No external force acts, and everything started at rest at the origin: the centre of mass of rocket plus exhaust stays at 0.`, t`$m_f\,x_\text{rocket} + (m_0 - m_f)\,X_\text{exhaust} = 0$.`],

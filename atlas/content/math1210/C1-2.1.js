@@ -147,14 +147,14 @@ Estimate $\displaystyle\lim_{x\to 0} f(x)$.`,
       id: 'dq-limit', difficulty: 2,
       gen(r) {
         const a = r.pick([1, 2, -1, -2, 1.5]);
-        const ans = 3 * a * a;
+        const ans = 3 * a * a, sub = a < 0 ? `+ ${nice(-(a ** 3))}` : `- ${nice(a ** 3)}`;
         return {
-          prompt: t`Find $\displaystyle\lim_{h\to 0}\frac{(${a} + h)^3 - ${nice(a ** 3)}}{h}$ — the slope of $y = x^3$ at $x = ${a}$.`,
+          prompt: t`Find $\displaystyle\lim_{h\to 0}\frac{(${a} + h)^3 ${sub}}{h}$ — the slope of $y = x^3$ at $x = ${a}$.`,
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 0, feedback: t`Substituting $h = 0$ gives $0/0$, which is not a number. Expand and cancel first.` }, { value: a ** 3, feedback: t`That is the value $y = x^3$ at $x = ${a}$, not the limit of the slope.` }],
           hints: [t`$(a + h)^3 = a^3 + 3a^2h + 3ah^2 + h^3$.`, t`After subtracting $${nice(a ** 3)}$, every term has a factor $h$: divide it out, then let $h \to 0$.`],
           teach: t`When direct substitution gives $0/0$, simplify for $h \ne 0$ first; the limit then follows by substitution.`,
-          explain: t`$\frac{(${a}+h)^3 - ${nice(a ** 3)}}{h} = ${nice(3 * a * a)} + ${nice(3 * a)}h + h^2 \to ${nice(ans)}$ as $h \to 0$.`,
+          explain: t`$\frac{(${a}+h)^3 ${sub}}{h} = ${nice(3 * a * a)} ${a < 0 ? '-' : '+'} ${nice(Math.abs(3 * a))}h + h^2 \to ${nice(ans)}$ as $h \to 0$.`,
           visual: { type: 'graph', params: { x: [a - 2, a + 2], y: [Math.min((a - 2) ** 3, (a + 2) ** 3) - 1, Math.max((a - 2) ** 3, (a + 2) ** 3) + 1], aspect: 'wide', curves: [{ fn: 'x^3', color: 'accent' }, { fn: `${a ** 3} + (${((a + 1) ** 3 - a ** 3)})*(x - (${a}))`, color: 'violet', dash: true, domain: [a - 0.8, a + 1.6] }], points: [{ x: a, y: a ** 3, color: 'gold' }, { x: a + 1, y: (a + 1) ** 3, color: 'violet' }] }, caption: t`$y = x^3$ and the secant for $h = 1$. The limit is the slope the secants approach as $h$ shrinks.` },
         };
       },

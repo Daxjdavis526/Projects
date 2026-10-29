@@ -260,7 +260,7 @@ and nothing in the physics says $\sigma$ must resemble the nucleus’s size: slo
           errors: [{ value: P / 1.602176634e-13 * 1.602176634e-19, feedback: t`200 MeV is $200\times1.602\times10^{-13}$ J: MeV, not eV.` }],
           hints: [t`Fissions per cm³ per second: $n\sigma\Phi$, with $\sigma = 585\times10^{-24}\ \text{cm}^2$.`, t`$n\sigma\Phi = ${tex(F, 3)}$; multiply by $200\times1.602\times10^{-13}$ J.`],
           teach: 'Reaction rate density = nσΦ: the same thin-target formula, with a flux in place of a beam.',
-          explain: t`$${tex(F, 3)}$ fissions per cm³ per second give $${fmt(P, 3)}$ W/cm³. Real fuel runs a few hundred W/cm³: the effective cross section, averaged over the hotter neutrons in a reactor, is lower than the 585 b of 2200 m/s neutrons, so this is an overestimate. A cubic centimetre of fuel matches the output of several electric kettles.`,
+          explain: t`$${tex(F, 3)}$ fissions per cm³ per second give $${fmt(P, 3)}$ W/cm³. Real fuel runs a few hundred W/cm³: the effective cross section, averaged over the hotter neutrons in a reactor, is lower than the 585 b of 2200 m/s neutrons, so this is an overestimate. A single cubic centimetre of fuel puts out a good fraction of an electric kettle’s power.`,
           visual: sigmaPlot({ mark: r6(Math.log10(0.0253)), caption: 'Uranium-235’s fission cross section (schematic, log scales): thermal neutrons, marked, do nearly all the fissioning in a light-water reactor.' }),
         };
       },

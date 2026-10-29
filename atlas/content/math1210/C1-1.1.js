@@ -135,7 +135,7 @@ A rocket’s altimeter gives altitude against time; the difference quotient of t
       },
       hints: ['The numerator is a temperature difference; the denominator is a time difference.'],
       teach: 'The units of an average rate of change are the units of the output divided by the units of the input.',
-      explain: t`The numerator is in K and the denominator in min, so the rate is in K/min — here about $0.2$ K/min of warming.`,
+      explain: t`The numerator is in K and the denominator in min, so the rate is in K/min — here about $0.37$ K/min of warming (the slope of the dashed secant).`,
     }),
     num({
       id: 'boyle', difficulty: 2,

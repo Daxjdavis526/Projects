@@ -213,7 +213,7 @@ export default lesson({
           errors: [{ value: (vt / G) * Math.log(2), feedback: t`That is the linear-drag answer, $\tau\ln 2$. With quadratic drag solve $\tanh u = \tfrac12$.` }, { value: vt / (2 * G), feedback: t`That ignores drag entirely ($v = gt$). Drag already matters at half terminal speed.` }],
           hints: [t`Solve $\tanh(gt/v_\text{ter}) = \tfrac12$.`, t`$\text{artanh}\,\tfrac12 = \tfrac12\ln 3 \approx 0.549$.`],
           teach: t`Invert the tanh: $t = (v_\text{ter}/g)\,\text{artanh}(v/v_\text{ter})$.`,
-          explain: t`$t = \dfrac{${vt}}{9.8}\times\text{artanh}\,0.5 = \dfrac{${vt}}{9.8}\times0.549 = ${sci(th)}$ s — only about 12% longer than free fall would take ($${sci(vt / (2 * G))}$ s), since drag at half speed is only a quarter of the weight.`,
+          explain: t`$t = \dfrac{${vt}}{9.8}\times\text{artanh}\,0.5 = \dfrac{${vt}}{9.8}\times0.549 = ${sci(th)}$ s — only about 10% longer than free fall would take ($${sci(vt / (2 * G))}$ s), since drag at half speed is only a quarter of the weight.`,
           visual: gpic({ x: [0, r6((3 * vt) / G)], y: [0, vt * 1.15], xlabel: 't (s)', ylabel: 'v (m/s)', curves: [{ fn: `${vt}*tanh(9.8*x/${vt})`, color: 'gold', width: 2.4 }], hlines: [{ y: vt, label: 'terminal', color: 'ink3' }, { y: vt / 2, label: 'half', color: 'ink3' }] }, t`$v(t)$ for quadratic drag; the dashed lines are $v_\text{ter}$ and $v_\text{ter}/2$.`, 'A tanh-shaped speed curve with two horizontal lines'),
         };
       },
