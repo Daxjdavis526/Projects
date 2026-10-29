@@ -213,7 +213,7 @@ print(best_h, best_err)`,
       ],
       hints: ['`hs = [10.0**-k for k in range(1, 16)]`, then a list comprehension for the errors.', '`k = errors.index(min(errors))` finds the position of the smallest.'],
       teach: 'When in doubt, scan h over decades and look for the bottom of the V — and expect it near ∛ε for central differences.',
-      explain: t`The minimum falls near $h = 10^{-5}$, with an error around $10^{-11}$ — about $\varepsilon^{2/3}$ times $e$. At $h = 10^{-15}$ the estimate has lost nearly every digit. In real work you cannot compute the error (you would not need the derivative if you knew it), so you use the rule of thumb instead, or Richardson extrapolation.`,
+      explain: t`The minimum falls near $h = 10^{-5}$, with an error of about $6\times10^{-11}$ — of order $\varepsilon^{2/3}$ times $e$. At $h = 10^{-15}$ the estimate has lost nearly every digit. In real work you cannot compute the error (you would not need the derivative if you knew it), so you use the rule of thumb instead, or Richardson extrapolation.`,
     }),
     mcq({
       id: 'complex-step', difficulty: 3,

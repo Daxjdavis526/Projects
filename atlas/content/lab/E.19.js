@@ -239,7 +239,7 @@ Find $\lambda$ with its full uncertainty and compare it with the NIST value, 632
       visual: { type: 'graph', params: dataGraph({ xs: IC.R.map((q) => q.m), ys: IC.R.map((q) => q.x + OFF), sy: P2.sx, fit: { a: IC.fit.a + OFF, b: IC.fit.b }, xlabel: 'fringe order m', ylabel: 'x (mm)' }), caption: t`The run: fringe position against order, read on a scale whose zero sits off the pattern’s centre, with the fitted line. ${SIMNOTE}` },
       choices: [
         'Nothing is wrong: the scale’s zero is simply not at the centre of the pattern; the slope, and λ, do not care',
-        'The wavelength is wrong by 0.31 mm per order and must be corrected',
+        `The wavelength is wrong by ${(IC.fit.a + OFF).toFixed(2)} mm per order and must be corrected`,
         'The slits are unequal in width, which shifts every fringe',
         'The fit has failed and the data must be retaken',
       ],
