@@ -418,7 +418,7 @@ print(gto, gto.period() / 3600, "h")`,
       ],
       hints: ['Inside a method, the object’s fields are `self.rp`, `self.ra` and `self.mu`.', 'One method can call another: `self.semi_major_axis()`.', t`\`gto = Orbit(6378 + 250, 6378 + 35786)\` — radii, not altitudes.`],
       teach: 'A dataclass bundles the numbers that belong together, and its methods compute what follows from them — one object to pass around instead of loose variables.',
-      explain: t`$a = ${A}$ km, $e = ${E_GTO.toFixed(4)}$, $T = ${T_GTO.toFixed(0)}$ s $= ${(T_GTO / 3600).toFixed(2)}$ h. The \`mu\` default makes Earth the common case and Mars one keyword away. The fields are radii: passing altitudes (250 and 35 786) would give an "orbit" passing through the centre of the Earth — a check worth adding as a test.`,
+      explain: t`$a = ${A}$ km, $e = ${E_GTO.toFixed(4)}$, $T = ${T_GTO.toFixed(0)}$ s $= ${(T_GTO / 3600).toFixed(2)}$ h. The \`mu\` default makes Earth the common case and Mars one keyword away. The fields are radii: passing altitudes (250 and 35 786) would give an "orbit" dipping to 250 km from the centre of the Earth, deep inside the planet — a check worth adding as a test.`,
     }),
     mcq({
       id: 'cp-main', difficulty: 2,

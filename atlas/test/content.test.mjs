@@ -97,7 +97,7 @@ async function checkVisual(where, spec) {
 // and captions: 58.800000000000004 N, ε = 0.00009999999999999999
 // …and so are code fields and a picture's expressions (fn: '0.98 + 0.030000000000000027*x' is never shown)
 const CODE_KEYS = new Set(['code', 'starter', 'solution', 'tests', 'setup', 'expected', 'output', 'listing',
-  'fn', 'expr', 'when', 'param', 'polar', 'sum', 'z', 'surface', 'P', 'Q', 'fx', 'fy', 'lower', 'upper', 'from', 'to', 'at', 'x', 'y', 'domain', 'value']);
+  'fn', 'expr', 'integrand', 'derivativeOf', 'limits', 'when', 'param', 'polar', 'sum', 'z', 'surface', 'P', 'Q', 'fx', 'fy', 'lower', 'upper', 'from', 'to', 'at', 'x', 'y', 'domain', 'value']);
 function rawFloatText(item) {
   let hit = null;
   (function walk(v) {

@@ -494,13 +494,13 @@ print(A_s.std())
           fixedOrder: true,
           answer: 0,
           why: {
-            1: 'Q is where r grows fastest — the radial speed, not the depth in the potential. The clock’s rate depends on r.',
+            1: 'Q is where r climbs back through a (E = 90°), with r growing quickly — but the clock’s rate depends on r alone, and there it is exactly the average rate.',
             2: 'R is apogee, the farthest point: the clock runs fastest there, high in Earth’s potential.',
-            3: 'S is where r shrinks fastest on the way in; its r equals Q’s, so its clock rate is the same as at Q.',
+            3: 'S is where r falls back through a on the way in; its r equals Q’s, so its clock rate is the same as at Q.',
           },
           hints: ['The rate is most negative where 1/r is largest.', 'Which point has the smallest r?'],
           teach: 'Read a phase portrait by its coordinates: the extremes of r sit where the loop crosses dr/dt = 0, on the left and right.',
-          explain: t`P is perigee — smallest $r$, deepest in the potential and fastest along the orbit — so the clock's rate is lowest there and highest at apogee R. The *accumulated* offset, $-A\sin E$, is most negative a quarter of an orbit later, at Q: a rate and its integral peak at different places.`,
+          explain: t`P is perigee — smallest $r$, deepest in the potential and fastest along the orbit — so the clock's rate is lowest there and highest at apogee R. The *accumulated* offset, $-A\sin E$, is most negative later, at Q ($E = 90°$, where the rate passes through its average): a rate and its integral peak at different places.`,
         }),
         mcq({
           id: 'r5-claim', skill: 'prog.P14.1', difficulty: 3,

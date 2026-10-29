@@ -334,7 +334,7 @@ Why did it fail?`,
       ],
       answer: 0,
       why: {
-        1: 'Below 30 km it is exponential to within a few per cent; with a sensible start the same call finds H ≈ 8.5 km.',
+        1: 'A fit converges whether or not the model is exact — a slightly wrong one just leaves larger residuals; with a sensible start the same call finds H ≈ 8.5 km.',
         2: 'pcov holds variances: inf means infinitely *un*certain — curve_fit could not estimate them at all.',
         3: 'Eleven points for two parameters leave nine degrees of freedom; the problem is where the search began.',
       },
