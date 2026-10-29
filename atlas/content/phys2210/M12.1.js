@@ -269,7 +269,7 @@ Once the forces balance, the torque sum comes out the same about every point —
             const S = scene({ perN: 1 / 150 });
             S.surface([0, -1.2], [0, 1.4], 'left').bar([0, 0], [Lr, 0], { width: 6 }).pin([0, 0], { wall: 'left' })
               .line([ds, 0], [ds, 1.3], { color: 'good', width: 2 }).force([ds, 0.04], 1.0 / (1 / 150), { deg: 90, color: 'good', label: 'T = ?' })
-              .force([Lr / 2, -0.04], mr * G, { deg: -90, color: 'ink2', label: `${mr * G} N` }).force([Lr, -0.04], mL * G, { deg: -90, color: 'ink2', label: `${s3(mL * G)} N` })
+              .force([Lr / 2, -0.04], mr * G, { deg: -90, color: 'ink2', label: `${s3(mr * G)} N` }).force([Lr, -0.04], mL * G, { deg: -90, color: 'ink2', label: `${s3(mL * G)} N` })
               .dim([0, 0], [ds, 0], `${s3(ds)} m`, { off: [0, -1.25] }).dim([0, 0], [Lr, 0], `${Lr} m`, { off: [0, -1.6] });
             return S.spec('The rod, hinged to the wall at the left. Weights to scale (1 m per 150 N); the rope’s arrow shows direction only.');
           })(),

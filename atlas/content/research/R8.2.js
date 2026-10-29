@@ -21,7 +21,7 @@ const RP = K * RS * RSUN_REARTH, REL = Math.hypot(SK / K, SRS / RS), SRP = RP * 
 // an uncertainty budget as horizontal bars (relative, in per cent)
 const budgetPic = (rows, caption, total = true) => {
   const tot = Math.hypot(...rows.map((r) => r[1]));
-  const bars = rows.map(([label, v], i) => ({ y: rows.length - i + (total ? 1 : 0), from: 0, to: v, color: 'accent', label: `${label}: ${v}%` }));
+  const bars = rows.map(([label, v], i) => ({ y: rows.length - i + (total ? 1 : 0), from: 0, to: v, color: 'accent', label: `${label}: ${+Number(v).toPrecision(6)}%` }));
   if (total) bars.push({ y: 1, from: 0, to: +tot.toFixed(3), color: 'gold', label: 'total, in quadrature' });
   return timeBars(bars, { x: [-0.1, Math.max(tot, ...rows.map((r) => r[1])) * 1.35], y: [0.4, rows.length + (total ? 1 : 0) + 0.7], xlabel: 'relative uncertainty (%)', xticks: 5 }, { caption, h: 0.28 });
 };

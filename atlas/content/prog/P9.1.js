@@ -315,7 +315,7 @@ print(E, k)`,
     }),
     mcq({
       id: 'tan-pole', difficulty: 3,
-      prompt: t`A student runs bisection on $f(x) = \tan x - 1$ over $[1, 2]$, where $f(1) = 0.56$ and $f(2) = -3.19$ have opposite signs. It returns \`1.5707963267948966\` and $f$ there is about $-1.6\times10^{16}$. What went wrong?`,
+      prompt: t`A student runs bisection on $f(x) = \tan x - 1$ over $[1, 2]$, where $f(1) = 0.56$ and $f(2) = -3.19$ have opposite signs. It returns \`1.5707963267948966\` and $f$ there is about $1.6\times10^{16}$. What went wrong?`,
       visual: {
         type: 'graph',
         params: { x: [0.6, 2.4], y: [-6, 6], aspect: 'wide', axesAt: 'edge',
@@ -432,7 +432,7 @@ Which reading is right?`,
       ],
       answer: 0,
       why: {
-        1: 'Halving each step is bisection’s signature, and that is Q. P’s exponents go −2, −4, −9, −17.',
+        1: `Halving each step is bisection’s signature, and that is Q. P’s exponents go ${NERR.map((x) => `−${-Math.floor(Math.log10(x))}`).join(', ')}.`,
         2: 'Linear convergence shrinks the error by a fixed factor. P’s factor grows from step to step — that is quadratic convergence.',
         3: 'Q needs about 50 halvings to reach 10⁻¹⁵; P is already there after 4 steps.',
       },

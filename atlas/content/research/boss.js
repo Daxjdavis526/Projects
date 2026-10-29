@@ -802,7 +802,7 @@ const ROUNDS = [
                 { value: d / Math.hypot(s, side), feedback: t`The published interval is a 90% interval, not $1\sigma$: divide $${side}$ by $1.645$ first.` },
                 { value: d / (s + sp), feedback: 'Independent uncertainties combine in quadrature, not linearly.' },
                 { value: d / s, feedback: 'The published value has an uncertainty too: combine both in quadrature.' },
-                { value: d / Math.hypot(s, (x >= MC_PUB ? MC_LO : MC_UP) / Z90), feedback: t`Use the side of the interval that faces your value: it lies ${x >= MC_PUB ? 'above' : 'below'} 30.4, so the ${x >= MC_PUB ? t`$+2.5$` : t`$-1.9$`} side.` },
+                { value: d / Math.hypot(s, (x >= MC_PUB ? MC_LO : MC_UP) / Z90), feedback: t`Use the side of the interval that faces your value: it lies ${x >= MC_PUB ? 'above' : 'below'} 30.4, so the ${x >= MC_PUB ? t`$+2.1$` : t`$-1.9$`} side.` },
               ], key),
               hints: [t`Convert: $\sigma_{\text{pub}} = ${side}/1.645 = ${sp.toFixed(2)}\,M_\odot$.`, t`$z = |\mathcal M - 30.4|/\sqrt{\sigma^2 + \sigma_{\text{pub}}^2}$.`],
               teach: t`Agreement is a number: the difference over the combined uncertainty — after converting every interval to the same convention.`,

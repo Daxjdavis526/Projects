@@ -185,7 +185,7 @@ with $u_1 = 1/r_a$ and $u_2 = 1/r_p$ the apsides, $u_3 = 1/2M - u_1 - u_2$ and $
     }),
     mcq({
       id: 'linear-locator', difficulty: 3,
-      prompt: t`An RK4 code measures the precession of the $(10, 25)M$ orbit. Its errors fall at slope 4 for coarse steps, then jump about and change sign. It finds each periapsis by drawing a straight line through $u'$ at the two ends of the step where $u'$ changes sign. What is wrong?`,
+      prompt: t`An RK4 code measures the precession of the $(10, 25)M$ orbit. Its errors jump about from one step size to the next, and even change sign. It finds each periapsis by drawing a straight line through $u'$ at the two ends of the step where $u'$ changes sign. What is wrong?`,
       visual: {
         type: 'graph',
         params: { x: [-2.4, -0.7], y: [-13, -1.5], xlog: true, ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'step dφ (rad)', ylabel: '|error in Δφ| (rad)',
@@ -378,7 +378,7 @@ print(precession(100), precession(200))`,
         const a = +precession(rp, ra, N).adv.toFixed(10), b = +precession(rp, ra, 2 * N).adv.toFixed(10), ans = (a - b) / 15;
         return {
           prompt: t`RK4 with a Hermite periapsis locator gives a precession of $${a.toFixed(10)}$ rad per orbit for $(r_p, r_a) = (${rp}, ${ra})M$ at $N = ${N}$ steps per orbit, and $${b.toFixed(10)}$ rad at $N = ${2 * N}$. Assuming fourth order, by how much does the finer run still exceed the true value?`,
-          visual: { type: 'graph', params: { x: [-1.1 * ra, 1.1 * ra], y: [-1.1 * ra, 1.1 * ra], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x (M)', ylabel: 'y (M)', points: [...orbitPts(rp, ra, 2), { x: 0, y: 0, r: 5, color: 'void' }] }, caption: 'Two radial periods of the orbit; the periapsis advances by more than a quarter turn each time.' },
+          visual: { type: 'graph', params: { x: [-1.1 * ra, 1.1 * ra], y: [-1.1 * ra, 1.1 * ra], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x (M)', ylabel: 'y (M)', points: [...orbitPts(rp, ra, 2), { x: 0, y: 0, r: 5, color: 'void' }] }, caption: `Two radial periods of the orbit; the periapsis advances by about ${Math.round((Ob.exact * 180) / Math.PI)}° each time.` },
           answer: ans, units: 'rad', tol: { rel: 0.02 },
           errors: [{ value: a - b, feedback: 'The difference overestimates the error: the remaining error is the difference divided by 2⁴ − 1 = 15.' }, { value: (a - b) / 3, feedback: 'For fourth order divide by 2⁴ − 1 = 15, not 2² − 1.' }],
           hints: [t`$A_{h/2} - A \approx (A_h - A_{h/2})/(2^p - 1)$ ([F13.2](#/lesson/st-f.F13.2)).`, t`$(${a.toFixed(10)} - ${b.toFixed(10)})/15$.`],

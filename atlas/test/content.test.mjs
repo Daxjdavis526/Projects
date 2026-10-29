@@ -93,6 +93,23 @@ async function checkVisual(where, spec) {
   }
 }
 
+// A raw float spliced into any text of an instance — prompt, hints, a picture's labels
+// and captions: 58.800000000000004 N, ε = 0.00009999999999999999
+// …and so are code fields and a picture's expressions (fn: '0.98 + 0.030000000000000027*x' is never shown)
+const CODE_KEYS = new Set(['code', 'starter', 'solution', 'tests', 'setup', 'expected', 'output', 'listing',
+  'fn', 'expr', 'when', 'param', 'polar', 'sum', 'z', 'surface', 'P', 'Q', 'fx', 'fy', 'lower', 'upper', 'from', 'to', 'at', 'x', 'y', 'domain', 'value']);
+function rawFloatText(item) {
+  let hit = null;
+  (function walk(v) {
+    if (hit) return;
+    // what Python prints is quoted on purpose: code fields and `code spans` are exempt
+    if (typeof v === 'string') { const m = /\d\.\d*?(?:0{8,}[1-9]|9{8,}[0-8]|9{12,})\d*/.exec(v.replace(/```[\s\S]*?```|`[^`]*`/g, '')); if (m) hit = m[0]; }
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!CODE_KEYS.has(k)) walk(x);
+  })({ ...item, answer: undefined, errors: (item.errors || []).map((e) => e.feedback) });
+  return hit ? `“${hit}” is a raw floating-point number in the item's text or picture labels — format it (N(), r6, toFixed)` : null;
+}
+
 // The player letters shuffled choices A–D, so a picture whose points are labelled
 // A–D and choices that name them ("B is higher") read ambiguously: label them P, Q, R, S.
 function letterClash(item) {
@@ -246,6 +263,8 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       if (calc) p.push(calc);
       const clash = letterClash(item);
       if (clash) p.push(clash);
+      const raw = rawFloatText(item);
+      if (raw) p.push(raw);
       if (p.length) { firstProblem = `variant ${v}: ${p.join('; ')}`; break; }
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
     }

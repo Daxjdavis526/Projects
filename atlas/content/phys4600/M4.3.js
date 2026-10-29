@@ -214,7 +214,7 @@ export default lesson({
           visual: wirePic(1.4, t`$A$ and $B$ against distance shortly after the switch-on (distance in units of the magnetometer’s distance; not to scale in time).`),
           answer: T * 1e6, units: 'μs', tol: { rel: 0.01 },
           errors: [{ value: (s / C) * 1e6, feedback: 'That is when the first news arrives; B is then far from settled.' }],
-          hints: [t`Solve $\dfrac{ct}{\sqrt{c^2t^2 - s^2}} = 1 + \epsilon$ for $t$, with $\epsilon = ${ppm * 1e-6}$.`, t`For small $\epsilon$, $ct \approx s/\sqrt{2\epsilon}$.`],
+          hints: [t`Solve $\dfrac{ct}{\sqrt{c^2t^2 - s^2}} = 1 + \epsilon$ for $t$, with $\epsilon = ${+(ppm * 1e-6).toPrecision(6)}$.`, t`For small $\epsilon$, $ct \approx s/\sqrt{2\epsilon}$.`],
           teach: 'Retarded fields settle slowly: an infinite source keeps arriving, and B approaches its static value only as 1/t².',
           explain: t`$ct = \dfrac{s(1 + \epsilon)}{\sqrt{(1 + \epsilon)^2 - 1}} \approx ${nice(sf(C * T, 3))}$ m, so $t \approx ${nice(sf(T * 1e6, 3))}$ μs — tiny for an instrument, but ${nice(sf((C * T) / s, 3))} times the light-travel time. Real cables are finite and real switches slow, so the true settling follows the current, not this ideal tail.`,
         };

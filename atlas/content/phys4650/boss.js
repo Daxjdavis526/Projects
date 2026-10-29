@@ -103,7 +103,7 @@ export default boss({
               answer: th, units: 'arcsec', tol: { rel: 0.01 },
               errors: [
                 { value: th / Math.SQRT2, feedback: t`$2GM/(c^2b)$ is the Newtonian half; light bending in general relativity is $4GM/(c^2b)$, and it is under the square root.` },
-                { value: th * th, feedback: t`Take the square root: the formula gives $\theta_E^2$ inside the brackets.` },
+                { value: (th * ARCSEC) ** 2 / ARCSEC, feedback: t`Take the square root: the formula gives $\theta_E^2$ inside the brackets.` },
                 { value: th * ARCSEC, feedback: 'That is in radians; 1 rad = 206 265″.' },
               ].filter((e) => Math.abs(e.value - th) > 0.02 * th),
               hints: [t`$4GM/c^2 = 4(${tex(GM_SUN, 5)})(${tex(s.M, 2)})/(2.998\times10^8)^2$ m.`, t`$D_{LS}/(D_LD_S) = ${s.DLS}/(${s.DL}\times${s.DS})$ per Gpc; convert to metres.`, t`Take the square root for radians, then multiply by 206 265.`],
@@ -252,7 +252,7 @@ Which step is wrong?`,
             const [lam, dl, band] = r.pick([[2.2, 0.4, 'K'], [1.65, 0.3, 'H'], [1.25, 0.25, 'J']]);
             const Lc = (lam * lam) / dl;     // µm
             return {
-              prompt: t`The interferometer observes the whole ${band} band, $${lam}\ \mu$m wide by $${dl}\ \mu$m. Delay lines keep the two telescopes’ light paths equal. Within roughly what path difference must they hold them for fringes to be seen at all — the band’s coherence length $\lambda^2/\Delta\lambda$ — in micrometres?`,
+              prompt: t`The interferometer observes the whole ${band} band, centred on $${lam}\ \mu$m and $${dl}\ \mu$m wide. Delay lines keep the two telescopes’ light paths equal. Within roughly what path difference must they hold them for fringes to be seen at all — the band’s coherence length $\lambda^2/\Delta\lambda$ — in micrometres?`,
               visual: { type: 'graph', caption: t`Fringe visibility against path difference for a broad band (Gaussian spectrum, logarithmic axis).`, params: { x: [-1, 3], y: [0, 1.1], xlog: true, axesAt: 'edge', aspect: 'wide', xlabel: 'path difference (µm)', ylabel: 'visibility', yticks: 2,
                 curves: [{ fn: `exp(-(pi*${dl}*(10^x)/${sf(lam * lam, 4)})^2/(4*ln(2)))`, color: 'gold', width: 2.4 }] } },
               answer: Lc, units: 'um', tol: { rel: 0.01 },

@@ -109,7 +109,7 @@ export function escapeDamage(text, { prose = true } = {}) {
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
   if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(withoutCode(s)) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
   // a raw float spliced in unformatted: 0.19999999999999998, 0.30000000000000004
-  const raw = /\d\.\d*?(?:9{8,}[0-8]|0{8,}[1-9])\d*/.exec(withoutCode(s));
+  const raw = /\d\.\d*?(?:9{8,}[0-8]|9{12,}|0{8,}[1-9])\d*/.exec(withoutCode(s));
   if (raw) return `“${raw[0]}” is a raw floating-point number — format it (N(), r6 or toFixed) before splicing it in`;
   for (const m of mathIn(s)) {
     const sci = /(?<![\w.\\])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(m.tex);
