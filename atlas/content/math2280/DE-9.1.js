@@ -132,7 +132,7 @@ with one condition at each end of the form $\alpha_1y + \alpha_2y' = 0$. When $p
       teach: t`Any $y'' + P(x)y' + \ldots$ becomes Sturm–Liouville after multiplying by $p = e^{\int P\,dx}$ — the same integrating factor as in DE-2.2.`,
       explain: t`$p'/p = -2x$ gives $p = e^{-x^2}$, so $(e^{-x^2}y')' + \lambda e^{-x^2}y = 0$ with $w = e^{-x^2}$. The eigenvalues are $\lambda = 2n$ and the eigenfunctions the Hermite polynomials $H_n$, orthogonal with weight $e^{-x^2}$ on the whole real line.`,
       integrand: '-2x*e^(-x^2)',
-      visual: fpic(null, [-3.5, 3.5], [-1.2, 1.2], t`*Preview:* the quantum harmonic oscillator’s first three states, $H_n(x)e^{-x^2/2}$, normalised to peak height 1. Their orthogonality is the Hermite weight at work.`, { xlabel: 'x', ylabel: 'ψ', curves: [{ fn: 'exp(-x^2/2)', color: 'accent', width: 2.2 }, { fn: '1.1658*x*exp(-x^2/2)', color: 'violet', width: 2.2 }, { fn: '(2x^2 - 1)*exp(-x^2/2)', color: 'teal', width: 2.2 }] }),
+      visual: fpic(null, [-3.5, 3.5], [-1.2, 1.2], t`*Preview:* the quantum harmonic oscillator’s first three states, $H_n(x)e^{-x^2/2}$, scaled to comparable heights. Their orthogonality is the Hermite weight at work.`, { xlabel: 'x', ylabel: 'ψ', curves: [{ fn: 'exp(-x^2/2)', color: 'accent', width: 2.2 }, { fn: '1.1658*x*exp(-x^2/2)', color: 'violet', width: 2.2 }, { fn: '(2x^2 - 1)*exp(-x^2/2)', color: 'teal', width: 2.2 }] }),
     }),
     num({
       id: 'legendre-norm', difficulty: 2,

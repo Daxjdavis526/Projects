@@ -13,9 +13,9 @@ import { nice, fmt, tex } from '../../src/core/format.js';
 import { r6, label } from './_geom.js';
 
 const t = String.raw;
-const MP = 938.27208816;            // MeV, proton
+const MP = 938.27208943;            // MeV, proton (CODATA 2022)
 const ME = 0.51099895;              // MeV, electron
-const U = 931.49410242;             // MeV per atomic mass unit
+const U = 931.49410372;             // MeV per atomic mass unit (CODATA 2022)
 const DEG = 180 / Math.PI;
 const gam = (b) => 1 / Math.sqrt(1 - b * b);
 /** Symmetric elastic scattering of equal masses: each particle's lab angle, in degrees, for a beam of Lorentz factor g. */
@@ -190,7 +190,7 @@ Four equations at once, true in every frame. Two tools make them easy. **Square 
           errors: [{ value: p / E, feedback: t`That is the beam proton’s own speed. The centre-of-momentum frame moves with the total: $p_{\text{tot}}/E_{\text{tot}}$.` }, { value: (p / E) / 2, feedback: t`Half the beam speed is Newton’s answer. Use the total four-momentum: $v = p_{\text{tot}}/E_{\text{tot}}$.` }],
           hints: [t`Total: $E_{\text{tot}} = K + 2m = ${nice(E + MP, 6)}$ MeV and $p_{\text{tot}} = \sqrt{(K + m)^2 - m^2} = ${nice(p, 5)}$ MeV.`, t`A frame in which a four-vector has no space part moves at $p/E$ of that four-vector.`],
           teach: t`The centre-of-momentum frame moves at $v = p_{\text{tot}}/E_{\text{tot}}$: the velocity of the total four-momentum.`,
-          explain: t`$v = ${nice(p, 5)}/${nice(E + MP, 6)} = ${nice(ans, 4)}c$, slower than half the beam speed’s Galilean guess, $${nice(p / E / 2, 4)}c$.`,
+          explain: t`$v = ${nice(p, 5)}/${nice(E + MP, 6)} = ${nice(ans, 4)}c$, faster than the Galilean guess of half the beam speed, $${nice(p / E / 2, 4)}c$.`,
         };
       },
     }),
@@ -221,7 +221,7 @@ Four equations at once, true in every frame. Two tools make them easy. **Square 
           errors: [{ value: 2 * ans, feedback: t`The recoil kinetic energy is $p^2/2M$ with $p = E_\gamma$: there is a 2 in the denominator.` }],
           hints: [t`$M^* \approx ${tex(M, 5)}$ eV and $\Delta E = ${tex(dE, 6)}$ eV.`, t`Recoil $= \Delta E^2/2M^* = (${tex(dE, 6)})^2/(2\times${tex(M, 5)})$ eV.`],
           teach: 'An emitting atom recoils with energy ΔE²/2M, so the photon falls short of the transition energy by that amount.',
-          explain: t`$\Delta E^2/2M^* = ${nice(ans, 4)}$ meV. That is about a million times the line’s natural width (for iron-57, about $5\times10^{-9}$ eV), so a free atom’s gamma ray misses the resonance of an identical atom at rest. Rudolf Mössbauer found in 1958 that a nucleus bound in a crystal can emit with no recoil — the whole crystal takes the momentum — and the line becomes sharp enough to measure gravitational redshift in a 22.5 m tower ([Clocks run slow low down](#/lesson/gr.S23.i)).`,
+          explain: t`$\Delta E^2/2M^* = ${nice(ans, 4)}$ meV. That is $10^4$ to $10^6$ times the natural width of such lines (for iron-57, about $5\times10^{-9}$ eV), so a free atom’s gamma ray misses the resonance of an identical atom at rest. Rudolf Mössbauer found in 1958 that a nucleus bound in a crystal can emit with no recoil — the whole crystal takes the momentum — and the line becomes sharp enough to measure gravitational redshift in a 22.5 m tower ([Clocks run slow low down](#/lesson/gr.S23.i)).`,
         };
       },
     }),

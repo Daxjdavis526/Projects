@@ -22,7 +22,7 @@ export const UNITS = {
   '°C': [1, D(0, 0, 0, 0, 1)], degC: [1, D(0, 0, 0, 0, 1)],
   mol: [1, D(0, 0, 0, 0, 0, 1)], cd: [1, D(0, 0, 0, 0, 0, 0, 1)],
   N: [1, D(1, 1, -2)], J: [1, D(2, 1, -2)], W: [1, D(2, 1, -3)], Pa: [1, D(-1, 1, -2)], Hz: [1, D(0, 0, -1)],
-  C: [1, D(0, 0, 1, 1)], V: [1, D(2, 1, -3, -1)], ohm: [1, D(2, 1, -3, -2)], Ω: [1, D(2, 1, -3, -2)],
+  C: [1, D(0, 0, 1, 1)], V: [1, D(2, 1, -3, -1)], ohm: [1, D(2, 1, -3, -2)], Ohm: [1, D(2, 1, -3, -2)], Ω: [1, D(2, 1, -3, -2)],
   F: [1, D(-2, -1, 4, 2)], H: [1, D(2, 1, -2, -2)], T: [1, D(0, 1, -2, -1)], Wb: [1, D(2, 1, -2, -1)],
   S: [1, D(-2, -1, 3, 2)], Bq: [1, D(0, 0, -1)], Gy: [1, D(2, 0, -2)], Sv: [1, D(2, 0, -2)],
   eV: [E_CHARGE, D(2, 1, -2)], L: [1e-3, D(3)], l: [1e-3, D(3)],
@@ -42,6 +42,7 @@ export const UNITS = {
   u: [1.66053906892e-27, D(0, 1)], Da: [1.66053906892e-27, D(0, 1)],
   Msun: [1.98841e30, D(0, 1)], 'M☉': [1.98841e30, D(0, 1)], Mearth: [5.9722e24, D(0, 1)],
   G: [1e-4, D(0, 1, -2, -1)],   // gauss; only reached as a whole token ("G"), never as a prefix
+  mG: [1e-7, D(0, 1, -2, -1)], uG: [1e-10, D(0, 1, -2, -1)], μG: [1e-10, D(0, 1, -2, -1)], µG: [1e-10, D(0, 1, -2, -1)], nG: [1e-13, D(0, 1, -2, -1)],   // prefixed gauss, as whole tokens
   c: [299792458, D(1, 0, -1)],  // "c" as a speed unit: 0.6 c
   mph: [0.44704, D(1, 0, -1)], kn: [1852 / 3600, D(1, 0, -1)], knot: [1852 / 3600, D(1, 0, -1)], nmi: [1852, D(1)], kph: [1 / 3.6, D(1, 0, -1)], ft: [0.3048, D(1)], in: [0.0254, D(1)],
   mi: [1609.344, D(1)], lb: [0.45359237, D(0, 1)], t: [1000, D(0, 1)],   // tonne (kt, Mt)
@@ -57,7 +58,7 @@ export const UNITS = {
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
 const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'week', 'wk', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kn', 'knot', 'nmi', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'ppm', 'ppb', 'Msun', 'M☉', 'Mearth',
-  'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB', 'dBm']);
+  'Å', 'angstrom', 'c', 'G', 'mG', 'uG', 'μG', 'µG', 'nG', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB', 'dBm']);
 
 export const PREFIXES = {
   Q: 1e30, R: 1e27, Y: 1e24, Z: 1e21, E: 1e18, P: 1e15, T: 1e12, G: 1e9, M: 1e6, k: 1e3, h: 1e2, da: 1e1,
@@ -221,7 +222,7 @@ export function unitTeX(u) {
   return '\\mathrm{' + String(u)
     .replace(/\*/g, '\\cdot ').replace(/·/g, '\\cdot ')
     .replace(/\^\((-?[\d.]+(?:\/\d+)?)\)|\^(-?\d+(?:\.\d+)?)/g, (_, a, b) => `^{${a ?? b}}`)
-    .replace(/(^|[\s/(·*])u(?=(?:m|s|g|A|V|W|J|F|H|K|N|Pa|L|mol|Hz|as|T|C|rad|sr)(?![A-Za-z]))/g, '$1μ')   // um, us, uas: the ASCII micro prefix shown as μ
-    .replace(/μ|µ/g, '\\mu{}').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
+    .replace(/(^|[\s/(·*])u(?=(?:m|s|g|A|V|W|J|F|H|K|N|Pa|L|mol|Hz|as|T|C|G|rad|sr|ohm|Ohm)(?![A-Za-z]))/g, '$1μ')   // um, us, uas: the ASCII micro prefix shown as μ
+    .replace(/μ|µ/g, '\\mu{}').replace(/Ω|[oO]hm/g, '\\Omega{}').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
     .replace(/ /g, '\\,') + '}';
 }

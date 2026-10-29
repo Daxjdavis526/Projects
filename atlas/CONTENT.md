@@ -267,7 +267,7 @@ num({ id: 'f-over-m', difficulty: 1,
   `'K'` or `'°C'`: a learner may type either, and a bare temperature is
   converted with the 273.15 offset. A temperature *change* is the same number
   in K and °C: mark such an item `difference: true` so no offset is applied.
-  A sound level takes `'dB'` and an RF power `'dBm'` (each read as a plain number: "85 dB" is 85). Powers may be decimals or fractions: `'nV/Hz^0.5'`, `'m^(1/2)'`. Radio flux
+  A sound level takes `'dB'` and an RF power `'dBm'` (each read as a plain number: "85 dB" is 85). Powers may be decimals or fractions: `'nV/Hz^0.5'`, `'m^(1/2)'`. Gauss takes no general prefix (G is giga), but `'mG'`, `'uG'` and `'nG'` exist; ohms are `'ohm'` or `'Ohm'` with any prefix (`'kOhm'`, `'uohm'`). Radio flux
   densities take `'Jy'` (10⁻²⁶ W m⁻² Hz⁻¹, with prefixes: mJy, μJy); cross-sections `'b'` (barns: mb, fb). Times include `'min'`, `'h'`, `'day'`, `'week'` and `'yr'`.
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
@@ -459,6 +459,9 @@ The same test also runs every `code-runner` snippet (an Explore step, or one
 anywhere else in the lesson) with the browser's helper modules, draws its
 figures, and fails if it raises or prints anything on stderr — a NumPy
 `RuntimeWarning` shows the learner red text before they have typed a thing.
+A `curve_fit` started from a poor guess can converge to a wrong minimum with no
+warning at all: give it a `p0` near the answer and assert the fit in a test.
+Only one variant of a generated code item is run: check the others yourself.
 It does not check what a snippet prints: if a lesson's prose quotes a number
 the snippet prints, run the snippet and copy the number from its output.
 
@@ -596,6 +599,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `labx-stats` | uncertainty made visible: a target (precision against accuracy), a rounding display, Gaussian and Poisson scatter, Monte Carlo propagation against the linear formula, p-values as shaded tails | see the file header |
 | `labe-rig` | nine classic experiments (e/m, Millikan, h/e, Franck–Hertz, Michelson, Fabry–Pérot, Cavendish, coupled pendulums, speed of light): the raw signal of each reading, data with error bars and a fit, residuals, a readings table, each experiment's systematic switchable, the result's z against CODATA | see the file header |
 | `labg-classics` | nine more classic experiments (chaotic pendulum, slits, fibre optics, decay counting, Johnson noise, electron diffraction, Balmer lines, resonance tube, torsion pendulum): readings, fits and a switchable systematic | see the file header |
+| `labg-rig` | eight advanced-lab experiments (cavity blackbody, Zeeman through an etalon, Compton, NaI spectrometer, inversion-recovery NMR, muon lifetime, Hall effect, YBCO T_c): spectra, histograms and sweeps, a fit and residuals, switchable systematics, a choice of analysis, the result's z against the accepted value | see the file header |
 | `labf-signal` | `lockin`: a 1 kHz signal under hum and noise ~1000× its amplitude recovered as X and Y with a ±1σ band; `allan`: the Allan deviation of white, 1/f and drift noise; `strobe`: a wheel under a strobe (aliasing) | see the file header |
 | `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
 | `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |

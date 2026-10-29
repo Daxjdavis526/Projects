@@ -67,7 +67,7 @@ This is a **Fourier sine series**. The formula for $b_n$ works because the eigen
   },
   example: {
     prompt: t`A string of length $L$ is pulled aside a height $h$ at its midpoint and released from rest. Find its Fourier sine coefficients and $u(x, t)$.`,
-    visual: fpic('(8/pi^2)*(sin(pi*x) - sin(3*pi*x)/9 + sin(5*pi*x)/25)', [0, 1], [-0.15, 1.15], t`The plucked shape (dashed, $h = 1$, $L = 1$) and the sum of its first three nonzero modes (blue): already within 2% everywhere.`, { xlabel: 'x / L', ylabel: 'u / h', curves: [{ fn: 'min(2x, 2 - 2x)', color: 'ink3', dash: true, width: 1.6 }] }),
+    visual: fpic('(8/pi^2)*(sin(pi*x) - sin(3*pi*x)/9 + sin(5*pi*x)/25)', [0, 1], [-0.15, 1.15], t`The plucked shape (dashed, $h = 1$, $L = 1$) and the sum of its first three nonzero modes (blue): already within 7% of the height everywhere, worst at the kink.`, { xlabel: 'x / L', ylabel: 'u / h', curves: [{ fn: 'min(2x, 2 - 2x)', color: 'ink3', dash: true, width: 1.6 }] }),
     steps: [
       { label: 'The shape', text: t`$f(x) = \dfrac{2h}{L}x$ for $x \le L/2$ and $\dfrac{2h}{L}(L - x)$ for $x \ge L/2$.` },
       { label: 'Coefficients', text: t`$b_n = \dfrac{2}{L}\displaystyle\int_0^L f(x)\sin\frac{n\pi x}{L}\,dx$. Integrate each half by parts ($\int x\sin kx\,dx = -\frac{x\cos kx}{k} + \frac{\sin kx}{k^2}$, $k = n\pi/L$): the cosine terms from the two halves cancel at $L/2$ and what remains is $\;b_n = \dfrac{8h}{n^2\pi^2}\sin\dfrac{n\pi}{2}$.` },

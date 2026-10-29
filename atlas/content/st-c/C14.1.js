@@ -121,7 +121,7 @@ Three consequences come free. $g(\dot x, \dot x)$ is **constant** along a geodes
       prompt: t`A geodesic $x^\mu(\lambda)$ is re-parameterized by $\sigma$ with $\lambda = \sigma^3$. What happens to the geodesic equation in terms of $\sigma$?`,
       visual: shoot('torus', [1, 0], { heading: 30, length: 12 }, 'A torus geodesic: the same curve whatever the parameter, but the equation’s form needs an affine one.'),
       choices: [
-        t`It picks up a term proportional to the velocity: $x'' + \Gamma x'x' = -\tfrac{2}{\sigma}x'$`,
+        t`It picks up a term proportional to the velocity: $x'' + \Gamma x'x' = \tfrac{2}{\sigma}x'$`,
         'It is unchanged: any parameter works',
         'The curve stops being a geodesic',
         t`The Christoffel symbols are multiplied by $3\sigma^2$`,

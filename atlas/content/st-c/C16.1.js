@@ -128,7 +128,7 @@ On a surface there is only one plane, so nothing is lost: $R_{ab} = K\,g_{ab}$ a
       },
       hints: [t`Scaling $g$ by a constant leaves every $\Gamma$ unchanged. Which quantities then bring in $g$ or $g^{-1}$?`],
       teach: t`Scaling the metric leaves $\Gamma$, $R^\rho{}_{\sigma\mu\nu}$ and $R_{\mu\nu}$ unchanged; $R_{\rho\sigma\mu\nu}$ scales with $g$ and $R$ with its inverse.`,
-      explain: t`$R = 2/a^2$ drops to a quarter; $R_{\theta\varphi\theta\varphi} = a^2\sin^2\theta$ grows fourfold. The rest — the $\Gamma$s, $R^\theta{}_{\varphi\theta\varphi}$ and $R_{\mu\nu}$ — never see the constant factor. This is the research notes’ favourite pitfall: "$R_{\theta\theta} = 1$, so the sphere’s Ricci curvature is 1" forgets that the size lives in $g$.`,
+      explain: t`$R = 2/a^2$ drops to a quarter; $R_{\theta\varphi\theta\varphi} = a^2\sin^2\theta$ grows fourfold. The rest — the $\Gamma$s, $R^\theta{}_{\varphi\theta\varphi}$ and $R_{\mu\nu}$ — never see the constant factor. A common pitfall: "$R_{\theta\theta} = 1$, so the sphere’s Ricci curvature is 1" forgets that the size lives in $g$.`,
     }),
     mcq({
       id: 'product', difficulty: 3,

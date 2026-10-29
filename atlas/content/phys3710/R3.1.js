@@ -11,7 +11,7 @@ import { nice, fmt, tex } from '../../src/core/format.js';
 import { r6, st, label } from './_geom.js';
 
 const t = String.raw;
-const MP = 938.27208816;          // MeV, proton rest energy (CODATA 2018)
+const MP = 938.27208943;          // MeV, proton rest energy (CODATA 2022)
 const gam = (b) => 1 / Math.sqrt(1 - b * b);
 
 /** A worldline through the origin at speed b, with its four-velocity arrow (tip on the unit hyperbola). */
@@ -204,7 +204,7 @@ Because $d\tau^2 = -ds^2$, every four-velocity has the same length: $\mathbf u\c
         t`$\sqrt{-\mathbf p\cdot\mathbf p}$, the proton’s mass`,
         t`$\mathbf u\cdot\mathbf u$`,
         t`$-\mathbf p\cdot\mathbf u_D$, where $\mathbf u_D$ is the four-velocity of one particular detector D`,
-        t`the energy $p^t$ in the laboratory frame’s coordinates, as computed by each observer in their own frame`,
+        t`the energy $p^t$, as each observer computes it in their own frame’s coordinates`,
         t`the component $p^x$`,
         t`$u^t$`,
       ],

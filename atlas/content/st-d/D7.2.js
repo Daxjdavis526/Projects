@@ -13,7 +13,7 @@ import { contour, laurent, circle } from './_cx2.js';
 const t = String.raw;
 const fact = (n) => (n <= 1 ? 1 : n * fact(n - 1));
 const p01 = [{ x: 0, y: 0, label: '0', kind: 'pole' }, { x: 1, y: 0, label: '1', kind: 'pole' }];
-const annuli = (b, la = 'A', lb = 'B') => [{ c: [0, 0], r0: 0, r1: b, color: 'teal', label: la }, { c: [0, 0], r0: b, r1: 40, color: 'gold', label: lb }];
+const annuli = (b, la = 'P', lb = 'Q') => [{ c: [0, 0], r0: 0, r1: b, color: 'teal', label: la }, { c: [0, 0], r0: b, r1: 40, color: 'gold', label: lb }];
 
 export default lesson({
   id: 'st-d.D7.2',
@@ -34,10 +34,10 @@ for any circle of radius $r$ inside the annulus $r_1 < |z - a| < r_2$. The ring 
   visual: {
     type: 'cx2-contour',
     title: 'One function, two series',
-    lead: t`$f(z) = \dfrac{1}{z(z - 1)}$ has poles at $0$ and $1$, so about $0$ it has two annuli: $A$ ($0 < |z| < 1$, teal) and $B$ ($|z| > 1$, gold). The circle of radius $r$ computes the coefficient $a_n$: the chain on the right is $\frac{1}{2\pi i}\oint f(z)\,z^{-n-1}\,dz$. Choose $n$, then move $r$ across $1$.`,
+    lead: t`$f(z) = \dfrac{1}{z(z - 1)}$ has poles at $0$ and $1$, so about $0$ it has two annuli: $P$ ($0 < |z| < 1$, teal) and $Q$ ($|z| > 1$, gold). The circle of radius $r$ computes the coefficient $a_n$: the chain on the right is $\frac{1}{2\pi i}\oint f(z)\,z^{-n-1}\,dz$. Choose $n$, then move $r$ across $1$.`,
     tasks: [
-      t`With $r$ in $A$, try $n = -1, 0, 1, 2$: every coefficient is $-1$ — the series $-\frac1z - 1 - z - z^2 - \cdots$. And $n = -2$ gives $0$.`,
-      t`Now take $r$ into $B$: the same $n$ give $0$, and $n = -2, -3, -4$ give $1$ — the series $\frac{1}{z^2} + \frac{1}{z^3} + \cdots$.`,
+      t`With $r$ in $P$, try $n = -1, 0, 1, 2$: every coefficient is $-1$ — the series $-\frac1z - 1 - z - z^2 - \cdots$. And $n = -2$ gives $0$.`,
+      t`Now take $r$ into $Q$: the same $n$ give $0$, and $n = -2, -3, -4$ give $1$ — the series $\frac{1}{z^2} + \frac{1}{z^3} + \cdots$.`,
       t`Set $r = 1$ exactly: the circle runs through the pole and no coefficient exists. The two series meet at the singularity that separates them.`,
     ],
     params: {
@@ -48,7 +48,7 @@ for any circle of radius $r$ inside the annulus $r_1 < |z - a| < r_2$. The ring 
       ],
       marks: p01, rings: annuli(1), x: [-2.2, 2.2], y: [-2.2, 2.2], scaleBy: 'twopii', n: 24, readout: ['I'], iLabel: '$a_n$',
     },
-    caption: t`The coefficient is computed by quadrature on the circle; the arrows on the left are drawn larger or smaller than true, all by one factor. The gold annulus $B$ continues outside the window.`,
+    caption: t`The coefficient is computed by quadrature on the circle; the arrows on the left are drawn larger or smaller than true, all by one factor. The gold annulus $Q$ continues outside the window.`,
   },
   example: {
     prompt: t`Find the Laurent series of $f(z) = \dfrac{1}{z(z - 1)}$ about $0$ in (a) $0 < |z| < 1$ and (b) $|z| > 1$.`,
@@ -102,7 +102,7 @@ for any circle of radius $r$ inside the annulus $r_1 < |z - a| < r_2$. The ring 
         const ans = laurent(`1/(z*(z - ${b}))`, n, [0, 0], region === 'A' ? b / 2 : 2 * b)[0];
         return {
           prompt: t`Find the coefficient $a_{${n}}$ of $z^{${n}}$ in the Laurent series of $\dfrac{1}{z(z - ${b})}$ about $0$ valid on ${region === 'A' ? t`$0 < |z| < ${b}$` : t`$|z| > ${b}$`}. (3 significant figures.)`,
-          visual: contour({ f: `1/(z*(z - ${b}))`, contour: null, panel: 'none', arrowsOn: false, marks: [{ x: 0, y: 0, label: '0', kind: 'pole' }, { x: b, y: 0, label: String(b), kind: 'pole' }], rings: annuli(b), x: [-b - 1.5, b + 1.5], y: [-b - 1, b + 1] }, t`The annuli about $0$: $A$ inside $|z| = ${b}$ (teal) and $B$ outside (gold).`),
+          visual: contour({ f: `1/(z*(z - ${b}))`, contour: null, panel: 'none', arrowsOn: false, marks: [{ x: 0, y: 0, label: '0', kind: 'pole' }, { x: b, y: 0, label: String(b), kind: 'pole' }], rings: annuli(b), x: [-b - 1.5, b + 1.5], y: [-b - 1, b + 1] }, t`The annuli about $0$: $P$ inside $|z| = ${b}$ (teal) and $Q$ outside (gold).`),
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: -ans, feedback: t`Check the sign: $\frac{1}{z - ${b}} = -\frac{1}{${b}}\cdot\frac{1}{1 - z/${b}}$ inside, but $+\frac1z\cdot\frac{1}{1 - ${b}/z}$ outside.` }]),
           hints: [region === 'A' ? t`For $|z| < ${b}$: $\dfrac{1}{z - ${b}} = -\dfrac{1}{${b}}\sum_k \left(\dfrac{z}{${b}}\right)^k$.` : t`For $|z| > ${b}$: $\dfrac{1}{z - ${b}} = \dfrac1z\sum_k \left(\dfrac{${b}}{z}\right)^k$.`, region === 'A' ? t`Dividing by $z$: $f = -\sum_k \dfrac{z^{k - 1}}{${b}^{k + 1}}$, so $a_n = -1/${b}^{n + 2}$ for $n \ge -1$.` : t`Dividing by $z$: $f = \sum_k ${b}^k z^{-k - 2}$, so $a_n = ${b}^{-n - 2}$ for $n \le -2$.`],

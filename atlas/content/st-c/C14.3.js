@@ -83,7 +83,7 @@ C6.2 met Clairaut’s relation on the catenoid; here it organizes whole families
     num({
       id: 'turning', difficulty: 3,
       gen(r) {
-        const [R, rr] = r.pick([[2, 1], [3, 1]]), psi = r.pick([20, 30, 45, 60]);
+        const [R, rr] = r.pick([[2, 1], [3, 1]]), psi = r.pick(R === 3 ? [20, 30, 45] : [20, 30, 45, 60]);   // 60° on R = 3 is the critical angle: no turning point
         const c = ((R + rr) * Math.cos(psi * DEG) - R) / rr;
         const ans = Math.acos(c) / DEG;
         return {
