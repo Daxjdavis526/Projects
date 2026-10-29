@@ -19,9 +19,9 @@ const C = 299792458, GM_SUN = 1.32712440018e20, LY = 9.4607304725808e15;
 const schwarzPic = (extra = {}) => ({
   x: [0.6, 6], y: [-3, 6], aspect: 'wide', xlabel: 'r (units of M)', ylabel: '',
   curves: [
-    { fn: '1/(1 - 2/x)', domain: [2.05, 6], color: 'accent', width: 2.2, label: 'g_rr = 1/(1 − 2M/r)', labelAt: 2.6, labelDx: 8, labelDy: -4 },
+    { fn: '1/(1 - 2/x)', domain: [2.05, 6], color: 'accent', width: 2.2, label: 'gᵣᵣ = 1/(1 − 2M/r)', labelAt: 2.6, labelDx: 8, labelDy: -4 },
     { fn: '1/(1 - 2/x)', domain: [0.6, 1.95], color: 'accent', width: 2.2 },
-    { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K M⁴ = 48M⁶/r⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
+    { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
   ],
   vlines: [{ x: 2, color: 'bad', label: 'r = 2M' }],
   hlines: [{ y: 0, color: 'ink4' }],
@@ -57,11 +57,11 @@ Because coordinates are then pure labels, anything a coordinate system says can 
     params: schwarzPic({
       choices: [{ key: 'ef', label: 'Coordinates', options: [[0, 'Schwarzschild (t, r)'], [1, 'Eddington–Finkelstein (v, r)']], value: 0, explain: 'Two charts on the same spacetime outside and across the horizon.' }],
       curves: [
-        { fn: '1/(1 - 2/x)', domain: [2.05, 6], color: 'accent', width: 2.2, label: 'g_rr = 1/(1 − 2M/r)', labelAt: 2.6, labelDx: 8, labelDy: -4, when: '1 - ef' },
+        { fn: '1/(1 - 2/x)', domain: [2.05, 6], color: 'accent', width: 2.2, label: 'gᵣᵣ = 1/(1 − 2M/r)', labelAt: 2.6, labelDx: 8, labelDy: -4, when: '1 - ef' },
         { fn: '1/(1 - 2/x)', domain: [0.6, 1.95], color: 'accent', width: 2.2, when: '1 - ef' },
-        { fn: '-(1 - 2/x)', domain: [0.6, 6], color: 'teal', width: 2.2, label: 'g_vv = −(1 − 2M/r)', labelAt: 4.4, labelDx: 4, labelDy: 14, when: 'ef' },
-        { fn: '1', domain: [0.6, 6], color: 'violet', width: 2.2, label: 'g_vr = 1', labelAt: 5.2, labelDy: -8, when: 'ef' },
-        { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K M⁴ = 48M⁶/r⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
+        { fn: '-(1 - 2/x)', domain: [0.6, 6], color: 'teal', width: 2.2, label: 'gᵥᵥ = −(1 − 2M/r)', labelAt: 4.4, labelDx: 4, labelDy: 14, when: 'ef' },
+        { fn: '1', domain: [0.6, 6], color: 'violet', width: 2.2, label: 'gᵥᵣ = 1', labelAt: 5.2, labelDy: -8, when: 'ef' },
+        { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
       ],
       readouts: [{ label: t`$K$ at $r = 2M$, in $M^{-4}$`, expr: '48/64', digits: 3 }],
     }),
@@ -92,7 +92,7 @@ Because coordinates are then pure labels, anything a coordinate system says can 
           errors: [{ value: (48 * C ** 8) / (4 * GM ** 4), feedback: t`Substituting $r_s^6 = 64(GM)^6/c^{12}$ gives $48/64 = 3/4$, not $48/4$.` }],
           hints: [t`$GM = ${tex(GM, 4)}\ \text{m}^3/\text{s}^2$ and $c^8 = ${tex(C ** 8, 4)}\ \text{m}^8/\text{s}^8$.`, t`$K = 0.75\,c^8/(GM)^4$.`],
           teach: 'A curvature invariant is finite at the Schwarzschild horizon, and smaller for bigger black holes: the horizon is a coordinate singularity, not a curvature one.',
-          explain: t`$K = ${tex(ans, 3)}\ \text{m}^{-4}$ — finite. ${m > 1e5 ? 'For a supermassive hole the horizon is gentler than a laboratory centrifuge’s tidal field; nothing marks it locally.' : 'Large, but finite: the infinity of g_rr was the coordinates’ doing.'}`,
+          explain: t`$K = ${tex(ans, 3)}\ \text{m}^{-4}$ — finite. ${m > 1e5 ? 'For a supermassive hole the horizon is gentler than a laboratory centrifuge’s tidal field; nothing marks it locally.' : t`Large, but finite: the infinity of $g_{rr}$ was the coordinates’ doing.`}`,
         };
       },
     }),
@@ -201,12 +201,11 @@ Because coordinates are then pure labels, anything a coordinate system says can 
       },
       hints: ['Recall Kretschmann.', 'What ingredients do lead to Einstein’s equations? (No prior geometry, the equivalence principle, second-order equations, Lovelock’s theorem in 4D.)'],
       teach: 'General covariance is a formal requirement any theory can meet; gravity-as-curvature comes from the equivalence principle and a dynamical metric with no prior geometry.',
-      explain: 'Einstein’s equations follow from a dynamical metric, the equivalence principle, and the demand for second-order equations (Lovelock: in 4D, G_μν + Λg_μν is then essentially unique). Covariance is the language; these are the physics.',
+      explain: t`Einstein’s equations follow from a dynamical metric, the equivalence principle, and the demand for second-order equations (Lovelock: in 4D, $G_{\mu\nu} + \Lambda g_{\mu\nu}$ is then essentially unique). Covariance is the language; these are the physics.`,
     }),
   ],
   sources: [
     { label: 'Norton, General covariance and the foundations of general relativity: eight decades of dispute, Rep. Prog. Phys. 56, 791 (1993)', url: 'https://doi.org/10.1088/0034-4885/56/7/001' },
-    { label: 'Kretschmann, Über den physikalischen Sinn der Relativitätspostulate, Ann. Phys. 358, 575 (1917)', url: 'https://doi.org/10.1002/andp.19183581602' },
     { label: 'Stanford Encyclopedia of Philosophy: The Hole Argument', url: 'https://plato.stanford.edu/entries/spacetime-holearg/' },
     { label: 'Carroll, Spacetime and Geometry (Addison-Wesley, 2004), §§4.1, 5.7 (minimal coupling; Kretschmann scalar)', url: 'https://arxiv.org/abs/gr-qc/9712019' },
   ],

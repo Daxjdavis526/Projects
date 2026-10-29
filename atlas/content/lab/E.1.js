@@ -203,7 +203,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
         type: 'graph',
         params: {
           aspect: 'wide', x: [0, 2.2], y: [0, 40], xlabel: 'I (A)', ylabel: '1/r (m⁻¹)', axesAt: 'edge',
-          curves: [{ fn: '16.35*(x - 0.32)', color: 'accent', label: 'coils with the ambient field', labelAt: 1.9, labelDy: 14 }, { fn: '16.35*(x + 0.32)', color: 'violet', label: 'current reversed', labelAt: 1.6, labelDy: -6 }, { fn: '16.35*x', color: 'good', dash: true }],
+          curves: [{ fn: '16.35*(x - 0.32)', color: 'accent', label: 'with the ambient field', labelAt: 1.25, labelDx: 10, labelDy: 10 }, { fn: '16.35*(x + 0.32)', color: 'violet', label: 'current reversed', labelAt: 0.35, labelDx: -4, labelDy: -14 }, { fn: '16.35*x', color: 'good', dash: true }],
         },
         caption: t`Illustrative lines: the two directions straddle the line through the origin (dashed). The gap between them is drawn ten times larger than a 25 μT field would make it.`,
       },

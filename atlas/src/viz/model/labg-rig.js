@@ -320,8 +320,9 @@ function compton(o) {
 
 // ─── E.13: a NaI(Tl) gamma-ray spectrometer ───────────────────────────────
 export const GS = {
-  nch: 1024, a: -3.0, b: 1.550, q: 3.0e-6,        // true response: E = a + b·ch + q·ch² (keV)
+  nch: 1024, a: -3.0, b: 1.550, q: 1.5e-6,        // true response: E = a + b·ch + q·ch² (keV)
   gainShift: 0.015,                               // the unknown's run: gain 1.5 % higher (the room warmed)
+  uLin: 0.0005,                                   // fractional allowance for the response's departure from a line
   sources: {
     am241: { label: 'Am-241', lines: [[LINES.am241, 15000]] },
     na22: { label: 'Na-22', lines: [[LINES.na22a, 15000], [LINES.na22b, 3500]] },
@@ -389,8 +390,8 @@ function gammaRun(o) {
     const guess = gsChannel(E), fw = naiFWHM(E) / GS.b;
     return { src, E, ...roiCentroid(spectra[src], guess, fw) };
   });
-  let fit = fitLine(cal.map((c) => c.c), cal.map((c) => c.E), cal.map((c) => 0.0015 * c.E));
-  for (let it = 0; it < 3; it++) fit = fitLine(cal.map((c) => c.c), cal.map((c) => c.E), cal.map((c) => Math.hypot(fit.b * c.sc, 0.0015 * c.E)));
+  let fit = fitLine(cal.map((c) => c.c), cal.map((c) => c.E), cal.map((c) => GS.uLin * c.E));
+  for (let it = 0; it < 3; it++) fit = fitLine(cal.map((c) => c.c), cal.map((c) => c.E), cal.map((c) => Math.hypot(fit.b * c.sc, GS.uLin * c.E)));
   fit.f = (t) => fit.a + fit.b * t;
   const Eof = (c) => fit.a + fit.b * c;
   const sEof = (c, sc) => Math.sqrt(fit.sa ** 2 + c * c * fit.sb ** 2 + 2 * c * fit.cov + (fit.b * sc) ** 2);
@@ -408,7 +409,7 @@ function gammaRun(o) {
   for (let ch = 0; ch < GS.nch; ch++) if (Number.isFinite(lg[ch])) pts.push([ch, r6(lg[ch])]);
   return {
     spectra, cal, fit, line: true, peak: pu, k40: pk, Ek, sEk,
-    data: { x: cal.map((c) => c.c), y: cal.map((c) => c.E), sy: cal.map((c) => Math.hypot(fit.b * c.sc, 0.0015 * c.E)), xlabel: 'peak centroid (channel)', ylabel: 'E (keV)', zeroX: true },
+    data: { x: cal.map((c) => c.c), y: cal.map((c) => c.E), sy: cal.map((c) => Math.hypot(fit.b * c.sc, GS.uLin * c.E)), xlabel: 'peak centroid (channel)', ylabel: 'E (keV)', zeroX: true },
     results: [
       result('E', 'unknown’s line', Eu, sEu, { unit: '\\mathrm{keV}', accepted: LINES.mn54 }),
       result('k40', 'K-40 background line', Ek, sEk, { unit: '\\mathrm{keV}', accepted: LINES.k40 }),
@@ -548,7 +549,7 @@ export const HL = {
   n: 1.20e21, mu: 0.360,                                     // m⁻³ (electrons), m²/(V s) (Hall mobility)
   V0: 9.0e-3, drift: 0.20e-3, Vth: 0.15e-3, xi: 1.0,         // V offset (misaligned contacts); V/min as the sample warms; V thermoelectric; magnetoresistance coefficient
   fields: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30],              // T
-  sV: 20e-6, sB: 0.5e-3,                                     // V; T (teslameter reading)
+  sV: 20e-6, sB: 0.05e-3,                                    // V; T (teslameter reading noise)
   typeB: { B: 0.010, t: 0.010, I: 0.002 },
   muTab: 0.39,                                               // m²/(V s): electrons in pure Ge at 300 K (Sze)
 };

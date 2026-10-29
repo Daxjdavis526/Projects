@@ -1152,6 +1152,7 @@ export const LESSONS = {
   'st-f.F9.2': () => import('./st-f/F9.2.js'),
   'st-f.F9.3': () => import('./st-f/F9.3.js'),
   'st-g.G-COV.1': () => import('./st-g/G-COV.1.js'),
+  'st-g.G-COV.2': () => import('./st-g/G-COV.2.js'),
   'st-g.G-FORMS.1': () => import('./st-g/G-FORMS.1.js'),
   'st-g.G-GRP.1': () => import('./st-g/G-GRP.1.js'),
   'st-g.G-GRP.2': () => import('./st-g/G-GRP.2.js'),
