@@ -76,7 +76,7 @@ $$\text{COP} = \frac{Q_c}{W} \le \frac{T_c}{T_h - T_c}.$$
       { label: 'Energy budget', text: t`That heat comes from the hydrogen’s enthalpy drop plus the work put in: $Q_\text{out} = \Delta h + W$. So $W_\text{min} = T_0\Delta s - \Delta h$.` },
       { label: 'Numbers', text: t`$W_\text{min} = ${fmt(EX.TdS / 1e6, 4)} - ${fmt(LIQUEFY.H2.dh / 1e6, 4)} = ${fmt(EX.W / 1e6, 4)}$ MJ/kg $= ${fmt(EX.kWh, 3)}$ kWh/kg.` },
       { label: 'Compare', text: t`Burning a kilogram of hydrogen releases about 120 MJ (lower heating value), so even a perfect liquefier spends $${fmt((100 * EX.W) / 120e6, 2)}\,\%$ of the fuel’s energy. Real plants need several times this, and must also convert ortho- to para-hydrogen (heat released inside the cold box), which raises the minimum further.` },
-      { label: 'Sense check', text: t`$T_0\Delta s$ is three times $\Delta h$: most of the cost is entropy, not energy. Nitrogen, liquefied at a much higher temperature, needs only about $${fmt(liqWork('N2') / 1e6, 2)}$ MJ/kg.` },
+      { label: 'Sense check', text: t`$T_0\Delta s$ is four times $\Delta h$: most of the cost is entropy, not energy. Nitrogen, liquefied at a much higher temperature, needs only about $${fmt(liqWork('N2') / 1e6, 2)}$ MJ/kg.` },
     ],
     answer: t`$W_\text{min} = T_0\Delta s - \Delta h = ${fmt(EX.W / 1e6, 4)}$ MJ/kg, about $${fmt(EX.kWh, 3)}$ kWh per kilogram.`,
   },

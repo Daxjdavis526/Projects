@@ -131,7 +131,7 @@ $$f_p(x) = \frac{e^{ipx/\hbar}}{\sqrt{2\pi\hbar}}, \qquad \langle f_p|f_{p'}\ran
           errors: [{ value: ans * 2 * Math.PI, feedback: t`On a ring $\Delta p = h/L$, not $2\pi h/L$.` }, { value: ans / (2 * Math.PI), feedback: t`$\Delta p = h/L$ — use $h$, not $\hbar$.` }],
           hints: [t`$\Delta p = h/L$ between neighbours.`, t`$\Delta E \approx v\,\Delta p = vh/L$; convert J to meV.`],
           teach: 'A box or ring makes momentum discrete with spacing h/L; as L grows the spectrum crowds into a continuum.',
-          explain: t`$\Delta E = vh/L = ${tex(v, 3)}\times${tex(H, 4)}/${tex(L * 1e-6, 2)} = ${fmt(ans, 3)}$ meV. For a ring a metre long it would be a million times smaller: the free-particle continuum is the limit of an ever-larger box, which is why “box normalization” is a common working trick.`,
+          explain: t`$\Delta E = vh/L = ${tex(v, 3)}\times${tex(H, 4)}/${tex(L * 1e-6, 2)} = ${fmt(ans, 3)}$ meV. For a ring a metre long it would be ${L === 0.1 ? 'ten million' : L === 1 ? 'a million' : 'a hundred thousand'} times smaller: the free-particle continuum is the limit of an ever-larger box, which is why “box normalization” is a common working trick.`,
         };
       },
     }),

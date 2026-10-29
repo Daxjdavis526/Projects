@@ -167,7 +167,7 @@ export default lesson({
           errors: [{ value: (al * al * n * n * Math.PI * Math.PI) / (4 * Math.sqrt(1 + m * m)) * 1000, feedback: t`The power is $3/2$: $(1 + m^2)^{3/2}$ comes from differentiating $1/\sqrt{1 + y'^2}$.` }, { value: (al * al * n * n * Math.PI * Math.PI) / (2 * (1 + m * m) ** 1.5) * 1000, feedback: t`$\int_0^1\cos^2(n\pi x)\,dx = \tfrac12$, so $\int\eta'^2\,dx = n^2\pi^2/2$ — and there is a $\tfrac12$ in front as well.` }].filter((e) => Math.abs(e.value - est * 1000) > 0.03 * est * 1000),
           hints: [t`$\eta = \sin(${n}\pi x)$, so $\eta' = ${n}\pi\cos(${n}\pi x)$ and $\int_0^1\eta'^2\,dx = ${n * n}\pi^2/2$.`, t`$\Delta L \approx \tfrac12(${al})^2\cdot\dfrac{${n * n}\pi^2/2}{(1 + ${m}^2)^{3/2}}$ m; convert to mm.`],
           teach: t`Near a stationary path the functional changes only at second order: $\Delta L \propto \alpha^2$.`,
-          explain: t`$\Delta L \approx \tfrac12(${al})^2(${sci((n * n * Math.PI * Math.PI) / 2, 4)})/${sci((1 + m * m) ** 1.5, 4)} = ${sci(est * 1000, 3)}$ mm. A ${al * 1000} mm wiggle costs only a fraction of a millimetre of length: that insensitivity is what stationary means.`,
+          explain: t`$\Delta L \approx \tfrac12(${al})^2(${sci((n * n * Math.PI * Math.PI) / 2, 4)})/${sci((1 + m * m) ** 1.5, 4)} = ${sci(est * 1000, 3)}$ mm. Halve the ${al * 1000} mm wiggle and the extra length falls to a quarter: a change of second order in $\alpha$ is what stationary means.`,
           visual: vary({ preset: 'length', n, alpha: Math.min(0.3, al * 6), ghosts: false, panels: ['path'] }, t`The shape of a mode-${n} variation, exaggerated six times (and drawn on a line of slope 0.5).`),
         };
       },

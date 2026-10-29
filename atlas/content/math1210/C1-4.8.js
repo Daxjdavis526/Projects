@@ -126,7 +126,7 @@ Close to a simple root the number of correct digits roughly **doubles** with eve
       why: {
         1: t`From $Q$ ($x = 2$) the tangent is steep and lands at $x_1 = 1.667$, then $1.549$, $1.5324$: it converges.`,
         2: t`Below or above the axis does not matter; the sign of $f$ just sets the direction of the step. From $S$ the next guesses are $1.558$, $1.533$.`,
-        3: t`From $R$ the steps go $1.556$, $1.533$: fine.`,
+        3: t`From $R$ the steps go $1.557$, $1.533$: fine.`,
       },
       hints: [t`The step is $f(x_n)/f'(x_n)$. What happens to it when $f'(x_n)$ is small?`, 'Find the point where the tangent line would be almost horizontal.'],
       teach: 'A nearly flat tangent meets the axis far away: never start Newton’s method near a turning point of f.',

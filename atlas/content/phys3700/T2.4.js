@@ -189,7 +189,7 @@ The second law now reads: an isolated system’s entropy tends to increase, beca
           hints: [t`$\Omega_f/\Omega_i = e^{\Delta S/k}$.`, t`$\log_{10}(\Omega_f/\Omega_i) = \dfrac{\Delta S}{k\ln 10}$.`],
           teach: t`A change in entropy is a ratio of multiplicities: $\Omega_f/\Omega_i = e^{\Delta S/k}$.`,
           explain: t`$\Delta S/k = ${fmt(dS / KB, 4)}$, so the factor is $e^{${fmt(dS / KB, 4)}} = 10^{${fmt(v, 4)}}$ — from an entropy change far too small to measure.`,
-          visual: { type: 'graph', params: { x: [0, 55], y: [0, 1800], aspect: 'wide', xlabel: 'ΔS (10⁻²¹ J/K)', ylabel: 'log₁₀(Ωf / Ωi)', axesAt: 'edge', curves: [{ fn: `x*1e-21/${KB}/ln(10)`, color: 'accent' }], vlines: [{ x: r4(dS * 1e21), color: 'gold' }] }, caption: 'The log of the multiplicity ratio grows in proportion to the entropy change; a zeptojoule per kelvin is already a factor of 10³⁰.' },
+          visual: { type: 'graph', params: { x: [0, 55], y: [0, 1800], aspect: 'wide', xlabel: 'ΔS (10⁻²¹ J/K)', ylabel: 'log₁₀(Ωf / Ωi)', axesAt: 'edge', curves: [{ fn: `x*1e-21/${KB}/ln(10)`, color: 'accent' }], vlines: [{ x: r4(dS * 1e21), color: 'gold' }] }, caption: 'The log of the multiplicity ratio grows in proportion to the entropy change; a zeptojoule per kelvin is already a factor of about 10³¹.' },
         };
       },
     }),

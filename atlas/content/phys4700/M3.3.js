@@ -132,7 +132,7 @@ so that $\hat H = \hbar\omega\big(\hat N + \tfrac12\big)$ with the **number oper
         return {
           prompt: t`What is the matrix element $\langle ${n + 2}|\,(\hat a^\dagger)^2\,|${n}\rangle$?`,
           visual: ladderPic({ top: Math.max(5, n + 3), hi: n, arrows: [{ from: n, to: n + 1, x: -0.2, label: 'a†' }, { from: n + 1, to: n + 2, x: 0.2, label: 'a†' }], caption: 'Two raisings in a row. Each multiplies by √(rung number reached).' }),
-          answer: ans, tol: { rel: 0.002 },
+          answer: ans, tol: { rel: 0.005 },
           errors: [
             { value: (n + 1) * (n + 2), feedback: t`Each step gives a square root: $\sqrt{n+1}$, then $\sqrt{n+2}$.` },
             { value: Math.sqrt(n * (n + 1)) || NaN, feedback: t`Raising uses $\sqrt{n+1}$ (the rung reached), not $\sqrt n$.` },

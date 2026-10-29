@@ -109,7 +109,7 @@ export default lesson({
       { label: 'Reduced mass', text: t`$\mu = \dfrac{${HT.mp}\times${HT.mc}}{${HT.M.toFixed(3)}}\,M_\odot = ${sci(HT.mu, 4)}\,M_\odot$ — about a quarter of the total, as for any equal pair.` },
       { label: 'Kepler III', text: t`With $M$ in place of the Sun's mass: $a^3 = \dfrac{GMP^2}{4\pi^2} = \dfrac{(${HT.M.toFixed(3)})(1.327\times10^{20})(${sci(HT.Pb, 5)})^2}{4\pi^2}$, so $a = ${sci(HT.a, 3)}$ m.` },
       { label: 'Each star', text: t`$\vec r_1 = (m_2/M)\vec r$ and $\vec r_2 = -(m_1/M)\vec r$: the pulsar's orbit has $a_p = (${HT.mc}/${HT.M.toFixed(3)})a = ${sci(HT.ap, 3)}$ m and its companion's $a_c = ${sci(HT.ac, 3)}$ m. The lighter star swings wider.` },
-      { label: 'Sense check', text: t`$a_p + a_c = a$ ✓. The whole binary is $${sci(HT.a / 1e9, 3)}$ million km across — ${HT.aRs.toFixed(1)} solar radii: it would fit inside the Sun, which is why it radiates gravitational waves so strongly ([gr.S27.i](#/lesson/gr.S27.i)).` },
+      { label: 'Sense check', text: t`$a_p + a_c = a$ ✓. The two stars are on average about $${sci(HT.a / 1e9, 3)}$ million km apart — only ${HT.aRs.toFixed(1)} solar radii, an orbit about the size of the Sun itself, which is why it radiates gravitational waves so strongly ([gr.S27.i](#/lesson/gr.S27.i)).` },
     ],
     answer: t`$\mu = ${sci(HT.mu, 3)}\,M_\odot$; $a = ${sci(HT.a, 3)}$ m; the pulsar's orbit $${sci(HT.ap, 3)}$ m and the companion's $${sci(HT.ac, 3)}$ m about the centre of mass.`,
   },

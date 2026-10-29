@@ -217,7 +217,7 @@ Where $f$ is negative its rectangles have negative height, so the integral is th
     num({
       id: 'cp-linear', difficulty: 2,
       gen(r) {
-        const A = r.int(2, 9), B = r.intExcept(-4, 6, [0]), p = r.int(2, 4), q = r.int(1, 3), ans = p * A - q * B;
+        const A = r.int(2, 9), B = r.intExcept(-4, 6, [0]), p = r.int(2, 4), q = r.int(2, 3), ans = p * A - q * B;
         return {
           prompt: t`If $\displaystyle\int_a^b f(x)\,dx = ${A}$ and $\displaystyle\int_a^b g(x)\,dx = ${B}$, what is $\displaystyle\int_a^b \big(${p}f(x) - ${q}g(x)\big)\,dx$?`,
           answer: ans, tol: { rel: 0, abs: 0.001 },

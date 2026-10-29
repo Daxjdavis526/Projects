@@ -223,7 +223,7 @@ print([-RY / n**2 for n in (1, 2, 3)])`,
       ],
       answer: 0,
       why: {
-        1: t`Rotational symmetry only guarantees degeneracy in $m$; the spherical well, the 3D oscillator in shells and real atoms all have $l$-dependent energies.`,
+        1: t`Rotational symmetry only guarantees degeneracy in $m$; the spherical well and real many-electron atoms have $l$-dependent energies.`,
         2: t`Spin was not in the equation; and the barrier is plainly there in $V_{\text{eff}}$.`,
         3: t`The reduced mass rescales every level equally; it cannot create or remove a degeneracy.`,
       },

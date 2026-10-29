@@ -88,7 +88,7 @@ which gives every function a length $\|f\| = \sqrt{\langle f|f\rangle}$ and ever
         return {
           prompt: t`Find the positive constant $A$ that makes $f(x) = A\,x^{${q}}$ a unit vector in $L^2(0, 1)$.`,
           visual: { type: 'graph', params: { x: [0, 1], y: [0, q < 0 ? 6 : 1.2], aspect: 'wide', xlabel: 'x', ylabel: '|f|² without A', xticks: 5, yticks: 3, axesAt: 'edge', curves: [{ fn: `x^(${2 * q})`, color: 'accent', width: 2.4, domain: [0.001, 1] }], shade: [{ fn: `x^(${2 * q})`, from: 0.001, to: 1, color: 'accent', alpha: 0.18 }] }, caption: t`The squared function $x^{${2 * q}}$. Its area is $\|x^{${q}}\|^2$; $A$ rescales it to 1.` },
-          answer: ans, tol: { rel: 0.002 },
+          answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 2 * q + 1, feedback: t`$A^2 = 2q + 1$; take the square root.` }, { value: Math.sqrt(q + 1), feedback: t`Square the function first: $\int_0^1x^{2q}dx = 1/(2q + 1)$.` }].filter((e) => Math.abs(e.value - ans) > 0.01),
           hints: [t`$\|x^q\|^2 = \int_0^1x^{2q}dx = \dfrac{1}{2q + 1}$ (finite for $q > -\tfrac12$).`, t`$A^2/(2q + 1) = 1$.`],
           teach: t`Normalizing means dividing by the length: $A = 1/\|f\|$.`,

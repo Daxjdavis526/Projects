@@ -225,7 +225,7 @@ print(coeffs(x * (1 - x), 5))`,
       ],
       hints: ['Normalize first: divide f by √(∫|f|²dx).', 'A list comprehension over n = 1 … nmax of `np.trapezoid(psi(n) * f, x)` gives the coefficients.'],
       teach: 'Projecting onto each basis function with one integral gives every coefficient; their squares are the energy probabilities.',
-      explain: t`The parabola gives $c_1 = 0.99964$, $c_3 = 0.0370$, … ; the sum $\sum n^2|c_n|^2$ converges to $10/\pi^2$ because $|c_n|^2 \propto n^{-6}$. Try the half box: there $|c_n|^2 \propto n^{-2}$, and $\sum n^2|c_n|^2$ grows without limit — its mean energy is infinite.`,
+      explain: t`The parabola gives $c_1 = 0.99928$, $c_3 = 0.0370$, … ; the sum $\sum n^2|c_n|^2$ converges to $10/\pi^2$ because $|c_n|^2 \propto n^{-6}$. Try the half box: there $|c_n|^2 \propto n^{-2}$, and $\sum n^2|c_n|^2$ grows without limit — its mean energy is infinite.`,
     }),
   ],
   checkpoint: [

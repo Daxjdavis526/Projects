@@ -130,10 +130,10 @@ Every derivative rule read backwards is an antiderivative rule: $\int x^n\,dx = 
         return {
           prompt: t`A car at $${v0}$ m/s brakes with a constant deceleration of $${d}\ \text{m/s}^2$. Using $v(t) = \int a\,dt$ and $x(t) = \int v\,dt$, find its stopping distance.`,
           answer: D, units: 'm', tol: { rel: 0.005 },
-          errors: [{ value: v0 * v0 / d, feedback: t`$\int (v_0 - dt)\,dt = v_0t - \tfrac12 dt^2$: keep the $\tfrac12$.` }, { value: T, feedback: 'That is the stopping time in seconds. Now use it in x(t).' }],
+          errors: [{ value: v0 * v0 / d, feedback: t`$\int (${v0} - ${d}t)\,dt = ${v0}t - \tfrac12\cdot ${d}t^2$: keep the $\tfrac12$.` }, { value: T, feedback: 'That is the stopping time in seconds. Now use it in x(t).' }],
           hints: [t`$v(t) = ${v0} - ${d}t$, which is $0$ at $t = ${nice(T, 4)}$ s.`, t`$x(t) = ${v0}t - ${d / 2}t^2$ (taking $x(0) = 0$). Evaluate at the stopping time.`],
           teach: 'Integrate acceleration to get velocity, find when it reaches zero, then integrate velocity to get the distance.',
-          explain: t`$v = ${v0} - ${d}t$ stops at $t = ${nice(T, 4)}$ s; $x = ${v0}(${nice(T, 4)}) - ${d / 2}(${nice(T, 4)})^2 = ${nice(D, 4)}$ m — the same as $v_0^2/2d$.`,
+          explain: t`$v = ${v0} - ${d}t$ stops at $t = ${nice(T, 4)}$ s; $x = ${v0}(${nice(T, 4)}) - ${d / 2}(${nice(T, 4)})^2 = ${nice(D, 4)}$ m — the same as the constant-deceleration formula $\dfrac{v_0^2}{2a} = \dfrac{${v0}^2}{2 \times ${d}}$.`,
           visual: { type: 'mech-graphlink', params: { a: -d, v0, T, panels: ['v', 'a'], readouts: ['t', 'v', 'a'], play: false }, caption: 'Braking with constant deceleration: v falls in a straight line to zero. Real braking is not quite constant.' },
         };
       },
@@ -213,15 +213,16 @@ Every derivative rule read backwards is an antiderivative rule: $\int x^n\,dx = 
       id: 'cp-ivp2', difficulty: 3,
       gen(r) {
         const p = r.intExcept(-3, 4, [0]), q = r.intExcept(-3, 4, [0]);
+        const sg = (n) => (n < 0 ? '-' : '+'), px = `${Math.abs(p) === 1 ? '' : Math.abs(p)}x`, pX = `${p === 1 ? '' : p === -1 ? '-' : p}x`;
         return {
           prompt: t`Find $f(x)$ if $f''(x) = 6x$, $f'(0) = ${p}$ and $f(0) = ${q}$.`,
           lhs: 'f(x)',
-          answer: `x^3 + ${p}x + ${q}`, answerTeX: t`x^3 ${p < 0 ? '-' : '+'} ${Math.abs(p)}x ${q < 0 ? '-' : '+'} ${Math.abs(q)}`,
+          answer: `x^3 + ${p}x + ${q}`, answerTeX: t`x^3 ${sg(p)} ${px} ${sg(q)} ${Math.abs(q)}`,
           vars: { x: [-2, 2] }, integrand: `3x^2 + ${p}`,
-          errors: [{ answer: `x^3 + ${q}`, feedback: t`Integrating $f''$ gives $f' = 3x^2 + C_1$ with $C_1 = ${p}$; integrating again, $C_1$ becomes $${p}x$.` }, { answer: `x^3 + ${p + q}`, feedback: t`The first constant becomes $${p}x$ after the second integration, not a constant.` }],
-          hints: [t`$f'(x) = 3x^2 + C_1$, and $f'(0) = ${p}$ gives $C_1$.`, t`$f(x) = x^3 + ${p}x + C_2$, and $f(0) = ${q}$ gives $C_2$.`],
+          errors: [{ answer: `x^3 + ${q}`, feedback: t`Integrating $f''$ gives $f' = 3x^2 + C_1$ with $C_1 = ${p}$; integrating again, $C_1$ becomes $${pX}$.` }, { answer: `x^3 + ${p + q}`, feedback: t`The first constant becomes $${pX}$ after the second integration, not a constant.` }],
+          hints: [t`$f'(x) = 3x^2 + C_1$, and $f'(0) = ${p}$ gives $C_1$.`, t`$f(x) = x^3 ${sg(p)} ${px} + C_2$, and $f(0) = ${q}$ gives $C_2$.`],
           teach: 'A second derivative needs two integrations and two conditions — like acceleration needing an initial velocity and an initial position.',
-          explain: t`$f' = 3x^2 + ${p}$, then $f = x^3 + ${p}x + ${q}$.`,
+          explain: t`$f' = 3x^2 ${sg(p)} ${Math.abs(p)}$, then $f = x^3 ${sg(p)} ${px} ${sg(q)} ${Math.abs(q)}$.`,
           visual: family('x^3', [-2.2, 2.2], [-8, 8], [-4, 0, 4], undefined, t`Dashed: a few functions with $f'' = 6x$, all with slope $0$ at $x = 0$. Yours must pass through the gold point with the gold slope: two conditions for two constants.`, { points: [{ x: 0, y: q, color: 'gold', label: `(0, ${q})` }], curves: [{ fn: `${q} + ${p}*x`, color: 'gold', width: 1.6, domain: [-0.7, 0.7] }] }),
         };
       },

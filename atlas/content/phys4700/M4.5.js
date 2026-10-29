@@ -157,7 +157,7 @@ $\Delta t$ is the time it takes the average of **some** observable $Q$ to move b
           errors: [{ value: ans * 2 * Math.PI, feedback: t`$\Delta\nu = \Gamma/h = 1/(2\pi\tau)$: you used $\hbar$ where $h$ belongs.` }, { value: ans / 2, feedback: t`$\Gamma = \hbar/\tau$ is the full width, not the half width.` }],
           hints: [t`$\Delta\nu = \dfrac{\Gamma}{h} = \dfrac{\hbar/\tau}{2\pi\hbar} = \dfrac{1}{2\pi\tau}$.`, t`$\tau = ${fmt(tau * 1e9, 5)}\times10^{-9}$ s.`],
           teach: 'A state that lives a time τ has an energy spread Γ = ħ/τ: its spectral line has a natural width 1/(2πτ) in frequency.',
-          explain: t`$\Delta\nu = 1/(2\pi\times${fmt(tau * 1e9, 5)}\ \text{ns}) = ${fmt(ans, 4)}$ MHz — about one part in $${tex(ans * 1e6 * lam / 299792458, 2)}$ of the optical frequency. Laser cooling relies on such narrow lines; the energy–time relation, with $\Delta t$ the decay time of the atom’s oscillating dipole, guarantees that a short-lived state cannot have a sharp energy.`,
+          explain: t`$\Delta\nu = 1/(2\pi\times${fmt(tau * 1e9, 5)}\ \text{ns}) = ${fmt(ans, 4)}$ MHz — a fraction $${tex(ans * 1e6 * lam / 299792458, 2)}$ of the optical frequency. Laser cooling relies on such narrow lines; the energy–time relation, with $\Delta t$ the decay time of the atom’s oscillating dipole, guarantees that a short-lived state cannot have a sharp energy.`,
         };
       },
     }),

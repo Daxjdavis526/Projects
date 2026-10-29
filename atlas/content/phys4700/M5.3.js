@@ -113,7 +113,7 @@ with $m = -l, -l + 1, \dots, l$ and $l$ a whole or half-whole number. $\hat L_+$
         return {
           prompt: t`$\hat L_+|l, m\rangle = c\,\hbar\,|l, m + 1\rangle$. Find $c$ for $l = ${l}$, $m = ${m}$.`,
           visual: ladderPic(l, m, 1, t`The rungs of $l = ${l}$; $\hat L_+$ takes $m = ${m}$ (gold) one rung up.`),
-          answer: ans, tol: { rel: 0.002 },
+          answer: ans, tol: { rel: 0.005 },
           errors: [{ value: Math.sqrt(l * (l + 1) - m * (m - 1)), feedback: t`That is the lowering coefficient, $\sqrt{l(l+1) - m(m - 1)}$. Raising uses $m(m + 1)$.` }, { value: Math.sqrt(l * l - m * m), feedback: t`$\hat L^2$’s eigenvalue is $l(l+1)$, not $l^2$.` }].filter((e) => Math.abs(e.value - ans) > 0.005 * ans),
           hints: [t`$c = \sqrt{l(l+1) - m(m+1)}$.`],
           teach: 'L± change m by one and multiply by ħ√(l(l + 1) − m(m ± 1)), which vanishes at the ends of the ladder.',

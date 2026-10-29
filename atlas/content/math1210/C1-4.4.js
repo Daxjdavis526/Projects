@@ -124,7 +124,7 @@ Read with $f$ as position and $x$ as time: if your average speed over a trip was
         return {
           prompt: t`Find the number $c$ in $(0, ${b})$ that the Mean Value Theorem promises for $f(x) = x^3$ on $[0, ${b}]$. Give 3 significant figures.`,
           answer: c, tol: { rel: 0.005 },
-          errors: [{ value: b / 2, feedback: t`The midpoint works only for a parabola. Solve $f'(c) = $ (chord slope) for $c$.` }, { value: b / 3, feedback: t`From $3c^2 = ${b * b}$ you get $c^2 = ${nice(b * b / 3)}$; take the square root.` }],
+          errors: [{ value: b / 2, feedback: t`The midpoint works only for a parabola. Solve $f'(c) = $ (chord slope) for $c$.` }, { value: b / 3, feedback: t`From $3c^2 = ${b * b}$ you get $c^2 = ${nice(b * b / 3)}$, so $c = ${b}/\sqrt3$: the square root takes the root of the $3$ as well, not $${b}/3$.` }],
           hints: [t`The chord slope is $\dfrac{${b ** 3} - 0}{${b} - 0} = ${b * b}$.`, t`Solve $3c^2 = ${b * b}$ for $c > 0$.`],
           teach: 'To find c, compute the chord slope, then solve f′(c) = that slope and keep the solution inside (a, b).',
           explain: t`Chord slope $= ${b * b}$; $f'(c) = 3c^2 = ${b * b}$ gives $c = ${b}/\sqrt3 = ${nice(c, 4)}$, which lies in $(0, ${b})$. It is past the midpoint because $x^3$ steepens to the right.`,

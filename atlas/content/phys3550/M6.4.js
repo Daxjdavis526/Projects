@@ -167,7 +167,7 @@ export default lesson({
           answer: ratio, tol: { rel: 0.005 },
           errors: distinct([{ value: (OMEGA_E * Math.sin(lat * DEG)) / w0, feedback: t`The Coriolis acceleration carries a factor 2: $2\Omega_zv$.` }, { value: (2 * OMEGA_E) / w0, feedback: t`Only the vertical component $\Omega_z = \Omega\sin\lambda$ deflects the swing sideways.` }], ratio),
           hints: [t`$\omega_0 = \sqrt{g/L}$ and $\Omega_z = \Omega\sin\lambda$.`],
-          teach: t`The Coriolis push on a pendulum is ten-thousand times weaker than gravity's — which is why Foucault needed a long, heavy, carefully started pendulum.`,
+          teach: t`The Coriolis push on a pendulum is thousands of times weaker than gravity's — which is why Foucault needed a long, heavy, carefully started pendulum.`,
           explain: t`$\omega_0 = ${sci(w0, 3)}$ rad/s, so the ratio is $${sci(ratio, 3)}$. A long wire helps (smaller $\omega_0$ means slower swings and more time for the push to act per swing), and a heavy bob keeps air drag and stray disturbances from swamping such a tiny effect.`,
           visual: gpic({ x: [-1.4, 1.4], y: [-1.5, 0.2], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves: [seg([-0.5, 0], [0.5, 0], 'ink2', 3), seg([0, 0], [0.35, -1.25], 'ink2', 1.4), seg([0, 0], [0, -1.3], 'ink4', 1, true)], points: [{ x: 0.35, y: -1.25, color: 'warn', r: 9 }, lab(0.65, -0.6, 'L', 'ink2')] }, t`A long pendulum, side-on (not to scale).`, 'A long pendulum hanging from a support'),
         };

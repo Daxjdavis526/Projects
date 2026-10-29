@@ -103,7 +103,7 @@ For [matrices](#/lesson/phys4700.M0.2) this meant equal to its conjugate transpo
     num({
       id: 'boundary-term', difficulty: 3,
       gen(r) {
-        const a = r.pick([1, 2, -0.5, 3]), b = r.pick([1, 2, -0.5, 0.5]);
+        const a = r.pick([1, 2, -0.25, 3]), b = r.pick([1, 2, -0.25, 0.5]);   // (1 + a)(1 + b) is never 1, so K ≠ 0
         const ans = (1 + a) * (1 + b) - 1;
         return {
           prompt: t`On the interval $0 \le x \le 1$ take the real functions $f = 1 ${a < 0 ? '-' : '+'} ${Math.abs(a)}x$ and $g = 1 ${b < 0 ? '-' : '+'} ${Math.abs(b)}x$, which do **not** vanish at the ends. Integration by parts gives $\langle f|\hat pg\rangle - \langle\hat pf|g\rangle = -i\hbar\big[f^*g\big]_0^1$. Writing this as $-i\hbar K$, find $K$.`,
@@ -169,7 +169,7 @@ For [matrices](#/lesson/phys4700.M0.2) this meant equal to its conjugate transpo
       why: {
         1: t`$\hat H$ acting on it gives $E_0\psi_0 + E_2\psi_2$, not a multiple of the state: it can give either value.`,
         2: t`A packet contains a spread of momenta, so a spread of kinetic energies.`,
-        3: t`$\tfrac12(\psi_1 + \psi_3)$ of the oscillator has $\langle H\rangle = E_2$, yet never gives $E_2$ at all.`,
+        3: t`$\tfrac{1}{\sqrt2}(\psi_1 + \psi_3)$ of the oscillator has $\langle H\rangle = E_2$, yet never gives $E_2$ at all.`,
       },
       hints: [t`$\sigma_H = 0$ exactly when $\hat H\Psi = E\Psi$.`],
       teach: 'A determinate state of an observable is an eigenstate of its operator; for energy, a stationary state.',

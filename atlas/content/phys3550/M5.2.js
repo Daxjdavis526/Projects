@@ -158,7 +158,7 @@ export default lesson({
           errors: [],
           hints: [t`At aphelion $\dot r = 0$, so $h = r_av_a$ and $\varepsilon = \tfrac12v_a^2 - GM/r_a$.`, t`Solve $\varepsilon r^2 + GMr - \tfrac12h^2 = 0$; the root that is not $r_a$ is the perihelion.`],
           teach: t`Both ends of an orbit are roots of $U_{\text{eff}}(r) = E$; knowing one end and the speed there gives the other.`,
-          explain: t`$\varepsilon = ${sci(eps, 4)}$ J/kg and $h = ${sci(hh, 4)}$ m²/s give roots $${Q}$ AU and $r_p = ${sci(rp, 3)}$ AU. A speed of under a kilometre per second at aphelion is enough to miss the Sun by tens of millions of kilometres.`,
+          explain: t`$\varepsilon = ${sci(eps, 4)}$ J/kg and $h = ${sci(hh, 4)}$ m²/s give roots $${Q}$ AU and $r_p = ${sci(rp, 3)}$ AU. A sideways speed of only $${vQ}$ km/s at aphelion is enough to miss the Sun by about $${sci((rp * AU) / 1e9, 2)}$ million km.`,
           visual: gpic({ x: [-Q * 1.05, 4], y: [-Q * 0.25, Q * 0.25], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves: [conic(0.6, Q, { color: 'ink3', width: 1.2, dash: true })], points: [{ x: 0, y: 0, color: 'gold', r: 6, label: 'Sun', labelDx: 8, labelDy: 12 }, { x: -Q, y: 0, color: 'warn', r: 5, label: 'aphelion', labelDx: 8, labelDy: 12 }], arrows: [{ from: [-Q, 0], to: [-Q, -Q * 0.15], color: 'warn', label: 'v', labelDx: 6, labelDy: 0 }] }, t`The comet at aphelion (orbit dashed, its perihelion distance not to scale). The speed there is the only other thing you need.`, 'A long comet orbit with the Sun at one end'),
         };
       },

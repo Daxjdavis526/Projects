@@ -227,7 +227,7 @@ def rot(alpha, n):
       answer: 0,
       why: {
         1: t`$\cos\tfrac\pi2 = 0$ and $\sin\tfrac\pi2 = 1$: $\hat U = -i\sigma_x$, which exchanges the components.`,
-        2: t`That is a $\pi/2$ pulse, $e^{-i\pi\sigma_x/4}$, which leaves the spin on the equator.`,
+        2: t`A state on the equator comes from a $\pi/2$ pulse (this one from $e^{-i\pi\sigma_y/4}$); a $\pi$ pulse carries $|0\rangle$ all the way to the south pole.`,
         3: t`$-\mathbb 1$ comes from a $2\pi$ rotation, not $\pi$.`,
       },
       hints: [t`$e^{-i\alpha\sigma_x/2} = \cos\tfrac\alpha2\,\mathbb 1 - i\sin\tfrac\alpha2\,\sigma_x$.`],

@@ -151,7 +151,7 @@ Here $L$ is the latent heat and $\Delta V$ the volume change of the transition (
         const Pbar = r.pick([2, 3, 3.5, 5]), s = SUBST.o2, T = ccT(s.Tb, 101325, s.Lb, Pbar * 1e5);
         return {
           prompt: t`A rocket’s liquid-oxygen tank is pressurized to $${Pbar}$ bar. Up to what temperature can the oxygen warm before it boils? Use Clausius–Clapeyron from the normal boiling point ($${s.Tb}$ K at 1.013 bar) with $L = ${fmt(s.Lb / 1000, 4)}$ kJ/mol.`,
-          answer: T, units: 'K', tol: { rel: 0.004 },
+          answer: T, units: 'K', tol: { rel: 0.005 },
           errors: apart([{ value: ccT(s.Tb, 101325, -s.Lb, Pbar * 1e5), feedback: 'Higher pressure raises the boiling point: check the sign in 1/T = 1/T₀ − (R/L) ln(P/P₀).' }, { value: ccT(s.Tb, 101325, s.Lb * 1000, Pbar * 1e5), feedback: 'L is 6818 J/mol: keep R and L in the same units.' }], T),
           hints: [t`$\dfrac1T = \dfrac1{T_0} - \dfrac{R}{L}\ln\dfrac{P}{P_0}$.`, t`$\ln(${Pbar}/1.013) = ${fmt(Math.log((Pbar * 1e5) / 101325), 4)}$.`],
           teach: 'Pressurizing a cryogen raises its boiling point, letting the liquid warm without boiling.',

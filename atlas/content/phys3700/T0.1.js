@@ -210,7 +210,7 @@ The spread about the mean is the standard deviation $\sigma_x = \sqrt{\langle x^
           errors: [{ value: N * p, feedback: 'That is the expected number of failures, not the spread.' }, { value: N * p * (1 - p), feedback: 'That is the variance; take its square root.' }],
           hints: [t`Each cell is one trial: $\sigma = \sqrt{Np(1-p)}$.`, t`$\sqrt{${N}\times${p}\times${nice(1 - p)}}$.`],
           teach: 'Independent failures follow the binomial distribution.',
-          explain: t`$\langle k\rangle = ${nice(N * p)}$ and $\sigma = \sqrt{${N}(${p})(${nice(1 - p)})} = ${fmt(s, 3)}$ — a designer sizing the array for $\langle k\rangle + 2\sigma \approx ${fmt(N * p + 2 * s, 2)}$ failures covers about 97% of missions.`,
+          explain: t`$\langle k\rangle = ${nice(N * p)}$ and $\sigma = \sqrt{${N}(${p})(${nice(1 - p)})} = ${fmt(s, 3)}$ — a designer sizing the array for $\langle k\rangle + 2\sigma \approx ${fmt(N * p + 2 * s, 2)}$ failures covers roughly 95–98% of missions (the exact share depends on $N$ and $p$).`,
           visual: binomBars(N, p, { xmax: 20, xlabel: 'failed cells', caption: `The binomial distribution of failures for ${N} cells, shown up to 20 failures (the rest are negligible). Real failures are not always independent: one radiation event can take out a string.` }),
         };
       },

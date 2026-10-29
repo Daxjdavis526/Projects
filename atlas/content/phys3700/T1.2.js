@@ -84,7 +84,7 @@ A monatomic gas has $f = 3$; a diatomic one adds 2 rotations; a vibration adds 2
     prompt: t`Predict $C_V/R$ for hydrogen gas at 50 K, 300 K and 3000 K by counting active degrees of freedom, and compare with the quantum calculation in the picture.`,
     visual: cvGraph({ n2: false, caption: 'Hydrogen’s Cᵥ/R from its quantum levels (normal hydrogen; dissociation and condensation ignored). The dotted lines mark the characteristic temperatures of rotation and vibration.' }),
     steps: [
-      { label: 'The scales', text: t`Hydrogen’s rotational levels are spaced $kθ_\text{rot}$ with $\theta_\text{rot} = ${fmt(thetaRot('H2'), 3)}$ K; its vibrational quantum is $\theta_\text{vib} = ${Math.round(thetaVib('H2'))}$ K (from the measured 4161 cm⁻¹ band).` },
+      { label: 'The scales', text: t`Hydrogen’s rotational levels are $E_J = J(J+1)\,k\theta_\text{rot}$ with $\theta_\text{rot} = ${fmt(thetaRot('H2'), 3)}$ K; its vibrational quantum is $\theta_\text{vib} = ${Math.round(thetaVib('H2'))}$ K (from the measured 4161 cm⁻¹ band).` },
       { label: '50 K', text: t`$T < \theta_\text{rot}$: only translation is active, $f = 3$, $C_V/R = 1.5$. The calculation gives $${fmt(EX[0].cv, 3)}$.` },
       { label: '300 K', text: t`$\theta_\text{rot} \ll T \ll \theta_\text{vib}$: translation and two rotations, $f = 5$, $C_V/R = 2.5$. Calculation: $${fmt(EX[1].cv, 3)}$; measured (NIST, 298 K): 2.47.` },
       { label: '3000 K', text: t`$T$ is half of $\theta_\text{vib}$: the vibration is only partly active, so $C_V/R$ lies between 2.5 and 3.5. Calculation: $${fmt(EX[2].cv, 3)}$ — equipartition’s 3.5 is reached only well above 6000 K.` },
@@ -140,7 +140,7 @@ A monatomic gas has $f = 3$; a diatomic one adds 2 rotations; a vibration adds 2
       prompt: t`Low-density hydrogen gas is held at 40 K. According to the curve, what is its molar $C_V$?`,
       choices: [t`$\tfrac32R$, because rotation is frozen`, t`$\tfrac52R$, as for any diatomic gas`, t`$\tfrac72R$, counting vibration`, t`$\tfrac12R$, one degree of freedom`],
       answer: 0,
-      why: { 1: t`$\tfrac52R$ is the room-temperature value; at 40 K, $kT$ is half the rotational spacing.`, 2: 'Vibration needs thousands of kelvin.', 3: 'The three translations are never frozen in a gas.' },
+      why: { 1: t`$\tfrac52R$ is the room-temperature value; at 40 K, $T$ is under half of $\theta_\text{rot}$, and the first rotational step is $2k\theta_\text{rot}$.`, 2: 'Vibration needs thousands of kelvin.', 3: 'The three translations are never frozen in a gas.' },
       hints: [t`Compare 40 K with $\theta_\text{rot} \approx 85$ K.`, 'Read the height of the blue curve at 40 K.'],
       teach: 'Below its characteristic temperature a motion holds almost no energy.',
       explain: t`At 40 K only translation is active: $C_V = \tfrac32R = 12.5$ J/(mol·K) (calculation: $${fmt(diatomicCv('H2', 40), 4)}R$). Hydrogen behaves like a monatomic gas.`,
@@ -190,7 +190,7 @@ A monatomic gas has $f = 3$; a diatomic one adds 2 rotations; a vibration adds 2
           errors: apart([{ value: Math.sqrt((1.4 * KB * T) / m), feedback: t`$\gamma = 7/5$ assumes rotation is active. At ${T} K hydrogen’s rotation is frozen: $f = 3$, $\gamma = 5/3$.` }], c),
           hints: [t`At ${T} K, compare with $\theta_\text{rot} \approx 85$ K: which motions are active?`, t`$f = 3$ gives $C_V = \tfrac32R$, $C_P = \tfrac52R$, $\gamma = 5/3$.`],
           teach: 'γ = (f + 2)/f uses only the active degrees of freedom — and for cold hydrogen that is 3.',
-          explain: t`Rotation frozen, so $\gamma = 5/3$: $c = \sqrt{(5/3)(1.381\times10^{-23})(${T})/(3.347\times10^{-27})} = ${Math.round(c)}$ m/s. Assuming room-temperature $\gamma = 7/5$ would give $${Math.round(Math.sqrt((1.4 * KB * T) / m))}$ m/s, 9% low — a real error for a cryogenic flow designer. (Liquid hydrogen’s boil-off is para-hydrogen, whose rotation freezes even more completely.)`,
+          explain: t`Rotation frozen, so $\gamma = 5/3$: $c = \sqrt{(5/3)(1.381\times10^{-23})(${T})/(3.347\times10^{-27})} = ${Math.round(c)}$ m/s. Assuming room-temperature $\gamma = 7/5$ would give $${Math.round(Math.sqrt((1.4 * KB * T) / m))}$ m/s, 8% low — a real error for a cryogenic flow designer. (Liquid hydrogen’s boil-off is para-hydrogen, whose rotation freezes even more completely.)`,
           visual: cvGraph({ T, n2: false, marks: false, caption: `Hydrogen’s Cᵥ/R from its quantum levels, with ${T} K marked (normal hydrogen; condensation ignored).` }),
         };
       },

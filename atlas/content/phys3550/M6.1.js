@@ -142,11 +142,11 @@ export default lesson({
     }),
     mcq({
       id: 'iss-gravity', difficulty: 2,
-      prompt: t`At the International Space Station's height (about 420 km) Earth's gravity is still $8.7$ m/s², 89% of its value on the ground. Why do the astronauts float?`,
+      prompt: t`At the International Space Station's height (about 420 km) Earth's gravity is still $8.6$ m/s², 88% of its value on the ground. Why do the astronauts float?`,
       visual: { type: 'gr-elevator', params: { mode: 'falling' }, caption: t`A closed box falling freely: inside (left), released objects float; from outside (right), box and objects fall together.` },
       choices: [t`The station and everything in it accelerate at $\vec A = \vec g$ (free fall), so $\vec g_{\text{eff}} = \vec g - \vec A = 0$`, t`Above the atmosphere there is no gravity`, t`The station's speed creates a centrifugal force that exactly balances gravity on every astronaut in the inertial frame`, t`Gravity is too weak at that height to be felt`],
       answer: 0,
-      why: { 1: t`Gravity at 420 km is 8.7 m/s² — it is what keeps the station in orbit at all.`, 2: t`In the inertial frame there is no centrifugal force: gravity is unbalanced and is exactly the centripetal force of the orbit. "Centrifugal" appears only in a rotating frame ([M6.3](#/lesson/phys3550.M6.3)).`, 3: t`8.7 m/s² is easily felt when you stand on a floor that pushes back; what is missing in orbit is the floor's push.` },
+      why: { 1: t`Gravity at 420 km is 8.6 m/s² — it is what keeps the station in orbit at all.`, 2: t`In the inertial frame there is no centrifugal force: gravity is unbalanced and is exactly the centripetal force of the orbit. "Centrifugal" appears only in a rotating frame ([M6.3](#/lesson/phys3550.M6.3)).`, 3: t`8.7 m/s² is easily felt when you stand on a floor that pushes back; what is missing in orbit is the floor's push.` },
       hints: [t`What is the station's own acceleration?`, t`Use $\vec g_{\text{eff}} = \vec g - \vec A$ with $\vec A$ the station's acceleration.`],
       teach: t`Free fall cancels gravity inside the falling frame: weightlessness is $\vec A = \vec g$, not $\vec g = 0$.`,
       explain: t`The orbiting station falls freely: its acceleration is $\vec g$, so in its frame $\vec g_{\text{eff}} = 0$ and nothing presses on anything. "Microgravity" is the small remainder: drag, and the tidal difference between points not at the station's centre of mass.`,

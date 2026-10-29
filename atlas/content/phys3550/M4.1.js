@@ -241,7 +241,7 @@ export default lesson({
       },
       hints: [t`Differentiate: $\dot x = \dot x_s + L\cos\theta\,\dot\theta$ and $\dot y = L\sin\theta\,\dot\theta$.`, t`Then $\dot x^2 + \dot y^2 = \dot x_s^2 + 2L\dot x_s\dot\theta\cos\theta + L^2\dot\theta^2(\cos^2\theta + \sin^2\theta)$.`],
       teach: t`Find $T$ by differentiating $\vec r(q, t)$ — prescribed motions bring cross terms.`,
-      explain: t`$v^2 = \dot x_s^2 + 2L\dot x_s\dot\theta\cos\theta + L^2\dot\theta^2$. The cross term couples the shaking to the swinging — it is how a shaken support drives a pendulum, and with $x_s = A\cos\Omega t$ it can even hold a pendulum upside down (Kapitza's pendulum).`,
+      explain: t`$v^2 = \dot x_s^2 + 2L\dot x_s\dot\theta\cos\theta + L^2\dot\theta^2$. The cross term couples the shaking to the swinging — it is how a shaken support drives a pendulum. (Shake the support fast enough **vertically** instead, and it can even hold a pendulum upside down: Kapitza's pendulum.)`,
     }),
   ],
   sources: [
