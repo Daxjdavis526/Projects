@@ -35,7 +35,7 @@ export default lesson({
 
 $$\sigma_A\,\sigma_B \ge \tfrac12\big|\langle[\hat A, \hat B]\rangle\big|, \qquad \text{so} \qquad \sigma_x\,\sigma_p \ge \frac{\hbar}{2}$$
 
-since $[\hat x, \hat p] = i\hbar$. This is the **Robertson inequality**, and it is a theorem about states, not about clumsy instruments: no wave function has both a sharp position and a sharp momentum, because a narrow $\psi(x)$ is built from a wide spread of wavenumbers. Gaussians, and only Gaussians with no position-dependent phase, sit exactly on the bound. ([The uncertainty principle](#/lesson/phys2710.MP6.3) used it to estimate sizes and energies; here it is derived and checked.)`,
+since $[\hat x, \hat p] = i\hbar$. This is the **Robertson inequality**, and it is a theorem about states, not about clumsy instruments: no wave function has both a sharp position and a sharp momentum, because a narrow $\psi(x)$ is built from a wide spread of wavenumbers. Gaussians, and only Gaussians without a chirp (a phase that grows as $x^2$), sit exactly on the bound. ([The uncertainty principle](#/lesson/phys2710.MP6.3) used it to estimate sizes and energies; here it is derived and checked.)`,
   symbols: [
     { tex: '\\sigma_A', text: t`the standard deviation of the results of measuring $A$: $\sigma_A^2 = \langle A^2\rangle - \langle A\rangle^2$` },
     { tex: '[\\hat A, \\hat B]', text: t`the commutator $\hat A\hat B - \hat B\hat A$: zero when the order of the two operators does not matter` },

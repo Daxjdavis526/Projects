@@ -107,7 +107,7 @@ function letterClash(item) {
     }
   })(item.visual.params || {});
   if (found.size < 2) return null;
-  const named = [...found].filter((l) => (item.choices || []).some((ch) => new RegExp(`(^|[^A-Za-z\\])${l}(?![A-Za-z])`).test(String(ch).replace(/\\[a-zA-Z]+/g, ''))));
+  const named = [...found].filter((l) => (item.choices || []).some((ch) => new RegExp(`(^|[^A-Za-z\\\\])${l}(?![A-Za-z])`).test(String(ch).replace(/\\[a-zA-Z]+/g, ''))));
   return named.length ? `the picture labels points ${[...found].sort().join(', ')} and the shuffled choices name ${named.join(', ')} — the player letters choices A–D too: relabel the picture P, Q, R, S (or set fixedOrder)` : null;
 }
 

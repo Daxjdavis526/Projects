@@ -85,7 +85,7 @@ When the limit exists it is the slope of the **tangent line** $y = f(a) + f'(a)(
           prompt: t`The derivative of $x^3$ at $x = a$ is $3a^2$. Write the equation of the tangent line to $y = x^3$ at $x = ${a}$.`,
           answer: `y = ${m}x + (${b})`, answerTeX: t`y = ${m}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}`,
           vars: { x: [-2, 2], y: [-2, 2] }, mode: 'equation',
-          errors: [{ answer: `y = ${m}x`, feedback: t`A tangent line passes through the point of tangency $(${a}, ${a ** 3})$, not through the origin: use $y = f(a) + f'(a)(x - a)$.` }, { answer: `y = ${a ** 3} + ${m}x`, feedback: t`Point–slope form is $f'(a)(x - a)$: the slope multiplies $x - ${a}$, not $x$.` }],
+          errors: [{ answer: `y = ${m}x`, feedback: t`A tangent line passes through the point of tangency $(${a}, ${a ** 3})$, not through the origin: use $y = f(a) + f'(a)(x - a)$.` }, { answer: `y = ${a ** 3} + ${m}x`, feedback: t`Point–slope form is $f'(a)(x - a)$: the slope multiplies $x - (${a})$, not $x$.` }],
           hints: [t`Point: $(${a}, ${a ** 3})$. Slope: $3(${a})^2 = ${m}$.`, t`$y = ${a ** 3} + ${m}(x - (${a}))$; expand if you like.`],
           teach: t`The tangent line at $a$ is $y = f(a) + f'(a)(x - a)$: the point, and the slope.`,
           explain: t`$y = ${a ** 3} + ${m}(x ${a < 0 ? '+' : '-'} ${Math.abs(a)}) = ${m}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}$.`,

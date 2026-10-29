@@ -139,7 +139,7 @@ export default lesson({
           errors: [{ value: ((w0 * E) / Q) * 1e6 * 2, feedback: t`$Q = \omega_0/2\beta$ means $2\beta = \omega_0/Q$: the loss rate is $2\beta E = \omega_0E/Q$, not $2\omega_0E/Q$.` }, { value: (E / Q) * 1e6, feedback: t`$E/Q$ has units of energy; the power is $\omega_0E/Q$.` }],
           hints: [t`The energy is $E = mgL(1 - \cos\theta_0)$; it is lost at $P = 2\beta E$.`, t`$2\beta = \omega_0/Q$ with $\omega_0 = \sqrt{g/L}$.`],
           teach: t`A driven steady state replaces exactly the energy damping removes: $P = 2\beta E = \omega_0E/Q$.`,
-          explain: t`$E = ${m}(9.8)(${L})(1 - \cos ${deg}^\circ) = ${sci(E)}$ J and $\omega_0 = ${sci(w0)}$ rad/s, so $P = \omega_0E/Q = ${sci(P * 1e6)}\ \mu$W. A falling weight of 5 kg needs to drop only about a metre a week to supply that.`,
+          explain: t`$E = ${m}(9.8)(${L})(1 - \cos ${deg}^\circ) = ${sci(E)}$ J and $\omega_0 = ${sci(w0)}$ rad/s, so $P = \omega_0E/Q = ${sci(P * 1e6)}\ \mu$W. A falling 5 kg weight needs to drop only about $${sci((P * 604800) / (5 * G) * 100, 2)}$ cm a week to supply that (a real clock's gear train takes more).`,
           visual: gpic({ x: [-1.2, 1.2], y: [-1.15, 0.15], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', curves: [seg([-0.3, 0], [0.3, 0], 'ink2', 3), seg([0, 0], [Math.sin(0.25), -Math.cos(0.25)], 'ink2', 1.8), seg([0, 0], [-Math.sin(0.25), -Math.cos(0.25)], 'ink4', 1, true), { param: ['0.98*sin(t)', '-0.98*cos(t)'], t: [-0.25, 0.25], color: 'ink3', width: 1, dash: true }], points: [{ x: r6(Math.sin(0.25)), y: r6(-Math.cos(0.25)), color: 'gold', r: 8 }] }, t`The pendulum at the end of its swing (angle exaggerated).`, 'A pendulum at the end of its swing'),
         };
       },
