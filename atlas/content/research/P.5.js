@@ -31,7 +31,7 @@ const ratioPic = (caption, { max = 90, series = true, mark = null } = {}) => ({
   },
   caption,
 });
-const pendPic = (theta0, caption, L = 1) => ({ type: 'oscillator', params: { kind: 'pendulum', L, theta0 }, caption });
+const pendPic = (theta0, caption, L = 1, g = 9.8) => ({ type: 'oscillator', params: { kind: 'pendulum', L, theta0, g }, caption });
 
 const PRELUDE = t`import numpy as np
 from scipy.special import ellipk
@@ -175,7 +175,7 @@ print(period_ratio(np.array([5, 10, 30, 90])))
         const ans = lo;
         return {
           prompt: t`You will use the small-angle formula and want the amplitude error in $g$ below ${pct}%. Since $(T/T_0)^2 \approx 1 + \theta_0^2/8$ for small $\theta_0$ (in radians), what is the largest release angle you may use, in degrees?`,
-          visual: pendPic(Math.max(1, Math.round(ans)), 'The exact pendulum (solid) beside the small-angle one: at small release angles they stay in step.'),
+          visual: ratioPic('Below 10°: the exact ratio (blue) and the series (gold) are indistinguishable, and both approach 1.', { max: 10 }),
           answer: ans, units: 'deg', tol: { rel: 0.01 },
           errors: [{ value: Math.sqrt(16 * pct / 100) * 180 / Math.PI, feedback: t`That bounds the period’s error. The error in $g$ is twice as large: use $\theta_0^2/8$.` }, { value: Math.sqrt(8 * pct / 100), feedback: 'That is in radians; convert to degrees.' }],
           hints: [t`Solve $\theta_0^2/8 = ${pct / 100}$ for $\theta_0$ in radians.`, 'Then multiply by 180/π.'],
@@ -270,7 +270,7 @@ print(g, sg)
         const ans = 4 * Math.PI ** 2 * L * ratio(d) ** 2 / (T * T);
         return {
           prompt: t`A lander on ${body} carries a ${L} m pendulum. Released from $${d}^\circ$, it swings with period $${T}$ s. At that angle $T/T_0 = ${ratio(d).toFixed(5)}$. What is the local $g$, in m/s²?`,
-          visual: pendPic(d, `A ${d}° release: the exact pendulum lags the small-angle one a little more each swing.`, L),
+          visual: pendPic(d, `A ${d}° release: the exact pendulum lags the small-angle one a little more each swing.`, L, gt),
           answer: ans, units: 'm/s^2', tol: { rel: 0.002 },
           errors: [{ value: 4 * Math.PI ** 2 * L / (T * T), feedback: 'That uses the small-angle formula: divide the period by the large-angle factor first.' }, { value: 4 * Math.PI ** 2 * L * ratio(d) / (T * T), feedback: t`$g \propto 1/T_0^2$: the factor enters squared.` }],
           hints: [t`$T_0 = ${T}/${ratio(d).toFixed(5)}$.`, t`$g = 4\pi^2 L/T_0^2$.`],

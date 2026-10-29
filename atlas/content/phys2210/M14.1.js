@@ -278,7 +278,7 @@ Where is the mistake?`,
       gen(r) {
         const [craft, pc, note] = r.pick([
           ['the International Space Station', 101.3, 'sea-level air pressure'],
-          ['the Space Shuttle, lowered before a spacewalk', 70.3, '10.2 psi'],
+          ['the Space Shuttle, lowered before a spacewalk,', 70.3, '10.2 psi'],
           ['an Apollo command module in flight', 34.5, '5 psi of pure oxygen'],
         ]);
         const d = r.pick([0.8, 0.9, 1.0]);

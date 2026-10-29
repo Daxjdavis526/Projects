@@ -163,7 +163,7 @@ $U$ is negative everywhere: anything near a planet sits in a well it must climb 
       id: 'v-infinity', difficulty: 2,
       gen(r) {
         const v = r.pick([12, 13, 14, 16]);
-        const vinf = Math.sqrt(v * v - (VE / 1000) ** 2);
+        const vinf = Math.sqrt(v * v - (+(VE / 1000).toPrecision(3)) ** 2); // with the 3-figure escape speed the prompt states
         return {
           prompt: t`A probe leaves Earth's surface at ${v} km/s (ignore air and Earth's spin). How fast is it still moving once it is far from Earth? Earth's escape speed is ${s3(VE / 1000)} km/s.`,
           answer: vinf, units: 'km/s', tol: { rel: 0.01 },

@@ -41,7 +41,7 @@ export default lesson({
     title: 'The bench: cutting back a fibre',
     lead: t`Start with 50 m of fibre and take a reading, then shorten it and read again — a real cut-back only goes from long to short. The power meter’s readings, in dBm, fall on a line whose slope is $-\alpha$. As set up, there is no mode stripper: watch the residuals at the shortest lengths.`,
     tasks: [
-      'With the cladding light present, the three shortest lengths sit above the line and the residuals curl up at the left; α comes out several σ high.',
+      'With the cladding light present, the shortest lengths sit above the line and the residuals curl up at the left; α comes out several σ high.',
       'Switch off “No cladding-mode stripper” (fit one): the curl disappears, χ²/ν falls to about 1, and α agrees with the specification.',
       'Notice that the intercept — the launched power — moves too: the cladding light was being counted as launched power.',
     ],

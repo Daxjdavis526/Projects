@@ -63,7 +63,7 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
           errors: [{ value: Math.abs(x) + Math.abs(y), feedback: 'Distance from the origin is Pythagoras: r = √(x² + y²).' }],
           hints: [t`$r = \sqrt{x^2 + y^2}$.`],
           teach: 'The same point carries different labels in different coordinate systems; the conversion is x = r cos θ, y = r sin θ.',
-          explain: t`$r = \sqrt{${x}^2 + ${y}^2} = ${rr}$ m, and $\theta = ${fmt(Math.atan2(y, x) / DEG, 4)}^\circ$. Same point, new labels.`,
+          explain: t`$r = \sqrt{${x < 0 ? `(${x})` : x}^2 + ${y < 0 ? `(${y})` : y}^2} = ${rr}$ m, and $\theta = ${fmt(Math.atan2(y, x) / DEG, 4)}^\circ$. Same point, new labels.`,
           visual: segmentPicture([0, 0], [x, y], 'The segment from the origin to the point: its length is the label r.'),
         };
       },
@@ -204,7 +204,7 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
           errors: [{ value: rr * Math.sin(th * DEG), feedback: 'x uses the cosine: x = r cos θ.' }],
           hints: [t`$x = r\cos\theta$.`],
           teach: 'Converting labels uses x = r cos θ and y = r sin θ; the point itself does not move.',
-          explain: t`$x = ${rr}\cos ${th}^\circ = ${rr}\times${fmt(Math.cos(th * DEG), 3)} = ${x}$ m.`,
+          explain: t`$x = ${rr}\cos ${th}^\circ = ${rr}\times${Math.cos(th * DEG) < 0 ? `(${fmt(Math.cos(th * DEG), 3)})` : fmt(Math.cos(th * DEG), 3)} = ${x}$ m.`,
           visual: segmentPicture([0, 0], fromPolar(rr, th * DEG), t`The point at distance ${rr} m from the origin, at ${th}° from the $x$ axis.`),
         };
       },

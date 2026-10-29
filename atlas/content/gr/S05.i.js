@@ -176,8 +176,8 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
             { value: 0.5 * g0 * tt, feedback: 'Square the travel time: the drop is ½gt² with t = L/c.' },
           ],
           hints: [t`The beam takes $t = L/c$ to cross. Relative to the cabin it falls like a dropped ball: $\tfrac12 g t^2$.`, t`$t = ${L}/(2.998\times10^{8}) = ${sci(tt)}$ s.`],
-          teach: 'Light falls in a gravitational field by the same ½gt² as everything else — but it crosses a room so fast that the drop is about 10⁻¹⁶ m.',
-          explain: t`$t = L/c = ${sci(tt)}$ s, so the drop is $\tfrac12(9.81)(${sci(tt)})^2 = ${sci(d)}$ m — smaller than an atomic nucleus. To see light fall you need the Sun.`,
+          teach: 'Light falls in a gravitational field by the same ½gt² as everything else — but it crosses a room so fast that the drop is $10^{-14}$ m or less, the size of an atomic nucleus.',
+          explain: t`$t = L/c = ${sci(tt)}$ s, so the drop is $\tfrac12(9.81)(${sci(tt)})^2 = ${sci(d)}$ m — ${d < 1.5e-14 ? 'no bigger than an atomic nucleus' : 'only a few times the size of an atomic nucleus'}. To see light fall you need the Sun.`,
           visual: {
             type: 'graph',
             params: {
@@ -244,7 +244,7 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
     num({
       id: 'tower-ns', difficulty: 3,
       gen(r) {
-        const [h, where] = r.pick([[330, 'the Eiffel Tower (330 m)'], [553, 'Toronto’s CN Tower (553 m)'], [828, 'the Burj Khalifa (828 m)'], [1609, 'a mile-high city (1609 m), compared with one at sea level']]);
+        const [h, where] = r.pick([[330, 'the Eiffel Tower (330 m)'], [553, 'Toronto’s CN Tower (553 m)'], [828, 'the Burj Khalifa (828 m)'], [1609, 'a cliff one mile (1609 m) high']]);
         const f = shift(h), sec = f * DAY, ns = sec * 1e9;
         return {
           prompt: t`One clock sits at the top of ${where}, an identical one at the bottom. How many nanoseconds per day does the higher clock gain?`,

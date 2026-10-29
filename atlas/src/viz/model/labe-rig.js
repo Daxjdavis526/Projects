@@ -734,14 +734,14 @@ export const EXPERIMENTS = {
       const pts = []; for (let k = 0; k <= 1200; k++) { const t = (120 * k) / 1200; pts.push([t, g(t, tr, 1) + g(t, tret, A)]); }
       const ret = F.walk ? tret - leadEdge(P, A) : tret, ref = F.walk ? tr - leadEdge(P, 1) : tr;
       return {
-        x: [0, 120], y: [-0.08, 1.2], xlabel: 't (ns)', ylabel: 'photodiode',
+        x: [0, 120], y: [-0.08, 1.25], xlabel: 't (ns)', ylabel: 'photodiode',
         paths: [{ pts, color: 'bad', width: 1.8 }],
         hlines: F.walk ? [{ y: P.thr, color: 'ink3', dash: [5, 4] }] : [],
         points: [{ x: ref, y: F.walk ? P.thr : 1, color: 'gold', r: 4.5 }, { x: ret, y: F.walk ? P.thr : A, color: 'gold', r: 4.5 }],
         texts: [
           { s: 'reference', x: tr, y: 1.1, color: 'ink2', size: 11, align: 'center' },
           { s: `return from x = ${d1(x)} m`, x: tret, y: A + 0.12, color: 'ink2', size: 11, align: 'center' },
-          { s: F.walk ? 'timed where each pulse crosses the threshold' : 'timed at each pulse’s peak (constant fraction)', x: 119, y: 0.62, color: 'gold', size: 11, align: 'right' },
+          { s: F.walk ? 'timed where each pulse crosses the threshold' : 'timed at each pulse’s peak (constant fraction)', x: 119, y: 1.2, color: 'gold', size: 11, align: 'right', dy: 8 },
         ],
       };
     },

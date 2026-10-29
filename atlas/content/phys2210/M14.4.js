@@ -201,7 +201,7 @@ Where the pipe narrows, the liquid must speed up; where it widens, it slows down
           ],
           hints: [t`Total open area: $A = N\pi(d/2)^2$, with $d$ in metres.`, t`$v = \dfrac{\dot m}{\rho A}$.`],
           teach: 'Several outlets in parallel share the flow: use their total area in Q = Av.',
-          explain: t`$A = ${N}\times\pi(${tn(d / 2000)})^2 = ${tn(N * Ah)}\ \text{m}^2$, so $v = \dfrac{${md}}{1141\times${tn(N * Ah)}} = ${tn(v)}\ \text{m/s}$. Real injectors are sized for speeds of roughly 10–50 m/s: fast enough to break the jets into droplets, not so fast that the pressure drop wastes the pump’s work.`,
+          explain: t`$A = ${N}\times\pi(${tn(d / 2000)})^2 = ${tn(N * Ah)}\ \text{m}^2$, so $v = \dfrac{${md}}{1141\times${tn(N * Ah)}} = ${tn(v)}\ \text{m/s}$. Real injectors are sized for speeds of roughly 10–50 m/s: fast enough to break the jets into droplets, not so fast that the pressure drop wastes the pump’s work.${v > 50 ? ' This plate, with too little open area, would be a poor design.' : ''}`,
           visual: {
             type: 'graph',
             params: {

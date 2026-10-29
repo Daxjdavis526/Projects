@@ -51,7 +51,7 @@ export function suspension(m1, m2, l1, l2) {
 const pickSusp = (r) => suspension(r.pick([20, 30, 40]), 40, r.pick([0.4, 0.5, 0.6]), r.pick([0.4, 0.5, 0.6]));
 /** The suspension as TeX facts for a prompt. */
 const suspTeX = (S) => t`an upper mass $m_1 = ${S.m1}\ \text{kg}$ hangs from the support on a wire $\ell_1 = ${S.l1}\ \text{m}$ long, and the mirror, $m_2 = ${S.m2}\ \text{kg}$, hangs from it on a wire $\ell_2 = ${S.l2}\ \text{m}$ long`;
-const eqTeX = t`$$\begin{bmatrix} m_1 & 0\\ 0 & m_2\end{bmatrix}\mathbf x'' = -\begin{bmatrix} k_1 + k_2 & -k_2\\ -k_2 & k_2\end{bmatrix}\mathbf x,\qquad k_1 = \frac{(m_1 + m_2)g}{\ell_1},\quad k_2 = \frac{m_2 g}{\ell_2},$$`;
+const eqTeX = t`$$\begin{gathered}\begin{bmatrix} m_1 & 0\\ 0 & m_2\end{bmatrix}\mathbf x'' = -\begin{bmatrix} k_1 + k_2 & -k_2\\ -k_2 & k_2\end{bmatrix}\mathbf x,\\ k_1 = \frac{(m_1 + m_2)g}{\ell_1},\quad k_2 = \frac{m_2 g}{\ell_2},\end{gathered}$$`;
 
 // ── round 1: hang it ─────────────────────────────────────────────────────────
 /** Radiation pressure 2P/c on the mirror: the static deflections (μm). */
@@ -130,7 +130,7 @@ const picture = (params, caption) => ({ type: 'graph', params: { equal: true, ax
  * displaced to (X1, X2) (already scaled for drawing), with optional arrows,
  * ghosts at rest and labels.
  */
-function suspPic({ l1 = 0.5, l2 = 0.5, X1 = 0, X2 = 0, ghost = false, arrows = [], extra = [], labels = true, caption }) {
+function suspPic({ l1 = 0.5, l2 = 0.5, X1 = 0, X2 = 0, ghost = false, arrows = [], extra = [], labels = true, laser = false, caption }) {
   const y1 = -l1, y2 = -l1 - l2, h1 = 0.16, h2 = 0.2;
   const curves = [seg([-0.7, 0], [0.7, 0], 'ink2', 3), ...[-0.6, -0.3, 0, 0.3, 0.6].map((x) => seg([x, 0], [x + 0.12, 0.1], 'ink3', 1.2))];
   if (ghost && (X1 || X2)) curves.push(seg([0, 0], [0, y1], 'ink4', 1.2, true), ...rect(0, y1, 0.36, h1, 'ink4', 1.2), seg([0, y1], [0, y2], 'ink4', 1.2, true), ...rect(0, y2, 0.26, h2, 'ink4', 1.2));
@@ -138,7 +138,8 @@ function suspPic({ l1 = 0.5, l2 = 0.5, X1 = 0, X2 = 0, ghost = false, arrows = [
   const points = labels ? [
     tag(X1 + 0.22, y1, 'm₁ (upper mass)', 'violet', 4, 0), tag(X2 + 0.17, y2, 'm₂ (mirror)', 'accent', 4, 0),
     tag(-0.04, y1 / 2, 'ℓ₁', 'ink2', -10, 0, 'right'), tag(X1 / 2 - 0.04, y1 + (y2 - y1) / 2, 'ℓ₂', 'ink2', -10, 0, 'right'),
-    tag(-0.7, 0, 'support', 'ink3', 0, -10),
+    tag(-0.72, 0, 'support', 'ink3', -6, 0, 'right'),
+    ...(laser ? [tag(-0.6, y2, 'laser push F', 'bad', -6, 0, 'right')] : []),
   ] : [];
   return picture({ x: [-1.3, 1.6], y: [r4(y2 - 0.25), 0.25], curves: [...curves, ...extra], arrows, points, alt: 'A mirror hanging from an upper mass, which hangs from a support: a double pendulum' }, caption);
 }
@@ -171,7 +172,7 @@ export default boss({
               ],
               teach: t`A static load on a linear structure is a linear system $K\mathbf x = \mathbf F$; for springs in series, elimination shows the deflections simply add.`,
               explain: t`$F = 2P/c = ${tn(F, 4)}$ N. Adding the rows of $$\begin{bmatrix} k_1 + k_2 & -k_2\\ -k_2 & k_2\end{bmatrix}\begin{bmatrix}x_1\\ x_2\end{bmatrix} = \begin{bmatrix}0\\ F\end{bmatrix}$$ eliminates $x_2$: $k_1x_1 = F$, so $x_1 = ${tn(x1)}\ \mu$m; the second row then gives $x_2 = x_1 + F/k_2 = ${tn(x2)}\ \mu$m. A few micrometres is enormous next to the $10^{-19}$ m the detector measures — but it is steady, and the control system simply holds the mirror there. It is the *changes* in the light’s power that matter, which the last round takes up. The pendulum’s small-angle stiffness is a linear model of wires that also stretch and bend.`,
-              visual: suspPic({ l1: S.l1, l2: S.l2, X1: 0.12, X2: 0.32, ghost: true, arrows: [{ from: [-0.55, r4(-S.l1 - S.l2)], to: [0.12, r4(-S.l1 - S.l2)], color: 'bad', width: 2.6, label: 'laser push F', labelDx: -96, labelDy: 18 }], caption: 'The suspension to scale in its lengths, with the deflections greatly exaggerated: the laser’s push (red) moves both masses, the mirror further. Grey: the rest position.' }),
+              visual: suspPic({ l1: S.l1, l2: S.l2, X1: 0.12, X2: 0.32, ghost: true, arrows: [{ from: [-0.6, r4(-S.l1 - S.l2)], to: [0.18, r4(-S.l1 - S.l2)], color: 'bad', width: 2.6 }], extra: [], laser: true, caption: 'The suspension to scale in its lengths, with the deflections greatly exaggerated: the laser’s push (red) moves both masses, the mirror further. Grey: the rest position.' }),
             };
           },
         }),
@@ -233,7 +234,7 @@ export default boss({
           gen(r) {
             const Cs = releaseCase(r), { S, d, c1, c2, T, key } = Cs;
             return {
-              prompt: t`For the suspension in which ${suspTeX(S)}, the modes are $$\omega_1 = ${tn(S.w1, 5)}\ \text{rad/s},\ \mathbf v_1 = \begin{bmatrix}1\\ ${tn(S.r1, 5)}\end{bmatrix};\qquad \omega_2 = ${tn(S.w2, 5)}\ \text{rad/s},\ \mathbf v_2 = \begin{bmatrix}1\\ ${tn(S.r2, 5)}\end{bmatrix}.$$ Actuators hold the upper mass at $x_1 = 0$ and push the mirror to $x_2 = ${d}\ \mu\text{m}$, then let both go from rest. Where is the mirror at $t = ${T}$ s, in μm (with its sign)? Give 3 significant figures.`,
+              prompt: t`For the suspension in which ${suspTeX(S)}, the modes are $$\begin{gathered}\omega_1 = ${tn(S.w1, 5)}\ \text{rad/s},\ \mathbf v_1 = \begin{bmatrix}1\\ ${tn(S.r1, 5)}\end{bmatrix};\\ \omega_2 = ${tn(S.w2, 5)}\ \text{rad/s},\ \mathbf v_2 = \begin{bmatrix}1\\ ${tn(S.r2, 5)}\end{bmatrix}.\end{gathered}$$ Actuators hold the upper mass at $x_1 = 0$ and push the mirror to $x_2 = ${d}\ \mu\text{m}$, then let both go from rest. Where is the mirror at $t = ${T}$ s, in μm (with its sign)? Give 3 significant figures.`,
               answer: key, units: 'um', tol: { rel: 0.005 },
               errors: apart([
                 { value: d * Math.cos(S.w1 * T), feedback: t`That lets the mirror ring in the lower mode alone. The starting shape $(0, ${d})$ is not a mode: write it as $c_1\mathbf v_1 + c_2\mathbf v_2$ — both modes ring.` },
@@ -248,7 +249,7 @@ export default boss({
               ],
               teach: t`To solve $M\mathbf x'' = -K\mathbf x$ from any start, find the start’s coordinates in the basis of mode shapes; then each coordinate rings on its own at its mode’s frequency.`,
               explain: t`In the eigenvector basis the start is $(0, ${d}) = c_1\mathbf v_1 + c_2\mathbf v_2$ with $c_1 = ${tn(c1, 4)}$ and $c_2 = ${tn(c2, 4)}\ \mu$m. Each part rings at its own frequency: $$x_2(t) = ${tn(c1 * S.r1, 4)}\cos(${tn(S.w1, 4)}\,t) ${c2 * S.r2 < 0 ? '-' : '+'} ${tn(Math.abs(c2 * S.r2), 4)}\cos(${tn(S.w2, 4)}\,t)\ \mu\text{m},$$ and at $t = ${T}$ s, $x_2 = ${tn(key)}\ \mu$m. Because the frequencies are not in a whole-number ratio, the motion never repeats exactly — and with no damping it would never stop, which is why the next round adds damping. Real wires and their clamps dissipate a little, so the modes ring down over minutes.`,
-              visual: suspPic({ l1: S.l1, l2: S.l2, X1: 0, X2: 0.3, ghost: true, arrows: [{ from: [0.62, r4(-S.l1 - S.l2)], to: [0.24, r4(-S.l1 - S.l2)], color: 'gold', width: 2.2, label: 'released', labelDx: 8, labelDy: -10 }], caption: 'The starting state, the displacement exaggerated: the upper mass held at rest, the mirror pushed aside. Grey: the rest position.' }),
+              visual: suspPic({ l1: S.l1, l2: S.l2, X1: 0, X2: 0.3, ghost: true, arrows: [{ from: [0.3, r4(-S.l1 - S.l2 - 0.17)], to: [0.02, r4(-S.l1 - S.l2 - 0.17)], color: 'gold', width: 2.2, label: 'released', labelDx: -8, labelDy: 0, labelAlign: 'right' }], caption: 'The starting state, the displacement exaggerated: the upper mass held at rest, the mirror pushed aside. Grey: the rest position.' }),
             };
           },
         }),
@@ -461,13 +462,13 @@ export default boss({
               hints: [
                 t`The matrix is triangular, so its eigenvalues are its diagonal entries, $-a = -Q/V_1$ and $-b = -Q/V_2$. Find an eigenvector for each.`,
                 t`For $-a$: $(b - a)v_2 = b v_1$ gives $\mathbf v = (b - a,\ b)$; for $-b$: $\mathbf v = (0, 1)$. Write $(${c0}, ${c0}) = k_1(b - a, b) + k_2(0, 1)$.`,
-                t`Then $c_2(t) = k_1\,b\,e^{-at} + k_2e^{-bt}$ with $a = ${r6(a)}$ and $b = ${r6(b)}\ \text{s}^{-1}$.`,
+                t`Then $c_2(t) = k_1\,b\,e^{-at} + k_2e^{-bt}$ with $a = ${nice(+a.toPrecision(4))}$ and $b = ${nice(+b.toPrecision(4))}\ \text{s}^{-1}$.`,
               ],
               teach: t`The eigenvalue method solves $\mathbf x' = A\mathbf x$ as a sum of eigenvectors times $e^{\lambda t}$, with weights fixed by the initial state; a triangular matrix shows its eigenvalues on the diagonal.`,
-              explain: t`The eigenvalues are $-a = -${r6(a)}$ and $-b = -${r6(b)}\ \text{s}^{-1}$, with eigenvectors $(b - a,\ b)$ and $(0, 1)$. Matching $(${c0}, ${c0})$ gives $k_1 = ${c0}/(b - a) = ${tn(c0 / (b - a), 4)}$ and $k_2 = ${c0} - k_1b = ${tn(c0 - (c0 / (b - a)) * b, 4)}$, so $$c_2(t) = ${tn((c0 / (b - a)) * b, 4)}\,e^{-${r6(a)}t} ${c0 - (c0 / (b - a)) * b < 0 ? '-' : '+'} ${tn(Math.abs(c0 - (c0 / (b - a)) * b), 4)}\,e^{-${r6(b)}t},$$ and after $${T}$ s, $c_2 = ${tn(key)}\%$ (compartment 1 is down to $${tn(c1)}\%$). The slower eigenvalue sets the purge time: the downstream compartment cannot clear faster than its own $V_2/Q$. Real purges check the result with an oxygen sensor, since gas does not mix perfectly.`,
+              explain: t`The eigenvalues are $-a = -${nice(+a.toPrecision(4))}$ and $-b = -${nice(+b.toPrecision(4))}\ \text{s}^{-1}$, with eigenvectors $(b - a,\ b)$ and $(0, 1)$. Matching $(${c0}, ${c0})$ gives $k_1 = ${c0}/(b - a) = ${tn(c0 / (b - a), 4)}$ and $k_2 = ${c0} - k_1b = ${tn(c0 - (c0 / (b - a)) * b, 4)}$, so $$c_2(t) = ${tn((c0 / (b - a)) * b, 4)}\,e^{-${nice(+a.toPrecision(4))}t} ${c0 - (c0 / (b - a)) * b < 0 ? '-' : '+'} ${tn(Math.abs(c0 - (c0 / (b - a)) * b), 4)}\,e^{-${nice(+b.toPrecision(4))}t},$$ and after $${T}$ s, $c_2 = ${tn(key)}\%$ (compartment 1 is down to $${tn(c1)}\%$). The slower eigenvalue sets the purge time: the downstream compartment cannot clear faster than its own $V_2/Q$. Real purges check the result with an oxygen sensor, since gas does not mix perfectly.`,
               visual: {
                 type: 'de-plane',
-                params: { matrix: [[r6(-a), 0], [r6(b), r6(-b)]], x: [0, 23], y: [0, 23], equal: true, aspect: 'wide', xlabel: 'c₁ (% O₂)', ylabel: 'c₂ (% O₂)', eigen: true, readout: false, grid: 13, seeds: [{ x: 21, y: 21, color: 'gold', dir: 'forward' }, { x: 21, y: 5, dir: 'forward' }, { x: 8, y: 21, dir: 'forward' }], T: 400, click: false },
+                params: { matrix: [[r6(-a), 0], [r6(b), r6(-b)]], x: [0, 23], y: [0, 23], equal: false, aspect: 'wide', xlabel: 'c₁ (% O₂)', ylabel: 'c₂ (% O₂)', eigen: true, readout: false, grid: 13, seeds: [{ x: 21, y: 21, color: 'gold', dir: 'forward' }, { x: 21, y: 5, dir: 'forward' }, { x: 8, y: 21, dir: 'forward' }], T: 400, click: false },
                 caption: t`The purge in the $(c_1, c_2)$ plane: both percentages fall to the origin, the gold path starting from air in both. Dashed: the eigenvector lines, labelled with their eigenvalues. Time is not marked along the paths. Perfect mixing is a model.`,
               },
             };

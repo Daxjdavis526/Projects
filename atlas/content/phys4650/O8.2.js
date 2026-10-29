@@ -34,25 +34,25 @@ function gratingPic(caption, thi = 20, labels = [[-1, -30], [0, 20], [1, 48]]) {
     type: 'graph', caption,
     params: pic([-5, 5.4], [-3.2, 3.4], {
       curves: [seg([0, -3], [0, 3], 'ink2', { width: 3, dash: [2, 3] }), seg([-4.5, 0], [4.5, 0], 'ink3', { width: 1, dash: [5, 5] })],
-      arrows: [{ from: [sf(-4 * Math.cos(thi * DEG), 4), sf(-4 * Math.sin(thi * DEG), 4)], to: [0, 0], color: 'accent', width: 2.4, label: 'incident' }, ...rays],
-      points: [word(0.2, -2.9, 'grating', 'ink3', { labelAlign: 'left' }), word(-4.6, 0.25, 'normal', 'ink3', { labelAlign: 'left' })],
+      arrows: [{ from: [sf(-4 * Math.cos(thi * DEG), 4), sf(-4 * Math.sin(thi * DEG), 4)], to: [0, 0], color: 'accent', width: 2.4 }, ...rays],
+      points: [word(0.2, -2.9, 'grating', 'ink3', { labelAlign: 'left' }), word(-4.6, 0.25, 'normal', 'ink3', { labelAlign: 'left' }), word(-2.6 * Math.cos(thi * DEG), -2.6 * Math.sin(thi * DEG) - 0.4, 'incident', 'accent')],
     }),
   };
 }
 
-/** A reflection grating's grooves, blazed: sawtooth facets tilted by θ_B. */
+/** A reflection grating's grooves, blazed: sawtooth facets tilted by θ_B (drawn between 12° and 60°). */
 function blazePic(caption, thB = 26) {
-  const curves = [], h = 0.8, w = h / Math.tan(thB * DEG);
-  for (let k = 0; k < 5; k++) {
-    const x0 = -4 + k * w * 1.0;
-    curves.push(seg([x0, 0], [x0 + w, h], 'gold', { width: 2.4 }), seg([x0 + w, h], [x0 + w, 0], 'gold', { width: 2.4 }));
+  const th = Math.min(60, Math.max(12, thB)) * DEG, p = 1.0, h = p * Math.tan(th), curves = [];
+  for (let k = 0; k < 6; k++) {
+    const x0 = -4 + k * p;
+    curves.push(seg([x0, 0], [x0 + p, h], 'gold', { width: 2.4 }), seg([x0 + p, h], [x0 + p, 0], 'gold', { width: 2.4 }));
   }
-  const x1 = -4 + 2 * w, mid = [x1 + w / 2, h / 2], n = [-Math.sin(thB * DEG), Math.cos(thB * DEG)];
+  const mid = [-4 + 3.5 * p, h / 2], n = [-Math.sin(th), Math.cos(th)], L = 2.4;
   return {
     type: 'graph', caption,
-    params: pic([-4.6, 5], [-0.6, 3.4], {
-      curves: [...curves, seg([-4.3, 0], [4.6, 0], 'ink3', { width: 1 }), seg([4.0, 0], [4.0, 3.0], 'ink3', { dash: [4, 4] }), seg(mid, [mid[0] + 2.6 * n[0], mid[1] + 2.6 * n[1]], 'accent', { dash: [4, 4] })],
-      points: [word(4.0, 3.2, 'grating normal', 'ink3'), word(mid[0] + 2.9 * n[0], mid[1] + 2.9 * n[1], 'facet normal', 'accent'), word(1.6, 2.3, 'facets tilted by θ (blaze)', 'ink2')],
+    params: pic([-4.6, 5], [-0.6, 3.6], {
+      curves: [...curves, seg([-4.3, 0], [4.6, 0], 'ink3', { width: 1 }), seg([3.2, 0], [3.2, 3.0], 'ink3', { dash: [4, 4] }), seg(mid, [mid[0] + L * n[0], mid[1] + L * n[1]], 'accent', { dash: [4, 4] })],
+      points: [word(3.2, 3.25, 'grating normal', 'ink3'), word(mid[0] + (L + 0.3) * n[0], mid[1] + (L + 0.3) * n[1], 'facet normal', 'accent'), word(3.2, -0.35, 'grating surface', 'ink3')],
     }),
   };
 }
@@ -91,9 +91,9 @@ with both angles measured from the normal, positive on the same side. Each order
         { key: 'e', label: 'Separation $\\Delta\\lambda/\\lambda$', min: 0.0005, max: 0.05, value: 0.01, logScale: true, explain: 'The fractional difference between the two wavelengths.' },
       ],
       curves: [
-        { fn: '(sin(N*pi*x + 0.000000001)/(N*sin(pi*x + 0.000000001)))^2', color: 'accent', width: 1.6, samples: 4000 },
-        { fn: '(sin(N*pi*((m + x)/(1 + e) - m) + 0.000000001)/(N*sin(pi*((m + x)/(1 + e) - m) + 0.000000001)))^2', color: 'violet', width: 1.6, samples: 4000 },
-        { fn: '(sin(N*pi*x + 0.000000001)/(N*sin(pi*x + 0.000000001)))^2 + (sin(N*pi*((m + x)/(1 + e) - m) + 0.000000001)/(N*sin(pi*((m + x)/(1 + e) - m) + 0.000000001)))^2', color: 'gold', width: 2.4, samples: 4000 },
+        { fn: '(sin(N*pi*(x + 0.000000001))/(N*sin(pi*(x + 0.000000001))))^2', color: 'accent', width: 1.6, samples: 4000 },
+        { fn: '(sin(N*pi*((m + x)/(1 + e) - m + 0.000000001))/(N*sin(pi*((m + x)/(1 + e) - m + 0.000000001))))^2', color: 'violet', width: 1.6, samples: 4000 },
+        { fn: '(sin(N*pi*(x + 0.000000001))/(N*sin(pi*(x + 0.000000001))))^2 + (sin(N*pi*((m + x)/(1 + e) - m + 0.000000001))/(N*sin(pi*((m + x)/(1 + e) - m + 0.000000001))))^2', color: 'gold', width: 2.4, samples: 4000 },
       ],
       readouts: [
         { label: 'resolving power $mN$', expr: 'm*N', digits: 4 },
