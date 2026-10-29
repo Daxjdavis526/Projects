@@ -180,7 +180,7 @@ const deltaPic = (C) => {
 };
 
 const gaussPic = (C) => {
-  const g = 0.25 + C.rc * 0.12;
+  const g = C.rc / 10;                                  // to scale: the block's radius, 10 cm, is drawn as 1
   return {
     type: 'graph',
     params: bare([-2.6, 2.6], [-1.25, 1.25], {
@@ -188,7 +188,7 @@ const gaussPic = (C) => {
       curves: [circle(1, 'ink2'), circle(g, 'gold', { dash: [5, 4] })],
       points: [{ x: 0, y: 1.14, r: 0, label: 'ρ = kr, densest at the edge', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'violet' }, { x: 0, y: -1.14, r: 0, label: `Gaussian sphere, r = ${C.rc} cm (gold)`, labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'gold' }],
     }),
-    caption: 'The block modelled as a sphere of radius 10 cm with trapped charge growing toward its surface (shading), and a Gaussian sphere (gold, dashed). Not to scale.',
+    caption: 'The block modelled as a sphere of radius 10 cm with trapped charge growing toward its surface (shading), and a Gaussian sphere (gold, dashed), to scale.',
   };
 };
 
@@ -417,7 +417,7 @@ export default boss({
               ], C.V * 1e3),
               hints: [t`Monopole: $\sum q_i = 0$. Dipole: $\sum q_iz_i = 0$. So the quadrupole term leads, falling as $1/r^3$.`, t`On the axis, $V \approx \dfrac{1}{4\pi\varepsilon_0}\dfrac{2qd^2}{r^3}$ — or sum the three Coulomb potentials exactly.`],
               teach: 'Far away, the lowest non-vanishing multipole wins: a neutral source with no dipole moment looks like a quadrupole, falling as 1/r³.',
-              explain: t`Exactly, $V = \dfrac{q}{4\pi\varepsilon_0}\left(\dfrac{1}{r - d} + \dfrac{1}{r + d} - \dfrac2r\right) \approx ${nice(sf(C.V * 1e3, 3))}$ mV; the quadrupole term alone gives $${nice(sf(C.quad * 1e3, 3))}$ mV, within $(d/r)^2$. Compare $${nice(sf((KC * C.q * 1e-9) / C.z, 3))}$ V for a single ${C.q} nC charge at that distance: cancelling the monopole and dipole costs a factor of several hundred.`,
+              explain: t`Exactly, $V = \dfrac{q}{4\pi\varepsilon_0}\left(\dfrac{1}{r - d} + \dfrac{1}{r + d} - \dfrac2r\right) \approx ${nice(sf(C.V * 1e3, 3))}$ mV; the quadrupole term alone gives $${nice(sf(C.quad * 1e3, 3))}$ mV, within $(d/r)^2$. Compare $${nice(sf((KC * C.q * 1e-9) / C.z, 3))}$ V for a single ${C.q} nC charge at that distance: cancelling the monopole and dipole costs a factor of about ${nice(sf((KC * C.q * 1e-9) / C.z / C.V, 2))}, roughly $k^2/2$ at $k = ${C.k}$ spacings.`,
             };
           },
         }),
@@ -435,7 +435,7 @@ export default boss({
               ], C.E),
               hints: [t`Inside $V = Ar\cos\theta$, outside $V = -E_0r\cos\theta + \dfrac{B\cos\theta}{r^2}$: match $V$ and $\varepsilon_rE_r$ at the surface.`, t`The result: $E_{\text{in}} = \dfrac{3E_0}{\varepsilon_r + 2}$, uniform.`],
               teach: t`A linear dielectric sphere has a uniform field inside, $3E_0/(\varepsilon_r + 2)$: weaker than outside, but less so than in a slab.`,
-              explain: t`$E_{\text{in}} = \dfrac{3(${C.E0})}{${C.P.eps} + 2} \approx ${nice(sf(C.E, 3))}$ kV/m, uniform and along $E_0$. Cryogenic propellants have permittivities so close to 1 that a gauge must resolve a few per cent change in capacitance between liquid and vapour — which is why such gauges need careful calibration in both phases.`,
+              explain: t`$E_{\text{in}} = \dfrac{3(${C.E0})}{${C.P.eps} + 2} \approx ${nice(sf(C.E, 3))}$ kV/m, uniform and along $E_0$. A gauge full of ${C.P.name} reads about $\varepsilon_r = ${C.P.eps}$ times its empty capacitance${C.P.eps < 1.6 ? ` — only ${Math.round((C.P.eps - 1) * 100)}% more, which is why gauges for cryogenic propellants need careful calibration in both phases` : ''}.`,
             };
           },
         }),
@@ -459,7 +459,7 @@ export default boss({
               ], C.B * 1e9),
               hints: [t`$m = NIA = NIs^2$.`, t`Across the dipole’s axis (θ = 90°), $B = \dfrac{\mu_0m}{4\pi r^3}$.`],
               teach: 'A coil’s moment is NIA, and its far field at 90° to the axis is μ₀m/4πr³.',
-              explain: t`$m = NIs^2 = ${nice(sf(C.m, 3))}\ \text{A·m}^2$ and $B = \dfrac{\mu_0m}{4\pi d^3} \approx ${nice(sf(C.B * 1e9, 3))}$ nT — ${C.B * 1e9 > 5 ? 'more than the field Kestrel came to measure' : 'a large share of the field Kestrel came to measure'}. Torquers are therefore switched off, or their known fields subtracted, while the magnetometer takes science data.`,
+              explain: t`$m = NIs^2 = ${nice(sf(C.m, 3))}\ \text{A·m}^2$ and $B = \dfrac{\mu_0m}{4\pi d^3} \approx ${nice(sf(C.B * 1e9, 3))}$ nT — ${C.B * 1e9 > 5 ? 'more than the field Kestrel came to measure' : `${nice(sf(C.B * 1e9 * 20, 2))}% of the 5 nT field Kestrel came to measure, against the fraction of a nanotesla it must resolve`}. Torquers are therefore switched off, or their known fields subtracted, while the magnetometer takes science data.`,
             };
           },
         }),

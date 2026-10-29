@@ -30,6 +30,7 @@ export const GMM = 2.203e13;        // m³/s², Mercury
 export const RM = 2.44e6;           // m, Mercury's radius
 export const RP_M = 4.600e10, RA_M = 6.982e10;   // m, Mercury's perihelion and aphelion distances
 export const DAY = 86400;
+const MERC_P = (2 * RP_M * RA_M) / (RP_M + RA_M);   // m, Mercury's semi-latus rectum a(1 − e²)
 
 /** Keep only the slips whose values are finite and clearly apart from the key (and a little apart from each other). */
 function apart(errors, key, rel = 0.03, mutual = 0.012) {
@@ -362,7 +363,7 @@ export default boss({
                 t`$GM_\odot/c^2 = ${sci(GMS / (CL * CL), 4)}$ m; convert the angle with $1\ \text{rad} = 206\,265''$.`,
               ],
               teach: 'General relativity’s perihelion advance per orbit grows as the orbit gets smaller and more eccentric: 6πGM/c²a(1 − e²).',
-              explain: t`$a(1 - e^2) = ${sci(p, 4)}$ m, so $\Delta\phi = 6\pi(${sci(GMS / (CL * CL), 4)})/${sci(p, 4)} = ${sci(arcsec / ARCSEC, 3)}$ rad $= ${sci(arcsec, 3)}''$ per orbit — more than Mercury's $0.104''$, because Kestrel dives closer. Where the formula comes from: [precession of nearly circular orbits](#/lesson/phys3550.M5.5) and [Mercury's 43 arcseconds](#/lesson/gr.S25.i).`,
+              explain: t`$a(1 - e^2) = ${sci(p, 4)}$ m, so $\Delta\phi = 6\pi(${sci(GMS / (CL * CL), 4)})/${sci(p, 4)} = ${sci(arcsec / ARCSEC, 3)}$ rad $= ${sci(arcsec, 3)}''$ per orbit — ${Math.abs(p / MERC_P - 1) < 0.03 ? t`about the same as Mercury's $0.104''$, because its $a(1 - e^2) = ${sci(p / AU, 3)}$ AU is close to Mercury's $0.371$ AU` : p < MERC_P ? t`more than Mercury's $0.104''$, because its $a(1 - e^2) = ${sci(p / AU, 3)}$ AU is smaller than Mercury's $0.371$ AU` : t`less than Mercury's $0.104''$, because its $a(1 - e^2) = ${sci(p / AU, 3)}$ AU is larger than Mercury's $0.371$ AU`}. Where the formula comes from: [precession of nearly circular orbits](#/lesson/phys3550.M5.5) and [Mercury's 43 arcseconds](#/lesson/gr.S25.i).`,
               visual: orb({ force: 'gr', delta: 0.004, L: 1, E: -0.38, turns: 6, view: 2.6, r: [0, 2.6], y: [-0.6, 0.1], panels: ['orbit'], apsides: false }, t`A precessing orbit, with the relativistic term exaggerated about $10^5$ times (units with $GM = 1$).`),
             };
           },
@@ -412,13 +413,15 @@ export default boss({
             const C = dayCase(r);
             const { B, sol, wrong } = C;
             const retro = B.rot < 0;
+            // the sidereal period lies within 0.5% of the solar day for Mars and Earth: tighten the tolerance so it is not accepted
+            const rel = Math.min(0.005, (0.3 * Math.abs(Math.abs(B.rot) - sol)) / sol);
             return {
               prompt: t`${B.name} turns once relative to the stars every ${Math.abs(B.rot)} days${retro ? ' — **backwards** (retrograde) compared with its orbital motion' : ''}, and goes round the Sun every ${B.orb} days. How long is its **solar day**, from one noon to the next at a fixed spot on the surface?`,
-              answer: sol, units: 'd', tol: { rel: 0.005 },
+              answer: sol, units: 'd', tol: { rel },
               errors: apart([
-                { value: wrong, feedback: retro ? t`For a backward spin the rates add: $1/T_{\text{sol}} = 1/|T_{\text{rot}}| + 1/T_{\text{orb}}$ — check which sign you used.` : t`The planet turns the same way it orbits, so the Sun's direction itself turns forward: the solar rate is the *difference*, $1/T_{\text{rot}} - 1/T_{\text{orb}}$.` },
                 { value: Math.abs(B.rot), feedback: t`That is the sidereal rotation period, relative to the stars. Relative to the Sun the planet must turn a little further (or less) because it has moved along its orbit.` },
-              ], sol, 0.005),
+                { value: wrong, feedback: retro ? t`For a backward spin the rates add: $1/T_{\text{sol}} = 1/|T_{\text{rot}}| + 1/T_{\text{orb}}$ — check which sign you used.` : t`The planet turns the same way it orbits, so the Sun's direction itself turns forward: the solar rate is the *difference*, $1/T_{\text{rot}} - 1/T_{\text{orb}}$.` },
+              ], sol, rel),
               hints: [
                 t`In a frame rotating with the planet's orbit (so the Sun stays put), the planet spins at $\omega_{\text{rot}} - \omega_{\text{orb}}$.`,
                 t`$1/T_{\text{sol}} = |1/T_{\text{rot}} - 1/T_{\text{orb}}|$, with $T_{\text{rot}}$ negative for a retrograde spin.`,

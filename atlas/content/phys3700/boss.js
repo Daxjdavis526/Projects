@@ -121,7 +121,7 @@ export default boss({
           why: { 1: 'Ω is exponential in S. Doubling M quadruples S, and $e^{4S/k} = (e^{S/k})^4$.', 2: 'That would be true if S grew by k ln 4. It grows by a factor of 4, which multiplies Ω by $e^{3S/k}$.', 3: 'S ∝ M², so doubling M quadruples S (not doubles it), and Ω goes to the fourth power.' },
           hints: [t`$S \propto M^2$, so doubling $M$ multiplies $S$ by 4.`, t`$\Omega = e^{S/k}$: what is $e^{4S/k}$ in terms of $\Omega$?`],
           teach: 'Multiplicity is exponential in entropy: multiplying S by n raises Ω to the n-th power.',
-          explain: t`$S \propto M^2$, so $S \to 4S$ and $\Omega = e^{S/k} \to e^{4S/k} = \Omega^4$. For Ember, whose $\Omega$ is already $10^{10^{37}}$ or so, that is a number beyond any picture.`,
+          explain: t`$S \propto M^2$, so $S \to 4S$ and $\Omega = e^{S/k} \to e^{4S/k} = \Omega^4$. For Ember, whose $S/k$ is $10^{59}$ to $10^{61}$, so that $\Omega$ is already around $10^{10^{60}}$, that is a number beyond any picture.`,
           visual: entropyPic({ caption: 'Bekenstein–Hawking entropy against mass (log axes): slope 2, so twice the mass is four times the entropy. Theory.' }),
         }),
       ],
@@ -286,7 +286,7 @@ export default boss({
               errors: apart([{ value: M2 * (2 / mue), feedback: 'M(Ch) ∝ 1/μₑ²: square the ratio 2/μₑ.' }, { value: M2 * (mue / 2) ** 2, feedback: 'More nucleons per electron means fewer electrons for the same mass: the limit falls.' }], M),
               hints: [t`$M_\text{Ch} \propto 1/\mu_e^2$, so $M_\text{Ch} = ${fmt(M2, 4)}\,(2/\mu_e)^2\,M_\odot$.`, t`$\mu_e = ${fmt(mue, 4)}$.`],
               teach: 'Electron degeneracy can hold up at most about 1.4 solar masses: above it, a core collapses.',
-              explain: t`$M_\text{Ch} = ${fmt(M2, 4)}\times(2/${fmt(mue, 4)})^2 = ${fmt(M, 3)}\,M_\odot$. ${mue === 2 ? 'This is the white-dwarf limit.' : 'An iron-group core that outgrows this collapses in under a second;'} if what is left is heavy enough, not even neutron pressure stops it, and a stellar black hole forms — a hole of several solar masses, tens of millions of times colder than the CMB.`,
+              explain: t`$M_\text{Ch} = ${fmt(M2, 4)}\times(2/${fmt(mue, 4)})^2 = ${fmt(M, 3)}\,M_\odot$. ${mue === 2 ? 'This is the white-dwarf limit (a carbon–oxygen white dwarf pushed to it usually explodes as a type Ia supernova); in a massive star it is the iron core that outgrows its limit and collapses in under a second, and' : 'An iron-group core that outgrows this collapses in under a second;'} if what is left is heavy enough, not even neutron pressure stops it, and a stellar black hole forms — a hole of several solar masses, hundreds of millions of times colder than the CMB.`,
               visual: { type: 'graph', params: { x: [1.8, 2.3], y: [1.0, 1.9], aspect: 'wide', axesAt: 'edge', xlabel: 'nucleons per electron μₑ', ylabel: 'M(Ch) (M☉)', curves: [{ fn: `${r4(M2)}*(2/x)^2`, domain: [1.8, 2.3], color: 'accent', width: 2.4 }], vlines: [{ x: r4(mue), color: 'gold' }] }, caption: 'The ideal Chandrasekhar mass against nucleons per electron (cold, non-rotating; the proton mass as the mass per nucleon). The gold line is this core.' },
             };
           },

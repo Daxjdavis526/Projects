@@ -147,7 +147,7 @@ function ellipsePicture() {
     arrows: [{ from: [rp, 0], to: [rp, 0.85], color: 'gold', label: 'v', labelDx: 6, labelDy: 0 }],
     points: [{ x: rp, y: 0, r: 5, color: 'gold', label: 'cutoff', labelDx: 8, labelDy: 14 }, { x: -ra, y: 0, r: 5, color: 'bad', label: 'apogee?', labelDx: -54, labelDy: 4 }, tag(0, -0.35, 'Earth', 'ink', -14, 4)],
     alt: 'Earth with an elliptical orbit around it, the engine cutoff at the closest point',
-  }, 'Not to scale: the real ellipse is far rounder, a few hundred kilometres above the ground at both ends.');
+  }, 'Not to scale: the real ellipse is far rounder — about 200 km above the ground at its low end and between about 500 and 1 300 km at its high end.');
 }
 
 function boomPicture(L, R) {

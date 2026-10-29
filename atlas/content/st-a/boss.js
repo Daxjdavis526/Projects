@@ -160,7 +160,7 @@ export default boss({
               errors: apart([
                 { value: mv(Ai, w)[k], feedback: t`That is the rule for a vector’s components, with $A^{-1}$. A gradient is a covector: its components are its values on the basis arrows, so they transform with $A$ itself, like the basis.` },
                 { value: mv(A, w)[k], feedback: t`You used a **row** of $A$. The covector law is $\omega'_j = A^i{}_j\,\omega_i$: the sum runs down column $j$ — the new arrow $\mathbf e'_j$ itself.` },
-                { value: mv(transpose(Ai), w)[k], feedback: t`The inverse transpose would be right for a vector in a perpendicular basis only. Here, just evaluate $dT$ on the new arrow: $\partial'_jT = \partial_iT\,(\mathbf e'_j)^i$.` },
+                { value: mv(transpose(Ai), w)[k], feedback: t`That is the inverse transpose of $A$, the basis matrix. The covector rule is the inverse transpose of the *vector* rule $A^{-1}$, which is $A^{\mathsf T}$ itself: just evaluate $dT$ on the new arrow, $\partial'_jT = \partial_iT\,(\mathbf e'_j)^i$.` },
               ], key),
               hints: [
                 t`A covector’s component on a basis arrow is its value there: $\partial'_jT = dT(\mathbf e'_j)$, and $dT$ is linear.`,

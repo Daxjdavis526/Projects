@@ -122,7 +122,7 @@ export default boss({
               errors: [{ value: beta * beta, feedback: t`$(1 - \beta^2)^{-1/2} \approx 1 + \tfrac12\beta^2$: keep the factor $\tfrac12$.` }, { value: beta / 2, feedback: t`Square $\beta$: the series is in powers of $\beta^2$.` }],
               hints: [t`$(1 + u)^{k} \approx 1 + ku$ with $u = -\beta^2$ and $k = -\tfrac12$.`, t`$\gamma - 1 \approx \tfrac12\beta^2$ with $\beta = ${texNum(beta, 4)}$.`],
               teach: 'For small β the binomial series gives γ ≈ 1 + β²/2, so γ − 1 ≈ β²/2 without catastrophic cancellation.',
-              explain: t`$\beta = ${texNum(beta, 4)}$, so $\gamma - 1 \approx \tfrac12\beta^2 = ${texNum(g1, 3)}$: its clock loses about ${fmt(g1 * 86400 * 1e6, 2)} μs a day to its speed alone. The next term, $\tfrac38\beta^4$, is smaller by another factor of about $10^{9}$.`,
+              explain: t`$\beta = ${texNum(beta, 4)}$, so $\gamma - 1 \approx \tfrac12\beta^2 = ${texNum(g1, 3)}$: its clock loses about ${fmt(g1 * 86400 * 1e6, 2)} μs a day to its speed alone. The next term, $\tfrac38\beta^4$, is smaller by another factor of about $${texNum(1 / (0.75 * beta * beta), 1)}$.`,
               visual: { type: 'graph', params: { x: [0, 0.75], y: [0, 0.55], xlabel: 'β = v/c', ylabel: 'γ − 1', curves: [{ fn: '1/sqrt(1 - x^2) - 1', color: 'accent', label: 'γ − 1', labelAt: 0.66 }, { fn: 'x^2/2', color: 'gold', dash: true, label: 'β²/2', labelAt: 0.7, labelDy: 14 }] }, caption: t`$\gamma - 1$ and its first binomial term. They part company only at large speeds; at the probe’s $\beta \approx ${texNum(beta, 2)}$ they agree to many digits.` },
             };
           },

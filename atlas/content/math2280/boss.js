@@ -198,7 +198,7 @@ export default boss({
               why: {
                 1: t`It is the cheapest — 8 evaluations — but RK4’s error grows as $h^4$: doubling $h$ multiplies it by about $16$, to roughly $${tn(16 * E.rk4, 2)}$ kPa, over the $${tolT}$ kPa limit.`,
                 2: t`It meets the limit (its error falls as $h^2$, to about $${tn(E.heun * hH ** 2, 2)}$ kPa), but it takes ${nH} evaluations, against RK4’s 16 at $h = 1$ s.`,
-                3: t`It meets the limit, but Euler’s error falls only in proportion to $h$: it needs ${nE.toLocaleString('en-GB').replace(/,/g, ' ')} evaluations. One evaluation per step is cheap; a million steps are not.`,
+                3: t`It meets the limit, but Euler’s error falls only in proportion to $h$: it needs ${nE.toLocaleString('en-GB').replace(/,/g, ' ')} evaluations. One evaluation per step is cheap; that many steps are not.`,
               },
               hints: [
                 t`A method of order $p$ has error about $Ch^p$ at a fixed end time: Euler $p = 1$, improved Euler $p = 2$, RK4 $p = 4$. Scale each measured error to other step sizes.`,
@@ -317,7 +317,7 @@ export default boss({
                 t`Solve $e^{${r6(dz)}\,\omega t} = 10$: $t = \dfrac{\ln 10}{${r6(dz)}\,\omega}$, with $\omega = 2\pi(${f})$ rad/s.`,
               ],
               teach: t`The real part of the characteristic roots sets the envelope: $\zeta < 0$ puts them in the right half-plane, and the vibration grows as $e^{|\zeta|\omega t}$ — a self-excited oscillation.`,
-              explain: t`The net damping ratio is $\zeta = ${zs} - ${zp} = -${r6(dz)}$, so the roots $r = -\zeta\omega \pm i\omega\sqrt{1 - \zeta^2}$ have real part $+${r6(dz)}\times${tn(w, 4)} = ${tn(grow)}\ \text{s}^{-1}$: the envelope grows as $e^{${tn(grow)}t}$. Tenfold takes $t = \ln 10/${tn(grow)} = ${tn(t10)}$ s — a few seconds of a burn of minutes. Pogo is a closed loop between structure and propulsion; folding it into one negative damping term is a teaching model, good near the frequency where the loop locks. On Apollo 6 the Saturn V’s pogo reached about $\pm0.6\,g$ near 5 Hz, and the cure was the next problem.`,
+              explain: t`The net damping ratio is $\zeta = ${zs} - ${zp} = -${r6(dz)}$, so the roots $r = -\zeta\omega \pm i\omega\sqrt{1 - \zeta^2}$ have real part $+${r6(dz)}\times${tn(w, 4)} = ${tn(grow)}\ \text{s}^{-1}$: the envelope grows as $e^{${tn(grow)}t}$. Tenfold takes $t = \ln 10/${tn(grow)} = ${tn(t10)}$ s — seconds, in a burn that lasts minutes. Pogo is a closed loop between structure and propulsion; folding it into one negative damping term is a teaching model, good near the frequency where the loop locks. On Apollo 6 the Saturn V’s pogo reached about $\pm0.6\,g$ near 5 Hz, and the cure was the next problem.`,
               visual: {
                 type: 'c3-roots',
                 params: { mode: 'free', zeta: -dz, w0: r4(w), x0: 1, v0: 0, T: r4(3 / f), sliders: false, readout: false, yname: 'x' },
@@ -545,7 +545,7 @@ export default boss({
               integrand: `(2/${L})*${r12(s)}*(x - ${L / 2})*cos(pi*x/${L})`, vars: { x: [0, L] }, limits: [0, L],
               errors: apart([
                 { value: c1 / 2, feedback: t`A cosine coefficient on $[0, L]$ is $\dfrac{2}{L}\displaystyle\int_0^L \eta\cos\frac{n\pi x}{L}\,dx$: the factor is $2/L$, not $1/L$.` },
-                { value: -D / 2, feedback: t`That sets the mode’s size equal to the tilt’s height at the wall. The cosine and the straight line differ in shape, so the line’s first coefficient comes from the integral — and it is a bit larger than the wall height: $8/\pi^2$ of it.` },
+                { value: -D / 2, feedback: t`That sets the mode’s size equal to the tilt’s height at the wall. The cosine and the straight line differ in shape, so the line’s first coefficient comes from the integral — and it is a little smaller than the wall height: $8/\pi^2 \approx 0.81$ of it.` },
                 { value: (-8 * D) / (PI * PI), feedback: t`Check the integral: $\displaystyle\int_0^L\Big(x - \frac L2\Big)\cos\frac{\pi x}{L}\,dx = -\frac{2L^2}{\pi^2}$; times $\dfrac{2}{L}$ and the slope, that is $-\dfrac{4\,(${D})}{\pi^2}$ cm.` },
               ], c1),
               hints: [

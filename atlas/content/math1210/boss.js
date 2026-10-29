@@ -325,7 +325,7 @@ export default boss({
           gen(r) {
             const { v, u, lag } = clockCase(r);
             return {
-              prompt: t`On its way out, Shearwater coasts at $v = ${v}\ \text{km/s}$ relative to the Sun. Special relativity says its clock ticks slow: while a time $t$ passes in the solar system's frame, it counts only $\tau = t\sqrt{1 - v^2/c^2}$. On a ten-digit calculator, $1 - \sqrt{1 - v^2/c^2}$ keeps barely one significant figure, so use the linearization of $\sqrt{1 - u}$ at $u = 0$ instead. How many microseconds per day ($t = 86\,400\ \text{s}$) does Shearwater's clock lose from its speed alone? ($c = 299\,792\ \text{km/s}$)`,
+              prompt: t`On its way out, Shearwater coasts at $v = ${v}\ \text{km/s}$ relative to the Sun. Special relativity says its clock ticks slow: while a time $t$ passes in the solar system's frame, it counts only $\tau = t\sqrt{1 - v^2/c^2}$. On a ten-digit calculator, $1 - \sqrt{1 - v^2/c^2}$ keeps only two or three significant figures, so use the linearization of $\sqrt{1 - u}$ at $u = 0$ instead. How many microseconds per day ($t = 86\,400\ \text{s}$) does Shearwater's clock lose from its speed alone? ($c = 299\,792\ \text{km/s}$)`,
               answer: lag, units: 'μs', tol: { rel: 0.01 },
               errors: apart([
                 { value: DAY * u * 1e6, feedback: t`The tangent line of $\sqrt{1-u}$ at $u = 0$ is $1 - \tfrac12u$: its slope there is $-\tfrac12$, so the clock loses $\tfrac12 u\,t$, not $u\,t$.` },

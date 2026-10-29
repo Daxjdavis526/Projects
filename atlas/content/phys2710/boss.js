@@ -189,7 +189,7 @@ function gamowPic() {
       shade: [{ fn: `${k}/x`, lower: String(E8), from: R, to: r4(k / E8), color: 'bad', alpha: 0.18 }],
       curves: [{ fn: `${k}/x`, domain: [R, 62], color: 'ink2', width: 2.4 }, seg(R, -5, R, k / R, 'ink2', 2.4), seg(0, -5, R, -5, 'ink2', 2.4),
         seg(0, E8, 62, E8, 'gold', 2), seg(0, E6, 62, E6, 'violet', 2, true)],
-      points: [label(17, 7.6, 'forbidden', 'bad', 0, 0, 'center')],
+      points: [label(17, 11, 'forbidden', 'bad', 0, 0, 'center')],
       legend: [{ label: 'Pu-236 alpha, 5.77 MeV', color: 'violet', dash: true }, { label: 'Pu-238 alpha, 5.50 MeV', color: 'gold' }], legendAt: 'tr',
       alt: 'The Coulomb barrier around a uranium nucleus, with two alpha energies drawn as horizontal lines',
     },
@@ -211,7 +211,7 @@ function diodePic(W0) {
       points: [label(W1, 0.5, 'after damage', 'ink3', 0, -10, 'right'), label(-5.8, 0, 'electron energy', 'gold', 0, 14, 'left'), label(W0 / 2, 0.25, 'barrier 0.5 eV high', 'bad', 0, 0, 'center')],
       alt: 'A rectangular barrier half an electronvolt high and a few nanometres wide, with a wave decaying inside it, and a dashed outline where damage widens it',
     },
-    caption: 'The rectangular-barrier teaching model of the junction (the real barrier is closer to a triangle). The wave’s decay inside is drawn far gentler than it really is, so it stays visible.',
+    caption: 'The rectangular-barrier teaching model of the junction (the real barrier is closer to a triangle). The wave’s decay inside is drawn far gentler than it really is, so it stays visible, and the dashed widening after damage is exaggerated.',
   };
 }
 
@@ -512,7 +512,7 @@ export default boss({
                 t`The two exponents are each about ${tex(G(PU[238].K), 3)}; it is their *difference*, about ${tex(dG, 2)}, that matters.`,
               ],
               teach: 'Because the tunnelling chance is exponential in 1/v, a few per cent more decay energy shortens an alpha emitter’s life many times over — the Geiger–Nuttall law.',
-              explain: t`The speeds are $v/c = ${tex(v(PU[238].K), 4)}$ and $${tex(v(PU[236].K), 4)}$, so $2\pi\eta = ${tex(G(PU[238].K), 5)}$ for plutonium-238 and $${tex(G(PU[236].K), 5)}$ for plutonium-236. The half-lives differ by $e^{${tex(dG, 3)}} \approx ${tex(Math.exp(dG), 2)}$${ask === 'life' ? t`, predicting $87.7/${tex(Math.exp(dG), 3)} = ${tex(87.7 / Math.exp(dG), 2)}$ years` : ''}. Measured: plutonium-236 lives 2.858 years, $${tex(PU[238].half / PU[236].half, 3)}$ times shorter — so a 5% step in energy really does shorten the life thirtyfold. The leading-order term exaggerates the effect a little; Gamow's full formula, with the nuclear radius in it (lesson MP7.3), gives about 29. The impurity matters because plutonium-236's chain passes through uranium-232 to thallium-208, whose 2.6 MeV gamma rays go through shielding that stops everything plutonium-238 emits.`,
+              explain: t`The speeds are $v/c = ${tex(v(PU[238].K), 4)}$ and $${tex(v(PU[236].K), 4)}$, so $2\pi\eta = ${tex(G(PU[238].K), 5)}$ for plutonium-238 and $${tex(G(PU[236].K), 5)}$ for plutonium-236. The half-lives differ by $e^{${tex(dG, 3)}} \approx ${tex(Math.exp(dG), 2)}$${ask === 'life' ? t`, predicting $87.7/${tex(Math.exp(dG), 3)} = ${tex(87.7 / Math.exp(dG), 2)}$ years` : ''}. Measured: plutonium-236 lives 2.858 years, $${tex(PU[238].half / PU[236].half, 3)}$ times shorter — so a 5% step in energy really does shorten the life thirtyfold. The leading-order term exaggerates the effect a little; Gamow's full formula, with the nuclear radius in it (lesson MP7.3), gives about 30. The impurity matters because plutonium-236's chain passes through uranium-232 to thallium-208, whose 2.6 MeV gamma rays go through shielding that stops everything plutonium-238 emits.`,
               visual: gamowPic(),
             };
           },
@@ -568,7 +568,7 @@ export default boss({
                 t`The telescope subtends a solid angle $\pi(D/2)^2/h^2$; multiply by it and by the detector's 0.40.`,
               ],
               teach: 'A laser echo’s photon budget is the pulse’s photon count, times the reflectance, times the telescope’s solid angle over π for a Lambertian surface — an inverse-square loss.',
-              explain: t`Each photon carries $hc/\lambda = ${tex((HPL * C) / (lam * 1e-9), 4)}$ J, so a ${Ep} mJ pulse holds $${tex(Nph, 4)}$ photons. Straight up, the surface sends $\rho/\pi$ of them per steradian, and the telescope subtends $\pi(D/2)^2/h^2$, so the fraction caught is $$\frac{\rho}{\pi}\cdot\frac{\pi(D/2)^2}{h^2} = \frac{${rho}\,(${tex(D / 200, 3)}\ \text{m})^2}{(${h * 1000}\ \text{m})^2} = ${tex(frac, 3)}.$$ With 40% detected, $N = ${tex(Nph, 4)}\times${tex(frac, 3)}\times0.40 = ${tex(N, 3)}$ photoelectrons per pulse. Of some $10^{16}$ photons sent, only thousands come back — still plenty to time an echo. NASA's Lunar Orbiter Laser Altimeter works with a few millijoules per pulse from 50 km; a photon-counting altimeter such as ICESat-2's, from 500 km, gets back only a handful of photons per shot and builds its map from millions of them.`,
+              explain: t`Each photon carries $hc/\lambda = ${tex((HPL * C) / (lam * 1e-9), 4)}$ J, so a ${Ep} mJ pulse holds $${tex(Nph, 4)}$ photons. Straight up, the surface sends $\rho/\pi$ of them per steradian, and the telescope subtends $\pi(D/2)^2/h^2$, so the fraction caught is $$\frac{\rho}{\pi}\cdot\frac{\pi(D/2)^2}{h^2} = \frac{${rho}\,(${tex(D / 200, 3)}\ \text{m})^2}{(${h * 1000}\ \text{m})^2} = ${tex(frac, 3)}.$$ With 40% detected, $N = ${tex(Nph, 4)}\times${tex(frac, 3)}\times0.40 = ${tex(N, 3)}$ photoelectrons per pulse. Of some $10^{16}$ photons sent, only about $${tex(N / eta, 2)}$ reach the telescope — still plenty to time an echo. NASA's Lunar Orbiter Laser Altimeter works with a few millijoules per pulse from 50 km; a photon-counting altimeter such as ICESat-2's, from 500 km, gets back only a handful of photons per shot and builds its map from millions of them.`,
               visual: altPic(),
             };
           },
