@@ -58,7 +58,7 @@ That is **Richardson extrapolation**: a higher-order answer from lower-order run
     tasks: [
       'For $e^{-x^2}$ the columns fall with slopes 2, 4, 6, 8 (against the panel width): each extrapolation adds two orders, as Euler–Maclaurin promises — until round-off near 10⁻¹⁴.',
       'For √x every column falls at the same slow rate: the error is not a series in h², so the extrapolation removes nothing useful.',
-      'For the pendulum’s period integral the trapezoid rule (blue) is already at round-off with 9 points; extrapolating makes it worse. Romberg assumes an h² error that is not there.',
+      'For the pendulum’s period integral the trapezoid rule (blue) is already near 10⁻¹³ with 9 points and at round-off with 17; extrapolating makes it worse. Romberg assumes an h² error that is not there.',
     ],
     params: {
       x: [-0.1, 2.25], y: [-16.5, 0], xlog: true, ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'function evaluations', ylabel: '|error|',
@@ -201,7 +201,7 @@ That is **Richardson extrapolation**: a higher-order answer from lower-order run
       why: {
         1: 'For m = ½ the square root stays well above zero; the integrand is smooth (it would be singular only for m = 1).',
         2: 'Romberg is perfectly stable; it just assumes the wrong error form here.',
-        3: 'Round-off is near 10⁻¹⁶; extrapolation’s errors here are 10⁻⁷ to 10⁻¹⁰.',
+        3: 'Round-off is near 10⁻¹⁶; with 8 panels the extrapolated values err by 10⁻⁷ to 10⁻⁵.',
       },
       hints: ['The integrand is symmetric about φ = 0 and φ = π/2. What does that do to its odd derivatives there?', 'Which coefficients appear in the Euler–Maclaurin series?'],
       teach: 'Extrapolation helps only when the error has the assumed form; for smooth periodic integrands the trapezoid rule is already spectrally accurate.',
@@ -318,7 +318,7 @@ print(R[-1][-1], abs(R[-1][-1] - exact))`,
       why: {
         1: 'More levels do not help; every column keeps the same slow slope.',
         2: 'Small values are harmless; the problem is the infinite slope at t = 0.',
-        3: 'The errors are around 10⁻³ to 10⁻⁴, far above round-off.',
+        3: 'The errors are 10⁻⁴ and above, far above round-off.',
       },
       hints: ['What is the derivative of √t at 0?', 'What error form does Romberg assume, and is it true here?'],
       teach: 'Extrapolation assumes an error expansion; a singular derivative breaks it, and the cure is a change of variable (t = s²) or a method built for the singularity.',
