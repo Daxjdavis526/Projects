@@ -126,7 +126,7 @@ Proof in one line: $\dfrac{dE}{dt} = \int\big(u_tu_{tt} + c^2u_xu_{xt}\big)dx$. 
     mcq({
       id: 'damped', difficulty: 2,
       prompt: t`With air drag the string obeys $u_{tt} + \gamma u_t = c^2u_{xx}$ ($\gamma > 0$), with fixed ends. What is $dE/dt$ for $E = \tfrac12\int(u_t^2 + c^2u_x^2)\,dx$?`,
-      visual: { type: 'graph', params: { x: [0, 10], y: [0, 1.1], aspect: 'wide', xlabel: 't (s)', ylabel: 'E / E(0)', curves: [{ fn: 'e^(-0.3*x)*(1 + 0.15*cos(2.4*x))/1.15', color: 'accent', width: 2.4 }] }, caption: 'The energy of a damped string (illustrative): it only ever falls, fastest when the string is moving fastest.' },
+      visual: { type: 'graph', params: { x: [0, 10], y: [0, 1.1], aspect: 'wide', xlabel: 't (s)', ylabel: 'E / E(0)', curves: [{ fn: 'e^(-0.3*x)*(1 + 0.1*cos(2.4*x))/1.1', color: 'accent', width: 2.4 }] }, caption: 'The energy of a damped string (illustrative): it only ever falls, fastest when the string is moving fastest.' },
       choices: [t`$-\gamma\displaystyle\int u_t^2\,dx$, never positive`, t`$0$: the wave equation conserves energy`, t`$-\gamma E$`, t`$+\gamma\displaystyle\int u_t^2\,dx$`],
       answer: 0,
       why: {

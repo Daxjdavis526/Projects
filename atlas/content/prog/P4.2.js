@@ -288,7 +288,7 @@ ax.set_ylabel("counts per 2 min")`,
       ],
       hints: ['Replace `ax.plot(t, N)` by `ax.errorbar(t, N, yerr=np.sqrt(N), fmt="o")`; `fmt="o"` draws markers without joining lines.', 'Then `ax.set_yscale("log")`, `ax.set_xlabel("time (min)")` and `ax.set_ylabel("counts per 2 min")`.'],
       teach: '`ax.errorbar(x, y, yerr=…, fmt="o")` draws measurements with their uncertainties; `set_yscale("log")` turns exponential decay into a straight line.',
-      explain: t`On the log axis the counts fall on a straight line, losing a factor of 2 every ${I128_HALF} min, and the bars grow as the counts fall: the relative error $1/\sqrt N$ is 2% at 3000 counts and 30% at 10. The caption should say "error bars: ±1σ, Poisson".`,
+      explain: t`On the log axis the counts fall on a straight line, losing a factor of 2 every ${I128_HALF} min, and the bars grow as the counts fall: the relative error $1/\sqrt N$ is 2% at 3000 counts and about 10% at the hundred or so counts of the last interval. The caption should say "error bars: ±1σ, Poisson".`,
     }),
     mcq({
       id: 'bar-meaning', difficulty: 2,

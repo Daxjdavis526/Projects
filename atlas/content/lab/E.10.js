@@ -28,6 +28,8 @@ const CD = G.run('blackbody', { seed: 9, flags: { gradient: false }, analysis: '
 const CT = CD.rows.map((r) => r.Tr), CV = CD.rows.map((r) => +(1000 * r.V).toFixed(4)), CS = CD.rows.map((r) => +(1000 * r.sV).toFixed(4));
 const CX = CT.map((T) => T ** 4 - BB.T0 ** 4);
 const CF = G.fitLine(CX, CV, CS);
+// the ln–ln fit the last checkpoint shows (seed 3)
+const LL = G.run('blackbody', { seed: 3, analysis: 'loglog' });
 const CSIG = (CF.b / 1000) / KV, CSIGs = (CF.sb / 1000) / KV;
 
 // Planck's curve, normalized to its peak, for a temperature T (x in μm)
@@ -242,9 +244,9 @@ print(f"sigma = {sigma:.4e} ± {s_sigma:.1e} W m^-2 K^-4 (statistical)")`,
     }),
     mcq({
       id: 'cp-loglog', difficulty: 3,
-      prompt: t`A student fits $\ln V$ against $\ln T$ from 400 to 1000 K and finds $n = 4.21 \pm 0.004$ with $\chi^2/\nu \approx 100$ and residuals shaped like a smile. What should the report conclude?`,
+      prompt: t`A student fits $\ln V$ against $\ln T$ from 400 to 1000 K and finds $n = ${LL.results[0].value.toFixed(2)} \pm ${LL.results[0].sStat.toFixed(3)}$ with $\chi^2/\nu \approx ${Math.round(LL.fit.chi2r / 10) * 10}$ and residuals shaped like an arch (negative at both ends, positive in the middle). What should the report conclude?`,
       visual: rig('blackbody', { seed: 3, analysis: 'loglog', raw: false }, t`The student’s fit: $\ln V$ against $\ln T$ with its residuals. ${SIMNOTE}`),
-      choices: ['The model is wrong, not the law: V ∝ T⁴ − T₀⁴ is not a power law; refit V against T⁴ − T₀⁴', 'The Stefan–Boltzmann exponent is 4.21 ± 0.004 for this cavity', 'The error bars are 10 times too small; inflate them until χ²/ν = 1', 'Drop the lowest temperatures until the residuals look flat, and quote n from the rest'],
+      choices: ['The model is wrong, not the law: V ∝ T⁴ − T₀⁴ is not a power law; refit V against T⁴ − T₀⁴', `The Stefan–Boltzmann exponent is ${LL.results[0].value.toFixed(2)} ± ${LL.results[0].sStat.toFixed(3)} for this cavity`, 'The error bars are 10 times too small; inflate them until χ²/ν = 1', 'Drop the lowest temperatures until the residuals look flat, and quote n from the rest'],
       answer: 0,
       why: {
         1: 'A tiny uncertainty on a wrong model is not a measurement: χ²/ν ≈ 100 and structured residuals say the model does not describe the data.',

@@ -178,7 +178,7 @@ And **thermal EMFs** of a few microvolts in the leads make zero resistance look 
           errors: [{ value: TB0, feedback: 'At lower pressure liquids boil at a lower temperature: correct for the local pressure.' }].filter((e) => Math.abs(e.value - ans) > 0.05),
           hints: [t`Solve for $T$: $1/T = 1/T_0 - (R/\Delta H)\ln(p/p_0)$.`, t`$R/\Delta H = 8.314/5570 = ${tex(RG / HV, 5)}$ per K.`],
           teach: 'A fixed point is only fixed at its stated pressure: nitrogen boils over a kelvin lower in a mountain town.',
-          explain: t`$1/T = 1/77.355 - ${tex(RG / HV, 5)} \times \ln(${p}/101.325)$, so $T = ${ans.toFixed(2)}$ K. Using 77.36 K uncorrected would put a ${(TB0 - ans).toFixed(1)} K error into every temperature — four times the sensor’s calibration uncertainty${p > 100 ? ' (none here, at sea level)' : ''}.`,
+          explain: t`$1/T = 1/77.355 - ${tex(RG / HV, 5)} \times \ln(${p}/101.325)$, so $T = ${ans.toFixed(2)}$ K. ${p > 100 ? 'At sea level the tabulated 77.36 K needs no correction — but only at standard pressure.' : `Using 77.36 K uncorrected would put a ${(TB0 - ans).toFixed(1)} K error into every temperature — about ${((TB0 - ans) / 0.3).toFixed(0)} times the sensor’s 0.3 K calibration uncertainty.`}`,
         };
       },
     }),

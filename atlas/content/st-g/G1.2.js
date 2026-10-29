@@ -183,9 +183,9 @@ The **converse** $Q \Rightarrow P$ is a different statement, and confusing the t
           visual: semi(a, b, t`The classical picture: in a semicircle on a diameter of length $a + b$, the radius is $(a + b)/2$ and the half-chord standing at the join of $a$ and $b$ is $\sqrt{ab}$. No half-chord is longer than the radius.`),
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: (Math.sqrt(a) - Math.sqrt(b)) ** 2, feedback: t`That is $(\sqrt a - \sqrt b)^2$; the gap is half of it.` }],
-          hints: [t`$\sqrt{${a}} = ${Math.sqrt(a)}$ and $\sqrt{${b}} = ${Math.sqrt(b)}$.`],
+          hints: [t`$\sqrt{${a}} ${Number.isInteger(Math.sqrt(a)) ? '= ' + Math.sqrt(a) : t`\approx ` + nice(Math.sqrt(a), 4)}$ and $\sqrt{${b}} ${Number.isInteger(Math.sqrt(b)) ? '= ' + Math.sqrt(b) : t`\approx ` + nice(Math.sqrt(b), 4)}$.`],
           teach: t`A direct proof of an inequality often rewrites the difference as something manifestly non-negative, such as a square.`,
-          explain: t`$\tfrac{${a} + ${b}}{2} - \sqrt{${a * b}} = ${nice((a + b) / 2)} - ${nice(Math.sqrt(a * b))} = ${nice(ans)}$, which is $(${Math.sqrt(a)} - ${Math.sqrt(b)})^2/2$. The gap is zero only when $a = b$.`,
+          explain: t`$\tfrac{${a} + ${b}}{2} - \sqrt{${a * b}} = ${nice((a + b) / 2)} - ${nice(Math.sqrt(a * b))} = ${nice(ans)}$, which is $(${Number.isInteger(Math.sqrt(a)) ? Math.sqrt(a) : t`\sqrt{${a}}`} - ${Number.isInteger(Math.sqrt(b)) ? Math.sqrt(b) : t`\sqrt{${b}}`})^2/2$. The gap is zero only when $a = b$.`,
         };
       },
     }),

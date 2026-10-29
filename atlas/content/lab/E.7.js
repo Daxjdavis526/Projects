@@ -162,7 +162,7 @@ export default lesson({
     }),
     mcq({
       id: 'drift', difficulty: 3,
-      prompt: t`A five-parameter fit without a drift term leaves residuals that drift steadily from negative to positive across the run, and $\chi^2/\nu \approx 8$. What should you do?`,
+      prompt: t`A four-parameter fit (no drift term) leaves residuals that drift steadily from negative to positive across the run, and $\chi^2/\nu \approx 8$. What should you do?`,
       visual: rigPlot('cavendish', { seed: 3, flags: { fitdrift: false } }, t`The fit with no drift term, and its residuals. ${SIMNOTE}`),
       choices: [
         'Add a drift term (a straight line in time) to the model, refit, and check that the residuals become structureless',

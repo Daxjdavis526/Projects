@@ -89,7 +89,8 @@ To get the **shape** alone, **eliminate the parameter**: solve one equation for 
     num({
       id: 'height-at-t', difficulty: 1,
       gen(r) {
-        const u = r.int(6, 12), w = r.int(10, 18), h = r.pick([0, 2, 5]), T = r.pick([1, 1.5, 2, 2.5]), ans = h + w * T - 4.9 * T * T;
+        const u = r.int(6, 12), w = r.int(10, 18), h = r.pick([0, 2, 5]), tf = (w + Math.sqrt(w * w + 19.6 * h)) / 9.8;
+        const T = r.pick([1, 1.5, 2, 2.5].filter((x) => x < 0.9 * tf)), ans = h + w * T - 4.9 * T * T;   // still in the air at T
         return {
           prompt: t`A ball moves as $x = ${u}t$, $y = ${h ? `${h} + ` : ''}${w}t - 4.9t^2$ (metres, seconds). How high is it at $t = ${T}$ s?`,
           answer: ans, units: 'm', tol: { rel: 0.005 },

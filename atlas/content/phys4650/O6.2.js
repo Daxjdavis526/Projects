@@ -44,7 +44,7 @@ It is the matrix method of [O4.2](#/lesson/phys4650.O4.2) again, with complex nu
     lead: t`Linearly polarized light (angle $\alpha$) passes a quarter-wave plate whose fast axis is at $\theta$. Above, the field’s ellipse before and after, seen facing the wave; below, the same states on the Poincaré sphere, where the plate turns the state about its fast axis by 90°.`,
     tasks: [
       t`Set the input to 45° and the plate to 0°: the output is circular (counterclockwise, Hecht’s left) — the north pole of the sphere.`,
-      t`Turn the plate to −45° (or 135°): clockwise circular, the south pole.`,
+      t`Turn the plate to 90° (fast axis vertical): clockwise circular, the south pole. At −45° the input lies along the plate’s slow axis and comes out unchanged.`,
       t`Put the plate parallel to the input: nothing changes — light along an axis of the plate is an eigenstate.`,
     ],
     params: {
@@ -61,7 +61,7 @@ It is the matrix method of [O4.2](#/lesson/phys4650.O4.2) again, with complex nu
     visual: jones({ angle: 45 }, [{ kind: 'qwp', angle: 0 }, { kind: 'pol', angle: EX.th }], t`The chain, with the state after each element and its irradiance.`),
     steps: [
       { label: 'Input', text: t`$\tilde{\mathbf E}_{\text{in}} = \dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ 1\end{pmatrix}$, irradiance $\tfrac12 + \tfrac12 = 1$.` },
-      { label: 'Wave plate', text: t`$\begin{pmatrix}1 & 0 \\ 0 & i\end{pmatrix}\dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ 1\end{pmatrix} = \dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ i\end{pmatrix}$: equal amplitudes, $E_y$ a quarter cycle ahead in phase — circular, turning counterclockwise as you face the wave.` },
+      { label: 'Wave plate', text: t`$\begin{pmatrix}1 & 0 \\ 0 & i\end{pmatrix}\dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ 1\end{pmatrix} = \dfrac{1}{\sqrt2}\begin{pmatrix}1 \\ i\end{pmatrix}$: equal amplitudes, with $E_y$ a quarter cycle behind $E_x$ in time (relative phase $+90^\circ$ in this convention) — circular, turning counterclockwise as you face the wave.` },
       { label: 'Polarizer', text: t`At $\theta = ${EX.th}^\circ$ the polarizer’s matrix (in the symbols table) acts on that vector:
 
 $$\begin{gathered}\frac{1}{\sqrt2}\begin{pmatrix}\cos^2\theta + i\sin\theta\cos\theta \\ \sin\theta\cos\theta + i\sin^2\theta\end{pmatrix}\\ = \frac{\cos\theta + i\sin\theta}{\sqrt2}\begin{pmatrix}\cos\theta \\ \sin\theta\end{pmatrix}\end{gathered}$$` },
@@ -88,7 +88,7 @@ $$\begin{gathered}\frac{1}{\sqrt2}\begin{pmatrix}\cos^2\theta + i\sin\theta\cos\
           visual: jones({ jones: vecs[opts[k][2]] }, [], t`The state’s field, seen facing the oncoming wave (hidden).`, { hide: ['states', 'out'] }),
           choices, answer: k,
           why: Object.fromEntries([0, 1, 2, 3].filter((i) => i !== k).map((i) => [i, i === 2 ? 'A real Jones vector (no relative phase) is always linear; this one has an imaginary component.' : k === 2 ? 'Both components are real: the field just oscillates along one line.' : 'Check the amplitudes (equal for circular) and the sign of the relative phase (+i counterclockwise, −i clockwise in this convention).'])),
-          hints: [t`Equal magnitudes and a phase of $\pm 90^\circ$: circular. Real components: linear. Otherwise elliptical.`, t`In Hecht’s convention $+i$ means $E_y$ leads: the field turns from $+x$ toward $+y$, counterclockwise facing the wave.`],
+          hints: [t`Equal magnitudes and a phase of $\pm 90^\circ$: circular. Real components: linear. Otherwise elliptical.`, t`In Hecht’s convention $+i$ means $E_y$ peaks a quarter period after $E_x$: the field turns from $+x$ toward $+y$, counterclockwise facing the wave.`],
           teach: 'Read a Jones vector by its two magnitudes and their relative phase.',
           explain: t`${vec} is ${opts[k][1]}. At $\omega t = 0$ the field is $(\text{Re}\,E_x, \text{Re}\,E_y)$; a quarter period later it is $(\text{Im}\,E_x, \text{Im}\,E_y)$ — follow those two points to see the turn.`,
         };

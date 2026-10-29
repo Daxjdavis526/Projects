@@ -68,7 +68,7 @@ A plate with $\Gamma = \pi/2$ (a quarter wave) turns linear light at 45° to its
     lead: t`Horizontal light passes a plate of retardance $\Gamma$ with its fast axis at $\theta$. Watch the output ellipse and its path on the Poincaré sphere: the plate turns the state about its fast-axis direction (on the equator) by the angle $\Gamma$.`,
     tasks: [
       t`At $\theta = 45^\circ$, raise $\Gamma$ from 0: linear → ellipse → circular at $90^\circ$ → linear at 90° (vertical) at $180^\circ$ → back again at $360^\circ$.`,
-      t`At $\Gamma = 90^\circ$, turn $\theta$: the ellipse’s axes follow the plate, with $b/a = \tan\theta$.`,
+      t`At $\Gamma = 90^\circ$, turn $\theta$: the ellipse’s axes follow the plate, with $b/a = \tan\theta$ up to $45^\circ$ (and $\cot\theta$ beyond, where the major axis lies along the slow axis).`,
       t`At $\Gamma = 180^\circ$ (a half-wave plate), the output stays linear, at $2\theta$.`,
     ],
     params: {
@@ -114,7 +114,7 @@ A plate with $\Gamma = \pi/2$ (a quarter wave) turns linear light at 45° to its
       id: 'retardance', difficulty: 2,
       gen(r) {
         const d = r.pick([0.5, 0.8, 1, 1.5]), nm = r.pick([589, 633]);
-        const waves = (dn(nm) * d * 1000) / nm, frac = waves - Math.floor(waves);
+        const waves = (dn(nm) * d * 1e6) / nm, frac = waves - Math.floor(waves);
         return {
           prompt: t`A quartz plate ${d} mm thick ($\Delta n = ${sf(dn(nm), 2)}$) is used at ${nm} nm. What is its retardance, in waves (the whole number of waves included)?`,
           visual: platePic(t`The two components leaving the plate out of step (schematic).`),

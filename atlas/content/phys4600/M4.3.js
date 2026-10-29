@@ -126,7 +126,7 @@ export default lesson({
           instruction: 'Drag the point to the retarded event, then check.',
           hints: [t`The retarded event is on the charge’s worldline and on P’s **past** light cone: the $45^\circ$ lines running down from P.`, t`$t_r = t_P - |x_P - x_0|/c = ${tP} - ${Math.abs(xP - x0)}$.`],
           teach: 'The retarded event is where the source’s worldline crosses the field point’s past light cone.',
-          explain: t`$(x, t) = (${x0}, ${tr})$: light leaving the charge then covers $${Math.abs(xP - x0)}$ light-seconds to reach P at $t = ${tP}$ s.`,
+          explain: t`$(x, t) = (${x0}, ${tr})$: light leaving the charge then covers $${Math.abs(xP - x0)}$ light-second${Math.abs(xP - x0) === 1 ? '' : 's'} to reach P at $t = ${tP}$ s.`,
         };
       },
     },

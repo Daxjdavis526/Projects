@@ -219,6 +219,6 @@ So $\log_2 8 = 3$ because $2^3 = 8$, and $\log_{10} 0.001 = -3$ because $10^{-3}
   sources: [
     { label: 'OpenStax Precalculus 2e, §4.3 Logarithmic Functions', url: 'https://openstax.org/books/precalculus-2e/pages/4-3-logarithmic-functions' },
     { label: 'NASA Earth Fact Sheet; U.S. Standard Atmosphere 1976 (pressure with height)', url: 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html' },
-    { label: 'CODATA 2018 recommended values (electron mass, elementary charge)', url: 'https://physics.nist.gov/cuu/Constants/' },
+    { label: 'CODATA 2022 recommended values (electron mass, elementary charge)', url: 'https://physics.nist.gov/cuu/Constants/' },
   ],
 });

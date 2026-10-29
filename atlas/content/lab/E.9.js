@@ -41,7 +41,7 @@ export default lesson({
     lead: t`Set the reflector’s distance and take a reading: above, the scope trace with the reference and return pulses and the instants the timing picks; below, delay against distance with the weighted fit. The readout turns the slope into $c$ and shows the offset.`,
     tasks: [
       'Run the series: c comes out within about 1% of 2.998 × 10⁸ m/s, and the intercept is the 12 ns of cables and electronics.',
-      'Switch on leading-edge timing: the far, weaker returns cross the threshold later, the slope steepens, and c reads about 1% low — with residuals that curve slightly.',
+      'Switch on leading-edge timing: the far, weaker returns cross the threshold later, the slope steepens, and c reads about 1.5% low — with residuals that curve slightly.',
       'Run the series several more times: σ of c shrinks, but the leading-edge bias does not — averaging cannot remove a systematic.',
     ],
     params: { exp: 'light', seed: 2, residuals: true, expected: true },

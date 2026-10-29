@@ -180,7 +180,7 @@ print(sigma_f)`,
       ],
       hints: [t`$\partial f/\partial x = e^{-y}$ and $\partial f/\partial y = -x e^{-y}$.`, 'The off-diagonal entries of C are both `rho*sx*sy`.'],
       teach: t`In matrix form the general formula is $\sigma_f^2 = J C J^{\mathsf T}$: the gradient sandwiching the covariance matrix.`,
-      explain: t`$J \approx (0.607, -2.43)$; the covariance term is negative here (the sensitivities have opposite signs), so $\sigma_f \approx 0.073$ is a little below the independent value 0.078. The same line handles any number of inputs.`,
+      explain: t`$J \approx (0.607, -2.43)$; the covariance term is negative here (the sensitivities have opposite signs), so $\sigma_f \approx 0.065$ is below the independent value 0.078. The same line handles any number of inputs.`,
     }),
     mcq({
       id: 'degrees', difficulty: 2, kind: 'error',
@@ -205,7 +205,7 @@ print(sigma_f)`,
         const ra = r.pick([0.1, 0.2, 0.3]), rT = r.pick([0.01, 0.02]), rG = 0.0022;
         const rel = Math.hypot(3 * ra, 2 * rT, rG);
         return {
-          prompt: t`A planet’s mass follows from its moon’s orbit: $M = \dfrac{4\pi^2 a^3}{G T^2}$. The orbit’s semi-major axis $a$ is known to ${ra}%, the period $T$ to ${rT}%, and $G$ to 0.0022% (CODATA 2018). What is the relative uncertainty of $M$, as a percentage?`,
+          prompt: t`A planet’s mass follows from its moon’s orbit: $M = \dfrac{4\pi^2 a^3}{G T^2}$. The orbit’s semi-major axis $a$ is known to ${ra}%, the period $T$ to ${rT}%, and $G$ to 0.0022% (CODATA 2022). What is the relative uncertainty of $M$, as a percentage?`,
           visual: budget([{ label: 'semi-major axis: 3σa/a', u: 3 * ra }, { label: 'period: 2σT/T', u: 2 * rT }, { label: 'G: σG/G', u: rG }], { unit: '%', combined: false, caption: 'The three relative contributions, to scale.' }),
           answer: rel, units: '%', tol: { rel: 0.01 },
           errors: [{ value: Math.hypot(ra, rT, rG), feedback: 'Multiply each relative uncertainty by its power: a is cubed, T squared.' }, { value: 3 * ra + 2 * rT + rG, feedback: 'Combine independent contributions in quadrature.' }],

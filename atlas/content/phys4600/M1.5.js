@@ -74,7 +74,7 @@ export default lesson({
     tasks: [
       t`Set $\varepsilon_2/\varepsilon_1 = 1$: no bend. Raise it: the line in medium 2 swings toward the surface, and the field there is weaker.`,
       t`At $\theta_1 = 0$ the line goes straight through — but its strength drops by $\varepsilon_1/\varepsilon_2$, because $D_\perp$, not $E_\perp$, is continuous.`,
-      t`Watch $D_2/D_1$ and $E_2/E_1$: they move in opposite directions as $\theta_1$ changes.`,
+      t`Watch $D_2/D_1$ and $E_2/E_1$: their ratio is always $\varepsilon_2/\varepsilon_1$. At $\theta_1 = 0$ it is $D$ that matches across the surface; near $90^\circ$ it is $E$.`,
     ],
     params: {
       x: [-2.8, 2.8], y: [-1.4, 1.4], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',

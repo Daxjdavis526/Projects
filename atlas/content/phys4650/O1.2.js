@@ -50,7 +50,7 @@ A surface of constant phase is a **wavefront**; a **ray** is a line everywhere p
     tasks: [
       t`At $R = 10$ m the edges lag the centre by about 57 waves: strongly curved. The curve is a parabola, $y^2/2R$.`,
       t`Push $R$ up until the whole curve fits inside the band: about 2.3 km. Closer than that, a lamp cannot stand in for a star.`,
-      t`Watch the Fresnel number $a^2/\lambda R$: it is the edge lag in **half**-waves, and it falls below 1 at the same distances.`,
+      t`Watch the Fresnel number $a^2/\lambda R$: it is the edge lag in **half**-waves, so the quarter-wave band is a Fresnel number of $\tfrac12$: it drops below that just where the curve fits inside the band.`,
     ],
     params: {
       x: [-25, 25], y: [-0.4, 2.2], aspect: 'wide', xlabel: 'y across the aperture (mm)', ylabel: 'lag (waves)', yticks: 5,

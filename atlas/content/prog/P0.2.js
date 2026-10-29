@@ -200,7 +200,7 @@ What fixes it?`,
       },
       hints: ['A SyntaxError means Python could not read the program at all.', 'The caret points at the bracket that was opened and never closed.'],
       teach: 'A SyntaxError stops the program before line 1 runs, and the caret marks where Python could not make sense of it.',
-      explain: t`Add the closing bracket: \`(c**2)\`. Then it prints about $${Math.round(RS_SUN)}$ m — the Sun would have to be squeezed to a ball under 3 km across to become a black hole.`,
+      explain: t`Add the closing bracket: \`(c**2)\`. Then it prints about $${Math.round(RS_SUN)}$ m — the Sun would have to be squeezed into a ball under 3 km in radius (about 6 km across) to become a black hole.`,
     }),
     mcq({
       id: 'not-callable', difficulty: 2,

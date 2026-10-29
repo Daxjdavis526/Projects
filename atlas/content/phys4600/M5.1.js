@@ -117,7 +117,7 @@ export default lesson({
           visual: patternPic(t`The radiation pattern $\sin^2\theta$ about the dipole’s axis (vertical), with the direction toward ${k === 1 ? 'the receiver' : 'Q'} at $${th}^\circ$.`, { rays: [{ deg: th, label: k === 1 ? 'receiver' : 'Q', color: 'accent' }, ...(k === 1 ? [] : [{ deg: 90, label: 'P', color: 'good' }])] }),
           answer: ans, tol: { rel: 0.01 },
           errors: errs,
-          hints: [t`$\langle S\rangle \propto \sin^2\theta/r^2$.`, t`Divide: $\dfrac{S_Q}{S_P} = \dfrac{\sin^2${th}^\circ}{\sin^2 90^\circ}\left(\dfrac{r}{${k}r}\right)^2$.`],
+          hints: [t`$\langle S\rangle \propto \sin^2\theta/r^2$.`, k === 1 ? t`Divide: $\dfrac{S(${th}^\circ)}{S(90^\circ)} = \dfrac{\sin^2${th}^\circ}{\sin^2 90^\circ}$, at the same $r$.` : t`Divide: $\dfrac{S_Q}{S_P} = \dfrac{\sin^2${th}^\circ}{\sin^2 90^\circ}\left(\dfrac{r}{${k}r}\right)^2$.`],
           teach: 'Dipole intensity goes as sin²θ/r²: θ from the axis, and the square of the distance.',
           explain: t`$\sin^2${th}^\circ = ${nice(sf(Math.sin(th * DEG) ** 2, 4))}$${k === 1 ? '' : t`, divided by $${k}^2 = ${k * k}$`}: $${nice(sf(ans, 3))}$.`,
         };

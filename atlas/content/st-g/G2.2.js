@@ -206,7 +206,7 @@ This is **uniform continuity**: one input tolerance serves the whole interval. $
     mcq({
       id: 'cp-grid', difficulty: 3, transfer: true,
       prompt: t`A simulation stores a field $f(r)$ on a grid of uniform spacing $h$ and needs $|f(r) - f(r_{\text{grid}})| < \varepsilon$ everywhere on its domain, with $r_{\text{grid}}$ the nearest grid point. Near a black hole puncture the field behaves like $1/r$ on $(0, R]$. Why do numerical-relativity codes refine the grid near the puncture instead of choosing one $h$?`,
-      visual: { type: 'graph', params: { x: [0, 2], y: [0, 9], aspect: 'wide', xlabel: 'r', ylabel: 'f ~ 1/r', curves: [{ fn: '1/x', color: 'accent', width: 2, domain: [0.11, 2] }], points: Array.from({ length: 10 }, (_, i) => { const r = 0.2 * (i + 1); return { x: +r.toFixed(2), y: +(1 / r).toFixed(4), r: 4, color: 'gold' }; }) }, caption: t`Grid points $h = 0.2$ apart on $1/r$. Between the first two the field changes by $2.5$; between the last two, by $0.03$. Real codes also excise or regularize the puncture itself.` },
+      visual: { type: 'graph', params: { x: [0, 2], y: [0, 9], aspect: 'wide', xlabel: 'r', ylabel: 'f ~ 1/r', curves: [{ fn: '1/x', color: 'accent', width: 2, domain: [0.11, 2] }], points: Array.from({ length: 10 }, (_, i) => { const r = 0.2 * (i + 1); return { x: +r.toFixed(2), y: +(1 / r).toFixed(4), r: 4, color: 'gold' }; }) }, caption: t`Grid points $h = 0.2$ apart on $1/r$. Between the first two the field changes by $2.5$; between the last two, by $0.06$. Real codes also excise or regularize the puncture itself.` },
       choices: [t`$1/r$ is not uniformly continuous on $(0, R]$: no single $h$ meets the tolerance everywhere, so the spacing must shrink toward the puncture`, t`$1/r$ is not continuous at grid points near the puncture`, t`A uniform grid would work, but it would waste memory far from the hole`, t`Refinement is needed only because the field is not differentiable`],
       answer: 0,
       why: {
@@ -247,7 +247,7 @@ This is **uniform continuity**: one input tolerance serves the whole interval. $
       },
       hints: ['Check both conditions: closed (contains its endpoints) and bounded.', 'Three of the sets miss an endpoint or run off to infinity.'],
       teach: t`Heine–Cantor needs a closed **and** bounded interval; drop either and a continuous function can fail to be uniformly continuous at the open or infinite end.`,
-      explain: t`$\tan x$ is continuous on $[0, 1.5]$, a closed bounded interval, so it is uniformly continuous there (its slope is at most $\sec^2 1.5 \approx 201$). The other three each lose one condition — and with it the conclusion.`,
+      explain: t`$\tan x$ is continuous on $[0, 1.5]$, a closed bounded interval, so it is uniformly continuous there (its slope is at most $\sec^2 1.5 \approx 200$). The other three each lose one condition — and with it the conclusion.`,
     }),
   ],
   sources: [

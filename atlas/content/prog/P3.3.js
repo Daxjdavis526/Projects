@@ -214,7 +214,7 @@ print(I)`,
       ],
       hints: ['Row k of `A` holds the coefficients of I₁, I₂, I₃ in equation k — zeros where a current is absent.', '`A = np.array([[15, -10, 0], …])`, `b = np.array([9, 0, -3])`, then `I = np.linalg.solve(A, b)`.'],
       teach: 'Writing a linear system for NumPy is bookkeeping: one row per equation, one column per unknown, the constants in b.',
-      explain: t`The currents are ${I_C.map((x) => (x * 1000).toFixed(2)).join(', ')} mA. The negative $I_3$ means that mesh current flows opposite to the direction assumed — the second source wins there. The matrix is symmetric with a dominant diagonal, typical of resistor networks and well conditioned ($\kappa \approx ${(() => { const e = jacobi3(A_C).w; return (e[2] / e[0]).toFixed(1); })()}$).`,
+      explain: t`The currents are ${I_C.map((x) => (x * 1000).toFixed(2)).join(', ')} mA. $I_3$ is small: in the third mesh the ${V2} V source almost cancels the drive from $I_2$ through the shared ${R[3]} Ω resistor (a negative current would mean it flowed opposite to the direction assumed). The matrix is symmetric with a dominant diagonal, typical of resistor networks and well conditioned ($\kappa \approx ${(() => { const e = jacobi3(A_C).w; return (e[2] / e[0]).toFixed(1); })()}$).`,
     }),
     num({
       id: 'cond-digits', difficulty: 2,

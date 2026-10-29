@@ -61,7 +61,7 @@ but **iteratively**: start from a guess, approximate the model by its tangent (l
     lead: t`A thermocouple at $20\ ^\circ\text{C}$ is plunged into hot gas at $t = 0$ and lags behind it: $T(t) = 20\ ^\circ\text{C} + \Delta T\,(1 - e^{-t/\tau})$. The dots are its readings, each $\pm 1.5$ K. Move the two sliders to make $\chi^2$ as small as you can — exactly what a fitting routine does, one small step at a time.`,
     tasks: [
       'Start with τ alone: too short and the curve rises too fast at the start; too long and it is still climbing at the end. χ² falls steeply toward the right value.',
-      'Find the smallest χ² you can (about 10, for 17 − 2 = 15 degrees of freedom). Then move τ until χ² has risen by exactly 1: that step is the 1σ uncertainty of τ, about 0.011 s.',
+      'Find the smallest χ² you can (about 10, for 17 − 2 = 15 degrees of freedom). Then step τ away, re-adjusting ΔT each time to bring χ² as low as it will go, until that lowest χ² has risen by exactly 1: the step is the 1σ uncertainty of τ, about 0.011 s. (Hold ΔT fixed instead and χ² rises by 1 after only about 0.007 s — too small.)',
       'Notice that the best ΔT changes when you change τ: the two parameters are correlated, so each must be re-adjusted as the other moves.',
     ],
     params: {

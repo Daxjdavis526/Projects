@@ -241,7 +241,7 @@ The second equation is the fundamental $\ell = m = 2$ mode of a **non-spinning**
           errors: apart(ans, [{ value: (QNM.s20[0] / (2 * PI * M * TSUN)) * 1e3, feedback: t`Use the spinning value, $0.5326$.` }, { value: (wr / (M * TSUN)) * 1e3, feedback: t`Divide $\operatorname{Re}\omega$ by $2\pi$ to get hertz.` }]),
           hints: [t`$GM/c^3 = ${nm(M, 3)}\times4.9255\ \mu\text{s} = ${nm(M * TSUN, 4)}$ s.`, t`$f = \dfrac{0.5326}{2\pi\times${nm(M * TSUN, 4)}\ \text{s}}$; convert to mHz.`],
           teach: 'Ringdown frequency scales as 1/M: supermassive black holes ring in LISA’s millihertz band.',
-          explain: t`$f = ${nm(ans, 3)}$ mHz${ans > 0.1 && ans < 100 ? ', inside LISA’s band' : ''}; it rings for $\tau = M/0.0808 = ${nm(M * TSUN / 0.0808, 3)}$ s. The same $M\omega$ that gives a LIGO thud at a few hundred hertz gives a LISA hum lasting minutes.`,
+          explain: t`$f = ${nm(ans, 3)}$ mHz${ans > 0.1 && ans < 100 ? ', inside LISA’s band' : ''}; it rings for $\tau = M/0.0808 = ${nm(M * TSUN / 0.0808, 3)}$ s. The same $M\omega$ that gives a LIGO thud at a few hundred hertz gives a LISA hum whose damping time is ${M * TSUN / 0.0808 > 120 ? 'minutes' : M * TSUN / 0.0808 > 45 ? 'about a minute' : 'tens of seconds'}.`,
         };
       },
     }),

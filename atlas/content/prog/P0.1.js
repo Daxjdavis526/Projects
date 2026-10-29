@@ -61,7 +61,7 @@ v = math.sqrt(2 * G * M / R)   # m/s
 \`\`\`python
 print(f"escape speed: {v / 1000:.2f} km/s")
 \`\`\`` },
-      { label: 'Sense check', text: t`It prints \`escape speed: 11.19 km/s\` — the textbook value. A wrong power of ten in \`R\` would have given 3.5 or 354 km/s, which a sense check catches at once.` },
+      { label: 'Sense check', text: t`It prints \`escape speed: 11.19 km/s\` — the textbook value. A slip in \`R\` shows at once: ten times too big gives 3.54 km/s, and typing it in km (6371) gives 354 km/s.` },
     ],
     answer: t`$v_\text{esc} \approx 11.19$ km/s.`,
   },

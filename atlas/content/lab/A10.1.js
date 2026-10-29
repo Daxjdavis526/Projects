@@ -78,7 +78,7 @@ Spread the settings wide and the slope tightens; take more and it tightens as $1
     visual: decayPic(TWO(BEST.t), t`Plan C: five readings at $t = 0$ and five at $t = ${BEST.t}$ s, on the expected curve (stacked dots are repeats).`),
     steps: [
       { label: 'The tool', text: t`For fitted parameters $p$, the covariance is $(J^\mathsf{T}J)^{-1}\sigma^2$, where $J$ holds the derivatives of the model at each planned setting. It needs only the plan and a guess of the parameters — no data yet.` },
-      { label: 'Derivatives', text: t`$\partial V/\partial V_0 = e^{-t/\tau}$ and $\partial V/\partial\tau = V_0t\,e^{-t/\tau}/\tau^2$. The second is zero at $t = 0$ and peaks at $t = 2\tau$: early readings pin $V_0$, later ones carry $\tau$.` },
+      { label: 'Derivatives', text: t`$\partial V/\partial V_0 = e^{-t/\tau}$ and $\partial V/\partial\tau = V_0t\,e^{-t/\tau}/\tau^2$. The second is zero at $t = 0$ and peaks at $t = \tau$: early readings pin $V_0$, later ones carry $\tau$.` },
       { label: 'Plan A', text: t`Evenly over five time constants: $\sigma_\tau = ${DA.sT.toFixed(3)}$ s. Half the readings are spent where the signal has nearly gone.` },
       { label: 'Plan B', text: t`Evenly over one time constant: $\sigma_\tau = ${DB.sT.toFixed(3)}$ s — slightly better, since every reading still carries signal.` },
       { label: 'Plan C', text: t`Scanning the second time, the best is $t = ${BEST.t}$ s $\approx ${(BEST.t / 10).toFixed(2)}\tau$, with $\sigma_\tau = ${DC.sT.toFixed(3)}$ s: $${(100 * (1 - DC.sT / DA.sT)).toFixed(0)}\,\%$ better than plan A, for free.` },

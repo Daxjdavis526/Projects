@@ -58,7 +58,7 @@ export default lesson({
     lead: t`Each press times a new drop: its trace above (falls with the field off, rises with it on, jittered by Brownian motion), its charge in the table. The plot puts every charge against the whole number $n$ the analysis assigns it; the slope of the line through the origin is $e$.`,
     tasks: [
       'Time 12 more drops: the points stay on one line through the origin, and σ of e shrinks.',
-      'Switch off the slip correction: every charge grows by 15–25%, by different amounts for different sizes — the slope lands far above e and χ²/ν balloons.',
+      'Switch off the slip correction: every charge grows by 15–30%, by different amounts for different sizes — the slope lands far above e and χ²/ν balloons.',
       'Switch Plot to Millikan’s plot: the uncorrected (q/n)^⅔ against 1/(pa) is a straight line, and its intercept gives e without knowing b — though from a long extrapolation.',
     ],
     params: { exp: 'millikan', seed: 6, residuals: true, expected: true },

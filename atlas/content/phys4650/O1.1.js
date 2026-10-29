@@ -57,7 +57,7 @@ What is new is the optics angle. Visible light oscillates about $3\times10^{15}$
     title: 'A wave through a slab of glass',
     lead: t`Light of vacuum wavelength $\lambda_0 = 0.6\ \mu\text{m}$ crosses a slab (shaded) 1.5 µm thick. The solid wave goes through the slab; the dashed one is the same wave in vacuum. Inside the slab $k = nk_0$: the crests crowd together, and the wave leaves **behind** the vacuum wave by $(n - 1)k_0L$.`,
     tasks: [
-      t`Set $n = 1.5$: inside the slab the wavelength shrinks to $\lambda_0/n = 0.4\ \mu\text{m}$, and after it the two waves are half a cycle apart.`,
+      t`Set $n = 1.5$: inside the slab the wavelength shrinks to $\lambda_0/n = 0.4\ \mu\text{m}$, and after it the solid wave lags by $(n - 1)L/\lambda_0 = 1.25$ cycles — a quarter of a cycle behind the dashed one.`,
       t`Find the index that makes the lag exactly one whole cycle ($2\pi$): beyond the slab the waves line up again. (It is $n = 1.4$.)`,
       t`Slide $\omega t$ up: every crest moves toward $+x$ — the minus sign in $kx - \omega t$ makes it travel that way.`,
     ],
@@ -203,7 +203,7 @@ What is new is the optics angle. Visible light oscillates about $3\times10^{15}$
           errors: [{ value: m2, feedback: t`$|\tilde E|^2$ is the square of the *peak* field; the average of $\cos^2$ over a cycle is $\tfrac12$.` }, { value: (a * a - b * b) / 2, feedback: t`$|\tilde E|^2 = a^2 + b^2$, not $\operatorname{Re}(\tilde E^2) = a^2 - b^2$.` }, { value: (a + b) ** 2 / 2, feedback: t`Add the squares of the real and imaginary parts, not the parts themselves.` }].filter((x) => Math.abs(x.value - m2 / 2) > 0.02 * m2),
           hints: [t`The amplitude is $|\tilde E| = \sqrt{a^2 + b^2}$, and $E(t) = |\tilde E|\cos(\omega t - \arg\tilde E)$.`, t`The average of $\cos^2$ over a whole cycle is $\tfrac12$, so $\langle E^2\rangle = |\tilde E|^2/2$.`],
           teach: t`The time average of a harmonic field is half the squared modulus of its complex amplitude: $\langle E^2\rangle = \tfrac12|\tilde E|^2 = \tfrac12\tilde E\tilde E^*$.`,
-          explain: t`$|\tilde E|^2 = ${a}^2 + ${b}^2 = ${m2}$ V²/m², so $\langle E^2\rangle = ${m2 / 2}$ V²/m². The phase of $\tilde E$ drops out — which is why a detector alone cannot measure phase.`,
+          explain: t`$|\tilde E|^2 = ${a < 0 ? `(${a})` : a}^2 + ${b < 0 ? `(${b})` : b}^2 = ${m2}$ V²/m², so $\langle E^2\rangle = ${m2 / 2}$ V²/m². The phase of $\tilde E$ drops out — which is why a detector alone cannot measure phase.`,
         };
       },
     }),

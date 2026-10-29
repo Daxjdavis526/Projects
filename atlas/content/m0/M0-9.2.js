@@ -169,7 +169,7 @@ Back the other way, $r = \sqrt{x^2 + y^2}$ and $\tan\theta = y/x$ — but $\tan\
           ].filter((e, i, A) => Math.abs(e.value - ans) > 0.5 && A.findIndex((o) => Math.abs(o.value - e.value) < 1e-9) === i),
           hints: [t`Which quadrant? $x ${x < 0 ? '<' : '>'} 0$ and $y ${y < 0 ? '<' : '>'} 0$.`, t`The reference angle is $\tan^{-1}|y/x| = ${sig(deg(Math.atan(Math.abs(y / x))), 4)}^\circ$; measure it from the ${x < 0 ? 'negative' : 'positive'} $x$-axis toward the point.`],
           teach: t`The angle comes from the quadrant and the reference angle together — never from $\tan^{-1}(y/x)$ alone.`,
-          explain: t`Quadrant ${x > 0 ? 'IV' : y > 0 ? 'II' : 'III'}, reference angle $${sig(deg(Math.atan(Math.abs(y / x))), 4)}^\circ$: $\theta = ${sig(ans, 4)}^\circ$. (\`atan2(${y}, ${x})\` gives $${sig(deg(Math.atan2(y, x)), 4)}^\circ$${ans > 180 ? t`; add $360^\circ$` : ''}.)`,
+          explain: t`Quadrant ${x > 0 ? (y > 0 ? 'I' : 'IV') : y > 0 ? 'II' : 'III'}, reference angle $${sig(deg(Math.atan(Math.abs(y / x))), 4)}^\circ$: $\theta = ${sig(ans, 4)}^\circ$. (\`atan2(${y}, ${x})\` gives $${sig(deg(Math.atan2(y, x)), 4)}^\circ$${ans > 180 ? t`; add $360^\circ$` : ''}.)`,
           visual: plane({ x: [-8, 8], y: [-8, 5], curves: [seg([0, 0], [x, y], { color: 'accent', width: 2.4 })], points: [dot([x, y], ptText([x, y]), { labelDx: x < 0 ? -8 : 8, labelAlign: x < 0 ? 'right' : 'left' })], caption: t`The point and the ray from the origin to it. $\theta$ is measured anticlockwise from the positive $x$-axis.` }),
         };
       },

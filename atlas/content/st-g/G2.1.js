@@ -234,7 +234,7 @@ Every convergent sequence is Cauchy. The converse is the defining property of th
       choices: [t`$\exists\varepsilon > 0\ \forall N\ \exists m, n \ge N:\ |a_m - a_n| \ge \varepsilon$`, t`$\forall\varepsilon > 0\ \forall N\ \exists m, n \ge N:\ |a_m - a_n| \ge \varepsilon$`, t`$\exists\varepsilon > 0\ \exists N\ \forall m, n \ge N:\ |a_m - a_n| \ge \varepsilon$`, t`$\exists\varepsilon > 0\ \forall N\ \exists n \ge N:\ |a_{n+1} - a_n| \ge \varepsilon$`],
       answer: 0,
       why: {
-        1: t`That says *every* tolerance fails, which is impossible: with $m = n$ the gap is $0$, never $\ge \varepsilon$.`,
+        1: t`That says *every* tolerance fails — true of an unbounded sequence such as $a_n = n$, but far more than “not Cauchy”: $(-1)^n + 1/n$ is not Cauchy, yet no two of its terms are $3$ apart.`,
         2: t`Too strong, and impossible: with $m = n$ the gap is $0$.`,
         3: t`That only says neighbours stay apart. A sequence like $\sqrt n$ has small neighbour steps and is still not Cauchy.`,
       },

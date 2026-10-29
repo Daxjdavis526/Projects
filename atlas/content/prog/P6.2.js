@@ -42,9 +42,9 @@ Lose a factor of $10^{8}$ in the subtraction and only 8 of the 16 digits survive
     title: 'One function, two formulas',
     lead: t`Press **Run**. Both lines compute $(1 - \cos x)/x^2$, whose true value tends to 0.5. The first subtracts $\cos x$ from 1; the second uses the identity $1 - \cos x = 2\sin^2(x/2)$. Read the plot from right to left.`,
     tasks: [
-      'Find where the dots start to scatter: near x = 10⁻⁵, where cos x agrees with 1 in about ten digits.',
-      'Below x ≈ 1.5 × 10⁻⁸, cos x rounds to exactly 1.0 and the naive formula returns 0. Check that `np.cos(1e-8) == 1.0` is `True`.',
-      'Use `np.float32` values for x: single precision fails a thousand times sooner.',
+      'Find where the dots start to scatter visibly: near x = 3 × 10⁻⁷, where cos x agrees with 1 in about 13 digits, so the difference keeps only about 3.',
+      'Below x ≈ 1.05 × 10⁻⁸, cos x rounds to exactly 1.0 and the naive formula returns 0. Check that `np.cos(1e-8) == 1.0` is `True`.',
+      'Use `np.float32` values for x: single precision fails at an x some 20 000 times larger (the threshold scales as √ε).',
     ],
     params: {
       rows: 21,

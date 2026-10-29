@@ -372,8 +372,8 @@ export default boss({
               prompt: t`A circular sensor diaphragm of radius $a = ${C.a}\ \text{mm}$, under tension $T = ${C.T}\ \text{N/m}$ and pressure difference $p = ${C.p}\ \text{Pa}$, takes the deflection $w(r)$ that makes $E[w] = \displaystyle\iint\Big(\frac T2|\nabla w|^2 - p\,w\Big)dA$ stationary, with $w = 0$ at the rim. Set $\delta E/\delta w = 0$, solve for the axisymmetric $w$, and give the deflection at the centre, in μm.`,
               answer: C.key, units: 'um', tol: { rel: 0.005 },
               errors: apart([
-                { value: ((C.p * (C.a * 1e-3) ** 2) / (8 * C.T)) * 1e6, feedback: t`$pa^2/8T$ is the strip (one-dimensional) result. In 2D, $\nabla^2w = \frac1r(rw')'$ gives $w = \frac{p}{4T}(a^2 - r^2)$.` },
-                { value: ((C.p * (C.a * 1e-3) ** 2) / (2 * C.T)) * 1e6, feedback: t`Integrate $\frac1r(rw')' = -p/T$ carefully: $rw' = -\frac{p}{2T}r^2$, then $w = \frac{p}{4T}(a^2 - r^2)$.` },
+                { value: ((C.p * (C.a * 1e-3) ** 2) / (8 * C.T)) * 1e6, feedback: t`$pa^2/8T$ is the strip formula $pL^2/8T$ with the radius as the span. The membrane is round: $\nabla^2w = \frac1r(rw')'$ gives $w = \frac{p}{4T}(a^2 - r^2)$.` },
+                { value: ((C.p * (C.a * 1e-3) ** 2) / (2 * C.T)) * 1e6, feedback: t`$pa^2/2T$ is the sag of a strip spanning the diameter ($-Tw'' = p$, one-dimensional). In 2D, $\frac1r(rw')' = -p/T$ gives $rw' = -\frac{p}{2T}r^2$ and $w = \frac{p}{4T}(a^2 - r^2)$: held all round, it sags half as much.` },
                 { value: (C.p * (C.a * 1e-3) ** 2) / (4 * C.T), feedback: 'That is in metres; the question asks for micrometres.' },
               ], C.key),
               hints: [t`$\delta E/\delta w = -T\nabla^2w - p$, so $-T\nabla^2w = p$.`, t`Axisymmetric: $\frac1r(rw')' = -p/T$, regular at the centre: $w = \frac{p}{4T}(a^2 - r^2)$.`],

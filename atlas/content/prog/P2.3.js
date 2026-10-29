@@ -342,6 +342,6 @@ def merge_sort(a):
   sources: [
     { label: 'Python documentation: sys.getrecursionlimit', url: 'https://docs.python.org/3/library/sys.html#sys.getrecursionlimit' },
     { label: 'functools.cache — memoizing a recursive function', url: 'https://docs.python.org/3/library/functools.html#functools.cache' },
-    { label: 'CODATA 2018: Wien wavelength displacement law constant (NIST)', url: 'https://physics.nist.gov/cgi-bin/cuu/Value?bwien' },
+    { label: 'CODATA 2022: Wien wavelength displacement law constant (NIST)', url: 'https://physics.nist.gov/cgi-bin/cuu/Value?bwien' },
   ],
 });

@@ -116,7 +116,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
           ].filter((e) => Math.abs(e.value - B * 1000) > 0.03 * B * 1000),
           hints: [t`The field at the centre of a Helmholtz pair is $B = (4/5)^{3/2}\mu_0NI/R$.`, t`$(4/5)^{3/2} = 0.7155$ and $\mu_0 = 1.2566\times10^{-6}$ N/A².`],
           teach: t`A Helmholtz pair’s centre field is $(4/5)^{3/2}\mu_0NI/R$ — about 0.72 of what one coil alone would give at its own centre, times two.`,
-          explain: t`$B = 0.7155 \times ${tex(M.K.mu0, 5)} \times ${N} \times ${I.toFixed(1)}/${R.toFixed(3)} = ${tex(B * 1000, 4)}$ mT — about fifty times the Earth’s field, which is why the Earth’s 2–5% still matters.`,
+          explain: t`$B = 0.7155 \times ${tex(M.K.mu0, 5)} \times ${N} \times ${I.toFixed(1)}/${R.toFixed(3)} = ${tex(B * 1000, 4)}$ mT — only about ${Math.round(B / 50e-6)} times the Earth’s field of roughly $50\ \mu\text{T}$, which is why a stray field of a few per cent still matters.`,
         };
       },
     }),

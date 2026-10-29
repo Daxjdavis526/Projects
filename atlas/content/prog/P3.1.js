@@ -11,7 +11,7 @@ const WIEN = 2.897771955e-3;
 const orbit = (hkm) => { const r = RE + hkm * 1e3, v = Math.sqrt(GM / r); return [v, (2 * Math.PI * r) / v / 60]; };
 
 // molecular nitrogen at 300 K
-const M_N2 = 28.0134 * 1.66053906660e-27;
+const M_N2 = 28.0134 * 1.66053906892e-27;   // u, CODATA 2022
 
 export default lesson({
   id: 'prog.P3.1',
@@ -289,7 +289,7 @@ print(f"largest saving: {saving:.3f} of the vehicle's mass")`,
       ],
       hints: ['`np.exp` acts on the whole `dv` array: `1 - np.exp(-dv / (311 * g0))`.', 'Subtract the two arrays and take `.max()`.'],
       teach: 'A table of a formula is one array expression; questions about the table are reductions like `max`, `argmax` and `mean`.',
-      explain: t`At the 9.4 km/s an orbit needs, a kerosene single stage must be ${(100 * (1 - Math.exp(-9400 / (311 * G0)))).toFixed(0)}% propellant, a hydrogen one ${(100 * (1 - Math.exp(-9400 / (450 * G0)))).toFixed(0)}% — the reason real launchers use stages. The hydrogen advantage peaks mid-table, where the two curves are farthest apart.`,
+      explain: t`At the 9.4 km/s an orbit needs, a kerosene single stage must be ${(100 * (1 - Math.exp(-9400 / (311 * G0)))).toFixed(0)}% propellant, a hydrogen one ${(100 * (1 - Math.exp(-9400 / (450 * G0)))).toFixed(0)}% — the reason real launchers use stages. The hydrogen advantage peaks near ${(Math.log((311 * G0) / (450 * G0)) / (1 / (450 * G0) - 1 / (311 * G0)) / 1000).toFixed(1)} km/s, where the two curves are farthest apart.`,
     }),
     mcq({
       id: 'cp-why-fast', difficulty: 2,

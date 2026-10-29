@@ -8,7 +8,7 @@ const GM = 3.986004418e14, RE = 6371;   // Earth: m³/s², km
 
 // √(x + a) = x − b with roots p (genuine) and q (extraneous): p + q = 2b + 1, pq = b² − a
 function radicalCase(r) {
-  const b = r.int(1, 4), p = b + r.intExcept(2, 5, [b + 1, b === 3 ? 3 : 0]), q = 2 * b + 1 - p, a = b * b - p * q;
+  const b = r.int(1, 4), p = b + r.intExcept(2, 5, [b + 1, b === 3 ? 3 : 0, b === 2 ? 2 : 0]), q = 2 * b + 1 - p, a = b * b - p * q;
   return { a, b, p, q, lhs: t`\sqrt{x ${sgn(a)}}`, rhs: t`x - ${b}` };
 }
 const radicalFig = ({ a, b, p, q }, caption, ticks = false) => bothSides({
@@ -138,7 +138,7 @@ The cure is simple and non-negotiable: **substitute every candidate back into th
     num({
       id: 'rational-solve', difficulty: 2,
       gen(r) {
-        const k = r.pick([2, 3, 4]), b = r.int(1, 5), x0 = r.intExcept(-4, 9, [b, 0]);
+        const k = r.pick([2, 3, 4]), b = r.int(1, 5), x0 = r.intExcept(-4, 9, [b, 0, k * b / (k - 1)]);   // x0 = kb/(k − 1) would give a = 0
         const a = k * (x0 - b) - x0;
         const errors = [];
         const slip = (a + b) / (k - 1);

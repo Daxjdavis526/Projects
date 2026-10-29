@@ -82,7 +82,7 @@ Put a mask there and a second lens transforms back: a **4f system** that edits a
     tasks: [
       t`Pass only the zeroth order ($M = 0$): the image is uniform. No detail without diffracted light — Abbe’s point.`,
       t`Pass $M = 1$: a pure cosine with the grating’s period. Raise $M$ and the edges sharpen (with Gibbs’s overshoot).`,
-      t`Block the centre spot: the field loses its average and swings positive and negative; its square, what you see, brightens at every edge.`,
+      t`Block the centre spot: the field loses its average and swings positive and negative; its square, what you see, drops to zero at every edge, where the field changes sign: each slit is outlined in dark lines.`,
     ],
     params: {
       x: [0, 3], y: [-0.8, 1.4], aspect: 'wide', xlabel: 'position across the image (grating periods)', ylabel: 'field', xticks: 6, yticks: 4,
@@ -106,7 +106,7 @@ Put a mask there and a second lens transforms back: a **4f system** that edits a
       { label: 'Spot spacing', text: t`$\Delta x_f = \lambda f/\Lambda = (633\times10^{-9})(${EX.f})/(${sf(EX.Lam, 3)})\ \text{m} = ${sf(EX.dx * 1e3, 3)}$ mm. Each spot is one spatial frequency, $\nu = x_f/(\lambda f) = m/\Lambda$.` },
       { label: 'Iris', text: t`To pass $m = 0, \pm1$ and block $\pm2$, the iris radius must lie between $${sf(EX.dx * 1e3, 3)}$ and $${sf(2 * EX.dx * 1e3, 3)}$ mm.` },
       { label: 'Image', text: t`Three plane waves recombine: the image field is $c_0 + 2c_1\cos(2\pi x/\Lambda)$ — the grating’s period, but a smooth cosine; the square edges needed the higher orders.` },
-      { label: 'Sense check', text: t`Wider gratings or longer focal lengths spread the spots further; at $\lambda f/\Lambda$ they scale exactly like the far-field fringes of O8.1, which is what they are.` },
+      { label: 'Sense check', text: t`Finer gratings or longer focal lengths spread the spots further; at $\lambda f/\Lambda$ they scale exactly like the far-field fringes of O8.1, which is what they are.` },
     ],
     answer: t`Spots $${sf(EX.dx * 1e3, 3)}$ mm apart; an iris of radius between $${sf(EX.dx * 1e3, 3)}$ and $${sf(2 * EX.dx * 1e3, 3)}$ mm leaves a sinusoidal image with the grating’s period.`,
   },
@@ -195,7 +195,7 @@ Put a mask there and a second lens transforms back: a **4f system** that edits a
           errors: [{ value: R * 2, feedback: 'That would be the diameter: the ripple’s spots sit λf/Λ from the axis, so the radius must be less than that.' }],
           hints: [t`The ripple sends light off at $\theta = \lambda/\Lambda$, which focuses at $x_f = f\theta$.`, t`The pinhole radius must be less than $\lambda f/\Lambda$.`],
           teach: t`A ripple of period $\Lambda$ focuses $\lambda f/\Lambda$ from the axis; a pinhole smaller than that removes it.`,
-          explain: t`$\lambda f/\Lambda = (1.064\times10^{-3}\ \text{mm})(${f}\ \text{mm})/(${L}\ \text{mm}) = ${sf(R, 3)}$ mm. The pinhole must also pass the beam’s own focused spot, so very short focal lengths leave no room between the two.`,
+          explain: t`$\lambda f/\Lambda = (1.064\times10^{-3}\ \text{mm})(${f}\ \text{mm})/(${L}\ \text{mm}) = ${sf(R, 3)}$ mm. The pinhole must also pass the beam’s own focused spot, about $\lambda f/D$ wide for a beam of width $D$: both scale with $f$, so only ripples much finer than the beam itself can be filtered out.`,
         };
       },
     }),
@@ -218,14 +218,14 @@ Put a mask there and a second lens transforms back: a **4f system** that edits a
     }),
     mcq({
       id: 'cp-darkfield', difficulty: 2,
-      prompt: t`A glass slide carrying a tiny opaque square is imaged by a 4f system whose Fourier plane has a small stop on the axis, blocking only the undiffracted light. What does the image show?`,
+      prompt: t`A glass slide carrying an opaque square $1$ mm across is imaged by a 4f system whose Fourier plane has a small stop on the axis: it blocks the undiffracted light and every spatial frequency below $20$ lines per millimetre. What does the image show?`,
       visual: fourF(t`A 4f system with a small central stop (schematic).`, 'stop'),
       choices: ['A dark field with the outline of the square glowing: only light diffracted by its edges gets through.', 'The square, bright on a dark background, filled in.', 'Nothing at all: the stop blocks all the light.', 'The usual image, slightly dimmer.'],
       answer: 0,
-      why: { 1: 'The flat inside of the square and the flat glass around it send light straight on, into the stop; only changes — edges — diffract.', 2: 'The stop is small: diffracted light passes around it.', 3: 'The undiffracted light, which carries most of the power and the uniform parts of the image, is removed.' },
-      hints: ['Uniform regions send light straight through the focus; edges diffract it sideways.', 'What is left after removing the zero spatial frequency?'],
-      teach: 'Blocking the zeroth order (dark field) shows only where the object changes: edges and small scatterers glow.',
-      explain: t`Removing the zero frequency removes everything uniform. What remains is the high-frequency light from the square’s edges — a glowing outline on black. Dark-field microscopes show live bacteria this way; coronagraphs use related tricks to suppress a star.`,
+      why: { 1: 'Inside the square and on the glass around it the field is uniform over far more than the $50\ \mu$m period the stop cuts at: that light lies in the low frequencies it removes. Only the edges diffract beyond the stop.', 2: 'The stop is small: diffracted light passes around it.', 3: 'The undiffracted light, which carries most of the power and the uniform parts of the image, is removed.' },
+      hints: ['Uniform regions send light straight through the focus; edges diffract it sideways.', 'What is left after removing the lowest spatial frequencies?'],
+      teach: 'Blocking the zeroth order and the lowest frequencies (dark field) shows only where the object changes over short distances: edges and small scatterers glow.',
+      explain: t`Removing the frequencies below $20$ lines per millimetre removes everything uniform over more than about $50\ \mu$m — the bright glass and the dark inside alike. What remains is the high-frequency light from the square’s edges — a glowing outline on black. (A square much smaller than $50\ \mu$m would glow all over instead: Babinet’s principle.) Dark-field microscopes show live bacteria this way; coronagraphs use related tricks to suppress a star.`,
     }),
   ],
   sources: [

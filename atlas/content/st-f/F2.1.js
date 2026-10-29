@@ -279,7 +279,7 @@ print(bad, good, math.exp(-20))`,
       ],
       hints: ['Loop with `while s + term != s:` — add the term, increase k, update the term.', 'Inside the loop: `s += term`, then `k += 1`, then `term *= x / k`.'],
       teach: 'Stopping when a term no longer changes the sum makes the truncation error smaller than a rounding error; whether the result is accurate then depends only on round-off.',
-      explain: t`The loop stops after about 95 terms either way. \`bad\` comes out near $6.1\times10^{-9}$, three times the true $2.06\times10^{-9}$, because terms up to $4.3\times10^{7}$ cancelled; \`good\` adds only positive terms and is correct to 15 digits.`,
+      explain: t`The loop stops after 95 terms for $x = -20$ (68 for $x = 20$). \`bad\` comes out near $6.1\times10^{-9}$, three times the true $2.06\times10^{-9}$, because terms up to $4.3\times10^{7}$ cancelled; \`good\` adds only positive terms and is correct to 15 digits.`,
     }),
     multi({
       id: 'classify', difficulty: 2,

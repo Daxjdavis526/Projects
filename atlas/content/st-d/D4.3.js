@@ -71,9 +71,9 @@ Because $\log z$ has infinitely many values, so may $z^c$: one value for an inte
           visual: argand({ arrows: [{ to: b, color: 'accent', label: 'base' }], arcs: [{ r: 0.45, from: 0, to: A, color: 'warn' }], circles: [{ r: 1 }], view: 1.4, ticks: false, caption: t`The base on the unit circle and its principal angle (orange).` }),
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: Math.exp(a * A), feedback: t`$i\cdot i = -1$: the exponent is $${a === 1 ? '' : a}i\cdot i\operatorname{Arg} = -${a === 1 ? '' : a}\operatorname{Arg}$.` }]),
-          hints: [t`$z^c = e^{c\operatorname{Log} z}$, and $\operatorname{Log}${bt} = i(${nm(A, 4)})$ since its modulus is 1.`, t`$c\operatorname{Log} z = ${a === 1 ? '' : a}i\cdot i(${nm(A, 4)}) = -${nm(a * A, 4)}$.`],
+          hints: [t`$z^c = e^{c\operatorname{Log} z}$, and $\operatorname{Log}${bt} = i(${nm(A, 4)})$ since its modulus is 1.`, t`$c\operatorname{Log} z = ${a === 1 ? '' : a}i\cdot i(${nm(A, 4)}) = ${nm(-a * A, 4)}$.`],
           teach: t`An imaginary power of a number on the unit circle is real: $(e^{i\theta})^{ai} = e^{-a\theta}$.`,
-          explain: t`$${bt}^{${a === 1 ? '' : a}i} = e^{-${a === 1 ? '' : a}\cdot${nm(A, 4)}} = ${nm(ans, 3)}$ (principal branch).`,
+          explain: t`$${bt}^{${a === 1 ? '' : a}i} = e^{-${a === 1 ? '' : a + '\\cdot'}(${nm(A, 4)})} = e^{${nm(-a * A, 4)}} = ${nm(ans, 3)}$ (principal branch).`,
         };
       },
     }),

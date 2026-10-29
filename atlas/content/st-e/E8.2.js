@@ -41,7 +41,7 @@ This **cross-product equation** has infinitely many roots $k_{m1} < k_{m2} < \cd
     lead: t`Above: one mode of a membrane clamped at $r = a$ and $r = b = 1$. Below: the cross-product (scaled by a positive factor so it stays readable) against $kb$; its roots, dotted, are the allowed wavenumbers, the gold one is drawn above. Dashed lines: the full disk’s $j_{mn}$ and the thin-gap estimate $n\pi/(1 - a/b)$.`,
     tasks: [
       'm = 0: slide the hub ratio from 0.9 down to 0.05. The roots track nπ/(1 − q) for a thin ring, but crawl only slowly toward the disk’s 2.405.',
-      'Now m = 1: the first root reaches the disk value 3.832 by q ≈ 0.1 — the hub barely matters once the mode vanishes at the centre anyway.',
+      'Now m = 1: the first root is within 3% of the disk value 3.832 by q ≈ 0.1, and within 1% by q ≈ 0.05 — the hub barely matters once the mode vanishes at the centre anyway.',
       'Pick root 2 or 3: each adds a nodal circle between the rims.',
     ],
     params: { mode: 'annulus', q: 0.4, m: 0, k: 1, kmax: 20, readout: true },

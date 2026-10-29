@@ -220,7 +220,7 @@ Otherwise split the panel and give each half the tolerance $\tau/2$, so the acce
       why: {
         1: 'A tighter tolerance makes the test harder to pass, not easier; here it passed trivially because both estimates agreed.',
         2: 'Once sampled finely, Simpson integrates a Gaussian very accurately.',
-        3: 'The samples are about e⁻¹⁷⁰ — tiny but exact; there was simply nothing there to add.',
+        3: 'The samples are e⁻¹⁴⁴ or smaller — tiny but computed correctly; there was simply nothing there to add.',
       },
       hints: ['Evaluate f at 0, 0.25, 0.5, 0.75 and 1.', 'If S₁ and S₂ agree, the test passes, whatever lies between the samples.'],
       teach: 'Error estimates are built from samples, so a feature narrower than the first sample spacing can be missed entirely; give the integrator breakpoints, or a minimum number of panels, where you know a feature lies.',

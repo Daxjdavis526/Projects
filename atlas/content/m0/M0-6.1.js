@@ -80,7 +80,7 @@ After one step $T$ the quantity is $N_0 b$, after two $N_0 b^2$, and so on. With
       why: {
         1: t`Equal *differences* ($+4$ each step): that is linear.`,
         2: t`The ratios are $1.5$, $1.5$, then $26/18 = 1.44$: close, but not constant. The differences $4, 6, 8$ grow by $2$ — a quadratic pattern.`,
-        3: t`It starts by doubling, but then adds $8$ each step: linear after the first step. The ratios are $2$, $1.5$, $1.33$.`,
+        3: t`Equal differences ($+8$ each step): that is linear. The first step happens to double, but the ratios then fall: $2$, $1.5$, $1.33$.`,
       },
       hints: [t`Divide each value by the one before. Which sequence has a constant ratio?`],
       teach: t`Exponential data have constant ratios between equally spaced values; linear data have constant differences.`,

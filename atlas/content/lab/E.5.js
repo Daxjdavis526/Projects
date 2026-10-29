@@ -45,7 +45,7 @@ export default lesson({
       'Switch off the lever error: the He–Ne wavelength now agrees. The fit could not tell the two cases apart; only the known wavelength could.',
       'Turn the lever error back on and switch to the sodium lamp: it reads about 2% high too, by the same factor. Divide by the factor the He–Ne run found.',
     ],
-    params: { exp: 'michelson', seed: 2, residuals: true, expected: true },
+    params: { exp: 'michelson', seed: 19, residuals: true, expected: true },
     caption: t`Simulated counts: the mirror moves the dial travel ÷ 5.10 (a lever 2% off its nominal 5, when switched on), and each count is the true $2d/\lambda$ plus a Gaussian error of 0.4 fringe, rounded to a whole number. Dashed green: the line the true wavelength gives with a perfect lever. ${SIMNOTE}`,
   },
   example: {

@@ -150,14 +150,14 @@ A straight line $F = a + bv$ fits with $R^2 = ${(1 - LIN.res.reduce((s, r) => s 
     }),
     mcq({
       id: 'r-squared', difficulty: 2,
-      prompt: t`A straight line fitted to the period of a pendulum against its length gives $R^2 = 0.998$. A student concludes that $T$ is proportional to $L$. What is wrong?`,
+      prompt: t`A straight line fitted to the period of a pendulum against its length gives $R^2 = 0.988$. A student concludes that $T$ is proportional to $L$. What is wrong?`,
       visual: (() => { const xs = [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5]; const ys = xs.map((L) => 2 * Math.PI * Math.sqrt(L / 9.8)); const f = linfit(xs, ys); return { type: 'graph', params: dataGraph({ xs, ys: ys.map(r6), fit: f, xlabel: 'L (m)', ylabel: 'T (s)' }), caption: 'Noise-free periods 2π√(L/g) and the best straight line. By eye, the line looks perfect.' }; })(),
-      choices: [t`$R^2$ measures how much of the variation the line follows, not whether a line is the right shape; the residuals of $T = a + bL$ form an arch`, t`Nothing: $R^2 > 0.99$ confirms a linear law`, t`$R^2$ should be exactly 1 for a correct model`, t`$R^2$ can only be used with weighted fits`],
+      choices: [t`$R^2$ measures how much of the variation the line follows, not whether a line is the right shape; the residuals of $T = a + bL$ form an arch`, t`Nothing: an $R^2$ this close to 1 confirms a linear law`, t`$R^2$ should be exactly 1 for a correct model`, t`$R^2$ can only be used with weighted fits`],
       answer: 0,
       why: { 1: t`Any smooth, monotonic curve over a modest range gives $R^2$ near 1 against a line. Here the truth is $T \propto \sqrt L$.`, 2: 'Real data have noise, so R² < 1 even for the right model.', 3: 'R² can be computed for any fit; it just does not test the model’s shape.' },
       hints: ['Would a gently curved function also give R² close to 1 over this range?'],
       teach: 'R² near 1 does not validate a model; patternless residuals and a sensible χ² do.',
-      explain: t`$T = 2\pi\sqrt{L/g}$ is curved, but only gently between 0.3 and 1.5 m, so a line captures 99.8% of its variation. Plot the residuals and the arch appears — the same arch as on the bench above.`,
+      explain: t`$T = 2\pi\sqrt{L/g}$ is curved, but only gently between 0.3 and 1.5 m, so a line captures 98.8% of its variation. Plot the residuals and the arch appears — the same arch as on the bench above.`,
     }),
     mcq({
       id: 'order', difficulty: 3,

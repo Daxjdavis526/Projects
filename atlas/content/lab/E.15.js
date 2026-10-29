@@ -62,7 +62,7 @@ Histogram a few thousand delays and fit. The counts in each bin are Poisson, man
     prompt: t`Two days of running record 4000 stop–decay pairs. A Poisson fit of $N_0e^{-t/\tau} + B$ to every bin gives $\tau = ${resT(Ra)}$ μs with a Poisson $\chi^2/\nu = ${EXa.fit.chi2r.toFixed(2)}$ ($\nu = ${EXa.fit.dof}$) and the first bins’ residuals far off the curve. Starting the fit at 1.0 μs gives $\tau = ${resT(Rc)}$ μs, $\chi^2/\nu = ${EXc.fit.chi2r.toFixed(2)}$. What do you report, and how does it compare with the muon’s lifetime?`,
     visual: rig('muon', { seed: 4, analysis: 'all', raw: false }, t`The fit to every bin, on a log scale, with normalized residuals: the excess in the first bins is afterpulsing. ${SIMNOTE}`),
     steps: [
-      { label: 'Read the residuals', text: t`A good fit leaves residuals scattered within about ±2σ. Here the first bin sits far above the curve and its neighbour below it: extra counts at short delays, which the fit tries to absorb by shortening $\tau$ — and fails.` },
+      { label: 'Read the residuals', text: t`A good fit leaves residuals scattered within about ±2σ. Here the first bin sits far above the curve and the next few scatter widely about it: extra counts at short delays, which the fit tries to absorb by shortening $\tau$ — and fails.` },
       { label: 'Name the cause', text: t`A photomultiplier sometimes fires again a few hundred nanoseconds after a big pulse — an afterpulse. It looks like a very early decay. It is a property of the tube, not of muons.` },
       { label: 'Cut', text: t`Fit only $t \ge 1.0$ μs, where afterpulses have died away. A cut does not bias an exponential: $e^{-t/\tau}$ has the same shape from any starting point. $\tau = ${resT(Rc)}$ μs, with $\chi^2/\nu = ${EXc.fit.chi2r.toFixed(2)}$.` },
       { label: 'Compare', text: t`Against the free muon’s 2.1970 μs: $z = ${zT(Rc.z)}$. Against the μ⁺/μ⁻ mix, $${MIX.toFixed(3)}$ μs: $z = ${zT((Rc.value - MIX) / Rc.sigma)}$. With 4000 events the two cannot be told apart.` },
@@ -140,7 +140,7 @@ Histogram a few thousand delays and fit. The counts in each bin are Poisson, man
       id: 'afterpulse', difficulty: 2,
       prompt: t`A fit to every bin gives $\tau = 1.94$ μs, with the first residual near $+5\sigma$, the next few disturbed, and the rest flat. What is the best next step?`,
       visual: rig('muon', { seed: 6, analysis: 'all', raw: false }, t`A fit to every bin, with normalized residuals. ${SIMNOTE}`),
-      choices: ['Refit starting from about 1 μs, and check that τ is stable as the start moves later', 'Report 1.95 μs: the fit converged', 'Inflate all error bars until the residuals look normal', 'Fit a second exponential with a free lifetime to the whole range'],
+      choices: ['Refit starting from about 1 μs, and check that τ is stable as the start moves later', 'Report 1.94 μs: the fit converged', 'Inflate all error bars until the residuals look normal', 'Fit a second exponential with a free lifetime to the whole range'],
       answer: 0,
       why: {
         1: 'Convergence does not mean the model is right; the residuals say it is not, at early times.',

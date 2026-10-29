@@ -118,7 +118,7 @@ An angle of $1$ rad is the one whose arc is exactly one radius long, about $57.3
       },
       hints: [t`Thirty radians is about how many turns? Divide by $2\pi$.`],
       teach: t`A bare angle with no degree sign is read in radians: $\sin(30) = \sin(30\ \text{rad})$.`,
-      explain: t`$30$ rad $= 30/2\pi \approx 4.77$ turns, ending at about $275^\circ$, where $\sin \approx -0.988$. Programming languages (Python’s \`math.sin\`, NumPy, spreadsheets) always work in radians, so convert first.`,
+      explain: t`$30$ rad $= 30/2\pi \approx 4.77$ turns, ending at about $279^\circ$, where $\sin \approx -0.988$. Programming languages (Python’s \`math.sin\`, NumPy, spreadsheets) always work in radians, so convert first.`,
     }),
     num({
       id: 'rpm-omega', difficulty: 2,
@@ -158,7 +158,7 @@ An angle of $1$ rad is the one whose arc is exactly one radius long, about $57.3
       hints: [t`Convert $0.518^\circ$ to radians.`, t`$s \approx 384\,400\ \text{km} \times ${sig(0.518 * D2R, 4)}$.`],
       teach: t`For a small angle, the arc and the straight chord are almost the same, so size $\approx$ distance $\times$ angle in radians.`,
       explain: t`$\theta = 0.518 \times \pi/180 = ${sig(0.518 * D2R, 4)}$ rad, so $D \approx 384\,400 \times ${sig(0.518 * D2R, 4)} = ${Math.round(384400 * 0.518 * D2R)}$ km. The measured diameter is $3474.8$ km: the arc and the straight chord differ by only about three parts in a million here; the small gap from the true size comes from the rounded angle.`,
-      visual: { type: 'graph', params: { x: [-0.6, 10.6], y: [-1.6, 1.6], aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves: [{ param: ['10*t', 't'], t: [0, 1], color: 'ink2', width: 1.6 }, { param: ['10*t', '-t'], t: [0, 1], color: 'ink2', width: 1.6 }, { param: ['10 + cos(t)', 'sin(t)'], t: [0, N(2 * PI)], color: 'ink3', width: 2 }, { param: ['10*cos(t)', '10*sin(t)'], t: [N(-0.0997), N(0.0997)], color: 'gold', width: 3 }], points: [{ x: 0, y: 0, color: 'accent', r: 5, label: 'observer', labelDx: 0, labelDy: 16, labelAlign: 'center' }, { x: 10, y: 0, r: 0, label: 'Moon', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }, { x: 1.6, y: 0, r: 0, label: 'θ', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 }] }, caption: t`Not to scale: the real angle is about $200$ times thinner than drawn. The gold arc and the Moon’s diameter are nearly the same length when $\theta$ is small.` },
+      visual: { type: 'graph', params: { x: [-0.6, 10.6], y: [-1.6, 1.6], aspect: 'wide', axes: false, grid: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves: [{ param: ['10*t', 't'], t: [0, 1], color: 'ink2', width: 1.6 }, { param: ['10*t', '-t'], t: [0, 1], color: 'ink2', width: 1.6 }, { param: ['10 + cos(t)', 'sin(t)'], t: [0, N(2 * PI)], color: 'ink3', width: 2 }, { param: ['10*cos(t)', '10*sin(t)'], t: [N(-0.0997), N(0.0997)], color: 'gold', width: 3 }], points: [{ x: 0, y: 0, color: 'accent', r: 5, label: 'observer', labelDx: 0, labelDy: 16, labelAlign: 'center' }, { x: 10, y: 0, r: 0, label: 'Moon', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }, { x: 1.6, y: 0, r: 0, label: 'θ', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 }] }, caption: t`Not to scale: the real angle is about $20$ times thinner than drawn. The gold arc and the Moon’s diameter are nearly the same length when $\theta$ is small.` },
     }),
   ],
   checkpoint: [

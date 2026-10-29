@@ -281,7 +281,7 @@ print(S[:6].round(3), floor, k, err_noisy, err_k)`,
       },
       hints: ['What does diffusion do to a rapidly varying input?', 'In x̂ = Σ (uᵢᵀb/σᵢ)vᵢ, which terms carry the oscillations?'],
       teach: 'Inverse problems of smoothing physics (conduction, blurring, gravity from orbit) have singular values falling towards zero; their solutions must be regularized, and the SVD shows how much the data can tell you.',
-      explain: t`The smallest singular vectors of $G$ are rapidly oscillating flux histories that conduction erases before they reach the sensors. A temperature error of $0.01$ K along such a $u_i$ becomes $10^7$ times larger in $q$. Truncating at the noise level (or Tikhonov’s damping $\sigma_i/(\sigma_i^2 + \lambda^2)$ instead of $1/\sigma_i$) gives a smooth, physically believable flux — with the honest caveat that its fine time detail is not determined by the data at all.`,
+      explain: t`The smallest singular vectors of $G$ are rapidly oscillating flux histories that conduction erases before they reach the sensors. A temperature error of $0.01$ K along such a $u_i$ is divided by $\sigma_i \approx 10^{-9}$: amplified a billionfold, to an error of order $10^7$ in $q$ (in the model’s units). Truncating at the noise level (or Tikhonov’s damping $\sigma_i/(\sigma_i^2 + \lambda^2)$ instead of $1/\sigma_i$) gives a smooth, physically believable flux — with the honest caveat that its fine time detail is not determined by the data at all.`,
     }),
   ],
   sources: [

@@ -122,7 +122,7 @@ The labels say how a number was **evaluated**, not what caused it: “Type A” 
         return {
           prompt: t`The calibration certificate of ${what} states an expanded uncertainty $U = ${U}$ ${unit} with coverage factor $k = ${k}$. What standard uncertainty goes into your budget, in ${unit}?`,
           visual: normalPic({ k, caption: t`A certificate’s $U$ spans $\pm k$ standard uncertainties of a normal distribution (shaded).` }),
-          answer: u, units: unit, tol: { rel: 0.01 },
+          answer: u, units: unit, ...(unit === 'K' ? { difference: true } : {}), tol: { rel: 0.01 },
           errors: [
             { value: U, feedback: t`$U$ is already expanded. Divide by the stated $k$ to get back to one standard uncertainty.` },
             { value: U / Math.sqrt(3), feedback: t`A certificate states a coverage factor, so its distribution is not rectangular: divide by $k = ${k}$.` },

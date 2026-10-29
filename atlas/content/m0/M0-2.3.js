@@ -4,7 +4,7 @@ import { nice, sig, tex } from '../../src/core/format.js';
 import { N, bars, thou } from './_m0kit.js';
 
 const t = String.raw;
-const G = 6.674e-11;   // m³ kg⁻¹ s⁻², CODATA 2018
+const G = 6.674e-11;   // m³ kg⁻¹ s⁻², CODATA 2022
 const DAY = 86400;
 
 // Jupiter's four large moons: semi-major axis (10⁶ km) and period (days), JPL

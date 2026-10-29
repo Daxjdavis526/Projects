@@ -11,6 +11,7 @@
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { M, rigPlot, rigRaw, pmT, tex, colTable, SIMNOTE, SRC } from './_classic.js';
 import { budget } from './_unc.js';
+import { dataGraph } from './_labf.js';
 
 const t = String.raw;
 const P2 = M.EXPERIMENTS.slit2.defaults, P1 = M.EXPERIMENTS.slit1.defaults;
@@ -25,6 +26,8 @@ const relT = Math.hypot(relS, relD, relL);
 const sTot = relT * EXl.value;
 const zEX = (EXl.value - HENE) / sTot;
 const run2 = (seed, flags = {}) => M.run('slit2', { seed, flags });
+// the intercept question: a run (seed 8) read on a scale whose zero sits 0.31 mm off the pattern's centre
+const IC = M.run('slit2', { seed: 8 }), OFF = 0.31;
 
 export default lesson({
   id: 'lab.E.19',
@@ -232,8 +235,8 @@ Find $\lambda$ with its full uncertainty and compare it with the NIST value, 632
     }),
     mcq({
       id: 'cp-intercept', difficulty: 2,
-      prompt: t`The fit of $x$ against $m$ returns an intercept of $0.31 \pm 0.02$ mm, far from zero. What should you conclude?`,
-      visual: rigPlot('slit2', { seed: 8, residuals: false }, t`A run: fringe position against order, with the fitted line. ${SIMNOTE}`),
+      prompt: t`The fit of $x$ against $m$ returns an intercept of $${pmT(IC.fit.a + OFF, IC.fit.sa)}$ mm, far from zero. What should you conclude?`,
+      visual: { type: 'graph', params: dataGraph({ xs: IC.R.map((q) => q.m), ys: IC.R.map((q) => q.x + OFF), sy: P2.sx, fit: { a: IC.fit.a + OFF, b: IC.fit.b }, xlabel: 'fringe order m', ylabel: 'x (mm)' }), caption: t`The run: fringe position against order, read on a scale whose zero sits off the pattern’s centre, with the fitted line. ${SIMNOTE}` },
       choices: [
         'Nothing is wrong: the scale’s zero is simply not at the centre of the pattern; the slope, and λ, do not care',
         'The wavelength is wrong by 0.31 mm per order and must be corrected',

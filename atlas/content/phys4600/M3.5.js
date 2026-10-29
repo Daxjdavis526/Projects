@@ -115,7 +115,7 @@ export default lesson({
             { value: (C * Math.sqrt((m / WR[g].a) ** 2 + (n / WR[g].b) ** 2) * 1e3) / 1e9, feedback: t`The cutoff is $\tfrac c2\sqrt{(m/a)^2 + (n/b)^2}$: half a wavelength fits across, not a whole one.` },
             ...(m && n ? [{ value: (C / 2) * (m / WR[g].a + n / WR[g].b) * 1e3 / 1e9, feedback: t`The two parts add in quadrature, $\sqrt{(m/a)^2 + (n/b)^2}$, not directly.` }] : []),
           ],
-          hints: [t`$f_{mn} = \dfrac c2\sqrt{\left(\dfrac ma\right)^2 + \left(\dfrac nb\right)^2}$, with $a$ and $b$ in metres.`, m && n ? t`Both terms count: $m = ${m}$ over $a$ and $n = ${n}$ over $b$.` : t`With ${m ? 'n = 0' : 'm = 0'} only one term survives: $f = ${m ? t`${m}c/2a` : t`${n}c/2b`}$.`],
+          hints: [t`$f_{mn} = \dfrac c2\sqrt{\left(\dfrac ma\right)^2 + \left(\dfrac nb\right)^2}$, with $a$ and $b$ in metres.`, m && n ? t`Both terms count: $m = ${m}$ over $a$ and $n = ${n}$ over $b$.` : t`With $${m ? 'n = 0' : 'm = 0'}$ only one term survives: $f = ${m ? t`${m === 1 ? '' : m}c/2a` : t`${n === 1 ? '' : n}c/2b`}$.`],
           teach: t`Cutoff: $f_{mn} = \tfrac c2\sqrt{(m/a)^2 + (n/b)^2}$; the $\text{TE}_{10}$ cutoff $c/2a$ is where half a wavelength just fits across the width.`,
           explain: t`$f_{${m}${n}} = \tfrac c2\sqrt{(${m}/a)^2 + (${n}/b)^2} \approx ${nice(sf(f / 1e9, 4))}$ GHz.`,
         };

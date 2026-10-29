@@ -219,7 +219,7 @@ print(frac)`,
     num({
       id: 'cp-tolerance', difficulty: 2,
       gen(r) {
-        const R = r.pick([100, 220, 470]), sigma = r.pick([0.4, 0.5, 0.6]) * R / 100, tol = R / 100;
+        const R = r.pick([100, 220, 470]), sigma = +(r.pick([0.4, 0.5, 0.6]) * R / 100).toPrecision(2), tol = R / 100;
         const k = tol / sigma, out = 100 * (1 - M.within(k));
         return {
           prompt: t`A batch of ${R} Ω resistors has values distributed normally about ${R} Ω with $\sigma = ${sf(sigma, 2)}\ \Omega$. What percentage fall outside the ±1% tolerance?`,

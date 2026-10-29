@@ -254,7 +254,7 @@ def observed_order(n):
 
 print(observed_order(100), observed_order(200))`,
       tests: [
-        { name: t`at $n = 100$ the observed order is about 4.1`, code: `abs(observed_order(100) - ${R4.p[2].toFixed(3)}) < 0.02` },
+        { name: t`at $n = 100$ the observed order is about 4.2`, code: `abs(observed_order(100) - ${R4.p[2].toFixed(3)}) < 0.02` },
         { name: t`at $n = 200$ it is closer to 4`, code: 'abs(observed_order(200) - 4) < abs(observed_order(100) - 4)' },
       ],
       hints: ['Compute a = final_angle(n), b = final_angle(2n), c = final_angle(4n).', 'Return log₂((a − b)/(b − c)).'],

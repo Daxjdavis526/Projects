@@ -173,7 +173,7 @@ with $k = 2$ for a perfect inversion. **The pulse is set by hand**, so $k$ is ra
       },
       hints: [t`Write $\ln(M_\infty - M)$ with $k$ in it.`, 'Which feature of a straight line does a multiplicative constant inside a logarithm change?'],
       teach: 'Choose an analysis in which the nuisance parameter separates from the one you want: here k lands in the intercept.',
-      explain: t`$\ln(M_\infty - M) = \ln k + \ln M_\infty - \tau/T_1$: $k$ is only in the intercept. The null point uses $\tau_0 = T_1\ln k$ and assumes $\ln k = \ln 2$ — a 160° pulse makes that 3 % wrong in $\ln k$ and 4 % wrong in $T_1$.`,
+      explain: t`$\ln(M_\infty - M) = \ln k + \ln M_\infty - \tau/T_1$: $k$ is only in the intercept. The null point uses $\tau_0 = T_1\ln k$ and assumes $\ln k = \ln 2$ — a 160° pulse makes $k$ 3 % smaller than 2, $\ln k$ 4.4 % smaller than $\ln 2$, and so $T_1$ 4.4 % low.`,
     }),
     code({
       id: 'fit-t1', difficulty: 3,

@@ -210,7 +210,7 @@ print(f"E = {E_u:.2f} ± {s_u:.2f} keV")`,
       ],
       hints: [t`\`p, cov = np.polyfit(c, E, 1, w=1/sE, cov='unscaled')\`; \`p\` is \`[b, a]\`, slope first.`, t`With \`J = np.array([c_u, 1.0])\`, the variance is \`J @ cov @ J\` — that includes $2c_u\,\text{cov}(a, b)$.`],
       teach: 'A calibrated value’s uncertainty is JᵀCJ: the covariance of the calibration, carried through.',
-      explain: t`$E_u = ${CEU.toFixed(2)} \pm ${CSEU.toFixed(2)}$ keV from the calibration alone; adding the peak’s own centroid error and the curvature allowance gives about $\pm 0.8$ keV — Mn-54 at 834.85 keV. Without the covariance term, $\sigma$ would be $${Math.sqrt(CF.sa ** 2 + CPK ** 2 * CF.sb ** 2).toFixed(2)}$ keV: the slope and intercept errors partly cancel.`,
+      explain: t`$E_u = ${CEU.toFixed(2)} \pm ${CSEU.toFixed(2)}$ keV from the calibration alone; adding the peak’s own centroid error and the curvature allowance gives about $\pm ${CD.results[0].sigma.toFixed(1)}$ keV — Mn-54 at 834.85 keV. Without the covariance term, $\sigma$ would be $${Math.sqrt(CF.sa ** 2 + CPK ** 2 * CF.sb ** 2).toFixed(2)}$ keV: the slope and intercept errors partly cancel.`,
     }),
   ],
   checkpoint: [

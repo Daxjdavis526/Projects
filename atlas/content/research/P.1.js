@@ -267,7 +267,7 @@ print(false_alarm_fraction(4.5, 100), false_alarm_fraction(12.0, 100))
       ],
       hints: ['Loop `n_trials` times; each time make `r.normal(size=t.size)` and take `snr(…, 30.0).max()`.', 'Count the records whose peak is `>= threshold`, then divide by `n_trials`.'],
       teach: 'A detection’s significance is measured against the noise background: how often noise alone does as well.',
-      explain: t`A threshold of 4.5 is passed by a few per cent of 4-second noise records — a false alarm every couple of minutes. None of 100 reach 12. LIGO built its background the same way, from data time-shifted between the detectors, and put GW150914’s false-alarm rate below one per 203 000 years.`,
+      explain: t`A threshold of 4.5 is passed by about one 4-second noise record in twelve (8 of these 100) — a false alarm about once a minute. None of 100 reach 12. LIGO built its background the same way, from data time-shifted between the detectors, and put GW150914’s false-alarm rate below one per 203 000 years.`,
     }),
     num({
       id: 'cp-lisa', difficulty: 3, transfer: true,

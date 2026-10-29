@@ -217,7 +217,7 @@ print(weak, strong, worst)`,
       ],
       hints: ['`growth(A, k, t)` is one line: `np.linalg.norm(expm(1j*k*A*t), 2)`.', '`weak = [growth(J, k, 1.0) for k in ks]`, and the same with `D`.', '`worst = max(growth(D, 1, t) for t in np.linspace(0, 10, 2001))`.'],
       teach: 'A uniform bound on $\\|e^{ikAt}\\|$ over all k and t is what strong hyperbolicity buys — and a Jordan block cannot have one.',
-      explain: t`The weak factors come out $1.618$, $10.10$, $100.01$, $1000.0$ — proportional to $k$. The strong ones wander between 1 and $1.618 = (1 + \sqrt5)/2$ and never exceed it, whatever $k$ and $t$ — comfortably inside the guaranteed bound, the condition number $2.618$ of $\mathsf D$’s eigenvector matrix. That uniform bound is Hadamard’s condition.`,
+      explain: t`The weak factors come out $1.618$, $10.10$, $100.01$, $1000.0$ — proportional to $k$. The strong ones wander between 1 and $1.618 = (1 + \sqrt5)/2$ and never exceed it, whatever $k$ and $t$ — exactly the guaranteed bound: the matrix of $\mathsf D$’s unit eigenvectors, $(1, 0)$ and $(1, -2)/\sqrt5$, has condition number $(1 + \sqrt5)/2$ too. That uniform bound is Hadamard’s condition.`,
     }),
   ],
   checkpoint: [

@@ -162,7 +162,7 @@ But first ask whether they **can** be combined. If the results scatter more than
           errors: [{ value: Math.sqrt(chi / N), feedback: 'Divide by N − 1: fitting the mean used up one degree of freedom.' }, { value: chi / (N - 1), feedback: 'That is χ²/ν. The Birge ratio is its square root, so it scales the uncertainties.' }],
           hints: [t`$R_B = \sqrt{\chi^2/(N - 1)}$.`],
           teach: 'The Birge ratio √(χ²/(N−1)) says how much more the results scatter than their uncertainties allow.',
-          explain: t`$R_B = \sqrt{${chi.toFixed(1)}/${N - 1}} = ${R.toFixed(2)}$. ${R > 1.5 ? 'Well above 1: the inputs are inconsistent; find the cause, or at least inflate the uncertainty by this factor.' : 'Near 1: consistent.'}`,
+          explain: t`$R_B = \sqrt{${chi.toFixed(1)}/${N - 1}} = ${R.toFixed(2)}$. ${R > 1.5 ? 'Well above 1: the inputs are inconsistent; find the cause, or at least inflate the uncertainty by this factor.' : t`Somewhat above 1, with $p = ${M.chi2Sf(chi, N - 1).toFixed(2)}$ for ${N - 1} degrees of freedom: ${M.chi2Sf(chi, N - 1) < 0.05 ? 'a borderline inconsistency worth investigating before combining' : 'within what chance allows, though worth a look'}.`}`,
         };
       },
     }),

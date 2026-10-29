@@ -46,7 +46,7 @@ function skinPic(caption, { ph = 30, B = true, depth = 5, marks = [] } = {}) {
         { fn: 'exp(-x)', domain: [0, depth], color: 'ink3', width: 1, dash: [3, 4] },
         { fn: '-exp(-x)', domain: [0, depth], color: 'ink3', width: 1, dash: [3, 4] },
         { fn: `exp(-x)*cos(x - ${p})`, domain: [0, depth], color: 'violet', width: 2.4, label: 'E', labelAt: 0.05, labelDy: -6 },
-        ...(B ? [{ fn: `exp(-x)*cos(x - ${p} - pi/4)`, domain: [0, depth], color: 'teal', width: 2.2, dash: [7, 4], label: 'B (rescaled)', labelAt: 1.6, labelDy: -10 }] : []),
+        ...(B ? [{ fn: `exp(-x)*cos(x - ${p} + pi/4)`, domain: [0, depth], color: 'teal', width: 2.2, dash: [7, 4], label: 'B (rescaled)', labelAt: 1.6, labelDy: -10 }] : []),
       ],
       points: [{ x: depth * 0.7, y: 1.05, r: 0, label: 'conductor', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink2' }, ...marks],
     },
@@ -138,7 +138,7 @@ export default lesson({
         { fn: 'exp(-x)', domain: [0, 5], color: 'ink3', width: 1, dash: [3, 4] },
         { fn: '-exp(-x)', domain: [0, 5], color: 'ink3', width: 1, dash: [3, 4] },
         { fn: 'exp(-x)*cos(x - ph*pi/180)', domain: [0, 5], color: 'violet', width: 2.4, label: 'E', labelAt: 0.05, labelDy: -6 },
-        { fn: 'exp(-x)*cos(x - ph*pi/180 - pi/4)', domain: [0, 5], color: 'teal', width: 2.2, dash: [7, 4], label: 'B (rescaled)', labelAt: 1.6, labelDy: -10 },
+        { fn: 'exp(-x)*cos(x - ph*pi/180 + pi/4)', domain: [0, 5], color: 'teal', width: 2.2, dash: [7, 4], label: 'B (rescaled)', labelAt: 1.6, labelDy: -10 },
       ],
       points: [{ x: 3.5, y: 1.05, r: 0, label: 'conductor', labelAlign: 'center', labelDx: 0, labelDy: 0, color: 'ink2' }],
       readouts: [
@@ -151,7 +151,7 @@ export default lesson({
   },
   example: {
     prompt: t`How far does an electromagnetic field penetrate copper ($\sigma = ${tex(CU, 3)}$ S/m) at mains frequency, ${EX.f1} Hz, and at ${nice(EX.f2 / 1e9)} GHz? Is copper a good conductor at both, and how do $E$ and $B$ compare inside it?`,
-    visual: depthPic(t`Skin depth against frequency (both axes logarithmic) from the good-conductor formula. The two lines are parallel: $\delta \propto 1/\sqrt f$.`, { which: ['cu', 'al', 'sea'] }),
+    visual: depthPic(t`Skin depth against frequency (both axes logarithmic) from the good-conductor formula. The three lines are parallel: $\delta \propto 1/\sqrt f$.`, { which: ['cu', 'al', 'sea'] }),
     steps: [
       { label: 'Good conductor?', text: t`The test is $\sigma/\varepsilon\omega \gg 1$. At ${nice(EX.f2 / 1e9)} GHz, $\sigma/\varepsilon_0\omega \approx ${tex(EX.q2, 2)}$; at ${EX.f1} Hz it is larger still. Copper is a superb conductor at both.` },
       { label: 'The formula', text: t`For $\sigma \gg \varepsilon\omega$, $k \approx \kappa \approx \sqrt{\omega\mu\sigma/2}$, so $\delta = \sqrt{2/\omega\mu\sigma}$: it shrinks as $1/\sqrt f$.` },
@@ -307,7 +307,7 @@ export default lesson({
     num({
       id: 'cp-sub', difficulty: 3, transfer: true,
       gen(r) {
-        const [band, f] = r.pick([['VLF transmitter at 24.0 kHz', 24e3], ['VLF transmitter at 19.8 kHz', 19.8e3], ['ELF system at 76 Hz', 76]]);
+        const [band, f] = r.pick([['VLF transmitter at 24.0 kHz', 24e3], ['VLF transmitter at 19.8 kHz', 19.8e3], ['76 Hz ELF system', 76]]);
         const fac = r.pick([100, 1000, 1e4]);
         const d = skin(SEA, f), z = d * Math.log(fac);
         return {

@@ -261,7 +261,7 @@ print(f"eta = {eta:.3f} Pa s")`,
       answer: 0,
       why: {
         1: 'v against r² is straight for each material but with a different slope for each Δρ.',
-        2: 'The driving force is the density difference, not the sphere’s density: nylon (≈1140 kg/m³) is barely denser than glycerol.',
+        2: 'The driving force is the density difference, not the sphere’s density: nylon (≈1140 kg/m³) is barely denser than an oil such as castor oil (961 kg/m³) — and in glycerol (1261 kg/m³) it would float.',
         3: 'On log–log axes the three are parallel lines (slope 2), not one line.',
       },
       hints: [t`Which variables does $v = 2\Delta\rho g r^2/(9\eta)$ contain besides the liquid’s properties?`],

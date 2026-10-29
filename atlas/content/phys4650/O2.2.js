@@ -146,7 +146,7 @@ Light also carries **momentum**: in vacuum, a beam of irradiance $I$ delivers mo
           errors: [{ value: Math.sqrt((2 * I) / (C * EPS0)) / 1000, feedback: t`Include the index: inside glass $I = \tfrac12nc\varepsilon_0E_0^2$.` }, { value: Math.sqrt((2 * P * 1e-3 / (PI * (mfd * 1e-6) ** 2)) / (n * C * EPS0)) / 1000, feedback: t`Use the radius, half the ${mfd} µm diameter, in the area $\pi r^2$.` }],
           hints: [t`First the irradiance: $I = P/\pi r^2$ with $r = ${mfd / 2}$ µm.`, t`Then $E_0 = \sqrt{2I/nc\varepsilon_0}$.`],
           teach: t`Squeezing modest power into a few-micrometre core makes enormous irradiance and fields — which is why fibres show nonlinear effects at milliwatts.`,
-          explain: t`$I = ${P}\times10^{-3}/\pi(${mfd / 2}\times10^{-6})^2 = ${tex(I, 3)}$ W/m², so $E_0 = \sqrt{2I/nc\varepsilon_0} = ${tex(E0 / 1000, 3)}$ kV/m — hundreds of thousands of times sunlight’s irradiance.`,
+          explain: t`$I = ${P}\times10^{-3}/\pi(${mfd / 2}\times10^{-6})^2 = ${tex(I, 3)}$ W/m², so $E_0 = \sqrt{2I/nc\varepsilon_0} = ${tex(E0 / 1000, 3)}$ kV/m. The irradiance is about $${tex(I / 1361, 2)}$ times sunlight’s.`,
         };
       },
     }),

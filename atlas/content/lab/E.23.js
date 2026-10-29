@@ -24,6 +24,7 @@ const EXd = EX.results[0];
 const relS = EXd.sigma / EXd.value, relL = 1 / 135, relV = 0.5 * 0.01;
 const relAll = Math.hypot(relS, relL, relV), sAll = relAll * EXd.value, zAll = (EXd.value - D10) / sAll;
 const runE = (seed, axes = 'inner') => M.run('ediff', { seed, axes });
+const SA = runE(4, 'outer');                   // the small-angle question's run
 
 export default lesson({
   id: 'lab.E.23',
@@ -48,7 +49,7 @@ export default lesson({
     lead: t`Set the voltage and take a reading: the screen shows the two rings, and both diameters go in the table. The plot shows the inner ring’s diameter against $1/\sqrt V$ with a line through the origin; the readout turns its slope into the plane spacing $d$ and compares it with graphite’s from crystallography.`,
     tasks: [
       'Switch Plot to the outer ring: it gives the smaller spacing, and its d comes out a few σ low — the small-angle formula is worse for the wider ring.',
-      'Switch to the exact analysis (2 sin θ against the relativistic λ): the inner ring’s d moves by about half a percent and agrees comfortably.',
+      'Switch to the exact analysis (2 sin θ against the relativistic λ): the inner ring’s d moves by only about 0.2% and agrees comfortably.',
       'Divide an outer diameter by the inner one at the same voltage: about 1.73 = √3, the ratio of the two graphite spacings.',
     ],
     params: { exp: 'ediff', seed: 3, expected: true },
@@ -150,7 +151,7 @@ Find the plane spacing $d$ with its full uncertainty and compare it with graphit
     }),
     mcq({
       id: 'small-angle', difficulty: 3,
-      prompt: t`Analysed the same way — small angles, a line through the origin — the *outer* ring gives $d_{11}$ about 3σ below $0.1231$ nm, while the inner ring agrees. Why?`,
+      prompt: t`Analysed the same way — small angles, a line through the origin — the *outer* ring gives $d_{11}$ about ${Math.round(-SA.results[0].z)}σ below $0.1231$ nm, while the inner ring agrees. Why?`,
       visual: rigPlot('ediff', { seed: 4, axes: 'outer', expected: true }, t`Outer-ring diameter against $1/\sqrt V$, the fit and residuals. ${SIMNOTE}`),
       choices: [
         t`$D = 2L\tan 2\theta$ grows faster than $2L\cdot2\theta$; the outer ring’s angle is twice as big, so the error is about four times bigger (over 1%), making $D$ — hence the slope — too large and $d$ too small`,
@@ -160,7 +161,7 @@ Find the plane spacing $d$ with its full uncertainty and compare it with graphit
       ],
       answer: 0,
       why: {
-        1: 'Lower precision would widen σ, not shift the result by 3σ.',
+        1: 'Lower precision would widen σ, not shift the result by several σ.',
         2: 'Every ring is made by the same electrons with the same λ; relativity shifts both rings by the same fraction.',
         3: 'Every ring comes from the same polycrystalline film.',
       },

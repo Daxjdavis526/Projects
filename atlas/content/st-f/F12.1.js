@@ -100,7 +100,7 @@ The middle row is the centred difference; the edge rows are one-sided. Each row 
             caption: 'Equally spaced angles on the semicircle; the gold one projects down to the point asked for.',
           },
           answer: ans, tol: { rel: 0, abs: 5e-4 },
-          errors: [{ value: 1 - (2 * j) / N, feedback: 'That is the equispaced point. Chebyshev points are cos(jπ/N): projections of equal angles.' }, { value: Math.cos((j * 180) / N), feedback: 'Your calculator is in degrees: the angle jπ/N is in radians.' }],
+          errors: [{ value: 1 - (2 * j) / N, feedback: 'That is the equispaced point. Chebyshev points are cos(jπ/N): projections of equal angles.' }, { value: Math.cos((j * 180) / N), feedback: 'That is the cosine of 180j/N taken in radians: the angle is jπ/N radians (180j/N degrees).' }],
           hints: [t`$x_j = \cos(j\pi/N)$, counting from $x_0 = 1$.`, t`$\cos(${j}\pi/${N})$.`],
           teach: 'Chebyshev points are the shadows of equally spaced points on a semicircle, so they bunch up near ±1.',
           explain: t`$x_{${j}} = \cos(${j}\pi/${N}) = ${ans.toFixed(4)}$. Near the ends the spacing is about $\pi^2/(2N^2)$, in the middle $\pi/N$.`,
@@ -194,7 +194,7 @@ The middle row is the centred difference; the edge rows are one-sided. Each row 
       answer: 0,
       why: {
         1: 'For even N, x = 0 is a Chebyshev point; the trouble is the kink, not the sampling.',
-        2: 'The errors here are 10⁻³ and up, far above round-off.',
+        2: 'The errors here are above 10⁻⁴, far above round-off.',
         3: 'Size does not matter; smoothness does.',
       },
       hints: ['What does the geometric rate ρ⁻ᴺ need of the function?', 'Differentiate |x|³ three times.'],

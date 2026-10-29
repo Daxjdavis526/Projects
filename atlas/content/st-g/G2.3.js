@@ -162,7 +162,7 @@ The difference decides whether limits can be swapped. A uniform limit of continu
       choices: [t`$\sum_{k\ge1}\dfrac{\cos kx}{k^2}$`, t`$\sum_{k\ge1}\dfrac{\cos kx}{k}$`, t`$\sum_{k\ge0}\dfrac{x^k}{k!}$`, t`$\sum_{k\ge1}\dfrac{x}{k^2}$`],
       answer: 0,
       why: {
-        1: t`The best bound is $M_k = 1/k$, whose sum diverges: the test says nothing (and near $x = 0$ the series does diverge).`,
+        1: t`The best bound is $M_k = 1/k$, whose sum diverges: the test says nothing (and at $x = 0$ the series does diverge).`,
         2: t`On $\mathbb R$ no bound $M_k$ independent of $x$ exists: $x^k/k!$ is unbounded. It converges uniformly on each bounded interval, not on all of $\mathbb R$.`,
         3: t`$|x|/k^2$ has no bound independent of $x$ on $\mathbb R$; the partial sums differ from the limit by $|x|\sum_{k > N}1/k^2$, unbounded in $x$.`,
       },

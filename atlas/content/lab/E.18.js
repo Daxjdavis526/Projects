@@ -65,7 +65,7 @@ Find $\lambda$ with its uncertainty and compare it with the model’s long-run v
       { label: 'Fit', text: t`The weighted line gives slope $${pmT(EX.fit.b, EX.fit.sb)}\ \text{s}^{-1}$ and intercept $${pmT(EX.fit.a, EX.fit.sa)}$, with $\chi^2/\nu = ${EX.fit.chi2r.toFixed(2)}$ for $\nu = ${EX.fit.dof}$.` },
       { label: 'Read the slope', text: t`So $\lambda = ${pmT(EXl.value, EXl.sigma)}\ \text{s}^{-1}$: separations grow by a factor $e$ every $1/\lambda = ${(1 / EXl.value).toFixed(2)}$ s, and double every $\ln 2/\lambda = ${(Math.LN2 / EXl.value).toFixed(2)}$ s.` },
       { label: 'Compare', text: t`There is no CODATA value for chaos. The reference is the model’s own long-run exponent, computed by carrying a tiny separation along trajectories for 100 000 drive periods in all and renormalizing it every period (Benettin’s method): $${LAM.toFixed(3)}\ \text{s}^{-1}$. Then $z = (${EXl.value.toFixed(3)} - ${LAM.toFixed(3)})/${EXl.sigma.toFixed(3)} = ${EXz.toFixed(2)}$: consistent.` },
-      { label: 'Be honest', text: t`Two caveats belong in the report. The points are not independent — each is the same 20 pairs one period later — so $\chi^2$ and the slope’s σ are only rough. And a window of ${nFit} s measures a *finite-time* exponent, which over many sets of pairs averages about 10% below the long-run value in this model (about 1.4σ): the early growth is slower than the long-run average. Quote it as a finite-time exponent for this window. A real apparatus adds Coulomb friction and drive jitter, which a model of the pendulum would have to include.` },
+      { label: 'Be honest', text: t`Two caveats belong in the report. The points are not independent — each is the same 20 pairs one period later — so $\chi^2$ and the slope’s σ are only rough. And a window of ${nFit} s measures a *finite-time* exponent, which over many sets of pairs averages about 12% below the long-run value in this model (about 1.5σ): the early growth is slower than the long-run average. Quote it as a finite-time exponent for this window. A real apparatus adds Coulomb friction and drive jitter, which a model of the pendulum would have to include.` },
     ],
     answer: t`$\lambda = ${pmT(EXl.value, EXl.sigma)}\ \text{s}^{-1}$ from ${nFit} points, $${Math.abs(EXz).toFixed(1)}\sigma$ from the model’s long-run $${LAM.toFixed(3)}\ \text{s}^{-1}$; a doubling time of about $${(Math.LN2 / EXl.value).toFixed(1)}$ s.`,
   },
@@ -226,13 +226,13 @@ Find $\lambda$ with its uncertainty and compare it with the model’s long-run v
           errors: [{ value: (100 * (l - LAM)) / LAM, feedback: 'That is the percentage difference; agreement is judged in units of σ.' }].filter((e) => Math.abs(e.value - ans) > 0.2),
           hints: ['Subtract the reference from the measurement.', t`$z = (\lambda - \lambda_\text{ref})/\sigma_\lambda$.`],
           teach: t`Compare with a reference in units of the uncertainty: $z = \Delta/\sigma$.`,
-          explain: t`$z = (${l.toFixed(3)} - ${LAM.toFixed(3)})/${s.toFixed(3)} = ${ans.toFixed(2)}$. ${Math.abs(ans) < 2 ? 'Within 2σ — though a finite window tends to read about 10% low, and the correlated points make σ itself rough.' : 'Beyond 2σ: before blaming chaos, check the fit window and the encoder floor.'}`,
+          explain: t`$z = (${l.toFixed(3)} - ${LAM.toFixed(3)})/${s.toFixed(3)} = ${ans.toFixed(2)}$. ${Math.abs(ans) < 2 ? 'Within 2σ — though a finite window tends to read about 12% low, and the correlated points make σ itself rough.' : 'Beyond 2σ: before blaming chaos, check the fit window and the encoder floor.'}`,
         };
       },
     }),
     mcq({
       id: 'cp-correlated', difficulty: 3,
-      prompt: t`Over many runs, fits of this kind give $\chi^2/\nu$ around 0.6 on average, not 1. Which explanation fits best?`,
+      prompt: t`Over many runs, fits of this kind give $\chi^2/\nu$ around 0.8 on average, not 1. Which explanation fits best?`,
       visual: rigRaw('chaos', { seed: 9, params: { ens: 9 } }, 'The 20 pairs behind every averaged point: each point is the same pairs one drive period later.'),
       choices: [
         'Successive points are made from the same pairs, so their errors are correlated; the χ² formula assumes independent points, and neither χ² nor the slope’s σ can be taken at face value',

@@ -49,7 +49,7 @@ export default lesson({
     title: 'The bench: Balmer lines through a grating',
     lead: t`Choose a line and take a reading: the telescope is set on it on both sides, and half the difference of the two vernier readings is its angle $\theta$. The lower plot shows $1/\lambda$ (vacuum) against $1/4 - 1/n^2$ with the weighted line; the readout gives $R_H$ as the slope and the intercept, which Bohr’s formula says is zero.`,
     tasks: [
-      'Switch on “Use the label’s 600 lines/mm”: every wavelength scales by 0.5% and so does R — the line is still straight and through the origin, but the result is now about 3σ low.',
+      'Switch on “Use the label’s 600 lines/mm”: every wavelength scales by 0.5% and so does R — the line is still straight and through the origin, but R drops by about 3σ.',
       'Switch off the air-to-vacuum conversion: R moves by 0.028%, a sixth of its σ. Worth doing, not worth worrying about here.',
       'Run the series a few times: the intercept scatters about zero, as it should.',
     ],
@@ -196,7 +196,7 @@ Find $R_H$ with its uncertainty and compare it with the CODATA-based $1.096\,776
       ],
       answer: 0,
       why: {
-        1: 'Bohr’s formula is confirmed to parts in 10⁶ by far better spectroscopy; a lab-bench intercept is not evidence against it.',
+        1: 'Bohr’s formula holds to a few parts in 10⁵ (fine structure is the next correction), far beyond what this bench can test; a lab-bench intercept is not evidence against it.',
         2: 'A spacing error multiplies every 1/λ by the same factor: it changes the slope and keeps the intercept at zero.',
         3: 'The conversion multiplies every λ by the same 1.000 277: again only the slope changes.',
       },

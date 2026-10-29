@@ -123,9 +123,10 @@ The **slope** $m$ is the rise per unit run; it is the same between any two point
         const [mn, md] = r.pick([[2, 1], [-3, 1], [1, 2], [-1, 2], [2, 3], [-3, 4], [3, 2]]), m = mn / md;
         const P = [r.intExcept(-3, 3, [0]), r.intExcept(-3, 3, [0])], mT = frac(m), b = P[1] - m * P[0];
         const end = [P[0] + md, P[1] + mn];
+        const bT = Math.abs(b) < 1e-9 ? t`y = ${mT}x` : t`y = ${mT}x ${b < 0 ? '-' : '+'} ${frac(Math.abs(b))}`;
         return {
           prompt: t`Write the equation of the line through $${ptTeX(P)}$ with slope $${mT}$.`,
-          answer: `y = ${N(m)}*(x - (${P[0]})) + (${P[1]})`, answerTeX: t`y = ${mT}x ${b < 0 ? '-' : '+'} ${frac(Math.abs(b))}`, mode: 'equation',
+          answer: `y = ${N(m)}*(x - (${P[0]})) + (${P[1]})`, answerTeX: bT, mode: 'equation',
           vars: { x: [-5, 5], y: [-5, 5] },
           errors: [
             { answer: `y = ${N(m)}*(x + (${P[0]})) + (${P[1]})`, feedback: t`The shift has the wrong sign: through $(x_1, y_1)$ the line is $y - y_1 = m(x - x_1)$, so $x_1 = ${P[0]}$ enters as $x - (${P[0]})$.` },
@@ -133,7 +134,7 @@ The **slope** $m$ is the rise per unit run; it is the same between any two point
           ],
           hints: [t`Point–slope form: $y - y_1 = m(x - x_1)$.`, t`$y - (${P[1]}) = ${mT}\,(x - (${P[0]}))$ — now tidy it up, or type it as it is.`],
           teach: t`A point and a slope fix a line: $y - y_1 = m(x - x_1)$.`,
-          explain: t`$y - (${P[1]}) = ${mT}(x - (${P[0]}))$, so $y = ${mT}x ${b < 0 ? '-' : '+'} ${frac(Math.abs(b))}$. Check: at $x = ${P[0]}$ this gives $y = ${P[1]}$ ✓.`,
+          explain: t`$y - (${P[1]}) = ${mT}(x - (${P[0]}))$, so $${bT}$. Check: at $x = ${P[0]}$ this gives $y = ${P[1]}$ ✓.`,
           visual: plane({ ...fit([P, end], 1.8), curves: [seg(P, [end[0], P[1]], { color: 'accent2', width: 2, dash: true }), seg([end[0], P[1]], end, { color: 'warn', width: 2, dash: true })], points: [dot(P, ptText(P), { labelDx: -8, labelAlign: 'right' }), note([P[0] + md / 2, P[1]], `run ${md}`, { color: 'accent2', labelDy: mn > 0 ? 13 : -13 }), note([end[0], P[1] + mn / 2], `rise ${lab(mn)}`, { color: 'warn', labelAlign: 'left', labelDx: 8 })], caption: t`The point, and one slope triangle from it: run $${md}$, rise $${mn}$.` }),
         };
       },

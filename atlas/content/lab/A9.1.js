@@ -143,7 +143,7 @@ indistinguishable from a real signal at $f_a$. No processing after sampling can 
         const f = fc * ratio;
         const ans = 10 * Math.log10(1 + ratio ** (2 * n));
         return {
-          prompt: t`An ${n}-pole Butterworth anti-alias filter has its corner at $${fc}$ kHz. By how many decibels does it attenuate a component at $${f}$ kHz? ($|H| = 1/\sqrt{1 + (f/f_c)^{2n}}$.)`,
+          prompt: t`${n === 8 ? 'An' : 'A'} ${n}-pole Butterworth anti-alias filter has its corner at $${fc}$ kHz. By how many decibels does it attenuate a component at $${f}$ kHz? ($|H| = 1/\sqrt{1 + (f/f_c)^{2n}}$.)`,
           visual: { type: 'graph', params: { aspect: 'wide', x: [-1, 1], y: [-100, 5], xlog: true, xlabel: 'f / fc', ylabel: 'gain (dB)', axesAt: 'edge', curves: [{ fn: `-10*log10(1 + (10^x)^(${2 * n}))`, color: 'accent' }], vlines: [{ x: r6(Math.log10(ratio)), color: 'warn' }] }, caption: `The filter’s gain against frequency (relative to its corner).` },
           answer: ans, units: 'dB', tol: { rel: 0.01 },
           errors: [{ value: 10 * Math.log10(1 + ratio ** n), feedback: t`The power response has $(f/f_c)^{2n}$, not $(f/f_c)^n$.` }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),

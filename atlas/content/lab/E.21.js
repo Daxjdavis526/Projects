@@ -51,7 +51,7 @@ export default lesson({
       'Switch Plot to the exponential-plus-background fit: it finds the background itself from the tail, at the cost of a larger σ on the half-life.',
       'Clear the table and record a few bins at a time: the half-life’s σ shrinks fastest while the counts are high.',
     ],
-    params: { exp: 'decay', seed: 2, expected: true },
+    params: { exp: 'decay', seed: 26, expected: true },
     caption: t`Simulated counts: 120 counts/s from the sample at $t = 0$, $T_{1/2} = 2.552$ min, a true background of 0.60 counts/s (351 counts were seen in the 10-minute background run), every bin a Poisson draw; dead time neglected at these rates. Dashed green: the line the NNDC half-life predicts. ${SIMNOTE}`,
   },
   example: {
@@ -131,7 +131,7 @@ Find the half-life with its uncertainty and compare it with NNDC’s 2.552 min.`
     mcq({
       id: 'no-bg', difficulty: 3,
       prompt: t`A student fits $\ln N$ against $t$ without subtracting the background. The late points sit above the line and the half-life comes out at 2.63 min. Why long?`,
-      visual: rigPlot('decay', { seed: 5, flags: { bg: false }, expected: true }, t`$\ln N$ with no background subtracted, the fit (gold) and the NNDC line (dashed). ${SIMNOTE}`),
+      visual: rigPlot('decay', { seed: 9, flags: { bg: false }, expected: true }, t`$\ln N$ with no background subtracted, the fit (gold) and the NNDC line (dashed). ${SIMNOTE}`),
       choices: [
         t`The constant background is a growing fraction of the late counts; $\ln N$ levels off toward $\ln B$ instead of falling, the line flattens, and $\lambda$ comes out small`,
         'The detector’s efficiency drifts down during the run',

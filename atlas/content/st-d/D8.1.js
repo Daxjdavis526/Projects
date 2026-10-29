@@ -96,7 +96,7 @@ $$f(z) = \underbrace{\cdots + \frac{a_{-2}}{(z - a)^2} + \frac{a_{-1}}{z - a}}_{
           prompt: t`What is the order of the pole of $${fT}$ at $z = 0$?`,
           visual: colour(src, { marks: at0() }, t`The colour picture near $0$: count how many times the colours circle the origin.`),
           answer: m, tol: { rel: 0, abs: 0.4 },
-          errors: [{ value: m + 1, feedback: t`The numerator vanishes at $0$ too: subtract its zero’s order from the denominator’s.` }],
+          errors: src.startsWith('1/') || src.startsWith('(z - 2)') ? [] : [{ value: m + 1, feedback: t`The numerator vanishes at $0$ too: subtract its zero’s order from the denominator’s.` }],
           hints: [t`Write numerator and denominator as $z^k\times$(something non-zero at $0$).`, t`Order of the pole = (order of the zero of the denominator) − (order of the zero of the numerator).`],
           teach: t`At a quotient $g/h$, a pole’s order is the order of $h$’s zero minus the order of $g$’s.`,
           explain: t`The pole has order $${m}$: the lowest power in the Laurent series is $z^{-${m}}$, and the colours circle $0$ ${m} times.`,

@@ -126,7 +126,7 @@ export default lesson({
       { label: 'LEP', text: t`$\gamma = E/m_ec^2 = ${tex(EX.ge, 3)}$, so $U \approx ${nice(sf(EX.Ue / 1e9, 3))}$ GeV per turn — over 3% of the beam’s energy, put back each turn by radio-frequency cavities.` },
       { label: 'LHC', text: t`$\gamma = E/m_pc^2 = ${nice(sf(EX.gp, 4))}$, so $U \approx ${nice(sf(EX.Up / 1e3, 2))}$ keV per turn — a billionth of the beam’s energy.` },
       { label: 'Why so different', text: t`At the same energy and radius $U \propto (E/mc^2)^4$, and $(m_p/m_e)^4 \approx ${tex((MPC2 / MEC2) ** 4, 2)}$. That is why a collider for the highest energies uses protons, and why a future electron collider is either much bigger or straight.` },
-      { label: 'Sense check', text: t`Both are $e^2/3\varepsilon_0\rho = ${tex(QE / (3 * EPS0 * RHO.lep), 3)}$ eV times $\gamma^4$ — a tiny number times a huge one, as it must be for a 3 km bend.` },
+      { label: 'Sense check', text: t`Both are $e^2/3\varepsilon_0\rho \approx 2\times10^{-12}$ eV ($${tex(QE / (3 * EPS0 * RHO.lep), 3)}$ eV for LEP’s bends, $${tex(QE / (3 * EPS0 * RHO.lhc), 3)}$ eV for the LHC’s) times $\gamma^4$ — a tiny number times a huge one, as it must be for a 3 km bend.` },
     ],
     answer: t`LEP: about ${nice(sf(EX.Ue / 1e9, 2))} GeV per electron per turn; the LHC: about ${nice(sf(EX.Up / 1e3, 2))} keV per proton per turn.`,
   },

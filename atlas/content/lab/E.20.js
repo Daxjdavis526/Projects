@@ -19,6 +19,7 @@ const EX = M.run('cutback', { seed: 4, flags: { clad: false } });
 const EXa = EX.results[0], EXp = EX.results[1];
 const loss50 = -EX.fit.b * 50;
 const runCut = (seed, flags = {}) => M.run('cutback', { seed, flags });
+const CL = runCut(7);                          // the cladding-light question's run
 
 export default lesson({
   id: 'lab.E.20',
@@ -143,7 +144,7 @@ Find $\alpha$ and the launched power, each with its uncertainty, and compare $\a
     }),
     mcq({
       id: 'cladding', difficulty: 3,
-      prompt: t`Without a mode stripper, the shortest lengths read above the fitted line, the residuals curl upward at the left, and $\chi^2/\nu$ is about 6. What is going on, and which way is $\alpha$ biased?`,
+      prompt: t`Without a mode stripper, the shortest lengths read above the fitted line, the residuals curl upward at the left, and $\chi^2/\nu$ is about ${Math.round(CL.fit.chi2r)}. What is going on, and which way is $\alpha$ biased?`,
       visual: rigPlot('cutback', { seed: 7, expected: true }, t`A cut-back with no mode stripper: data, fit (gold), the line without cladding light (dashed) and residuals. ${SIMNOTE}`),
       choices: [
         'Light launched into the cladding still reaches the meter through short fibres but leaks away over a few metres; the extra power at the left steepens the line, so α comes out too high',

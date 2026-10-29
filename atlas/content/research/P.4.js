@@ -263,11 +263,11 @@ print(per, gr_advance)
         const ans = dphi * perYear * ARC * 1000;                        // milliarcseconds per year
         return {
           prompt: t`The same relativistic term turns the orbit of ${name} around Earth ($GM_\oplus = 3.986\times10^{14}\ \text{m}^3\text{s}^{-2}$, Earth’s radius 6378 km, nearly circular orbit, so take $e = 0$). Using $\Delta\phi = 6\pi GM/(c^2 a)$ per orbit, how many **milliarcseconds per year** does its perigee advance?`,
-          visual: orbitPic('An exaggerated precessing orbit. Around Earth the effect is milliarcseconds per year.', 0.006),
+          visual: orbitPic('An exaggerated precessing orbit. Around Earth the effect is a few hundred to a few thousand milliarcseconds per year.', 0.006),
           answer: ans, units: 'mas', tol: { rel: 0.01 },
           errors: [{ value: dphi * ARC * 1000, feedback: 'That is per orbit; multiply by the number of orbits in a year.' }, { value: 6 * Math.PI * GME / (CSI * CSI * h) * perYear * ARC * 1000, feedback: 'a is measured from Earth’s centre: add Earth’s radius to the altitude.' }],
           hints: [t`$a = 6378\ \text{km} + $ altitude; the period is $2\pi\sqrt{a^3/GM}$.`, t`Per year: $\Delta\phi \times (365.25\ \text{days} / \text{period})$, then convert radians to milliarcseconds ($\times 2.063\times10^{8}$).`],
-          teach: 'One formula, two scales: what takes a century to reach 43″ for Mercury is milliarcseconds per year for an Earth satellite.',
+          teach: 'One formula, two scales: Mercury’s perihelion gains 43″ a century, while a close Earth satellite’s perigee gains arcseconds a year — Earth’s weaker pull is outweighed by the far smaller orbit and thousands of orbits a year.',
           explain: t`$a = ${(aS / 1e3).toFixed(0)}$ km, $\Delta\phi = ${sci(dphi, 3)}$ rad per orbit, ${perYear.toFixed(0)} orbits a year: $${ans.toFixed(0)}$ mas per year. Laser ranging to the LAGEOS satellites has measured perigee advances of this kind.`,
         };
       },

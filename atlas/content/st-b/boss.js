@@ -154,14 +154,14 @@ export default boss({
             const op = `${term(C.A, 'u_{xx}', true)}${term(C.B, 'u_{xy}')}${term(C.C, 'u_{yy}')}`;
             const choices = ['hyperbolic everywhere', 'parabolic everywhere', 'elliptic everywhere', 'hyperbolic in some regions of the plane and elliptic in others'];
             const why = {};
-            for (let i = 0; i < 3; i++) if (i !== C.type) why[i] = t`$B^2 - 4AC = ${C.B}^2 - 4(${C.A})(${C.C}) = ${C.disc}$, which is ${C.disc > 0 ? 'positive' : C.disc < 0 ? 'negative' : 'zero'}: ${TYPES[C.type]}, not ${TYPES[i]}.`;
+            for (let i = 0; i < 3; i++) if (i !== C.type) why[i] = t`$B^2 - 4AC = (${C.B})^2 - 4(${C.A})(${C.C}) = ${C.disc}$, which is ${C.disc > 0 ? 'positive' : C.disc < 0 ? 'negative' : 'zero'}: ${TYPES[C.type]}, not ${TYPES[i]}.`;
             why[3] = 'The coefficients are constants, so the discriminant — and the type — is the same at every point. Type changes need variable coefficients, as in the Tricomi equation.';
             return {
               prompt: t`One of the solver’s test equations is $${op} + u_x - 3u = 0$, with constant coefficients. What is its type?`,
               choices, answer: C.type, why,
               hints: [t`Only the second-order part matters: $A = ${C.A}$, $B = ${C.B}$, $C = ${C.C}$.`, t`Compute $B^2 - 4AC$: positive is hyperbolic, zero parabolic, negative elliptic.`],
               teach: 'The sign of B² − 4AC decides the type; lower-order terms do not matter.',
-              explain: t`$B^2 - 4AC = ${C.B * C.B} - ${4 * C.A * C.C} = ${C.disc}$: **${TYPES[C.type]}**. ${C.type === 0 ? 'Two families of characteristics: an initial-value problem in a time-like direction is the right question.' : C.type === 1 ? 'One family of characteristics, like the heat equation.' : 'No real characteristics: like Laplace’s equation, it wants boundary values all round, not initial data.'}`,
+              explain: t`$B^2 - 4AC = ${C.B * C.B} ${4 * C.A * C.C < 0 ? '+' : '-'} ${Math.abs(4 * C.A * C.C)} = ${C.disc}$: **${TYPES[C.type]}**. ${C.type === 0 ? 'Two families of characteristics: an initial-value problem in a time-like direction is the right question.' : C.type === 1 ? 'One family of characteristics, like the heat equation.' : 'No real characteristics: like Laplace’s equation, it wants boundary values all round, not initial data.'}`,
               visual: { type: 'graph', params: { x: [-6, 6], y: [-20, 40], aspect: 'wide', axesAt: 'edge', xlabel: 'B', ylabel: '4AC', curves: [{ fn: 'x^2', color: 'gold', width: 2.2 }], shade: [{ fn: '40', lower: 'x^2', from: -6, to: 6, color: 'accent', alpha: 0.12 }, { fn: 'x^2', lower: '-20', from: -6, to: 6, color: 'warn', alpha: 0.12 }], points: [{ x: -5.6, y: 33, r: 0, label: 'elliptic: B² < 4AC', color: 'accent' }, { x: -5.6, y: -14, r: 0, label: 'hyperbolic: B² > 4AC', color: 'warn' }, { x: 2.3, y: 12, r: 0, label: 'parabolic', color: 'gold' }] }, caption: 'The three types in the plane of B against 4AC: the gold parabola B² = 4AC is the parabolic boundary. Place the equation yourself.' },
             };
           },

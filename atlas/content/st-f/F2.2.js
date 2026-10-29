@@ -102,7 +102,7 @@ A **backward-stable** algorithm returns the exact answer to an input perturbed b
       },
       choices: [
         t`A change of $10^{-10}$ in the constant term of $(x - 1)^2$ moves its roots by $10^{-5}$`,
-        t`The textbook quadratic formula loses half the digits of the small root of $x^2 + 10^8x + 1$`,
+        t`The textbook quadratic formula gets the small root of $x^2 + 10^8x + 1$ wrong by 25%`,
         t`The recursion $I_n = 1 - nI_{n-1}$ returns negative values`,
         'Gaussian elimination without row swaps divides by zero on a matrix whose first entry is 0',
       ],
@@ -335,7 +335,7 @@ for n in [5, 10, 15, 20]:
     }),
     mcq({
       id: 'cp-bessel', difficulty: 3,
-      prompt: t`The diffraction pattern of a circular aperture needs the Bessel functions $J_n(1)$. A code builds them from $J_0(1)$ and $J_1(1)$ with the exact identity $J_{n+1}(x) = \frac{2n}{x}J_n(x) - J_{n-1}(x)$. It matches tables to 15 digits at $n = 2$, but by $n = 10$ it returns $-6.9\times10^{-9}$ for the true $2.6\times10^{-10}$. What is going on, and what is the fix?`,
+      prompt: t`The diffraction pattern of a circular aperture needs the Bessel functions $J_n(1)$. A code builds them from $J_0(1)$ and $J_1(1)$ with the exact identity $J_{n+1}(x) = \frac{2n}{x}J_n(x) - J_{n-1}(x)$. It matches tables to 15 digits at $n = 2$, but by $n = 10$ it returns $1.2\times10^{-9}$ for the true $2.6\times10^{-10}$ (starting from correctly rounded $J_0(1)$ and $J_1(1)$; one ulp less in $J_1(1)$ gives $-6.9\times10^{-9}$). What is going on, and what is the fix?`,
       visual: {
         type: 'graph',
         params: { x: [-0.3, 12.3], y: [-13.5, 0.5], ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'n', ylabel: '|Jₙ(1)|',

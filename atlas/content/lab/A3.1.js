@@ -189,7 +189,7 @@ print(rho, s_rho)`,
       ],
       hints: ['Relative uncertainties: `s_m / m`, `2 * s_d / d` (d is squared), `s_h / h`.', 'Combine them with `np.sqrt` of the sum of squares, then multiply by `rho`.'],
       teach: 'Propagation for a power law is one line: the square root of the sum of (power × relative uncertainty)².',
-      explain: t`$\rho = 8.37\ \text{g/cm}^3$ (a typical brass) with $\sigma_\rho \approx 0.019\ \text{g/cm}^3$; the diameter supplies most of it.`,
+      explain: t`$\rho = 8.37\ \text{g/cm}^3$ (a typical brass) with $\sigma_\rho \approx 0.018\ \text{g/cm}^3$; the diameter supplies most of it.`,
     }),
   ],
   checkpoint: [

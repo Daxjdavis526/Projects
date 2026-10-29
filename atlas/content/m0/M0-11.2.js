@@ -36,7 +36,7 @@ For the ellipse $a$ is the **semi-major** axis (the long half), $b$ the semi-min
     title: 'Two foci, one fixed total',
     lead: t`Slide $P$ round the curve and watch the distances to the two foci (orange and blue). On the ellipse their **sum** never changes; switch to the hyperbola and their **difference** never changes. Both equal $2a$.`,
     tasks: [
-      t`Ellipse, $a = 5$, $b = 4$: the foci sit at $\pm 3$, and $PF_1 + PF_2 = 10$ wherever $P$ is.`,
+      t`Ellipse, $a = 2.5$, $b = 2$: the foci sit at $\pm 1.5$, and $PF_1 + PF_2 = 5$ wherever $P$ is.`,
       t`Shrink $b$ toward $0.5$: the foci slide out toward the ends, and the ellipse flattens.`,
       t`Switch to the hyperbola: now $|PF_1 - PF_2| = 2a$, the foci are outside the vertices at $\pm\sqrt{a^2 + b^2}$, and the dashed asymptotes have slope $\pm b/a$.`,
     ],
@@ -191,7 +191,7 @@ For the ellipse $a$ is the **semi-major** axis (the long half), $b$ the semi-min
         return {
           prompt: t`A spacecraft flies past a planet on the right branch of $\dfrac{x^2}{${a * a}} - \dfrac{y^2}{${b * b}} = 1$ (in thousands of km), with the planet at the focus $(${sig(c, 3)},\ 0)$. Far away it travels along the asymptotes: it arrives along one and leaves along the other. Through what angle does the flyby turn its direction of travel, in degrees?`,
           answer: ans, units: 'deg', tol: { rel: 0, abs: 0.5 },
-          errors: [{ value: 2 * phi, feedback: t`$2\tan^{-1}(b/a)$ is the angle between the asymptotes measured across the $y$-axis side. The craft comes in along one and leaves along the other, turning through $180^\circ$ minus that.` }, { value: 180 - 2 * deg(Math.atan(a / b)), feedback: t`$a$ and $b$ swapped: the asymptotes have slope $\pm b/a = \pm ${b}/${a}$.` }, { value: phi, feedback: t`That is one asymptote’s angle to the axis. The turn involves both.` }].filter((e) => Math.abs(e.value - ans) > 0.5),
+          errors: [{ value: 2 * phi, feedback: t`$2\tan^{-1}(b/a)$ is the angle between the asymptotes across the $x$-axis — the wedge the branch sits in. The craft comes in along one and leaves along the other, turning through $180^\circ$ minus that.` }, { value: 180 - 2 * deg(Math.atan(a / b)), feedback: t`$a$ and $b$ swapped: the asymptotes have slope $\pm b/a = \pm ${b}/${a}$.` }, { value: phi, feedback: t`That is one asymptote’s angle to the axis. The turn involves both.` }].filter((e) => Math.abs(e.value - ans) > 0.5),
           hints: [t`The asymptotes make angles $\pm\varphi$ with the $x$-axis, $\varphi = \tan^{-1}(b/a)$.`, t`Incoming along one asymptote toward the planet, outgoing along the other away from it: the direction turns by $180^\circ - 2\varphi$.`],
           teach: t`A hyperbolic flyby bends the path by $180^\circ - 2\tan^{-1}(b/a)$: a small $b/a$ (slow, close pass) turns it most.`,
           explain: t`$\varphi = \tan^{-1}(${b}/${a}) = ${sig(phi, 4)}^\circ$, so the turn is $180^\circ - 2(${sig(phi, 4)}^\circ) = ${sig(ans, 4)}^\circ$. Gravity assists use exactly this bend to redirect a spacecraft without fuel.`,

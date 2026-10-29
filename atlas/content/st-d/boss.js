@@ -156,12 +156,12 @@ export default boss({
               answer: key, units: 'rad/s', tol: { rel: 0.005 },
               errors: apart([
                 { value: PI / (a * b * (a + b)), feedback: t`$|H|^2 = \dfrac{a^2b^2}{(\omega^2 + a^2)(\omega^2 + b^2)}$: keep the $a^2b^2$ on top.` },
-                { value: (a * b) / (2 * (a + b)), feedback: t`That is the noise bandwidth in hertz-like units, divided by $2\pi$. The question asks for the integral itself.` },
+                { value: (a * b) / (2 * (a + b)), feedback: t`That is the integral divided by $2\pi$ — an integral over frequency in hertz. The question asks for $\int|H|^2\,d\omega$ itself.` },
                 { value: (PI * a * a) / (a + b), feedback: 'Both poles contribute; recheck the residues at ia and ib.' },
               ], key),
               hints: [t`$|H|^2 = \dfrac{a^2b^2}{(\omega^2 + a^2)(\omega^2 + b^2)}$: poles at $\pm ia$, $\pm ib$.`, t`D9.1: $\displaystyle\int\frac{d\omega}{(\omega^2 + a^2)(\omega^2 + b^2)} = \frac{\pi}{ab(a + b)}$.`, t`Multiply by $a^2b^2$.`],
               teach: t`$\int|H|^2d\omega$ for a two-pole filter is $\pi ab/(a + b)$: a sum of two upper-half-plane residues.`,
-              explain: t`$a^2b^2\cdot\dfrac{\pi}{ab(a + b)} = \dfrac{\pi ab}{a + b} = \dfrac{\pi\times${a * b}}{${a + b}} = ${nm(key, 4)}$ rad/s. Dividing by $2\pi$ gives the filter’s equivalent noise bandwidth, $${nm(key / (2 * PI), 3)}$ Hz.`,
+              explain: t`$a^2b^2\cdot\dfrac{\pi}{ab(a + b)} = \dfrac{\pi ab}{a + b} = \dfrac{\pi\times${a * b}}{${a + b}} = ${nm(key, 4)}$ rad/s. Dividing by $4\pi$ (half the line, and hertz instead of rad/s) gives the filter’s equivalent noise bandwidth, $${nm(key / (4 * PI), 3)}$ Hz.`,
             };
           },
         }),
@@ -177,7 +177,7 @@ export default boss({
             const C = periodCase(r), { e, key } = C;
             return {
               prompt: t`HALCYON’s orbit is $r = p/(1 + e\cos\theta)$ with eccentricity $e = ${e}$. Its period is $T = \dfrac{p^2}{h}\displaystyle\int_0^{2\pi}\frac{d\theta}{(1 + e\cos\theta)^2}$, with $h$ the angular momentum per unit mass. Evaluate the integral.`,
-              visual: { type: 'graph', params: { x: [-(1 + e) / (1 - e) * 1.1 - 0.2, 1.6], y: [-1.15 / Math.sqrt(1 - e * e), 1.15 / Math.sqrt(1 - e * e)], equal: true, xlabel: '', ylabel: '', axesAt: 'edge', xticks: 0, yticks: 0, curves: [{ polar: `${r4(1 - e * e)}/(1 + ${e}*cos(theta))`, theta: [0, 2 * PI], color: 'accent', width: 2.4 }], points: [{ x: 0, y: 0, label: 'Saturn', color: 'gold', r: 6 }] }, caption: 'The orbit drawn with semi-major axis 1. Saturn (not to scale) sits at the focus.' },
+              visual: { type: 'graph', params: { x: [-(1 + e) - 0.25, 1 - e + 0.5], y: [-1.2 * Math.sqrt(1 - e * e), 1.2 * Math.sqrt(1 - e * e)], equal: true, xlabel: '', ylabel: '', axesAt: 'edge', xticks: 0, yticks: 0, curves: [{ polar: `${r4(1 - e * e)}/(1 + ${e}*cos(theta))`, theta: [0, 2 * PI], color: 'accent', width: 2.4 }], points: [{ x: 0, y: 0, label: 'Saturn', color: 'gold', r: 6 }] }, caption: 'The orbit drawn with semi-major axis 1. Saturn (not to scale) sits at the focus.' },
               answer: key, tol: { rel: 0.005 },
               errors: apart([
                 { value: (2 * PI) / Math.sqrt(1 - e * e), feedback: t`That is $\int d\theta/(1 + e\cos\theta)$. Squaring makes the inner pole double: its residue needs a derivative.` },

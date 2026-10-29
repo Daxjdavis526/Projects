@@ -77,7 +77,7 @@ Keyword searches trade one against the other. **Citation trails** escape the tra
 references(bibcode:2016ApJ...829...55W)
 \`\`\`
 
-This reaches the discovery (Hulse & Taylor 1975) and the first orbital-decay measurement (Taylor & Weisberg 1982).` },
+This reaches the discovery (Hulse & Taylor 1975) and the early orbital-decay measurements (Taylor, Fowler & McCulloch 1979; Taylor & Weisberg 1982).` },
       { label: 'Forward', text: t`Who built on it since?
 
 \`\`\`text

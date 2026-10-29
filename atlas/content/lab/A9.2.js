@@ -156,7 +156,7 @@ A full-scale sine then reaches at best $\text{SNR} = 6.02N + 1.76$ dB: each bit 
       why: { 1: 'Without noise every reading is the same code: averaging identical numbers gives the same number.', 2: 'The output is a constant: there is nothing for a filter to work on.', 3: 'With dither, the fraction of readings that round up encodes the sub-LSB value.' },
       hints: ['Averaging needs readings that differ. What would make them differ?', 'With noise of about 1 LSB, how often does a reading at 0.3 LSB round up to 1?'],
       teach: 'Noise of about an LSB (dither) lets averaging resolve below one LSB — quantization error becomes random and averages away.',
-      explain: t`With ~1 LSB of random noise added, a 0.3 LSB input rounds up about 30% of the time; the average of many codes recovers 0.3. Counter-intuitively, a little noise improves the measurement — which is why noisy sensors such as the star tracker’s pixel need no extra dither.`,
+      explain: t`With random noise of about an LSB added, the codes scatter over neighbouring values whose average recovers 0.3 — with rectangular dither exactly one LSB wide, precisely 30% of readings round up to 1. Counter-intuitively, a little noise improves the measurement — which is why noisy sensors such as the star tracker’s pixel need no extra dither.`,
     }),
     code({
       id: 'quant-np', difficulty: 2,

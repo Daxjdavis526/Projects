@@ -214,7 +214,7 @@ The fraction that is polarized, the **degree of polarization**, follows from the
           errors: [{ value: m, feedback: 'Only the polarized fraction of the light is affected: multiply by P.' }, { value: m * (1 - P), feedback: 'It is the polarized part, P, that the instrument responds to unevenly.' }],
           hints: [t`Model the response as $1 + m\cos 2(\theta - \theta_0)$ for polarized light and 1 for unpolarized.`, t`Only the fraction $P$ is polarized: error up to $\pm mP$.`],
           teach: 'A polarization sensitivity m turns a scene polarization P into a radiometric error up to mP.',
-          explain: t`$\pm${m}\%\times${P} = \pm${sf(err, 2)}\%$ — larger than many climate-quality accuracy budgets, which is why such instruments use depolarizers or measure the polarization and correct for it.`,
+          explain: t`$\pm${m}\%\times${P} = \pm${sf(err, 2)}\%$ — ${err >= 0.3 ? 'as large as or larger than' : 'a sizeable share of'} a climate-quality accuracy budget (a few tenths of a percent), which is why such instruments use depolarizers or measure the polarization and correct for it.`,
         };
       },
     }),

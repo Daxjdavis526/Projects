@@ -194,7 +194,7 @@ $|p|$ is the **focal length**; $p > 0$ opens upward, $p < 0$ downward (swap $x$ 
           prompt: t`Find the $y$-coordinate of the focus of $y = \dfrac{x^2 ${B < 0 ? '-' : '+'} ${Math.abs(B)}x ${C < 0 ? '-' : '+'} ${Math.abs(C)}}{${A}}$.`,
           answer: ans, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: k, feedback: t`That is the vertex’s height. The focus is $p = ${p}$ above it.` }, { value: k + A, feedback: t`$${A}$ is $4p$; the focus is $p = ${p}$ above the vertex.` }, { value: k - p, feedback: t`That is the directrix. The focus is on the inside of the curve, above the vertex for an upward parabola.` }].filter((e) => Math.abs(e.value - ans) > 0.01),
-          hints: [t`Complete the square in the numerator: $x^2 ${B < 0 ? '-' : '+'} ${Math.abs(B)}x = (x ${h < 0 ? '+' : '-'} ${Math.abs(h)})^2 - ${h * h}$.`, t`So $y = \dfrac{(x ${h < 0 ? '+' : '-'} ${Math.abs(h)})^2}{${A}} + ${frac(k)}$: vertex $(${h}, ${k})$, $4p = ${A}$.`],
+          hints: [t`Complete the square in the numerator: $x^2 ${B < 0 ? '-' : '+'} ${Math.abs(B)}x = (x ${h < 0 ? '+' : '-'} ${Math.abs(h)})^2 - ${h * h}$.`, t`So $y = \dfrac{(x ${h < 0 ? '+' : '-'} ${Math.abs(h)})^2}{${A}} ${k < 0 ? '-' : '+'} ${Math.abs(k)}$: vertex $(${h}, ${k})$, $4p = ${A}$.`],
           teach: t`Complete the square to reach vertex form; then the focus is $p$ above the vertex.`,
           explain: t`$y - (${k}) = \tfrac{1}{${A}}(x ${h < 0 ? '+' : '-'} ${Math.abs(h)})^2$: vertex $(${h}, ${k})$, $p = ${p}$, focus $(${h}, ${ans})$.`,
           visual: parabPic({ h, k, p, xr: 4, focus: false, directrix: false, ticks: false, caption: t`The parabola (axis numbers hidden).` }),

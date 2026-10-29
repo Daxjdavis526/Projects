@@ -40,7 +40,7 @@ It is an inner product in the sense of [normed and inner-product spaces](#/lesso
     tasks: [
       t`Slide the template to $30\ M_\odot$: a spike near $\rho \approx 8$ stands out of a noise floor near $1$ — although you cannot see the signal in the top panel at all. Turn on “Reveal” to check.`,
       t`Set the signal to $0.3\sigma$: the spike sinks into the noise peaks. Then press “New noise” a few times: the noise peaks wander, the real spike stays put.`,
-      t`Compare $15$ and $60\ M_\odot$ templates: the light chirp lasts $0.8\ \text{s}$ and $75$ cycles, the heavy one $0.08\ \text{s}$ and $4$. More cycles, more SNR from the same peak amplitude.`,
+      t`Compare $15$ and $60\ M_\odot$ templates: the light chirp lasts $0.8\ \text{s}$ and $38$ cycles, the heavy one $0.08\ \text{s}$ and $4$. More cycles, more SNR from the same peak amplitude.`,
     ],
     params: { Mc: 30, tpl: 24, amp: 1, seed: 2, panels: ['data', 'snr', 'scan'] },
   },

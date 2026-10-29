@@ -115,7 +115,7 @@ so the largest entry dominates. [Writing a lab report and abstract](#/lesson/lab
       why: { 1: t`Even a perfect stellar radius leaves $\sqrt{3.2^2 + 1.0^2} = 3.35\%$.`, 2: t`Removing it entirely leaves $\sqrt{3.2^2 + 0.8^2} = 3.30\%$.`, 3: 'Maybe — but the question is where the month helps most, and the budget answers it.' },
       hints: ['The total is the square root of the sum of squares. Which term, halved, moves it most?'],
       teach: 'The budget tells you where effort pays: shrink the largest term first.',
-      explain: t`Halving the transit-depth term takes the total from $${Math.hypot(3.2, 0.8, 1).toFixed(2)}\%$ to $${Math.hypot(1.6, 0.8, 1).toFixed(2)}\%$; halving either other term changes the second decimal. Since the statistical error falls as $1/\sqrt{N}$, four times as many transits halve it.`,
+      explain: t`Halving the transit-depth term takes the total from $${Math.hypot(3.2, 0.8, 1).toFixed(2)}\%$ to $${Math.hypot(1.6, 0.8, 1).toFixed(2)}\%$; halving either other term trims it by only about a tenth of a percentage point (to $${Math.hypot(3.2, 0.4, 1).toFixed(2)}\%$ or $${Math.hypot(3.2, 0.8, 0.5).toFixed(2)}\%$). Since the statistical error falls as $1/\sqrt{N}$, four times as many transits halve it.`,
     }),
     order({
       id: 'sections', difficulty: 1,

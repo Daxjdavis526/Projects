@@ -149,7 +149,7 @@ Every $\tau$ the quantity falls to $1/e \approx 37\%$; every half-life $t_{1/2} 
         return {
           prompt: t`A population doubles every $${T}$ hours: $N = N_0 \cdot 2^{t/${T}}$. Write it as $N_0\,e^{kt}$. What is the growth rate $k$, per hour?`,
           answer: ans, units: 'h^-1', tol: { rel: 0.005 },
-          errors: [{ value: T * LN2, feedback: t`$2^{t/${T}} = e^{(t/${T})\ln 2}$, so $k = \ln 2 / ${T}$, not $${T}\ln 2$.` }, { value: 1 / T, feedback: t`$2^{t/${T}}$ is not $e^{t/${T}}$: changing the base from $2$ to $e$ brings in a factor $\ln 2$.` }, { value: 1 / (T * LN2), feedback: t`That is the time constant’s reciprocal upside down: $k = \ln 2 / ${T}$.` }],
+          errors: [{ value: T * LN2, feedback: t`$2^{t/${T}} = e^{(t/${T})\ln 2}$, so $k = \ln 2 / ${T}$, not $${T}\ln 2$.` }, { value: 1 / T, feedback: t`$2^{t/${T}}$ is not $e^{t/${T}}$: changing the base from $2$ to $e$ brings in a factor $\ln 2$.` }, { value: 1 / (T * LN2), feedback: t`You divided by $\ln 2$ instead of multiplying by it: $2^{t/${T}} = e^{t\ln 2/${T}}$, so $k = \ln 2 / ${T}$.` }],
           hints: [t`$2 = e^{\ln 2}$, so $2^{t/${T}} = e^{(\ln 2)\,t/${T}}$.`, t`Read off $k$ as the coefficient of $t$ in the exponent.`],
           teach: t`Any exponential converts to base $e$: $b^{x} = e^{x\ln b}$.`,
           explain: t`$2^{t/${T}} = e^{t\ln 2/${T}}$, so $k = \dfrac{\ln 2}{${T}} = ${nice(sig(ans, 3))}$ per hour. Conversely the doubling time is $\ln 2/k$.`,

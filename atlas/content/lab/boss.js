@@ -15,10 +15,10 @@ const GLOC = 9.7998;                 // m/s²: the local g (illustrative value, 
 const LS = [0.20, 0.40, 0.60, 0.80, 1.00, 1.20];
 const ST = 0.004;                    // s: σ of each period (100 swings timed)
 
-/** A seeded data set: periods at six lengths, the T² line fit and the blinding offset. */
-function dataset(seed) {
+/** A seeded data set: periods at six lengths (true length L + dL), the T² line fit and the blinding offset. */
+function dataset(seed, dL = 0) {
   const z = normals(seed);
-  const T = LS.map((L) => +(2 * Math.PI * Math.sqrt(L / GLOC) + ST * z()).toFixed(4));
+  const T = LS.map((L) => +(2 * Math.PI * Math.sqrt((L + dL) / GLOC) + ST * z()).toFixed(4));
   const T2 = T.map((v) => v * v), s2 = T.map((v) => 2 * v * ST);
   const fit = linfit(LS, T2, s2);
   const raw = linfit(LS, T, ST);                      // the naive straight line through T itself
@@ -26,6 +26,8 @@ function dataset(seed) {
   return { T, T2, s2, fit, raw, blind };
 }
 const gOf = (b) => (4 * Math.PI ** 2) / b;
+// the intercept question: lengths read to the top of a bob 12 mm across, so the true length is L + 6 mm
+const IC = dataset(33, 0.006), dIC = (IC.fit.a * GLOC) / (4 * Math.PI ** 2);
 
 export default boss({
   title: 'The Blind Analysis',
@@ -188,8 +190,8 @@ export default boss({
         }),
         mcq({
           id: 'r3-intercept', skill: 'lab.E.25', difficulty: 3,
-          prompt: t`The fit’s intercept is $-0.012 \pm 0.004\ \text{s}^2$, three σ from zero. The lengths were measured from the pivot to the *top* of the bob. What is the most likely reading of this?`,
-          visual: (() => { const D = dataset(6); return { type: 'graph', params: dataGraph({ xs: LS, ys: D.T2, sy: D.s2, fit: { a: D.fit.a, b: D.fit.b }, xlabel: 'L (m)', ylabel: 'T² (s²)', x: [0, 1.3] }), caption: 'The line extended back toward L = 0.' }; })(),
+          prompt: t`The fit’s intercept is $+${IC.fit.a.toFixed(3)} \pm ${IC.fit.sa.toFixed(3)}\ \text{s}^2$, ${(IC.fit.a / IC.fit.sa).toFixed(1)}σ from zero. The lengths were measured from the pivot to the *top* of the bob. What is the most likely reading of this?`,
+          visual: { type: 'graph', params: dataGraph({ xs: LS, ys: IC.T2, sy: IC.s2, fit: { a: IC.fit.a, b: IC.fit.b }, xlabel: 'L (m)', ylabel: 'T² (s²)', x: [0, 1.3] }), caption: 'The line extended back toward L = 0.' },
           choices: [
             t`The true pendulum length is $L + \delta$, with $\delta$ about the bob’s radius: $T^2 = (4\pi^2/g)(L + \delta)$ puts $4\pi^2\delta/g$ in the intercept and leaves the slope — and $g$ — unbiased`,
             t`$g$ is wrong by 3σ and the run must be discarded`,
@@ -204,7 +206,7 @@ export default boss({
           },
           hints: [t`Write $T^2$ with the true length $L + \delta$.`, t`Which coefficient of the line does a constant $\delta$ change?`],
           teach: 'An unknown constant offset in the knob lands in the intercept: leave the intercept free and the slope stays honest.',
-          explain: t`$4\pi^2\delta/g = 0.012\ \text{s}^2$ gives $\delta = 0.012 \times 9.8/39.5 = 3.0$ mm: a bob 6 mm across measured to its top. The free intercept absorbed it — the same move as the end correction in the [speed of sound](#/lesson/lab.E.25).`,
+          explain: t`$4\pi^2\delta/g = ${IC.fit.a.toFixed(3)}\ \text{s}^2$ gives $\delta = ag/4\pi^2 = ${(1000 * dIC).toFixed(1)}$ mm: about the radius of a bob a centimetre or so across, measured to its top. The free intercept absorbed it — the same move as the end correction in the [speed of sound](#/lesson/lab.E.25).`,
         }),
       ],
     },

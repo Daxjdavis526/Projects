@@ -92,7 +92,7 @@ export function coaxCase(r) {
 }
 /** Recoil of a high-gain dish beaming P watts for T days from a craft of mass m: Δv = PT/mc. */
 export function recoilCase(r) {
-  const P = r.pick([5, 10, 20]), m = r.pick([12, 24, 50]), days = r.pick([30, 100, 365]);
+  const P = r.pick([5, 10, 20]), m = 24, days = r.pick([30, 100, 365]);
   return { P, m, days, F: P / C, dv: (P * days * 86400) / (m * C) };
 }
 function dishPic() {
@@ -414,7 +414,7 @@ export default boss({
               ], Cq.P / 1e-23),
               hints: [t`$\gamma = 1 + K/m_ec^2$, $v = c\sqrt{1 - 1/\gamma^2}$.`, t`$a = v\,eB/(\gamma m_e)$.`, t`$P = \dfrac{\mu_0e^2a^2}{6\pi c}\gamma^4$.`],
               teach: 'For circular motion Liénard’s formula is Larmor’s times γ⁴ — with the relativistic gyrofrequency eB/γm.',
-              explain: t`$\gamma = ${nice(sf(Cq.g, 4))}$, $v = ${nice(sf(Cq.v / C, 3))}c$, $a \approx ${tex(Cq.a, 3)}\ \text{m/s}^2$, so $P = \dfrac{\mu_0e^2a^2}{6\pi c}\gamma^4 \approx ${tex(Cq.P, 3)}$ W. At that rate the electron would take millions of years to radiate away its energy: in the belts, losses come from collisions and waves instead ([M5.3](#/lesson/phys4600.M5.3)).`,
+              explain: t`$\gamma = ${nice(sf(Cq.g, 4))}$, $v = ${nice(sf(Cq.v / C, 3))}c$, $a \approx ${tex(Cq.a, 3)}\ \text{m/s}^2$, so $P = \dfrac{\mu_0e^2a^2}{6\pi c}\gamma^4 \approx ${tex(Cq.P, 3)}$ W. At that rate it would take about ${nice(sf((Cq.K * 1.602176634e-13) / Cq.P / 3.156e7, 2))} years to radiate away its kinetic energy (longer still, since the power falls as it slows) — longer than most belt electrons survive: there, losses come from collisions and waves instead ([M5.3](#/lesson/phys4600.M5.3)).`,
               visual: beltPic(),
             };
           },

@@ -19,7 +19,7 @@ const GPS_GAIN_US = (GM_E / C ** 2) * (1 / R_E - 1 / R_GPS) * 86400 * 1e6;
 const GPS_SPEED_US = -(GM_E / R_GPS / (2 * C ** 2)) * 86400 * 1e6;    // −v²/2c² with v² = GM/r (Earth's rotation ignored)
 
 // nitrogen at 300 K
-const KB = 1.380649e-23, M_N2 = 28.0134 * 1.66053906660e-27;
+const KB = 1.380649e-23, M_N2 = 28.0134 * 1.66053906892e-27;   // u, CODATA 2022
 const V_MEAN = Math.sqrt((8 * KB * 300) / (Math.PI * M_N2));
 
 // the pendulum: exact T/T0 = (2/π) K(sin²(θ0/2))

@@ -74,7 +74,7 @@ export default lesson({
     num({
       id: 'lw-factor', difficulty: 2,
       gen(r) {
-        const b = r.pick([0.3, 0.5, 0.8, 0.9]), [dir, cth] = r.pick([['straight toward the field point', 1], ['straight away from it', -1], ['at 60° to the line joining it to the field point (heading toward that side)', 0.5]]);
+        const b = r.pick([0.3, 0.5, 0.8, 0.9]), [dir, cth] = r.pick([['straight toward the field point', 1], ['straight away from the field point', -1], ['at 60° to the line joining it to the field point (heading toward that side)', 0.5]]);
         const f = 1 / (1 - b * cth);
         return {
           prompt: t`At the retarded time a charge was moving at $${b}c$ ${dir}. By what factor is its Liénard–Wiechert potential larger than the Coulomb potential $q/4\pi\varepsilon_0R$ from its retarded position?`,
@@ -83,7 +83,7 @@ export default lesson({
           errors: [{ value: 1 / (1 + b * cth), feedback: t`$\hat R$ points from the charge toward the field point; moving toward the field point makes $\hat R\cdot\vec v$ **positive** and the factor larger than 1.` }, { value: gam(b), feedback: t`That is $\gamma$. The Liénard–Wiechert factor is $1/(1 - \hat R\cdot\vec v/c)$, set by the direction of motion relative to $\hat R$.` }].filter((e) => Math.abs(e.value - f) > 0.01 * f),
           hints: [t`$\dfrac{V}{q/4\pi\varepsilon_0R} = \dfrac{1}{1 - \hat R\cdot\vec v/c}$.`, t`$\hat R\cdot\vec v/c = \beta\cos\theta$ with $\theta$ the angle between the velocity and $\hat R$.`],
           teach: 'The Liénard–Wiechert factor 1/(1 − R̂·v/c) boosts a source coming toward you and weakens one going away.',
-          explain: t`$\hat R\cdot\vec v/c = ${b} \times ${cth}$, so the factor is $1/(1 - ${nice(b * cth)}) = ${nice(sf(f, 4))}$.`,
+          explain: t`$\hat R\cdot\vec v/c = ${b} \times ${cth < 0 ? `(${cth})` : cth}$, so the factor is $1/(1 ${b * cth < 0 ? '+' : '-'} ${nice(Math.abs(b * cth))}) = ${nice(sf(f, 4))}$.`,
         };
       },
     }),

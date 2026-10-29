@@ -45,7 +45,7 @@ export default lesson({
     title: 'The bench: the noise of resistors',
     lead: t`Choose a resistor and take a reading: the upper panel shows 2 ms of its noise at the amplifier input, with the rms level dashed. Each reading is the mean square over 10 s. Below, $\langle V^2\rangle$ against $R$ with the weighted fit; the readout turns the slope into $k_B$ and the intercept into the amplifier’s noise density.`,
     tasks: [
-      t`As set up, 50 pF of cable shunts the resistor: the 90 and 100 kΩ points sag below the line, the residuals arch, and $k_B$ comes out several percent low.`,
+      t`As set up, 50 pF of cable shunts the resistor: the 90 and 100 kΩ points sag below the line, the residuals arch, and $k_B$ comes out about 2% low — more than ten standard deviations.`,
       t`Switch the capacitance off (the resistor mounted right at the input): the residuals flatten, $\chi^2/\nu$ drops to about 1 and $k_B$ agrees with its exact value.`,
       'Compare the intercept with and without the capacitance: a bent line fitted straight spoils both coefficients.',
     ],

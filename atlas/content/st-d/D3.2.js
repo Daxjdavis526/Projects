@@ -158,12 +158,12 @@ When they hold (and the partial derivatives are continuous), $f$ is complex-diff
           visual: uvPic('x', '2*y', [0.5, 0.5], 'A non-example for comparison: u = x, v = 2y squashes small discs into ellipses.', { wx: [-3, 3], wy: [-4, 4] }),
           ...(() => {
             const k = r.int(0, 3), ch = [...set.slice(1, k + 1), set[0], ...set.slice(k + 1)];
-            const msg = t`Compute all four partial derivatives: $u_x = v_y$ or $u_y = -v_x$ fails here except on a line or at a point, so the function is not analytic.`;
+            const msg = t`Compute all four partial derivatives: $u_x = v_y$ or $u_y = -v_x$ fails here — everywhere, or everywhere except on a line or at a point — so the function is not analytic.`;
             return { choices: ch, answer: k, why: Object.fromEntries([0, 1, 2, 3].filter((j) => j !== k).map((j) => [j, msg])) };
           })(),
           hints: [t`Test $u_x = v_y$ and $u_y = -v_x$ for each.`, 'A linear pair (u, v) is analytic only if its matrix has the turn-and-stretch shape.'],
           teach: 'Analytic on the plane means the Cauchy–Riemann equations hold at every point.',
-          explain: t`${set[0]} passes both equations everywhere: it is $${set[0].includes('+ x') ? 'z^2 + z' : set[0].includes('+ 1') ? '2z + 1' : set[0].includes('-y') ? 'iz' : 'z^3'}$. Each of the others breaks at least one equation except on a line or a point.`,
+          explain: t`${set[0]} passes both equations everywhere: it is $${set[0].includes('+ x') ? 'z^2 + z' : set[0].includes('+ 1') ? '2z + 1' : set[0].includes('-y') ? 'iz' : 'z^3'}$. Each of the others breaks at least one equation everywhere except, at most, on a line or at a point.`,
         };
       },
     }),

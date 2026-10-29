@@ -93,7 +93,7 @@ over the singularities $a_k$ inside $\gamma$. You rarely need the whole Laurent 
           visual: contour({ f: `exp(${k}*z)/z^${m + 1}`, contour: null, panel: 'none', view: 'colour', arrowsOn: false, marks: [{ x: 0, y: 0, label: '0', kind: 'pole' }], x: [-1.6, 1.6], y: [-1.2, 1.2] }, t`The colour picture: a pole of order $${m + 1}$ at $0$ (the colours circle it ${m + 1} times, backwards).`),
           answer: ans, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: k ** m, feedback: t`Divide by $${m}! = ${fact(m)}$.` }, { value: k ** (m + 1) / fact(m + 1), feedback: t`You want the coefficient of $z^{-1}$, which comes from the $z^{${m}}$ term of $e^{${k}z}$ — not $z^{${m + 1}}$.` }]),
-          hints: [t`$e^{${k}z} = \sum_j \dfrac{(${k}z)^j}{j!}$; dividing by $z^{${m + 1}}$, the $z^{-1}$ term comes from $j = ${m}$.`, t`So the residue is $\dfrac{${k}^{${m}}}{${m}!}$.`],
+          hints: [t`$e^{${k}z} = \sum_j \dfrac{(${k}z)^j}{j!}$; dividing by $z^{${m + 1}}$, the $z^{-1}$ term comes from $j = ${m}$.`, t`So the residue is $\dfrac{${k < 0 ? `(${k})` : k}^{${m}}}{${m}!}$.`],
           teach: t`The residue is just the $z^{-1}$ coefficient: often quickest straight from a known series.`,
           explain: t`$\operatorname{Res} = \frac{(${k})^{${m}}}{${m}!} = ${nm(ans, 4)}$ — the same as the order-$m$ formula, $\frac{1}{${m}!}\frac{d^{${m}}}{dz^{${m}}}e^{${k}z}$ at $0$.`,
         };

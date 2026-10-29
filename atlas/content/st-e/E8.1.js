@@ -194,7 +194,7 @@ Far from the origin both become damped cosines, $J_n \approx \sqrt{2/\pi x}\cos\
           visual: bes({ n, x: [0, 20], y: [-1, 0.8], show: ['Y', 'asym'] }, t`$Y_{${n}}$ and its large-$x$ form (dashed).`),
           answer: ans, tol: { rel: 0.005 },
           errors: [{ value: (k + n / 2 - 0.25) * PI, feedback: t`That is where the cosine — $J_{${n}}$’s form — vanishes. $Y_n$ uses the sine: $x - \frac{n\pi}2 - \frac\pi4 = (k - 1)\pi$.` }, { value: exact, feedback: 'That is the exact zero; the question asks for the asymptotic estimate.' }].filter((e) => Math.abs(e.value - ans) > 0.006 * ans),
-          hints: [t`The sine vanishes when $x - \frac{n\pi}2 - \frac\pi4 = 0, \pi, 2\pi, \dots$ — the first zero is the first of these with $x > 0$.`, t`So $x_k \approx \big(k + \frac n2 - \frac34\big)\pi$ (check $k = 1$, $n = 0$: $0.785$, while the true first zero is $${r4(yZeros(0)[0])}$).`],
+          hints: [t`The sine vanishes when $x - \frac{n\pi}2 - \frac\pi4 = 0, \pi, 2\pi, \dots$: the $k$-th zero is the one where it equals $(k - 1)\pi$ (for $n = 2$ the root at $\pi/4$ lies where the form is not valid, $x < n$).`, t`So $x_k \approx \big(k + \frac n2 - \frac34\big)\pi$ (check $k = 1$, $n = 0$: $0.785$, while the true first zero is $${r4(yZeros(0)[0])}$).`],
           teach: 'Asymptotic forms place the zeros of Yₙ a quarter period away from those of Jₙ, spaced by π.',
           explain: t`$x \approx \big(${k} + ${n}/2 - 3/4\big)\pi = ${r4(ans)}$; the exact zero is $${r4(exact)}$. The estimate improves with $k$: the correction is of order $1/x$.`,
         };

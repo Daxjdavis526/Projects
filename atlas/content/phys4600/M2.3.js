@@ -175,7 +175,7 @@ export default lesson({
           ].filter((e) => Math.abs(e.value - F * 1e3) > 0.02 * F * 1e3),
           hints: [t`Momentum flux of light is $I/c$ (the field momentum density $I/c^2$ moving at $c$).`, t`Absorbed: $F = IA/c$. Reflected straight back: $F = 2IA/c$. And $I = 1361/r^2$ with $r$ in AU.`],
           teach: 'Light pushes with its momentum flux: I/c on an absorber, 2I/c on a mirror.',
-          explain: t`$I = ${nice(sf(Iv, 4))}$ W/m², so $F = ${refl ? 2 : 1}IA/c \approx ${nice(sf(F * 1e3, 3))}$ mN. In stress-tensor language, the light’s $T_{zz}$ is its energy density; a mirror doubles the momentum transfer.`,
+          explain: t`$I = ${nice(sf(Iv, 4))}$ W/m², so $F = ${refl ? '2' : ''}IA/c \approx ${nice(sf(F * 1e3, 3))}$ mN. In stress-tensor language, the light’s momentum flux $-T_{zz}$ equals its energy density $u$; a mirror doubles the momentum transfer.`,
         };
       },
     }),

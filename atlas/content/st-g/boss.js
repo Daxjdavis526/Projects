@@ -261,7 +261,7 @@ export default boss({
               errors: apart([{ value: R.coords, feedback: 'That counts the coordinates before the constraints: each rigid rod removes one.' }, { value: R.coords + R.k, feedback: 'Constraints subtract, they do not add.' }, { value: R.coords - 2 * R.k, feedback: 'A holonomic constraint removes one configuration coordinate, not two (two is its phase-space count).' }], key, 0.01),
               hints: ['Count coordinates first: 3 per bead in space, 2 per bead in a plane.', 'Subtract one for each independent holonomic constraint.'],
               teach: 'Degrees of freedom = coordinates − independent holonomic constraints.',
-              explain: t`$${R.coords} - ${R.k} = ${key}$.${key === 6 && R.coords >= 9 ? ' Six — three translations and three rotations — as for any rigid body that is not a line.' : ''}`,
+              explain: t`$${R.coords} - ${R.k} = ${key}$.${key === 6 && !R.pivot ? ' Six — three translations and three rotations — as for any rigid body that is not a line.' : ''}`,
             };
           },
         }),

@@ -106,7 +106,7 @@ $$T = T_0\,\frac{2}{\pi}\,K\!\left(\sin^2\tfrac{\theta_0}{2}\right), \qquad T_0 
     type: 'code-runner',
     title: 'Two analyses of one data set',
     lead: t`Run it: the same 80 synthetic periods analysed with the small-angle formula and with the exact large-angle factor divided out. The plot shows the timings against release angle, the exact curve and the first-order series.`,
-    tasks: ['Compare the two values of g: ignoring amplitude costs 4.5% — about 200 times the timing error.', 'Change the angles to [2, 3, 4, 5] and rerun: the small-angle answer is now right to 0.1%.', 'Look at the error budget line: the length’s 0.2% dominates, not the timing.'],
+    tasks: ['Compare the two values of g: ignoring amplitude costs 4.5% — about 900 times the timing error.', 'Change the angles to [2, 3, 4, 5] and rerun: the small-angle answer is now right to 0.1%.', 'Look at the error budget line: the length’s 0.2% dominates, not the timing.'],
     params: { code: EXPLORE, rows: 20 },
     caption: 'Synthetic timings of an ideal simple pendulum: no damping (so no amplitude decay during timing), a point bob, a massless string.',
   },

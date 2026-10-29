@@ -252,7 +252,7 @@ $h^2$ per step times $1/h$ steps is **one power of $h$**: Euler is a first-order
           errors: [{ value: actual, feedback: 'That is the actual error at the end. The question asks for the bound, which is larger.' }, { value: (h * a * a * eT) / 2, feedback: 'That is the largest local error, ½hM — per unit h. The bound multiplies by $(e^{LT} - 1)/L$ for the propagation.' }],
           hints: [t`$M/L = ${a}e^{${a * Tt}}$ here.`, t`Bound $= \tfrac{h}{2}\cdot${a}e^{${a * Tt}}\cdot(e^{${a * Tt}} - 1)$.`],
           teach: 'The bound is the largest local error per unit step, hM/2, times the worst-case amplification $(e^{LT} - 1)/L$.',
-          explain: t`Bound $= ${tex(ans, 3)}$. The actual error, $e^{${a * Tt}} - (1 + ${a * h})^{${n}} = ${tex(actual, 3)}$, is a little over half of it: the bound assumes every local error is the largest one and is amplified for the whole interval. It is a guarantee, not an estimate — measure, as in the worked example, for the real number.`,
+          explain: t`Bound $= ${tex(ans, 3)}$. The actual error, $e^{${a * Tt}} - (1 + ${a * h})^{${n}} = ${tex(actual, 3)}$, is ${Math.round((100 * actual) / ans)}% of it: the bound assumes every local error is the largest one and is amplified for the whole interval. It is a guarantee, not an estimate — measure, as in the worked example, for the real number.`,
         };
       },
     }),

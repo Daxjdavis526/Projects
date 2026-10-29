@@ -136,7 +136,7 @@ Multiplying by the complex number $f'(z_0)$ turns **every** small arrow $\delta 
         const ans = ((2 * T0) / PI) * Math.atan2(y, x);
         return {
           prompt: t`In the worked example (the quarter-plate with its $x$-edge at $0^\circ$C and its $y$-edge at $T_0 = ${T0}^\circ$C), what is the temperature at the point $(${x}, ${y})$, in $^\circ$C?`,
-          visual: { type: 'c3-contour', params: { f: `${(2 * T0) / PI}*atan2(y, x)`, x: [0, 3.2], y: [0, 3.2 / 1.6], levels: { from: T0 / 6, to: (5 * T0) / 6, step: T0 / 6 }, labels: false, fill: true, points: [{ x, y: Math.min(y, 1.95), label: `(${x}, ${y})`, color: 'gold' }], aspect: '' }, caption: t`The isotherms of the plate: rays from the corner, equally spaced in angle (labels hidden). The window is cut at $y = 2$.` },
+          visual: { type: 'c3-contour', params: { f: `${(2 * T0) / PI}*atan2(y, x)`, x: [0, 5.2], y: [0, 5.2 / 1.6], levels: { from: T0 / 6, to: (5 * T0) / 6, step: T0 / 6 }, labels: false, fill: true, points: [{ x, y, label: `(${x}, ${y})`, color: 'gold' }], aspect: '' }, caption: t`The isotherms of the plate: rays from the corner, equally spaced in angle (labels hidden).` },
           answer: ans, units: '°C', difference: true, tol: { rel: 0.005 },
           errors: apart(ans, [{ value: (T0 / PI) * Math.atan2(y, x), feedback: t`$w = z^2$ doubles the angle: $T = \frac{T_0}{\pi}\arg w = \frac{2T_0}{\pi}\arg z$.` }, { value: ((2 * T0) / PI) * Math.atan2(x, y), feedback: t`$\arg z = \arctan(y/x)$, measured from the cold $x$-axis.` }]),
           hints: [t`$T = \dfrac{2T_0}{\pi}\arctan\dfrac{y}{x}$, with the angle in radians.`, t`$\arctan(${y}/${x}) = ${nm(Math.atan2(y, x), 4)}$ rad.`],

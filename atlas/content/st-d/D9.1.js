@@ -226,7 +226,7 @@ The arc dies when $Q$’s degree beats $P$’s by **at least 2**: then $|P/Q| \l
           prompt: t`Evaluate $\displaystyle\int_{-\infty}^{\infty} \frac{x^2\,dx}{(x^2 + ${nm(a * a, 3)})(x^2 + ${nm(b * b, 3)})}$. (3 significant figures.)`,
           visual: realPic({ fn: f, x: [-4 * b, 4 * b], y: [0, 1.2 / ((a + b) ** 2)], caption: 'The integrand: zero at the origin, two humps, and tails falling like 1/x².' }),
           answer: ans, tol: { rel: 0.005 }, integrand: f, limits: ['-inf', 'inf'], vars: { x: [-5, 5] },
-          errors: apart(ans, [{ value: PI / (a * b * (a + b)), feedback: t`That is $\int dx/((x^2 + a^2)(x^2 + b^2))$: the $z^2$ on top changes each residue.` }, { value: PI * a / (b * b - a * a), feedback: 'Include the residue at the second upper pole as well.' }]),
+          errors: apart(ans, [{ value: PI / (a * b * (a + b)), feedback: t`That is $\int dx/((x^2 + a^2)(x^2 + b^2))$: the $z^2$ on top changes each residue.` }, { value: -PI * a / (b * b - a * a), feedback: 'Include the residue at the second upper pole as well.' }, { value: PI * b / (b * b - a * a), feedback: 'Include the residue at the first upper pole as well.' }]),
           hints: [t`Upper poles $${nm(a, 3)}i$, $${nm(b, 3)}i$. At $ai$: $\operatorname{Res} = \dfrac{(ai)^2}{2ai\,(b^2 - a^2)} = \dfrac{-a^2}{2ai(b^2 - a^2)}$.`, t`Adding both residues gives $\dfrac{1}{2i(a + b)}$.`],
           teach: 'The same recipe works with any numerator of low enough degree: P(a)/Q′(a) at each upper simple pole.',
           explain: t`The residues add to $\dfrac{1}{2i}\cdot\dfrac{b - a}{b^2 - a^2} = \dfrac{1}{2i(a + b)}$, so the integral is $\dfrac{\pi}{a + b} = \dfrac{\pi}{${nm(a + b, 3)}} = ${nm(ans, 4)}$.`,

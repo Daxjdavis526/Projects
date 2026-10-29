@@ -132,7 +132,7 @@ $$x_i = x_{\text{true}} + b + \varepsilon_i, \quad \text{shown to the nearest } 
           errors: [{ value: -b, feedback: 'Bias is reading minus true value: a meter reading high has a positive bias.' }],
           hints: ['Bias = mean reading − true value.'],
           teach: 'Reading a known reference is how accuracy is checked: the mean minus the reference value estimates the bias.',
-          explain: t`$b \approx ${mean.toFixed(5)} - 10.0000 = ${b.toFixed(2)}$ mV, known to about $0.2/\sqrt{${n}} = ${(0.2 / Math.sqrt(n)).toFixed(2)}$ mV from the scatter — a bias more than ten times that is real. Correct for it, or quote it.`,
+          explain: t`$b \approx ${mean.toFixed(5)} - 10.0000 = ${b.toFixed(2)}$ mV, known to about $0.2/\sqrt{${n}} = ${(0.2 / Math.sqrt(n)).toFixed(2)}$ mV from the scatter — the bias is about ${Math.round(Math.abs(b) / (0.2 / Math.sqrt(n)))} times that, so it is real. Correct for it, or quote it.`,
         };
       },
     }),

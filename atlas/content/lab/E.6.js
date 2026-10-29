@@ -53,7 +53,7 @@ export default lesson({
       'Switch it off again — measuring each ring’s diameter and halving it cancels the centre’s position completely.',
     ],
     params: { exp: 'fp', seed: 2, residuals: true, expected: true },
-    caption: t`Simulated radii: exact ring positions for a $2.000$ mm air gap at 632.8 nm behind an $f = 200$ mm lens (illustrative), each radius measured with $\sigma = 0.03$ mm. The analysis uses the small-angle form, good to about 0.1% at the tenth ring. Ring widths in the picture are not to scale. ${SIMNOTE}`,
+    caption: t`Simulated radii: exact ring positions for a $2.000$ mm air gap at 632.8 nm behind an $f = 200$ mm lens (illustrative), each radius measured with $\sigma = 0.03$ mm. The analysis uses the small-angle form, good to about 0.2% in $r^2$ at the tenth ring. Ring widths in the picture are not to scale. ${SIMNOTE}`,
   },
   example: {
     prompt: t`He–Ne light (632.8 nm) through an etalon; a lens of focal length $f = 200.0 \pm 0.5$ mm. Measured radii (diameters halved, $\sigma = 0.03$ mm):
@@ -207,7 +207,7 @@ Find the gap $d$ with its uncertainty, the fraction of an order at the centre, a
       ],
       answer: 0,
       why: {
-        1: 'Here it is good to about 0.1% at the tenth ring — far too small for a 5% shift.',
+        1: 'Here it is good to about 0.2% in r² at the tenth ring — far too small for a 5% shift.',
         2: 'Underestimated random errors raise χ² but leave no smooth pattern, and do not shift the slope by 5%.',
         3: 'A wrong λ scales d but leaves the plot perfectly straight.',
       },

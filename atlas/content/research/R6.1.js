@@ -84,7 +84,7 @@ The research skill is choosing $p(d \mid \theta)$ to match **how the data were r
     type: 'graph',
     title: 'Counting: when the Gaussian shortcut fails',
     lead: t`You observe $n$ counts in one interval and want the mean rate $\mu$. Blue: the exact Poisson likelihood. Gold: the common shortcut, a Gaussian with $\sigma = \sqrt{n}$ (the $\chi^2$ you would get from error bars of $\sqrt n$). Where each crosses the grey line is its 68% interval.`,
-    tasks: ['At n = 25 the two curves nearly agree: the shortcut is fine for large counts.', 'At n = 2 the Poisson curve is lopsided: the interval runs much further up than down, and the Gaussian’s lower limit is nearly zero.', 'At n = 1, the Gaussian says μ could be 0 — impossible, since you saw a count. The Poisson curve never allows it.'],
+    tasks: ['At n = 25 the two curves nearly agree: the shortcut is fine for large counts.', 'At n = 2 the Poisson curve is lopsided: the interval runs much further up than down (about 0.9 to 3.8), while the Gaussian’s symmetric interval (0.6 to 3.4) sits too low at both ends.', 'At n = 1, the Gaussian says μ could be 0 — impossible, since you saw a count. The Poisson curve never allows it.'],
     params: {
       x: [0, 40], y: [0, 6], aspect: 'wide', axesAt: 'edge', xlabel: 'rate μ (counts per interval)', ylabel: 'Δ(−2 ln L)', xticks: 8, yticks: 6,
       sliders: [{ key: 'n', label: t`observed counts $n$`, min: 1, max: 30, step: 1, value: 2, explain: 'The number of counts recorded in the interval.' }],

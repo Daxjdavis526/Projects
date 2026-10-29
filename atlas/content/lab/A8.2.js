@@ -137,7 +137,7 @@ For white noise it falls as $1/\sqrt\tau$, exactly like $\sigma/\sqrt N$; for fl
           errors: [{ value: Math.sqrt((sw * sw) / (fs * D)), feedback: t`Differentiate carefully: $-\sigma_w^2/(f_s\tau^2) + D/3 = 0$ gives $\tau^2 = 3\sigma_w^2/(f_sD)$ — keep the 3.` }, { value: (3 * sw * sw) / (fs * D), feedback: 'That is τ². Take the square root.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`Differentiate $\sigma_A^2$ with respect to $\tau$ and set it to zero.`, t`$\tau^* = \sqrt{3\sigma_w^2/(f_sD)}$.`],
           teach: 'The optimal averaging time balances white noise falling as 1/τ against drift growing as τ (in variance).',
-          explain: t`$\tau^* = \sqrt{3 \times ${sw}^2/(${fs} \times ${tex(D)})} = ${ans.toPrecision(3)}$ s, where the two dashed lines cross. There $\sigma_A = ${Math.sqrt(2 * sw * sw / (fs * ans)).toPrecision(2)}$ K.`,
+          explain: t`$\tau^* = \sqrt{3 \times ${sw}^2/(${fs} \times ${tex(D)})} = ${ans.toPrecision(3)}$ s, where the white and drift terms of $\sigma_A^2$ are equal. There $\sigma_A = ${Math.sqrt(2 * sw * sw / (fs * ans)).toPrecision(2)}$ K.`,
         };
       },
     }),

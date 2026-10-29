@@ -337,7 +337,7 @@ The cross term is the interference. It survives only if $\delta$ holds still for
       why: { 1: 'That passes one beam and blocks the other: a uniform patch, no fringes.', 2: 'Brightness does not help: the cross term is zero for perpendicular fields at any power.', 3: 'The paths can match perfectly and the fields still have no common component.' },
       hints: ['Perpendicular fields have no common component, so the cross term vanishes.', 'Something must project both fields onto one shared direction.'],
       teach: 'Perpendicular polarizations do not interfere; projecting both onto a common axis restores fringes (the Fresnel–Arago laws).',
-      explain: t`A polarizer at $45^\circ$ passes $\cos 45^\circ$ of each field along the same axis, so the transmitted beams are parallel, equal and coherent: full-visibility fringes, at a quarter of the total irradiance. This is how polarization interferometers and the Nomarski microscope work.`,
+      explain: t`A polarizer at $45^\circ$ passes $\cos 45^\circ$ of each field along the same axis, so the transmitted beams are parallel, equal and coherent: full-visibility fringes, with on average half the total irradiance getting through. This is how polarization interferometers and the Nomarski microscope work.`,
     }),
   ],
   sources: [

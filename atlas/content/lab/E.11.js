@@ -23,6 +23,8 @@ const EXc = G.run('zeeman', { seed: 6, analysis: 'centre' });
 const EXm = G.run('zeeman', { seed: 6, analysis: 'mapped' });
 const EX6 = EXc.rows[4];                                   // B = 0.60 T
 const Rc = EXc.results[0], Rm = EXm.results[0], Em = EXm.results[1];
+// the run the scale-error question shows (seed 80, lamp off centre)
+const SE = G.run('zeeman', { seed: 80 });
 
 // ── the code exercise: lamp centred, seed 7, printed numbers re-fitted ──
 const CD = G.run('zeeman', { seed: 7, flags: { gradient: false } });
@@ -63,7 +65,7 @@ So you measure squared ring radii, not wavelengths, and a straight line of $\Del
     lead: t`Eight field settings from 0.20 to 0.90 T. The top panel is the ring profile at one field: each order’s ring split into a σ⁻ and σ⁺ pair. Below, the shift of each σ line against $B$, its fit and residuals; the readout gives $\mu_B/h$ and $e/m = 4\pi\mu_B/h$ against CODATA.`,
     tasks: [
       'Slide the profile’s field from 0.2 to 0.9 T: the pairs open up until, near 0.6 T, the σ⁺ ring of one order meets the σ⁻ ring of the next. Above that you must follow each ring up from low field to know which is which.',
-      t`With the lamp off the gap centre, $\mu_B/h$ sits about 3 % low, z ≈ −2 to −3 — yet the residuals are flat and χ²/ν is fine. A scale error keeps a line straight.`,
+      t`With the lamp off the gap centre, $\mu_B/h$ sits ${(100 * (1 - Rc.value / MUBH)).toFixed(0)} % low, z ≈ ${zT(Rc.z, 1)} — yet the residuals are flat and χ²/ν is fine. A scale error keeps a line straight.`,
       'Switch the analysis to “B corrected by a field map”: the slope returns to CODATA within its (slightly larger) uncertainty.',
     ],
     params: { exp: 'zeeman', seed: 6 },
@@ -152,8 +154,8 @@ So you measure squared ring radii, not wavelengths, and a straight line of $\Del
     }),
     mcq({
       id: 'scale-error', difficulty: 3,
-      prompt: t`Your fit of $\Delta\nu$ against $B$ has flat residuals and $\chi^2/\nu = 1.1$, but $\mu_B/h$ comes out $3.0\,\%$ low ($z = -2.8$). Which explanation fits **all** of that?`,
-      visual: rig('zeeman', { seed: 11, raw: false }, t`A run like the one described: shift against the probe’s reading, fit and residuals. ${SIMNOTE}`),
+      prompt: t`Your fit of $\Delta\nu$ against $B$ has flat residuals and $\chi^2/\nu = ${SE.fit.chi2r.toFixed(1)}$, but $\mu_B/h$ comes out $${(100 * (1 - SE.results[0].value / MUBH)).toFixed(1)}\,\%$ low ($z = ${zT(SE.results[0].z, 1)}$). Which explanation fits **all** of that?`,
+      visual: rig('zeeman', { seed: 80, raw: false }, t`The run described: shift against the probe’s reading, fit and residuals. ${SIMNOTE}`),
       choices: ['The field at the atoms is a fixed fraction of the probe’s reading (a calibration or position error)', 'The ring radii are read with too much noise', 'The etalon’s free spectral range is wrong because the rings are not exactly circular', 'The fit should have been forced through the origin'],
       answer: 0,
       why: {
@@ -163,7 +165,7 @@ So you measure squared ring radii, not wavelengths, and a straight line of $\Del
       },
       hints: ['What kind of error keeps a straight line straight but changes its slope?', 'Which input has a 1 % calibration and depends on where in the gap you measure?'],
       teach: 'A scale error in x keeps the data linear and χ² happy: only an independent check — here, mapping the field where the atoms are — exposes it.',
-      explain: t`A field that is 3 % weaker at the lamp than at the probe’s calibration point multiplies every $B$ by 0.97 — the line stays straight, the slope reads 3 % high in $B$, so $\mu_B/h$ reads 3 % low. Residual plots cannot see a systematic that is the same shape as the model.`,
+      explain: t`A field that is 3 % weaker at the lamp than at the probe’s calibration point makes every probe reading about 3 % higher than the field the atoms feel — the line stays straight, but its slope, and with it $\mu_B/h$, reads about 3 % low. Residual plots cannot see a systematic that is the same shape as the model.`,
     }),
     num({
       id: 'em', difficulty: 2,

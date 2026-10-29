@@ -22,6 +22,9 @@ const EX = M.run('sound', { seed: 1 });
 const EXv = EX.results[0], EXe = EX.results[1];
 const sComb = Math.hypot(EXv.sigma, sVacc), zEX = (EXv.value - vAcc) / sComb;
 const runS = (seed, flags = {}, axes = null) => M.run('sound', { seed, flags, axes });
+// the warm-tube question's run (seed 2, tube air 4 °C warm)
+const WM = runS(2, { warm: true }), wv = +WM.results[0].value.toFixed(1);
+const wFrac = wv / +vAcc.toFixed(1) - 1;
 
 export default lesson({
   id: 'lab.E.25',
@@ -147,10 +150,10 @@ Find $v$ and the end correction with their uncertainties, and compare $v$ with t
     }),
     mcq({
       id: 'warm', difficulty: 3,
-      prompt: t`A run’s $v$ is $346.4 \pm 0.3$ m/s, about 6σ above the ideal-gas value at the thermometer’s 22.0 °C. The fit is fine ($\chi^2/\nu \approx 1$) and the end correction looks right. Which explanation is most likely?`,
-      visual: rigPlot('sound', { seed: 4, flags: { warm: true }, expected: true }, t`The run (gold fit) against the ideal-gas line at the thermometer’s reading (dashed). ${SIMNOTE}`),
+      prompt: t`A run’s $v$ is $${wv.toFixed(1)} \pm ${WM.results[0].sigma.toFixed(1)}$ m/s, about ${Math.round((WM.results[0].value - vAcc) / WM.results[0].sigma)}σ above the ideal-gas value at the thermometer’s 22.0 °C. The fit is fine ($\chi^2/\nu \approx 1$) and the end correction looks right. Which explanation is most likely?`,
+      visual: rigPlot('sound', { seed: 2, flags: { warm: true }, expected: true }, t`The run (gold fit) against the ideal-gas line at the thermometer’s reading (dashed). ${SIMNOTE}`),
       choices: [
-        'The air in the tube is warmer than the air at the thermometer: about 4 °C would do it, since v grows by 0.17% per kelvin',
+        'The air in the tube is warmer than the air at the thermometer: a few kelvin would do it, since v grows by 0.17% per kelvin',
         'The tuning forks are 0.7% sharp, so every λ reads short',
         'The water surface is not flat, so every length reads long',
         'Sound travels faster in a narrow tube',
@@ -161,9 +164,9 @@ Find $v$ and the end correction with their uncertainties, and compare $v$ with t
         2: 'A constant length error shifts the intercept (the end correction), not the slope.',
         3: 'Wall friction slows sound slightly in a narrow tube (by well under 0.1% here), it does not speed it up.',
       },
-      hints: [t`How does $v$ depend on $T$?`, t`$v \propto \sqrt T$: what temperature makes $v = 346.4$ m/s instead of 344.4?`],
+      hints: [t`How does $v$ depend on $T$?`, t`$v \propto \sqrt T$: what temperature makes $v = ${wv.toFixed(1)}$ m/s instead of ${vAcc.toFixed(1)}?`],
       teach: 'When the comparison value depends on a side measurement, a systematic can hide in that side measurement.',
-      explain: t`$v \propto \sqrt T$: $346.4/344.4$ is 0.58% faster, or $1.16\%$ in $T$ — about 3.4 K. A lamp near the tube or a draught at the thermometer is enough. Put the thermometer in the tube’s air.`,
+      explain: t`$v \propto \sqrt T$: $${wv.toFixed(1)}/${vAcc.toFixed(1)}$ is ${(100 * wFrac).toFixed(2)}% faster, or $${(200 * wFrac).toFixed(2)}\%$ in $T$ — about ${(295.15 * ((1 + wFrac) ** 2 - 1)).toFixed(1)} K. A lamp near the tube or a draught at the thermometer is enough. Put the thermometer in the tube’s air.`,
     }),
     num({
       id: 'thermometer', difficulty: 2,
