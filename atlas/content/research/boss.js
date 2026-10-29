@@ -1,8 +1,8 @@
 // The Research in Physics boss, "The Mini-Thesis": one research project in
 // miniature, from the question to the abstract, on one of the three projects
 // the guided mini-papers practised. GW150914's chirp mass from a synthetic
-// chirp (research.P.1): the published detector-frame 𝓜 = 30.2 +2.5/−1.9 M☉,
-// source frame 28.1 +1.8/−1.5 M☉, both medians with 90% credible intervals
+// chirp (research.P.1): the published detector-frame 𝓜 = 30.4 +2.1/−1.9 M☉,
+// source frame 28.0 +2.0/−1.7 M☉, both medians with 90% credible intervals
 // (Abbott et al. 2016, PRL 116, 241102, Table I); the discovery letter's
 // ≃ 30 M☉, masses 36 and 29 M☉, remnant 62 M☉. Kepler-10b's radius from a
 // synthetic transit (research.P.3): R_p/R★ = 0.01261, R_p = 1.47 +0.03/−0.02
@@ -34,7 +34,7 @@ const t = String.raw;
 
 // ── published values and constants ──────────────────────────────────────────
 export const TSUN = 4.925491e-6;                          // G M☉ / c³, s
-export const MC_PUB = 30.2, MC_UP = 2.5, MC_LO = 1.9;      // detector-frame chirp mass, 90% credible
+export const MC_PUB = 30.4, MC_UP = 2.1, MC_LO = 1.9;      // detector-frame chirp mass, 90% credible
 export const Z90 = 1.6449;                                // a central 90% interval spans ±1.645σ for a Gaussian
 export const K10 = 0.01261, RSTAR = 1.065, SRSTAR = 0.009; // Kepler-10b's radius ratio; the star's radius (R☉)
 export const RP_PUB = 1.47, RP_UP = 0.03, RP_LO = 0.02;    // R⊕ (Dumusque et al. 2014)
@@ -203,7 +203,7 @@ const QUESTIONS = {
       { text: 'Find every binary black-hole merger in LIGO’s public data with the same matched filter, and measure each one’s chirp mass.', why: t`That is a survey of several years of data, not a semester: the result you must have would come months after the deadline. Scope creep.` },
       { text: 'Why are black holes of about 30 solar masses so common — what does GW150914 say about how massive stars die?', why: t`An open question about how massive stars live and die; one event’s chirp, real or synthetic, cannot answer it.` },
     ],
-    explain: t`A good question names **one observable** (the chirp mass), **the comparison that settles it** (the published $30.2^{+2.5}_{-1.9}\,M_\odot$, detector frame) and **data that can reach it** (a synthetic chirp you control, so you know the right answer). The rest name no observable, ask what a leading-order model cannot see, or would take years. This is the project of ${LINK.gw}.`,
+    explain: t`A good question names **one observable** (the chirp mass), **the comparison that settles it** (the published $30.4^{+2.1}_{-1.9}\,M_\odot$, detector frame) and **data that can reach it** (a synthetic chirp you control, so you know the right answer). The rest name no observable, ask what a leading-order model cannot see, or would take years. This is the project of ${LINK.gw}.`,
     pic: () => ({ type: 'gr-chirp', params: { m1: 36, m2: 29, D: 410, sliders: false, play: false, readout: false }, caption: 'A leading-order chirp from black holes of 36 and 29 solar masses at 410 Mpc (GW150914’s published values) and the detector arms it stretches, enormously exaggerated. No merger or ringdown is modelled.' }),
   },
   transit: {
@@ -237,8 +237,8 @@ const TARGETS = {
   gw: {
     prompt: t`Thesis: **${TITLE.gw}**. Your matched filter runs on a synthetic chirp *as a detector receives it*: there is no cosmology anywhere in your code. The properties paper (Abbott et al. 2016, PRL 116, 241102) lists several masses, each a median with a 90% credible interval. Which is the right comparison for your result?`,
     choices: [
-      t`The detector-frame chirp mass, $30.2^{+2.5}_{-1.9}\,M_\odot$: the universe’s expansion stretches every period by $1 + z$, so a filter on received data measures $(1 + z)\mathcal M$`,
-      t`The source-frame chirp mass, $28.1^{+1.8}_{-1.5}\,M_\odot$, because that is the binary’s true property`,
+      t`The detector-frame chirp mass, $30.4^{+2.1}_{-1.9}\,M_\odot$: the universe’s expansion stretches every period by $1 + z$, so a filter on received data measures $(1 + z)\mathcal M$`,
+      t`The source-frame chirp mass, $28.0^{+2.0}_{-1.7}\,M_\odot$, because that is the binary’s true property`,
       t`The final black hole’s mass, $62\,M_\odot$, the headline number of the discovery`,
       t`The total source-frame mass, $36 + 29 = 65\,M_\odot$`,
     ],
@@ -247,16 +247,16 @@ const TARGETS = {
       2: t`The remnant’s mass is set by the merger and ringdown, which a leading-order chirp does not model — and it is not a chirp mass at all.`,
       3: t`The chirp mass is a different combination, $(m_1m_2)^{3/5}/(m_1 + m_2)^{1/5}$ (for equal masses $0.435$ times the total) — and this one is in the source frame too.`,
     },
-    explain: t`A leading-order chirp is fixed by $G\mathcal M/c^3$, a time. Every time in the received wave is stretched by $1 + z$, so data analysed as received give $(1+z)\mathcal M$ — the **detector-frame** $30.2\,M_\odot$, the paper’s $\mathcal M \simeq 30\,M_\odot$. Dividing by $1 + z$ to reach $28.1\,M_\odot$ needs a distance and a cosmology. And note the convention: the intervals are **90% credible**, not one standard deviation.`,
+    explain: t`A leading-order chirp is fixed by $G\mathcal M/c^3$, a time. Every time in the received wave is stretched by $1 + z$, so data analysed as received give $(1+z)\mathcal M$ — the **detector-frame** $30.4\,M_\odot$, the paper’s $\mathcal M \simeq 30\,M_\odot$. Dividing by $1 + z$ to reach $28.0\,M_\odot$ needs a distance and a cosmology. And note the convention: the intervals are **90% credible**, not one standard deviation.`,
     pic: () => ({
       type: 'graph',
       params: {
         x: [-0.3, 0], y: [0, 260], aspect: 'wide', axesAt: 'edge', xlabel: 'time before coalescence (s)', ylabel: 'GW frequency (Hz)', xticks: 6, yticks: 4,
         curves: [
-          { fn: `(5/(256*max(-x, 0.0004)))^0.375/(pi*${(28.1 * TSUN).toExponential(5)}^0.625)`, domain: [-0.3, -0.0012], color: 'violet', width: 2, dash: [6, 4] },
-          { fn: `(5/(256*max(-x, 0.0004)))^0.375/(pi*${(30.2 * TSUN).toExponential(5)}^0.625)`, domain: [-0.3, -0.0012], color: 'accent', width: 2 },
+          { fn: `(5/(256*max(-x, 0.0004)))^0.375/(pi*${(28.0 * TSUN).toExponential(5)}^0.625)`, domain: [-0.3, -0.0012], color: 'violet', width: 2, dash: [6, 4] },
+          { fn: `(5/(256*max(-x, 0.0004)))^0.375/(pi*${(30.4 * TSUN).toExponential(5)}^0.625)`, domain: [-0.3, -0.0012], color: 'accent', width: 2 },
         ],
-        legend: [{ label: 'chirp mass 28.1 M☉', color: 'violet', dash: [6, 4] }, { label: 'chirp mass 30.2 M☉', color: 'accent' }], legendAt: 'tl',
+        legend: [{ label: 'chirp mass 28.0 M☉', color: 'violet', dash: [6, 4] }, { label: 'chirp mass 30.4 M☉', color: 'accent' }], legendAt: 'tl',
       },
       caption: 'Leading-order chirps for the two published chirp masses: the heavier sweeps through the band sooner. A redshift stretches the received chirp in time, which makes it look heavier.',
     }),
@@ -343,7 +343,7 @@ const CODE = {
 TSUN = 4.925491e-6                     # G M_sun / c^3, in seconds
 
 # SYNTHETIC data: the frequency of a leading-order chirp built with the
-# published detector-frame chirp mass, 30.2 M_sun, read off a
+# chirp mass 30.2 M_sun (near the published 30.4), read off a
 # time-frequency map at 40 moments, each reading with 1.5% scatter
 rng = np.random.default_rng(150914)
 tc = 0.25                              # coalescence, s on the record
@@ -442,7 +442,7 @@ export function codeCase(P) {
 
 /** A check that could fail: the numbers each project's reply quotes. */
 export function checkCase(r, P) {
-  if (P === 'gw') return { P, inj: r.pick([[22, 40], [20, 36], [25, 45]]), v: +(30.2 + r.pick([-0.6, -0.3, 0.2, 0.4, 0.7])).toFixed(1), s: r.pick([0.9, 1.1, 1.3]) };
+  if (P === 'gw') return { P, inj: r.pick([[22, 40], [20, 36], [25, 45]]), v: +(30.4 + r.pick([-0.6, -0.3, 0.2, 0.4, 0.7])).toFixed(1), s: r.pick([0.9, 1.1, 1.3]) };
   if (P === 'transit') return { P, inj: r.pick([[80, 400], [60, 300], [100, 500]]), v: +(1.465 + r.pick([-0.02, -0.01, 0.01, 0.02])).toFixed(2), s: r.pick([0.04, 0.05]) };
   const [rtol, drift] = r.pick(NULLT);
   return { P, rtol, drift, pct: (100 * drift) / 42.98 };
@@ -452,7 +452,7 @@ export function checkCase(r, P) {
 /** The uncertainty budget: a power law in quadrature (chirp mass, radius) or three numerical entries (Mercury). */
 export function budgetCase(r, P) {
   if (P === 'gw') {
-    const v = +(30.2 + r.pick([-0.5, -0.2, 0.1, 0.3, 0.6])).toFixed(1), a = r.pick([0.5, 1, 1.5]), b = r.pick([3, 4, 5, 6, 8]);
+    const v = +(30.4 + r.pick([-0.5, -0.2, 0.1, 0.3, 0.6])).toFixed(1), a = r.pick([0.5, 1, 1.5]), b = r.pick([3, 4, 5, 6, 8]);
     return { P, v, a, b, key: (v * 0.6 * Math.hypot((11 / 3) * a, b)) / 100 };
   }
   if (P === 'transit') {
@@ -541,30 +541,30 @@ const ROUNDS = [
             const T30 = MC_PUB * TSUN, f = C.flo;
             if (C.kind === 'tau') {
               return {
-                prompt: t`Thesis: **${TITLE.gw}**. Size the signal before you write a template. At leading order a chirp reaches coalescence a time $$\tau = \frac{5}{256}\,(\pi f)^{-8/3}\left(\frac{G\mathcal M}{c^3}\right)^{-5/3}$$ after its frequency passes $f$. For the published detector-frame $\mathcal M = 30.2\,M_\odot$, how long, in seconds, does the signal take from $${f}$ Hz to coalescence? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
+                prompt: t`Thesis: **${TITLE.gw}**. Size the signal before you write a template. At leading order a chirp reaches coalescence a time $$\tau = \frac{5}{256}\,(\pi f)^{-8/3}\left(\frac{G\mathcal M}{c^3}\right)^{-5/3}$$ after its frequency passes $f$. For the published detector-frame $\mathcal M = 30.4\,M_\odot$, how long, in seconds, does the signal take from $${f}$ Hz to coalescence? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
                 answer: C.key, units: 's', tol: { rel: 0.01 },
                 errors: apart([
                   { value: (5 / 256) * f ** (-8 / 3) * T30 ** (-5 / 3), feedback: t`The $\pi$ sits inside the bracket with $f$: $(\pi f)^{-8/3}$.` },
                   { value: (5 / 256) * (Math.PI * f) ** (-8 / 3) * T30 ** (-3 / 5), feedback: t`The exponent on $G\mathcal M/c^3$ is $-5/3$, not $-3/5$.` },
                   { value: (5 / 256) * (Math.PI * f) ** (-8 / 3) * T30 ** (-5 / 3) * 1e3, feedback: 'That is in milliseconds; the answer is wanted in seconds.' },
                 ], C.key),
-                hints: [t`First $G\mathcal M/c^3 = 30.2 \times 4.925\times10^{-6}$ s $= ${sci(T30, 4)}$ s.`, t`Then $(\pi \times ${f})^{-8/3}$ and $(${sci(T30, 4)})^{-5/3}$; multiply by $5/256$.`],
+                hints: [t`First $G\mathcal M/c^3 = 30.4 \times 4.925\times10^{-6}$ s $= ${sci(T30, 4)}$ s.`, t`Then $(\pi \times ${f})^{-8/3}$ and $(${sci(T30, 4)})^{-5/3}$; multiply by $5/256$.`],
                 teach: t`Sizing the signal first tells you how long a record and a template you need — and checks your reading of the paper against its own description.`,
                 explain: t`$\tau = \tfrac{5}{256}(\pi\cdot${f})^{-8/3}(${sci(T30, 4)})^{-5/3} = ${C.key.toFixed(3)}$ s. A heavy binary crosses the band fast: the discovery paper describes about 8 cycles in 0.2 s, from 35 to 150 Hz, where the merger (not in this formula) takes over. So a 4-second record holds the whole chirp with plenty of noise around it to measure the background.`,
-                visual: trackPic(MC_PUB, `A leading-order chirp of 30.2 M☉ coalescing at 0.3 s on the record; the dashed line is ${f} Hz.`, { extra: { hlines: [{ y: f, label: `${f} Hz`, color: 'ink3' }] } }),
+                visual: trackPic(MC_PUB, `A leading-order chirp of 30.4 M☉ coalescing at 0.3 s on the record; the dashed line is ${f} Hz.`, { extra: { hlines: [{ y: f, label: `${f} Hz`, color: 'ink3' }] } }),
               };
             }
             return {
-              prompt: t`Thesis: **${TITLE.gw}**. Size the signal before you write a template: a matched filter gains from every cycle it can line up. At leading order the number of gravitational-wave cycles between frequency $f$ and coalescence is $$N = \frac{1}{32\,\pi^{8/3}}\left(\frac{G\mathcal M f}{c^3}\right)^{-5/3}.$$ For the published detector-frame $\mathcal M = 30.2\,M_\odot$, how many cycles lie between $${f}$ Hz and coalescence? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
+              prompt: t`Thesis: **${TITLE.gw}**. Size the signal before you write a template: a matched filter gains from every cycle it can line up. At leading order the number of gravitational-wave cycles between frequency $f$ and coalescence is $$N = \frac{1}{32\,\pi^{8/3}}\left(\frac{G\mathcal M f}{c^3}\right)^{-5/3}.$$ For the published detector-frame $\mathcal M = 30.4\,M_\odot$, how many cycles lie between $${f}$ Hz and coalescence? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
               answer: C.key, tol: { rel: 0.01 },
               errors: apart([
                 { value: (T30 * f) ** (-5 / 3) / (32 * Math.PI), feedback: t`The prefactor is $1/(32\pi^{8/3})$, not $1/(32\pi)$.` },
                 { value: (T30 * f) ** (-3 / 5) / (32 * Math.PI ** (8 / 3)), feedback: t`The exponent is $-5/3$, not $-3/5$.` },
               ], C.key),
-              hints: [t`$G\mathcal M f/c^3 = 30.2 \times 4.925\times10^{-6}\ \text{s} \times ${f}\ \text{Hz}$ — a pure number.`, t`Raise it to the power $-5/3$ and divide by $32\pi^{8/3} = ${(32 * Math.PI ** (8 / 3)).toFixed(1)}$.`],
+              hints: [t`$G\mathcal M f/c^3 = 30.4 \times 4.925\times10^{-6}\ \text{s} \times ${f}\ \text{Hz}$ — a pure number.`, t`Raise it to the power $-5/3$ and divide by $32\pi^{8/3} = ${(32 * Math.PI ** (8 / 3)).toFixed(1)}$.`],
               teach: t`Sizing the signal first tells you how much there is to filter — and checks your reading of the paper against its own description.`,
               explain: t`$G\mathcal M f/c^3 = ${sci(T30 * f, 4)}$, so $N = ${C.key.toFixed(1)}$ cycles. The discovery paper describes about 8 cycles from 35 to 150 Hz, where the merger (not in this formula) takes over: a heavy binary gives a short, loud chirp, and a template of a few tenths of a second covers it.`,
-              visual: trackPic(MC_PUB, `A leading-order chirp of 30.2 M☉ coalescing at 0.3 s on the record; the dashed line is ${f} Hz.`, { extra: { hlines: [{ y: f, label: `${f} Hz`, color: 'ink3' }] } }),
+              visual: trackPic(MC_PUB, `A leading-order chirp of 30.4 M☉ coalescing at 0.3 s on the record; the dashed line is ${f} Hz.`, { extra: { hlines: [{ y: f, label: `${f} Hz`, color: 'ink3' }] } }),
             };
           }
           if (P === 'transit') {
@@ -615,7 +615,7 @@ const ROUNDS = [
             const { F1, F2, T2, K, key } = C;
             const slipNoDiff = ((F1 ** (-8 / 3)) / ((256 / 5) * Math.PI ** (8 / 3) * T2)) ** 0.6 / TSUN;
             return {
-              prompt: t`Thesis: **${TITLE.gw}**. The synthetic chirp (built with $\mathcal M = 30.2\,M_\odot$, plus noise) is read off a time–frequency map at two moments: at $t_P = 0$ the frequency is $f_P = ${F1}$ Hz, and at $t_Q = ${T2}$ s it is $f_Q = ${F2}$ Hz. At leading order $f^{-8/3}$ falls linearly in time, $$f^{-8/3} = \frac{256}{5}\,\pi^{8/3}\left(\frac{G\mathcal M}{c^3}\right)^{5/3}(t_c - t),$$ with $t_c$ unknown. What chirp mass do the two readings give, in solar masses? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
+              prompt: t`Thesis: **${TITLE.gw}**. The synthetic chirp (built with $\mathcal M = 30.4\,M_\odot$, plus noise) is read off a time–frequency map at two moments: at $t_P = 0$ the frequency is $f_P = ${F1}$ Hz, and at $t_Q = ${T2}$ s it is $f_Q = ${F2}$ Hz. At leading order $f^{-8/3}$ falls linearly in time, $$f^{-8/3} = \frac{256}{5}\,\pi^{8/3}\left(\frac{G\mathcal M}{c^3}\right)^{5/3}(t_c - t),$$ with $t_c$ unknown. What chirp mass do the two readings give, in solar masses? ($GM_\odot/c^3 = 4.925\times10^{-6}$ s.)`,
               answer: key, units: 'Msun', tol: { rel: 0.01 },
               errors: apart([
                 { value: K ** 0.6, feedback: t`That is $G\mathcal M/c^3$ in seconds; divide by $4.925\times10^{-6}$ s per solar mass.` },
@@ -624,7 +624,7 @@ const ROUNDS = [
               ], key),
               hints: [t`Subtract the equation at $Q$ from the one at $P$: $f_P^{-8/3} - f_Q^{-8/3} = \tfrac{256}{5}\pi^{8/3}(G\mathcal M/c^3)^{5/3}\,(t_Q - t_P)$.`, t`Solve for $(G\mathcal M/c^3)^{5/3}$, raise to $3/5$ to get seconds, then divide by $4.925\times10^{-6}$ s.`, t`Here $f_P^{-8/3} - f_Q^{-8/3} = ${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}\ \text{Hz}^{-8/3}$.`],
               teach: t`Two readings of a chirp’s frequency fix its chirp mass, with the unknown coalescence time cancelling in the difference.`,
-              explain: t`$$\left(\frac{G\mathcal M}{c^3}\right)^{5/3} = \frac{${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}}{\tfrac{256}{5}\pi^{8/3}\times${T2}} = ${sci(K, 4)}\ \text{s}^{5/3},$$ so $G\mathcal M/c^3 = ${sci(K ** 0.6, 4)}$ s and $\mathcal M = ${key.toFixed(1)}\,M_\odot$ — within reading error of the $30.2$ built in. Two points are the least a fit can use; the code item uses forty.`,
+              explain: t`$$\left(\frac{G\mathcal M}{c^3}\right)^{5/3} = \frac{${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}}{\tfrac{256}{5}\pi^{8/3}\times${T2}} = ${sci(K, 4)}\ \text{s}^{5/3},$$ so $G\mathcal M/c^3 = ${sci(K ** 0.6, 4)}$ s and $\mathcal M = ${key.toFixed(1)}\,M_\odot$ — within reading error of the $30.4$ built in. Two points are the least a fit can use; the code item uses forty.`,
               visual: trackPic(MC_PUB, 'The synthetic chirp’s frequency on the record (blue) and the two readings P and Q (gold). Leading order; the merger is not modelled.', { tc: r6(C.tc), pts: [[0, F1, 'P'], [T2, F2, 'Q']] }),
             };
           }
@@ -680,18 +680,18 @@ const ROUNDS = [
           const sameWhy = t`That shows the analysis is reproducible, not that it is right: a biased pipeline returns the same biased number every time.`;
           if (P === 'gw') {
             return {
-              prompt: t`Thesis: **${TITLE.gw}**. Your pipeline returns $\mathcal M = ${C.v} \pm ${C.s}\,M_\odot$ from the synthetic chirp built with $30.2\,M_\odot$. A referee asks how you know it measures the chirp mass, rather than returning something near 30 whatever the data hold. Which reply is strongest?`,
+              prompt: t`Thesis: **${TITLE.gw}**. Your pipeline returns $\mathcal M = ${C.v} \pm ${C.s}\,M_\odot$ from the synthetic chirp built with $30.4\,M_\odot$. A referee asks how you know it measures the chirp mass, rather than returning something near 30 whatever the data hold. Which reply is strongest?`,
               choices: [
                 t`Chirps of other known masses, $${C.inj[0]}$ and $${C.inj[1]}\,M_\odot$, injected into fresh noise and analysed blind, come back within their uncertainties`,
-                t`The result agrees with the published $30.2\,M_\odot$, well inside the uncertainties`,
+                t`The result agrees with the published $30.4\,M_\odot$, well inside the uncertainties`,
                 same,
                 t`The peak SNR is far above anything the noise alone produces, so the signal is unmistakable`,
               ],
               answer: 0,
-              why: { 1: t`The data were built with 30.2: a pipeline that ignored them and printed 30 would agree too. A check must be able to fail.`, 2: sameWhy, 3: t`Significance says a chirp is present; it says nothing about whether its mass comes out unbiased.` },
+              why: { 1: t`The data were built with 30.4: a pipeline that ignored them and printed 30 would agree too. A check must be able to fail.`, 2: sameWhy, 3: t`Significance says a chirp is present; it says nothing about whether its mass comes out unbiased.` },
               hints: ['Which of these tests could the pipeline fail if it were broken?', 'Feed it an input whose right answer is known and different from the published one.'],
               teach: t`A check is evidence only if it could have failed: inject a known input that differs from the published value (or no signal at all) and see the pipeline return it.`,
-              explain: t`Injection and recovery at other masses is a test the pipeline could fail: a bias toward 30, a units slip or a bank that never reaches 22 would all show. Agreement with 30.2 cannot, because the data were built with it. LIGO validates its searches the same way, with thousands of simulated signals injected into real noise.`,
+              explain: t`Injection and recovery at other masses is a test the pipeline could fail: a bias toward 30, a units slip or a bank that never reaches 22 would all show. Agreement with 30.4 cannot, because the data were built with it. LIGO validates its searches the same way, with thousands of simulated signals injected into real noise.`,
               visual: { type: 'sg2-matched', params: { Mc: 30, tpl: 30, amp: 1, seed: 3, panels: ['data', 'snr'], controls: false, readout: false }, caption: 'A synthetic one-second record hiding a 30 M☉ chirp (top) and the matched filter’s output (bottom). The simulation’s noise, not the thesis’s data.' },
             };
           }
@@ -796,15 +796,15 @@ const ROUNDS = [
           if (P === 'gw') {
             const side = x >= MC_PUB ? MC_UP : MC_LO;
             return {
-              prompt: t`Thesis: **${TITLE.gw}**. Your synthetic-data result is $\mathcal M = ${x.toFixed(1)} \pm ${s.toFixed(1)}\,M_\odot$ (one standard deviation). The published detector-frame value is $30.2^{+2.5}_{-1.9}\,M_\odot$ — a median with a **90% credible** interval, which for a Gaussian spans $\pm 1.645\sigma$. Using the side of the published interval that faces your value, by how many standard deviations do the two differ?`,
+              prompt: t`Thesis: **${TITLE.gw}**. Your synthetic-data result is $\mathcal M = ${x.toFixed(1)} \pm ${s.toFixed(1)}\,M_\odot$ (one standard deviation). The published detector-frame value is $30.4^{+2.1}_{-1.9}\,M_\odot$ — a median with a **90% credible** interval, which for a Gaussian spans $\pm 1.645\sigma$. Using the side of the published interval that faces your value, by how many standard deviations do the two differ?`,
               answer: key, tol: { rel: 0.02 },
               errors: apart([
                 { value: d / Math.hypot(s, side), feedback: t`The published interval is a 90% interval, not $1\sigma$: divide $${side}$ by $1.645$ first.` },
                 { value: d / (s + sp), feedback: 'Independent uncertainties combine in quadrature, not linearly.' },
                 { value: d / s, feedback: 'The published value has an uncertainty too: combine both in quadrature.' },
-                { value: d / Math.hypot(s, (x >= MC_PUB ? MC_LO : MC_UP) / Z90), feedback: t`Use the side of the interval that faces your value: it lies ${x >= MC_PUB ? 'above' : 'below'} 30.2, so the ${x >= MC_PUB ? t`$+2.5$` : t`$-1.9$`} side.` },
+                { value: d / Math.hypot(s, (x >= MC_PUB ? MC_LO : MC_UP) / Z90), feedback: t`Use the side of the interval that faces your value: it lies ${x >= MC_PUB ? 'above' : 'below'} 30.4, so the ${x >= MC_PUB ? t`$+2.5$` : t`$-1.9$`} side.` },
               ], key),
-              hints: [t`Convert: $\sigma_{\text{pub}} = ${side}/1.645 = ${sp.toFixed(2)}\,M_\odot$.`, t`$z = |\mathcal M - 30.2|/\sqrt{\sigma^2 + \sigma_{\text{pub}}^2}$.`],
+              hints: [t`Convert: $\sigma_{\text{pub}} = ${side}/1.645 = ${sp.toFixed(2)}\,M_\odot$.`, t`$z = |\mathcal M - 30.4|/\sqrt{\sigma^2 + \sigma_{\text{pub}}^2}$.`],
               teach: t`Agreement is a number: the difference over the combined uncertainty — after converting every interval to the same convention.`,
               explain: t`$\sigma_{\text{pub}} = ${side}/1.645 = ${sp.toFixed(2)}$, so $z = ${d.toFixed(1)}/\sqrt{${s.toFixed(1)}^2 + ${sp.toFixed(2)}^2} = ${key.toFixed(2)}$. ${key < 2 ? 'Consistent: a difference this size happens by chance often.' : 'Worth a look: before claiming anything, hunt for a difference in inputs or conventions.'} Taking the 90% half-width as if it were $1\sigma$ would have made the agreement look better than it is.`,
               visual: comparePic({ ...cmp(P, x, s), ylabel: YLAB[P], caption: CMPCAP[P] }),
@@ -845,9 +845,9 @@ const ROUNDS = [
         gen(r, v) {
           const P = projectOf(r, 'r3-verdict', v), C = verdictCase(r, P), { v: x, s, z } = C;
           const val = P === 'gw' ? t`$\mathcal M = ${x.toFixed(1)} \pm ${s.toFixed(1)}\,M_\odot$` : P === 'transit' ? t`$R_p = ${x.toFixed(2)} \pm ${s.toFixed(2)}\,R_\oplus$` : t`$${x.toFixed(4)}'' \pm ${s.toFixed(4)}''$ per century`;
-          const pub = P === 'gw' ? t`$30.2^{+2.5}_{-1.9}\,M_\odot$` : P === 'transit' ? t`$1.47^{+0.03}_{-0.02}\,R_\oplus$` : t`formula’s $${FORMULA.toFixed(4)}''$`;
+          const pub = P === 'gw' ? t`$30.4^{+2.1}_{-1.9}\,M_\odot$` : P === 'transit' ? t`$1.47^{+0.03}_{-0.02}\,R_\oplus$` : t`formula’s $${FORMULA.toFixed(4)}''$`;
           const confirm = {
-            gw: [t`It independently confirms GW150914’s published chirp mass: two analyses now agree`, t`The synthetic chirp was built with $30.2\,M_\odot$, so a working pipeline had to find it. Confirming the event’s mass needs the real strain data — a replication, with new data.`],
+            gw: [t`It independently confirms GW150914’s published chirp mass: two analyses now agree`, t`The synthetic chirp was built with $30.4\,M_\odot$, so a working pipeline had to find it. Confirming the event’s mass needs the real strain data — a replication, with new data.`],
             transit: [t`It independently confirms Kepler-10b’s published radius: two analyses now agree`, t`The synthetic light curve was built with the published ratio, so a working pipeline had to find it. Confirming the planet’s radius needs the real Kepler photometry.`],
             mercury: [t`It confirms general relativity: the simulated orbit turns by just the observed amount`, t`You reproduced a prediction of general relativity from general relativity’s own equation. The test of the theory is the comparison with the observed anomaly — which your project did not make.`],
           }[P];
@@ -915,10 +915,10 @@ const ROUNDS = [
           const X = x.toFixed(dec), S = s.toFixed(dec), Z = z.toFixed(1);
           const L = {
             gw: {
-              good: t`“On synthetic data built with GW150914’s published parameters, a leading-order matched filter recovers $\mathcal M = ${X} \pm ${S}\,M_\odot$ (detector frame), within $${Z}\sigma$ of the published $30.2^{+2.5}_{-1.9}\,M_\odot$: a check of the method, not a new measurement of the event.”`,
-              long: t`“We measure GW150914’s chirp mass to be $${vLong} \pm ${sLong}\,M_\odot$, consistent with the published $30.2\,M_\odot$.”`,
+              good: t`“On synthetic data built with GW150914’s published parameters, a leading-order matched filter recovers $\mathcal M = ${X} \pm ${S}\,M_\odot$ (detector frame), within $${Z}\sigma$ of the published $30.4^{+2.1}_{-1.9}\,M_\odot$: a check of the method, not a new measurement of the event.”`,
+              long: t`“We measure GW150914’s chirp mass to be $${vLong} \pm ${sLong}\,M_\odot$, consistent with the published $30.4\,M_\odot$.”`,
               conf: t`“Our matched-filter analysis confirms the chirp mass of GW150914, in excellent agreement with LIGO’s published value.”`,
-              prove: t`“On synthetic data our pipeline finds $\mathcal M = ${X}\,M_\odot$, proving the published value of $30.2\,M_\odot$ correct.”`,
+              prove: t`“On synthetic data our pipeline finds $\mathcal M = ${X}\,M_\odot$, proving the published value of $30.4\,M_\odot$ correct.”`,
               pic: trackPic(MC_PUB, 'The thesis’s key fit: 40 synthetic frequency readings with 1.5% scatter (grey), the chirp they were built from (blue) and the fitted chirp (gold, dashed). Leading order, no merger.', { fit: x, scatter: 0.015 }),
             },
             transit: {
