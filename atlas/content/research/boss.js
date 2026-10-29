@@ -94,7 +94,7 @@ export const tension = (P, v, s) => Math.abs(v - pubValue(P)) / Math.hypot(s, si
 
 // ── pictures ─────────────────────────────────────────────────────────────────
 /** A chirp's frequency against time on the record, coalescing at tc; optional readings P, Q and a fitted second track. */
-function trackPic(Mc, caption, { tc = 0.3, pts = [], fit = null, extra = {} } = {}) {
+function trackPic(Mc, caption, { tc = 0.3, pts = [], fit = null, scatter = 0, extra = {} } = {}) {
   const fn = (m) => `(5/(256*max(${tc} - x, 0.0004)))^0.375/(pi*${(m * TSUN).toExponential(5)}^0.625)`;
   const curves = [{ fn: fn(Mc), domain: [0, r6(tc - 0.0012)], color: 'accent', width: 2.2 }];
   if (fit) curves.push({ fn: fn(fit), domain: [0, r6(tc - 0.0012)], color: 'gold', width: 1.8, dash: [6, 4] });
@@ -103,20 +103,23 @@ function trackPic(Mc, caption, { tc = 0.3, pts = [], fit = null, extra = {} } = 
     params: {
       x: [0, r6(tc + 0.02)], y: [0, 260], aspect: 'wide', axesAt: 'edge', xlabel: 'time on the record (s)', ylabel: 'GW frequency (Hz)', xticks: 6, yticks: 4,
       curves,
-      points: pts.map(([x, y, label]) => ({ x: r6(x), y: r6(y), color: 'gold', r: 5, label, labelDx: -16, labelDy: -8 })),
+      points: [
+        ...pts.map(([x, y, label]) => ({ x: r6(x), y: r6(y), color: 'gold', r: 5, label, labelDx: -16, labelDy: -8 })),
+        ...(scatter ? (() => { const g = normals(150914); return Array.from({ length: 40 }, (_, i) => { const x = (0.96 * tc * i) / 39; return { x: r6(x), y: r6(fOf(MC_PUB, tc - x) * (1 + scatter * g())), color: 'ink3', r: 2.6 }; }); })() : []),
+      ],
       ...extra,
     },
     caption,
   };
 }
 /** A folded transit: synthetic points (seeded) and the box model, in ppm against hours from mid-transit. */
-function foldPic(caption, { depth = K10 ** 2 * 1e6, noise = 100, seed = 10, model = true, hl = [] } = {}) {
+function foldPic(caption, { depth = K10 ** 2 * 1e6, noise = 100, seed = 10, model = true, hl = [], base = 0 } = {}) {
   const g = normals(seed), u = makeRng(seed + 1);
-  const pts = Array.from({ length: 150 }, () => { const h = -6 + 12 * u.next(); return [h, (Math.abs(h) < 0.9 ? -depth : 0) + noise * g()]; });
+  const pts = Array.from({ length: 150 }, () => { const h = -6 + 12 * u.next(); return [h, base + (Math.abs(h) < 0.9 ? -depth : 0) + noise * g()]; });
   return {
     type: 'graph',
     params: {
-      x: [-6, 6], y: [r6(-depth - 3.2 * noise), r6(3.2 * noise)], aspect: 'wide', axesAt: 'edge', xlabel: 'hours from mid-transit', ylabel: 'flux change (ppm)', xticks: 6, yticks: 4,
+      x: [-6, 6], y: [r6(base - depth - 3.2 * noise), r6(base + 3.2 * noise)], aspect: 'wide', axesAt: 'edge', xlabel: 'hours from mid-transit', ylabel: 'flux change (ppm)', xticks: 6, yticks: 4,
       points: pts.map(([x, y]) => ({ x: r6(x), y: r6(y), r: 2.2, color: 'ink3' })),
       ...(model ? { curves: [{ fn: `-${r6(depth)}*step(0.9 - abs(x))`, color: 'gold', width: 2.4, samples: 3000 }] } : {}),
       hlines: hl,
@@ -135,7 +138,7 @@ function lamPic(pts, caption, { fit = false } = {}) {
   return {
     type: 'graph',
     params: {
-      x: [-200, 3300], y: [r6(lo - 0.006), r6(hi + 0.006)], aspect: 'wide', axesAt: 'edge', xlabel: 'exaggeration factor λ', ylabel: 'advance ÷ λ (″ per century)', xticks: 6, yticks: 4,
+      x: [-200, 3300], y: [r6(lo - 0.006), r6(hi + 0.006)], aspect: 'wide', axesAt: 'edge', xlabel: 'exaggeration factor λ', ylabel: '', xticks: 6, yticks: 4,
       points: pts.map(([x, y]) => ({ x, y, color: 'gold', r: 5 })),
       ...(fit ? { curves: [{ fn: `${r6(b0)} + ${r6(sl)}*x`, domain: [0, 3200], color: 'accent', dash: [6, 4], width: 1.6 }] } : {}),
     },
@@ -143,7 +146,7 @@ function lamPic(pts, caption, { fit = false } = {}) {
   };
 }
 /** Your result beside the published one, with error bars (asymmetric for the published value); `flaw` drafts a bad figure. */
-function comparePic({ v, s, pv, pu, pl, ylabel, caption, flaw = null }) {
+function comparePic({ v, s, pv, pu, pl, ylabel, caption, flaw = null, pubLabel = 'published' }) {
   const mine = [[1, v, s]], theirs = [[2, pv, pu, pl]];
   let y = [Math.min(v - s, pv - pl), Math.max(v + s, pv + pu)];
   const pad = 0.35 * (y[1] - y[0]);
@@ -157,20 +160,20 @@ function comparePic({ v, s, pv, pu, pl, ylabel, caption, flaw = null }) {
   }
   const top = y[1] - 0.06 * (y[1] - y[0]);
   points.push({ x: 1, y: r6(top), r: 0, label: 'this thesis', color: 'accent', labelAlign: 'center', labelDx: 0, labelDy: 0 });
-  if (flaw !== 'nocompare') points.push({ x: 2, y: r6(top), r: 0, label: 'published', color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 });
+  if (flaw !== 'nocompare') points.push({ x: 2, y: r6(top), r: 0, label: pubLabel, color: 'gold', labelAlign: 'center', labelDx: 0, labelDy: 0 });
   return {
     type: 'graph',
     params: { x: flaw === 'nocompare' ? [0.3, 1.7] : [0.3, 2.7], y: [r6(y[0]), r6(y[1])], aspect: 'wide', axesAt: 'edge', xticks: 0, yticks: 4, xlabel: '', ylabel, curves, points },
     caption,
   };
 }
-const YLAB = { gw: 'chirp mass (M☉)', transit: 'planet radius (R⊕)', mercury: 'advance (″ per century)' };
+const YLAB = { gw: 'chirp mass (M☉)', transit: 'planet radius (R⊕)', mercury: '' };          // Mercury's long tick labels leave no room: its unit is in the caption
 /** Each project's numbers for a comparison picture. */
-const cmp = (P, v, s) => (P === 'gw' ? { v, s, pv: MC_PUB, pu: MC_UP / Z90, pl: MC_LO / Z90 } : P === 'transit' ? { v, s, pv: RP_PUB, pu: RP_UP, pl: RP_LO } : { v, s, pv: FORMULA, pu: 0, pl: 0 });
+const cmp = (P, v, s) => (P === 'gw' ? { v, s, pv: MC_PUB, pu: MC_UP / Z90, pl: MC_LO / Z90 } : P === 'transit' ? { v, s, pv: RP_PUB, pu: RP_UP, pl: RP_LO } : { v, s, pv: FORMULA, pu: 0, pl: 0, pubLabel: 'formula' });
 const CMPCAP = {
   gw: 'Your synthetic-data result (blue, ±1σ) beside the published detector-frame chirp mass (gold; its 90% credible interval drawn as ±1σ, i.e. divided by 1.645).',
   transit: 'Your synthetic-data result (blue, ±1σ) beside Dumusque et al.’s published radius (gold, +0.03/−0.02 R⊕).',
-  mercury: 'Your integration (blue, ±1σ numerical uncertainty) beside the formula’s value for the same model (gold), which is exact and has no error bar.',
+  mercury: 'Advance in ″ per century: your integration (blue, ±1σ numerical uncertainty) beside the formula’s value for the same model (gold), which is exact and has no error bar.',
 };
 /** Clemence's 1947 tally of Mercury's perihelion turning, as bars (″ per century). */
 const tallyPic = (caption) => timeBars([
@@ -180,10 +183,10 @@ const tallyPic = (caption) => timeBars([
   { y: 0, from: 5557, to: 5600, color: 'gold', label: 'the rest ≈ 43', labelX: 4700 },
 ], { x: [-150, 6000], y: [-0.6, 3.8], xlabel: 'perihelion turning (″ per century)', xticks: 6 }, { h: 0.28, caption });
 /** A budget's inputs as a Monte Carlo cloud (labx-stats), numbers hidden. */
-const mcPic = (f, x, y, names, caption) => ({ type: 'labx-stats', params: { mode: 'mc', f, x, y, N: 20000, xname: names[0], yname: names[1], fname: names[2], controls: false, readout: false, seed: 4 }, caption });
+const mcPic = (f, x, y, names, caption) => ({ type: 'labx-stats', params: { mode: 'mc', f, x, y, N: 20000, xname: names[0], yname: names[1], fname: names[2], controls: false, readout: false, hide: ['mc'], seed: 4 }, caption });
 /** A notebook whose cells were run out of order. */
 const NB = {
-  gw: ['make synthetic chirp', 'whiten and filter', 'template bank', 'fit chirp mass', 'figure'],
+  gw: ['make synthetic chirp', 'read frequency track', 'template bank', 'fit chirp mass', 'figure'],
   transit: ['make light curve', 'detrend', 'period search', 'fold and fit', 'figure'],
   mercury: ['constants', 'integrate', 'null test', 'extrapolate', 'figure'],
 };
@@ -195,10 +198,10 @@ const QUESTIONS = {
     setting: t`You have a semester, a laptop and the published papers on the first black-hole merger ever detected.`,
     right: t`Does a leading-order matched filter, run on a synthetic chirp built with GW150914’s published detector-frame chirp mass, recover that mass — and with what uncertainty?`,
     wrong: [
-      { text: 'Is general relativity correct?', why: t`No single project shows a theory correct, and this question names no observable and no rival prediction your data could separate.` },
-      { text: 'What are the masses of GW150914’s two black holes, separately?', why: t`A leading-order chirp depends on the masses only through the chirp mass $\mathcal M$: two pairs with the same $\mathcal M$ give the same waveform, so your model cannot answer this.` },
-      { text: 'Find every binary black-hole merger in LIGO’s public data.', why: t`That is a survey of several years of data, not a semester: the result you must have would come months after the deadline. Scope creep.` },
-      { text: 'Why are black holes of about 30 solar masses so common?', why: t`An open question about how massive stars live and die; one event’s chirp, real or synthetic, cannot answer it.` },
+      { text: 'Is general relativity correct? GW150914 is the cleanest strong-field test there is, so a semester on it should settle the question.', why: t`No single project shows a theory correct, and this question names no observable and no rival prediction your data could separate.` },
+      { text: 'What are the masses of GW150914’s two black holes, separately, from the same synthetic chirp and the same leading-order filter?', why: t`A leading-order chirp depends on the masses only through the chirp mass $\mathcal M$: two pairs with the same $\mathcal M$ give the same waveform, so your model cannot answer this.` },
+      { text: 'Find every binary black-hole merger in LIGO’s public data with the same matched filter, and measure each one’s chirp mass.', why: t`That is a survey of several years of data, not a semester: the result you must have would come months after the deadline. Scope creep.` },
+      { text: 'Why are black holes of about 30 solar masses so common — what does GW150914 say about how massive stars die?', why: t`An open question about how massive stars live and die; one event’s chirp, real or synthetic, cannot answer it.` },
     ],
     explain: t`A good question names **one observable** (the chirp mass), **the comparison that settles it** (the published $30.2^{+2.5}_{-1.9}\,M_\odot$, detector frame) and **data that can reach it** (a synthetic chirp you control, so you know the right answer). The rest name no observable, ask what a leading-order model cannot see, or would take years. This is the project of ${LINK.gw}.`,
     pic: () => ({ type: 'gr-chirp', params: { m1: 36, m2: 29, D: 410, sliders: false, play: false, readout: false }, caption: 'A leading-order chirp from black holes of 36 and 29 solar masses at 410 Mpc (GW150914’s published values) and the detector arms it stretches, enormously exaggerated. No merger or ringdown is modelled.' }),
@@ -207,10 +210,10 @@ const QUESTIONS = {
     setting: t`You have a semester, a laptop and the published papers on Kepler’s first rocky planet.`,
     right: t`Does a detrend–search–fold pipeline recover Kepler-10b’s published radius ratio, $R_p/R_\star = 0.01261$, from synthetic Kepler-like photometry — and with what uncertainty?`,
     wrong: [
-      { text: 'Is Kepler-10b rocky?', why: t`Rock or gas is decided by the density, which needs the mass — and the mass comes from the star’s radial-velocity wobble, which a light curve cannot give.` },
-      { text: 'Does Kepler-10 also have an Earth-sized planet in its habitable zone?', why: t`An Earth-sized transit there is under 100 ppm deep and comes about once a year: forty days of photometry cannot answer it either way.` },
-      { text: 'Measure the radius of every planet Kepler found.', why: t`Thousands of light curves, each with its own star and systematics: a survey, not a semester. Scope creep.` },
-      { text: 'Why are there so many planets smaller than Neptune?', why: t`A population question for thousands of planets and models of how they form; one planet’s light curve cannot answer it.` },
+      { text: 'Is Kepler-10b rocky — does its light curve show a solid surface rather than a thick gas envelope?', why: t`Rock or gas is decided by the density, which needs the mass — and the mass comes from the star’s radial-velocity wobble, which a light curve cannot give.` },
+      { text: 'Does Kepler-10 also have an Earth-sized planet in its habitable zone, hidden in the same forty days of photometry?', why: t`An Earth-sized transit there is under 100 ppm deep and comes about once a year: forty days of photometry cannot answer it either way.` },
+      { text: 'Measure the radius of every planet Kepler found, with the same detrend–search–fold pipeline and the same noise model.', why: t`Thousands of light curves, each with its own star and systematics: a survey, not a semester. Scope creep.` },
+      { text: 'Why are there so many planets smaller than Neptune — what does Kepler-10b say about how such planets form?', why: t`A population question for thousands of planets and models of how they form; one planet’s light curve cannot answer it.` },
     ],
     explain: t`A good question names **one observable** (the radius ratio, then the radius), **the comparison that settles it** (Dumusque et al.’s $0.01261$ and $1.47\,R_\oplus$) and **data that can reach it** (synthetic photometry with Kepler-like noise, so you know the right answer). The rest need a mass, years of data or thousands of planets. This is the project of ${LINK.transit}.`,
     pic: () => foldPic('A synthetic folded transit with Kepler-10b’s published depth: every orbit stacked on one time axis, 100 ppm noise, with the box model (gold). No limb darkening.'),
@@ -219,13 +222,13 @@ const QUESTIONS = {
     setting: t`You have a semester, a laptop with SciPy and the published tests of general relativity.`,
     right: t`Does Newtonian gravity plus the leading general-relativistic term, integrated numerically, reproduce Mercury’s $42.98''$ per century — with the integrator’s own drift shown to be far smaller?`,
     wrong: [
-      { text: t`Account for all $5600''$ per century of Mercury’s observed perihelion turning.`, why: t`About $5025''$ of it is the precession of Earth’s equinoxes and $532''$ the other planets’ pull: a reference-frame and many-body problem far beyond one semester.` },
-      { text: 'Prove that general relativity is correct.', why: t`Reproducing a prediction tests your code, and even a real measurement agreeing with it is evidence, not proof.` },
-      { text: 'Is there an undiscovered planet, Vulcan, inside Mercury’s orbit?', why: t`A different question, answered by searching the sky — and the anomaly that once suggested Vulcan is the general-relativistic term itself.` },
-      { text: 'Does general relativity break down near the Sun?', why: t`An open-ended question with no stated observable or rival prediction; a simulation of GR’s own equation cannot show GR failing.` },
+      { text: t`Account for all $5600''$ per century of Mercury’s observed perihelion turning, from one numerical integration of its orbit.`, why: t`About $5025''$ of it is the precession of Earth’s equinoxes and $532''$ the other planets’ pull: a reference-frame and many-body problem far beyond one semester.` },
+      { text: 'Prove that general relativity is correct, by matching its prediction for Mercury to more decimal places than anyone before.', why: t`Reproducing a prediction tests your code, and even a real measurement agreeing with it is evidence, not proof.` },
+      { text: t`Is there an undiscovered planet, Vulcan, inside Mercury’s orbit that could produce the same $43''$ per century?`, why: t`A different question, answered by searching the sky — and the anomaly that once suggested Vulcan is the general-relativistic term itself.` },
+      { text: 'Does general relativity break down near the Sun, where its field is strongest anywhere in the solar system?', why: t`An open-ended question with no stated observable or rival prediction; a simulation of GR’s own equation cannot show GR failing.` },
     ],
     explain: t`A good question names **one observable** (the advance per century), **the comparison that settles it** (the published $42.98''$) and **a test that could fail** (the integrator’s drift, measured with the relativistic term switched off). The rest are too big, name no observable or need telescopes. This is the project of ${LINK.mercury}.`,
-    pic: () => orbitPic('Newton plus the relativistic term: the orbit’s ellipse turns a little each time round. The effect is exaggerated about a million times here; Mercury’s is 0.1″ per orbit.'),
+    pic: () => orbitPic('Newton plus the relativistic term: the orbit’s ellipse turns a little each time round. The effect is exaggerated hundreds of thousands of times here; Mercury’s is 0.1″ per orbit.'),
   },
 };
 
@@ -594,7 +597,7 @@ const ROUNDS = [
             hints: [t`$a = 0.3871 \times 1.496\times10^{11}$ m $= ${sci(0.3871 * 1.496e11, 4)}$ m.`, t`$6\pi GM/(c^2a(1-e^2))$ is in radians; multiply by $\lambda$, then by $206\,265''$ per radian.`],
             teach: t`Size the effect before simulating: an advance of a tenth of an arcsecond per orbit is what the integrator’s own error must stay far below.`,
             explain: t`$\Delta\phi = ${lam}\times${sci(rad / lam, 4)}$ rad $= ${sci(rad, 4)}$ rad $= ${key.toFixed(key < 100 ? 2 : 1)}''$ per orbit. Unexaggerated it is $${((rad / lam) * ARC).toFixed(4)}''$ — about one part in ${(1.296e6 / ((rad / lam) * ARC) / 1e6).toFixed(0)} million of a turn per orbit, which is why the thesis exaggerates the term, and why it must show the integrator’s drift is smaller still.`,
-            visual: orbitPic('The orbit turns a little each time round under Newton plus the relativistic term, exaggerated about a million times here.'),
+            visual: orbitPic('The orbit turns a little each time round under Newton plus the relativistic term, exaggerated hundreds of thousands of times here.'),
           };
         },
       }),
@@ -621,7 +624,7 @@ const ROUNDS = [
               ], key),
               hints: [t`Subtract the equation at $Q$ from the one at $P$: $f_P^{-8/3} - f_Q^{-8/3} = \tfrac{256}{5}\pi^{8/3}(G\mathcal M/c^3)^{5/3}\,(t_Q - t_P)$.`, t`Solve for $(G\mathcal M/c^3)^{5/3}$, raise to $3/5$ to get seconds, then divide by $4.925\times10^{-6}$ s.`, t`Here $f_P^{-8/3} - f_Q^{-8/3} = ${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}\ \text{Hz}^{-8/3}$.`],
               teach: t`Two readings of a chirp’s frequency fix its chirp mass, with the unknown coalescence time cancelling in the difference.`,
-              explain: t`$(G\mathcal M/c^3)^{5/3} = \dfrac{${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}}{\tfrac{256}{5}\pi^{8/3}\times${T2}} = ${sci(K, 4)}\ \text{s}^{5/3}$, so $G\mathcal M/c^3 = ${sci(K ** 0.6, 4)}$ s and $\mathcal M = ${key.toFixed(1)}\,M_\odot$ — within reading error of the $30.2$ built in. Two points are the least a fit can use; the code item uses forty.`,
+              explain: t`$$\left(\frac{G\mathcal M}{c^3}\right)^{5/3} = \frac{${sci(F1 ** (-8 / 3) - F2 ** (-8 / 3), 4)}}{\tfrac{256}{5}\pi^{8/3}\times${T2}} = ${sci(K, 4)}\ \text{s}^{5/3},$$ so $G\mathcal M/c^3 = ${sci(K ** 0.6, 4)}$ s and $\mathcal M = ${key.toFixed(1)}\,M_\odot$ — within reading error of the $30.2$ built in. Two points are the least a fit can use; the code item uses forty.`,
               visual: trackPic(MC_PUB, 'The synthetic chirp’s frequency on the record (blue) and the two readings P and Q (gold). Leading order; the merger is not modelled.', { tc: r6(C.tc), pts: [[0, F1, 'P'], [T2, F2, 'Q']] }),
             };
           }
@@ -639,7 +642,7 @@ const ROUNDS = [
               hints: [t`The depth is out minus in: $\delta = ${o} + ${i}$ ppm.`, t`$R_p/R_\star = \sqrt{\delta}$ with $\delta$ as a fraction, then $R_p = \sqrt\delta \times 1.065 \times 109.08\,R_\oplus$.`],
               teach: t`The depth is measured from the out-of-transit level, and it is an area ratio: the radius ratio is its square root.`,
               explain: t`$\delta = ${depth}$ ppm, so $R_p/R_\star = \sqrt{${depth}\times10^{-6}} = ${k.toFixed(5)}$ and $R_p = ${k.toFixed(5)} \times 1.065 \times 109.08 = ${key.toFixed(3)}\,R_\oplus$ — against the $0.01261$ and $1.465\,R_\oplus$ built into the synthetic data.`,
-              visual: foldPic('The synthetic folded transit (grey), with the out-of-transit and in-transit averages (dashed). No limb darkening.', { model: false, hl: [{ y: o, label: 'out of transit', color: 'good' }, { y: -i, label: 'in transit', color: 'gold' }] }),
+              visual: foldPic('The synthetic folded transit (grey), with the out-of-transit and in-transit averages (dashed). No limb darkening.', { model: false, depth, base: o, hl: [{ y: o, label: 'out of transit', color: 'good' }, { y: -i, label: 'in transit', color: 'gold' }] }),
             };
           }
           const { l1, y1, l2, y2, slope, key } = C;
@@ -654,7 +657,7 @@ const ROUNDS = [
             hints: [t`The slope is $(${y2.toFixed(4)} - ${y1.toFixed(4)})/(${l2} - ${l1})$ per unit $\lambda$.`, t`The intercept is $${y1.toFixed(4)} - \text{slope}\times${l1}$.`],
             teach: t`Exaggerate an effect too small to resolve, then extrapolate the scaled result back to the true value — the λ² part drops out at λ = 0.`,
             explain: t`Slope $= {${sci(slope, 4)}}''$ per century per unit $\lambda$, so the intercept is $${y1.toFixed(4)} - ${sci(slope, 4)}\times${l1} = ${key.toFixed(4)}''$ per century — the formula’s $${FORMULA.toFixed(4)}''$ and the published $42.98''$.`,
-            visual: lamPic([[l1, y1], [l2, y2]], 'The two exaggerated runs: advance divided by λ against λ. The line back to λ = 0 is yours to draw.'),
+            visual: lamPic([[l1, y1], [l2, y2]], 'The two exaggerated runs: the advance divided by λ (″ per century, vertical) against λ. The line back to λ = 0 is yours to draw.'),
           };
         },
       }),
@@ -673,16 +676,16 @@ const ROUNDS = [
         id: 'r2-check', skill: 'research.R5.1', difficulty: 3,
         gen(r, v) {
           const P = projectOf(r, 'r2-check', v), C = checkCase(r, P);
-          const same = t`Rerunning the script reproduces the result to every digit`;
+          const same = t`Rerunning the script reproduces the result to every digit, on two different computers`;
           const sameWhy = t`That shows the analysis is reproducible, not that it is right: a biased pipeline returns the same biased number every time.`;
           if (P === 'gw') {
             return {
               prompt: t`Thesis: **${TITLE.gw}**. Your pipeline returns $\mathcal M = ${C.v} \pm ${C.s}\,M_\odot$ from the synthetic chirp built with $30.2\,M_\odot$. A referee asks how you know it measures the chirp mass, rather than returning something near 30 whatever the data hold. Which reply is strongest?`,
               choices: [
                 t`Chirps of other known masses, $${C.inj[0]}$ and $${C.inj[1]}\,M_\odot$, injected into fresh noise and analysed blind, come back within their uncertainties`,
-                t`The result agrees with the published $30.2\,M_\odot$`,
+                t`The result agrees with the published $30.2\,M_\odot$, well inside the uncertainties`,
                 same,
-                t`The peak SNR is far above anything the noise alone produces`,
+                t`The peak SNR is far above anything the noise alone produces, so the signal is unmistakable`,
               ],
               answer: 0,
               why: { 1: t`The data were built with 30.2: a pipeline that ignored them and printed 30 would agree too. A check must be able to fail.`, 2: sameWhy, 3: t`Significance says a chirp is present; it says nothing about whether its mass comes out unbiased.` },
@@ -697,9 +700,9 @@ const ROUNDS = [
               prompt: t`Thesis: **${TITLE.transit}**. Your pipeline returns $R_p = ${C.v.toFixed(2)} \pm ${C.s.toFixed(2)}\,R_\oplus$ from synthetic photometry built with the published radius ratio. A referee asks how you know the detrending and folding do not distort the depth. Which reply is strongest?`,
               choices: [
                 t`Transits of other known depths, ${C.inj[0]} and ${C.inj[1]} ppm, and a light curve with no transit at all, injected into fresh noise, come back within their uncertainties — zero for the empty one`,
-                t`The radius agrees with the published $1.47\,R_\oplus$`,
+                t`The radius agrees with the published $1.47\,R_\oplus$, well inside the uncertainties`,
                 same,
-                t`The folded transit looks clean and box-shaped`,
+                t`The folded transit looks clean and box-shaped, with no trace of the stellar wobble left`,
               ],
               answer: 0,
               why: { 1: t`The data were built with the published ratio: agreement is what a working pipeline must give, but a test must be able to fail.`, 2: sameWhy, 3: t`A fold can look clean while a detrending filter has eaten a third of the depth — a filter narrower than the transit does exactly that. Only a number tested against a known input shows it.` },
@@ -714,16 +717,16 @@ const ROUNDS = [
             prompt: t`Thesis: **${TITLE.mercury}**. Your integration (solver tolerance $\text{rtol} = ${rt}$) reproduces $42.98''$ per century. A referee asks how you know the advance comes from the relativistic term and not from the integrator. Which reply is strongest?`,
             choices: [
               t`With the relativistic term switched off ($\lambda = 0$) the same code gives $${C.drift}''$ per century — ${C.pct < 0.01 ? C.pct.toFixed(3) : C.pct.toFixed(2)}% of the signal — and the advance grows in proportion to $\lambda$, as the physics requires`,
-              t`The result matches the published $42.98''$`,
+              t`The result matches the published $42.98''$ to all four significant figures`,
               same,
-              t`DOP853, an eighth-order method, is well tested`,
+              t`DOP853, an eighth-order method, is well tested and widely used for orbits`,
             ],
             answer: 0,
             why: { 1: t`Matching the number you were aiming for could be luck or tuning; the referee asks for a test that could have failed.`, 2: sameWhy, 3: t`A good method can still be misused — too loose a tolerance, a wrong initial condition. Only tests on this problem show it worked here.` },
             hints: ['Which of these tests could the integration fail if the integrator were the cause?', 'What should a Newton-only orbit do?'],
             teach: t`A check is evidence only if it could have failed: switch the effect off and see the result vanish, or vary it and see the result scale.`,
             explain: t`A null test could have failed: at a looser tolerance ($\text{rtol} = 10^{-8}$) the same code reports $4.7''$ of fake precession per century. At $\text{rtol} = ${rt}$ the drift is $${C.drift}''$, far below the $43''$ signal, and the linear growth with $\lambda$ is a second test the physics had to pass.`,
-            visual: orbitPic('Newton plus the relativistic term, exaggerated about a million times so the turning shows. An integrator’s error can turn an orbit too.'),
+            visual: orbitPic('Newton plus the relativistic term, exaggerated hundreds of thousands of times so the turning shows. An integrator’s error can turn an orbit too.'),
           };
         },
       }),
@@ -781,7 +784,7 @@ const ROUNDS = [
             hints: [t`Richardson: with order $p$, the fine run’s error is about $|q_N - q_{2N}|/(2^p - 1)$.`, t`Here $(${coarse.toFixed(4)} - ${fine.toFixed(4)})/15 = ${u.toFixed(5)}''$.`, t`Then $\sqrt{d^2 + u^2 + e^2}$ with all three in the same units.`],
             teach: t`A simulation’s budget is numerical: drift, discretization (from a resolution study) and any extrapolation, combined in quadrature like any other entries.`,
             explain: t`The step-size entry is $${D.toFixed(4)}/15 = ${u.toFixed(5)}''$, so the total is $\sqrt{${d.toFixed(4)}^2 + ${u.toFixed(5)}^2 + ${e.toFixed(4)}^2} = ${key.toFixed(5)}''$ per century — about ${((100 * key) / 42.98).toFixed(3)}% of the signal. Constants such as $GM_\odot$ and Mercury’s orbit are known far better and stay out of the budget.`,
-            visual: { type: 'graph', params: { x: [2.8, 3.5], y: [r6(fine - 0.25 * D), r6(coarse + 0.3 * D)], aspect: 'wide', axesAt: 'edge', xlog: true, xlabel: 'steps per orbit', ylabel: 'advance (″ per century)', xticks: 3, yticks: 4, points: [{ x: 3, y: coarse, color: 'accent', r: 5, label: 'N = 1000', labelDx: 8, labelDy: -6 }, { x: r6(Math.log10(2000)), y: fine, color: 'accent', r: 5, label: 'N = 2000', labelDx: -64, labelDy: -8 }] }, caption: 'The two resolution runs of your study (fixed-step RK4). Halving the step shrinks a fourth-order error sixteenfold.' },
+            visual: { type: 'graph', params: { x: [2.8, 3.5], y: [r6(fine - 0.25 * D), r6(coarse + 0.3 * D)], aspect: 'wide', axesAt: 'edge', xlog: true, xlabel: 'steps per orbit', ylabel: '', xticks: 3, yticks: 4, points: [{ x: 3, y: coarse, color: 'accent', r: 5, label: 'N = 1000', labelDx: 8, labelDy: -6 }, { x: r6(Math.log10(2000)), y: fine, color: 'accent', r: 5, label: 'N = 2000', labelDx: -64, labelDy: -8 }] }, caption: 'The two resolution runs of your study (fixed-step RK4): the advance in ″ per century against steps per orbit. Halving the step shrinks a fourth-order error sixteenfold.' },
           };
         },
       }),
@@ -844,14 +847,14 @@ const ROUNDS = [
           const val = P === 'gw' ? t`$\mathcal M = ${x.toFixed(1)} \pm ${s.toFixed(1)}\,M_\odot$` : P === 'transit' ? t`$R_p = ${x.toFixed(2)} \pm ${s.toFixed(2)}\,R_\oplus$` : t`$${x.toFixed(4)}'' \pm ${s.toFixed(4)}''$ per century`;
           const pub = P === 'gw' ? t`$30.2^{+2.5}_{-1.9}\,M_\odot$` : P === 'transit' ? t`$1.47^{+0.03}_{-0.02}\,R_\oplus$` : t`formula’s $${FORMULA.toFixed(4)}''$`;
           const confirm = {
-            gw: [t`It independently confirms GW150914’s published chirp mass`, t`The synthetic chirp was built with $30.2\,M_\odot$, so a working pipeline had to find it. Confirming the event’s mass needs the real strain data — a replication, with new data.`],
-            transit: [t`It independently confirms Kepler-10b’s published radius`, t`The synthetic light curve was built with the published ratio, so a working pipeline had to find it. Confirming the planet’s radius needs the real Kepler photometry.`],
-            mercury: [t`It confirms general relativity`, t`You reproduced a prediction of general relativity from general relativity’s own equation. The test of the theory is the comparison with the observed anomaly — which your project did not make.`],
+            gw: [t`It independently confirms GW150914’s published chirp mass: two analyses now agree`, t`The synthetic chirp was built with $30.2\,M_\odot$, so a working pipeline had to find it. Confirming the event’s mass needs the real strain data — a replication, with new data.`],
+            transit: [t`It independently confirms Kepler-10b’s published radius: two analyses now agree`, t`The synthetic light curve was built with the published ratio, so a working pipeline had to find it. Confirming the planet’s radius needs the real Kepler photometry.`],
+            mercury: [t`It confirms general relativity: the simulated orbit turns by just the observed amount`, t`You reproduced a prediction of general relativity from general relativity’s own equation. The test of the theory is the comparison with the observed anomaly — which your project did not make.`],
           }[P];
           const combine = {
             gw: [t`It can now be combined with the published value to shrink the chirp mass’s uncertainty`, t`Your data contain nothing about the real event — only the number that was put in. Combining would count the published information twice.`],
             transit: [t`It can now be combined with the published value to shrink the radius’s uncertainty`, t`Your light curve holds no new photons from Kepler-10: only the ratio that was put in. Combining would count the published information twice.`],
-            mercury: [t`Your error bar must be too large, since the agreement is so close`, t`One comparison within $1\sigma$ happens two times in three. Only many comparisons — say a $\chi^2$ over many runs — could show the bars are too large.`],
+            mercury: [t`Your error bar must be too large, since the agreement is closer than one standard deviation`, t`One comparison within $1\sigma$ happens two times in three. Only many comparisons — say a $\chi^2$ over many runs — could show the bars are too large.`],
           }[P];
           return {
             prompt: t`Thesis: **${TITLE[P]}**. Your result, ${val}, lies within $${z.toFixed(1)}\sigma$ of the published ${pub}. What does this agreement establish?`,
@@ -859,7 +862,7 @@ const ROUNDS = [
               t`That your analysis reproduces the published number from data built with it — a check of the method, not a new measurement of nature`,
               confirm[0],
               combine[0],
-              P === 'mercury' ? t`The published uncertainty can now be reduced` : t`Your error bar must be too large, since the agreement is so close`,
+              P === 'mercury' ? t`The published uncertainty can now be reduced, since a second, independent calculation agrees` : t`Your error bar must be too large, since the agreement is closer than one standard deviation`,
             ],
             answer: 0,
             why: {
@@ -889,7 +892,7 @@ const ROUNDS = [
           const answer = flaw === 'nobars' ? 0 : 1;
           return {
             prompt: t`Thesis: **${TITLE[P]}**. This is the draft of the key figure: your synthetic-data result, to be judged against the published value. What must change before it goes in the thesis?`,
-            choices: [bars, pub, t`Use a logarithmic vertical axis`, t`Start the vertical axis at zero`],
+            choices: [bars, pub, t`Use a logarithmic vertical axis, so that values of any size sit comfortably on one scale`, t`Start the vertical axis at zero, so that the difference between the two cannot look exaggerated`],
             answer,
             why: {
               ...(flaw === 'nobars' ? { 1: t`The published value is there (gold). What is missing is how uncertain each number is.` } : { 0: t`Your point has its error bar. What is missing is the number it is meant to agree with.` }),
@@ -913,24 +916,24 @@ const ROUNDS = [
           const L = {
             gw: {
               good: t`“On synthetic data built with GW150914’s published parameters, a leading-order matched filter recovers $\mathcal M = ${X} \pm ${S}\,M_\odot$ (detector frame), within $${Z}\sigma$ of the published $30.2^{+2.5}_{-1.9}\,M_\odot$: a check of the method, not a new measurement of the event.”`,
-              long: t`“We measure GW150914’s chirp mass to be $${vLong} \pm ${sLong}\,M_\odot$.”`,
-              conf: t`“Our analysis confirms the chirp mass of GW150914, in excellent agreement with LIGO.”`,
-              prove: t`“On synthetic data our pipeline finds $\mathcal M = ${X}\,M_\odot$, proving the published value correct.”`,
-              pic: trackPic(MC_PUB, 'The thesis’s key fit: the synthetic chirp’s frequency track (blue) and the fitted chirp (gold, dashed). Leading order, no merger.', { fit: x }),
+              long: t`“We measure GW150914’s chirp mass to be $${vLong} \pm ${sLong}\,M_\odot$, consistent with the published $30.2\,M_\odot$.”`,
+              conf: t`“Our matched-filter analysis confirms the chirp mass of GW150914, in excellent agreement with LIGO’s published value.”`,
+              prove: t`“On synthetic data our pipeline finds $\mathcal M = ${X}\,M_\odot$, proving the published value of $30.2\,M_\odot$ correct.”`,
+              pic: trackPic(MC_PUB, 'The thesis’s key fit: 40 synthetic frequency readings with 1.5% scatter (grey), the chirp they were built from (blue) and the fitted chirp (gold, dashed). Leading order, no merger.', { fit: x, scatter: 0.015 }),
             },
             transit: {
               good: t`“On synthetic photometry built with Kepler-10b’s published parameters, our detrend–search–fold pipeline recovers $R_p = ${X} \pm ${S}\,R_\oplus$, within $${Z}\sigma$ of the published $1.47^{+0.03}_{-0.02}\,R_\oplus$: a check of the method, not a new measurement of the planet.”`,
-              long: t`“We measure Kepler-10b’s radius to be $${vLong} \pm ${sLong}\,R_\oplus$.”`,
-              conf: t`“Our analysis confirms the radius of Kepler-10b, in excellent agreement with the literature.”`,
-              prove: t`“On synthetic data our pipeline finds $R_p = ${X}\,R_\oplus$, proving the published radius correct.”`,
+              long: t`“We measure Kepler-10b’s radius to be $${vLong} \pm ${sLong}\,R_\oplus$, consistent with the published $1.47\,R_\oplus$.”`,
+              conf: t`“Our detrend–search–fold analysis confirms the radius of Kepler-10b, in excellent agreement with the published value.”`,
+              prove: t`“On synthetic data our pipeline finds $R_p = ${X}\,R_\oplus$, proving the published radius of $1.47\,R_\oplus$ correct.”`,
               pic: foldPic('The thesis’s key fit: the synthetic folded transit (grey) and the fitted box (gold). No limb darkening.'),
             },
             mercury: {
               good: t`“Integrating Newtonian gravity plus the leading relativistic term, with a null test bounding the integrator’s drift, we find a perihelion advance of $${X}'' \pm ${S}''$ per century for Mercury, within $${Z}\sigma$ of the formula’s $${FORMULA.toFixed(4)}''$ (the published $42.98''$); planets and the reference frame were left out.”`,
-              long: t`“We find Mercury’s relativistic perihelion advance to be $${vLong}'' \pm ${sLong}''$ per century.”`,
-              conf: t`“Our simulation confirms general relativity, in excellent agreement with observation.”`,
+              long: t`“We find Mercury’s relativistic perihelion advance to be $${vLong}'' \pm ${sLong}''$ per century, consistent with the published $42.98''$.”`,
+              conf: t`“Our numerical integration of Mercury’s orbit confirms general relativity, in excellent agreement with observation.”`,
               prove: t`“Our integration gives $${X}''$ per century, proving the published $42.98''$ correct.”`,
-              pic: lamPic(PER, 'The thesis’s key fit: advance divided by λ from the exaggerated runs (gold) and the straight line back to λ = 0 (dashed).', { fit: true }),
+              pic: lamPic(PER, 'The thesis’s key fit: the advance divided by λ (″ per century, vertical) from the exaggerated runs (gold) and the straight line back to λ = 0 (dashed).', { fit: true }),
             },
           }[P];
           return {
@@ -938,7 +941,7 @@ const ROUNDS = [
             choices: [L.good, L.long, L.conf, L.prove],
             answer: 0,
             why: {
-              1: t`Digits far beyond the uncertainty (round it to one or two significant figures, and the value to match) — and it hides that the data were synthetic, so it reads as a measurement of nature.`,
+              1: t`Digits far beyond the uncertainty (round it to one or two significant figures, and the value to match) — and “we measure” hides that the data were synthetic, so it reads as a measurement of nature.`,
               2: t`No number, no uncertainty, and “confirms”: data built from the published value cannot confirm it, and “excellent agreement” is an adjective where a number of $\sigma$ belongs.`,
               3: t`No uncertainty, and “proving”: agreement on data built from that value proves only that the pipeline works.`,
             },

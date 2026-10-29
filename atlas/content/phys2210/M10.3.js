@@ -101,8 +101,8 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
     }),
     mcq({
       id: 'least', difficulty: 1,
-      prompt: 'A flat plate can be spun about any of the four parallel axes A–D, each perpendicular to the plate. About which is its moment of inertia smallest?',
-      choices: ['B, through the centre of mass', 'A, at a corner', 'D, on an edge', 'All the same: same plate, same mass'],
+      prompt: 'A flat plate can be spun about any of the four parallel axes P–S, each perpendicular to the plate. About which is its moment of inertia smallest?',
+      choices: ['Q, through the centre of mass', 'P, at a corner', 'S, on an edge', 'All the same: same plate, same mass'],
       answer: 0,
       why: {
         1: 'A corner is the farthest any axis on the plate can be from the centre of mass: the largest Md².',
@@ -111,14 +111,14 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
       },
       hints: [t`$I = I_\text{cm} + Md^2$. For which axis is $d$ smallest?`],
       teach: 'Among parallel axes, the one through the centre of mass has the least moment of inertia.',
-      explain: t`Every other axis adds $Md^2 > 0$ to $I_\text{cm}$, so the axis through the centre of mass, B, has the least.`,
+      explain: t`Every other axis adds $Md^2 > 0$ to $I_\text{cm}$, so the axis through the centre of mass, Q, has the least.`,
       visual: {
         type: 'graph',
         params: {
           x: [-1.4, 1.4], y: [-0.9, 0.9], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           shade: [{ fn: '0.6', lower: '-0.6', from: -1, to: 1, color: 'accent', alpha: 0.3 }],
           curves: [seg([-1, -0.6], [1, -0.6], 'accent', 1.6), seg([1, -0.6], [1, 0.6], 'accent', 1.6), seg([1, 0.6], [-1, 0.6], 'accent', 1.6), seg([-1, 0.6], [-1, -0.6], 'accent', 1.6),
-            axisRing(-0.95, 0.55, 'A'), axisRing(0, 0, 'B'), axisRing(0.55, -0.2, 'C'), axisRing(1, 0, 'D')],
+            axisRing(-0.95, 0.55, 'P'), axisRing(0, 0, 'Q'), axisRing(0.55, -0.2, 'R'), axisRing(1, 0, 'S')],
         },
         caption: 'A uniform rectangular plate with four candidate axes (gold), all perpendicular to the screen.',
       },
@@ -164,31 +164,31 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
     }),
     mcq({
       id: 'two-axes', difficulty: 3, kind: 'error',
-      prompt: t`A 2.0 kg rod has $I_A = 0.10\ \text{kg·m}^2$ about axis A, 0.10 m from its centre of mass. A student wants $I_B$ about a parallel axis B, 0.30 m from the centre of mass on the same side, and writes $I_B = I_A + M(0.20)^2 = 0.18\ \text{kg·m}^2$. What went wrong?`,
+      prompt: t`A 2.0 kg rod has $I_P = 0.10\ \text{kg·m}^2$ about axis P, 0.10 m from its centre of mass. A student wants $I_Q$ about a parallel axis Q, 0.30 m from the centre of mass on the same side, and writes $I_Q = I_P + M(0.20)^2 = 0.18\ \text{kg·m}^2$. What went wrong?`,
       choices: [
-        t`The theorem starts from the centre of mass: $I_\text{cm} = 0.10 - 2(0.10)^2 = 0.08$, then $I_B = 0.08 + 2(0.30)^2 = 0.26\ \text{kg·m}^2$`,
+        t`The theorem starts from the centre of mass: $I_\text{cm} = 0.10 - 2(0.10)^2 = 0.08$, then $I_Q = 0.08 + 2(0.30)^2 = 0.26\ \text{kg·m}^2$`,
         'Nothing: the axes are 0.20 m apart, so 0.18 kg·m² is right',
-        t`Going from A to B should subtract: $I_B = 0.10 - 2(0.20)^2 = 0.02\ \text{kg·m}^2$`,
+        t`Going from P to Q should subtract: $I_Q = 0.10 - 2(0.20)^2 = 0.02\ \text{kg·m}^2$`,
         t`$d$ should be measured to the end of the rod`,
       ],
       answer: 0,
       why: {
         1: t`$I = I_\text{cm} + Md^2$ needs one of the axes through the centre of mass; between two other axes the cross term $2d\sum m x$ does not vanish.`,
-        2: t`B is farther from the centre of mass than A, so $I_B$ must be larger than $I_A$, not smaller.`,
+        2: t`Q is farther from the centre of mass than P, so $I_Q$ must be larger than $I_P$, not smaller.`,
         3: 'd is always between the two parallel axes, one of them through the centre of mass — the rod’s ends play no part.',
       },
-      hints: [t`The theorem is $I = I_\text{cm} + Md^2$. Is either A or B through the centre of mass?`, 'Go back to the centre of mass first, then out to B.'],
+      hints: [t`The theorem is $I = I_\text{cm} + Md^2$. Is either P or Q through the centre of mass?`, 'Go back to the centre of mass first, then out to Q.'],
       teach: 'Use the parallel-axis theorem only from (or to) an axis through the centre of mass; to go between two others, pass through the centre of mass.',
-      explain: t`Back to the centre: $I_\text{cm} = I_A - M(0.10)^2 = 0.08\ \text{kg·m}^2$. Out to B: $I_B = 0.08 + 2.0(0.30)^2 = 0.26\ \text{kg·m}^2$ — not 0.18.`,
+      explain: t`Back to the centre: $I_\text{cm} = I_P - M(0.10)^2 = 0.08\ \text{kg·m}^2$. Out to Q: $I_Q = 0.08 + 2.0(0.30)^2 = 0.26\ \text{kg·m}^2$ — not 0.18.`,
       visual: {
         type: 'graph',
         params: {
           aspect: 'wide', x: [-0.7, 0.7], y: [-0.18, 0.18], equal: true, xlabel: 'position along the rod (m)', ylabel: '', yticks: 0.001,
           shade: [{ fn: '0.025', lower: '-0.025', from: -0.6, to: 0.6, color: 'accent', alpha: 0.5 }],
-          curves: [axisRing(0.1, 0, 'A', 0.03), axisRing(0.3, 0, 'B', 0.03)],
+          curves: [axisRing(0.1, 0, 'P', 0.03), axisRing(0.3, 0, 'Q', 0.03)],
           points: [{ x: 0, y: 0, r: 4, color: 'ink', label: 'CM', labelDy: 14 }],
         },
-        caption: 'The rod (a 1.2 m example) with the centre of mass and the two parallel axes A and B, perpendicular to the screen.',
+        caption: 'The rod (a 1.2 m example) with the centre of mass and the two parallel axes P and Q, perpendicular to the screen.',
       },
     }),
     num({

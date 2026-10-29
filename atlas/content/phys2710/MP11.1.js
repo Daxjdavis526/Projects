@@ -193,7 +193,7 @@ The sum piles charge up *between* the protons, where it is attracted by both: a 
       },
       hints: ['Bond order = (bonding electrons − antibonding electrons)/2.', 'The antibonding orbital is pushed up a little more than the bonding one is pulled down.'],
       teach: 'Bond order, (bonding − antibonding electrons)/2, predicts which molecules hold together.',
-      explain: 'He₂ would put two electrons in σ and two in σ*: bond order 0, and since σ* rises more than σ falls, the pair repels. (A van der Waals He₂ “molecule” does exist, but bound by a hundred-millionth of an eV: it falls apart above about a millikelvin.)',
+      explain: 'He₂ would put two electrons in σ and two in σ*: bond order 0, and since σ* rises more than σ falls, the pair repels. (A van der Waals He₂ “molecule” does exist, but bound by about a ten-millionth of an eV: it falls apart above about a millikelvin.)',
       visual: moDiagram(4, 'Molecular orbitals from two 1s orbitals, filled with four electrons as for He₂: up spins blue, down spins orange. Schematic energies.'),
     }),
     {

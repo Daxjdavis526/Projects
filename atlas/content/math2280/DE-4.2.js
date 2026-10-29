@@ -83,7 +83,7 @@ Solve it, and say what each eigenvalue means.`,
     visual: {
       type: 'de-plane',
       params: { matrix: [[-0.15, 0.05], [0.05, -0.15]], x: [-14, 34], y: [-14, 22], aspect: 'wide', xlabel: 'u₁ (K)', ylabel: 'u₂ (K)', eigen: true, start: [30, 10], series: true, tmax: 40, seriesNames: ['u₁(t)', 'u₂(t)'], readout: false, click: false, grid: 22 },
-      caption: 'Top: the state slides in along a curve that ends tangent to the slow line λ = −0.1 (gold). Bottom: the two temperatures against time in minutes — they meet long before they reach the panel’s temperature. Lumped, linear model: radiation and the boxes’ own power are ignored.',
+      caption: 'Top: the state slides in along a curve that ends tangent to the slow line λ = −0.1 (gold). Bottom: the two temperatures against time in minutes — they draw together long before they reach the panel’s temperature. Lumped, linear model: radiation and the boxes’ own power are ignored.',
     },
     steps: [
       { label: 'Characteristic equation', text: t`$\tau = -0.3$ and $\Delta = 0.0225 - 0.0025 = 0.02$, so $\lambda^2 + 0.3\lambda + 0.02 = 0$, which factors as $(\lambda + 0.1)(\lambda + 0.2) = 0$: $\lambda_1 = -0.1$, $\lambda_2 = -0.2$ per minute.` },

@@ -496,8 +496,8 @@ export function toTeX(node) {
     case 'const': return CONSTS[node.name].tex;
     case 'group': return toTeX(node.a);
     case 'neg': return '-' + wrap(node.a, PREC.neg, true);
-    case '+': return `${toTeX(node.a)} + ${wrap(node.b, 1, false)}`;
-    case '-': return `${toTeX(node.a)} - ${wrap(node.b, 1, true)}`;
+    case '+': return `${toTeX(node.a)} + ${negWrap(node.b) ?? wrap(node.b, 1, false)}`;
+    case '-': return `${toTeX(node.a)} - ${negWrap(node.b) ?? wrap(node.b, 1, true)}`;
     case '*': return mulTeX(node);
     case '/': return `\\frac{${toTeX(node.a)}}{${toTeX(node.b)}}`;
     case '^': {
@@ -508,8 +508,9 @@ export function toTeX(node) {
           return `${spec.tex}^{${toTeX(node.b)}}\\!${fnArgTeX(fn)}`;
         }
       }
-      const base = node.a.t === 'fn' && !['sqrt', 'cbrt', 'abs', 'floor', 'ceil'].includes(FUNCS[node.a.name]?.tex)
-        ? `\\left(${toTeX(node.a)}\\right)` : wrap(node.a, PREC['^'], true);
+      const A = bare(node.a);
+      const base = A.t === 'fn' && !['sqrt', 'cbrt', 'abs', 'floor', 'ceil'].includes(FUNCS[A.name]?.tex)
+        ? `\\left(${toTeX(A)}\\right)` : wrap(A, PREC['^'], true);
       return `${base}^{${toTeX(node.b)}}`;
     }
     case 'fn': return fnTeX(node);
@@ -524,16 +525,24 @@ function numTeX(node) {
   return s;
 }
 
+// the learner's own brackets are a 'group' node; TeX brackets are rebuilt from the
+// structure inside it, so look through groups when deciding where they go
+const bare = (n) => { while (n.t === 'group') n = n.a; return n; };
+
+// a negative right operand keeps its brackets: x + (−y), 2·(−3), not x + −y
+const negWrap = (n) => (bare(n).t === 'neg' ? `\\left(${toTeX(bare(n))}\\right)` : null);
+
 function wrap(node, prec, strict) {
+  node = bare(node);
   const p = PREC[node.t] ?? 6;
   const tex = toTeX(node);
   return p < prec || (strict && p === prec && node.t !== 'fn') ? `\\left(${tex}\\right)` : tex;
 }
 
 function mulTeX(node) {
-  const a = node.a, b = node.b;
+  const a = bare(node.a), b = bare(node.b);
   const left = wrap(a, 2, false);
-  const right = wrap(b, 2, true);
+  const right = negWrap(b) ?? wrap(b, 2, true);
   // a number followed by a number needs a visible dot; otherwise juxtapose
   const startsWithDigit = /^[-\d.]/.test(right);
   const needDot = startsWithDigit || (b.t === 'neg');

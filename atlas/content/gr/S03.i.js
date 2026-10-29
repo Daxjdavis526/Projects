@@ -95,26 +95,26 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
         const kind = r.pick(['future', 'null', 'space', 'past']);
         const [dt, dx] = r.pick(CLASSES[kind].cases);
         return {
-          prompt: t`Event B happens ${Math.abs(dt)} ${Math.abs(dt) === 1 ? 'year' : 'years'} ${dt >= 0 ? 'after' : 'before'} event A, ${Math.abs(dx)} ${Math.abs(dx) === 1 ? 'light-year' : 'light-years'} away from it. Where does B lie relative to A’s light cone?`,
+          prompt: t`Event Q happens ${Math.abs(dt)} ${Math.abs(dt) === 1 ? 'year' : 'years'} ${dt >= 0 ? 'after' : 'before'} event P, ${Math.abs(dx)} ${Math.abs(dx) === 1 ? 'light-year' : 'light-years'} away from it. Where does Q lie relative to P’s light cone?`,
           answer: CLASSES[kind].answer,
-          visual: spacetimeSketch({ events: [[0, 0, 'A'], [dt, dx, 'B']] }),
+          visual: spacetimeSketch({ events: [[0, 0, 'P'], [dt, dx, 'Q']] }),
         };
       },
       choices: [
-        'Inside A’s future light cone: a signal slower than light could carry an influence from A to B',
-        'On A’s light cone: only a flash of light could connect them',
-        'Outside A’s light cone: neither event can affect the other',
-        'Inside A’s past light cone: B could have influenced A',
+        'Inside P’s future light cone: a signal slower than light could carry an influence from P to Q',
+        'On P’s light cone: only a flash of light could connect them',
+        'Outside P’s light cone: neither event can affect the other',
+        'Inside P’s past light cone: Q could have influenced P',
       ],
       why: {
-        0: 'The future cone needs B later than A and |Δx| smaller than the light-years light covers in Δt.',
+        0: 'The future cone needs Q later than P and |Δx| smaller than the light-years light covers in Δt.',
         1: 'On the cone means |Δx| equals cΔt exactly — light covers the gap with no time to spare.',
         2: 'Outside the cone means |Δx| is larger than c|Δt|: the gap is too wide for light to cross in the time available.',
-        3: 'The past cone needs B earlier than A, with |Δx| smaller than c|Δt|.',
+        3: 'The past cone needs Q earlier than P, with |Δx| smaller than c|Δt|.',
       },
       hints: ['Compare the distance |Δx| with how far light gets in the time between them, c|Δt|.', 'Which event comes first? A cone has a future half and a past half.'],
       teach: 'Compare |Δx| with c|Δt|: smaller means inside a cone (future or past), equal means on it, larger means outside it.',
-      explain: 'Light covers c|Δt| light-years in |Δt| years. If B is closer than that, it lies inside A’s cone — the future half if B is later, the past half if earlier. If B is farther, no signal can link them.',
+      explain: 'Light covers c|Δt| light-years in |Δt| years. If Q is closer than that, it lies inside P’s cone — the future half if Q is later, the past half if earlier. If Q is farther, no signal can link them.',
     }),
     num({
       id: 'simultaneous-line', difficulty: 2,

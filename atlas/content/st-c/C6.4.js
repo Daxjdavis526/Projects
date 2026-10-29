@@ -172,7 +172,7 @@ with $g$ the number of holes (the **genus**). Bend, dent or stretch a sphere how
           errors: [{ value: 180, feedback: 'That is a flat triangle. On a sphere the angles exceed 180° by ∬K dA.' }, { value: 180 + 360 / n, feedback: t`The whole sphere has $\iint K\,dA = 4\pi = 720^\circ$, not $360^\circ$.` }].filter((e) => Math.abs(e.value - sum) > 0.005 * sum),
           hints: [t`Gauss–Bonnet with geodesic sides: $\iint K\,dA + \sum(\pi - \alpha_i) = 2\pi$, so $\sum\alpha_i = \pi + \iint K\,dA$.`, t`$\iint K\,dA$ over the triangle is $4\pi/${n}$ rad $= ${nice(720 / n, 4)}^\circ$.`],
           teach: 'For a geodesic triangle, the angle sum is π plus the curvature inside.',
-          explain: t`$\sum\alpha_i = 180^\circ + 720^\circ/${n} = ${nice(sum, 5)}^\circ$. ${n === 4 ? 'Each corner is 120°: three of them meet at each vertex of the tiling, filling 360°.' : n === 8 ? 'Three right angles.' : 'In the icosahedral tiling five 72° corners meet at each vertex.'}`,
+          explain: t`$\sum\alpha_i = 180^\circ + 720^\circ/${n} = ${nice(sum, 5)}^\circ$. ${n === 4 ? 'Each corner is 120°: three of them meet at each vertex of the tiling, filling 360°.' : n === 8 ? 'Three right angles.' : n === 20 ? 'In the icosahedral tiling five 72° corners meet at each vertex.' : 'Its corners average 63°. (In a real subdivided grid the faces differ slightly in size, so this is the average face.)'}`,
         };
       },
     }),

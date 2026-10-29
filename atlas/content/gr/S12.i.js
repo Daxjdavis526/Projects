@@ -82,7 +82,7 @@ export default lesson({
   practice: [
     mcq({
       id: 'which-max', difficulty: 1,
-      prompt: 'A clock can be carried from event A to event B (both on the ground, two seconds apart) along many different worldlines. Which one records the most time?',
+      prompt: 'A clock can be carried from event P to event Q (both on the ground, two seconds apart) along many different worldlines. Which one records the most time?',
       choices: [
         'The free-fall path: tossed up and caught',
         'A path that climbs as high as possible, where clocks run fastest',
@@ -107,9 +107,9 @@ export default lesson({
             { fn: '4.905*x*(2 - x)', domain: [0, 2], color: 'accent', label: 'tossed', labelAt: 1 },
             { fn: '0', domain: [0, 2], color: 'teal', label: 'stays put', labelAt: 1 },
           ],
-          points: [{ x: 0, y: 0, color: 'ink' }, { x: 2, y: 0, color: 'ink' }, { x: -0.13, y: -1.5, r: 0.5, color: 'ink', label: 'A' }, { x: 1.87, y: -1.5, r: 0.5, color: 'ink', label: 'B' }],
+          points: [{ x: 0, y: 0, color: 'ink' }, { x: 2, y: 0, color: 'ink' }, { x: -0.13, y: -1.5, r: 0.5, color: 'ink', label: 'P' }, { x: 1.87, y: -1.5, r: 0.5, color: 'ink', label: 'Q' }],
         },
-        caption: 'Three worldlines joining the same two events: leave the ground at A, be back on it at B two seconds later.',
+        caption: 'Three worldlines joining the same two events: leave the ground at P, be back on it at Q two seconds later.',
       },
     }),
     mcq({

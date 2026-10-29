@@ -58,6 +58,12 @@ check('x2 is ambiguous', throws(() => parse('x2', { vars: ['x'] })));
 check('missing bracket is an error', throws(() => parse('sin(x', { vars: ['x'] })));
 check('empty is an error', throws(() => parse('  ')));
 check('TeX preview of a fraction', toTeX(parse('(x+1)/(x-1)', { vars: ['x'] })) === '\\frac{x + 1}{x - 1}');
+{
+  const T = (src) => toTeX(parse(src, { vars: ['x', 'y', 'a', 'b', 'c'] }));
+  check('TeX preview keeps the learner\'s brackets round a sum: 2*(1 - x), -(x+1), (1-x)*2',
+    T('2*(1 - x)') === '2\\,\\left(1 - x\\right)' && T('-(x+1)') === '-\\left(x + 1\\right)' && T('(1-x)*2') === '\\left(1 - x\\right) \\cdot 2' && T('a*(b-c)') === 'a\\,\\left(b - c\\right)');
+  check('TeX preview brackets a negative operand: x + (-y), 2*(-3)', T('x + (-y)') === 'x + \\left(-y\\right)' && T('2*(-3)') === '2 \\cdot \\left(-3\\right)');
+}
 check('TeX preview of sin^2', toTeX(parse('sin^2 x', { vars: ['x'] })).startsWith('\\sin^{2}'));
 check('TeX of v0 is v_{0}', toTeX(parse('v0', { vars: ['v0'] })) === 'v_{0}');
 check('TeX of theta is \\theta', toTeX(parse('theta', { vars: ['theta'] })) === '\\theta');

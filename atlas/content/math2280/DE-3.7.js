@@ -183,16 +183,16 @@ The circuit **is** a forced, damped spring, term for term: inductance is inertia
       id: 'charge-ivp', difficulty: 3,
       gen(r) {
         const [L, R, C, al, be] = r.pick([[1, 2, 0.2, 1, 2], [1, 2, 0.1, 1, 3], [0.5, 2, 0.4, 2, 1]]), E = r.pick([5, 10, 20]);
-        const Q = C * E, k = al / be;
+        const Q = C * E, k = al / be, kT = be === 1 ? String(al) : t`\tfrac{${al}}{${be}}`;
         return {
           prompt: t`A ${L} H choke, a ${R} Ω resistor and a ${C} F supercapacitor (uncharged) are connected in series across a ${E} V battery at $t = 0$, with no current flowing. Find the charge $q(t)$ on the capacitor, in coulombs.`,
-          answer: `${nice(Q)}*(1 - e^(-${al}*t)*(cos(${be}*t) + ${nice(k)}*sin(${be}*t)))`,
-          answerTeX: t`${nice(Q)}\left[1 - e^{-${al === 1 ? '' : al}t}\left(\cos ${be === 1 ? '' : be}t + ${k === 0.5 ? '\\tfrac12' : nice(k)}\sin ${be === 1 ? '' : be}t\right)\right]`, lhs: 'q(t)',
+          answer: `${nice(Q)}*(1 - e^(-${al}*t)*(cos(${be}*t) + (${al}/${be})*sin(${be}*t)))`,
+          answerTeX: t`${nice(Q)}\left[1 - e^{-${al === 1 ? '' : al}t}\left(\cos ${be === 1 ? '' : be}t + ${kT}\sin ${be === 1 ? '' : be}t\right)\right]`, lhs: 'q(t)',
           vars: { t: [0, 3] },
           errors: [{ answer: `${nice(Q)}*(1 - e^(-${al}*t)*cos(${be}*t))`, feedback: t`That meets $q(0) = 0$ but not $q'(0) = 0$: the transient needs a sine term too.` }, { answer: `${nice(Q)}*e^(-${al}*t)*cos(${be}*t)`, feedback: t`That is how a *charged* capacitor discharges. Here it starts empty and charges toward $C\mathcal{E} = ${nice(Q)}$ C.` }],
           hints: [t`$${L === 1 ? '' : L}q'' + ${R}q' + ${nice(1 / C)}q = ${E}$. Its characteristic roots are $-${al} \pm ${be}i$, and a constant forcing gives $q_p = C\mathcal{E} = ${nice(Q)}$.`, t`$q = ${nice(Q)} + e^{-${al === 1 ? '' : al}t}(A\cos ${be === 1 ? '' : be}t + B\sin ${be === 1 ? '' : be}t)$ with $q(0) = 0$ and $q'(0) = 0$.`],
           teach: 'A battery switched onto an RLC is a constant force on a spring: q = Cℰ plus a transient fitted to q(0) = 0 and i(0) = 0.',
-          explain: t`$A = -${nice(Q)}$ from $q(0) = 0$; $q'(0) = -${al}A + ${be}B = 0$ gives $B = ${nice(-Q * k)}$. So $q = ${nice(Q)}\left[1 - e^{-${al === 1 ? '' : al}t}\left(\cos ${be === 1 ? '' : be}t + ${nice(k)}\sin ${be === 1 ? '' : be}t\right)\right]$: it overshoots $C\mathcal{E}$ once, then settles.`,
+          explain: t`$A = -${nice(Q)}$ from $q(0) = 0$; $q'(0) = -${al}A + ${be}B = 0$ gives $B = ${be === 3 ? t`-${nice(Q)}\cdot${kT}` : nice(-Q * k)}$. So $q = ${nice(Q)}\left[1 - e^{-${al === 1 ? '' : al}t}\left(\cos ${be === 1 ? '' : be}t + ${kT}\sin ${be === 1 ? '' : be}t\right)\right]$: it overshoots $C\mathcal{E}$ once, then settles.`,
           visual: rlcPic({ E: `${E} V`, R: `${R} Ω`, L: `${L} H`, C: `${C} F`, caption: 'The series circuit, at the moment the switch closes. Values as given; the battery is ideal.' }),
         };
       },

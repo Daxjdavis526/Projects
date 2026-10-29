@@ -78,7 +78,7 @@ $$\rho = \frac{m}{V}, \qquad p = \frac{F_\perp}{A}$$
     mcq({
       id: 'which-lox', difficulty: 1,
       ...(() => {
-        const names = ['C', 'A', 'B'];   // the lines of RP-1, water and liquid oxygen
+        const names = ['Q', 'R', 'P'];   // the lines of RP-1, water and liquid oxygen
         return {
           prompt: t`The graph shows mass against volume for samples of RP-1 kerosene ($810\ \text{kg/m}^3$), water ($1000\ \text{kg/m}^3$) and liquid oxygen ($1141\ \text{kg/m}^3$). Which line is liquid oxygen?`,
           choices: [`Line ${names[2]}`, `Line ${names[0]}`, `Line ${names[1]}`, 'None of them: a density line depends on how much of the liquid you have'],
@@ -177,10 +177,10 @@ $$\rho = \frac{m}{V}, \qquad p = \frac{F_\perp}{A}$$
       id: 'plate-force', difficulty: 2,
       prompt: t`A thin flat plate of area $A$ is held at $30^\circ$ to the horizontal, deep in a lake where the pressure is $p$. Which describes the force of the water on the plate’s **upper** face?`,
       choices: [
-        t`Size $pA$, perpendicular to the face (arrow A)`,
-        t`Size $pA$, straight down (arrow B)`,
-        t`Size $pA\cos 30^\circ$, straight down (arrow B)`,
-        t`Size $pA\sin 30^\circ$, along the face (arrow C)`,
+        t`Size $pA$, perpendicular to the face (arrow 1)`,
+        t`Size $pA$, straight down (arrow 2)`,
+        t`Size $pA\cos 30^\circ$, straight down (arrow 2)`,
+        t`Size $pA\sin 30^\circ$, along the face (arrow 3)`,
       ],
       answer: 0,
       why: {
@@ -190,7 +190,7 @@ $$\rho = \frac{m}{V}, \qquad p = \frac{F_\perp}{A}$$
       },
       hints: ['Which way can a fluid at rest push on a surface?', 'It pushes straight against the surface, never along it.'],
       teach: 'A fluid at rest pushes perpendicular to every surface, with force pA, whatever the surface’s tilt.',
-      explain: t`The force is $pA$ along the inward normal of the face — arrow A. The lower face feels (almost) the same push the other way, which is why a plate in still water is not crushed.`,
+      explain: t`The force is $pA$ along the inward normal of the face — arrow 1. The lower face feels (almost) the same push the other way, which is why a plate in still water is not crushed.`,
       visual: {
         type: 'graph',
         params: {
@@ -203,7 +203,7 @@ $$\rho = \frac{m}{V}, \qquad p = \frac{F_\perp}{A}$$
             { from: [r3(-0.8 * 0.866), 0.62], to: [r3(-0.8 * 0.866), -0.32], color: 'warn' },
             { from: [r3(-0.3 * 0.866 - 0.14 * 0.5), r3(-0.3 * 0.5 + 0.14 * 0.866)], to: [r3(0.25 * 0.866 - 0.14 * 0.5), r3(0.25 * 0.5 + 0.14 * 0.866)], color: 'violet' },
           ],
-          points: [label(0.6 * 0.866 - 1.0 * 0.5 + 0.05, 0.6 * 0.5 + 1.0 * 0.866 + 0.1, 'A', 'good'), label(-0.8 * 0.866 + 0.06, 0.7, 'B', 'warn'), label(0.25 * 0.866 - 0.14 * 0.5 + 0.04, 0.25 * 0.5 + 0.14 * 0.866 + 0.16, 'C', 'violet')],
+          points: [label(0.6 * 0.866 - 1.0 * 0.5 + 0.05, 0.6 * 0.5 + 1.0 * 0.866 + 0.1, '1', 'good'), label(-0.8 * 0.866 + 0.06, 0.7, '2', 'warn'), label(0.25 * 0.866 - 0.14 * 0.5 + 0.04, 0.25 * 0.5 + 0.14 * 0.866 + 0.16, '3', 'violet')],
         },
         caption: 'The plate seen edge-on, in still water. Three candidate directions for the water’s push on its upper face.',
       },

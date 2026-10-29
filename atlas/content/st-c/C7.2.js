@@ -110,7 +110,7 @@ The classic monster is the **line with two origins**: a line whose origin has be
       { label: 'An escape', text: t`In $D^*$ take $p_n = (1/n, 0)$, $n \ge 2$. Every term is in $D^*$, and $p_n \to (0, 0)$, which is not. Every subsequence has the same limit, so no subsequence converges *in* $D^*$: it is **not compact**.` },
       { label: 'No escape', text: t`$A$ is the preimage of the closed interval $[\tfrac14, 1]$ under the continuous $x^2 + y^2$, so it is closed; closed and bounded in $\mathbb R^2$ means **compact** (Heine–Borel). A sequence in $A$ can only converge to points with $\tfrac14 \le r^2 \le 1$.` },
       { label: 'Connected?', text: t`Any two points of either set can be joined by walking round an arc of a circle and then along a radius, staying inside. Both are **connected**.` },
-      { label: 'Sense check', text: t`Removing a single point (the centre) destroyed compactness but not connectedness. Removing the whole circle $x^2 + y^2 = \tfrac12$ from $A$ would do the opposite: two pieces, neither compact.` },
+      { label: 'Sense check', text: t`Removing a single point (the centre) destroyed compactness but not connectedness. Removing the whole circle $x^2 + y^2 = \tfrac12$ from $A$ would break both: two pieces, neither of them compact.` },
     ],
     answer: t`$D^*$ is not compact — $(1/n, 0)$ escapes to the missing centre; $A$ is compact (closed and bounded). Both are connected.`,
   },

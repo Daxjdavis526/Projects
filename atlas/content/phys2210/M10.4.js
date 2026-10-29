@@ -115,17 +115,17 @@ where $r$ is the distance from the axis to the point where the force acts and $\
     }),
     mcq({
       id: 'largest', difficulty: 2,
-      prompt: 'Four forces act on a door (seen from above, hinged on the left). Which gives the largest torque about the hinge? A: 100 N, at right angles, 0.1 m from the hinge. B: 40 N, at right angles, 0.8 m out. C: 200 N, along the door toward the hinge, 0.8 m out. D: 60 N, at 30° to the door, 0.8 m out.',
-      choices: ['B', 'C', 'A', 'D'],
+      prompt: 'Four forces act on a door (seen from above, hinged on the left). Which gives the largest torque about the hinge? P: 100 N, at right angles, 0.1 m from the hinge. Q: 40 N, at right angles, 0.8 m out. R: 200 N, along the door toward the hinge, 0.8 m out. S: 60 N, at 30° to the door, 0.8 m out.',
+      choices: ['Q', 'R', 'P', 'S'],
       answer: 0,
       why: {
-        1: 'C is the biggest force, but it points straight at the hinge: zero lever arm, zero torque.',
-        2: 'A is large but acts only 0.1 m from the hinge: 100 × 0.1 = 10 N·m.',
+        1: 'R is the biggest force, but it points straight at the hinge: zero lever arm, zero torque.',
+        2: 'P is large but acts only 0.1 m from the hinge: 100 × 0.1 = 10 N·m.',
         3: 'At 30° only half the force counts: 60 × 0.8 × sin 30° = 24 N·m.',
       },
       hints: ['Compute rF sin φ for each.', 'A force pointing along the door, at the hinge, has no lever arm.'],
       teach: 'A larger force does not mean a larger torque: what counts is force times lever arm.',
-      explain: t`A: $0.1\times100 = 10$; B: $0.8\times40 = 32$; C: $0$ (no lever arm); D: $0.8\times60\times\sin30° = 24$ N·m. B wins, with the second-smallest force.`,
+      explain: t`P: $0.1\times100 = 10$; Q: $0.8\times40 = 32$; R: $0$ (no lever arm); S: $0.8\times60\times\sin30° = 24$ N·m. Q wins, with the second-smallest force.`,
       visual: {
         type: 'graph',
         params: {
@@ -133,10 +133,10 @@ where $r$ is the distance from the axis to the point where the force acts and $\
           shade: [{ fn: '0.025', lower: '-0.025', from: 0, to: 1, color: 'accent', alpha: 0.6 }],
           curves: [{ param: ['0.04*cos(t)', '0.04*sin(t)'], t: [0, 6.2832], color: 'gold', width: 2.2 }],
           arrows: [
-            { from: [0.1, 0.03], to: [0.1, 0.43], color: 'warn', label: 'A' },
-            { from: [0.8, 0.03], to: [0.8, 0.33], color: 'good', label: 'B' },
-            { from: [0.95, 0], to: [0.52, 0], color: 'bad', label: 'C', labelDy: -14 },
-            { from: [0.8, -0.03], to: [r4(0.8 + 0.4 * Math.cos(-150 * DEG)), r4(-0.03 + 0.4 * Math.sin(-150 * DEG))], color: 'violet', label: 'D', labelDx: -16, labelDy: 8 },
+            { from: [0.1, 0.03], to: [0.1, 0.43], color: 'warn', label: 'P' },
+            { from: [0.8, 0.03], to: [0.8, 0.33], color: 'good', label: 'Q' },
+            { from: [0.95, 0], to: [0.52, 0], color: 'bad', label: 'R', labelDy: -14 },
+            { from: [0.8, -0.03], to: [r4(0.8 + 0.4 * Math.cos(-150 * DEG)), r4(-0.03 + 0.4 * Math.sin(-150 * DEG))], color: 'violet', label: 'S', labelDx: -16, labelDy: 8 },
           ],
           points: [{ x: 0, y: 0, r: 0.01, color: 'gold', label: 'hinge', labelDy: 22, labelDx: -16 }],
         },
