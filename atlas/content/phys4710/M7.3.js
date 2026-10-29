@@ -29,7 +29,7 @@ const windowPic = (tt, s, caption, sliders = false) => ({
     x: [-20, 20], y: [-0.4, 10.6], aspect: 'wide', xlabel: 'Δω = ω(f) − ω (rad/ns)', ylabel: 'window ÷ t', axesAt: 'edge', xticks: 8, yticks: 5,
     ...(sliders ? { sliders: [{ key: 'T', label: 'Time $t$', min: 0.3, max: 10, step: 0.1, value: tt, unit: '\\text{ns}', explain: 'How long the perturbation has acted.' }] } : {}),
     curves: [{ fn: `sin(x*${sliders ? 'T' : tt}/2)^2/((x/2)^2*${sliders ? 'T' : tt})`, color: 'accent', width: 2.4, samples: 2000 }],
-    points: Array.from({ length: 49 }, (_, k) => ({ x: r6((k - 24) * s), y: 0, r: 2.6, color: 'gold' })),
+    points: Array.from({ length: 2 * Math.floor(20 / s) + 1 }, (_, k) => ({ x: r6((k - Math.floor(20 / s)) * s), y: 0, r: 2.6, color: 'gold' })),
     ...(sliders ? { readouts: [{ label: t`central peak’s width $4\pi/t$ (rad/ns)`, expr: '4*pi/T', digits: 3 }, { label: 'final states inside it', expr: `floor(4*pi/T/${s}) + 1`, digits: 3 }] } : {}),
   },
   caption,
@@ -53,7 +53,7 @@ The rate needs two things: the coupling to a typical final state, and **how many
   ],
   why: 'Spontaneous emission, beta decay, photo-ionization, scattering rates, conductivities, neutrino cross sections: almost every rate in physics is the golden rule.',
   visual: {
-    ...windowPic(1, 0.8, 'The first-order weight of each final state after time t, divided by t so that its area stays 2π: the central peak narrows as 4π/t and grows as t. Gold dots: final states 0.8 rad/ns apart (illustrative).', true),
+    ...windowPic(1, 2, 'The first-order weight of each final state after time t, divided by t so that its area stays 2π: the central peak narrows as 4π/t and grows as t. Gold dots: final states 2 rad/ns apart (illustrative).', true),
     title: 'Why a constant rate appears',
     lead: t`After a time $t$, each final state at detuning $\Delta\omega$ has been fed with weight $\propto \sin^2(\Delta\omega t/2)/(\Delta\omega/2)^2$. Here that window is divided by $t$, so its area is fixed. The gold dots are the final states.`,
     tasks: [

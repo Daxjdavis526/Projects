@@ -26,4 +26,4 @@ export const pic = (x, y, extra = {}) => ({ x, y, equal: true, aspect: 'wide', a
  * `mix` (0–1) scales the interference term (polarization or coherence).
  */
 export const fringeCurve = (I1, I2, L, mix = 1, phi0 = 0) =>
-  `${sf(I1, 5)} + ${sf(I2, 5)} + ${sf(2 * mix * Math.sqrt(I1 * I2), 5)}*cos(2*pi*x/${sf(L, 6)} + ${sf(phi0, 5)})`;
+  `${sf(I1, 5)} + ${sf(I2, 5)} + ${sf(2 * mix * Math.sqrt(I1 * I2), 5)}*cos(2*pi*x/${sf(L, 6)} + (${sf(phi0, 5)}))`;
