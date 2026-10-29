@@ -280,7 +280,7 @@ It is **zero exactly when the three vectors lie in one plane**. The **vector tri
       why: {
         1: t`Near the zenith the three directions bunch together: the box is thin, with volume $0.08$ against $0.97$ for the $30^\circ$ sky.`,
         2: t`On the horizon all three vectors lie in the horizontal plane: the triple product is exactly $0$, and the receiver cannot tell its height.`,
-        3: t`Bunched in azimuth, the three directions are nearly parallel: the volume is only $0.002$.`,
+        3: t`Bunched in azimuth, the three directions are nearly parallel: the volume is only about $0.0002$.`,
       },
       hints: ['Picture the box spanned by the three unit vectors. When is it flat?', t`Unit vectors that are close to each other, or that all lie in one plane, give a nearly flat box.`],
       teach: 'Three directions span space well when their triple product is far from zero — nearly perpendicular, never nearly coplanar.',

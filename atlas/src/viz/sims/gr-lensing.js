@@ -4,6 +4,7 @@
 // sit. Drag the galaxy (or use the slider) behind the lens and its two images
 // merge into an Einstein ring. Left: a side view of the two light paths, with
 // every angle hugely exaggerated. Physics in model/gr-lensing.js (tested).
+// readout: false hides the numbers (a question's picture must not print its answer).
 
 import { Plot } from '../plot.js';
 import { images, magnifications, lensMap, einsteinRadius, M_SUN, PC, RAD_TO_ARCSEC } from '../model/gr-lensing.js';
@@ -26,6 +27,7 @@ export function validate(P) {
   if (!SYSTEMS[P.system]) p.push(`gr-lensing: unknown system “${P.system}”`);
   if (!(P.beta >= 0 && P.beta <= 2)) p.push('gr-lensing: beta must lie in [0, 2]');
   if (!(P.size >= 0.04 && P.size <= 0.6)) p.push('gr-lensing: size must lie in [0.04, 0.6]');
+  if (P.readout !== undefined && typeof P.readout !== 'boolean') p.push('gr-lensing: readout must be true or false');
   return p;
 }
 
@@ -121,7 +123,7 @@ export function mount(F, P) {
     const tE = einsteinRadius(sys.M, sys.DL, sys.DS) * RAD_TO_ARCSEC;     // arcsec
     const ang = tE < 1 ? `${(tE * 1e3).toPrecision(2)}\\,\\mathrm{mas}` : `${tE.toPrecision(2)}''`;
     const m = magnifications(Math.max(u, 1e-9));
-    F.readout([
+    if (P.readout !== false) F.readout([
       ['true offset', `${u.toFixed(2)}\\,\\theta_E`],
       ['images at', `${a.toFixed(2)}\\,\\theta_E\\ \\text{and}\\ ${b.toFixed(2)}\\,\\theta_E`],
       ['brightening (point source)', u >= 0.01 ? `${m.total.toFixed(2)}\\times` : '\\text{huge: a ring}'],

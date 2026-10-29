@@ -79,7 +79,7 @@ The basis covectors $dx^\mu$ are themselves differentials — of the coordinate 
     steps: [
       { label: 'Components', text: t`$\partial_xf = 2xy = 4$ and $\partial_yf = x^2 = 1$ at $(1, 2)$, so $df = 4\,dx + 1\,dy$.` },
       { label: 'Pair with the vector', text: t`$df(V) = 4\,dx(V) + dy(V) = 4V^x + V^y = 4(3) + (-1) = 11$, using $dx(V) = V^x$ and $dy(V) = V^y$.` },
-      { label: 'Check numerically', text: t`With $\varepsilon = 0.001$: $f(1.003,\ 1.999) - f(1, 2) = 1.003^2\times1.999 - 2 = 0.011\,005$, which is $11.005\,\varepsilon$. ✓ The extra $0.005\,\varepsilon$ is second order and vanishes as $\varepsilon \to 0$.` },
+      { label: 'Check numerically', text: t`With $\varepsilon = 0.001$: $f(1.003,\ 1.999) - f(1, 2) = 1.003^2\times1.999 - 2 = 0.011\,012$, which is $11.012\,\varepsilon$. ✓ The extra $0.012\,\varepsilon$ (that is, $12\varepsilon^2$) is second order and vanishes as $\varepsilon \to 0$.` },
       { label: 'Why the basis works', text: t`$dx(\partial_x) = 1$, $dx(\partial_y) = 0$, $dy(\partial_x) = 0$, $dy(\partial_y) = 1$: the covectors $dx^\mu$ pick out components, which is exactly why $df(V) = \partial_\mu f\,V^\mu$.` },
     ],
     answer: t`$df = 4\,dx + dy$ at $(1, 2)$, and $df(V) = 11$.`,

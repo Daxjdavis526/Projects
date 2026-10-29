@@ -19,10 +19,11 @@ const t = String.raw;
 // a pipeline drawn as boxes and arrows; hi marks one stage
 function pipe(labels, caption, hi = -1, warn = -1) {
   const n = labels.length, w = 10 / n;
-  const curves = labels.map((_, i) => ({ param: [`${r6(i * w + 0.15 * w)} + ${r6(0.7 * w)}*t`, '0.5'], t: [0, 1], color: i === warn ? 'warn' : i === hi ? 'gold' : 'accent', width: 26, alpha: 0.35 }));
-  const arrows = labels.slice(0, -1).map((_, i) => ({ from: [r6(i * w + 0.86 * w), 0.5], to: [r6((i + 1) * w + 0.14 * w), 0.5], color: 'ink3' }));
-  const points = labels.map((l, i) => ({ x: r6(i * w + 0.5 * w), y: 0.5, r: 0, label: l, labelAlign: 'center', labelDx: 0, labelDy: 0 }));
-  return { type: 'graph', params: { aspect: 'wide', x: [0, 10], y: [0, 1], axes: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves, arrows, points }, caption };
+  const box = (x0, x1, col) => [[x0, 0.4, x1, 0.4], [x1, 0.4, x1, 0.6], [x1, 0.6, x0, 0.6], [x0, 0.6, x0, 0.4]].map(([a, b, c, d]) => ({ param: [`${r6(a)} + ${r6(c - a)}*t`, `${r6(b)} + ${r6(d - b)}*t`], t: [0, 1], color: col, width: 2 }));
+  const curves = labels.flatMap((_, i) => box(i * w + 0.3 * w, i * w + 0.7 * w, i === warn ? 'warn' : i === hi ? 'gold' : 'accent'));
+  const arrows = labels.slice(0, -1).map((_, i) => ({ from: [r6(i * w + 0.72 * w), 0.5], to: [r6((i + 1) * w + 0.28 * w), 0.5], color: 'ink3' }));
+  const points = labels.map((l, i) => ({ x: r6(i * w + 0.5 * w), y: i % 2 ? 0.25 : 0.75, r: 0, label: l, labelAlign: 'center', labelDx: 0, labelDy: 0, color: i === warn ? 'warn' : i === hi ? 'gold' : 'ink' }));
+  return { type: 'graph', params: { aspect: 'wide', x: [0, 10], y: [0.1, 0.9], axes: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves, arrows, points }, caption };
 }
 
 // Monte Carlo spread of a standard-deviation estimate from B draws: σ/√(2(B − 1))

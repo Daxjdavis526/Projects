@@ -146,7 +146,7 @@ Find the plane spacing $d$ with its full uncertainty and compare it with graphit
       },
       hints: [t`$D \propto 1/d$ for every ring at the same $\lambda$.`, t`What is $d_{10}/d_{11}$ for $d_{10} = a\sqrt3/2$, $d_{11} = a/2$?`],
       teach: 'Ratios of ring diameters fingerprint a crystal’s geometry, whatever the wavelength.',
-      explain: t`$D_\text{outer}/D_\text{inner} = d_{10}/d_{11} = (a\sqrt3/2)/(a/2) = \sqrt3 = 1.732$: the spacings of a hexagonal net of carbon atoms. (A second order of the inner ring would sit at about twice its diameter; graphite’s (10) second order is faint.)`,
+      explain: t`$D_\text{outer}/D_\text{inner} = d_{10}/d_{11}$ $= (a\sqrt3/2)/(a/2) = \sqrt3 = 1.732$: the spacings of a hexagonal net of carbon atoms. (A second order of the inner ring would sit at about twice its diameter; graphite’s (10) second order is faint.)`,
     }),
     mcq({
       id: 'small-angle', difficulty: 3,

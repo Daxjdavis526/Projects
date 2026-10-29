@@ -69,7 +69,7 @@ Find $R_H$ with its uncertainty and compare it with the CODATA-based $1.096\,776
       { label: 'Linearize', text: t`Against $x = 1/4 - 1/n^2$ $(${EX.R.map((q) => (0.25 - 1 / q.n ** 2).toFixed(4)).join(', ')})$, the points $1/\lambda$ should lie on a line through the origin of slope $R_H$. Each bar: $\sigma_{1/\lambda} = (1/\lambda)\cot\theta\,\sigma_\theta$ — largest relatively for the smallest angles.` },
       { label: 'Fit', text: t`Slope $${pmT(EX.fit.b, EX.fit.sb)}\ \mu\text{m}^{-1}$, intercept $${pmT(EX.fit.a, EX.fit.sa)}\ \mu\text{m}^{-1}$ (zero, as Bohr says), $\chi^2/\nu = ${EX.fit.chi2r.toFixed(2)}$ ($\nu = 2$).` },
       { label: 'Uncertainty', text: t`$R_H = ${fmtR(EXR.value)}\ \text{m}^{-1}$ with the fit’s $${(100 * relS).toFixed(3)}\%$; the calibration’s $${(100 * relCal).toFixed(3)}\%$ scales every wavelength alike, so it adds in quadrature: $${(100 * relAll).toFixed(3)}\%$, $\sigma = ${tex(sAll, 2)}\ \text{m}^{-1}$.` },
-      { label: 'Compare', text: t`$z = (${fmtR(EXR.value)} - ${fmtR(RH)})/${tex(sAll, 2)} = ${zAll.toFixed(2)}$. $${(100 * relAll).toFixed(2)}\%$ with a vernier and a grating. Enough to see the reduced mass? $R_\infty$ is 0.054% bigger: about ${(0.054 / (100 * relAll)).toFixed(1)}σ — not quite.` },
+      { label: 'Compare', text: t`$z = (${fmtR(EXR.value)} - ${fmtR(RH)})/${tex(sAll, 2)}$ $= ${zAll.toFixed(2)}$. $${(100 * relAll).toFixed(2)}\%$ with a vernier and a grating. Enough to see the reduced mass? $R_\infty$ is 0.054% bigger: about ${(0.054 / (100 * relAll)).toFixed(1)}σ — not quite.` },
     ],
     answer: t`$R_H = (${pmT(EXR.value / 1e7, sAll / 1e7)})\times10^7\ \text{m}^{-1}$, $${Math.abs(zAll).toFixed(1)}\sigma$ from the CODATA-based value.`,
   },
@@ -122,7 +122,7 @@ Find $R_H$ with its uncertainty and compare it with the CODATA-based $1.096\,776
           ],
           hints: [t`$1/\lambda = R_H(1/4 - 1/n^2)$.`],
           teach: t`Each Balmer line has $1/\lambda = R_H(1/4 - 1/n^2)$: they crowd toward 364.6 nm as $n$ grows.`,
-          explain: t`$1/\lambda = 1.096\,776\times10^7 \times (1/4 - 1/${n * n}) = ${tex(RH * (0.25 - 1 / (n * n)), 5)}\ \text{m}^{-1}$, so $\lambda = ${ans.toFixed(2)}$ nm.`,
+          explain: t`$1/\lambda = 1.096\,776\times10^7 \times (1/4 - 1/${n * n})$ $= ${tex(RH * (0.25 - 1 / (n * n)), 5)}\ \text{m}^{-1}$, so $\lambda = ${ans.toFixed(2)}$ nm.`,
         };
       },
     }),

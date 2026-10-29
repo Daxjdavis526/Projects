@@ -142,7 +142,7 @@ $$\omega(\mathbf V) = \omega(V^i\mathbf e_i) = V^i\,\omega(\mathbf e_i) = \omega
       },
       hints: ['Which words in the student’s recipe involve measuring?'],
       teach: 'Turning a covector into an arrow needs a metric; the stack picture does not.',
-      explain: 'Perpendicular and spacing are measurements. With a metric you can trade a covector for an arrow (lesson A7, “raising the index”); without one, the stack is the honest picture — and the pairing, counting crossings, never needs it.',
+      explain: 'Perpendicular and spacing are measurements. With a metric you can trade a covector for an arrow (lesson A6.4, “raising the index”); without one, the stack is the honest picture — and the pairing, counting crossings, never needs it.',
     }),
     num({
       id: 'along-lines', difficulty: 2,

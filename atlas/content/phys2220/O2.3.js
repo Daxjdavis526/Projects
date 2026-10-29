@@ -57,7 +57,7 @@ A magnifying glass gives $M = 25\ \text{cm}/f$; a microscope multiplies the enla
     steps: [
       { label: 'Magnification', text: t`$M = -f_o/f_e = -100/2.5 = -40$: angles become 40 times larger, and the view is upside down.` },
       { label: 'Length', text: t`The objective's image of a distant object lies at its focal point, which must also be the eyepiece's focal point: $f_o + f_e = 102.5$ cm.` },
-      { label: 'The Moon', text: t`$\theta' \approx |M|\theta = 40\times0.52° \approx 21°$ — like a dinner plate held at arm's length. ($\theta' = M\theta$ is a small-angle rule; at 20° it runs about 4% high, and an ideal telescope gives $\tan\theta' = 40\tan\theta$, or 20°.)` },
+      { label: 'The Moon', text: t`$\theta' \approx |M|\theta = 40\times0.52° \approx 21°$ — like a dinner plate held at arm's length. ($\theta' = M\theta$ is a small-angle rule. An ideal telescope maps each edge of the Moon, $0.26°$ off the axis, by $\tan\theta' = 40\tan\theta$, which gives $20.6°$ in all — the rule is about 1% high here.)` },
       { label: 'Sense check', text: t`A long objective and a short eyepiece give a high magnification. The inverted view does not matter to astronomers; terrestrial telescopes add a prism or lens to turn it upright.` },
     ],
     answer: t`$M = -40$; the tube is $102.5$ cm long; the Moon appears about $21°$ across.`,

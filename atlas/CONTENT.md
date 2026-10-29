@@ -583,7 +583,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `gr-sphere-transport` | parallel transport around a loop on a sphere: the arrow returns rotated by area/R² |
 | `gr-elevator` | Einstein's elevator in four situations, with the tides a small box cannot hide |
 | `gr-timewarp` | a thrown clock's proper time: height speeds it, speed slows it, free fall ages most |
-| `gr-lensing` | a ray-traced point-mass lens: drag a galaxy behind it, make an Einstein ring |
+| `gr-lensing` | a ray-traced point-mass lens: drag a galaxy behind it, make an Einstein ring (`readout: false` hides its numbers, for a question's picture) |
 | `gr-dustball` | a freely falling ball of dust: tidal stretching and squeezing, the Ricci volume change |
 | `gr-friedmann` | solutions a(t) of the Friedmann equation for matter plus Λ: the universe's possible fates |
 | `gr-chirp` | a gravitational-wave chirp and what it does to a detector's arms |
@@ -649,6 +649,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `em4c-boost` | uniform E and B under a boost, with F^μν, F_μν, G^μν or T^μν shown as a 4×4 array and the invariants | see the file header |
 | `op-fresnel` | Fresnel's equations: r and t (or R and T) against angle with Brewster and critical angles and a draggable incidence; an evanescent field map with its depth profile, or a gap with transmission against width (frustrated TIR) | see the file header |
 | `op2-bench` | a ray tracer for chains of thin lenses, conic surfaces in real glasses and mirrors: paraxial (ABCD) or exact (Snell) at several wavelengths, folded Cassegrains, F, F′, H, H′, the system matrix, spherical and colour aberration | see the file header |
+| `op3-fresnel` | `zones`: a hole or disc face-on with its half-period zones, the phasor circle and the on-axis brightness (Arago's spot); `edge`: the Cornu spiral and a straight edge's or slit's pattern | see the file header |
 | `op2-jones` | polarization through polarizers, wave plates and rotators, as field ellipses and as paths on the Poincaré sphere (Hecht's convention) | see the file header |
 | `cm2-vary` | a true path, a family of varied paths, and the functional (length, bead travel time or action) against the variation — flat at the true path | `preset`, `n`, `alpha`, `T`, `sliders`, `modes`, `panels`, `ghosts`, `marks`, `readouts`, `labels` |
 | `cm2-race` | beads racing downhill on a line, a circular arc, a cycloid, a steep curve and a drop; a tautochrone mode | `mode`, `x1`, `curves`, `p`, `sliders`, `a`, `times`, `play`, `at`, `slow`, `labels` |
@@ -832,7 +833,7 @@ parts; `\underbrace{…}_{\text{?}}` in a prompt is a good way to point at one.
 
 ## Boss battles (`content/<course>/boss.js`)
 
-A boss is tested only by a whole-course run: `node atlas/test/content.test.mjs <course>` (and `code.test.mjs <course>` for code items).
+A boss is tested only by a whole-course run: `node atlas/test/content.test.mjs <course>` (and `code.test.mjs <course>` for code items). That run re-tests every lesson of the course too, so another author's lesson in progress can fail it: judge the boss by its own lines.
 
 A boss is a short story in rounds of unassisted problems that mix the course's
 skills — the kind of multi-step problem the course exists to make solvable.
