@@ -57,17 +57,17 @@ Every term is an energy per volume (J/m³, which is the same as Pa). So where a 
   practice: [
     mcq({
       id: 'lowest-p', difficulty: 1,
-      prompt: t`Water flows steadily from left to right through a horizontal pipe with a wide section A, a narrow section B and a middle-sized section C. Where is the pressure lowest?`,
-      choices: ['In B, the narrow section', 'In A, the wide section, where the water is slowest', 'In C', 'Nowhere: the pressure is the same throughout one pipe'],
+      prompt: t`Water flows steadily from left to right through a horizontal pipe with a wide section X, a narrow section Y and a middle-sized section Z. Where is the pressure lowest?`,
+      choices: ['In Y, the narrow section', 'In X, the wide section, where the water is slowest', 'In Z', 'Nowhere: the pressure is the same throughout one pipe'],
       answer: 0,
       why: {
         1: 'That reverses Bernoulli: slow water keeps more of its energy as pressure. Faster flow has *lower* pressure.',
-        2: 'C is narrower than A, so its pressure is below A’s — but B is narrower still.',
+        2: 'Z is narrower than X, so its pressure is below X’s — but Y is narrower still.',
         3: 'In a flowing fluid the pressure changes wherever the speed does: p + ½ρv² stays constant, not p.',
       },
       hints: ['Where is the water fastest?', 'In a horizontal pipe, p + ½ρv² is the same everywhere.'],
       teach: 'Along a horizontal streamline, where the speed is highest the pressure is lowest.',
-      explain: t`B has the smallest area, so the highest speed (continuity), so the largest $\tfrac12\rho v^2$ — and since $p + \tfrac12\rho v^2$ is fixed, the lowest $p$.`,
+      explain: t`Y has the smallest area, so the highest speed (continuity), so the largest $\tfrac12\rho v^2$ — and since $p + \tfrac12\rho v^2$ is fixed, the lowest $p$.`,
       visual: {
         type: 'graph',
         params: {
@@ -75,7 +75,7 @@ Every term is an energy per volume (J/m³, which is the same as Pa). So where a 
           shade: [box(0, 3.2, -1.2, 1.2, 'accent', 0.3), box(3.2, 6.4, -0.45, 0.45, 'accent', 0.3), box(6.4, 10, -0.8, 0.8, 'accent', 0.3)],
           curves: [seg([0, 1.2], [3.2, 1.2]), seg([3.2, 1.2], [3.2, 0.45]), seg([3.2, 0.45], [6.4, 0.45]), seg([6.4, 0.45], [6.4, 0.8]), seg([6.4, 0.8], [10, 0.8]), seg([0, -1.2], [3.2, -1.2]), seg([3.2, -1.2], [3.2, -0.45]), seg([3.2, -0.45], [6.4, -0.45]), seg([6.4, -0.45], [6.4, -0.8]), seg([6.4, -0.8], [10, -0.8])],
           arrows: [{ from: [0.3, 0], to: [1.3, 0], color: 'ink2' }],
-          points: [label(1.5, 1.55, 'A', 'gold'), label(4.7, 0.8, 'B', 'gold'), label(8.1, 1.15, 'C', 'gold')],
+          points: [label(1.5, 1.55, 'X', 'gold'), label(4.7, 0.8, 'Y', 'gold'), label(8.1, 1.15, 'Z', 'gold')],
         },
         caption: 'The pipe from above, flow left to right. Not to scale.',
       },

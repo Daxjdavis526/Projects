@@ -77,7 +77,7 @@ That one demand pays for everything that follows. A function $f: M \to \mathbb R
       { label: 'Smooth', text: t`Every entry is a rational function whose denominator $\rho^4$ never vanishes on the overlap, so all derivatives of all orders exist: $T \in C^\infty$. $T$ is its own inverse, so the other direction is smooth too.` },
       { label: 'Determinant', text: t`$\det J = \dfrac{-(X^2 - Y^2)^2 - 4X^2Y^2}{\rho^8} = -\dfrac{1}{(X^2 + Y^2)^2}$, never zero: $T$ is invertible near every point, as a transition map must be.` },
       { label: 'At the point', text: t`$\rho^2 = 5$: $J = \tfrac{1}{25}\begin{pmatrix} -3 & -4 \\ -4 & 3\end{pmatrix}$ and $\det J = -\tfrac{1}{25} = -0.04$.` },
-      { label: 'Sense check', text: t`$J/\!\det$ is $\tfrac15$ times a reflection matrix: near $(2, 1)$, $T$ shrinks by $1/\rho^2 = 1/5$ and flips orientation. Flipping the sign of $Y'$ in the south chart would make the determinant positive — an *oriented* atlas.` },
+      { label: 'Sense check', text: t`$J$ is $\tfrac15$ times a reflection matrix: near $(2, 1)$, $T$ shrinks by $1/\rho^2 = 1/5$ and flips orientation. Flipping the sign of $Y'$ in the south chart would make the determinant positive — an *oriented* atlas.` },
     ],
     answer: t`$J = \rho^{-4}\begin{pmatrix} Y^2 - X^2 & -2XY \\ -2XY & X^2 - Y^2\end{pmatrix}$, $\det J = -1/(X^2 + Y^2)^2$; at $(2, 1)$, $J = \tfrac1{25}\begin{pmatrix} -3 & -4 \\ -4 & 3\end{pmatrix}$ and $\det J = -0.04$. Smooth with smooth inverse: compatible.`,
   },

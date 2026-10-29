@@ -91,7 +91,7 @@ In a chart $x^\mu$ the partial derivatives $\partial_\mu|_p$ are such derivation
   },
   example: {
     prompt: t`At the point P with polar coordinates $(r, \theta) = (2, 60^\circ)$, write the derivation $V = \partial_x$ in the polar basis, then check it by applying both forms to $f = x^2 + y^2$ and to $g = \theta$.`,
-    visual: polarPic(2, 60, { arrows: [{ from: [1, r6(Math.sqrt(3))], to: [2, r6(Math.sqrt(3))], color: 'gold', width: 2.6, label: '∂x' }, { from: [1, r6(Math.sqrt(3))], to: [1.5, r6(Math.sqrt(3) + Math.sqrt(3) / 2)], color: 'accent', width: 1.6, label: '½∂r' }, { from: [1, r6(Math.sqrt(3))], to: [r6(1 + 2 * Math.sin(Math.PI / 3) * 0.433), r6(Math.sqrt(3) - 2 * Math.cos(Math.PI / 3) * 0.433)], color: 'violet', width: 1.6, label: '−0.433∂θ' }], caption: t`$\partial_x$ at P (gold) as the sum of $\tfrac12\partial_r$ (blue) and $-0.433\,\partial_\theta$ (violet).` }),
+    visual: polarPic(2, 60, { arrows: [{ from: [1, r6(Math.sqrt(3))], to: [2, r6(Math.sqrt(3))], color: 'gold', width: 2.6, label: '∂x' }, { from: [1, r6(Math.sqrt(3))], to: [1.25, r6(Math.sqrt(3) + Math.sqrt(3) / 4)], color: 'accent', width: 1.6, label: '½∂r' }, { from: [1, r6(Math.sqrt(3))], to: [r6(1 + 2 * Math.sin(Math.PI / 3) * 0.433), r6(Math.sqrt(3) - 2 * Math.cos(Math.PI / 3) * 0.433)], color: 'violet', width: 1.6, label: '−0.433∂θ' }], caption: t`$\partial_x$ at P (gold) as the sum of $\tfrac12\partial_r$ (blue) and $-0.433\,\partial_\theta$ (violet).` }),
     steps: [
       { label: 'Components are values', text: t`The polar components of $V$ are what $V$ does to the polar coordinates: $V^r = V(r)$ and $V^\theta = V(\theta)$.` },
       { label: 'The radial component', text: t`$r = \sqrt{x^2 + y^2}$, so $V(r) = \partial_x r = x/r = \cos\theta = \tfrac12$.` },

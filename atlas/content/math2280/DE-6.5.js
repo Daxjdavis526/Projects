@@ -100,7 +100,7 @@ Read the input as a stream of small kicks $f(\tau)\,d\tau$; each is answered by 
           ],
           hints: [t`From rest, $\mathcal{L}\{x''\} = s^2X$ and $\mathcal{L}\{x'\} = sX$.`, t`$(${co(m)}s^2 + ${co(c)}s + ${k})X = F$; divide.`],
           teach: t`From rest every derivative becomes a power of $s$, so $H(s)$ is one over the characteristic polynomial.`,
-          explain: t`$H(s) = \dfrac{1}{${co(m)}s^2 + ${co(c)}s + ${k}}$, in metres per newton·second. Its poles are the characteristic roots, $${n(re)} \pm ${n(im)}i$ — shown above. $H(0) = 1/${k}$ m/N is the spring’s static compliance.`,
+          explain: t`$H(s) = \dfrac{1}{${co(m)}s^2 + ${co(c)}s + ${k}}$, in metres per newton. Its poles are the characteristic roots, $${n(re)} \pm ${n(im)}i$ — shown above. $H(0) = 1/${k}$ m/N is the spring’s static compliance.`,
           visual: polePic([{ re: +re.toFixed(4), im: +im.toFixed(4) }], t`The poles of this system’s transfer function: the roots of $${co(m)}s^2 + ${co(c)}s + ${k}$.`),
         };
       },
@@ -230,7 +230,7 @@ print(peak, t_peak)`,
       ],
       hints: [t`\`np.convolve(h, f)\` returns \`2*len(t) - 1\` values; keep the first \`len(t)\` and multiply by \`dt\` — the width of each kick.`, t`\`y.max()\` and \`y.argmax()\` give the largest value and its index; \`t[index]\` is the time.`],
       teach: 'A numerical convolution is a Riemann sum of delayed impulse responses: it gives the response to any sampled input without solving the equation again.',
-      explain: t`The mount peaks at about 0.325 m per unit (per newton per kilogram of thrust) at $t \approx 2.1$ s, 38% above the steady $1/4.25 = 0.235$: the ramp is short compared with the 3.2 s natural period, so the structure overshoots. A designer checks exactly this peak load, for measured thrust curves, with exactly this sum.`,
+      explain: t`The mount peaks at about 0.325 m per unit (per newton per kilogram of thrust) at $t \approx 2.1$ s, 38% above the steady $1/4.25 = 0.235$: the ramp is short compared with the 3.1 s period of its ringing, so the structure overshoots. A designer checks exactly this peak load, for measured thrust curves, with exactly this sum.`,
     }),
   ],
   checkpoint: [

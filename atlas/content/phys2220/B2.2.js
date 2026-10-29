@@ -139,7 +139,7 @@ Currents outside the path change $\vec B$ along it, but their contributions to t
     mcq({
       id: 'zero-circ', difficulty: 2,
       prompt: t`For the loop shown, $\oint\vec B\cdot d\vec l = 0$. What can you conclude?`,
-      visual: ampPic([{ x: -2.4, y: 0.4, I: 5, label: 'A' }, { x: 3.4, y: -1.0, I: -4, label: 'B' }], { shape: 'circle', x: 0.4, y: 0.2, r: 1.6 }, 'The loop (green and amber where B runs with it or against it) between two wires, with the field lines.'),
+      visual: ampPic([{ x: -2.4, y: 0.4, I: 5, label: 'P' }, { x: 3.4, y: -1.0, I: -4, label: 'Q' }], { shape: 'circle', x: 0.4, y: 0.2, r: 1.6 }, 'The loop (green and amber where B runs with it or against it) between two wires, with the field lines.'),
       choices: [
         'No net current threads the loop — though B along it is not zero',
         'B is zero everywhere on the loop',

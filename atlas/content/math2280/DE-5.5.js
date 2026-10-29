@@ -238,7 +238,7 @@ print("period", period)
       id: 'cp-hopf', difficulty: 3,
       prompt: t`For $x'' - \mu(1 - x^2)x' + x = 0$, the origin’s Jacobian is $${M([[0, 1], [-1, '\\mu']])}$. As $\mu$ increases through 0, what happens?`,
       choices: [
-        'The origin turns from a stable spiral into an unstable one, and a small limit cycle is born round it',
+        'The origin turns from a stable spiral into an unstable one, and a limit cycle (amplitude about 2) appears round it',
         'The origin turns from a saddle into a centre',
         'Nothing changes: the origin is a centre for every μ',
         'The origin turns from a stable node into a saddle',

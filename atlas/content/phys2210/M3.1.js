@@ -197,20 +197,20 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
     mcq({
       id: 'crossing', difficulty: 2,
       prompt: 'The x–t graphs of two cars on a straight road cross at t = 4 s. What is true at that instant?',
-      choices: ['They are at the same position', 'They have the same velocity', 'They have the same speed but move in opposite directions', 'Car B is about to overtake car A'],
+      choices: ['They are at the same position', 'They have the same velocity', 'They have the same speed but move in opposite directions', 'Car Q is about to overtake car P'],
       answer: 0,
       why: {
-        1: 'Equal *heights* on an x–t graph mean equal positions. Velocity is the slope, and A’s line is twice as steep as B’s.',
+        1: 'Equal *heights* on an x–t graph mean equal positions. Velocity is the slope, and P’s line is twice as steep as Q’s.',
         2: 'Both lines slope upward, so both cars move in +x — and at different speeds.',
-        3: 'It is the other way round: A’s line is steeper, so A is faster and pulls ahead of B after t = 4 s.',
+        3: 'It is the other way round: P’s line is steeper, so P is faster and pulls ahead of Q after t = 4 s.',
       },
       hints: ['What does the height of an x–t graph tell you? What does its slope tell you?'],
       teach: 'Where two x–t graphs cross, the objects are at the same place — their velocities are the slopes, which can differ.',
-      explain: t`At the crossing $x_A = x_B = 8$ m: the cars are side by side. A’s slope is 2 m/s and B’s is 1 m/s, so A is the faster car and is overtaking B.`,
+      explain: t`At the crossing $x_P = x_Q = 8$ m: the cars are side by side. P’s slope is 2 m/s and Q’s is 1 m/s, so P is the faster car and is overtaking Q.`,
       visual: {
         type: 'graph',
-        params: { x: [0, 8], y: [0, 16.5], xlabel: 't (s)', ylabel: 'x (m)', curves: [{ fn: '2*x', color: 'accent', label: 'A', labelAt: 6.6 }, { fn: '4 + x', color: 'warn', label: 'B', labelAt: 7.2 }] },
-        caption: 'Positions of cars A and B against time.',
+        params: { x: [0, 8], y: [0, 16.5], xlabel: 't (s)', ylabel: 'x (m)', curves: [{ fn: '2*x', color: 'accent', label: 'P', labelAt: 6.6 }, { fn: '4 + x', color: 'warn', label: 'Q', labelAt: 7.2 }] },
+        caption: 'Positions of cars P and Q against time.',
       },
     }),
     mcq({

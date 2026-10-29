@@ -89,18 +89,18 @@ Near the natural frequency $\omega_0 = \sqrt{k/m}$ the first term in the root va
     mcq({
       id: 'which-curve', difficulty: 1,
       prompt: t`The graph shows the steady amplitude of the same mass and spring with three different dampers, driven by the same force. Which curve has the **least** damping?`,
-      choices: ['A', 'C', 'B', 'None: all three have the same damping, since damping does not change a resonance curve'],
+      choices: ['U', 'W', 'V', 'None: all three have the same damping, since damping does not change a resonance curve'],
       answer: 0,
       why: {
-        1: 'More damping removes more energy each cycle, so it limits the peak more: C, the low, broad curve, is the most heavily damped.',
-        2: 'B is in between: more damped than A, less than C.',
+        1: 'More damping removes more energy each cycle, so it limits the peak more: W, the low, broad curve, is the most heavily damped.',
+        2: 'V is in between: more damped than U, less than W.',
         3: t`Damping is the only thing that limits the peak: its height is $F_0/(b\omega_0)$.`,
       },
       hints: [t`The peak height is $F_0/(b\omega_0)$.`],
       teach: 'Light damping gives a tall, narrow resonance peak; heavy damping a low, broad one.',
-      explain: t`The peak height goes as $1/b$ and its width as $b/m$, so the least-damped oscillator, A, has the tallest and sharpest peak — the highest $Q$.`,
+      explain: t`The peak height goes as $1/b$ and its width as $b/m$, so the least-damped oscillator, U, has the tallest and sharpest peak — the highest $Q$.`,
       visual: resonance({
-        curves: [{ f: 1, w0: 10, g2: 0.8, label: 'A', labelAt: 10.4, labelDy: -2 }, { f: 1, w0: 10, g2: 2.5, label: 'B', labelAt: 10, labelDx: -3, labelDy: -12 }, { f: 1, w0: 10, g2: 6, label: 'C', labelAt: 9, labelDx: -3, labelDy: 16 }],
+        curves: [{ f: 1, w0: 10, g2: 0.8, label: 'U', labelAt: 10.4, labelDy: -2 }, { f: 1, w0: 10, g2: 2.5, label: 'V', labelAt: 10, labelDx: -3, labelDy: -12 }, { f: 1, w0: 10, g2: 6, label: 'W', labelAt: 9, labelDx: -3, labelDy: 16 }],
         y: [0, 0.14], numbers: false, caption: 'Resonance curves for three amounts of damping (no numbers on the axes). Same mass, spring and driving force.',
       }),
     }),

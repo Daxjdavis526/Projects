@@ -84,7 +84,7 @@ Draw $df$ as you did in [st-a A3.1](#/lesson/st-a.A3.1) and [A3.2](#/lesson/st-a
   },
   example: {
     prompt: t`For $f = x^2y$ at $p = (1, 2)$ and $V = 3\,\partial_x - 2\,\partial_y$, compute $df$ and $df(V)$. Then redo it in polar coordinates — $df = \partial_rf\,dr + \partial_\theta f\,d\theta$ and $V = V^r\partial_r + V^\theta\partial_\theta$ — and check that the number is the same.`,
-    visual: { type: 'c3-contour', params: { f: 'x^2*y', x: [-1.2, 3.6], y: [0.5, 3.5], levels: { from: -6, to: 12, step: 1 }, labels: true, points: [{ x: 1, y: 2, color: 'ink', label: 'p' }], arrows: [{ from: [1, 2], to: [2.5, 1], color: 'gold', label: '½V' }] }, caption: t`Level curves of $x^2y$ every 1, and $V$ at $p$ drawn at half length. Along the full $V$ the value of $f$ rises by about 10.` },
+    visual: { type: 'c3-contour', params: { f: 'x^2*y', x: [-1.2, 3.6], y: [0.5, 3.5], levels: { from: -6, to: 12, step: 1 }, labels: true, points: [{ x: 1, y: 2, color: 'ink', label: 'p' }], arrows: [{ from: [1, 2], to: [2.5, 1], color: 'gold', label: '½V' }] }, caption: t`Level curves of $x^2y$ every 1, and $V$ at $p$ drawn at half length. To first order $f$ rises by $df(V)/2 = 5$ along the drawn arrow; the level lines curve, so the arrow actually crosses about 4 of them (the true change is 4.25).` },
     steps: [
       { label: 'Cartesian components', text: t`$\partial_xf = 2xy = 4$ and $\partial_yf = x^2 = 1$ at $p$, so $df = 4\,dx + dy$.` },
       { label: 'Pair', text: t`$df(V) = 4\cdot 3 + 1\cdot(-2) = 10$.` },

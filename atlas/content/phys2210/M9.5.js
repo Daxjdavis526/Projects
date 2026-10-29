@@ -148,7 +148,7 @@ and the same for $y$ and $z$. It is the point that moves **as if all the mass we
     mcq({
       id: 'outside', difficulty: 1,
       prompt: 'A uniform flat L-shaped bracket is drawn below. Which marked point is its centre of mass?',
-      choices: ['A — in the open corner, off the metal', 'B — at the corner where the two arms meet', 'C — in the middle of the longer arm', 'D — in the middle of the shorter arm'],
+      choices: ['P — in the open corner, off the metal', 'Q — at the corner where the two arms meet', 'R — in the middle of the longer arm', 'S — in the middle of the shorter arm'],
       answer: 0,
       why: {
         1: 'The centre of mass need not be on the material. Each arm’s mass pulls it toward that arm’s middle, so it ends up between them — in the empty corner.',
@@ -157,14 +157,14 @@ and the same for $y$ and $z$. It is the point that moves **as if all the mass we
       },
       hints: ['Treat each arm as a rectangle with all its mass at its own centre.', 'The centre of mass of the whole lies on the line joining the two arms’ centres, closer to the heavier arm.'],
       teach: 'A centre of mass need not lie inside the material: for an L, a ring or a boomerang it sits in empty space.',
-      explain: t`Long arm: area 4 with centre (2, 0.5); short arm: area 3 with centre (0.5, 2.5). So $x_\text{cm} = y_\text{cm} = \dfrac{4(2) + 3(0.5)}{7} = 1.36$ — point A, off the metal. Hang the bracket from any point and A will sit straight below it.`,
+      explain: t`Long arm: area 4 with centre (2, 0.5); short arm: area 3 with centre (0.5, 2.5). So $x_\text{cm} = y_\text{cm} = \dfrac{4(2) + 3(0.5)}{7} = 1.36$ — point P, off the metal. Hang the bracket from any point and P will sit straight below it.`,
       visual: {
         type: 'graph',
         params: {
           x: [-0.7, 4.7], y: [-0.5, 4.4], equal: true, xlabel: '', ylabel: '', xticks: 0.001, yticks: 0.001, axes: false,
           shade: [box(0, 4, 0, 1), box(0, 1, 1, 4)],
           curves: [seg([0, 0], [4, 0], 'accent', 1.6), seg([4, 0], [4, 1], 'accent', 1.6), seg([4, 1], [1, 1], 'accent', 1.6), seg([1, 1], [1, 4], 'accent', 1.6), seg([1, 4], [0, 4], 'accent', 1.6), seg([0, 4], [0, 0], 'accent', 1.6)],
-          points: [{ x: 1.357, y: 1.357, r: 4, color: 'gold', label: 'A' }, { x: 0.5, y: 0.5, r: 4, color: 'gold', label: 'B' }, { x: 2.6, y: 0.5, r: 4, color: 'gold', label: 'C' }, { x: 0.5, y: 2.5, r: 4, color: 'gold', label: 'D' }],
+          points: [{ x: 1.357, y: 1.357, r: 4, color: 'gold', label: 'P' }, { x: 0.5, y: 0.5, r: 4, color: 'gold', label: 'Q' }, { x: 2.6, y: 0.5, r: 4, color: 'gold', label: 'R' }, { x: 0.5, y: 2.5, r: 4, color: 'gold', label: 'S' }],
         },
         caption: 'A uniform flat bracket: arms 4 × 1 and 3 × 1 (the corner square belongs to the long arm).',
       },

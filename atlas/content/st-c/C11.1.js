@@ -229,7 +229,7 @@ In C4 the metric of a surface was *induced* — the dot product of $\mathbb R^3$
           errors: [{ answer: `${k}*e^(-v)`, feedback: t`That is $\sqrt{g_{uu}}$, the length of $\partial_u$; the metric component is its square.` }, { answer: `${k * k}*e^(2*v)`, feedback: t`$g$ has $1/y^2 = e^{-2v}$ in it, not $y^2$.` }],
           hints: [t`$dx = ${k === 1 ? '' : k}\,du$ and $dy = e^v\,dv$.`, t`$ds^2 = \dfrac{${k * k === 1 ? '' : k * k}\,du^2 + e^{2v}dv^2}{e^{2v}}$.`],
           teach: t`To change coordinates, substitute $dx^\mu = (\partial x^\mu/\partial u^\alpha)\,du^\alpha$ into $ds^2$.`,
-          explain: t`$ds^2 = ${k * k === 1 ? '' : k * k}e^{-2v}\,du^2 + dv^2$. The same hyperbolic plane now looks like a line $v$ times circles shrinking as $e^{-v}$ — the shape the space slices of de Sitter spacetime take in C11.3, with time in place of $v$.`,
+          explain: t`$ds^2 = ${k * k === 1 ? '' : k * k}e^{-2v}\,du^2 + dv^2$. The same hyperbolic plane now looks like a line $v$ times copies of the $u$-line (horocycles) whose scale shrinks as $e^{-v}$ — the shape the space slices of de Sitter spacetime take in C11.3, with time in place of $v$.`,
         };
       },
     }),

@@ -110,17 +110,17 @@ $f(v)\,dv$ is the fraction of molecules with speeds between $v$ and $v + dv$. Th
     mcq({
       id: 'heavier-curve', difficulty: 2,
       prompt: 'The graph shows the speed distributions of two different gases at the same temperature. Which gas has the heavier molecules?',
-      choices: ['A: its curve is narrower and peaks at a lower speed', 'B: its curve reaches higher speeds, so its molecules carry more momentum', 'B: its peak is lower', 'Neither can be told apart: the curves could just be different temperatures'],
+      choices: ['P: its curve is narrower and peaks at a lower speed', 'Q: its curve reaches higher speeds, so its molecules carry more momentum', 'Q: its peak is lower', 'Neither can be told apart: the curves could just be different temperatures'],
       answer: 0,
       why: {
         1: 'Reaching higher speeds is the mark of *lighter* molecules: at the same temperature they need more speed to carry the same kinetic energy.',
-        2: 'B’s peak is lower because its curve is spread over more speeds — the area is always 1. That spreading comes from light molecules.',
+        2: 'Q’s peak is lower because its curve is spread over more speeds — the area is always 1. That spreading comes from light molecules.',
         3: 'Different temperatures could also stretch the curves — but the question fixes the temperature, so only the mass is left to differ.',
       },
       hints: [t`At fixed $T$, $v_p = \sqrt{2k_BT/m}$. Which curve has the smaller $v_p$?`],
       teach: 'At one temperature heavier molecules have a narrower distribution peaked at lower speed.',
-      explain: t`A peaks near 350 m/s and B near 1100 m/s. Since $v_p \propto 1/\sqrt m$, A’s molecules are about $(1100/350)^2 \approx 10$ times heavier: argon (40 g/mol) against helium (4 g/mol).`,
-      visual: mbGraph({ curves: [{ T: 300, M: MOLAR.Ar, label: 'A', color: 'warn' }, { T: 300, M: MOLAR.He, label: 'B', color: 'accent', labelAt: 1500 }], vmax: 3500, caption: 'Speed distributions of two gases at the same temperature.' }),
+      explain: t`P peaks near 350 m/s and Q near 1100 m/s. Since $v_p \propto 1/\sqrt m$, P’s molecules are about $(1100/350)^2 \approx 10$ times heavier: argon (40 g/mol) against helium (4 g/mol).`,
+      visual: mbGraph({ curves: [{ T: 300, M: MOLAR.Ar, label: 'P', color: 'warn' }, { T: 300, M: MOLAR.He, label: 'Q', color: 'accent', labelAt: 1500 }], vmax: 3500, caption: 'Speed distributions of two gases at the same temperature.' }),
     }),
     num({
       id: 'same-vrms', difficulty: 2,

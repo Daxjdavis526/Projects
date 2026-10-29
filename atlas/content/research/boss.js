@@ -179,8 +179,8 @@ const CMPCAP = {
 const tallyPic = (caption) => timeBars([
   { y: 3, from: 0, to: 5600, color: 'ink3', label: 'observed from Earth ≈ 5600', alpha: 0.45 },
   { y: 2, from: 0, to: 5025, color: 'accent', label: 'precession of the equinoxes ≈ 5025' },
-  { y: 1, from: 5025, to: 5557, color: 'violet', label: 'other planets ≈ 532', labelX: 3500 },
-  { y: 0, from: 5557, to: 5600, color: 'gold', label: 'the rest ≈ 43', labelX: 4700 },
+  { y: 1, from: 5025, to: 5557, color: 'violet', label: 'other planets ≈ 532', labelX: 2500 },
+  { y: 0, from: 5557, to: 5600, color: 'gold', label: 'the rest ≈ 43', labelX: 3300 },
 ], { x: [-150, 6000], y: [-0.6, 3.8], xlabel: 'perihelion turning (″ per century)', xticks: 6 }, { h: 0.28, caption });
 /** A budget's inputs as a Monte Carlo cloud (labx-stats), numbers hidden. */
 const mcPic = (f, x, y, names, caption) => ({ type: 'labx-stats', params: { mode: 'mc', f, x, y, N: 20000, xname: names[0], yname: names[1], fname: names[2], controls: false, readout: false, hide: ['mc'], seed: 4 }, caption });
@@ -753,7 +753,7 @@ const ROUNDS = [
               hints: [t`For $q \propto x^p y^s$, $\;\sigma_q/q = \sqrt{(p\,\sigma_x/x)^2 + (s\,\sigma_y/y)^2}$.`, t`Here the powers are $\tfrac35\cdot\tfrac{11}{3} = \tfrac{11}{5}$ on $f$ and $\tfrac35$ on $\dot f$.`, t`So $\sigma_{\mathcal M}/\mathcal M = \sqrt{(\tfrac{11}{5}\times${a}\%)^2 + (\tfrac35\times${b}\%)^2}$.`],
               teach: t`Each input enters a budget weighted by its power in the formula, and independent entries add in quadrature — so a steep power can make a small input uncertainty dominate.`,
               explain: t`$\sigma_{\mathcal M}/\mathcal M = \sqrt{(${(2.2 * a).toFixed(2)}\%)^2 + (${(0.6 * b).toFixed(2)}\%)^2} = ${((100 * key) / M).toFixed(2)}\%$, so $\sigma_{\mathcal M} = ${key.toFixed(2)}\,M_\odot$. ${2.2 * a > 0.6 * b ? t`The frequency, though better measured, dominates: its power $\tfrac{11}{5}$ amplifies it.` : t`The rate $\dot f$ dominates — that is the entry to work on.`} The picture propagates the same inputs by Monte Carlo at $f = 100$ Hz.`,
-              visual: mcPic('((5/96)*pi^(-8/3)*x^(-11/3)*y)^0.6/0.000004925491', [100, a], [r6(fd), r6((fd * b) / 100)], ['f (Hz)', 'ḟ (Hz/s)', 'chirp mass (M☉)'], t`Monte Carlo propagation: each dot one draw of $f$ and $\dot f$ (at 100 Hz on a 30 M☉ chirp) with your relative uncertainties, the histogram the chirp masses they give. The dashed curve is linear propagation.`),
+              visual: mcPic('((5/96)*pi^(-8/3)*x^(-11/3)*y)^0.6/0.000004925491', [100, a], [r6(fd), r6((fd * b) / 100)], ['f (Hz)', 'ḟ (Hz/s)', 'chirp mass (M☉)'], t`Monte Carlo propagation: each dot one draw of $f$ and $\dot f$ (at 100 Hz on your chirp) with your relative uncertainties, the histogram the chirp masses they give. The dashed curve is linear propagation.`),
             };
           }
           if (P === 'transit') {

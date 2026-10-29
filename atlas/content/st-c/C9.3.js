@@ -49,7 +49,7 @@ A **covector** at $F(p)$ is **pulled back** to $p$: $F^*\omega$ eats a vector at
     steps: [
       { label: 'Pull back the coordinates', text: t`Along the curve $x = 2\cos t$ and $y = \sin t$, so $\gamma^*dx = -2\sin t\,dt$ and $\gamma^*dy = \cos t\,dt$.` },
       { label: 'Substitute', text: t`$\gamma^*\omega = -\sin t\,(-2\sin t\,dt) + 2\cos t\,(\cos t\,dt) = 2(\sin^2 t + \cos^2 t)\,dt = 2\,dt$.` },
-      { label: 'Integrate', text: t`$\int_\gamma\omega = \int_0^\pi 2\,dt = 2\pi \approx 6.283$. The ellipse is the boundary of half a region of area $\pi$, and $\omega$ measures twice the swept area — a fact C10.3 explains.` },
+      { label: 'Integrate', text: t`$\int_\gamma\omega = \int_0^\pi 2\,dt = 2\pi \approx 6.283$. Closed up along the axis, where $\omega$ pulls back to 0, the half-ellipse bounds a region of area $\pi$, and $\omega$ measures twice the enclosed area — a fact C10.3 explains.` },
       { label: 'New pace', text: t`With $t = s^2$: $\tilde\gamma(s) = \gamma(s^2)$, and the chain rule gives $\tilde\gamma^*\omega = 2\,d(s^2) = 4s\,ds$.` },
       { label: 'Same total', text: t`$\int_0^{\sqrt\pi}4s\,ds = 2s^2\big|_0^{\sqrt\pi} = 2\pi$ ✓. Pullback and change of variables are the same operation, so the integral belongs to the *oriented curve*, not the parameter.` },
     ],

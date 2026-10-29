@@ -25,7 +25,7 @@ const uGraph = ({ U, x, y, points = [], arrows = [], curves = [], caption, xlabe
   caption,
 });
 
-// two routes from A to B
+// two routes from P to Q
 const routes = (h, caption) => ({
   type: 'graph',
   params: {
@@ -35,7 +35,7 @@ const routes = (h, caption) => ({
       { param: ['7*t', `${h}*t`], t: [0, 1], color: 'accent', width: 2.4, label: 'route 1' },
       { param: ['7*t', `${h}*t + 1.6*sin(2*pi*t)`], t: [0, 1], color: 'warn', width: 2.4 },
     ],
-    points: [{ x: 0, y: 0, color: 'ink', label: 'A', labelDx: -14 }, { x: 7, y: h, color: 'ink', label: 'B' }, { x: 1.6, y: 1.45 + h * 0.23, r: 0.01, color: 'warn', label: 'route 2' }, { x: 3.6, y: h * 0.51 - 0.35, r: 0.01, color: 'accent', label: 'route 1' }],
+    points: [{ x: 0, y: 0, color: 'ink', label: 'P', labelDx: -14 }, { x: 7, y: h, color: 'ink', label: 'Q' }, { x: 1.6, y: 1.45 + h * 0.23, r: 0.01, color: 'warn', label: 'route 2' }, { x: 3.6, y: h * 0.51 - 0.35, r: 0.01, color: 'accent', label: 'route 1' }],
   },
   caption,
 });
@@ -104,7 +104,7 @@ So the force points **downhill** on the graph of $U(x)$, and it is strongest whe
       hints: ['Ask: does the work between two points depend on the route?', 'Forces that always oppose the motion do negative work on every leg, so a longer route means more work.'],
       teach: 'A force is conservative if its work between two points is the same for every path — so it has a potential energy.',
       explain: 'Gravity, ideal springs and the electrostatic force all do path-independent work and have potential energies (mgy, ½kx², and kq₁q₂/r in Physics II). Friction and drag always oppose the motion, so their work grows with the length of the path.',
-      visual: routes(3, 'Two routes from A to B. Gravity does the same work along both; friction would do more along the longer, wavy route 2.'),
+      visual: routes(3, 'Two routes from P to Q. Gravity does the same work along both; friction would do more along the longer, wavy route 2.'),
     }),
     num({
       id: 'two-routes', difficulty: 2,
@@ -112,13 +112,13 @@ So the force points **downhill** on the graph of $U(x)$, and it is strongest whe
         const m = r.pick([2, 5, 8, 12]), h = r.pick([2, 3, 4]);
         const W = -m * G * h;
         return {
-          prompt: t`A ${m} kg box is carried from A to B along the wavy route 2, which rises and dips but ends ${h} m higher than it started. How much work does gravity do on the box over the whole trip?`,
+          prompt: t`A ${m} kg box is carried from P to Q along the wavy route 2, which rises and dips but ends ${h} m higher than it started. How much work does gravity do on the box over the whole trip?`,
           answer: W, units: 'J', tol: { rel: 0.01 },
           errors: [{ value: -W, feedback: t`The box ends up higher, so gravity (pointing down) did negative work: $W_g = -mgh$.` }],
           hints: ['Gravity is conservative: its work depends only on the start and the end.', t`$W_g = -\Delta U_g = -mg\,\Delta y$.`],
           teach: 'Gravity’s work depends only on the change in height, never on the route.',
           explain: t`$W_g = -mg\,\Delta y = -(${m})(9.8)(${h}) = ${s3(W)}$ J — the same as along the straight route 1. On the wavy route, the work done on the rises and the dips cancels except for the net ${h} m.`,
-          visual: routes(h, 'The two routes from A to B (horizontal and vertical scales equal).'),
+          visual: routes(h, 'The two routes from P to Q (horizontal and vertical scales equal).'),
         };
       },
     }),
@@ -171,19 +171,19 @@ So the force points **downhill** on the graph of $U(x)$, and it is strongest whe
     mcq({
       id: 'steepest', difficulty: 2,
       prompt: t`The graph shows a particle’s potential energy $U(x)$. At which marked point is the force on the particle largest **and** pointing toward $-x$?`,
-      choices: ['D', 'A', 'B', 'C'],
+      choices: ['S', 'P', 'Q', 'R'],
       answer: 0,
       why: {
-        1: 'A is on a steep slope too, but there U falls toward +x, so the force points toward +x — and the slope at D is steeper still.',
-        2: 'B is near the top of a hill, where the curve is almost flat: the force there is almost zero. The size of U is not the size of the force.',
-        3: 'C is near the bottom of a valley: almost flat, so almost no force. A low U does not mean a large force.',
+        1: 'P is on a steep slope too, but there U falls toward +x, so the force points toward +x — and the slope at S is steeper still.',
+        2: 'Q is near the top of a hill, where the curve is almost flat: the force there is almost zero. The size of U is not the size of the force.',
+        3: 'R is near the bottom of a valley: almost flat, so almost no force. A low U does not mean a large force.',
       },
       hints: ['The force is minus the slope: look for the steepest place where U rises toward +x.'],
       teach: 'The force depends on the slope of U, not on its height: it is largest where the graph is steepest and points downhill.',
-      explain: t`$F_x = -dU/dx$. At D the graph rises steeply to the right ($dU/dx \approx +8$ J/m), so $F_x \approx -8$ N: large and toward $-x$. At B and C the tangent is nearly flat.`,
+      explain: t`$F_x = -dU/dx$. At S the graph rises steeply to the right ($dU/dx \approx +8$ J/m), so $F_x \approx -8$ N: large and toward $-x$. At Q and R the tangent is nearly flat.`,
       visual: uGraph({
         U: UX, x: [-3, 3], y: [-7, 6], numbers: false,
-        points: [-2.5, 0.25, 1.9, 2.6].map((x, i) => ({ x, y: +U0(x).toFixed(4), color: 'gold', label: 'ABCD'[i], labelDy: i === 1 ? -14 : 14 })),
+        points: [-2.5, 0.25, 1.9, 2.6].map((x, i) => ({ x, y: +U0(x).toFixed(4), color: 'gold', label: 'PQRS'[i], labelDy: i === 1 ? -14 : 14 })),
         caption: 'A potential-energy curve with four marked points. Energy scale hidden.',
       }),
     }),

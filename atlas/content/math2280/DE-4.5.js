@@ -216,7 +216,7 @@ print(np.round(V / np.abs(V).max(axis=0), 3))
       ],
       hints: [t`\`eigh(K, M)\` returns the eigenvalues $\omega^2$ in increasing order and the mode shapes as the columns of \`V\`.`, t`The zero mode may come out as $-10^{-12}$ or so: \`np.clip(w2, 0, None)\` before \`np.sqrt\`. Then \`nu = omega / (2 * np.pi * c)\`.`],
       teach: 'scipy.linalg.eigh(K, M) solves the generalized symmetric eigenproblem Kv = ω²Mv directly — the standard tool for normal modes of any size.',
-      explain: t`The wavenumbers are about $0$, $1333$ and $2552$ cm⁻¹, with shapes $(1, 1, 1)$, $(1, 0, -1)$ and $(0.375, -1, 0.375)$. The stiffness was chosen to match the measured symmetric stretch (1333 cm⁻¹); the model then predicts the antisymmetric stretch at 2552 cm⁻¹, while the measured band is at 2349 cm⁻¹ — 9% lower, because real bonds interact (stretching one softens the other), which two independent springs cannot capture.`,
+      explain: t`The wavenumbers are about $0$, $1333$ and $2552$ cm⁻¹, with shapes $(1, 1, 1)$, $(1, 0, -1)$ and $(0.375, -1, 0.375)$. The stiffness was chosen to match the measured symmetric stretch (1333 cm⁻¹); the model then predicts the antisymmetric stretch at 2552 cm⁻¹, while the measured band is at 2349 cm⁻¹ — 8% lower, because real bonds interact (stretching one softens the other), which two independent springs cannot capture.`,
     }),
   ],
   checkpoint: [

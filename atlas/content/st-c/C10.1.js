@@ -110,7 +110,7 @@ The basic case: $dx\wedge dy\,(\mathbf u, \mathbf v) = u^xv^y - u^yv^x$, the sig
           errors: [{ value: -d, feedback: t`Order matters: $dx\wedge dy(\mathbf u, \mathbf v) = u^xv^y - u^yv^x$.` }, { value: u[0] * v[1] + u[1] * v[0], feedback: 'The wedge subtracts the swapped product: it is antisymmetric.' }].filter((e) => Math.abs(e.value - d) > 0.01),
           hints: [t`$dx\wedge dy(\mathbf u, \mathbf v) = dx(\mathbf u)\,dy(\mathbf v) - dx(\mathbf v)\,dy(\mathbf u)$.`],
           teach: 'dx∧dy on two vectors is the signed area of their parallelogram — the 2×2 determinant.',
-          explain: t`$${u[0]}\cdot${v[1]} - (${u[1]})(${v[0]}) = ${d}$: the parallelogram has area $${Math.abs(d)}$, ${d > 0 ? 'positive because the turn from u to v is anticlockwise' : 'negative because the turn from u to v is clockwise'}.`,
+          explain: t`$${u[0]}\cdot${v[1]} - (${u[1]})(${v[0]}) = ${d}$: ${d === 0 ? 'the vectors are parallel, so the parallelogram has no area' : t`the parallelogram has area $${Math.abs(d)}$, ${d > 0 ? 'positive because the turn from u to v is anticlockwise' : 'negative because the turn from u to v is clockwise'}`}.`,
         };
       },
     }),

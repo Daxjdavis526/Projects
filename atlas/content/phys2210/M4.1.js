@@ -152,16 +152,16 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
     mcq({
       id: 'tangent', difficulty: 2,
       prompt: 'A drone flies from left to right along the grey path. At the marked point, which arrow shows the direction of its velocity?',
-      choices: ['Arrow A', 'Arrow B', 'Arrow C', 'Arrow D'],
+      choices: ['Arrow P', 'Arrow Q', 'Arrow R', 'Arrow S'],
       answer: 0,
       why: {
-        1: 'B points along the line from the origin through the drone: that is the direction of the position vector, not the velocity.',
-        2: 'C points toward the inside of the curve. For a turning object that is the direction the velocity is *changing* — the acceleration has a part along it — not the velocity itself.',
-        3: 'D is tangent to the path but points backward, against the motion.',
+        1: 'Q points along the line from the origin through the drone: that is the direction of the position vector, not the velocity.',
+        2: 'R points toward the inside of the curve. For a turning object that is the direction the velocity is *changing* — the acceleration has a part along it — not the velocity itself.',
+        3: 'S is tangent to the path but points backward, against the motion.',
       },
       hints: ['Velocity is the direction the drone is moving at that instant.', 'Which arrow follows the path forward?'],
       teach: 'Velocity is always tangent to the path, pointing in the direction of motion.',
-      explain: t`$\vec v = d\vec r/dt$ points along the path, the way the drone is going: arrow A, tangent and forward.`,
+      explain: t`$\vec v = d\vec r/dt$ points along the path, the way the drone is going: arrow P, tangent and forward.`,
       visual: {
         type: 'graph',
         params: {
@@ -169,10 +169,10 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           curves: [{ fn: '6 - 0.15*(x - 6)^2', domain: [0.2, 11.8], color: 'ink3', width: 1.6 }],
           points: [{ x: 7, y: 5.85, color: 'ink' }],
           arrows: [
-            { from: [7, 5.85], to: [9.299, 5.16], color: 'gold', label: 'A' },
-            { from: [7, 5.85], to: [8.842, 7.389], color: 'accent', label: 'B' },
-            { from: [7, 5.85], to: [6.31, 3.551], color: 'violet', label: 'C' },
-            { from: [7, 5.85], to: [4.701, 6.54], color: 'warn', label: 'D' },
+            { from: [7, 5.85], to: [9.299, 5.16], color: 'gold', label: 'P' },
+            { from: [7, 5.85], to: [8.842, 7.389], color: 'accent', label: 'Q' },
+            { from: [7, 5.85], to: [6.31, 3.551], color: 'violet', label: 'R' },
+            { from: [7, 5.85], to: [4.701, 6.54], color: 'warn', label: 'S' },
           ],
         },
         caption: 'The drone’s path; it moves from left to right.',

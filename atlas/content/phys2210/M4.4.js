@@ -87,7 +87,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
     mcq({
       id: 'direction', difficulty: 1,
       prompt: 'An object moves counter-clockwise round the circle at constant speed. Which describes its acceleration at the marked point?',
-      choices: ['Toward the centre (arrow A)', 'Along its velocity (arrow B)', 'Away from the centre (arrow C)', 'There is none: the speed is constant'],
+      choices: ['Toward the centre (arrow P)', 'Along its velocity (arrow Q)', 'Away from the centre (arrow R)', 'There is none: the speed is constant'],
       answer: 0,
       why: {
         1: 'An acceleration along the velocity would change the speed. Here only the direction changes.',
@@ -96,13 +96,13 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
       },
       hints: ['The velocity has a constant size but a changing direction.', 'Which way is the velocity being turned?'],
       teach: 'In uniform circular motion the acceleration points to the centre of the circle.',
-      explain: t`The velocity is turned continually toward the inside of the circle, so $\vec a$ points to the centre (arrow A), with size $v^2/r$, perpendicular to $\vec v$.`,
+      explain: t`The velocity is turned continually toward the inside of the circle, so $\vec a$ points to the centre (arrow P), with size $v^2/r$, perpendicular to $\vec v$.`,
       visual: {
         type: 'graph',
         params: {
           x: [-9, 9], y: [-7.5, 7.5], equal: true, xlabel: '', ylabel: '', axes: false, grid: false,
           curves: [circle(5)],
-          arrows: [{ from: [3.54, 3.54], to: [1.77, 1.77], color: 'bad', label: 'A' }, { from: [3.54, 3.54], to: [1.77, 5.3], color: 'gold', label: 'B' }, { from: [3.54, 3.54], to: [5.3, 5.3], color: 'violet', label: 'C' }],
+          arrows: [{ from: [3.54, 3.54], to: [1.77, 1.77], color: 'bad', label: 'P' }, { from: [3.54, 3.54], to: [1.77, 5.3], color: 'gold', label: 'Q' }, { from: [3.54, 3.54], to: [5.3, 5.3], color: 'violet', label: 'R' }],
           points: [{ x: 3.54, y: 3.54, color: 'accent' }, { x: 0, y: 0, color: 'ink3' }],
         },
         caption: 'Seen from above; the object moves counter-clockwise.',
@@ -111,7 +111,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
     mcq({
       id: 'release', difficulty: 1,
       prompt: 'A ball on a string is whirled in a horizontal circle (counter-clockwise, seen from above). The string breaks when the ball is at the marked point. Which path does it follow, seen from above?',
-      choices: ['Path A: straight along the tangent', 'Path B: straight outward, away from the centre', 'Path C: it keeps curving, spiralling slowly outward', 'It keeps going round the circle for a while'],
+      choices: ['Path P: straight along the tangent', 'Path Q: straight outward, away from the centre', 'Path R: it keeps curving, spiralling slowly outward', 'It keeps going round the circle for a while'],
       answer: 0,
       why: {
         1: 'Nothing pushes the ball outward. It simply keeps the velocity it had, which was along the tangent.',
@@ -120,7 +120,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
       },
       hints: ['After the break, what acts on the ball horizontally?', 'With no horizontal force, the horizontal velocity cannot change.'],
       teach: 'Released from circular motion, an object continues along the tangent, not outward.',
-      explain: t`Once the string breaks there is no horizontal force, so the ball keeps its velocity at the moment of release — tangent to the circle (path A). Seen from the side it also falls, of course.`,
+      explain: t`Once the string breaks there is no horizontal force, so the ball keeps its velocity at the moment of release — tangent to the circle (path P). Seen from the side it also falls, of course.`,
       visual: {
         type: 'graph',
         params: {
@@ -131,7 +131,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
             { param: ['5 + t', '0'], t: [0, 6], color: 'violet', width: 1.6, dash: true },
             { param: ['(5 + 0.3*t)*cos(t/5)', '(5 + 0.3*t)*sin(t/5)'], t: [0, 7], color: 'warn', width: 1.6, dash: true },
           ],
-          points: [{ x: 5, y: 0, color: 'accent' }, { x: 0, y: 0, color: 'ink3' }, { x: 4.2, y: 7.8, r: 0.1, color: 'gold', label: 'A' }, { x: 10.6, y: 0.2, r: 0.1, color: 'violet', label: 'B' }, { x: 0.3, y: 7.6, r: 0.1, color: 'warn', label: 'C' }],
+          points: [{ x: 5, y: 0, color: 'accent' }, { x: 0, y: 0, color: 'ink3' }, { x: 4.2, y: 7.8, r: 0.1, color: 'gold', label: 'P' }, { x: 10.6, y: 0.2, r: 0.1, color: 'violet', label: 'Q' }, { x: 0.3, y: 7.6, r: 0.1, color: 'warn', label: 'R' }],
         },
         caption: 'Three candidate paths after the string breaks (seen from above).',
       },

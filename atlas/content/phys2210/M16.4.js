@@ -156,17 +156,17 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
     }),
     mcq({
       id: 'which-segment', difficulty: 2,
-      prompt: 'The graph is the heating curve of a kilogram of water, from ice to steam. During which segment is the water boiling?',
-      choices: ['D', 'B', 'C', 'E'],
+      prompt: 'The graph is the heating curve of a kilogram of water, from ice to steam. During which numbered segment is the water boiling?',
+      choices: ['Segment 4', 'Segment 2', 'Segment 3', 'Segment 5'],
       answer: 0,
       why: {
-        1: 'B is a flat step too — but at 0 °C. That is melting.',
-        2: 'On C the temperature is rising: liquid water is warming from 0 °C to 100 °C, and nothing is changing phase.',
-        3: 'On E the temperature is rising again: the boiling is finished, and the steam is warming up.',
+        1: 'Segment 2 is a flat step too — but at 0 °C. That is melting.',
+        2: 'On segment 3 the temperature is rising: liquid water is warming from 0 °C to 100 °C, and nothing is changing phase.',
+        3: 'On segment 5 the temperature is rising again: the boiling is finished, and the steam is warming up.',
       },
       hints: ['During a phase change the temperature does not change. Which segments are flat?', 'Of the two flat ones, which is at 100 °C?'],
       teach: 'On a heating curve, flat segments are phase changes; sloped ones are a single phase warming up.',
-      explain: t`D is the long flat step at 100 °C: the water is boiling, and it is long because $L_v = 2257$ kJ/kg is by far the largest heat in the whole process.`,
+      explain: t`Segment 4 is the long flat step at 100 °C: the water is boiling, and it is long because $L_v = 2257$ kJ/kg is by far the largest heat in the whole process.`,
       visual: heatingCurve({ segs: waterSegs(-20, 120), letters: true, labels: false, caption: 'One kilogram of water, heated slowly from −20 °C. Specific heats taken as constant within each phase.' }),
     }),
     num({

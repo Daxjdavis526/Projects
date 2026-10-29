@@ -109,17 +109,17 @@ Where $U = E$ the particle stops and turns back: a **turning point**. Where the 
     multi({
       id: 'which-stable', difficulty: 2,
       prompt: 'At which of the marked points could the particle rest in **stable** equilibrium? Select all that apply.',
-      choices: ['A', 'B', 'C', 'D', 'E'],
+      choices: ['P', 'Q', 'R', 'S', 'T'],
       answer: [0, 3],
       why: {
-        1: 'B is on a slope: the curve is not flat, so there is a force there. Not an equilibrium at all.',
-        2: 'C is an equilibrium — the curve is flat — but on a hilltop: a nudge either way and the force pushes it further away. Unstable.',
-        4: 'E is on a slope too: the force pushes it downhill toward D.',
+        1: 'Q is on a slope: the curve is not flat, so there is a force there. Not an equilibrium at all.',
+        2: 'R is an equilibrium — the curve is flat — but on a hilltop: a nudge either way and the force pushes it further away. Unstable.',
+        4: 'T is on a slope too: the force pushes it downhill toward S.',
       },
       hints: ['Equilibrium needs a flat curve (zero force). Stability needs a valley, not a hilltop.'],
       teach: 'Stable equilibria sit at the bottoms of valleys of U(x); hilltops are unstable; slopes are not equilibria at all.',
-      explain: 'A and D are valley bottoms: displaced either way, the force (downhill) pushes the particle back. C is a hilltop (unstable). B and E are on slopes, where the force is not zero.',
-      visual: diagram({ U: HILLS, x: [0, 10], y: [0, 5.5], marks: [HEQ[0].x, 3.3, HEQ[1].x, HEQ[2].x, 9.6].map((x, i) => ({ x: +x.toFixed(4), label: 'ABCDE'[i], dy: i === 2 ? -14 : 16 })), caption: 'A potential-energy curve with five marked points.' }),
+      explain: 'P and S are valley bottoms: displaced either way, the force (downhill) pushes the particle back. R is a hilltop (unstable). Q and T are on slopes, where the force is not zero.',
+      visual: diagram({ U: HILLS, x: [0, 10], y: [0, 5.5], marks: [HEQ[0].x, 3.3, HEQ[1].x, HEQ[2].x, 9.6].map((x, i) => ({ x: +x.toFixed(4), label: 'PQRST'[i], dy: i === 2 ? -14 : 16 })), caption: 'A potential-energy curve with five marked points.' }),
     }),
     num({
       id: 'max-speed', difficulty: 2,

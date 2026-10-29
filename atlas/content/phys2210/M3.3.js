@@ -57,21 +57,21 @@ The two classic mistakes are reading a graph as a **picture of the path**, and r
   practice: [
     mcq({
       id: 'which-faster', difficulty: 2,
-      prompt: 'Objects A and B move along the same straight line. At t = 3 s, which one is moving faster?',
-      choices: ['B, because its graph is steeper', 'A, because its graph is higher', 'Neither: straight lines mean they have the same speed', 'A, because it started farther along'],
+      prompt: 'Objects P and Q move along the same straight line. At t = 3 s, which one is moving faster?',
+      choices: ['Q, because its graph is steeper', 'P, because its graph is higher', 'Neither: straight lines mean they have the same speed', 'P, because it started farther along'],
       answer: 0,
       why: {
-        1: 'Height on an x–t graph is position. A is farther along, but speed is the slope, and B’s line is three times steeper.',
+        1: 'Height on an x–t graph is position. P is farther along, but speed is the slope, and Q’s line is three times steeper.',
         2: 'Straight lines mean each speed is constant — not that the two speeds are equal. Compare the slopes.',
         3: 'Where an object started says nothing about how fast it moves now.',
       },
       hints: ['On an x–t graph, which feature is velocity: the height or the slope?'],
       teach: 'On an x–t graph, speed is the steepness of the line, not how high it is.',
-      explain: t`A’s slope is $0.5$ m/s and B’s is $1.5$ m/s. B is behind A at $t = 3$ s but moving three times as fast.`,
+      explain: t`P’s slope is $0.5$ m/s and Q’s is $1.5$ m/s. Q is behind P at $t = 3$ s but moving three times as fast.`,
       visual: {
         type: 'graph',
-        params: { x: [0, 8], y: [0, 15.5], xlabel: 't (s)', ylabel: 'x (m)', curves: [{ fn: '10 + 0.5*x', color: 'accent', label: 'A', labelAt: 6.5 }, { fn: '1.5*x', color: 'warn', label: 'B', labelAt: 6 }], vlines: [{ x: 3, label: 't = 3 s' }] },
-        caption: 'Position against time for objects A and B.',
+        params: { x: [0, 8], y: [0, 15.5], xlabel: 't (s)', ylabel: 'x (m)', curves: [{ fn: '10 + 0.5*x', color: 'accent', label: 'P', labelAt: 6.5 }, { fn: '1.5*x', color: 'warn', label: 'Q', labelAt: 6 }], vlines: [{ x: 3, label: 't = 3 s' }] },
+        caption: 'Position against time for objects P and Q.',
       },
     }),
     mcq({
