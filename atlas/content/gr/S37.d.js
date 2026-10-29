@@ -35,7 +35,7 @@ const HE = `(67.4*${P1} + 67.19*${P2})`, SE = `(0.5*${P1} + 0.38*${P2})`, RE = `
 const HL = `(73.04*${Q1} + 73.5*${Q2} + 70.39*${Q3})`, SL = `(1.04*${Q1} + 0.81*${Q2} + ${round(CCHP_S, 4)}*${Q3})`, RL = `(2*${Q1} + 1*${Q2} + 3*${Q3})`;
 const ROWS = [
   [7, 67.4, 0.5, 0.5, 'Planck 2018 (CMB): 67.4 ± 0.5', 'accent'],
-  [6, 67.19, 0.38, 0.38, 'CMB combined, 2026: 67.19 ± 0.38', 'accent'],
+  [6, 67.19, 0.38, 0.38, 'Planck + ACT + SPT: 67.19 ± 0.38', 'accent'],
   [5, 71.0, 7, 9, 'gravitational-wave sirens, 2026: 71 +9 −7', 'ink2'],
   [4, 71.6, 3.3, 3.9, 'lensing time delays (TDCOSMO): 71.6 +3.9 −3.3', 'ink2'],
   [3, 70.39, CCHP_S, CCHP_S, 'CCHP 2025 (TRGB): 70.4 ± 1.9', 'bad'],
@@ -48,7 +48,7 @@ const h0Pic = ({ p = 1, q = 1, interactive = false, caption } = {}) => ({
     x: [61, 82], y: [0.3, 7.9], xlabel: 'H₀ (km/s/Mpc)', ylabel: '', grid: false, axesAt: 'edge', yticks: 0,
     ...(interactive ? {
       choices: [
-        { key: 'p', label: 'Early-universe value', options: [[1, 'Planck 2018: 67.4 ± 0.5'], [2, 'CMB combined, 2026: 67.19 ± 0.38']], value: p, explain: 'Inferred from the cosmic microwave background by fitting the standard model of cosmology, ΛCDM.' },
+        { key: 'p', label: 'Early-universe value', options: [[1, 'Planck 2018: 67.4 ± 0.5'], [2, 'Planck + ACT + SPT: 67.19 ± 0.38']], value: p, explain: 'Inferred from the cosmic microwave background by fitting the standard model of cosmology, ΛCDM.' },
         { key: 'q', label: 'Local measurement', options: [[1, 'SH0ES 2022: 73.04 ± 1.04'], [2, 'H0DN 2026: 73.50 ± 0.81'], [3, 'CCHP 2025: 70.4 ± 1.9']], value: q, explain: 'Measured from the distance ladder: parallaxes, then Cepheid or TRGB stars, then type Ia supernovae.' },
       ],
       readouts: [
@@ -344,8 +344,8 @@ export default lesson({
       gen(r) {
         const [a, sa, na, b, sb, nb] = r.pick([
           [73.04, 1.04, 'SH0ES 2022', 67.4, 0.5, 'Planck 2018'],
-          [73.5, 0.81, 'H0DN 2026', 67.19, 0.38, 'the combined CMB value of 2026'],
-          [73.04, 1.04, 'SH0ES 2022', 67.19, 0.38, 'the combined CMB value of 2026'],
+          [73.5, 0.81, 'H0DN 2026', 67.19, 0.38, 'the combined Planck + ACT + SPT value'],
+          [73.04, 1.04, 'SH0ES 2022', 67.19, 0.38, 'the combined Planck + ACT + SPT value'],
         ]);
         const n = Math.abs(a - b) / Math.hypot(sa, sb);
         const fmt = (x) => (x === 73.5 ? '73.50' : String(x));

@@ -281,7 +281,7 @@ Divide every density by the **critical density** $\rho_c = 3H_0^2/(8\pi G)$ — 
       },
       hints: ['Compare the bars with the 5σ line.'],
       teach: 'Results below 5σ, especially ones that shift with calibration, are hints: report them as open, with both possibilities alive.',
-      explain: 'DESI DR2 found 2.8–4.2σ preferences for evolving dark energy (March 2025); a recalibration of one supernova sample lowered its case from 4.2σ to 3.2σ, the full Dark Energy Survey analysis (May 2026) gave 2.2–3.0σ, and DESI’s Lyman-α analysis (July 2026) moved toward Λ. Euclid and further DESI data will test it.',
+      explain: 'DESI DR2 found 2.8–4.2σ preferences for evolving dark energy (March 2025); a recalibration of one supernova sample lowered its case from 4.2σ to 3.2σ, the Dark Energy Survey’s final Year 6 analysis (2026) gave 2.3–3.2σ depending on the data combined, and DESI’s Lyman-α analysis (July 2026) moved toward Λ. Euclid and further DESI data will test it.',
       visual: {
         type: 'graph',
         params: {

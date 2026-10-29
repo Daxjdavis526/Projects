@@ -98,6 +98,7 @@ export const LESSONS = {
   'lab.A11.1': () => import('./lab/A11.1.js'),
   'lab.A11.2': () => import('./lab/A11.2.js'),
   'lab.A12.1': () => import('./lab/A12.1.js'),
+  'lab.A13.1': () => import('./lab/A13.1.js'),
   'lab.A2.1': () => import('./lab/A2.1.js'),
   'lab.A2.2': () => import('./lab/A2.2.js'),
   'lab.A2.3': () => import('./lab/A2.3.js'),

@@ -40,14 +40,15 @@ function skyPic(u, caption) {
   const w = Math.sqrt(u * u + 4), p = (u + w) / 2, m = (u - w) / 2;
   return {
     type: 'graph', caption,
-    params: pic([-2.6, 2.6], [-1.5, 1.5], {
-      curves: [arc([0, 0], 1, 'ink3', 0, 6.2832, { dash: [5, 5], width: 1.4 })],
+    params: pic([-2.2, 2.2], [-1.3, 1.3], {
+      curves: [arc([0, 0], 1, u === 0 ? 'gold' : 'ink3', 0, 6.2832, u === 0 ? { width: 4 } : { dash: [5, 5], width: 1.4 })],
       points: [
-        { x: 0, y: 0, r: 6, color: 'ink2', label: 'lens', labelDx: -12, labelDy: 16 },
-        { x: sf(u, 4), y: 0, r: 4, color: 'gold', hollow: true, label: 'true position', labelDx: -20, labelDy: -14 },
-        { x: sf(p, 4), y: 0, r: 6, color: 'gold', label: 'image', labelDx: 8, labelDy: -12 },
-        { x: sf(m, 4), y: 0, r: 5, color: 'gold', label: 'image', labelDx: -36, labelDy: -12 },
-        word(0, 1.25, 'Einstein ring (radius θE)', 'ink3'),
+        { x: 0, y: 0, r: 6, color: 'ink2', label: 'lens', labelAlign: 'center', labelDx: 0, labelDy: 18 },
+        ...(u === 0 ? [] : [
+          { x: sf(u, 4), y: 0, r: 4, color: 'gold', hollow: true },
+          { x: sf(p, 4), y: 0, r: 6, color: 'gold', label: 'image', labelAlign: 'center', labelDx: 0, labelDy: -16 },
+          { x: sf(m, 4), y: 0, r: 5, color: 'gold', label: 'image', labelAlign: 'center', labelDx: 0, labelDy: -16 },
+        ]),
       ],
     }),
   };
@@ -98,7 +99,7 @@ export default boss({
             const s = r.pick(SYSTEMS), th = thetaE(s.M, s.DL, s.DS, s.DLS) / ARCSEC;
             return {
               prompt: t`Integrating the index gradient gives a bending of $4GM/(c^2b)$, and with the geometry of source, lens and observer this makes a ring of angular radius $\theta_E = \sqrt{\dfrac{4GM}{c^2}\dfrac{D_{LS}}{D_LD_S}}$. The galaxy holds $M = ${tex(s.M, 2)}$ solar masses within the ring; the angular-diameter distances are $D_L = ${s.DL}$ Gpc, $D_S = ${s.DS}$ Gpc and $D_{LS} = ${s.DLS}$ Gpc. What is $\theta_E$, in arcseconds? ($GM_\odot = ${tex(GM_SUN, 5)}$ m³/s², 1 Gpc $= 3.086\times10^{25}$ m.)`,
-              visual: lensPic(0, t`Source directly behind a point lens: an Einstein ring (the simulation’s own lens; angles in the side view hugely exaggerated).`),
+              visual: skyPic(0, t`A source directly behind a point lens appears as a ring of angular radius $\theta_E$ (schematic).`),
               answer: th, units: 'arcsec', tol: { rel: 0.01 },
               errors: [
                 { value: th / Math.SQRT2, feedback: t`$2GM/(c^2b)$ is the Newtonian half; light bending in general relativity is $4GM/(c^2b)$, and it is under the square root.` },
@@ -118,7 +119,7 @@ export default boss({
             const sep = thE * Math.sqrt(u * u + 4);
             return {
               prompt: t`For a point lens the images lie where $\beta = \theta - \theta_E^2/\theta$, with $\beta$ the source’s true offset from the lens: $\theta_\pm = \tfrac12\bigl(\beta \pm \sqrt{\beta^2 + 4\theta_E^2}\bigr)$. With $\theta_E = ${thE}''$ and the quasar offset by $\beta = ${u}\,\theta_E$, how far apart on the sky are its two images, in arcseconds?`,
-              visual: skyPic(u, t`The sky round a point lens: the source’s true position (hollow) and its two images on either side (schematic, no scale given).`),
+              visual: skyPic(u, t`The sky round a point lens: the Einstein ring (dashed), the source’s true position (hollow) and its two images on either side (schematic, no scale given).`),
               answer: sep, units: 'arcsec', tol: { rel: 0.01 },
               errors: [{ value: thE * (u + Math.sqrt(u * u + 4)) / 2, feedback: t`That is only the outer image’s distance from the lens; the inner one is on the other side, so add their distances.` }, { value: 2 * thE, feedback: t`$2\theta_E$ holds only for perfect alignment; the separation is $\sqrt{\beta^2 + 4\theta_E^2}$.` }].filter((e) => Math.abs(e.value - sep) > 0.01 * sep),
               hints: [t`$\theta_+ > 0$ and $\theta_- < 0$: the images are on opposite sides of the lens.`, t`$\theta_+ - \theta_- = \sqrt{\beta^2 + 4\theta_E^2}$.`, t`$= \theta_E\sqrt{u^2 + 4}$ with $u = ${u}$.`],
@@ -270,14 +271,14 @@ Which step is wrong?`,
             const T = ((4 * GM_SUN * s.M) / C ** 3) * (1 + s.zl) * bracket / DAY;
             return {
               prompt: t`Fermat’s arrival-time surface puts the two images at different travel times. For a point lens of mass $M$ at redshift $z_L$, with the source offset by $u = \beta/\theta_E$, the delay is
-$$\Delta t = \frac{4GM}{c^3}(1 + z_L)\left[\frac{u\sqrt{u^2 + 4}}{2} + \ln\frac{\sqrt{u^2 + 4} + u}{\sqrt{u^2 + 4} - u}\right]$$
+$$\begin{gathered}\Delta t = \frac{4GM}{c^3}(1 + z_L)\,F(u), \\ F(u) = \frac{u\sqrt{u^2 + 4}}{2} + \ln\frac{\sqrt{u^2 + 4} + u}{\sqrt{u^2 + 4} - u}\end{gathered}$$
 With $M = ${tex(s.M, 2)}$ solar masses, $z_L = ${s.zl}$ and $u = ${u}$, how many days after the first image does the second repeat a flicker of the quasar?`,
               visual: lensPic(u, t`The two images of a source offset by ${u} Einstein radii; their light paths differ in length and in gravitational delay (the simulation’s own lens).`),
               answer: T, units: 'd', tol: { rel: 0.01 },
               errors: [{ value: T / (1 + s.zl), feedback: t`Keep the factor $1 + z_L$: the delay accrues near the lens and is stretched by the expansion on its way to us.` }, { value: ((4 * GM_SUN * s.M) / C ** 3) * (1 + s.zl) * ((u * w) / 2) / DAY, feedback: 'Both terms count: the geometric one (the first) and the gravitational one (the logarithm).' }].filter((e) => Math.abs(e.value - T) > 0.01 * T),
-              hints: [t`$4GM_\odot/c^3 = ${sf((4 * GM_SUN) / C ** 3 * 1e6, 4)}\ \mu$s; multiply by $M$ in solar masses.`, t`$\sqrt{u^2 + 4} = ${sf(w, 5)}$.`, t`Evaluate the bracket, multiply, and divide by 86 400 s per day.`],
+              hints: [t`$4GM_\odot/c^3 = ${sf((4 * GM_SUN) / C ** 3 * 1e6, 4)}\ \mu$s; multiply by $M$ in solar masses.`, t`$\sqrt{u^2 + 4} = ${sf(w, 5)}$.`, t`Evaluate $F(u)$, multiply, and divide by 86 400 s per day.`],
               teach: 'Lensed images arrive at different times — the stationary points of Fermat’s arrival-time surface — and the delay weighs the lens.',
-              explain: t`$4GM/c^3 = ${sf((4 * GM_SUN * s.M) / C ** 3, 3)}$ s; the bracket is $${sf((u * w) / 2, 4)} + ${sf(Math.log((w + u) / (w - u)), 4)} = ${sf(bracket, 4)}$; with $1 + z_L = ${1 + s.zl}$ the delay is $${sf(T, 3)}$ days. Real lensed quasars show delays of days to months; with the image positions they measure the lens’s mass and even the expansion rate of the universe.`,
+              explain: t`$4GM/c^3 = ${sf((4 * GM_SUN * s.M) / C ** 3, 3)}$ s; $F(u) = ${sf((u * w) / 2, 4)} + ${sf(Math.log((w + u) / (w - u)), 4)} = ${sf(bracket, 4)}$; with $1 + z_L = ${1 + s.zl}$ the delay is $${sf(T, 3)}$ days. Real lensed quasars show delays of days to months; with the image positions they measure the lens’s mass and even the expansion rate of the universe.`,
             };
           },
         }),
