@@ -291,7 +291,7 @@ export default boss({
               ], C.G),
               hints: [t`$g_{rr} = \dfrac{r}{r - 2M}$, so $\partial_rg_{rr} = \dfrac{-2M}{(r - 2M)^2}$.`, t`$g^{rr} = \dfrac{r - 2M}{r}$, so $\Gamma^r{}_{rr} = -\dfrac{M}{r(r - 2M)}$.`],
               teach: t`For a diagonal metric, $\Gamma^r{}_{rr} = \tfrac12 g^{rr}\partial_rg_{rr}$: the log-derivative of $\sqrt{g_{rr}}$.`,
-              explain: t`$\Gamma^r{}_{rr} = -\dfrac{M}{r(r - 2M)} = -\dfrac{${nice(C.M, 4)}}{${nice(C.rr, 4)}\times${nice(C.rr - 2 * C.M, 4)}} = ${tex(C.G, 4)}\ \text{km}^{-1}$. The others: $\Gamma^r{}_{\varphi\varphi} = -(r - 2M) = ${nice(C.Gpp, 4)}$ km and $\Gamma^\varphi{}_{r\varphi} = 1/r$ — the same as in the flat polar plane, because $g_{\varphi\varphi} = r^2$ is.`,
+              explain: t`$\Gamma^r{}_{rr} = -\dfrac{M}{r(r - 2M)}$ $= -\dfrac{${nice(C.M, 4)}}{${nice(C.rr, 4)}\times${nice(C.rr - 2 * C.M, 4)}}$ $= ${tex(C.G, 4)}\ \text{km}^{-1}$. The others: $\Gamma^r{}_{\varphi\varphi} = -(r - 2M) = ${nice(C.Gpp, 4)}$ km and $\Gamma^\varphi{}_{r\varphi} = 1/r$ — the same as in the flat polar plane, because $g_{\varphi\varphi} = r^2$ is.`,
             };
           },
         }),
