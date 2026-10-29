@@ -100,3 +100,41 @@ export function geomPic(thetaDeg = 40, caption, { waves = true, detector = true 
     caption: caption || 'A scattering experiment seen from above (schematic): a plane wave arrives from the left, the target sends out a spherical wave, and a detector at angle θ catches the part of it inside its small solid angle.',
   };
 }
+
+/**
+ * A driven two-level system on the Bloch sphere, in the frame rotating with
+ * the drive (rotating-wave approximation): ground state |g⟩ at +z, excited
+ * |e⟩ at −z; the Bloch vector turns about Ω⃗ = (Ω, 0, −Δ) at Ω′ = √(Ω² + Δ²).
+ * Frequencies in MHz (Ω/2π, Δ/2π), time in μs. With sliders: keys W, D, tt.
+ * Without: fixed numbers. The path so far is drawn in gold.
+ */
+export function rabiBloch({ W = 1, D = 0, tt = 0.25, sliders = false, axis = true, path = true, readouts = false, caption, yaw = 0.9, pitch = 0.3 } = {}) {
+  const w = sliders ? 'W' : r6(W), d = sliders ? 'D' : r6(D), T = sliders ? 'tt' : r6(tt);
+  const OP = `sqrt(${w}^2 + (${d})^2)`;
+  const X = (s) => `-(${w})*(${d})/(${OP})^2*(1 - cos(2*pi*${OP}*${s}))`;
+  const Y = (s) => `-(${w})/(${OP})*sin(2*pi*${OP}*${s})`;
+  const Z = (s) => `((${d})^2 + (${w})^2*cos(2*pi*${OP}*${s}))/(${OP})^2`;
+  const extra = {
+    vectors: [{ to: [X(T), Y(T), Z(T)], color: 'gold', label: '\\vec r' }, ...(axis ? [{ to: [`1.3*(${w})/(${OP})`, '0', `-1.3*(${d})/(${OP})`], color: 'accent', label: '\\vec\\Omega' }] : [])],
+    points: [{ at: [0, 0, 1], label: '|g\\rangle', color: 'ink2' }, { at: [0, 0, -1], label: '|e\\rangle', color: 'ink2' }],
+    ...(path ? { curves: [{ param: [X(`${T}*t`), Y(`${T}*t`), Z(`${T}*t`)], t: [0, 1], color: 'gold' }] } : {}),
+    ...(sliders ? {
+      sliders: [
+        { key: 'W', label: t`Rabi frequency $\Omega/2\pi$`, min: 0.2, max: 5, step: 0.1, value: W, unit: '\\text{MHz}', explain: 'How strongly the drive couples the two levels: the rate of flopping exactly on resonance.' },
+        { key: 'D', label: t`Detuning $\Delta/2\pi$`, min: -5, max: 5, step: 0.1, value: D, unit: '\\text{MHz}', explain: 'Drive frequency minus the transition frequency.' },
+        { key: 'tt', label: t`Time $t$`, min: 0, max: 2, step: 0.005, value: tt, unit: '\\mu\\text{s}', explain: 'How long the drive has been on, starting in the ground state.' },
+      ],
+    } : {}),
+    ...(readouts ? {
+      readouts: [
+        { label: t`$\Omega'/2\pi$ (MHz)`, expr: OP, digits: 3 },
+        { label: t`$P_e(t)$`, expr: `(1 - ${Z(T)})/2`, digits: 3 },
+        { label: t`largest $P_e = \Omega^2/\Omega'^2$`, expr: `(${w})^2/(${OP})^2`, digits: 3 },
+      ],
+    } : {}),
+  };
+  return blochPic({ marks: false, yaw, pitch, extra, caption: caption || 'The Bloch vector (gold) of a driven two-level system in the frame rotating with the drive: it turns about the vector Ω = (Ω, 0, −Δ) (blue). Ground state at the top, excited state at the bottom. Rotating-wave approximation; no decay. Drag to rotate.' });
+}
+
+/** Rabi’s formula: the excited-state probability after time t (μs) for Ω/2π, Δ/2π in MHz, starting in |g⟩. */
+export const rabiP = (W, D, tt) => { const op = Math.hypot(W, D); return (W * W) / (op * op) * Math.sin(Math.PI * op * tt) ** 2; };

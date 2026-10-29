@@ -2,7 +2,7 @@
 // waveform and normalize so noise alone gives unit spread: ρ = ⟨d, h⟩/(σ‖h‖).
 // Cauchy–Schwarz makes this the best linear filter for white Gaussian noise;
 // the optimal SNR A‖h‖/σ grows as √(samples), so a chirp whose peak equals the
-// noise σ reaches ρ_opt = 7.69 (sim model/sg2-matched.js, 30 M☉, 30→250 Hz at
+// noise σ reaches ρ_opt ≈ 7.7 (sim model/sg2-matched.js, 30 M☉, 30→250 Hz at
 // 4096 Hz). Worked: a 0.5 s, 100 Hz burst at 0.2σ gives ρ = 6.4. Template
 // mismatch (match 0.97 loses 8.7% of the event rate), network SNR in
 // quadrature, the trials factor (max of noise over N times grows like

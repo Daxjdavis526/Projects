@@ -125,7 +125,7 @@ export default lesson({
         const g = 1 / Math.sqrt(1 - b * b);
         return {
           prompt: t`A beam of charge has density $\rho = ${rho}\ \mu\text{C/m}^3$ in the lab and moves at $${b}c$, so $\vec J = \rho\vec v$. What is its charge density in its own rest frame? (Use $J_\mu J^\mu = -c^2\rho_0^2$.)`,
-          visual: wirePic(t`Worldlines of moving charges (blue dashed) beside charges at rest (orange): moving charges look closer together. Drawn for a wire; $c = 1$.`, { b: -b, u: 0 }),
+          visual: wirePic(t`Seen from the rest frame of the blue charges: the orange charges, spaced 1 apart in their own rest frame, move at $0.8c$ and are packed $\gamma = 1.67$ times closer, 0.6 apart. $c = 1$.`, { b: 0.8, u: 0.8 }),
           answer: rho / g, units: 'uC/m^3', tol: { rel: 0.01 },
           errors: [{ value: rho * g, feedback: t`In the lab the beam is length-contracted, so the lab density is the **larger** one: $\rho = \gamma\rho_0$.` }],
           hints: [t`$J_\mu J^\mu = -c^2\rho^2 + J^2 = -c^2\rho^2(1 - \beta^2)$.`, t`So $\rho_0 = \rho\sqrt{1 - \beta^2} = \rho/\gamma$.`],
@@ -216,7 +216,7 @@ export default lesson({
         const g = (E * 1e3) / MPC2, rho = (Np * QE) / (PI * rad * rad * L), rho0 = rho / g;
         return {
           prompt: t`An LHC bunch holds $${tex(Np, 3)}$ protons at ${E} TeV ($m_pc^2 = 938.3$ MeV). Model it in the lab as a uniform cylinder 30 cm long and ${rad * 1e3} mm in radius. What is its charge density in its own rest frame, in $\mu\text{C/m}^3$?`,
-          visual: wirePic(t`Moving charges (blue dashed) are packed $\gamma$ times closer than in their rest frame. $c = 1$; drawn for a modest $\gamma$.`, { b: -0.8, u: 0 }),
+          visual: wirePic(t`Seen from the rest frame of the blue charges: the orange charges, spaced 1 apart in their own rest frame, move at $0.8c$ and are packed $\gamma = 1.67$ times closer, 0.6 apart. $c = 1$.`, { b: 0.8, u: 0.8 }),
           answer: rho0 * 1e6, units: 'uC/m^3', tol: { rel: 0.01 },
           errors: [{ value: rho * 1e6, feedback: t`That is the lab density. In the rest frame the bunch is $\gamma$ times longer (its radius is unchanged), so $\rho_0 = \rho/\gamma$.` }, { value: rho * g * 1e6, feedback: t`The lab sees the bunch contracted: the rest-frame density is **lower**, $\rho/\gamma$.` }],
           hints: [t`Lab density: $\rho = Ne/(\pi r^2L)$.`, t`$\rho_0 = \rho/\gamma$ with $\gamma = E/m_pc^2$: only the length along the motion changes.`],

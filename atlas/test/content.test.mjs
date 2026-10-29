@@ -15,7 +15,7 @@ import { mathIn, escapeDamage, groupDigits } from '../src/core/markup.js';
 import { scan, render as renderLoads } from '../tools/register.mjs';
 import ACHIEVEMENTS from '../content/achievements.js';
 import GALLERY from '../content/gallery.js';
-import { parse, compile } from '../src/core/expr.js';
+import { parse, compile, canonEnv } from '../src/core/expr.js';
 import { makeRng } from '../src/core/rng.js';
 
 const require = createRequire(import.meta.url);
@@ -131,7 +131,7 @@ function calculusProblem(item) {
   const domains = item.vars && !Array.isArray(item.vars) ? item.vars : Object.fromEntries((item.vars || ['x']).map((v) => [v, [-2, 2]]));
   const names = Object.keys(domains);
   const wrt = item.wrt || names[0] || 'x';
-  const f = (src) => { const g = compile(parse(String(src), { vars: names })); return (env) => g(env); };
+  const f = (src) => { const g = compile(parse(String(src), { vars: names })); return (env) => g(canonEnv(env)); };
   const rng = makeRng(99);
   if (item.type === 'expression') {
     const A = f(item.answer), T = f(item.integrand || item.derivativeOf);

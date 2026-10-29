@@ -145,7 +145,7 @@ This is the GUM’s **law of propagation of uncertainty**; the rules for sums, p
           errors: [{ value: R * Math.hypot(sr / L1, sr / L2, scale, scale), feedback: 'A scale error multiplies both lengths by the same factor, which cancels in the ratio: leave it out (it is fully correlated).' }],
           hints: ['If the tape reads 0.1% long, both lengths are 0.1% long. What happens to their ratio?', t`Only the independent reading errors remain: $\sigma_R/R = \sqrt{(\sigma/L_1)^2 + (\sigma/L_2)^2}$.`],
           teach: 'A fully correlated scale error cancels exactly in a ratio — one reason physicists measure ratios.',
-          explain: t`$R = ${R.toFixed(4)}$; $\sigma_R = ${R.toFixed(4)} \times \sqrt{(0.0005/${L1.toFixed(3)})^2 + (0.0005/${L2.toFixed(3)})^2} = ${tex(sR, 2)}$. In the general formula the scale’s two contributions have opposite signs and $\rho = 1$, so they cancel exactly.`,
+          explain: t`$R = ${R.toFixed(4)}$; $\sigma_R/R = \sqrt{(0.0005/${L1.toFixed(3)})^2 + (0.0005/${L2.toFixed(3)})^2}$, so $\sigma_R = ${tex(sR, 2)}$. In the general formula the scale’s two contributions have opposite signs and $\rho = 1$, so they cancel exactly.`,
         };
       },
     }),

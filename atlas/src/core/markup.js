@@ -118,6 +118,8 @@ export function escapeDamage(text, { prose = true } = {}) {
     if (/\\begin\{(?:[pbvBV]?matrix|array|aligned|cases)\}/.test(m.tex) && /&/.test(m.tex) && !/\\\\/.test(m.tex) && /(?<!\\)\\ (?!\\)/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” has columns but no row break, and a lone “\\ ” (a control space) where \\\\ was probably meant — inside t\`…\` write \\\\`;
     const lost = lostRowBreak(m.tex);
     if (lost) return `the math “${m.tex.slice(0, 40)}” ${lost} — a row break \\\\ was probably lost (inside t\`…\` write \\\\)`;
+    // a Unicode prime inside TeX renders as a stray glyph: KaTeX wants an apostrophe
+    if (/[′″]/.test(m.tex)) return `the math “${m.tex.slice(0, 40)}” contains a Unicode prime (′) — inside $…$ write an apostrophe: F', x''`;
     // a number that failed to compute: NaN, undefined or Infinity spliced into the math
     const junk = /(?<![A-Za-z\\])(NaN|undefined|Infinity|null)(?![A-Za-z])/.exec(m.tex);
     if (junk) return `the math “${m.tex.slice(0, 40)}” contains “${junk[1]}” — a value failed to compute before it was spliced in`;

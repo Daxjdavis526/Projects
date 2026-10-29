@@ -48,7 +48,7 @@ export const UNITS = {
    lbf: [4.4482216152605, D(1, 1, -2)],
   b: [1e-28, D(2)], barn: [1e-28, D(2)],
   Jy: [1e-26, D(0, 1, -2)],   // jansky, a radio flux density: 10⁻²⁶ W m⁻² Hz⁻¹ (mJy, μJy by prefix)   // nuclear cross-section: mb, μb, nb, pb, fb by prefix
-  percent: [0.01, ZERO], '%': [0.01, ZERO],
+  percent: [0.01, ZERO], '%': [0.01, ZERO], ppm: [1e-6, ZERO], ppb: [1e-9, ZERO],
   // a decibel is a level, not a size: "85 dB" is read as the number 85, so a sound
   // level can carry its unit; levels never convert multiplicatively to anything else
   dB: [1, ZERO],
@@ -56,7 +56,7 @@ export const UNITS = {
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
 const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
-  'atm', 'mmHg', 'psi', 'mph', 'kn', 'knot', 'nmi', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
+  'atm', 'mmHg', 'psi', 'mph', 'kn', 'knot', 'nmi', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'ppm', 'ppb', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB']);
 
 export const PREFIXES = {

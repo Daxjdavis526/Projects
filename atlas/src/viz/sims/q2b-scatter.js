@@ -50,7 +50,7 @@ export function mount(F, P0) {
   for (const k of PANELS) if (panels.includes(k)) { cv[k] = F.canvas({ aspect: 'wide', label: LBL[k] }).canvas; }
   if (cv.angle) pl.angle = new Plot(cv.angle, { x: [0, 180], y: [0, 1], xlabel: 'scattering angle θ (degrees)', ylabel: P.logy ? 'dσ/dΩ (a²), log scale' : 'dσ/dΩ (a²)', axesAt: 'edge', xticks: 6 });
   if (cv.polar) pl.polar = new Plot(cv.polar, { x: [-1.6, 1.6], y: [-1, 1], equal: true, axes: false, grid: false });
-  if (cv.partials) pl.partials = new Plot(cv.partials, { x: [-0.7, 10.7], y: [0, 1], xlabel: 'l', ylabel: 'σₗ (πa²)', axesAt: 'edge', xticks: 0 });
+  if (cv.partials) pl.partials = new Plot(cv.partials, { x: [-0.7, 10.7], y: [0, 1], xlabel: 'channel l', ylabel: 'σₗ (πa²)', axesAt: 'edge', xticks: 0 });
   if (cv.sigma) pl.sigma = new Plot(cv.sigma, { x: [0, 12], y: [0, 6], xlabel: 'ka', ylabel: 'σ (πa²)', axesAt: 'edge' });
 
   const sigCache = new Map();
@@ -126,14 +126,14 @@ export function mount(F, P0) {
       sigCache.set(key, { pts, pb });
     }
     const { pts, pb } = sigCache.get(key);
-    const ymax = Math.min(60, Math.max(5, ...pts.map((q) => q[1]).filter((v) => v < 60)) * 1.15);
+    const ymax = Math.min(60, Math.max(0.02, ...pts.map((q) => q[1]).filter((v) => v < 60), ...(st.born ? pb.map((q) => q[1]).filter((v) => v < 60) : [])) * 1.15);
     p.setView([0, 12], [0, ymax]);
     p.clear();
     if (st.target === 'hard') {
       p.line(0, 4, 12, 4, { color: 'ink3', dash: [5, 4] }); p.text('4πa²', 11.9, 4, { align: 'right', dy: -9, color: 'ink3', size: 11 });
       p.line(0, 2, 12, 2, { color: 'ink3', dash: [5, 4] }); p.text('2πa²', 11.9, 2, { align: 'right', dy: -9, color: 'ink3', size: 11 });
     }
-    p.line(0, 1, 12, 1, { color: 'ink4', dash: [2, 4] }); p.text('πa² (the geometric area)', 11.9, 1, { align: 'right', dy: 10, color: 'ink4', size: 10.5 });
+    if (ymax > 1.1) { p.line(0, 1, 12, 1, { color: 'ink4', dash: [2, 4] }); p.text('πa² (the geometric area)', 11.9, 1, { align: 'right', dy: 10, color: 'ink4', size: 10.5 }); }
     p.path(pts.map(([x, y]) => [x, Math.min(y, ymax * 1.5)]), { color: 'accent', width: 2.2 });
     if (st.born && pb.length) p.path(pb.map(([x, y]) => [x, Math.min(y, ymax * 1.5)]), { color: 'gold', width: 1.8, dash: [6, 4] });
     p.point(st.ka, Math.min(st.cs.total, ymax), { color: 'gold', r: 5 });
