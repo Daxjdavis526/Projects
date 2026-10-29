@@ -1,0 +1,30 @@
+import { mod } from '../_util.js';
+
+export default {
+  id: 'st-g', track: 'spacetime', code: 'Advanced Math G', title: 'Foundations for General Relativity',
+  provenance: 'usu-course', evidence: 'B', credits: null,
+  catalog: 'USU has courses for most of these (MATH 4200 → 5210/5220 analysis, 5510 → 6510 topology, 4310 → 5310 algebra, 6370 representation theory, 5710 probability) but none is required by this B.S.; no functional-analysis course exists, so that module is supplementary.',
+  source: { label: 'USU catalog: MATH 4200', url: 'https://catalog.usu.edu/courses/MATH4200' },
+  summary: 'The quiet foundations, kept to what theoretical physics uses: proof, real and functional analysis, probability, variational principles, constrained dynamics, topology, groups and Lie theory, symmetry, forms, coordinate invariance, conventions and units.',
+  prereqs: ['math2270', 'math1220'],
+  boss: { title: 'The Foundations Defence', blurb: 'Prove a lemma, count a constrained system’s degrees of freedom, and translate between sign conventions.' },
+  modules: [
+    mod('G1', 'Logic and proof techniques', ['Statements and quantifiers', 'Direct proof and contrapositive', 'Contradiction and induction', 'ε–δ arguments']),
+    mod('G2', 'Real analysis essentials', ['Sequences, limits and completeness', 'Continuity and uniform continuity', 'Uniform convergence and why it matters']),
+    mod('G3', 'Functional analysis essentials', ['Normed and inner-product spaces', 'Hilbert spaces and L²', 'Operators and their spectra']),
+    mod('G4', 'Probability and statistics', ['Distributions and Bayes’ theorem', 'Estimation and likelihood', 'Signals in noise: matched filtering', 'Bayesian parameter estimation for gravitational waves']),
+    mod('G5', 'Variational principles', ['Functional derivatives', 'Actions for fields', 'The Einstein–Hilbert action']),
+    mod('G6', 'Constrained dynamical systems', ['Holonomic and nonholonomic constraints', 'Lagrange multipliers in mechanics', 'Dirac’s constraints, intuitively', 'Counting degrees of freedom: gravity has two']),
+    mod('G-TOP1', 'Point-set topology', ['Open sets, neighbourhoods and continuity']),
+    mod('G-TOP2', 'Manifold topology', ['Connectedness, compactness and orientability']),
+    mod('G-LIN', 'Abstract linear algebra', ['Multilinear maps and tensor products']),
+    mod('G-GRP', 'Group theory', ['Groups, subgroups and homomorphisms', 'Representations']),
+    mod('G-LIEG', 'Lie groups', ['Matrix groups: SO(3), SU(2), SO(1,3)', 'The four pieces of the Lorentz group']),
+    mod('G-LIEA', 'Lie algebras', ['Generators and commutators', 'su(2) and so(3)', 'The Lorentz algebra']),
+    mod('G-SYM', 'Symmetry groups in physics', ['Rotations, boosts and the Poincaré group']),
+    mod('G-FORMS', 'Exterior calculus', ['Forms, wedges and d, in one sitting']),
+    mod('G-COV', 'Coordinate invariance', ['What “covariant” means', 'General covariance and its limits']),
+    mod('G-SIG', 'Signature and sign conventions', ['(−,+,+,+) versus (+,−,−,−)', 'The MTW sign table and translating between textbooks']),
+    mod('G-UNITS', 'Natural and geometrized units', ['c = 1', 'G = c = 1 and converting back to SI']),
+  ],
+};

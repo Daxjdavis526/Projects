@@ -1,0 +1,31 @@
+import { mod } from '../_util.js';
+
+export default {
+  id: 'prog', track: 'computing', code: 'CS 1400 + computational physics', title: 'Scientific Programming',
+  provenance: 'usu-reconstructed', evidence: 'B', credits: 4,
+  catalog: 'Introduction to science of problem solving, programming, program development, algorithm analysis, and data structures (CS 1400).',
+  source: { label: 'USU catalog: CS 1400', url: 'https://catalog.usu.edu/courses/CS1400' },
+  note: 'CS 1400 is de facto required because PHYS 3870 lists it as a prerequisite. The catalog names no language; USU’s challenge exam “is currently available only in Python”, so the Atlas teaches Python — real Python, running in your browser.',
+  summary: 'Python from fundamentals to the numerical toolkit physicists use: NumPy, SciPy, Matplotlib, SymPy, floating point, derivatives and integrals, root finding, ODE solvers, Fourier transforms, Monte Carlo and fitting.',
+  prereqs: ['math1210'],
+  boss: { title: 'The Simulation Challenge', blurb: 'Write, test and converge a simulation of an orbit — then defend its accuracy.' },
+  modules: [
+    mod('P0', 'Workflow', ['Running Python here: the code lab', 'Reading error messages']),
+    mod('P1', 'Python refresher', ['Variables, types and arithmetic', 'Conditionals and loops', 'Functions', 'Lists, tuples and dictionaries', 'Strings and formatting']),
+    mod('P2', 'Algorithms', ['Thinking in steps: algorithms and complexity', 'Searching and sorting', 'Recursion']),
+    mod('P3', 'NumPy', ['Arrays and vectorized arithmetic', 'Indexing, slicing and broadcasting', 'Linear algebra with numpy.linalg']),
+    mod('P4', 'Plotting with Matplotlib', ['Line and scatter plots', 'Labels, units and honest axes']),
+    mod('P5', 'SymPy', ['Symbols, simplification and solving', 'Derivatives, integrals and series with SymPy']),
+    mod('P6', 'Floating point', ['How floats work: machine epsilon', 'Round-off and catastrophic cancellation']),
+    mod('P7', 'Numerical differentiation', ['Finite differences and their error', 'The step-size trade-off']),
+    mod('P8', 'Numerical integration', ['Trapezoid and Simpson in code', 'scipy.integrate.quad']),
+    mod('P9', 'Roots and optimization', ['Bisection and Newton’s method', 'scipy.optimize: brentq and minimize']),
+    mod('P10', 'Linear algebra in practice', ['Solving systems and eigenproblems numerically']),
+    mod('P11', 'Ordinary differential equations', ['Euler and RK4 by hand', 'solve_ivp', 'Energy conservation as an accuracy check']),
+    mod('P12', 'Fourier analysis', ['The FFT and frequency spectra']),
+    mod('P13', 'Monte Carlo methods', ['Random numbers and estimating π', 'Monte Carlo error propagation']),
+    mod('P14', 'Fitting data', ['curve_fit with honest uncertainties']),
+    mod('P15', 'Software practice', ['Testing your code', 'Organizing a project']),
+    mod('P16', 'Visualization', ['Animations and phase-space plots']),
+  ],
+};

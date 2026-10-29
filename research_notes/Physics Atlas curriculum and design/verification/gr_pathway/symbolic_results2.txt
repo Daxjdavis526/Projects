@@ -1,0 +1,20 @@
+Sphere R_thphthph trigsimp of a^2(sin2th/(2tan th) - cos2th): a**2*(sin(2*theta)/(2*tan(theta)) - cos(2*theta))
+Alcubierre G^tt numeric at {t: 1/3, x: 7/10, y: 2/5, z: -3/10}: -0.0542013591963234
+Alcubierre closed form -(v^2/4)(rho^2/rs^2)f'^2 at {t: 1/3, x: 7/10, y: 2/5, z: -3/10}: -0.0542013591963234
+Alcubierre G^tt numeric at {t: 0, x: 9/10, y: 1/2, z: 1/5}: -0.322881465197042
+Alcubierre closed form -(v^2/4)(rho^2/rs^2)f'^2 at {t: 0, x: 9/10, y: 1/2, z: 1/5}: -0.322881465197042
+ISCO radius for L=2sqrt3 M: [6*M, 6*M]
+Photon sphere radius: [3*M]
+E at ISCO: 2*sqrt(2)/3
+L at ISCO: 2*sqrt(3)*M
+Marginally bound circular orbit radius (E=1): [4*M]
+check dV=0 for circular L: 0
+check E^2/2 = V for circular orbit: 0
+Critical impact parameter b_c (photon sphere): 3*sqrt(3)*M
+Efficiency 1 - E_isco: 0.0571910
+Kerr horizons: [M - sqrt(M**2 - a**2), M + sqrt(M**2 - a**2)]
+Kerr ergosurface roots of r^2 - 2Mr + a^2 cos^2(th): [M - sqrt(M**2 - a**2*cos(theta)**2), M + sqrt(M**2 - a**2*cos(theta)**2)]
+Kerr Ricci max |component| at test point (should be ~0): 2.58493941422821E-26
+Kerr g_phiphi forms agree: True
+Kerr omega_H check (should be 0): 0
+Kerr a->0 g_tt, g_rr: ((2*M - r)/r, r/(-2*M + r))

@@ -1,0 +1,225 @@
+// Screenshots of the Atlas for visual checks — pages, lesson steps and every
+// simulation in the gallery — in dark and light themes. Several rendering
+// bugs in this repository were only ever visible in a screenshot.
+//   node atlas/tools/shots.mjs <out-dir> [pages|sims|lesson:<id>|sim:<gallery id>|boss:<course>|all] [dark|light] [width]
+//   (width, default 1280: e.g. 390 to walk a lesson, boss or sim at phone width; it then also
+//   lists math, canvases, tables and code that run past the screen — clipped, so easy to miss)
+// It serves the repository itself on a free local port (so several runs can
+// go at once) and prints any page errors; exit status 1 if there were some.
+// Playwright comes preinstalled in this environment; nothing is installed.
+
+import { createRequire } from 'node:module';
+import { mkdirSync, createReadStream, statSync } from 'node:fs';
+import { createServer } from 'node:http';
+import { join, extname, normalize, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const require = createRequire(import.meta.url);
+const { chromium } = require('playwright');
+const out = (process.argv[2] || 'shots').replace(/\/$/, '') + '/';
+const what = process.argv[3] || 'all';
+const themes = process.argv[4] ? [process.argv[4]] : ['dark', 'light'];
+const WIDTH = +(process.argv[5] || 1280);      // e.g. 390 for a phone-width walk of a lesson or boss
+mkdirSync(out, { recursive: true });
+
+// a static file server over the repository root
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.wasm': 'application/wasm', '.zip': 'application/zip', '.whl': 'application/zip', '.tar': 'application/x-tar', '.py': 'text/plain' };
+const server = createServer((req, res) => {
+  let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  if (path.endsWith('/')) path += 'index.html';
+  const file = normalize(join(ROOT, path));
+  if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
+  try { if (!statSync(file).isFile()) throw new Error(); } catch { res.writeHead(404).end(); return; }
+  res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
+  createReadStream(file).pipe(res);
+});
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const BASE = process.env.ATLAS_URL || `http://127.0.0.1:${server.address().port}/atlas/`;
+
+const PAGES = [['home', '#/'], ['library', '#/library'], ['course', '#/course/math1220'], ['gr', '#/gr'], ['map', '#/map'], ['review', '#/review'], ['progress', '#/progress'], ['manifest', '#/manifest'], ['settings', '#/settings'], ['explore', '#/explore']];
+
+const browser = await chromium.launch();
+const errors = [], overflow = [];
+async function newPage(theme, width = 1280, height = 860) {
+  const page = await browser.newPage({ viewport: { width, height } });
+  page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`));
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(`${page.url()}: ${m.text()}`); });
+  if (width < 600) {
+    // at phone width, after each shot, report math, pictures, tables and code that run past their
+    // clipping box or the screen: overflow is clipped, so a screenshot shows a cut-off edge at best
+    const shoot = page.screenshot.bind(page);
+    page.screenshot = async (o) => {
+      const r = await shoot(o);
+      const over = await page.evaluate(() => {
+        const W = innerWidth, found = [];
+        const clipOf = (el) => { for (let a = el.parentElement; a; a = a.parentElement) { const ox = getComputedStyle(a).overflowX; if (ox !== 'visible') return a; } return null; };
+        for (const el of document.querySelectorAll('main .katex, main canvas, main table, main pre, main img')) {
+          if (el.closest('.katex') && el.closest('.katex') !== el) continue;
+          const r = el.getBoundingClientRect();
+          if (!r.width) continue;
+          const c = clipOf(el), cr = c ? c.getBoundingClientRect() : { left: 0, right: W };
+          const lim = Math.min(cr.right, W);
+          if (r.right > lim + 2) found.push(`${el.tagName.toLowerCase()}${el.classList.contains('katex') ? ' (math)' : ''} by ${Math.round(r.right - lim)} px: ${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 50)}`);
+        }
+        return found;
+      });
+      if (over.length) overflow.push(`${o?.path?.split('/').pop() || page.url()}: ${over.slice(0, 4).join(' · ')}`);
+      return r;
+    };
+  }
+  await page.goto(BASE + '#/settings');
+  await page.waitForTimeout(400);
+  // set the theme through the app itself, so it is saved with the other settings
+  await page.evaluate(async (th) => {
+    sessionStorage.setItem('atlas:skipWelcome', '1');
+    const state = await import('./src/ui/state.js');
+    await state.setSettings({ theme: th });
+  }, theme);
+  return page;
+}
+
+for (const theme of themes) {
+  if (what === 'all' || what === 'pages') {
+    const page = await newPage(theme);
+    for (const [name, hash] of PAGES) {
+      await page.goto(BASE + hash); await page.waitForTimeout(900);
+      await page.screenshot({ path: `${out}${theme}-${name}.png`, fullPage: true });
+    }
+    const phone = await newPage(theme, 390, 844);
+    for (const [name, hash] of PAGES.slice(0, 4)) {
+      await phone.goto(BASE + hash); await phone.waitForTimeout(900);
+      await phone.screenshot({ path: `${out}${theme}-phone-${name}.png`, fullPage: true });
+    }
+  }
+  if (what === 'all' || what === 'sims') {
+    const { default: GALLERY } = await import('../content/gallery.js');
+    const page = await newPage(theme, WIDTH);
+    for (const g of GALLERY) {
+      await page.goto(BASE + '#/explore/' + g.id); await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${out}${theme}-sim-${g.id}.png`, fullPage: true });
+    }
+  }
+  if (what.startsWith('sim:')) {
+    const page = await newPage(theme, WIDTH);
+    await page.goto(BASE + '#/explore/' + what.slice(4)); await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${out}${theme}-sim-${what.slice(4)}.png`, fullPage: true });
+  }
+  if (what.startsWith('boss:')) {
+    // an authored boss: the intro, then every problem before and after "I don't know"
+    const course = what.slice(5);
+    const page = await newPage(theme, WIDTH);
+    await page.goto(BASE + '#/boss/' + course); await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${out}${theme}-boss-${course}-00-intro.png`, fullPage: true });
+    const begin = await page.$('button:has-text("Begin")');
+    if (begin) { await begin.click(); await page.waitForTimeout(1500); }
+    for (let q = 1; q <= 16; q++) {
+      await page.waitForTimeout(800);
+      const n = String(q).padStart(2, '0');
+      await page.screenshot({ path: `${out}${theme}-boss-${course}-${n}-q.png`, fullPage: true });
+      const dunno = await page.$('.stage button:has-text("I don’t know")');
+      if (!dunno) break;
+      await dunno.click(); await page.waitForTimeout(700);
+      await page.screenshot({ path: `${out}${theme}-boss-${course}-${n}-a.png`, fullPage: true });
+      const next = await page.$('.q-actions button.btn.primary:has-text("Next"), .q-actions button.btn.primary:has-text("Finish")');
+      if (!next) break;
+      await next.click();
+    }
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${out}${theme}-boss-${course}-99-end.png`, fullPage: true });
+  }
+  if (what.startsWith('lesson:')) {
+    // every step up to the first practice question, then each practice
+    // question with a hint and then its solution, then each checkpoint
+    // question and its worked answer
+    const id = what.slice(7);
+    const page = await newPage(theme, WIDTH);
+    await page.goto(BASE + '#/lesson/' + id); await page.waitForTimeout(1000);
+    let k = 0;
+    const shot = async (tag) => page.screenshot({ path: `${out}${theme}-${id}-${String(k++).padStart(2, '0')}-${tag}.png`, fullPage: true });
+    await shot('intro');
+    for (let step = 0; step < 6; step++) {
+      const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
+      if (crumb === 'Practice' || crumb === 'Checkpoint') break;
+      const next = await page.$('.player-nav .btn.primary');
+      if (!next) break;
+      await next.click(); await page.waitForTimeout(1100);
+      const all = await page.$('button:has-text("Show all")');
+      if (all) { await all.click(); await page.waitForTimeout(300); }
+      const now = await page.$eval('.crumb', (e) => e.textContent).catch(() => 'step');
+      const runBtn = await page.$('.stage button:has-text("Run ▶")');
+      if (runBtn) {
+        await runBtn.click();
+        await page.waitForFunction(() => ![...document.querySelectorAll('.stage button')].some((b) => b.textContent.includes('Running')), null, { timeout: 120000 }).catch(() => {});
+        await page.waitForTimeout(300);
+      }
+      await shot(now.toLowerCase().replace(/\W+/g, '-'));
+    }
+    // walk the practice questions: show one with its first hint, then make a
+    // throwaway attempt and open the solution, which ends the question
+    for (let q = 0; q < 20; q++) {
+      const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
+      if (crumb !== 'Practice') break;
+      const hint = await page.$('button:has-text("Hint")');
+      if (hint) { await hint.click(); await page.waitForTimeout(250); }
+      await shot(`practice-${q + 1}`);
+      const choice = await page.$('.stage button.choice');
+      if (choice) await choice.click();
+      else {
+        const input = await page.$('.stage .answer input');
+        if (input) await input.fill('1');
+        for (const sel of await page.$$('.stage .match-row select')) await sel.selectOption({ index: 1 });
+      }
+      // throwaway answers that parse: a number, an equation, then the item's own variables
+      // (its keypad note reads "Use t, y. …")
+      const note = await page.$eval('.stage', (e) => (e.textContent.match(/Use ([^.]+)\./) || [])[1] || '').catch(() => '');
+      const vars = note.split(/,\s*/).map((v) => v.trim()).filter((v) => /^[A-Za-zα-ωθ]\w*$/.test(v));
+      const [v1 = 'x', v2 = 'y'] = vars;
+      const tries = ['1', `${v1} = 1`, v1, `${v2} = ${v1}`];
+      for (let k = 0; k < tries.length; k++) {
+        const check = await page.$('.stage button.btn.primary:has-text("Check")');
+        if (!check || !(await check.isEnabled())) break;
+        await check.click(); await page.waitForTimeout(150);
+        const conf = await page.$('.stage .confidence button');
+        if (conf) { await conf.click(); await page.waitForTimeout(150); }
+        // a coding exercise runs Python: wait for it to finish
+        await page.waitForFunction(() => ![...document.querySelectorAll('.stage button')].some((b) => b.textContent.includes('Running')), null, { timeout: 120000 }).catch(() => {});
+        if (!(await page.$('.stage .feedback.info .head:has-text("Not quite readable")'))) break;
+        const input = await page.$('.stage .answer input');
+        if (!input) break;
+        if (k + 1 < tries.length) await input.fill(tries[k + 1]);
+      }
+      const give = await page.$('.stage button:has-text("Show solution")');
+      if (give) { await give.click(); await page.waitForTimeout(400); }
+      await shot(`practice-${q + 1}-answered`);
+      // the question's own continue button (an answer choice may contain the word "next")
+      const nxt = await page.$('.q-actions button.btn.primary:has-text("Next question"), .q-actions button.btn.primary:has-text("On to the checkpoint"), .q-actions button.btn.primary:has-text("Finish")');
+      if (!nxt) break;
+      await nxt.click(); await page.waitForTimeout(900);
+    }
+    // the checkpoint: missed practice problems come back as fresh variants, so the
+    // walk may not have reached it — start again and take "I know this — test me"
+    if ((await page.$eval('.crumb', (e) => e.textContent).catch(() => '')) !== 'Checkpoint') {
+      await page.goto(BASE + '#/settings'); await page.goto(BASE + '#/lesson/' + id); await page.waitForTimeout(1000);
+      const test = await page.$('button:has-text("test me")');
+      if (test) { await test.click(); await page.waitForTimeout(900); }
+    }
+    for (let q = 0; q < 6; q++) {
+      const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
+      if (crumb !== 'Checkpoint') break;
+      await shot(`checkpoint-${q + 1}`);
+      const dunno = await page.$('.stage button:has-text("I don’t know")');
+      if (!dunno) break;
+      await dunno.click(); await page.waitForTimeout(400);
+      await shot(`checkpoint-${q + 1}-answered`);
+      const nxt = await page.$('.q-actions button.btn.primary:has-text("Next"), .q-actions button.btn.primary:has-text("See results")');
+      if (!nxt) break;
+      await nxt.click(); await page.waitForTimeout(900);
+    }
+  }
+}
+await browser.close();
+server.close();
+console.log(errors.length ? errors.join('\n') : 'no page errors');
+if (WIDTH < 600) console.log(overflow.length ? `content wider than the screen (clipped):\n${overflow.join('\n')}` : 'nothing overflows the screen');
+process.exit(errors.length ? 1 : 0);

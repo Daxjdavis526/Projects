@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- =============================================================================
+     THE PHYSICS ATLAS — an interactive physics and mathematics academy, from
+     algebra to Einstein's field equations. Static files, no build step: the
+     DOM-free learning engine lives in src/core (tested with node test/*.test.mjs),
+     the interface in src/ui, simulations in src/viz, and every course in content/.
+     ========================================================================== -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060a13">
+<!-- an installable app: home-screen icon, full screen, works offline (sw.js) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Atlas">
+<title>The Physics Atlas</title>
+<meta name="description" content="An interactive physics and mathematics academy covering a full physics B.S. and a graduate road to general relativity: short lessons, live simulations, verified problems, mastery tracking and spaced review.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='11' fill='%233f7fe6'/%3E%3Cellipse cx='20' cy='20' rx='18' ry='6.2' fill='none' stroke='%238cbaff' stroke-width='1.6' transform='rotate(-22 20 20)'/%3E%3Ccircle cx='35.3' cy='13.4' r='2' fill='%23f2c14e'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/katex-0.19.0/katex.min.css">
+<link rel="stylesheet" href="css/atlas.css">
+<script>
+  // apply the saved theme before first paint (the full settings live in IndexedDB;
+  // this mirror only avoids a flash)
+  try { const t = localStorage.getItem('atlas:theme'); if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<script defer src="vendor/katex-0.19.0/katex.min.js"></script>
+<script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+<noscript><p style="padding:2rem;font-family:sans-serif">The Physics Atlas needs JavaScript: it runs every lesson, simulation and answer check in your browser, with nothing sent to a server.</p></noscript>
+<div id="app" class="app" aria-busy="true"></div>
+</body>
+</html>

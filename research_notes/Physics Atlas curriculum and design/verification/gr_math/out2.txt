@@ -1,0 +1,41 @@
+=== Geodesic deviation on S^2 (A^mu = R^mu_{nu rho sigma} T^nu T^rho S^sigma) ===
+    D S/ds = [0, Delta_phi/(a*tan(s/a))] 
+    D^2 S/ds^2 = [0, -Delta_phi/a**2] 
+    R^mu_{nu rho sigma} T^nu T^rho S^sigma = [0, -Delta_phi/a**2]
+    proper separation a sin(s/a) dphi satisfies xi'' = -xi/a^2: True
+
+=== Parallel transport around latitude theta0 ===
+     [cosh(sqrt(2)*phi*sqrt(-sin(2*theta_0)/tan(theta_0))/2), sqrt(2)*sqrt(-sin(2*theta_0)/tan(theta_0))*sinh(sqrt(2)*phi*sqrt(-sin(2*theta_0)/tan(theta_0))/2)/sin(2*theta_0)]
+    orthonormal components (V^th_hat, V^ph_hat) = (V^th, sin(th0) V^ph): [cosh(sqrt(2)*phi*sqrt(-sin(2*theta_0)/tan(theta_0))/2), sqrt(2)*sqrt(-sin(2*theta_0)/tan(theta_0))*sinh(sqrt(2)*phi*sqrt(-sin(2*theta_0)/tan(theta_0))/2)/(2*cos(theta_0))]  -> rotates by angle -phi*cos(th0) relative to (e_th, e_ph)
+    cap: int K dA = 2*pi*(1 - cos(theta_0)) ; geodesic curvature of latitude k_g = cot(th0)/a ; oint k_g ds = 2*pi*cos(theta_0) ; sum = 2*pi (= 2 pi chi(disk) = 2 pi)
+
+=== Covector covariant derivative & divergence identity ===
+    nabla_mu (dx)_nu in polar = [[0, 0], [0, 0]]
+    Gamma^mu_{mu lam} - d_lam ln sqrt(g) (spherical): [0, 0, 0]
+    nabla g = 0 on S^2: False
+
+=== Maximal symmetry check on S^3 ===
+    R_abcd == (g_ac g_bd - g_ad g_bc)/a^2 : True
+
+=== Cartan formula L_X w = i_X dw + d(i_X w) ===
+    L_X w = [x, -y] ; i_X dw + d i_X w = [x, -y]
+
+=== Hodge star on 2-forms in Minkowski space ===
+    *(dt^dx) = -1 dy^dz
+    *(dy^dz) = 1 dt^dx
+    ** on 2-forms: True (expect ** = -1)
+
+=== Verify F_{mu nu}F^{mu nu} and the dual invariant are Lorentz scalars ===
+    F_{mu nu}F^{mu nu} = 2*B_x**2 + 2*B_y**2 + 2*B_z**2 - 2*E_x**2 - 2*E_y**2 - 2*E_z**2 ; after boost: 2*B_x**2 + 2*B_y**2 + 2*B_z**2 - 2*E_x**2 - 2*E_y**2 - 2*E_z**2
+    F_{mu nu}(*F)^{mu nu} = 4*B_x*E_x + 4*B_y*E_y + 4*B_z*E_z ; after boost: 4*B_x*E_x + 4*B_y*E_y + 4*B_z*E_z
+
+=== Signature bookkeeping ===
+    u.u with (-+++): -1  ; with (+---): 1
+    polar: coordinate component V^theta vs orthonormal V^theta_hat = r V^theta (since |d_theta| = r)
+
+=== Induced metrics ===
+    induced metric on sphere J^T delta J = [[a**2, 0], [0, a**2*sin(theta)**2]]
+    induced metric on hyperboloid in Minkowski 2+1: [[1, 0], [0, sinh(u)**2]] (hyperbolic plane, K = -1)
+
+=== Inhomogeneous transformation law of Gamma (Cartesian -> polar) ===
+    Gamma'^r_{th th} = -r ; Gamma'^th_{r th} = 1/r  (match metric-derived values -r, 1/r)
