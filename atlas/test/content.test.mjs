@@ -93,6 +93,24 @@ async function checkVisual(where, spec) {
   }
 }
 
+// The player letters shuffled choices A–D, so a picture whose points are labelled
+// A–D and choices that name them ("B is higher") read ambiguously: label them P, Q, R, S.
+function letterClash(item) {
+  if (!['mcq', 'multi'].includes(item.type) || item.fixedOrder || !item.visual) return null;
+  const found = new Set();
+  (function walk(v) {
+    if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) {
+      if ((k === 'label' || k === 'name') && typeof x === 'string' && /^[A-D]$/.test(x.trim())) found.add(x.trim());
+      else if (k === 'names' && Array.isArray(x)) x.forEach((n) => typeof n === 'string' && /^[A-D]$/.test(n) && found.add(n));
+      else walk(x);
+    }
+  })(item.visual.params || {});
+  if (found.size < 2) return null;
+  const named = [...found].filter((l) => (item.choices || []).some((ch) => new RegExp(`(^|[^A-Za-z\\])${l}(?![A-Za-z])`).test(String(ch).replace(/\\[a-zA-Z]+/g, ''))));
+  return named.length ? `the picture labels points ${[...found].sort().join(', ')} and the shuffled choices name ${named.join(', ')} — the player letters choices A–D too: relabel the picture P, Q, R, S (or set fixedOrder)` : null;
+}
+
 // ∫_a^b g by tanh–sinh quadrature, which shrugs off integrable endpoint
 // singularities (x^(-2/3) at 0); infinite limits are mapped onto finite ones
 function integral(g, a, b) {
@@ -226,6 +244,8 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       const p = validateItem(item, tex);
       const calc = calculusProblem(item);
       if (calc) p.push(calc);
+      const clash = letterClash(item);
+      if (clash) p.push(clash);
       if (p.length) { firstProblem = `variant ${v}: ${p.join('; ')}`; break; }
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
     }

@@ -193,7 +193,7 @@ For a matter wave $E = \hbar\omega$ and $p = \hbar k$, so $v_\text{group} = dE/d
           errors: [{ value: dl / 0.441, feedback: t`Keep the 0.441: $\Delta\nu = 0.441/\Delta t$ for Gaussian pulses measured by their full widths.` }],
           hints: [t`$\Delta\nu = 0.441/(${fs}\times10^{-15}\ \text{s})$.`, t`$\Delta\lambda = \dfrac{(800\times10^{-9}\ \text{m})^2\,\Delta\nu}{3.00\times10^{8}\ \text{m/s}}$.`],
           teach: 'A short pulse is a wave packet in time: Δν·Δt has a floor, so the shorter the pulse, the broader its spectrum.',
-          explain: t`$\Delta\nu = ${tex(dnu, 3)}$ Hz, so $\Delta\lambda = ${fmt(dl, 3)}$ nm. ${fs <= 10 ? 'That is a sizeable slice of the visible spectrum’s width — such pulses look white, not red.' : 'Halve the pulse and the spectrum doubles in width.'} The same trade-off, with $E = h\nu$, is the energy–time uncertainty of the next lesson.`,
+          explain: t`$\Delta\nu = ${tex(dnu, 3)}$ Hz, so $\Delta\lambda = ${fmt(dl, 3)}$ nm. ${fs <= 10 ? 'That is a broad band — a quarter of the width of the whole visible spectrum, or more — though centred in the near infrared.' : 'Halve the pulse and the spectrum doubles in width.'} The same trade-off, with $E = h\nu$, is the energy–time uncertainty of the next lesson.`,
           visual: pulse(fs),
         };
       },

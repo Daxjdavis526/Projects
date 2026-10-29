@@ -73,9 +73,11 @@ Plot $V$ against $T^4 - T_0^4$: a straight line through the origin whose slope, 
     visual: rig('blackbody', { seed: 4, flags: { gradient: false }, raw: false }, t`The run as analysed: $V$ against $T^4 - T_0^4$, the weighted line (gold) and the residuals. ${SIMNOTE}`),
     steps: [
       { label: 'The model', text: t`$V = K(T^4 - T_0^4)$ with $K = S\varepsilon\sigma G$ and the geometric factor $G = A_sA_d/(\pi d^2)$. The slope is $K$; everything but $\sigma$ in it is apparatus.` },
-      { label: 'Geometry', text: t`$A_s = \pi(5.0\ \text{mm})^2 = ${tex(BB.As, 4)}\ \text{m}^2$, $A_d = ${tex(BB.Ad, 4)}\ \text{m}^2$, so $G = ${tex(BB.As, 4)} \times ${tex(BB.Ad, 4)}/(\pi \times 0.200^2) = ${tex(GF, 4)}\ \text{m}^2$.` },
+      { label: 'Geometry', text: t`$A_s = \pi(5.0\ \text{mm})^2 = ${tex(BB.As, 4)}\ \text{m}^2$, $A_d = ${tex(BB.Ad, 4)}\ \text{m}^2$, so
+
+$$\begin{aligned}G &= ${tex(BB.As, 4)} \times ${tex(BB.Ad, 4)}/(\pi \times 0.200^2)\\ &= ${tex(GF, 4)}\ \text{m}^2.\end{aligned}$$` },
       { label: 'Units of the slope', text: t`$b = ${f(EX.fit.b, 5)}$ mV per $10^{10}\ \text{K}^4$ is $${tex(EX.fit.b * 1e-13, 5)}$ V/K⁴.` },
-      { label: 'Sigma', text: t`$\sigma = b/(S\varepsilon G) = ${tex(EX.fit.b * 1e-13, 5)}/(25.0 \times 0.99 \times ${tex(GF, 4)}) = ${tex(EXs.value, 5)}\ \text{W m}^{-2}\text{K}^{-4}$.` },
+      { label: 'Sigma', text: t`$$\begin{aligned}\sigma &= b/(S\varepsilon G)\\ &= ${tex(EX.fit.b * 1e-13, 5)}/(25.0 \times 0.99 \times ${tex(GF, 4)})\\ &= ${tex(EXs.value, 5)}\ \text{W m}^{-2}\text{K}^{-4}.\end{aligned}$$` },
       { label: 'Statistical part', text: t`$\sigma_b/b = ${(100 * EXrel).toFixed(2)}\,\%$: thirteen readings of a large, clean signal pin the slope very well.` },
       { label: 'Type B part', text: t`The responsivity (3 %), the distance (0.5 mm in 200 mm, doubled because $d$ enters squared: 0.5 %), each aperture’s area (0.5 %) and the emissivity (0.5 %) add in quadrature to $${(100 * EXB).toFixed(1)}\,\%$. That is the uncertainty, almost all of it.` },
       { label: 'Compare', text: t`$\sigma = (${resT(EXs)})\times10^{-8}$ against CODATA’s $5.670\,374\times10^{-8}$: $z = ${zT(EXs.z, 2)}$. The intercept, $${pmT(EX.fit.a, EX.fit.sa)}$ mV, is consistent with zero, as the model says.` },

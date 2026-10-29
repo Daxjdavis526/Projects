@@ -206,7 +206,7 @@ Every solution is the free motion from the last lesson plus **one particular sol
     }),
     mcq({
       id: 'cp-quadrature', difficulty: 3, transfer: true,
-      prompt: t`Before launch, a satellite panel is shaken on a vibration table while the frequency is swept slowly. An accelerometer on the panel shows its motion lagging the table’s drive by exactly $90^\circ$ at 212 Hz. What does that tell you?`,
+      prompt: t`Before launch, a satellite panel is driven by a small shaker attached to it while the frequency is swept slowly. Its displacement is seen to lag the shaker’s force by exactly $90^\circ$ at 212 Hz. What does that tell you?`,
       visual: { type: 'graph', params: { x: [0, 3], y: [0, 180], aspect: 'wide', xlabel: 'ω/ω₀', ylabel: 'phase lag (°)', yticks: 6, curves: [0.05, 0.2, 0.5].map((z, k) => ({ fn: `atan2(${2 * z}*x, 1 - x^2)*180/pi`, color: ['accent', 'violet', 'teal'][k], width: 2.2, label: `ζ = ${z}`, labelAt: 1.6 + 0.35 * k, labelDy: k === 0 ? -12 : 14 })), hlines: [{ y: 90, label: '90°' }] }, caption: t`The phase lag of the steady response against driving frequency, for three damping ratios.` },
       choices: [
         t`212 Hz is the panel’s natural frequency $f_0$: the lag is exactly $90^\circ$ at $\omega = \omega_0$, whatever the damping`,

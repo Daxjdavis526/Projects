@@ -152,7 +152,7 @@ $$dA = |\mathbf X_u\times\mathbf X_v|\,du\,dv = \sqrt{EG - F^2}\;du\,dv.$$
     num({
       id: 'catenoid-band', difficulty: 3,
       gen(r) {
-        const c = r.pick([1, 2]), h = r.pick([0.5, 1, 1.5]) * c;
+        const c = r.pick([1, 2]), h = r.pick([0.5, 0.8, 1]) * c;   // h/c below 1.1997, so the film is the stable catenoid
         const A = 2 * Math.PI * c * (h + (c / 2) * Math.sinh((2 * h) / c));
         return {
           prompt: t`A soap film between two rings of radius $${nice(c * Math.cosh(h / c), 3)}$ cm, $${nice(2 * h)}$ cm apart, is the catenoid $\big(${c}\cosh(v/${c})\cos u,\ ${c}\cosh(v/${c})\sin u,\ v\big)$ for $|v| \le ${nice(h)}$, with $E = ${c * c}\cosh^2(v/${c})$, $F = 0$, $G = \cosh^2(v/${c})$. What is the area of the film (one side), in cm²?`,

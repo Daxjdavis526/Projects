@@ -246,16 +246,16 @@ $$E\,A_\text{G} = \frac{Q_\text{enc}}{\varepsilon_0}$$
     mcq({
       id: 'cp-graph', difficulty: 2,
       prompt: 'Which curve shows the field of a uniformly charged ball (solid, radius R) against distance from its centre?',
-      choices: ['P', 'Q', 'R', 'S'],
+      choices: ['P', 'Q', 'T', 'S'],
       answer: 0,
       why: {
         1: 'Q is zero inside: that is a thin charged shell, whose inside encloses no charge.',
-        2: 'R is constant inside: that needs a charge density that falls as 1/r from the centre. In a uniform ball the enclosed charge grows as r³, so E grows as r.',
+        2: 'T is constant inside: that needs a charge density that falls as 1/r from the centre. In a uniform ball the enclosed charge grows as r³, so E grows as r.',
         3: 'S grows without limit at the centre: a point charge, not a ball.',
       },
       hints: ['Inside, the enclosed charge grows as r³ and the area as r²: E ∝ r.'],
       teach: 'A uniformly charged ball’s field grows linearly inside and falls as 1/r² outside, peaking at the surface.',
-      explain: 'Inside, E = kQr/R³ grows in a straight line from zero; outside, E = kQ/r². Curve P. (Q is a shell; S is a point charge; R would need a density falling as 1/r.)',
+      explain: 'Inside, E = kQr/R³ grows in a straight line from zero; outside, E = kQ/r². Curve P. (Q is a shell; S is a point charge; T would need a density falling as 1/r.)',
       visual: {
         type: 'graph',
         params: {
@@ -263,7 +263,7 @@ $$E\,A_\text{G} = \frac{Q_\text{enc}}{\varepsilon_0}$$
           curves: [
             { fn: 'min(x, 1/max(x, 0.01)^2)', domain: [0, 3.2], color: 'accent', width: 2.4, label: 'P', labelAt: 0.88, labelDx: -18, labelDy: -6 },
             { fn: 'step(x - 1)*1.25/max(x, 0.01)^2', domain: [1.001, 3.2], color: 'gold', width: 2.4, label: 'Q', labelAt: 1.5, labelDy: -12 },
-            { fn: 'min(0.6, 0.6/max(x, 0.01)^2)', domain: [0, 3.2], color: 'violet', width: 2.4, label: 'R', labelAt: 0.2, labelDy: -12 },
+            { fn: 'min(0.6, 0.6/max(x, 0.01)^2)', domain: [0, 3.2], color: 'violet', width: 2.4, label: 'T', labelAt: 0.2, labelDy: -12 },
             { fn: '0.3/x^2', domain: [0.44, 3.2], color: 'teal', width: 2.4, label: 'S', labelAt: 0.6, labelDx: 6 },
           ],
           vlines: [{ x: 1, label: 'R' }],

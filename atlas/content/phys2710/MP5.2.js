@@ -279,7 +279,7 @@ That 0.05% correction separates hydrogen’s spectral lines from deuterium’s �
       errors: [{ value: (RC * MU.H * (1 / 110 ** 2)) / 1e9, feedback: 'The photon carries the difference between the two levels: subtract 1/110² from 1/109².' }],
       hints: [t`$f = \dfrac{\mu}{m_e}R_\infty c\left(\dfrac{1}{109^2} - \dfrac{1}{110^2}\right)$.`, t`$\dfrac{1}{109^2} - \dfrac{1}{110^2} = ${tex(1 / 109 ** 2 - 1 / 110 ** 2, 5)}$.`],
       teach: 'Jumps between neighbouring high levels emit radio waves; at such n the photon frequency is almost the orbital frequency.',
-      explain: t`$f = 0.999\,456\times3.289\,842\times10^{15}\times${tex(1 / 109 ** 2 - 1 / 110 ** 2, 5)} = ${fmt((RC * MU.H * (1 / 109 ** 2 - 1 / 110 ** 2)) / 1e9, 5)}$ GHz, a 6 cm radio wave (the catalogued frequency is 5008.923 MHz). An atom in level 110 is $110^2a_0 \approx ${fmt((110 * 110 * A0 * 1e6) / MU.H, 2)}\ \mu\text{m}$ across — larger than a bacterium — and survives only in the near-vacuum of interstellar space.`,
+      explain: t`$f = 0.999\,456\times3.289\,842\times10^{15}\times${tex(1 / 109 ** 2 - 1 / 110 ** 2, 5)} = ${fmt((RC * MU.H * (1 / 109 ** 2 - 1 / 110 ** 2)) / 1e9, 5)}$ GHz, a 6 cm radio wave (the catalogued frequency is 5008.923 MHz). An atom in level 110 has a radius of $110^2a_0 \approx ${fmt((110 * 110 * A0 * 1e6) / MU.H, 2)}\ \mu\text{m}$ — about the size of a bacterium — and survives only in the near-vacuum of interstellar space.`,
       visual: corrGraph(110, 'Photon and orbital frequencies against n (Bohr’s model, nucleus fixed). At n = 110 the two curves have merged: the line is almost exactly the orbital frequency.'),
     }),
     num({

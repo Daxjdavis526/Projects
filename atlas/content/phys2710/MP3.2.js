@@ -227,7 +227,7 @@ The differences are tiny for chemistry and everyday heat, a part in a thousand f
           errors: [{ value: dm * 1e9, feedback: 'That is in micrograms. One kilogram is 10¹² ng.' }],
           hints: [t`Heat in: $Q = mc_w\Delta T$. Mass gained: $\Delta m = Q/c^2$.`, t`$Q = ${kg}\times4184\times${100 - T0}$ J $= ${tex(kg * 4184 * (100 - T0), 4)}$ J, and $c^2 = ${tex(C2, 4)}$ m²/s².`],
           teach: 'Heat is energy, so it has mass: Δm = Q/c², about 10⁻¹² of the mass for everyday heating.',
-          explain: t`$\Delta m = ${tex(kg * 4184 * (100 - T0), 4)}\ \text{J}/(${tex(C2, 4)}\ \text{m}^2/\text{s}^2) = ${tex(dm, 3)}$ kg $= ${fmt(dm * 1e12, 3)}$ ng: real, and a few parts in $10^{12}$ of the water — about ten thousand times too small for the best balances to see.`,
+          explain: t`$\Delta m = ${tex(kg * 4184 * (100 - T0), 4)}\ \text{J}/(${tex(C2, 4)}\ \text{m}^2/\text{s}^2) = ${tex(dm, 3)}$ kg $= ${fmt(dm * 1e12, 3)}$ ng: real, and a few parts in $10^{12}$ of the water — still far too small for the best balances to see.`,
           visual: ladder({ hide: [0], caption: 'Fractions of a mass that are energy, on a log axis. Everyday heat sits near the bottom left; the proton, top right, is almost all energy.' }),
         };
       },

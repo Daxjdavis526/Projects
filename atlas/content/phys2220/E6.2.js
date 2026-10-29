@@ -128,7 +128,7 @@ A wire’s resistance comes from its shape and its material: longer wires resist
       choices: ['Q', 'P', 'R', 'None of them: a bulb is ohmic'],
       answer: 0,
       why: {
-        1: 'P is a straight line through the origin: constant R, an ohmic resistor.',
+        1: 'P is a straight line through the origin: constant resistance, an ohmic resistor.',
         2: 'R carries almost no current until about 0.6 V and then rises steeply — a diode (and it would block the other way).',
         3: 'A filament heats up as the current grows, and hot tungsten has a much higher resistivity, so its I–V curve bends.',
       },

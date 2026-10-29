@@ -341,7 +341,7 @@ Each half-life halves whatever is left: after one, half remains; after two, a qu
           ],
           hints: [t`Solve $${f} = 2^{-t/${T}}$ for $t$.`, t`$t = ${T}\times\dfrac{\ln(1/${f})}{\ln 2}$.`],
           teach: 'Turning the decay law around gives the time to fall to any fraction: t = T½ log₂(1/f).',
-          explain: t`$t = ${T}\,\dfrac{\ln(1/${f})}{\ln 2} = ${fmt(life, 3)}$ years — longer than the ${fmt(((1 - f) / 0.5) * T, 3)} years a straight-line decline would give. In practice the electrical output falls faster than the heat, because the thermocouples also degrade; even so, Voyager 1 and 2 were still sending data more than 45 years after their 1977 launch.`,
+          explain: t`$t = ${T}\,\dfrac{\ln(1/${f})}{\ln 2} = ${fmt(life, 3)}$ years — sooner than the ${fmt(((1 - f) / 0.5) * T, 3)} years a straight-line decline would give. In practice the electrical output falls faster than the heat, because the thermocouples also degrade; even so, Voyager 1 and 2 were still sending data more than 45 years after their 1977 launch.`,
           visual: heatCurve({ frac: f, relative: true, caption: `Heat from a plutonium-238 source as a percentage of its launch heat, with the mission’s ${pct}% requirement marked.` }),
         };
       },

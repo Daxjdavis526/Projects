@@ -148,7 +148,7 @@ So $V$ against $I$ is a straight line of slope $R$, and $R$ against $L$ a straig
       gen(r) {
         const { rows, f, q } = run(r, 'ohm', { sys: 'wiring' });
         return {
-          prompt: t`Your $V$ against $I$ fit is excellent — $\chi^2/\text{dof} = ${f.chi2r.toFixed(2)}$, intercept $${pmTeX(f.a, f.sa, t`\text{V}`)}$ — but $R = ${pmTeX(q.value, q.sigma, t`\Omega`)}$ is 9% above $\rho L/A = 1.07$ Ω. Either the voltmeter is clipped outside the ammeter, or it reads 9% high. Which test tells the two apart?`,
+          prompt: t`Your $V$ against $I$ fit runs straight through the origin — $\chi^2/\text{dof} = ${f.chi2r.toFixed(2)}$, intercept $${pmTeX(f.a, f.sa, t`\text{V}`)}$ — but $R = ${pmTeX(q.value, q.sigma, t`\Omega`)}$ is 9% above $\rho L/A = 1.07$ Ω. Either the voltmeter is clipped outside the ammeter, or it reads 9% high. Which test tells the two apart?`,
           choices: [
             'Clip the voltmeter directly onto the wire’s terminals and repeat: a placement error disappears, a calibration error stays',
             'Take three times as many readings',

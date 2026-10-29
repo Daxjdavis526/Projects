@@ -303,7 +303,7 @@ print(E.round(1), E_mid)
           errors: [{ value: a / b, feedback: 'Upside down: the same 1 V over a shorter distance is a stronger field. The closer pair has the stronger field.' }],
           hints: [t`Each pair is 1 V apart, so $E = 1\ \text{V}/\Delta x$ for each.`, 'The ratio of the fields is the inverse ratio of the spacings.'],
           teach: 'Equipotentials at equal voltage steps are closest where the field is strongest: E is inversely proportional to their spacing.',
-          explain: t`$E_1/E_2 = (1\ \text{V}/${a.toFixed(2)}\ \text{cm})/(1\ \text{V}/${b.toFixed(2)}\ \text{cm}) = ${(b / a).toFixed(2)}$. The field near a dot is several times the field in the middle.`,
+          explain: t`$E_1/E_2 = (1\ \text{V}/${a.toFixed(2)}\ \text{cm})/(1\ \text{V}/${b.toFixed(2)}\ \text{cm}) = ${(b / a).toFixed(2)}$. The field nearer a dot is more than twice the field nearer the middle.`,
           visual: apparatus('fieldmap-dots', {}, 'The equipotentials, 1 V apart, between the dots. Not to scale.'),
         };
       },

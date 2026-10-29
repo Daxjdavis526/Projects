@@ -1270,6 +1270,7 @@ export const BOSSES = {
   'phys4700': () => import('./phys4700/boss.js'),
   'phys4710': () => import('./phys4710/boss.js'),
   'prog': () => import('./prog/boss.js'),
+  'research': () => import('./research/boss.js'),
   'st-a': () => import('./st-a/boss.js'),
   'st-b': () => import('./st-b/boss.js'),
   'st-c': () => import('./st-c/boss.js'),

@@ -272,7 +272,7 @@ for zeta, W in [(0.1, 0.9), (0.05, 1.0), (0.2, 2.0)]:
       ],
       hints: [t`Write the system as $y = [x, x']$: \`rhs\` returns \`[y[1], np.cos(W*t) - 2*zeta*y[1] - y[0]]\`.`, t`Pass \`t_eval=np.linspace(t_end - 5*period, t_end, 2000)\` to \`solve_ivp\`, then take \`np.max(np.abs(sol.y[0]))\`. Tight tolerances (\`rtol=1e-9\`) keep the long run accurate.`],
       teach: 'Integrating long enough for the transient to die, then measuring, is how any steady response — linear or not — is found numerically.',
-      explain: t`The integrator knows nothing of the formula, yet after the transient has died its amplitude agrees with $1/\sqrt{(1 - W^2)^2 + (2\zeta W)^2}$: about 3.7 at $W = 0.9$, 10 at resonance with $\zeta = 0.05$ (that is $Q$), and 0.32 at $W = 2$. The same program would handle a nonlinear spring, where no formula exists.`,
+      explain: t`The integrator knows nothing of the formula, yet after the transient has died its amplitude agrees with $1/\sqrt{(1 - W^2)^2 + (2\zeta W)^2}$: about 3.8 at $W = 0.9$, 10 at resonance with $\zeta = 0.05$ (that is $Q$), and 0.32 at $W = 2$. The same program would handle a nonlinear spring, where no formula exists.`,
     }),
   ],
   checkpoint: [
