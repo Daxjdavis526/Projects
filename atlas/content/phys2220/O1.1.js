@@ -248,7 +248,7 @@ Every lens, prism, optical fibre and camera in this module is designed with this
       },
       hints: ['Which side of the ray has the higher index: toward the hot centre or away from it?', 'As in the wavefront picture, the part of a crest in the slower (higher-n) gas falls behind, so the crest turns toward that side.'],
       teach: 'Light bends toward the region of higher refractive index — in a gas, the denser region.',
-      explain: t`Across the ray, the gas on the outer side is denser, so it has the higher index and the light there is slower. Each crest's outer end lags, so the ray curves outward, away from the hot core. The deflections are tiny — the index of 1000 K exhaust differs from that of the air around it in the fifth decimal place — so a Schlieren system brings the light to a focus and blocks part of it with a knife edge: a ray bent by a few arcseconds then shows up as a brighter or darker spot.`,
+      explain: t`Across the ray, the gas on the outer side is denser, so it has the higher index and the light there is slower. Each crest's outer end lags, so the ray curves outward, away from the hot core. The deflections are tiny — the index of 1000 K exhaust differs from that of the air around it only in the fourth decimal place — so a Schlieren system brings the light to a focus and blocks part of it with a knife edge: a ray bent by a few arcseconds then shows up as a brighter or darker spot.`,
       visual: {
         type: 'graph',
         params: {
