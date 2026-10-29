@@ -331,7 +331,7 @@ export default boss({
     },
     {
       title: 'Chirp',
-      story: t`03:14. Both detectors trigger within milliseconds of each other. The trace on your screen rises in pitch and loudness for a fraction of a second, then stops. Is it real, what made it, and how far away was it?`,
+      story: t`03:14. An alarm flags about a second of data, and its trace appears on your screen. Is it real, what made it, and — if it was a merger — how far away was it?`,
       items: [
         mcq({
           id: 'r5-recognise', skill: SKILL('W14.1'), difficulty: 3,
