@@ -248,11 +248,11 @@ $\partial_r$ is one unit long and points outward; $\partial_\theta$ points down 
       id: 'cp-physical', difficulty: 2,
       prompt: t`A satellite has spherical coordinate components $V^r = 0$, $V^\theta = 0$, $V^\phi = 1.1\times10^{-3}$ rad/s at $r = 7000$ km and $\theta = 90^\circ$. What is its speed?`,
       visual: sph3(1.8, 90, 30, { k: 0.5, caption: t`At the equator, $\theta = 90^\circ$: $\partial_\phi$ is $r$ long.` }),
-      choices: ['7.7 km/s', t`$1.1\times10^{-3}$ km/s`, '0.16 km/s', '7.7 m/s'],
+      choices: ['7.7 km/s', t`$1.1\times10^{-3}$ km/s`, '0 km/s', '7.7 m/s'],
       answer: 0,
       why: {
         1: t`That is $V^\phi$ itself, an angular rate; multiply by $|\partial_\phi| = r\sin\theta$.`,
-        2: t`That divides by $r$ instead of multiplying.`,
+        2: t`That used $r\cos\theta$, which is 0 at the equator. $|\partial_\phi| = r\sin\theta$, the distance from the axis — here the full $r$.`,
         3: 'Keep the units: 7000 km × 1.1×10⁻³ rad/s is in km/s.',
       },
       hints: [t`$|V| = |V^\phi|\,|\partial_\phi| = V^\phi\,r\sin\theta$.`],

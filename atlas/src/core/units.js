@@ -51,13 +51,13 @@ export const UNITS = {
   percent: [0.01, ZERO], '%': [0.01, ZERO], ppm: [1e-6, ZERO], ppb: [1e-9, ZERO],
   // a decibel is a level, not a size: "85 dB" is read as the number 85, so a sound
   // level can carry its unit; levels never convert multiplicatively to anything else
-  dB: [1, ZERO],
+  dB: [1, ZERO], dBm: [1, ZERO],   // dBm: a power level relative to 1 mW, read as its number like dB
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
 const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'week', 'wk', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kn', 'knot', 'nmi', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'ppm', 'ppb', 'Msun', 'M☉', 'Mearth',
-  'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB']);
+  'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l', 'dB', 'dBm']);
 
 export const PREFIXES = {
   Q: 1e30, R: 1e27, Y: 1e24, Z: 1e21, E: 1e18, P: 1e15, T: 1e12, G: 1e9, M: 1e6, k: 1e3, h: 1e2, da: 1e1,
@@ -127,11 +127,12 @@ export function parseUnit(src) {
     if (peek() === '^') {
       i++;
       // m^3, m^-2, or a bracketed fraction m^(1/2) — a ")" is the power's own only if a "(" opened it
-      const e = /^(?:\((-?\d+(?:\/\d+)?)\)|(-?\d+(?:\/\d+)?))/.exec(s.slice(i));
-      if (!e) throw new UnitError('A unit power must be a whole number');
+      // (or a decimal: Hz^0.5, Hz^-0.5)
+      const e = /^(?:\((-?\d+(?:\.\d+)?(?:\/\d+)?)\)|(-?\d+(?:\.\d+)?(?:\/\d+)?))/.exec(s.slice(i));
+      if (!e) throw new UnitError('A unit power must be a number, such as 2, -1, 0.5 or (1/2)');
       i += e[0].length;
       const [n, d = '1'] = (e[1] ?? e[2]).split('/');
-      base = pow(base, parseInt(n, 10) / parseInt(d, 10));
+      base = pow(base, parseFloat(n) / parseInt(d, 10));
     } else {
       // m2, s-1 style powers written without a caret
       const e = /^(-?\d+)/.exec(s.slice(i));
@@ -219,7 +220,7 @@ export function unitTeX(u) {
   if (!u) return '';
   return '\\mathrm{' + String(u)
     .replace(/\*/g, '\\cdot ').replace(/·/g, '\\cdot ')
-    .replace(/\^\(?(-?\d+)\)?/g, '^{$1}')
+    .replace(/\^\((-?[\d.]+(?:\/\d+)?)\)|\^(-?\d+(?:\.\d+)?)/g, (_, a, b) => `^{${a ?? b}}`)
     .replace(/(^|[\s/(·*])u(?=(?:m|s|g|A|V|W|J|F|H|K|N|Pa|L|mol|Hz|as|T|C|rad|sr)(?![A-Za-z]))/g, '$1μ')   // um, us, uas: the ASCII micro prefix shown as μ
     .replace(/μ|µ/g, '\\mu{}').replace(/Ω|ohm/g, '\\Omega ').replace(/°/g, '^{\\circ}').replace(/%/g, '\\%')
     .replace(/ /g, '\\,') + '}';

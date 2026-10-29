@@ -124,7 +124,7 @@ Find $m_ec^2$ and compare it with CODATA — and with the $${resT(Ro)}$ keV that
           errors: [{ value: 1 / Ep - 1 / E0, feedback: 'That is in keV⁻¹: multiply by 1000 for MeV⁻¹.' }, { value: 1000 * (1 / E0 - 1 / Ep), feedback: t`Sign: $E' < E$, so $1/E' > 1/E$ and $y$ is positive.` }].filter((e) => Math.abs(e.value - ans) > 0.006 * ans),
           hints: [t`$1/E'$ and $1/E$ in keV⁻¹, subtract, then × 1000.`],
           teach: t`Linearizing turns the Compton formula into a straight line through the origin with slope $1/(m_ec^2)$.`,
-          explain: t`$1/${Ep} - 1/661.657 = ${tex(ans / 1000, 4)}\ \text{keV}^{-1} = ${ans.toFixed(4)}\ \text{MeV}^{-1}$; the line predicts $${((1 - Math.cos(th * D2R)) / (MC2 / 1000)).toFixed(4)}$ here.`,
+          explain: t`$1/${Ep} - 1/661.657$ $= ${tex(ans / 1000, 4)}\ \text{keV}^{-1}$ $= ${ans.toFixed(4)}\ \text{MeV}^{-1}$; the line predicts $${((1 - Math.cos(th * D2R)) / (MC2 / 1000)).toFixed(4)}$ here.`,
         };
       },
     }),

@@ -280,7 +280,7 @@ print(h * c / (wien_x() * k), "m K")`,
       why: {
         1: 'Emission and absorption balance in equilibrium; the question is how much visible radiation the equilibrium contains — almost none.',
         2: 'The opposite: the number of modes per hertz grows as f², so there are more visible modes. Each one is simply empty.',
-        3: 'Visible light exists at any temperature; a 300 K body emits a little — about 10⁻³⁵ of the classical amount per mode.',
+        3: 'Visible light exists at any temperature; a 300 K body emits a little — at 550 nm about 10⁻³⁶ of the classical amount per mode.',
       },
       hints: ['Compare one visible quantum with kT at room temperature.'],
       teach: 'Modes whose quantum hf is much larger than kT are frozen out: Boltzmann’s factor makes even one quantum improbable.',

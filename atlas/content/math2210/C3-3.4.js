@@ -93,7 +93,7 @@ Each term is how fast the field changes in one direction times how fast you trav
         { label: t`$\tfrac{dT}{dt}$`, expr: `${TX}*(-2*sin(s)) + ${TY}*(2*cos(s))`, unit: '^\\circ\\mathrm{C/s}', digits: 3 },
       ],
     },
-    caption: t`The plate’s temperature is $T = 20 + 50\,e^{-((x - 1)^2 + y^2)/2}$ °C, with $x$ and $y$ in cm: a hot spot at $(1, 0)$. The gold velocity arrow is to scale (0.4 s of travel); the red arrow shows only the direction of $(\partial T/\partial x,\ \partial T/\partial y)$, whose size varies thirtyfold round the loop. The plate is idealised as steady.`,
+    caption: t`The plate’s temperature is $T = 20 + 50\,e^{-((x - 1)^2 + y^2)/2}$ °C, with $x$ and $y$ in cm: a hot spot at $(1, 0)$. The gold velocity arrow is to scale (0.4 s of travel); the red arrow shows only the direction of $(\partial T/\partial x,\ \partial T/\partial y)$, whose size varies nearly twentyfold round the loop. The plate is idealised as steady.`,
   },
   example: {
     prompt: t`On the plate $T(x, y) = 20 + 50\,e^{-((x - 1)^2 + y^2)/2}$ (°C, with $x$, $y$ in cm), the probe moves as $x = 2\cos t$, $y = 2\sin t$. Find $dT/dt$ at $t = 2\pi/3$ s.`,

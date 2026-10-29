@@ -263,7 +263,7 @@ print(f"E = {E_u:.2f} ± {s_u:.2f} keV")`,
           errors: [{ value: Math.sqrt(sa ** 2 + c * c * sb ** 2), feedback: t`You dropped the covariance term $2c\,\rho\,\sigma_a\sigma_b$, which is negative here.` }, { value: sa + c * sb, feedback: 'Combine in quadrature, with the covariance term.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * ans),
           hints: [t`$\sigma_E^2 = \sigma_a^2 + c^2\sigma_b^2 + 2c\,\rho\,\sigma_a\sigma_b$.`],
           teach: 'Slope and intercept errors are correlated; the covariance term usually shrinks the uncertainty inside the calibrated range.',
-          explain: t`$\sigma_E = \sqrt{${sa}^2 + ${c}^2(${sb.toFixed(5)})^2 + 2(${c})(${rho})(${sa})(${sb.toFixed(5)})} = ${ans.toFixed(3)}$ keV. See [covariance and correlated errors](#/lesson/lab.A6.3).`,
+          explain: t`$$\begin{aligned}\sigma_E &= \sqrt{${sa}^2 + ${c}^2(${sb.toFixed(5)})^2 + 2(${c})(${rho})(${sa})(${sb.toFixed(5)})}\\ &= ${ans.toFixed(3)}\ \text{keV}.\end{aligned}$$ See [covariance and correlated errors](#/lesson/lab.A6.3).`,
         };
       },
     }),

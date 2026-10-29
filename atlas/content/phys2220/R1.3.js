@@ -256,7 +256,7 @@ and $y' = y$, $z' = z$. When $v \ll c$, $\gamma \to 1$ and the $vx/c^2$ term van
       errors: [{ value: 8.4e9 * (17e3 / C) ** 2 / 2 / 1e3, feedback: 'At low speeds the shift is first order in v/c: Δf ≈ f₀·v/c.' }],
       hints: [t`At $v \ll c$, $\sqrt{(1 - \beta)/(1 + \beta)} \approx 1 - \beta$, so $\Delta f \approx f_0\,v/c$.`, t`$v/c = 1.7\times10^{4}/(2.998\times10^{8})$; multiply by $8.4\times10^{9}$ Hz.`],
       teach: 'At everyday speeds the relativistic Doppler shift reduces to Δf ≈ f₀v/c — and the deep-space network measures it to track spacecraft.',
-      explain: t`$v/c = ${tex(17e3 / C, 3)}$, so $\Delta f \approx f_0\,v/c$; precisely, $\Delta f = f_0\left(1 - \sqrt{\tfrac{1-\beta}{1+\beta}}\right) = ${fmt(8.4e9 * (1 - doppler(17e3 / C)) / 1e3, 4)}$ kHz, the same as $f_0\beta$ to five figures. NASA’s Deep Space Network tracks such shifts to a fraction of a hertz — measuring a spacecraft’s speed along the line of sight to better than a millimetre per second.`,
+      explain: t`$v/c = ${tex(17e3 / C, 3)}$, so $\Delta f \approx f_0\,v/c$; precisely, $\Delta f = f_0\left(1 - \sqrt{\tfrac{1-\beta}{1+\beta}}\right) = ${fmt(8.4e9 * (1 - doppler(17e3 / C)) / 1e3, 4)}$ kHz, against $f_0\beta = 476.33$ kHz: they agree to four figures. NASA’s Deep Space Network tracks such shifts to a fraction of a hertz — measuring a spacecraft’s speed along the line of sight to better than a millimetre per second.`,
       visual: {
         type: 'graph',
         params: {

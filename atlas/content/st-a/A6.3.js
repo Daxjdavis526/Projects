@@ -169,7 +169,7 @@ print(g_sph, g_par)`,
       answer: 0,
       why: {
         1: t`In our convention $\phi$ is the azimuth, and the azimuthal step is the one scaled by the sine of the *polar* angle.`,
-        2: 'It is the same Euclidean space with the angle names swapped (the research notes’ pitfall P17).',
+        2: 'It is the same Euclidean space with the angle names swapped.',
         3: t`$\sin^2\phi$ multiplying $d\phi^2$ mixes the two angles up.`,
       },
       hints: [t`Which angle in the book is measured from the $z$ axis? That angle’s sine scales the other one’s step.`],

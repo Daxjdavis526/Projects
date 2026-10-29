@@ -3,7 +3,7 @@
 //   node atlas/test/check.test.mjs
 
 import { parse, evaluate, toTeX, toText, compile, gammaFn, erf, ParseError } from '../src/core/expr.js';
-import { parseUnit, parseQuantity, convert, describeDims } from '../src/core/units.js';
+import { parseUnit, parseQuantity, convert, describeDims, unitTeX } from '../src/core/units.js';
 import { grade, countSigFigs, compareExpr } from '../src/core/check.js';
 import { makeRng, roundTo } from '../src/core/rng.js';
 
@@ -248,6 +248,9 @@ check('a power just before a closing bracket: J/(K m^3)', describeDims(parseUnit
   const item = { type: 'numeric', answer: 10, tol: { rel: 0.02 }, errors: [{ value: 20, feedback: 'far' }, { value: 20.3, feedback: 'near' }] };
   check('overlapping known errors: the nearest one answers', grade(item, '20.3').feedback === 'near' && grade(item, '20').feedback === 'far');
 }
+
+check('decimal unit powers: nV/Hz^0.5 is V Hz^-1/2, typeset whole', Math.abs(convert(1, 'uV/Hz^(1/2)', 'nV/Hz^0.5') - 1000) < 1e-9 && unitTeX('nV/Hz^0.5') === '\\mathrm{nV/Hz^{0.5}}' && unitTeX('m^(1/2)') === '\\mathrm{m^{1/2}}');
+check('dBm is read as its number', convert(-30, 'dBm', 'dBm') === -30);
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

@@ -267,7 +267,7 @@ num({ id: 'f-over-m', difficulty: 1,
   `'K'` or `'°C'`: a learner may type either, and a bare temperature is
   converted with the 273.15 offset. A temperature *change* is the same number
   in K and °C: mark such an item `difference: true` so no offset is applied.
-  A sound level takes `'dB'` (read as a plain number: "85 dB" is 85). Radio flux
+  A sound level takes `'dB'` and an RF power `'dBm'` (each read as a plain number: "85 dB" is 85). Powers may be decimals or fractions: `'nV/Hz^0.5'`, `'m^(1/2)'`. Radio flux
   densities take `'Jy'` (10⁻²⁶ W m⁻² Hz⁻¹, with prefixes: mJy, μJy); cross-sections `'b'` (barns: mb, fb). Times include `'min'`, `'h'`, `'day'`, `'week'` and `'yr'`.
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
@@ -595,6 +595,7 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `lab-bench` | twenty-eight virtual experiments (pendulum, free fall, carts, friction, track, collisions, a spun disc, springs, calorimetry; field mapping, Ohm's law and resistivity, RC decay, a coil's field, induction, refraction and lenses, slits and gratings, string resonance…): noisy readings into a table, linearized data with error bars, a least-squares fit with uncertainties and χ²/dof, residuals, an injectable systematic error, a histogram of repeats |
 | `labx-stats` | uncertainty made visible: a target (precision against accuracy), a rounding display, Gaussian and Poisson scatter, Monte Carlo propagation against the linear formula, p-values as shaded tails | see the file header |
 | `labe-rig` | nine classic experiments (e/m, Millikan, h/e, Franck–Hertz, Michelson, Fabry–Pérot, Cavendish, coupled pendulums, speed of light): the raw signal of each reading, data with error bars and a fit, residuals, a readings table, each experiment's systematic switchable, the result's z against CODATA | see the file header |
+| `labg-classics` | nine more classic experiments (chaotic pendulum, slits, fibre optics, decay counting, Johnson noise, electron diffraction, Balmer lines, resonance tube, torsion pendulum): readings, fits and a switchable systematic | see the file header |
 | `labf-signal` | `lockin`: a 1 kHz signal under hum and noise ~1000× its amplitude recovered as X and Y with a ±1σ band; `allan`: the Allan deviation of white, 1/f and drift noise; `strobe`: a wheel under a strobe (aliasing) | see the file header |
 | `wave-string` | waves on a string as moving beads: travelling pulses and harmonics, speed from tension and linear density, superposition, a driven string's standing waves and resonances |
 | `wave-sound` | sound as air parcels: displacement against pressure, intensity, standing waves in open and closed pipes, audible beats |
@@ -773,6 +774,12 @@ under reduced motion unless the learner presses Play.
 - Never claim mastery from completion; never shame a wrong answer.
 - Computer notation (`100e-6`) anywhere in prose is flagged; where it is the
   thing being taught (a value typed into code), put it in a code span: `` `100e-6` ``.
+- A chaotic system computed in Node and drawn in the browser can disagree after a
+  few Lyapunov times (the two engines round transcendental functions differently):
+  when a prompt quotes a chaotic run's numbers, precompute them as constants (see
+  `labg-classics`) rather than integrating in both places.
+- Check a new sim's name is unused (`ls atlas/src/viz/sims/`) — prefixes are assigned per
+  author but another author may have taken one before you.
 - Never splice a raw float into text (`${x}` gives 0.19999999999999998): format
   it with `N()`, `r6` or `toFixed`. The content test flags such numbers, and
   caret notation like e^(−γt) outside `$…$`.
