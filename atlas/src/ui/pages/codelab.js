@@ -146,7 +146,7 @@ export function render(main) {
   const statusLine = h('span.small.faint', 'Python starts when you press Run.');
   const runBtn = h('button.btn.primary', { type: 'button', onclick: go, html: `${icon('play')}Run` });
   const stopBtn = h('button.btn', { type: 'button', onclick: () => stop(), disabled: true }, 'Stop');
-  const pick = h('select', { 'aria-label': 'Load an example', onchange: (e) => { if (EXAMPLES[e.target.value]) { code.value = EXAMPLES[e.target.value][1]; save(); } e.target.value = ''; } },
+  const pick = h('select', { 'aria-label': 'Load an example', style: { flex: '1 1 9rem', minWidth: 0 }, onchange: (e) => { if (EXAMPLES[e.target.value]) { code.value = EXAMPLES[e.target.value][1]; save(); } e.target.value = ''; } },
     h('option', { value: '' }, 'Examples…'), Object.entries(EXAMPLES).map(([k, [label]]) => h('option', { value: k }, label)));
   const save = () => { try { sessionStorage.setItem('atlas:lab', code.value); } catch { /* ignore */ } };
   code.addEventListener('input', save);
@@ -173,7 +173,7 @@ export function render(main) {
     h('header.page-head', h('h1', 'Code lab'),
       h('p', 'Real Python 3.14, running in your browser through Pyodide — nothing is sent to a server. NumPy, SciPy, Matplotlib, SymPy and mpmath load the first time a program imports them; atlas.plot is a lighter pyplot-like helper drawn by the Atlas itself.'),
       h('p.small.faint', 'The first import of NumPy, SciPy or Matplotlib downloads them once (NumPy about 3 MB; SciPy 14 MB; Matplotlib and its helpers about 11 MB), then the browser keeps them. Runaway programs stop after 20 seconds or when you press Stop.')),
-    h('div.row.between', { style: { marginBottom: '.6rem' } }, h('div.row', runBtn, stopBtn, pick), statusLine),
+    h('div.row.between', { style: { marginBottom: '.6rem' } }, h('div.row', { style: { minWidth: 0, maxWidth: '100%' } }, runBtn, stopBtn, pick), statusLine),
     h('div.code-cell', code, out, plots),
     h('p.tiny.faint', { style: { marginTop: '.6rem' } }, 'Ctrl/⌘ + Enter runs. Tab inserts four spaces.')));
   start().catch(() => {});

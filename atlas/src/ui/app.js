@@ -71,8 +71,12 @@ function paintChrome() {
   side.append(h('div.side-foot', h('a.lvl', { href: '#/progress', style: { color: 'inherit', textDecoration: 'none' }, html: `${ring(lv.into / lv.span, { size: 42, stroke: 4, label: String(lv.level) })}<div><b>${rankOf(lv.level)}</b><small>${(app.st?.xp ?? 0).toLocaleString()} XP · ${(lv.next - (app.st?.xp ?? 0)).toLocaleString()} to level ${lv.level + 1}</small></div>` })));
   clear(topbar);
   topbar.append(h('a.brand', { href: '#/', html: `${LOGO}<div><b>The Physics Atlas</b></div>` }), h('span.spacer'),
-    h('a.icon-btn', { href: '#/map', 'aria-label': 'Skill map', html: icon('map') }),
-    h('a.icon-btn', { href: '#/settings', 'aria-label': 'Settings', html: icon('gear') }));
+    h('a.icon-btn', { href: '#/explore', 'aria-label': 'Simulations', html: icon('atom') }),
+    // everything the five tabs leave out: on a phone this menu is the only way to it
+    h('details.more-menu',
+      h('summary.icon-btn', { 'aria-label': 'More' , html: icon('more') }),
+      h('nav.menu', { 'aria-label': 'More pages' }, NAV.filter((n) => n && !TABS.some((t) => t[0] === n[0])).map((n) =>
+        h('a', { href: '#' + n[0], 'aria-current': active(n[0]) ? 'page' : null, html: `${icon(n[2])}<span>${n[1]}</span>` })))));
   clear(tabbar);
   tabbar.append(...TABS.map((t) => h('a', { href: '#' + t[0], 'aria-current': active(t[0]) ? 'page' : null, html: `${icon(t[2])}<span>${t[1]}</span>${t[0] === '/review' && dueCount ? `<span class="count">${dueCount}</span>` : ''}` })));
 }
@@ -110,12 +114,21 @@ function showError(e) {
   main.append(h('div.page.narrow', h('h1', 'Something went wrong'), h('p.muted', String(e?.message || e)), h('a.btn', { href: '#/' }, 'Home')));
 }
 
+// Android and desktop Chrome offer to install the app; keep the offer so Settings
+// can show an Install button (iPhone has no such event: Settings explains Share →
+// Add to Home Screen instead)
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); window.atlasInstall = e; });
+
 async function boot() {
+  // the service worker keeps every file it fetches, so the app opens offline (sw.js)
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch((e) => console.warn('service worker:', e));
   chrome();
   await init();
   paintChrome();
   subscribe(() => paintChrome());
   window.addEventListener('hashchange', route);
+  // a tap anywhere outside the More menu closes it
+  document.addEventListener('click', (e) => { for (const d of document.querySelectorAll('details.more-menu[open]')) if (!d.contains(e.target)) d.open = false; });
   route();
 }
 

@@ -9,6 +9,7 @@
 import { readdirSync, readFileSync, writeFileSync, renameSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeOffline } from './offline.mjs';
 
 const CONTENT = join(dirname(fileURLToPath(import.meta.url)), '..', 'content');
 const LESSON_FILE = /^[A-Za-z0-9-]+\.[0-9a-z]+\.js$/;
@@ -64,7 +65,8 @@ if (isMain) {
   try { have = readFileSync(file, 'utf8'); } catch { /* first run */ }
   if (process.argv.includes('--check')) {
     if (have !== want) { console.log('content/loads.js is out of date — run: node atlas/tools/register.mjs'); process.exit(1); }
-    console.log('content/loads.js is up to date');
+    if (!writeOffline({ check: true })) { console.log('offline-files.json is out of date — run: node atlas/tools/register.mjs'); process.exit(1); }
+    console.log('content/loads.js and offline-files.json are up to date');
   } else if (have !== want) {
     // write-then-rename, so two authors registering at once never leave a torn file
     const tmp = `${file}.${process.pid}.tmp`;
@@ -73,4 +75,6 @@ if (isMain) {
     const s = scan();
     console.log(`content/loads.js: ${s.lessons.length} lessons, ${s.bosses.length} bosses`);
   } else console.log(`content/loads.js already up to date (${scan().lessons.length} lessons — a new lesson may have been registered by another author's run)`);
+  // the offline download list follows the files on disk too
+  if (!process.argv.includes('--check')) writeOffline();
 }

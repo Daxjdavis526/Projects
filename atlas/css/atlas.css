@@ -119,15 +119,22 @@ hr{border:0;border-top:1px solid var(--line);margin:1.4rem 0}
 @media (max-width:860px){
   .app{grid-template-columns:minmax(0,1fr)}   /* 1fr alone lets one wide equation widen the page */
   .side{display:none}
-  .topbar{display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:30;padding:.6rem 1rem;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar{display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:30;padding:calc(.6rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) .6rem calc(1rem + env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .topbar .brand{padding:0}
   .topbar .spacer{flex:1}
+  .more-menu{position:relative}
+  .more-menu summary{list-style:none}
+  .more-menu summary::-webkit-details-marker{display:none}
+  .more-menu .menu{position:absolute;right:0;top:calc(100% + .4rem);min-width:13rem;display:flex;flex-direction:column;padding:.35rem;border-radius:14px;border:1px solid var(--line-2);background:var(--panel);box-shadow:0 12px 32px rgba(0,0,0,.35)}
+  .more-menu .menu a{display:flex;align-items:center;gap:.7rem;padding:.65rem .7rem;border-radius:10px;color:var(--ink-2);text-decoration:none}
+  .more-menu .menu a svg{width:19px;height:19px}
+  .more-menu .menu a[aria-current="page"]{color:var(--accent-2);background:var(--panel-2)}
   .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--bg-2) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom))}
   .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.35rem 0;color:var(--ink-3);font-size:.68rem;text-decoration:none;position:relative}
   .tabbar a svg{width:21px;height:21px}
   .tabbar a[aria-current="page"]{color:var(--accent-2)}
   .tabbar .count{position:absolute;top:0;left:56%;min-width:1.05rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:.62rem;font-weight:700;line-height:1.05rem;padding:0 .25rem}
-  .main{padding:1.2rem 1rem 6rem}
+  .main{padding:1.2rem calc(1rem + env(safe-area-inset-right)) 6rem calc(1rem + env(safe-area-inset-left))}
 }
 
 /* ── building blocks ───────────────────────────────────────────────────── */
@@ -278,7 +285,10 @@ a.lesson-row:hover{background:var(--panel-2);text-decoration:none}
 .viz-canvas{position:relative;width:100%;aspect-ratio:16/10;background:radial-gradient(circle at 50% 40%,rgba(92,157,255,.05),transparent 70%)}
 .viz-canvas.square{aspect-ratio:1/1}
 .viz-canvas.wide{aspect-ratio:2/1}
-.viz-canvas canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+/* a vertical swipe over a picture scrolls the page (on a phone a full-width picture would
+   otherwise trap the thumb); a touch that starts on a draggable handle drags it instead
+   (plot.js cancels the scroll for that touch), and 3D views opt out with touch-action:none */
+.viz-canvas canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}
 .viz-canvas .overlay{position:absolute;inset:0;pointer-events:none}
 .viz-canvas .overlay .lbl{position:absolute;transform:translate(-50%,-50%);font-size:.85rem;color:var(--ink);white-space:nowrap;text-shadow:0 0 6px var(--bg)}
 .viz-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem 1.2rem;padding:.9rem 1rem;border-top:1px solid var(--line);background:var(--panel)}
@@ -365,7 +375,7 @@ details.solution > div{padding:0 1rem .9rem}
 .match-row select{width:100%;padding:.55rem .6rem;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2)}
 .match-row.right select{border-color:var(--good)}
 .match-row.wrong select{border-color:var(--bad)}
-select{background:var(--panel-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .55rem}
+select{background:var(--panel-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .55rem;max-width:100%;text-overflow:ellipsis}
 .qcount{font-size:.8rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .diff{display:inline-flex;gap:2px;align-items:center}
 .diff i{width:6px;height:12px;border-radius:2px;background:var(--panel-3)}

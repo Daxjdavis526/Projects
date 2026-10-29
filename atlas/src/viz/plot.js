@@ -383,6 +383,12 @@ export class Plot {
     let drag = null;
     const pos = (e) => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
     const hit = ([px, py]) => this.handles.find((H) => { const [x, y] = H.get(); return Math.hypot(this.X(x) - px, this.Y(y) - py) <= H.r + 8; });
+    // the canvas lets vertical swipes scroll the page (touch-action: pan-y); a touch that
+    // lands on a handle must drag it instead, so cancel the scroll for that touch alone
+    c.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      if (t && e.touches.length === 1 && hit(pos(t))) e.preventDefault();
+    }, { passive: false });
     c.addEventListener('pointerdown', (e) => {
       const H = hit(pos(e));
       if (!H) return;

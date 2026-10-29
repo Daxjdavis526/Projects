@@ -9,6 +9,7 @@ import { STATES, STATE_LABEL } from '../../core/mastery.js';
 import { courseCard, heroCanvas, heatmap, masteryStack } from '../widgets.js';
 import { medalSVG } from '../medals.js';
 import { ROUTES } from '../../../content/gr/index.js';
+import { installState } from '../offline.js';
 
 export function render(main) {
   let stopHero = null;
@@ -94,7 +95,7 @@ function page() {
   const histCard = h('div.card', h('div.row.between', h('h3', 'Study history'), h('span.tiny.faint', 'last 12 weeks')), h('div', { style: { overflowX: 'auto' } }, heatmap(84)),
     h('p.tiny.faint', { style: { marginTop: '.5rem' } }, `${ready} lesson${ready === 1 ? '' : 's'} ready to learn right now.`));
 
-  return h('div.page', hero, stats, courses,
+  return h('div.page', hero, installTip(), stats, courses,
     h('section.section.grid.g2', masteryCard, achCard),
     h('section.section.grid.g2', grCard, histCard));
 }
@@ -108,4 +109,19 @@ function weeklyCard() {
   return h('div.card', h('div.stat', h('span.eyebrow', 'Weekly goal'), h('b', `${Math.min(w.doneThisWeek, w.goal)} / ${w.goal} days`),
     h('span', w.run > 1 ? `${w.run} goal weeks in a row${w.tokens ? ` · ${w.tokens} rest token${w.tokens > 1 ? 's' : ''}` : ''}` : 'New week, fresh start.')),
   bar(Math.min(1, w.doneThisWeek / w.goal)));
+}
+
+// On a phone, until it is installed or dismissed: say the Atlas can live on the home screen.
+function installTip() {
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('atlas:installTip') === 'no'; } catch { /* private mode */ }
+  const how = installState();
+  if (dismissed || how === 'installed' || !matchMedia('(max-width: 860px)').matches) return null;
+  const tip = h('section.card.section', { style: { display: 'flex', gap: '.8rem', alignItems: 'center' } },
+    h('div', { style: { flex: 1 } }, h('b', 'Put the Atlas on your home screen'),
+      h('div.tiny.faint', how === 'ios' ? 'Tap Share, then “Add to Home Screen”. It opens full screen, and Settings can save every lesson for offline use.'
+        : 'It opens full screen like an app, and Settings can save every lesson for offline use.')),
+    how === 'ios' ? null : h('a.btn.small', { href: '#/settings' }, 'How'),
+    h('button.icon-btn', { type: 'button', 'aria-label': 'Dismiss', html: icon('x'), onclick: () => { try { localStorage.setItem('atlas:installTip', 'no'); } catch { /* ignore */ } tip.remove(); } }));
+  return tip;
 }
