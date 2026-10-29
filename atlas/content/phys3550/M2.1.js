@@ -93,7 +93,7 @@ export default lesson({
           errors: distinct([{ value: Math.abs(x0) + Math.abs(v0) / w, feedback: t`$x_0$ and $v_0/\omega_0$ are the real and imaginary parts of $C$: combine them in quadrature, $A = |C|$.` }, { value: Math.hypot(x0, v0), feedback: t`$v_0$ needs dividing by $\omega_0$ to be a length.` }], A),
           hints: [t`Write $x = B_1\cos\omega_0t + B_2\sin\omega_0t$ with $B_1 = x_0$, $B_2 = v_0/\omega_0$.`, t`$A = \sqrt{B_1^2 + B_2^2}$.`],
           teach: t`The amplitude is $|C| = \sqrt{x_0^2 + (v_0/\omega_0)^2}$: the initial speed adds to the swing.`,
-          explain: t`$B_2 = v_0/\omega_0 = ${sci(v0 / w)}$ cm, so $A = \sqrt{${x0}^2 + (${sci(v0 / w)})^2} = ${sci(A)}$ cm. Energy says the same: $\tfrac12kA^2 = \tfrac12kx_0^2 + \tfrac12mv_0^2$.`,
+          explain: t`$B_2 = v_0/\omega_0 = ${sci(v0 / w)}$ cm, so $A = \sqrt{(${x0})^2 + (${sci(v0 / w)})^2} = ${sci(A)}$ cm. Energy says the same: $\tfrac12kA^2 = \tfrac12kx_0^2 + \tfrac12mv_0^2$.`,
           visual: gpic({ x: [-r6(1.3 * Math.max(Math.abs(x0), Math.abs(v0 / w))), r6(1.3 * Math.max(Math.abs(x0), Math.abs(v0 / w)))], y: [-r6(1.3 * Math.max(Math.abs(x0), Math.abs(v0 / w))), r6(1.3 * Math.max(Math.abs(x0), Math.abs(v0 / w)))], equal: true, xlabel: 'x (cm)', ylabel: 'v/ω₀ (cm)', curves: [seg([x0, 0], [x0, v0 / w], 'ink3', 1, true), seg([0, v0 / w], [x0, v0 / w], 'ink3', 1, true)], points: [{ x: x0, y: r6(v0 / w), color: 'gold', r: 5, label: 'start', labelDx: 8 }] }, t`Phase space scaled by $\omega_0$: the start (gold) sits at $(x_0, v_0/\omega_0)$. In these axes the motion is a circle about the origin.`, 'A point in scaled phase space'),
         };
       },
