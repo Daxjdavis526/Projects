@@ -267,7 +267,7 @@ A kelvin and a Celsius degree are the same size; the two scales differ only in w
         const Tc = r.pick([15, 20, 25, 30]), T2 = r.pick([77.4, 90.2, 120, 150]);
         const T1 = toK(Tc), Tf = (T1 + T2) / 2;
         return {
-          prompt: t`Two identical aluminium blocks — same mass, same alloy — are clamped together in a vacuum chamber, insulated from everything else. One starts at ${Tc} °C, the other at ${T2} K. What common temperature do they reach, in kelvin?`,
+          prompt: t`Two identical aluminium blocks — same mass, same alloy — are clamped together in a vacuum chamber, insulated from everything else. One starts at ${Tc} °C, the other at ${T2} K. Treating aluminium’s specific heat as constant, what common temperature do they reach, in kelvin?`,
           answer: +Tf.toFixed(2), units: 'K', tol: { rel: 0, abs: 0.3 },
           errors: [
             { value: +((Tc + T2) / 2).toFixed(2), feedback: 'You averaged a Celsius number with a kelvin number. Convert first.' },
@@ -275,7 +275,7 @@ A kelvin and a Celsius degree are the same size; the two scales differ only in w
           ],
           hints: ['Identical blocks have identical heat capacities: the energy one loses, the other gains, so their temperatures change by equal amounts.', 'Put both temperatures in kelvin, then take the midpoint.'],
           teach: 'Two identical bodies meet exactly halfway — once both temperatures are on one scale.',
-          explain: t`$${Tc}\ ^\circ\text{C} = ${tx2(T1)}$ K. Equal heat capacities mean equal and opposite temperature changes, so they meet at the midpoint: $(${tx2(T1)} + ${T2})/2 = ${tx2(Tf)}$ K.`,
+          explain: t`$${Tc}\ ^\circ\text{C} = ${tx2(T1)}$ K. Equal heat capacities mean equal and opposite temperature changes, so they meet at the midpoint: $(${tx2(T1)} + ${T2})/2 = ${tx2(Tf)}$ K. (Real aluminium’s specific heat falls by a third or more at these low temperatures, so the real blocks would meet somewhat warmer.)`,
           visual: bodiesPic({ bodies: [{ name: 'block 1', temp: `${Tc} °C`, color: 'warn' }, { name: 'block 2', temp: `${T2} K`, color: 'accent' }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Two identical blocks, clamped together in vacuum. Not to scale.' }),
         };
       },

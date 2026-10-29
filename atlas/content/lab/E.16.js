@@ -32,7 +32,7 @@ const CX = H.fields.map((_, i) => (CRD[2 * i][0] - CRD[2 * i + 1][0]) / 2), CY =
 const CF = G.fitLine(CX, CY);
 const CRH = (CF.b / 1000) * H.t / H.I, CN = -1 / (CRH * E);
 
-const slabPic = (caption) => ({ type: 'graph', params: { aspect: 'wide', x: [-1.6, 5.6], y: [-0.5, 2.6], equal: true, axes: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves: [{ param: ['4*t', '0'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['4', '2*t'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['4 - 4*t', '2'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['0', '2 - 2*t'], t: [0, 1], color: 'ink2', width: 2 }], arrows: [{ from: [-1.3, 1], to: [-0.1, 1], color: 'gold' }, { from: [2.6, 1.6], to: [2.6, 0.4], color: 'accent' }], points: [{ x: -1.3, y: 1, r: 0, label: 'current I', labelDy: -14 }, { x: 2.7, y: 1.0, r: 0, label: 'force on the carriers', color: 'accent' }, { x: 2, y: 2.2, r: 0, label: 'contact', labelAlign: 'center', labelDx: 0 }, { x: 2, y: -0.25, r: 0, label: 'contact', labelAlign: 'center', labelDx: 0 }, { x: 0.15, y: 1.75, r: 0, label: 'B out of the page', labelDx: 0 }, { x: 2, y: 2, r: 4, color: 'violet' }, { x: 2, y: 0, r: 4, color: 'violet' }] }, caption });
+const slabPic = (caption) => ({ type: 'graph', params: { aspect: 'wide', x: [-1.6, 5.6], y: [-0.5, 2.6], equal: true, axes: false, xticks: 0, yticks: 0, xlabel: '', ylabel: '', curves: [{ param: ['4*t', '0'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['4', '2*t'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['4 - 4*t', '2'], t: [0, 1], color: 'ink2', width: 2 }, { param: ['0', '2 - 2*t'], t: [0, 1], color: 'ink2', width: 2 }], arrows: [{ from: [-1.3, 1], to: [-0.1, 1], color: 'gold' }, { from: [1.2, 1.6], to: [1.2, 0.4], color: 'accent' }], points: [{ x: -1.3, y: 1, r: 0, label: 'current I', labelDy: -14 }, { x: 1.3, y: 1.0, r: 0, label: 'force on the carriers', color: 'accent' }, { x: 2, y: 2.2, r: 0, label: 'contact', labelAlign: 'center', labelDx: 0 }, { x: 2, y: -0.25, r: 0, label: 'contact', labelAlign: 'center', labelDx: 0 }, { x: 0.15, y: 1.75, r: 0, label: 'B out of the page', labelDx: 0 }, { x: 2, y: 2, r: 4, color: 'violet' }, { x: 2, y: 0, r: 4, color: 'violet' }] }, caption });
 
 export default lesson({
   id: 'lab.E.16',
@@ -108,7 +108,7 @@ With $I = 30.0$ mA and $t = 1.00$ mm, find $R_H$, the carrier type and density, 
         const ans = 1 / (E * Math.abs(R));
         return {
           prompt: t`A Hall coefficient of $R_H = ${tex(R, 3)}\ \text{m}^3/\text{C}$: what is the carrier density, in m⁻³? (And are the carriers electrons or holes? Decide, but enter only $n$.)`,
-          visual: slabPic('The slab seen along B: the current, and the magnetic force pushing carriers toward one contact. Schematic.'),
+          visual: slabPic('The slab seen along B: the current, and the magnetic force that pushes the carriers toward one contact — the same edge for electrons and holes, so the sign of the voltage tells them apart. Schematic.'),
           answer: ans, units: 'm^-3', tol: { rel: 0.005 },
           errors: [{ value: Math.abs(R) / E, feedback: t`$R_H = 1/(nq)$: $n = 1/(e|R_H|)$.` }, { value: 1 / Math.abs(R), feedback: 'Divide by the carrier charge too.' }].filter((e) => Math.abs(e.value - ans) > 0.01 * ans),
           hints: [t`$n = 1/(|q|\,|R_H|)$ with $|q| = e$.`],
