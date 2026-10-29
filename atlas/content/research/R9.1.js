@@ -58,7 +58,7 @@ A proposal that shows this number — and that it fits the time available — ha
     type: 'graph',
     title: 'How many measurements?',
     lead: t`The blue line is the scatter of a mean of $N$ measurements, falling as $1/\sqrt{N}$; the gold line is the effect divided by the significance you want. Where they cross is the $N$ you must propose. Start with a stopwatch timing a pendulum’s swings to see the 10° amplitude effect.`,
-    tasks: ['With a stopwatch (σ₁ = 50 ms) the 3.8 ms effect needs about 1600 timed swings at 3σ.', 'Switch to a photogate (σ₁ = 1 ms): a single swing would already do — the instrument decided the project.', 'Ask for 5σ instead of 3σ: N grows by (5/3)², nearly three times.'],
+    tasks: ['With a stopwatch (σ₁ = 50 ms) the 3.8 ms effect needs about 1500 timed swings at 3σ.', 'Switch to a photogate (σ₁ = 1 ms): a single swing would already do — the instrument decided the project.', 'Ask for 5σ instead of 3σ: N grows by (5/3)², nearly three times.'],
     params: {
       x: [-0.5, 5], y: [-1, 2.5], aspect: 'wide', axesAt: 'edge', xlog: true, ylog: true, xlabel: 'number of measurements N', ylabel: 'σ of the mean (ms)', xticks: 5, yticks: 4,
       sliders: [
@@ -75,7 +75,7 @@ A proposal that shows this number — and that it fits the time available — ha
   },
   example: {
     prompt: t`Propose to measure how a pendulum’s period grows with amplitude. For a $2.000$ s pendulum, the exact period at $10^\circ$ is longer by $${(DT10 * 1000).toFixed(2)}$ ms. How many timed swings does a 3σ detection need with a stopwatch ($\sigma_1 = 50$ ms) and with a photogate ($\sigma_1 = 0.5$ ms)? What goes in the feasibility paragraph?`,
-    visual: nPic(50, DT10 * 1000, 3, 'The stopwatch case: the crossing sits near N = 1600.'),
+    visual: nPic(50, DT10 * 1000, 3, 'The stopwatch case: the crossing sits near N = 1500.'),
     steps: [
       { label: 'The effect', text: t`The exact period exceeds $2\pi\sqrt{L/g}$ by the factor $T/T_0 = ${ratio(10).toFixed(6)}$ at $10^\circ$ (project [P.5](#/lesson/research.P.5) derives it). So $\Delta = ${(DT10 * 1000).toFixed(2)}$ ms.` },
       { label: 'Stopwatch', text: t`$N = (3 \times 50/${(DT10 * 1000).toFixed(2)})^2 = ${Math.round((3 * 50 / (DT10 * 1000)) ** 2)}$ swings — and as many again at small amplitude for the comparison. Over an hour of timing, with a human’s drifting reaction time: not credible.` },

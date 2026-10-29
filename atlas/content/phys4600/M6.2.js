@@ -27,7 +27,7 @@ const FPIC = (caption, hide = []) => tensorTable(F_CELLS, { caption, colors: F_C
 
 export default lesson({
   id: 'phys4600.M6.2',
-  title: 'The field tensor F^μν',
+  title: 'The electromagnetic field tensor',
   minutes: 18, difficulty: 4,
   equation: t`F^{\mu\nu} = \begin{pmatrix} 0 & E_x/c & E_y/c & E_z/c \\ -E_x/c & 0 & B_z & -B_y \\ -E_y/c & -B_z & 0 & B_x \\ -E_z/c & B_y & -B_x & 0 \end{pmatrix}`,
   intro: t`[M6.1](#/lesson/phys4600.M6.1) showed that a boost mixes $\vec E$ with $\vec B$. Six numbers that mix among themselves under Lorentz transformations are the six independent entries of an **antisymmetric tensor**, $F^{\mu\nu} = -F^{\nu\mu}$. With $x^0 = ct$ and the signature $(-, +, +, +)$ of the rest of the Atlas, the electric field fills the time row (divided by $c$, so every entry is in tesla) and the magnetic field the space block. It comes from the four-potential $A^\mu = (V/c, \vec A)$ as $F^{\mu\nu} = \partial^\mu A^\nu - \partial^\nu A^\mu$ — six derivatives, which are exactly $\vec E = -\nabla V - \partial\vec A/\partial t$ and $\vec B = \nabla\times\vec A$. A boost acts on each index with one Lorentz matrix: $F'^{\mu\nu} = \Lambda^\mu{}_\alpha\Lambda^\nu{}_\beta F^{\alpha\beta}$, or as matrices $F' = \Lambda F\Lambda^{\mathsf T}$. That one line **is** M6.1’s set of rules. Lowering both indices with $\eta_{\mu\nu} = \text{diag}(-1, 1, 1, 1)$ flips the sign of the time–space entries only.`,

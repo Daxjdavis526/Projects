@@ -527,14 +527,15 @@ function muon(o) {
   const from = o.analysis === 'cut' ? MU.cut : 0;
   const fit = muFit(edges, counts, from);
   const mid = edges.slice(0, -1).map((t) => t + MU.bin / 2);
-  const model = (t) => { const i = Math.min(nb - 1, Math.max(0, Math.floor(t / MU.bin))); return fit.p[0] * fit.p[1] * (Math.exp(-edges[i] / fit.p[1]) - Math.exp(-edges[i + 1] / fit.p[1])) + fit.p[2] * MU.bin; };
+  const h2 = MU.bin / 2;
+  const model = (t) => fit.p[0] * fit.p[1] * (Math.exp(-(t - h2) / fit.p[1]) - Math.exp(-(t + h2) / fit.p[1])) + fit.p[2] * MU.bin;   // expected counts in the bin centred on t
   const used = mid.map((t, i) => i).filter((i) => edges[i] >= from - 1e-9);
   const lg = counts.map((c) => (c > 0 ? Math.log10(c) : NaN));
   const smooth = []; for (let k = 0; k <= 400; k++) { const t = (k / 400) * MU.window; smooth.push([r6(t), r6(fit.p[0] * fit.p[1] * (1 - Math.exp(-MU.bin / fit.p[1])) * Math.exp(-t / fit.p[1]) + fit.p[2] * MU.bin)]); }
   const top = Math.max(...counts) * 1.12;
   return {
     edges, counts, fit, N, from,
-    data: { x: used.map((i) => mid[i]), y: used.map((i) => counts[i]), sy: used.map((i) => Math.sqrt(Math.max(model(mid[i]), 1))), xlabel: 'decay time t (μs)', ylabel: 'counts per 0.25 μs', zeroX: true, curveSteps: true, normRes: true, model },
+    data: { x: used.map((i) => mid[i]), y: used.map((i) => counts[i]), sy: used.map((i) => Math.sqrt(Math.max(model(mid[i]), 1))), xlabel: 'decay time t (μs)', ylabel: 'counts per 0.25 μs', zeroX: true, ylog: true, normRes: true, model },
     results: [
       result('tau', '$\\tau$ (Poisson fit)', fit.p[1], fit.sp[1], { unit: '\\mu\\mathrm{s}', accepted: K.tauMu }),
     ],
@@ -732,6 +733,7 @@ export const RIGS = {
       { key: 'rev', label: 'Reverse the current at each reading', value: false, explain: 'Half the difference of V(+I) and V(−I) keeps the part that follows the current and drops the rest.' },
     ],
     analyses: [['avg', 'Mean of both sweeps'], ['warm', 'Warming sweep only'], ['cool', 'Cooling sweep only']],
+    noRes: true,
   },
 };
 

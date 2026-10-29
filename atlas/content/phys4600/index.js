@@ -16,6 +16,6 @@ export default {
     mod('M3', 'Electromagnetic waves', ['Waves in vacuum', 'Waves in linear media and at interfaces', 'Fresnel equations', 'Absorption and dispersion in conductors', 'Waveguides']),
     mod('M4', 'Potentials and gauges', ['Scalar and vector potentials', 'Gauge transformations: Coulomb and Lorenz', 'Retarded potentials', 'Liénard–Wiechert potentials']),
     mod('M5', 'Radiation', ['Electric dipole radiation', 'Magnetic dipole radiation', 'Radiation from a point charge: the Larmor formula', 'Radiation reaction']),
-    mod('M6', 'Relativistic electrodynamics', ['Lorentz transformations of fields', 'The field tensor F^μν', 'Maxwell’s equations in covariant form', 'The stress–energy tensor of the field']),
+    mod('M6', 'Relativistic electrodynamics', ['Lorentz transformations of fields', 'The electromagnetic field tensor', 'Maxwell’s equations in covariant form', 'The stress–energy tensor of the field']),
   ],
 };

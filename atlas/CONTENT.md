@@ -639,6 +639,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `em4-poynting` | a resistor, a charging or discharging capacitor and a coaxial cable side-on, with E, B and the Poynting vector S, and the total flux of S beside VI, I²R or d(½CV²)/dt | see the file header |
 | `em4b-guide` | rectangular-waveguide TE_mn modes: the cross-section (E arrows, B_z shading), a top or side view travelling or evanescent, and the dispersion diagram with cutoff, λ_g, v_p and v_g | see the file header |
 | `em4b-kink` | exact Liénard–Wiechert field lines of a charge that coasts, stops or starts, with the radiation shells, a draggable probe showing the retarded position, and a light-cone panel | see the file header |
+| `em4c-dipole` | an oscillating electric or magnetic dipole: exact field lines pinching off into radiation, and the sin²θ / half-wave antenna pattern | see the file header |
+| `em4c-boost` | uniform E and B under a boost, with F^μν, F_μν, G^μν or T^μν shown as a 4×4 array and the invariants | see the file header |
 | `op-fresnel` | Fresnel's equations: r and t (or R and T) against angle with Brewster and critical angles and a draggable incidence; an evanescent field map with its depth profile, or a gap with transmission against width (frustrated TIR) | see the file header |
 | `op2-bench` | a ray tracer for chains of thin lenses, conic surfaces in real glasses and mirrors: paraxial (ABCD) or exact (Snell) at several wavelengths, folded Cassegrains, F, F′, H, H′, the system matrix, spherical and colour aberration | see the file header |
 | `op2-jones` | polarization through polarizers, wave plates and rotators, as field ellipses and as paths on the Poincaré sphere (Hecht's convention) | see the file header |
