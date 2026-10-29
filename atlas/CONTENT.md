@@ -660,6 +660,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `num-float` | the bits of a float64 or float32 coloured by field: flip a bit, step to the neighbouring floats, read the exact stored decimal and the gap; presets such as 0.1 and 2⁵³ + 1 mark the true value | see the file header |
 | `num3-stability` | a method's stability region shaded in the complex hλ-plane (Euler, RK2–4, Dormand–Prince, backward Euler, Crank–Nicolson) with a draggable z, a system's eigenvalues scaled by h, or the heat equation's grid modes scaled by r; |yₙ| against the exact decay; `get('point')`, `get('h')`, `get('r')` answer items | see the file header |
 | `qm4-sg` | an oven or a prepared state feeding up to three Stern–Gerlach analysers (z, x, y or a tilted n̂(θ)), each passing its + beam, its − beam, or both recombined unobserved; atoms one at a time or by thousands against \|⟨±n\|ψ⟩\|² | see the file header |
+| `q2b-wkb` | exact (Numerov) against WKB levels and wave functions in five wells, a phase-space orbit panel, the Airy function at a turning point | see the file header |
+| `q2b-scatter` | partial-wave scattering from a hard sphere or a square well or barrier: dσ/dΩ (log or polar), phase shifts against the unitarity ceiling, σ against ka, a Born overlay | see the file header |
 | `m0-unitcircle` | drag a point round the unit circle: cosine and sine as projections, radian ticks, quadrant signs and the reference angle; `unroll` beside the sine/cosine graph; `inverse` with the principal branch bold and other solutions hollow; `get('theta')` answers slider items | see the file header |
 | `mp-blackbody` | Planck's law for any temperature, with the Rayleigh–Jeans and Wien curves and real sources (the CMB, the Sun, stars) |
 | `mp-shells`, `mp-laser`, `mp-molecule` | atoms built electron by electron (orbital boxes, quantum numbers, the periodic table, real ionization energies); two-, three- and four-level lasers with inversion and threshold; a diatomic molecule's rotational ladders and spectra (CO lines, HCl's P and R branches) |
@@ -767,6 +769,9 @@ under reduced motion unless the learner presses Play.
   Planck 2018, IAU). Use `sources` for the textbook or paper; every source
   needs a `url` (the content test rejects one without).
 - Never claim mastery from completion; never shame a wrong answer.
+- Never splice a raw float into text (`${x}` gives 0.19999999999999998): format
+  it with `N()`, `r6` or `toFixed`. The content test flags such numbers, and
+  caret notation like e^(−γt) outside `$…$`.
 
 ## Conventions
 

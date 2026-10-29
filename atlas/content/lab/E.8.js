@@ -18,6 +18,7 @@ const F15 = M.amplitudeFactor((15 * Math.PI) / 180);
 const EX = M.run('coupled', { seed: 7 });
 const EXg = EX.results[0], EXk = EX.results[1];
 const W1 = M.analyse('coupled', EX.rows, { axes: 'w1' });
+const FLAT = M.run('coupled', { seed: 3, axes: 'w1' });
 const q6 = EX.R[3];                                   // ℓ = 0.6 m
 const w1x = TAU / q6.T1, w2x = TAU / q6.T2;
 
@@ -220,13 +221,13 @@ Find $g$ and the spring constant $k$, with uncertainties.`,
     }),
     mcq({
       id: 'cp-flat', difficulty: 2,
-      prompt: t`Your plot of $\omega_1^2$ (in-phase mode) against $\ell^2$ has slope $-0.02 \pm 0.06\ \text{s}^{-2}\text{m}^{-2}$. What does that tell you?`,
-      visual: rigPlot('coupled', { seed: 2, axes: 'w1' }, t`The in-phase mode’s $\omega_1^2$ against $\ell^2$, fitted. ${SIMNOTE}`),
+      prompt: t`Your plot of $\omega_1^2$ (in-phase mode) against $\ell^2$ has slope $${pmT(FLAT.fit.b, FLAT.fit.sb)}\ \text{s}^{-2}\text{m}^{-2}$. What does that tell you?`,
+      visual: rigPlot('coupled', { seed: 3, axes: 'w1' }, t`The in-phase mode’s $\omega_1^2$ against $\ell^2$, fitted. ${SIMNOTE}`),
       choices: [
         'It is consistent with zero, as the model predicts: in phase, the spring keeps its length, so the coupling does not enter',
         'The spring is too weak to measure; use a stiffer one',
         'The timing is biased at low clip heights',
-        'The spring constant is −0.02 N/m',
+        'The spring constant is negative and tiny, about the size of the slope',
       ],
       answer: 0,
       why: {
@@ -236,7 +237,7 @@ Find $g$ and the spring constant $k$, with uncertainties.`,
       },
       hints: ['In the in-phase mode, does the spring ever stretch?'],
       teach: 'A null result predicted by the model is a test passed — and the in-phase mode gives g independently of the spring.',
-      explain: t`$-0.02 \pm 0.06$ is $0.3\sigma$ from zero: consistent. The intercept of this line gives $g/L$ with no spring involved — a cross-check on the out-of-phase fit’s intercept.`,
+      explain: t`$${pmT(FLAT.fit.b, FLAT.fit.sb)}$ is $${Math.abs(FLAT.fit.b / FLAT.fit.sb).toFixed(1)}\sigma$ from zero: consistent. The intercept of this line gives $g/L$ with no spring involved — a cross-check on the out-of-phase fit’s intercept.`,
     }),
     num({
       id: 'cp-huygens', difficulty: 3, transfer: true,
@@ -248,7 +249,7 @@ Find $g$ and the spring constant $k$, with uncertainties.`,
           visual: analogue(0.2, { start: 'one', starts: false }, 'Weak coupling: the energy creeps slowly from one oscillator to the other (analogue, coupling exaggerated).'),
           answer: ans, units: 'min', tol: { rel: 0.01 },
           errors: [{ value: ans / 2, feedback: 'Half a beat moves the energy across once; the question asks for the full beat.' }],
-          hints: [t`$T_\text{beat} = T_1T_2/(T_1 - T_2)$.`],
+          hints: ['Beats come from the difference of the two mode frequencies, ω₂ − ω₁.', t`$T_\text{beat} = 2\pi/(\omega_2 - \omega_1) = T_1T_2/(T_1 - T_2)$; convert seconds to minutes.`],
           teach: 'Weak coupling means close mode frequencies — and slow beats.',
           explain: t`$T_\text{beat} = ${T1.toFixed(4)} \times ${T2.toFixed(4)}/${(T1 - T2).toFixed(4)} = ${(ans * 60).toFixed(0)}$ s $= ${ans.toFixed(1)}$ min. A real clock’s escapement keeps feeding energy and its friction removes it, which is what locks two coupled clocks into step — a story beyond the free-oscillator model.`,
         };

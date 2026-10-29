@@ -264,7 +264,7 @@ Once the forces balance, the torque sum comes out the same about every point —
             t`$T(${s3(ds)}) = (${mr})(9.8)(${Lr / 2}) + (${mL})(9.8)(${Lr})$.`,
           ],
           teach: 'Put the pivot at the hinge: its unknown force then has no torque, and one torque equation gives the rope’s tension.',
-          explain: t`$T = \dfrac{(${mr})(9.8)(${Lr / 2}) + (${mL})(9.8)(${Lr})}{${s3(ds)}} = ${s3(T)}$ N. Then $\sum F_y = 0$ gives the hinge's force: $T - (${mr} + ${mL})(9.8) = ${s3(T - (mr + mL) * G)}$ N, so the hinge pulls the rod **down** that much.`,
+          explain: t`$T = \dfrac{(${mr})(9.8)(${Lr / 2}) + (${mL})(9.8)(${Lr})}{${s3(ds)}} = ${s3(T)}$ N. Then $\sum F_y = 0$ gives the hinge's force: ${T > (mr + mL) * G ? t`$T - (${mr} + ${mL})(9.8) = ${s3(T - (mr + mL) * G)}$ N, so the hinge pulls the rod **down** that much` : t`$(${mr} + ${mL})(9.8) - T = ${s3((mr + mL) * G - T)}$ N, so the hinge pushes the rod **up** that much`}.`,
           visual: (() => {
             const S = scene({ perN: 1 / 150 });
             S.surface([0, -1.2], [0, 1.4], 'left').bar([0, 0], [Lr, 0], { width: 6 }).pin([0, 0], { wall: 'left' })

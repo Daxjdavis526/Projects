@@ -185,7 +185,7 @@ Steel's $Y$ is about 200 GPa, so a stress of 200 MPa stretches it by just 0.1%. 
     num({
       id: 'bulk', difficulty: 2,
       gen(r) {
-        const [where, depth] = r.pick([['the bottom of the Mariana Trench', 10935], ['the floor of the North Atlantic', 4000], ['the depth of the Titanic wreck', 3800], ['6000 m down, the abyssal plain', 6000]]);
+        const [where, depth] = r.pick([['the bottom of the Mariana Trench', 10935], ['the floor of the North Atlantic', 4000], ['the depth of the Titanic wreck', 3800], ['the abyssal plain', 6000]]);
         const dp = 1025 * G * depth, frac = dp / 2.2e9;
         return {
           prompt: t`Water's bulk modulus is about $B = 2.2$ GPa. At ${where}, ${depth.toLocaleString('en-US')} m down, the pressure is $\rho g h$ higher than at the surface (sea water: $\rho = 1025\ \text{kg/m}^3$). By what percentage is a sample of water squeezed in volume there?`,

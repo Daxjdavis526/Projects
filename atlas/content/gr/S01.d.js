@@ -239,7 +239,7 @@ One look at that equation shows the trouble it is in with relativity: **it conta
         const f = r.pick([0.25, 0.5, 0.75, 0.9]);
         const ans = G_SURF * f;
         return {
-          prompt: t`Model the Earth as a ball of uniform density (it is not: its core is about twice as dense as its crust). How fast does a body fall at the bottom of an imaginary shaft, at $r = ${f}R_\oplus$ from the centre? Use Gauss’s law, $GM_\oplus = 3.986\times10^{14}\ \text{m}^3/\text{s}^2$ and $R_\oplus = 6371$ km.`,
+          prompt: t`Model the Earth as a ball of uniform density (it is not: its core is about four times as dense as its crust). How fast does a body fall at the bottom of an imaginary shaft, at $r = ${f}R_\oplus$ from the centre? Use Gauss’s law, $GM_\oplus = 3.986\times10^{14}\ \text{m}^3/\text{s}^2$ and $R_\oplus = 6371$ km.`,
           answer: ans, units: 'm/s^2', tol: { rel: 0.01 },
           errors: [
             { value: GM_EARTH / (f * R_EARTH) ** 2, feedback: t`That counts all of Earth’s mass. Only the mass inside your radius pulls: $M(r) = M_\oplus (r/R_\oplus)^3$.` },

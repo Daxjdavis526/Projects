@@ -108,6 +108,9 @@ export function escapeDamage(text, { prose = true } = {}) {
   const s = String(text);
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
   if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(withoutCode(s)) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
+  // a raw float spliced in unformatted: 0.19999999999999998, 0.30000000000000004
+  const raw = /\d\.\d*?(?:9{8,}[0-8]|0{8,}[1-9])\d*/.exec(withoutCode(s));
+  if (raw) return `“${raw[0]}” is a raw floating-point number — format it (N(), r6 or toFixed) before splicing it in`;
   for (const m of mathIn(s)) {
     const sci = /(?<![\w.\\])(\d+(?:\.\d+)?e[+-]?\d+)(?![\w])/.exec(m.tex);
     if (sci) return `the math “${m.tex.slice(0, 40)}” contains “${sci[1]}”, computer notation — use tex() to write ×10ⁿ`;
@@ -144,6 +147,9 @@ export function escapeDamage(text, { prose = true } = {}) {
     // …and after a bracket: (∂P/∂T)_V, (a + b)^2
     const after = /\)([_^](?:\{[^}]*\}|[A-Za-z0-9α-ωΑ-Ω]+))/.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
     if (after) return `“)${after[1]}” is a subscript or power outside $…$ and would print literally — put the whole expression in math`;
+    // caret notation with a bracket: e^(−γt), 10^(−3)
+    const caret = /(?<![\p{L}_\\/.-])((?:[\p{L}]{1,2}|\d+)\^\()/u.exec(g.v.replace(/\]\([^)]*\)/g, ']'));
+    if (caret) return `“${caret[1]}…)” is caret notation outside $…$ and would print literally — write the power in math, $e^{-\\gamma t}$`;
     if (/\{,\}/.test(g.v)) return 'a “{,}” sits outside $…$ and would print literally — a TeX thousands separator belongs in math';
     if (/\\[,;:!]/.test(g.v)) return `a TeX space “${/\\[,;:!]/.exec(g.v)[0]}” sits outside $…$ and would print literally — a number formatted for math was spliced into prose; format it as plain text (a space or a comma)`;
   }

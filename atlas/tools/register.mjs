@@ -72,5 +72,5 @@ if (isMain) {
     renameSync(tmp, file);
     const s = scan();
     console.log(`content/loads.js: ${s.lessons.length} lessons, ${s.bosses.length} bosses`);
-  } else console.log('content/loads.js already up to date');
+  } else console.log(`content/loads.js already up to date (${scan().lessons.length} lessons — a new lesson may have been registered by another author's run)`);
 }

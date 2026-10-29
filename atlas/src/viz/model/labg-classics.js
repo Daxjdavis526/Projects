@@ -345,7 +345,7 @@ export const EXPERIMENTS = {
         x: [-14, 14], y: [-0.05, 1.2], xlabel: 'x on the screen (mm)', ylabel: 'intensity', yticks: 3,
         paths: [{ pts: env, color: 'ink3', width: 1, dash: [4, 4] }, { pts, color: 'bad', width: 1.6 }],
         vlines: q ? [{ x: q.x, color: 'gold' }] : [],
-        texts: [{ s: 'dashed: one slit’s envelope', x: 13.6, y: 1.12, color: 'ink3', size: 10.5, align: 'right' }, q ? { s: `m = ${q.m}`, x: q.x, y: 1.12, color: 'gold', size: 11, align: 'center' } : null].filter(Boolean),
+        texts: [{ s: 'dashed: one slit’s envelope', x: -13.6, y: 1.12, color: 'ink3', size: 10.5 }, q ? { s: `m = ${q.m}`, x: q.x, y: 1.12, color: 'gold', size: 11, align: 'center' } : null].filter(Boolean),
       };
     },
   },
