@@ -21,7 +21,7 @@ const schwarzPic = (extra = {}) => ({
   curves: [
     { fn: '1/(1 - 2/x)', domain: [2.05, 6], color: 'accent', width: 2.2, label: 'gᵣᵣ = 1/(1 − 2M/r)', labelAt: 2.6, labelDx: 8, labelDy: -4 },
     { fn: '1/(1 - 2/x)', domain: [0.6, 1.95], color: 'accent', width: 2.2 },
-    { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
+    { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 2.3, labelDx: 6, labelDy: -10 },
   ],
   vlines: [{ x: 2, color: 'bad', label: 'r = 2M' }],
   hlines: [{ y: 0, color: 'ink4' }],
@@ -61,7 +61,7 @@ Because coordinates are then pure labels, anything a coordinate system says can 
         { fn: '1/(1 - 2/x)', domain: [0.6, 1.95], color: 'accent', width: 2.2, when: '1 - ef' },
         { fn: '-(1 - 2/x)', domain: [0.6, 6], color: 'teal', width: 2.2, label: 'gᵥᵥ = −(1 − 2M/r)', labelAt: 4.4, labelDx: 4, labelDy: 14, when: 'ef' },
         { fn: '1', domain: [0.6, 6], color: 'violet', width: 2.2, label: 'gᵥᵣ = 1', labelAt: 5.2, labelDy: -8, when: 'ef' },
-        { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 1.25, labelDx: 10, labelDy: 0 },
+        { fn: '48/x^6', domain: [1.12, 6], color: 'gold', width: 2.4, label: 'K × M⁴ = 48(M/r)⁶', labelAt: 2.3, labelDx: 6, labelDy: -10 },
       ],
       readouts: [{ label: t`$K$ at $r = 2M$, in $M^{-4}$`, expr: '48/64', digits: 3 }],
     }),

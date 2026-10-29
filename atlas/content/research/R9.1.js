@@ -63,7 +63,7 @@ A proposal that shows this number — and that it fits the time available — ha
       x: [-0.5, 5], y: [-1, 2.5], aspect: 'wide', axesAt: 'edge', xlog: true, ylog: true, xlabel: 'number of measurements N', ylabel: 'σ of the mean (ms)', xticks: 5, yticks: 4,
       sliders: [
         { key: 's', label: t`single-measurement scatter $\sigma_1$`, min: 1, max: 100, step: 1, value: 50, unit: t`\text{ms}`, explain: 'About 50 ms for a hand-held stopwatch (reaction time); about 1 ms or better for a photogate.' },
-        { key: 'D', label: t`effect $\Delta$`, min: 1, max: 20, step: 0.1, value: +DT10.toFixed(1), unit: t`\text{ms}`, explain: 'The change you want to detect: here, how much longer a 2 s pendulum’s period is at 10° than at small amplitude.' },
+        { key: 'D', label: t`effect $\Delta$`, min: 1, max: 20, step: 0.1, value: +(DT10 * 1000).toFixed(1), unit: t`\text{ms}`, explain: 'The change you want to detect: here, how much longer a 2 s pendulum’s period is at 10° than at small amplitude.' },
         { key: 'k', label: t`significance $k$`, min: 1, max: 5, step: 1, value: 3, unit: t`\sigma`, explain: 'How many standard deviations the effect should stand above the noise.' },
       ],
       curves: [{ fn: 'log10(s) - x/2', color: 'accent', width: 2.2, label: 'σ₁/√N', labelAt: 0.2, labelDy: -12 }],
@@ -81,7 +81,7 @@ A proposal that shows this number — and that it fits the time available — ha
       { label: 'Stopwatch', text: t`$N = (3 \times 50/${(DT10 * 1000).toFixed(2)})^2 = ${Math.round((3 * 50 / (DT10 * 1000)) ** 2)}$ swings — and as many again at small amplitude for the comparison. Over an hour of timing, with a human’s drifting reaction time: not credible.` },
       { label: 'Photogate', text: t`$N = (3 \times 0.5/${(DT10 * 1000).toFixed(2)})^2 = ${((3 * 0.5 / (DT10 * 1000)) ** 2).toFixed(2)}$: a handful of swings is plenty. The **instrument** makes the project feasible.` },
       { label: 'Systematics', text: t`Averaging does not remove systematic error: the amplitude itself decays during timing, and the length must stay fixed between runs. The paragraph names these and how they are controlled.` },
-      { label: 'The paragraph', text: t`“With a photogate ($\sigma_1 \approx 0.5$ ms per period), 20 periods at each of six amplitudes measure the $${(DT10 * 1000).toFixed(1)}$ ms effect at $10^\circ$ at over $${Math.floor(DT10 * 1000 / (0.5 / Math.sqrt(20)))}\sigma$; the dominant systematic, amplitude decay, is measured and corrected.”` },
+      { label: 'The paragraph', text: t`“With a photogate ($\sigma_1 \approx 0.5$ ms per period), 20 periods at each of six amplitudes measure the $${(DT10 * 1000).toFixed(1)}$ ms difference between $10^\circ$ and small amplitude at over $${Math.floor(DT10 * 1000 / (0.5 * Math.sqrt(2 / 20)))}\sigma$; the dominant systematic, amplitude decay, is measured and corrected.”` },
     ],
     answer: t`Stopwatch: about $${Math.round((3 * 50 / (DT10 * 1000)) ** 2)}$ swings — infeasible. Photogate: a few swings. Propose the photogate, and budget the systematics separately.`,
   },
@@ -164,7 +164,7 @@ A proposal that shows this number — and that it fits the time available — ha
       prompt: 'Which risk-and-fallback line belongs in the proposal for the pendulum project?',
       visual: pagePic(5, 'Risks and fallback (gold): what could stop the project, and what you would do.'),
       choices: [
-        'If the photogate is unavailable, a phone’s video at 240 frames per second (about 4 ms per frame) still measures the 40° point, where the effect is 60 ms',
+        `If the photogate is unavailable, a phone’s video at 240 frames per second (about 4 ms per frame) still measures the 40° point, where the effect is ${(T0 * (ratio(40) - 1) * 1000).toFixed(0)} ms`,
         'There are no risks',
         'If anything goes wrong we will work harder',
         'Risk: the result might disagree with theory',
