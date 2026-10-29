@@ -130,7 +130,7 @@ But the ant can do this: stake a point, walk out a distance $\rho$ in every dire
           errors: [{ value: (Math.PI * rho * rho - Ar) / rho ** 4, feedback: t`Multiply by $12/\pi$: the area shortfall is $\frac{\pi}{12}K\rho^4$.` }].filter((e) => Math.abs(e.value - K) > 0.05 * K),
           hints: [t`$\pi\rho^2 = ${thou(Math.PI * rho * rho)}\ \text{km}^2$, so the shortfall is $${nice(Math.PI * rho * rho - Ar, 4)}\ \text{km}^2$.`, t`$K \approx \dfrac{12}{\pi\rho^4}\times\text{shortfall}$.`],
           teach: 'The shortfall of a small disc’s area below πρ² also measures K: A = πρ² − πKρ⁴/12 + ….',
-          explain: t`$K \approx ${tex(K, 3)}\ \text{km}^{-2}$, i.e. a radius $1/\sqrt K \approx ${nice(1 / Math.sqrt(K), 4)}$ km — the Moon’s mean radius is $1737.4$ km. (The measured area was rounded to the nearest 10 km²; the estimate is good to about a percent.)`,
+          explain: t`$K \approx ${tex(K, 3)}\ \text{km}^{-2}$, i.e. a radius $1/\sqrt K \approx ${nice(1 / Math.sqrt(K), 4)}$ km — the Moon’s mean radius is $1737.4$ km. (The measured area was rounded to the nearest 10 km²; at $\rho = 200$ km that alone moves $K$ by a few percent, so the larger circles give the better estimate.)`,
         };
       },
     }),
