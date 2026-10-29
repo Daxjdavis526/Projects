@@ -156,7 +156,7 @@ export default lesson({
           visual: coilsPic(t`The two loops side-on on their common axis. Not to scale: they are far apart compared with their size.`, { far: true }),
           answer: Mf * 1e12, units: 'pH', tol: { rel: Math.max(0.01, 1.2 * dev) },
           errors: [
-            { value: (MU0 * PI * (a / 100) ** 2 * (b / 100) ** 2) / (4 * PI * (z / 100) ** 3) * 1e12, feedback: t`On the axis a dipole’s field is $\mu_0m/2\pi z^3$, not $\mu_0m/4\pi z^3$ — the factor for the side-on direction.` },
+            { value: (Mf / 2) * 1e12, feedback: t`On the axis a dipole’s field is $\mu_0m/2\pi z^3$, not $\mu_0m/4\pi z^3$ — the factor for the side-on direction.` },
           ],
           hints: [t`Loop 1 with current $I$ is a dipole $m = I\pi a^2$; far along its axis its field is $B = \dfrac{\mu_0m}{2\pi z^3}$, nearly uniform over loop 2.`, t`The flux through loop 2 is $B\pi b^2$, so $M = \dfrac{\mu_0\pi a^2b^2}{2z^3}$.`],
           teach: 'Far apart, two coaxial loops couple like two dipoles: M ≈ μ₀πa²b²/2z³, falling as the cube of the distance.',

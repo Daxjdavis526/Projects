@@ -124,11 +124,11 @@ export default lesson({
           answer: E * 1e3, units: 'mV/m', tol: { rel: 0.01 },
           errors: [
             { value: (I / (SIG_CU * PI * (d * 1e-3) ** 2)) * 1e3, feedback: t`The area is $\pi r^2$ with the **radius**, half the diameter.` },
-            { value: (I * SIG_CU * A) * 1e3, feedback: t`$E = J/\sigma$: divide by the conductivity, do not multiply.` },
+            { value: ((I / A) * SIG_CU) * 1e3, feedback: t`$E = J/\sigma$: divide by the conductivity, do not multiply.` },
           ],
           hints: [t`$J = I/A$ with $A = \pi(d/2)^2$.`, t`Ohm’s law point by point: $E = J/\sigma$.`],
           teach: 'Inside a conductor carrying current, the field is J/σ: small for a good conductor, but not zero.',
-          explain: t`$J = I/A \approx ${tex(I / A, 3)}\ \text{A/m}^2$, so $E = J/\sigma \approx ${nice(sf(E * 1e3, 3))}$ mV/m. A wire carrying current is **not** an equipotential: tens of millivolts per metre drive the current along it, which is why a long, thin supply cable drops voltage.`,
+          explain: t`$J = I/A \approx ${tex(I / A, 3)}\ \text{A/m}^2$, so $E = J/\sigma \approx ${nice(sf(E * 1e3, 3))}$ mV/m. A wire carrying current is **not** an equipotential: millivolts to tenths of a volt per metre drive the current along it, which is why a long, thin supply cable drops voltage.`,
         };
       },
     }),

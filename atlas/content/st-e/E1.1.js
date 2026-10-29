@@ -54,7 +54,7 @@ $$\cos^3\theta = \tfrac18\big(e^{3i\theta} + 3e^{i\theta} + 3e^{-i\theta} + e^{-
       { label: 'Uniqueness', text: t`Could some other mixture of harmonics also give $v$? No: the harmonics are orthogonal, so the coefficient of $\cos3\theta$ is fixed by one integral, $\frac1\pi\int_{-\pi}^{\pi}\cos^3\theta\,\cos3\theta\,d\theta = \tfrac14$. Components along perpendicular axes are unique.` },
       { label: 'Sense check', text: t`With $\varepsilon = 0$ the output is the pure tone. The third harmonic is $a_3/a_1 = ${r3(100 * (0.05 / 4) / (1 + 0.75 * 0.05))}\%$ of the fundamental, $${r3(20 * Math.log10((0.05 / 4) / (1 + 0.75 * 0.05)))}$ dB: a real line in the spectrum at $3\omega$ that is **made by the instrument**, not by the chamber.` },
     ],
-    answer: t`$v = ${1 + 0.75 * 0.05}\cos\omega t + ${0.05 / 4}\cos3\omega t$: lines at $\omega$ and $3\omega$ only, the second $${r3(20 * Math.log10((0.05 / 4) / (1 + 0.75 * 0.05)))}$ dB below the first — a sensor artefact that an engineer must not mistake for a second acoustic mode.`,
+    answer: t`$v = ${1 + 0.75 * 0.05}\cos\omega t + ${0.05 / 4}\cos3\omega t$: lines at $\omega$ and $3\omega$ only, the second $${r3(-20 * Math.log10((0.05 / 4) / (1 + 0.75 * 0.05)))}$ dB below the first — a sensor artefact that an engineer must not mistake for a second acoustic mode.`,
   },
   practice: [
     num({

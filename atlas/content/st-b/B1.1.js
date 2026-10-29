@@ -132,7 +132,7 @@ The change you see is the change at a fixed place, plus the change you cause by 
       prompt: t`A weather balloon rises steadily through still air whose temperature at every height stays the same all morning. Its thermometer reading falls steadily. At a given height, what is $T_t$?`,
       visual: { type: 'graph', params: { x: [0, 60], y: [0, 12], aspect: 'wide', xlabel: 't (min)', ylabel: 'height z (km)', axesAt: 'edge',
         hlines: [2, 4, 6, 8, 10].map((z, i) => ({ y: z, label: `${15 - 13 * (i + 1)} °C`, color: 'violet' })),
-        curves: [{ fn: 'x/5', color: 'gold', width: 2.6, domain: [0, 55], label: 'balloon', labelAt: 40, labelDy: -10 }] },
+        curves: [{ fn: '0.3*x', color: 'gold', width: 2.6, domain: [0, 38], label: 'balloon', labelAt: 25, labelDy: -10 }] },
       caption: t`Isotherms (violet) are horizontal: the temperature at each height does not change with time. The balloon’s path (gold) climbs through them at 5 m/s.` },
       choices: [t`$T_t = 0$; the falling reading is $\dot z\,T_z$`, t`$T_t < 0$, because the reading falls`, t`$T_t > 0$, because the balloon rises`, t`$T_t$ cannot be defined while the balloon moves`],
       answer: 0,

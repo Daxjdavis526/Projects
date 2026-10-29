@@ -159,7 +159,7 @@ where $f(x) = u(x, 0)$ is the initial profile. One initial condition fixes every
       gen(r) {
         const c = r.pick([2, 3, 4, 5]), a = r.pick([1, 2, 4]);
         return {
-          prompt: t`Solve $u_t + ${c}\,u_x = 0$ with $u(x, 0) = \dfrac{1}{${a === 1 ? '' : a} + x^2}$.`,
+          prompt: t`Solve $u_t + ${c}\,u_x = 0$ with $u(x, 0) = \dfrac{1}{${a} + x^2}$.`,
           visual: profile(`1/(${a} + x^2)`, [-6, 6], [-0.05, 1.1 / a], t`The initial profile $1/(${a} + x^2)$.`),
           answer: `1/(${a} + (x - ${c}t)^2)`, answerTeX: t`\frac{1}{${a} + (x - ${c}t)^2}`, lhs: 'u(x, t)',
           vars: { x: [-3, 3], t: [0, 2] },

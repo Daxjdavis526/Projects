@@ -219,7 +219,7 @@ export default lesson({
           ].filter((e) => Math.abs(e.value - N * 1e6) > 0.02 * N * 1e6),
           hints: [t`$\dot B = -\omega B\sin\omega t$, so $\langle\dot B^2\rangle = \tfrac12\omega^2B^2$ and $\langle P\rangle = \dfrac{\pi\sigma h\omega^2B^2a^4}{16}$.`, t`The torque does work at the rate $\tau\omega = \langle P\rangle$, so $\tau = \dfrac{\pi\sigma h\omega B^2a^4}{16}$.`],
           teach: 'A conductor spinning in a field dissipates eddy-current power that grows as ω²: the braking torque grows as ω, so the spin decays exponentially.',
-          explain: t`$\langle P\rangle = \pi\sigma h\omega^2B^2a^4/16$ and $\tau = \langle P\rangle/\omega \approx ${tex(N * 1e6, 3)}$ μN·m. Tiny, but it never stops: since $\tau\propto\omega$, the spin decays exponentially, with a time constant of weeks to months for a small satellite (a few kg m² of moment of inertia). Early spin-stabilized satellites slowed down measurably this way, and some missions use it deliberately to damp a tumble.`,
+          explain: t`$\langle P\rangle = \pi\sigma h\omega^2B^2a^4/16$ and $\tau = \langle P\rangle/\omega \approx ${tex(N * 1e6, 3)}$ μN·m. Tiny, but it never stops: since $\tau\propto\omega$, the spin decays exponentially, with a time constant of days to months for a small satellite (a few kg m² of moment of inertia). Early spin-stabilized satellites slowed down measurably this way, and some missions use it deliberately to damp a tumble.`,
         };
       },
     }),

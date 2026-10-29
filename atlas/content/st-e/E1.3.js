@@ -183,7 +183,7 @@ $$c_n = \frac{(-1)^n\sinh(\pi/2)}{\pi\,(\frac12 - in)} .$$` },
       why: {
         1: 'The kernel is even, so it weighs the left side exactly as much as the right side.',
         2: 'The same symmetry argument rules out the left value too.',
-        3: t`At the jump itself every partial sum of this odd function is exactly 0 — no divergence.`,
+        3: t`The partial sums converge at a jump; for the square wave $\operatorname{sign}x$, every one of them is exactly 0 there.`,
       },
       hints: ['As N grows, the kernel’s mass crowds into a spike at y = x. How much of the spike lies on each side of the jump?', t`Because $D_N$ is even, exactly half its weight lies on each side: the sum averages $-1$ and $+1$.`],
       teach: 'An even kernel of total weight 1 averages the two sides of a jump: Fourier series converge to the midpoint there.',

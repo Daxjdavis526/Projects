@@ -10,7 +10,7 @@ const YR = 3.156e7;           // one year, s
 const LY = 9.4607e15;         // light-year, m
 const GM = 3.986004418e14;    // Earth, m³/s²
 
-// lengths in metres: proton charge radius (CODATA 2018), hydrogen atom (twice the Bohr radius), …
+// lengths in metres: proton charge radius (CODATA 2022), hydrogen atom (twice the Bohr radius), …
 const SIZES = {
   proton: [8.4e-16, 'proton', 'a proton’s radius'], atom: [1.06e-10, 'hydrogen atom', 'a hydrogen atom’s diameter'], human: [1.8, 'human', 'a person’s height'],
   earth: [6.371e6, 'Earth radius', 'Earth’s radius'], au: [1.496e11, 'Earth–Sun', 'the Earth–Sun distance'], ly: [LY, 'light-year', 'a light-year'],
@@ -198,6 +198,6 @@ Multiply two such numbers by multiplying the mantissas and **adding** the expone
   sources: [
     { label: 'OpenStax Algebra and Trigonometry 2e, §1.2 Exponents and Scientific Notation', url: 'https://openstax.org/books/algebra-and-trigonometry-2e/pages/1-2-exponents-and-scientific-notation' },
     { label: 'OpenStax University Physics Vol. 1, §1.3 Unit Conversion and §1.5 Estimates', url: 'https://openstax.org/books/university-physics-volume-1/pages/1-5-estimates-and-fermi-calculations' },
-    { label: 'CODATA 2018 recommended values (proton charge radius, Bohr radius)', url: 'https://physics.nist.gov/cuu/Constants/' },
+    { label: 'CODATA 2022 recommended values (proton charge radius, Bohr radius)', url: 'https://physics.nist.gov/cuu/Constants/' },
   ],
 });

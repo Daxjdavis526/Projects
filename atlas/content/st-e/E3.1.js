@@ -173,7 +173,7 @@ Parseval passes to the limit as **Plancherel’s theorem**, $\int|f|^2\,dt = \fr
       answer: 0,
       why: {
         1: 'Each line amplitude cₙ (volts) shrinks to zero as the lines crowd; what stays finite is amplitude per unit frequency.',
-        2: 'V² s, or V²/Hz per unit time, is for energy and power spectra, |V̂|².',
+        2: 'V̂ is linear in V. Squares belong to the energy spectrum |V̂|², in V² s² (V² s of energy per hertz).',
         3: 'The integral multiplies by dt, which adds seconds rather than dividing by them.',
       },
       hints: ['Look at the definition: what does the dt contribute?', 'Tcₙ is volts times seconds.'],
