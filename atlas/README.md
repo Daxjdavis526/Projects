@@ -15,7 +15,9 @@ browser (IndexedDB) and can be exported and imported from Settings.
 
 ## What is in it
 
-- **30 courses, 1,243 planned lessons**, in six tracks: Mathematics (M0
+- **30 courses, 1,341 lessons — all built — with about 12,000 practice and
+  checkpoint problems (98% with a picture), 30 boss battles and 160
+  simulations** (the gallery shows 167 configurations of them), in six tracks: Mathematics (M0
   foundations, Calculus I–III, linear algebra, differential equations),
   Physics (PHYS 2210 → 4710, optics), Experimental Physics (labs, research),
   Scientific Computing, the Mathematics of Spacetime (seven advanced tracks:

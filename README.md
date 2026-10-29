@@ -54,7 +54,7 @@ built, and what in it is computed versus drawn.
 of a physics degree, from algebra to Einstein's field equations, built around
 Utah State University's B.S. in Physics (Professional Emphasis) and extended
 with a graduate-level route to general relativity. Thirty courses in six
-tracks; every lesson has an interactive simulation, a worked example revealed
+tracks and 1,341 lessons; every lesson has an interactive simulation, a worked example revealed
 step by step, generated practice problems with hints and instant feedback,
 and an unassisted checkpoint. Spaced review (FSRS-6), evidence-based mastery
 estimates, XP, achievements, boss battles, a skill map, a Python code lab
