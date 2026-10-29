@@ -121,6 +121,7 @@ export const LESSONS = {
   'lab.E.5': () => import('./lab/E.5.js'),
   'lab.E.6': () => import('./lab/E.6.js'),
   'lab.E.7': () => import('./lab/E.7.js'),
+  'lab.E.8': () => import('./lab/E.8.js'),
   'lab.E.10': () => import('./lab/E.10.js'),
   'lab.E.11': () => import('./lab/E.11.js'),
   'lab.E.12': () => import('./lab/E.12.js'),

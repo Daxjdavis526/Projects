@@ -100,7 +100,8 @@ export function mount(F, P0) {
     }
     if (S.T.soft1) p.point(S.T.x1, S.E, { color: 'gold', r: 4 });
     if (S.T.soft2) p.point(S.T.x2, S.E, { color: 'gold', r: 4 });
-    p.text(F.params.wkb ? 'solid: exact levels · dashed: WKB levels' : 'the exact levels', S.xb, top, { align: 'right', dy: 10, color: 'ink3', size: 11 });
+    const nar = (cv.energy.clientWidth || 600) < 520;
+    p.text(F.params.wkb ? (nar ? 'solid: exact · dashed: WKB' : 'solid: exact levels · dashed: WKB levels') : 'the exact levels', S.xb, top, { align: 'right', dy: 10, color: 'ink3', size: nar ? 10 : 11 });
   }
 
   function drawWave(S) {
