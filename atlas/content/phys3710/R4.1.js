@@ -216,7 +216,7 @@ A clock moving at $v$ through an inertial frame records less time than that fram
           errors: [{ value: ans * 2, feedback: t`$1 - \beta \approx 1/(2\gamma^2)$ — keep the 2.` }],
           hints: [t`$\gamma = ${EGeV}\ \text{GeV}/0.511\ \text{MeV} = ${nice(g, 4)}$.`, t`Gap $= L(1 - \beta) \approx L/2\gamma^2$.`],
           teach: 'At accelerator energies 1 − β ≈ 1/2γ² is tiny: the particles move at light’s speed to many decimal places, but never at it.',
-          explain: t`$1 - \beta = ${tex(oneMinusB, 3)}$, so the gap is $${nice(ans, 3)}$ nm after 3.2 km — less than the wavelength of visible light. The electrons really did gain energy all along, so the true lag is larger, but the point stands: more energy no longer means more speed.`,
+          explain: t`$1 - \beta = ${tex(oneMinusB, 3)}$, so the gap is $${nice(ans, 3)}$ nm after 3.2 km — about the wavelength of light, or less. The electrons really did gain energy all along, so the true lag is larger, but the point stands: more energy no longer means more speed.`,
         };
       },
     }),

@@ -178,18 +178,18 @@ $V$ falls along the direction of the field: in a uniform field, a step $d$ along
     }),
     mcq({
       id: 'two-paths', difficulty: 2,
-      prompt: t`A small positive test charge is carried from A to B along path 1, and the field does $2.0\ \mu\text{J}$ of work on it. How much work does the field do if the charge goes along path 2 instead?`,
+      prompt: t`A small positive test charge is carried from P to Q along path 1, and the field does $2.0\ \mu\text{J}$ of work on it. How much work does the field do if the charge goes along path 2 instead?`,
       choices: ['2.0 μJ: the same', 'More: path 2 is longer', 'Less: part of path 2 runs against the field', 'There is no way to tell without the field all along path 2'],
       answer: 0,
       why: {
         1: 'Work is force times distance only for a constant force along a straight path. Here the extra length goes partly with the field and partly against it, and these cancel.',
         2: 'It does — and partly with the field too. The two parts cancel down to the same total.',
-        3: t`The field is conservative: the work is $q(V_A - V_B)$, set by the end points alone.`,
+        3: t`The field is conservative: the work is $q(V_P - V_Q)$, set by the end points alone.`,
       },
       hints: ['The electric force is conservative. What does the work depend on?'],
-      teach: t`The work an electrostatic field does on a charge, $q(V_A - V_B)$, depends only on where the charge starts and ends.`,
-      explain: t`The work the field does is $W = -\Delta U = q(V_A - V_B)$, which depends only on the potentials at A and B. Along any path from A to B it is $2.0\ \mu\text{J}$. (Equivalently: around any closed loop the field does no net work.)`,
-      visual: field({ unit: 'cm', x: [-8, 8], y: [-5, 5], charges: [{ x: 0, y: 0, q: 2 }], equip: true, equipLabels: false, fieldLines: false, notes: { lines: [{ from: [-3, 2], to: [5, -1], color: 'gold', width: 2.4 }, { from: [-3, 2], to: [-6, -3.5], color: 'teal', width: 2.4 }, { from: [-6, -3.5], to: [2, -4.2], color: 'teal', width: 2.4 }, { from: [2, -4.2], to: [5, -1], color: 'teal', width: 2.4 }], points: [{ x: -3, y: 2, label: 'A', color: 'ink', r: 4 }, { x: 5, y: -1, label: 'B', color: 'ink', r: 4, ldx: 8, ldy: 4 }, { x: 1, y: 0.75, label: '1', color: 'gold', r: 0.1, ldx: 4, ldy: -6 }, { x: -4.5, y: -0.75, label: '2', color: 'teal', r: 0.1, ldx: -14, ldy: -4 }] } }, 'A positive point charge, its equipotentials (violet), and two paths from A to B: path 1 (gold) straight, path 2 (teal) the long way round.'),
+      teach: t`The work an electrostatic field does on a charge, $q(V_P - V_Q)$, depends only on where the charge starts and ends.`,
+      explain: t`The work the field does is $W = -\Delta U = q(V_P - V_Q)$, which depends only on the potentials at P and Q. Along any path from P to Q it is $2.0\ \mu\text{J}$. (Equivalently: around any closed loop the field does no net work.)`,
+      visual: field({ unit: 'cm', x: [-8, 8], y: [-5, 5], charges: [{ x: 0, y: 0, q: 2 }], equip: true, equipLabels: false, fieldLines: false, notes: { lines: [{ from: [-3, 2], to: [5, -1], color: 'gold', width: 2.4 }, { from: [-3, 2], to: [-6, -3.5], color: 'teal', width: 2.4 }, { from: [-6, -3.5], to: [2, -4.2], color: 'teal', width: 2.4 }, { from: [2, -4.2], to: [5, -1], color: 'teal', width: 2.4 }], points: [{ x: -3, y: 2, label: 'P', color: 'ink', r: 4 }, { x: 5, y: -1, label: 'Q', color: 'ink', r: 4, ldx: 8, ldy: 4 }, { x: 1, y: 0.75, label: '1', color: 'gold', r: 0.1, ldx: 4, ldy: -6 }, { x: -4.5, y: -0.75, label: '2', color: 'teal', r: 0.1, ldx: -14, ldy: -4 }] } }, 'A positive point charge, its equipotentials (violet), and two paths from P to Q: path 1 (gold) straight, path 2 (teal) the long way round.'),
     }),
     num({
       id: 'work-carry', difficulty: 2,

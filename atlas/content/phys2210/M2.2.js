@@ -96,18 +96,18 @@ $$\vec R = \vec A + \vec B \quad\Longleftrightarrow\quad R_x = A_x + B_x, \qquad
       ],
       answer: 0,
       why: {
-        1: 'With the tails together, the arrow from one tip to the other is a difference, A − B, not a sum.',
+        1: 'With the tails together, the arrow from one tip to the other is a difference, u − v, not a sum.',
         2: 'Lengths only add when the arrows point the same way; in general the sum is shorter.',
         3: 'Meeting tip to tip reverses one of the arrows, which again gives a difference.',
       },
       hints: ['A displacement is a trip: do the first one, then start the second where the first ended.'],
       visual: vectorPicture({
-        arrows: [{ to: [3, 1.2], label: 'A' }, { from: [4.2, -1.4], to: [5.4, 1.4], color: 'violet', label: 'B' }],
+        arrows: [{ to: [3, 1.2], label: 'u' }, { from: [4.2, -1.4], to: [5.4, 1.4], color: 'violet', label: 'v' }],
         numbers: false,
         caption: 'Two displacements, drawn apart. An arrow may be slid anywhere, as long as it is not turned or stretched: it is still the same vector.',
       }),
       teach: 'Vectors add tip to tail: start each one where the previous one ends.',
-      explain: 'Walking along A and then along B takes you from A’s tail to B’s tip, so that arrow is A + B. (The other diagonal of the parallelogram, from tip to tip, is A − B.)',
+      explain: 'Walking along u and then along v takes you from u’s tail to v’s tip, so that arrow is u + v. (The other diagonal of the parallelogram, from tip to tip, is u − v.)',
     }),
     num({
       id: 'sum-from-components', difficulty: 1,

@@ -210,7 +210,7 @@ where the observer moves at speed $\beta$ at angle $\alpha$ to the photon’s di
       answer: 0,
       why: {
         1: t`The first-order term $\beta\cos\alpha$ vanishes, but the factor $\gamma$ remains: a second-order shift.`,
-        2: t`That is light at $90^\circ$ in the *satellite’s* frame — light that reaches the station from slightly ahead of perpendicular.`,
+        2: t`That is light at $90^\circ$ in the *satellite’s* frame — light emitted while the satellite is still approaching, which reaches the station tilted from perpendicular by about $v/c$.`,
         3: t`Aberration means $90^\circ$ in one frame is not $90^\circ$ in the other; the two cases give $1/\gamma$ and $\gamma$.`,
       },
       hints: [t`Work in the station’s frame: there the satellite’s clock, which sets the emitted frequency, runs slow by $\gamma$.`, t`Light that is perpendicular in the station’s frame is not perpendicular in the satellite’s: aberration tilts it. So the two meanings of “$90^\circ$” give different answers.`],

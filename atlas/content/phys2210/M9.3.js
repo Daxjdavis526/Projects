@@ -164,7 +164,7 @@ $$m_1v_{1i} + m_2v_{2i} = m_1v_{1f} + m_2v_{2f}, \qquad e = \frac{v_{2f} - v_{1f
       hints: ['What is the total momentum before? Add two equal and opposite vectors.', 'Momentum after must be the same — what does that say about the stuck-together lump?'],
       teach: 'Momentum is conserved even when every joule of kinetic energy disappears into heat and deformation.',
       explain: 'Total momentum before: m v + m(−v) = 0. After: the lump has total momentum zero, so it is at rest. Every joule of kinetic energy went into deforming and warming the clay — while momentum was conserved exactly.',
-      visual: snaps({ m1: 1, m2: 1, u1: 3, u2: -3, e: 0, show: 'before', names: ['A', 'B'] }, 'The two lumps just before they meet.'),
+      visual: snaps({ m1: 1, m2: 1, u1: 3, u2: -3, e: 0, show: 'before', names: ['P', 'Q'] }, 'The two lumps just before they meet.'),
     }),
     num({
       id: 'bounce-e', difficulty: 2,
