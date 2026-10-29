@@ -25,6 +25,9 @@ const relTot = Math.hypot(relStat, relR);
 
 // a seeded run for the problems
 const runEm = (seed, flags = {}, axes = null) => M.run('em', { seed, flags, axes });
+// the point-by-point factor (1 + Bₐ/kI)² with the ambient field
+const TF = (I) => (1 + P0.Be / (K0 * I)) ** 2;
+const TR1 = (100 * (1 - TF(1))).toFixed(0), TR2 = (100 * (1 - TF(2))).toFixed(0);
 const em1 = (P, I, r) => (2 * P.V) / (M.helmholtzK(P) * I * r) ** 2;
 
 export default lesson({
@@ -195,12 +198,12 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
     }),
     mcq({
       id: 'reverse', difficulty: 3,
-      prompt: t`You repeat each reading with the coil current reversed (and turn the tube round so the beam still circles inside the bulb). The coils’ field flips; the ambient field does not. What does averaging $1/r$ for the two directions at each current give you?`,
+      prompt: t`You repeat each reading with the coil current reversed, so the beam curls the other way (the tube can be turned so it still circles inside the bulb). The coils’ field flips; the ambient field does not. What does averaging $1/r$ for the two directions at each current give you?`,
       visual: {
         type: 'graph',
         params: {
           aspect: 'wide', x: [0, 2.2], y: [0, 40], xlabel: 'I (A)', ylabel: '1/r (m⁻¹)', axesAt: 'edge',
-          curves: [{ fn: '16.35*(x + 0.032)', color: 'accent', label: 'coils with the ambient field', labelAt: 1.9, labelDy: 14 }, { fn: '16.35*(x - 0.032)', color: 'violet', label: 'current reversed', labelAt: 1.9, labelDx: 8, labelDy: 30 }, { fn: '16.35*x', color: 'good', dash: true }],
+          curves: [{ fn: '16.35*(x - 0.32)', color: 'accent', label: 'coils with the ambient field', labelAt: 1.9, labelDy: 14 }, { fn: '16.35*(x + 0.32)', color: 'violet', label: 'current reversed', labelAt: 1.6, labelDy: -6 }, { fn: '16.35*x', color: 'good', dash: true }],
         },
         caption: t`Illustrative lines: the two directions straddle the line through the origin (dashed). The gap between them is drawn ten times larger than a 25 μT field would make it.`,
       },
@@ -263,7 +266,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
     }),
     mcq({
       id: 'cp-trend', difficulty: 3,
-      prompt: t`A lab partner works out $e/m$ point by point from $B = kI$ and finds the values rising steadily with coil current, from about 5% below CODATA at 1 A to about 2.5% below at 2 A. Which explanation fits?`,
+      prompt: t`A lab partner works out $e/m$ point by point from $B = kI$ and finds the values rising steadily with coil current, from about ${TR1}% below CODATA at 1 A to about ${TR2}% below at 2 A. Which explanation fits?`,
       visual: rigPlot('em', { seed: 9, axes: 'pp', expected: true }, t`Point-by-point $e/m$ against current with a weighted mean (gold) and CODATA (dashed). ${SIMNOTE}`),
       choices: [
         t`A steady ambient field opposes the coils’: $B$ is really $kI - |B_a|$, a bigger fraction of $kI$ at low current`,
@@ -279,7 +282,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
       },
       hints: [t`Point by point, the calculation gives $(e/m)(1 + B_a/kI)^2$.`, 'For which sign of Bₐ is that factor below 1, and where is it furthest from 1?'],
       teach: 'A trend in a quantity that should be constant points at a systematic that depends on the knob — here, a fixed field that matters less as the coils’ field grows.',
-      explain: t`$(1 + B_a/kI)^2$ with $B_a = -25\ \mu\text{T}$ is $0.951$ at 1 A ($kI = 0.78$ mT) and $0.975$ at 2 A — exactly the climb. Fitting $1/r$ against $I$ puts $B_a$ in the intercept and removes it from $e/m$.`,
+      explain: t`$(1 + B_a/kI)^2$ with $B_a = -25\ \mu\text{T}$ is $${TF(1).toFixed(3)}$ at 1 A ($kI = ${(K0 * 1000).toFixed(3)}$ mT) and $${TF(2).toFixed(3)}$ at 2 A — exactly the climb. Fitting $1/r$ against $I$ puts $B_a$ in the intercept and removes it from $e/m$.`,
     }),
     num({
       id: 'cp-xenon', difficulty: 3, transfer: true,
@@ -292,7 +295,7 @@ Find $e/m$ with its uncertainty, and the ambient field, and compare $e/m$ with C
           prompt: t`In a Hall thruster, singly charged xenon ions (mass $131.29$ u, with $1\ \text{u} = 1.6605\times10^{-27}$ kg) are accelerated through about $${V}$ V across a radial magnetic field of about $${(B * 1000).toFixed(0)}$ mT (illustrative values). Using the same relation as the $e/m$ tube, $r = \sqrt{2mV/q}\,/B$, what is an ion’s radius of curvature in that field? Answer in m.`,
           visual: { type: 'graph', params: { aspect: 'wide', x: [0, 400], y: [0, 6], xlabel: 'energy of an electron (eV)', ylabel: 'electron radius (mm)', axesAt: 'edge', curves: [{ fn: `${(Math.sqrt((2 * M.K.me) / M.K.e) / B * 1000).toFixed(6)}*sqrt(x)`, color: 'accent' }], points: [{ x: 20, y: +(re * 1000).toFixed(4), label: 'a 20 eV electron', color: 'gold' }] }, caption: t`The same formula for electrons in this field: their circles are millimetres across, so the field traps them. Compute the ion’s yourself.` },
           answer: ans, units: 'm', tol: { rel: 0.01 },
-          errors: [{ value: ans * Math.sqrt(1.66053906892e-27 * 131.293 / mXe) / Math.sqrt(131.293), feedback: 'You used the mass of one atomic mass unit: multiply by 131.29.' }, { value: Math.sqrt((mXe * V) / M.K.e) / B, feedback: t`Kinetic energy $qV = \tfrac12mv^2$ gives $v = \sqrt{2qV/m}$; the 2 belongs under the root.` }],
+          errors: [{ value: ans / Math.sqrt(131.293), feedback: 'You used the mass of one atomic mass unit: multiply by 131.29.' }, { value: Math.sqrt((mXe * V) / M.K.e) / B, feedback: t`Kinetic energy $qV = \tfrac12mv^2$ gives $v = \sqrt{2qV/m}$; the 2 belongs under the root.` }],
           hints: [t`$m = 131.29 \times 1.6605\times10^{-27}$ kg $= ${tex(mXe, 4)}$ kg and $q = e$.`, t`$r = \sqrt{2mV/e}\,/B$.`],
           teach: t`The $e/m$ tube’s relation $r = \sqrt{2mV/q}/B$ sizes any charged particle’s circle — and the mass makes all the difference.`,
           explain: t`$r = \sqrt{2(${tex(mXe, 4)})(${V})/${tex(M.K.e, 4)}}\,/\,${B} = ${ans.toFixed(2)}$ m — far bigger than a thruster channel a few centimetres wide, while a 20 eV electron circles in $${(re * 1000).toFixed(1)}$ mm. That is the design: the field traps electrons (which ionize the propellant) and barely steers the ions it accelerates.`,

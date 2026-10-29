@@ -114,6 +114,7 @@ export const LESSONS = {
   'lab.A8.3': () => import('./lab/A8.3.js'),
   'lab.A9.1': () => import('./lab/A9.1.js'),
   'lab.A9.2': () => import('./lab/A9.2.js'),
+  'lab.E.1': () => import('./lab/E.1.js'),
   'm0.M0-1.1': () => import('./m0/M0-1.1.js'),
   'm0.M0-1.2': () => import('./m0/M0-1.2.js'),
   'm0.M0-1.3': () => import('./m0/M0-1.3.js'),

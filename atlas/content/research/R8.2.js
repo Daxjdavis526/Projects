@@ -53,7 +53,7 @@ so the largest entry dominates. [Writing a lab report and abstract](#/lesson/lab
     type: 'graph',
     title: 'An uncertainty budget',
     lead: t`Three independent sources of error on a planet’s radius, in per cent. The gold bar is their total in quadrature. Shrink each in turn and watch which one the total cares about.`,
-    tasks: ['Halve the stellar-radius term: the total barely moves.', 'Halve the transit-depth term: the total drops by nearly half as much.', 'Set the two small terms to zero: the total is hardly smaller than the largest term alone.'],
+    tasks: ['Halve the stellar-radius term: the total barely moves.', 'Halve the transit-depth term (to 1.6%): the total falls from 3.45% to about 2.0%.', 'Set the two small terms to zero: the total is hardly smaller than the largest term alone.'],
     params: {
       x: [-0.1, 6.5], y: [0.4, 4.7], aspect: 'wide', axesAt: 'edge', xlabel: 'relative uncertainty (%)', ylabel: '', yticks: 0, xticks: 6,
       sliders: [
