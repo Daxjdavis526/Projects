@@ -274,6 +274,10 @@ a.lesson-row:hover{background:var(--panel-2);text-decoration:none}
 .display-math{overflow-x:auto;overflow-y:hidden;padding:.2em 0;margin:.4em 0 .9em}
 .katex{font-size:1.06em}
 .katex-display{margin:.6em 0;overflow-x:auto;overflow-y:hidden;padding:.15em 0}
+/* an equation too wide for the screen scrolls sideways (fitmath.js sets its max-width) */
+.math-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex.math-scroll{display:inline-block;vertical-align:middle;padding-bottom:2px}
+.katex-display.math-scroll{display:block}
 .player-nav{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-top:1.3rem}
 .why{display:flex;gap:.6rem;align-items:flex-start;color:var(--ink-2);font-size:.93rem;margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line-2)}
 .symbols{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;align-items:baseline;margin:.6rem 0 1rem;padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-size:.93rem}

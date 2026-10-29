@@ -4,6 +4,7 @@
 import { h, clear, icon, LOGO, ring } from './dom.js';
 import { app, init, subscribe } from './state.js';
 import { levelOf, rankOf } from '../core/progress.js';
+import { watchMath } from './fitmath.js';
 
 const ROUTES = [
   [/^\/?$/, () => import('./pages/home.js')],
@@ -54,6 +55,7 @@ function chrome() {
   main = h('main.main#main', { tabindex: '-1' });
   tabbar = h('nav.tabbar', { 'aria-label': 'Main navigation' });
   root.append(side, h('div', topbar, main), tabbar);
+  watchMath(main);
   root.removeAttribute('aria-busy');
   paintChrome();
 }
