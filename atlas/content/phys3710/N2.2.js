@@ -102,7 +102,7 @@ const recoilLines = {
     curves: [{ fn: '1/(1 + ((x + 1)/0.08)^2)', color: 'accent', width: 2.4, label: 'emitted', labelAt: -1, labelDx: -12, labelDy: -6 }, { fn: '1/(1 + ((x - 1)/0.08)^2)', color: 'warn', width: 2.4, label: 'needed to absorb', labelAt: 1, labelDx: 12, labelDy: -6 }],
     vlines: [{ x: 0, label: 'transition energy', color: 'ink3' }],
   },
-  caption: 'A free nucleus emits a gamma ray short by its recoil energy and needs one long by the same to absorb it. The lines are drawn far wider than they are: for iron-57 each is a few hundred-thousandths of the gap between them. In a crystal the whole lattice takes the recoil, and the lines coincide — the Mössbauer effect.',
+  caption: 'A free nucleus emits a gamma ray short by its recoil energy and needs one long by the same to absorb it. The lines are drawn far wider than they are: for iron-57 each is about a millionth of the gap between them. In a crystal the whole lattice takes the recoil, and the lines coincide — the Mössbauer effect.',
 };
 
 export default lesson({
@@ -157,9 +157,9 @@ The exponent is a large number, and small changes in $Q$ change it a lot. Beta a
       { label: 'The integral', text: t`For a pure Coulomb barrier the integral is exact: $2G = \dfrac{2\sqrt{2\mu c^2Q}}{\hbar c}\,b\left[\arccos\sqrt x - \sqrt{x(1-x)}\right]$ with $x = R/b$. Uranium: $x = ${fmt(GU.x, 3)}$, $2G = ${fmt(GU.G2, 4)}$. Polonium: $x = ${fmt(GP.x, 3)}$, $2G = ${fmt(GP.G2, 4)}$.` },
       { label: 'Assault frequency', text: t`Inside the well the alpha has kinetic energy $Q + 35$ MeV, so $v = c\sqrt{2(Q + 35)/\mu c^2} \approx ${fmt(GU.v / C_FM, 2)}c$ and $f = v/2R \approx ${tex(GU.f, 2)}\ \text{s}^{-1}$ — nearly the same for both.` },
       { label: 'Half-lives', text: t`$T_{1/2} = \ln 2/(f e^{-2G})$: uranium $${tex(GU.T, 2)}$ s $= ${tex(GU.T / YEAR, 2)}$ yr; polonium $${tex(GP.T, 2)}$ s.` },
-      { label: 'Sense check', text: t`Measured: $4.468\times10^9$ yr and $0.294\ \mu\text{s}$. The model is off by factors of ${fmt(T_U / GU.T, 2)} and ${fmt(T_P / GP.T, 2)} — across a ratio of $${tex(T_U / T_P, 2)}$. Only the difference of the exponents matters for that ratio: $e^{${fmt(GU.G2, 3)} - ${fmt(GP.G2, 3)}} \approx 10^{${fmt((GU.G2 - GP.G2) / Math.LN10, 3)}}$. The factors left over come from $R$ (enlarge it 10% and the half-lives shorten about thirtyfold), the shape of the nuclear edge and the chance of finding an alpha preformed.` },
+      { label: 'Sense check', text: t`Measured: $4.468\times10^9$ yr and $0.294\ \mu\text{s}$. The model is off by factors of ${fmt(T_U / GU.T, 2)} and ${fmt(T_P / GP.T, 2)} — across a ratio of $${tex(T_U / T_P, 2)}$. Only the difference of the exponents matters for that ratio: $e^{${fmt(GU.G2, 3)} - ${fmt(GP.G2, 3)}} \approx 10^{${fmt((GU.G2 - GP.G2) / Math.LN10, 3)}}$. The factors left over come from $R$ (enlarge it 10% and the half-lives shorten twenty- to fortyfold), the shape of the nuclear edge and the chance of finding an alpha preformed.` },
     ],
-    answer: t`Gamow’s model gives $${tex(GU.T / YEAR, 2)}$ yr for uranium-238 and $${tex(GP.T, 2)}$ s for polonium-212: both within a factor of ten of the truth, over 24 orders of magnitude.`,
+    answer: t`Gamow’s model gives $${tex(GU.T / YEAR, 2)}$ yr for uranium-238 and $${tex(GP.T, 2)}$ s for polonium-212: both within about a factor of ten of the truth, over 24 orders of magnitude.`,
   },
   practice: [
     num({
@@ -331,7 +331,7 @@ for name, Q, Zd, Ad, T in [("U-238", 4.2698, 90, 234, 1.410e17), ("Po-212", 8.95
       ],
       hints: [t`\`integrand = lambda r: np.sqrt(max(0.0, 2 * mu * (2 * Zd * KE2 / r - Q)))\` — the \`max\` guards against rounding just past $b$, where the square root’s argument touches zero.`, t`\`val, err = quad(integrand, R, b)\`, then \`return 2 * val / HBARC\`.`],
       teach: 'quad handles the square-root endpoint at the turning point; the exponent 2G carries all the physics of the half-life.',
-      explain: t`The integral agrees with the closed form to many digits: $2G \approx 88.0$ for uranium-238 and $32.3$ for polonium-212. The predicted half-lives, about $5\times10^{16}$ s and $3\times10^{-8}$ s, are each within a factor of ten of the measured ones — across 24 orders of magnitude. Try changing the 1.2 in $R$ to 1.3: both predictions move by a factor of about 30, a reminder that the model’s agreement depends on a sensible radius.`,
+      explain: t`The integral agrees with the closed form to many digits: $2G \approx 88.0$ for uranium-238 and $32.3$ for polonium-212. The predicted half-lives, about $5\times10^{16}$ s and $3\times10^{-8}$ s, are each within about a factor of ten of the measured ones — across 24 orders of magnitude. Try changing the 1.2 in $R$ to 1.3: the predictions shorten by factors of about 20 (uranium) and 13 (polonium), a reminder that the model’s agreement depends on a sensible radius.`,
     }),
   ],
   checkpoint: [
@@ -342,7 +342,7 @@ for name, Q, Zd, Ad, T in [("U-238", 4.2698, 90, 234, 1.410e17), ("Po-212", 8.95
       errors: [{ value: (9.81 * 22.5) / 299792458 ** 2, feedback: t`That is the fractional shift of the energy. Multiply by $E_\gamma$ to get the shift in eV, then divide by $\Gamma$.` }],
       hints: [t`$gh/c^2 = 9.81\times22.5/(2.998\times10^8)^2 = ${tex((9.81 * 22.5) / 299792458 ** 2, 3)}$.`, t`Shift $= ${tex((9.81 * 22.5) / 299792458 ** 2, 3)}\times14\,410$ eV; width $\Gamma = 6.582\times10^{-16}/1.418\times10^{-7}$ eV.`],
       teach: 'Recoil-free gamma rays are so sharp that a 22-metre climb in gravity shifts them by a measurable fraction of their width.',
-      explain: t`The shift is $${tex(((9.81 * 22.5) / 299792458 ** 2) * 14412.9, 3)}$ eV and the width $${tex(HBAR_EVS / 141.8e-9, 3)}$ eV, a ratio of $${fmt(((9.81 * 22.5) / 299792458 ** 2) * 14412.9 / (HBAR_EVS / 141.8e-9), 2)}$ — about 1/130 of a line width. Pound and Rebka compensated it with the Doppler shift of a source moving a few μm/s, swapped source and absorber to cancel systematic errors, and found $1.05 \pm 0.10$ times Einstein’s prediction: the first laboratory test that clocks run slower lower down.`,
+      explain: t`The shift is $${tex(((9.81 * 22.5) / 299792458 ** 2) * 14412.9, 3)}$ eV and the width $${tex(HBAR_EVS / 141.8e-9, 3)}$ eV, a ratio of $${fmt(((9.81 * 22.5) / 299792458 ** 2) * 14412.9 / (HBAR_EVS / 141.8e-9), 2)}$ — about 1/130 of a line width. Pound and Rebka compensated it with the Doppler shift of a source moving at under a micrometre per second, swapped source and absorber to cancel systematic errors, and found $1.05 \pm 0.10$ times Einstein’s prediction: the first laboratory test that clocks run slower lower down.`,
       visual: recoilLines,
     }),
     num({
