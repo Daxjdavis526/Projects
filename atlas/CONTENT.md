@@ -17,7 +17,7 @@ are downloaded libraries, some of them megabytes on one line.
 
 ```sh
 # 1. write content/<course>/<MODULE>.<n>.js  (the id must already be in content/<course>/index.js)
-node atlas/tools/register.mjs                           # 2. list it in content/loads.js
+node atlas/tools/register.mjs                           # 2. list it in content/loads.js (and offline-files.json)
 node atlas/test/content.test.mjs math1220.C2-2.3        # 3. validate one lesson (or a whole course: math1220)
 node atlas/tools/shots.mjs /tmp/x lesson:math1220.C2-2.3 dark   # 4. screenshot every step, then LOOK at them
 ```
