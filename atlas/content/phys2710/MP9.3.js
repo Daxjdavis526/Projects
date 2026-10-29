@@ -179,7 +179,7 @@ In 1913 Henry Moseley measured these lines for elements from aluminium to gold a
       },
       hints: ['You need an edge between the two lines: above Kα, below Kβ.'],
       teach: 'An element absorbs X-rays strongly just above its K edge, so a foil with its edge between Kα and Kβ passes one and stops the other.',
-      explain: t`Nickel’s edge, ${fmt(K_EDGE[28], 4)} keV, sits between copper’s Kα (${fmt(KALPHA1[CU], 3)}) and Kβ (${fmt(KBETA1[CU], 3)} keV): Kβ photons can eject nickel’s 1s electrons and are absorbed, Kα photons cannot. By Moseley’s law the edge of element $Z - 1$ always falls in this gap, which is why molybdenum tubes use zirconium ($Z = 40$) filters.`,
+      explain: t`Nickel’s edge, ${fmt(K_EDGE[28], 4)} keV, sits between copper’s Kα (${fmt(KALPHA1[CU], 3)}) and Kβ (${fmt(KBETA1[CU], 3)} keV): Kβ photons can eject nickel’s 1s electrons and are absorbed, Kα photons cannot. By Moseley’s law the edge of element $Z - 1$ falls in this gap — for heavier targets that of $Z - 2$ as well — which is why molybdenum tubes use zirconium ($Z = 40$) filters.`,
       visual: xrfSpectrum([[KALPHA1[CU], 1, 'Kα'], [KBETA1[CU], 0.2, 'Kβ']], { x: [6.5, 9.5], caption: 'A copper tube’s characteristic lines (the bremsstrahlung continuum is not drawn). Heights illustrative.' }),
     }),
     num({
