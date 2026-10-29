@@ -434,7 +434,7 @@ Which reading is right?`,
       why: {
         1: `Halving each step is bisection’s signature, and that is Q. P’s exponents go ${NERR.map((x) => `−${-Math.floor(Math.log10(x))}`).join(', ')}.`,
         2: 'Linear convergence shrinks the error by a fixed factor. P’s factor grows from step to step — that is quadratic convergence.',
-        3: 'Q needs about 50 halvings to reach 10⁻¹⁵; P is already there after 4 steps.',
+        3: 'Q needs about 50 halvings to reach 10⁻¹⁵; P is near 10⁻¹³ after 4 steps and at round-off level after 5.',
       },
       hints: ['Divide each error by the one before it, for both columns.', 'A constant ratio is linear convergence; a ratio that keeps shrinking means the error is being squared.'],
       teach: 'Read convergence from the exponents: linear methods subtract a fixed amount from log₁₀(error) each step; quadratic methods double it.',
