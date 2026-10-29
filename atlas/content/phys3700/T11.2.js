@@ -240,7 +240,7 @@ with entropy $S = kc^3A/(4G\hbar)$, a quarter of the horizon area in units of th
         const dS = (m * CL * CL) / hawkingT(Mh), v = Math.log10(dS / Sgas);
         return {
           prompt: t`A $${m}$ kg box of nitrogen at room temperature, with entropy about $${texNum(Sgas, 3)}$ J/K, falls into ${what} black hole. Its entropy vanishes from the outside world, but the hole gains energy $mc^2$, so its entropy rises by $\Delta S = mc^2/T_H$. Give $\log_{10}$ of the ratio $\Delta S_\text{hole}/S_\text{box}$.`,
-          answer: v, tol: { rel: 0, abs: 0.02 },
+          answer: v, tol: { rel: 0, abs: 0.05 },
           errors: [{ value: Math.log10((m * CL) / hawkingT(Mh) / Sgas), feedback: 'The energy added is mc², with c squared.' }],
           hints: [t`$\Delta S = mc^2/T_H$ with $T_H = ${texNum(hawkingT(Mh), 3)}$ K (thermodynamic identity, $dS = dU/T$).`, t`$\Delta S = ${texNum(dS, 3)}$ J/K; divide by $${texNum(Sgas, 3)}$ J/K and take $\log_{10}$.`],
           teach: 'The generalized second law: the hole’s entropy gain far outweighs the entropy it swallows.',

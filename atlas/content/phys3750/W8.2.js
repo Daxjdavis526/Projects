@@ -61,7 +61,7 @@ Of its two solutions only $J_m$ stays finite at the centre. The rim $r = a$ is f
     prompt: t`Model the diaphragm of a half-inch measurement microphone as a nickel membrane of radius ${tn(EX.a * 1e3)} mm and thickness ${tn(EX.h * 1e6)} μm (density ${EX.rho} kg/m³) under a tension of ${EX.T} N/m. Find its fundamental and its next two modes.`,
     steps: [
       { label: 'Wave speed', text: t`$\sigma = \rho h = ${tn(EX.s)}$ kg/m², so $v = \sqrt{T/\sigma} = ${tn(EX.v)}$ m/s.` },
-      { label: 'First zero', text: t`$J_0$ first crosses zero at $j_{01} = ${tn(EX.j01, 5)}$ (found numerically). McMahon’s estimate $(n + \tfrac m2 - \tfrac14)\pi$ gives $\tfrac34\pi = ${tn(EX.m01, 4)}$ — already within 2%.` },
+      { label: 'First zero', text: t`$J_0$ first crosses zero at $j_{01} = ${tn(EX.j01, 5)}$ (found numerically). McMahon’s estimate $(n + \tfrac m2 - \tfrac14)\pi$ gives $\tfrac34\pi = ${tn(EX.m01, 4)}$ — already within about 2%.` },
       { label: 'Fundamental', text: t`$f_{01} = \dfrac{j_{01}v}{2\pi a} = ${tn(EX.f01 / 1e3)}$ kHz.` },
       { label: 'Next modes', text: t`$(1, 1)$: $j_{11} = ${tn(EX.j11, 4)}$, $f = ${tn(EX.f11 / 1e3)}$ kHz — a rocking mode with a still centre and a nodal diameter. $(0, 2)$: $j_{02} = ${tn(EX.j02, 4)}$, $f = ${tn(EX.f02 / 1e3)}$ kHz, with one nodal circle.` },
       { label: 'Sense check', text: t`A uniform sound pressure pushes every point the same way, so it drives only the symmetric $m = 0$ modes; the rocking $(1, 1)$ mode stays nearly silent. The microphone is flat below $f_{01}$ and is designed with $f_{01}$ near the top of its band. (Real diaphragms are also stiffened and damped by the air film behind them.)` },
@@ -214,7 +214,7 @@ Of its two solutions only $J_m$ stays finite at the centre. The rim $r = a$ is f
         return {
           prompt: t`McMahon’s estimate of the zeros of $J_m$ is $j_{mn} \approx (n + \tfrac m2 - \tfrac14)\pi$. Evaluate it for $(m, n) = (${m}, ${n})$.`,
           visual: curvesPic([{ fn: `besselj(${m}, x)`, color: 'accent', width: 2.2 }], [0, 20], [-0.5, 1.1], t`$J_{${m}}(x)$; count its zeros from the left (not $x = 0$).`, { xlabel: 'x', ylabel: '' }),
-          answer: est, tol: { rel: 0.003 },
+          answer: est, tol: { rel: 0.005 },
           errors: [{ value: (n + m / 2 + 0.25) * Math.PI, feedback: t`The correction is $-\tfrac14$, not $+\tfrac14$.` }, { value: (n + m - 0.25) * Math.PI, feedback: t`The order enters as $m/2$.` }].filter((e) => Math.abs(e.value - est) > 0.01 * est),
           hints: [t`Substitute: $(${n} + ${m}/2 - 1/4)\pi$.`, t`$= ${tn(n + m / 2 - 0.25)}\pi$.`],
           teach: t`McMahon: $j_{mn} \approx (n + \tfrac m2 - \tfrac14)\pi$, better for larger $n$.`,

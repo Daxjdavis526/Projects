@@ -152,7 +152,7 @@ A matrix equal to its own transpose is **symmetric** — a mirror image across i
           errors: Math.abs(val) > 0.01 ? [{ value: -val, feedback: t`Check the sign: the product of inertia is $-\sum m\,x\,y$.` }] : [],
           hints: [t`Compute $m\,x\,y$ for each mass and add them up.`, t`$\sum m\,x\,y = ${pick.map(([x, y], k) => `(${ms[k]})(${x})(${y})`).join(' + ')}$; then change the sign.`],
           teach: 'A product of inertia couples two axes, and the same entry appears on both sides of the diagonal, which makes the inertia tensor symmetric.',
-          explain: t`$\sum m\,x\,y = ${nice(-val)}$, so $I_{xy} = I_{yx} = ${nice(val)}$ kg m². The same number sits in both off-diagonal places because $xy = yx$. ${val === 0 ? '' : t`A nonzero product of inertia means a spin about the $z$-axis is not a free, steady spin: the body wobbles unless it turns about a principal axis — an eigenvector of this symmetric matrix (LA-11).`}`,
+          explain: t`$\sum m\,x\,y = ${nice(-val)}$, so $I_{xy} = I_{yx} = ${nice(val)}$ kg m². The same number sits in both off-diagonal places because $xy = yx$. ${val === 0 ? '' : t`A nonzero $I_{xy}$ means a spin about the $x$- or $y$-axis is not a free, steady spin (all three masses lie in the $xy$-plane, so the $z$-axis is still a principal axis): the body wobbles unless it turns about a principal axis — an eigenvector of this symmetric matrix (LA-11).`}`,
           visual: masses(pts, 'The three point masses in the xy-plane (gold), joined to the centre by dashed lines. Drag to rotate.'),
         };
       },
@@ -217,8 +217,8 @@ A matrix equal to its own transpose is **symmetric** — a mirror image across i
       answer: 0,
       why: {
         1: t`$(AB)${T} = B${T}A${T} = BA$, which equals $AB$ only when the two commute. The picture shows a pair that does not.`,
-        2: t`$A = B$ is enough, but not needed: any commuting pair works, such as $A$ and $2A + I$.`,
-        3: t`$A = B = I$ gives $AB = I$, which is symmetric.`,
+        2: t`$A = B = I$ gives $AB = I$, which is symmetric.`,
+        3: t`$A = B$ is enough, but not needed: any commuting pair works, such as $A$ and $2A + I$.`,
       },
       hints: [t`Transpose the product: $(AB)${T} = B${T}A${T}$.`, t`With $A${T} = A$ and $B${T} = B$, that is $BA$.`],
       teach: 'The transpose of AB is BA when A and B are symmetric, so AB is symmetric exactly when they commute.',

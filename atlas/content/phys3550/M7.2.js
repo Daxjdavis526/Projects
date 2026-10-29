@@ -121,7 +121,7 @@ export default lesson({
           errors: distinct([{ value: b, feedback: t`$I_{yy}$ is the moment about the $y$-axis, which is not principal while $I_{xy} \ne 0$. The principal moment is a little larger.` }, { value: b + Math.abs(c), feedback: t`Adding the product is right only when the diagonal elements are equal. Solve $\lambda^2 - (a + b)\lambda + (ab - c^2) = 0$.` }, { value: (a + b) / 2 + Math.sqrt(((a - b) / 2) ** 2 - c * c), feedback: t`The discriminant is $\left(\frac{a - b}{2}\right)^2 + c^2$: the product of inertia pushes the moments apart, never together.` }], big),
           hints: [t`$\det\begin{bmatrix} a - \lambda & c \\ c & b - \lambda \end{bmatrix} = 0$.`, t`$\lambda = \frac{a + b}{2} \pm \sqrt{\left(\frac{a - b}{2}\right)^2 + c^2}$.`],
           teach: t`For a symmetric $2\times2$ block the principal moments sit symmetrically about the mean of the diagonal, pushed apart by the product of inertia.`,
-          explain: t`$\lambda = \frac{${a + b}}{2} + \sqrt{${(a - b) / 2}^2 + ${c}^2} = ${sci(big, 4)}$ kg·m². The two moments always straddle the diagonal elements: the largest principal moment is at least the largest diagonal entry.`,
+          explain: t`$\lambda = \frac{${a + b}}{2} + \sqrt{(${(a - b) / 2})^2 + (${c})^2} = ${sci(big, 4)}$ kg·m². The two moments always straddle the diagonal elements: the largest principal moment is at least the largest diagonal entry.`,
           visual: blockMap([[r6(a / 100), r6(c / 100)], [r6(c / 100), r6(b / 100)]]),
         };
       },

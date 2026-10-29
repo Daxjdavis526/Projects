@@ -62,7 +62,7 @@ For fermions with $a = b$ this is zero: **no two identical fermions in the same 
     lead: t`The joint density $|\psi(x_1, x_2)|^2$ of two non-interacting particles in an infinite well, one in state $a$, one in state $b$. Each point of the square is one configuration: particle 1 at $x_1$, particle 2 at $x_2$. Bright means likely.`,
     tasks: [
       'With a = 1, b = 2, switch between bosons, distinguishable particles and fermions. Fermions have a dark diagonal — they are never found at the same place — and their rms separation is the largest.',
-      'Bosons pile up along the diagonal: the separation drops to about half the distinguishable value. That is the exchange “force”: a correlation from symmetry, not an interaction.',
+      'Bosons pile up along the diagonal: the separation drops to about three-fifths of the distinguishable value. That is the exchange “force”: a correlation from symmetry, not an interaction.',
       'Set a = b. Bosons give a single symmetric blob; fermions give nothing at all — the density is zero everywhere. Pauli’s principle in one picture.',
     ],
   },

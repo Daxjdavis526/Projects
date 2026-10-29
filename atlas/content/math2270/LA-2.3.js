@@ -167,9 +167,9 @@ Which is the complete solution, with free variables $x_2 = s$ and $x_4 = t$?`,
             prompt: t`For which number $h$ does this system have infinitely many solutions?
 $$\left[\begin{array}{rrr|r} ${R1.join(' & ')} \\ ${R2.join(' & ')} \\ ${C.join(' & ')} & h \end{array}\right]$$`,
             answer: h, tol: { rel: 0, abs: 0.01 },
-            hints: ['The coefficients of row 3 are a combination of rows 1 and 2. Find it.', t`Row 3's coefficients are $${al}\,R_1 + (${be})\,R_2$.`, t`Then elimination turns row 3 into $(0, 0, 0 \mid h - (${al}\cdot${R1[3]} + (${be})\cdot${R2[3]}))$: it must read $0 = 0$.`],
+            hints: ['The coefficients of row 3 are a combination of rows 1 and 2. Find it.', t`Row 3's coefficients are $${al}\,R_1 + (${be})\,R_2$.`, t`Then elimination turns row 3 into $(0, 0, 0 \mid h - (${al}\cdot(${R1[3]}) + (${be})\cdot(${R2[3]})))$: it must read $0 = 0$.`],
             teach: 'When a row’s coefficients are a combination of other rows, its right-hand side must be the same combination, or the system has no solution.',
-            explain: t`Row 3's coefficients are $${al}R_1 + (${be})R_2$, so elimination leaves $(0, 0, 0 \mid h - ${h})$. For $h = ${h}$ that row is $0 = 0$, rows 1 and 2 leave one free variable, and the solutions fill a line. For any other $h$ the row says $0 = $ something nonzero: no solution at all — never exactly one.`,
+            explain: t`Row 3's coefficients are $${al}R_1 + (${be})R_2$, so elimination leaves $(0, 0, 0 \mid h ${h < 0 ? '+' : '-'} ${Math.abs(h)})$. For $h = ${h}$ that row is $0 = 0$, rows 1 and 2 leave one free variable, and the solutions fill a line. For any other $h$ the row says $0 = $ something nonzero: no solution at all — never exactly one.`,
             visual: planes3([R1, R2], { range: 4, size: 2.6, centre: P, line: [P, n.map((v) => v / Math.sqrt(nn))], caption: 'Planes 1 and 2 and the gold line where they meet. The third plane must contain that whole line. Drag to rotate.' }),
           };
         }

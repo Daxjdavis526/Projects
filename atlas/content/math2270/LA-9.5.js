@@ -167,7 +167,7 @@ So **the eigenvalue of largest size, $\lambda_1$, wins**: after many steps $\mat
           errors: [{ value: 1 - a * b, feedback: t`Use the trace: $\lambda_1 + \lambda_2 = \operatorname{tr}P$, with $\lambda_1 = 1$.` }].filter((e) => Math.abs(e.value - l2) > 0.005),
           hints: [t`One eigenvalue is 1. The two add up to $\operatorname{tr}P = ${nice(2 - a - b)}$.`],
           teach: 'For a 2-state chain the second eigenvalue is tr P − 1; its size sets how fast the chain forgets its start.',
-          explain: t`$\lambda_2 = \operatorname{tr}P - 1 = ${nice(2 - a - b)} - 1 = ${nice(l2)}$. ${l2 < 0 ? 'Negative: the deviation flips sign each step while it shrinks.' : 'Positive: the deviation shrinks steadily.'} After 10 steps it has shrunk by $|\lambda_2|^{10} = ${tex(Math.abs(l2) ** 10)}$.`,
+          explain: t`$\lambda_2 = \operatorname{tr}P - 1 = ${nice(2 - a - b)} - 1 = ${nice(l2)}$. ${Math.abs(l2) < 1e-9 ? 'Zero: both columns of $P$ are the steady state, so the chain reaches it in a single step, whatever the start.' : t`${l2 < 0 ? 'Negative: the deviation flips sign each step while it shrinks.' : 'Positive: the deviation shrinks steadily.'} After 10 steps it has shrunk by $|\lambda_2|^{10} = ${tex(Math.abs(l2) ** 10)}$.`}`,
           visual: chainPic(a, b),
         };
       },

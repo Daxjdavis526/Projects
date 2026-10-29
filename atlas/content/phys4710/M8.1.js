@@ -69,7 +69,7 @@ For a qubit, $\hat\rho = \tfrac12(1 + \vec r\cdot\vec\sigma)$: the Bloch sphere 
       { label: 'Mix', text: t`$\hat\rho = \tfrac12(\cdot) + \tfrac12(\cdot) = \begin{pmatrix}3/4 & 1/4\\ 1/4 & 1/4\end{pmatrix}$. Trace 1, Hermitian, as required.` },
       { label: 'Bloch vector', text: t`$r_x = \operatorname{Tr}(\rho\sigma_x) = 2\operatorname{Re}\rho_{01} = \tfrac12$, $r_y = 0$, $r_z = \rho_{00} - \rho_{11} = \tfrac12$. So $\vec r = (\tfrac12, 0, \tfrac12)$, $|\vec r| = ${fmt(Math.SQRT1_2, 4)}$: inside the ball.` },
       { label: 'Purity', text: t`$\operatorname{Tr}\rho^2 = \tfrac12(1 + |\vec r|^2) = \tfrac34$ — less than 1, so no state vector describes this beam. Eigenvalues $(1 \pm 0.7071)/2 = ${fmt((1 + Math.SQRT1_2) / 2, 4)}$ and $${fmt((1 - Math.SQRT1_2) / 2, 4)}$.` },
-      { label: 'Measure x', text: t`$P(+x) = \tfrac12(1 + r_x) = \tfrac34$: a quarter of the $|{+z}\rangle$ half fails, none of the $|{+x}\rangle$ half does.` },
+      { label: 'Measure x', text: t`$P(+x) = \tfrac12(1 + r_x) = \tfrac34$: half of the $|{+z}\rangle$ particles fail (a quarter of the beam), none of the $|{+x}\rangle$ ones do.` },
       { label: 'Superposition', text: t`The normalized superposition of $|{+z}\rangle$ and $|{+x}\rangle$ points midway between them on the **surface**: $\vec r = (\tfrac{1}{\sqrt2}, 0, \tfrac{1}{\sqrt2})$, purity 1, and $P(+x) = ${fmt((1 + Math.SQRT1_2) / 2, 4)}$. Same direction, different length: a mixture is not a superposition.` },
     ],
     answer: t`$\hat\rho = \begin{pmatrix}3/4 & 1/4\\ 1/4 & 1/4\end{pmatrix}$, $\vec r = (\tfrac12, 0, \tfrac12)$, $\operatorname{Tr}\rho^2 = \tfrac34$, $P(+x) = \tfrac34$ (the pure superposition gives ${fmt((1 + Math.SQRT1_2) / 2, 3)}).`,

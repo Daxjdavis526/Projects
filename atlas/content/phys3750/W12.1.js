@@ -222,7 +222,7 @@ The last two feed each other: a changing $\vec B$ curls $\vec E$, and a changing
         const [what, v] = r.pick([['a hypothetical world where light travels at $2.00\\times10^{8}$ m/s', 2e8], ['a hypothetical world where light travels at $1.50\\times10^{8}$ m/s', 1.5e8], ['a hypothetical world where light travels at $4.00\\times10^{8}$ m/s', 4e8]]);
         const eps = 1 / (MU0 * v * v);
         return {
-          prompt: t`Since 2019 the SI fixes $c$ exactly and measures $\mu_0 = 1.2566\times10^{-6}$ N/A²; $\varepsilon_0$ follows from $c = 1/\sqrt{\mu_0\varepsilon_0}$. In ${what}, with the same $\mu_0$, what would $\varepsilon_0$ be, in units of $10^{-12}$ F/m?`,
+          prompt: t`The SI fixes $c$ exactly (since 1983) and, since 2019, measures $\mu_0 = 1.2566\times10^{-6}$ N/A²; $\varepsilon_0$ follows from $c = 1/\sqrt{\mu_0\varepsilon_0}$. In ${what}, with the same $\mu_0$, what would $\varepsilon_0$ be, in units of $10^{-12}$ F/m?`,
           visual: curvesPic([{ fn: '1/x^2', color: 'accent', width: 2.4, domain: [0.6, 3] }], [0.5, 3], [0, 3], t`$\varepsilon_0 \propto 1/c^2$ at fixed $\mu_0$ (relative units).`, { xlabel: 'c (relative)', ylabel: 'ε₀ (relative)' }),
           answer: eps * 1e12, tol: { rel: 0.01 },
           errors: [{ value: (1 / (MU0 * v)) * 1e12, feedback: t`$c^2 = 1/\mu_0\varepsilon_0$: square the speed.` }],

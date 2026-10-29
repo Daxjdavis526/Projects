@@ -192,7 +192,7 @@ It is perfectly Lorentz-invariant, and as a theory of one particle it fails: it 
           errors: [{ value: 1 + (b * b) / 2, feedback: 'Use the exact γ = 1/√(1 − β²); at these speeds the small-β expansion is not accurate.' }].filter((e) => Math.abs(e.value - ans) > 0.004 * ans),
           hints: [t`$\beta = Z\alpha = ${Z}/137.036$.`, t`$\gamma = 1/\sqrt{1 - \beta^2}$.`],
           teach: 'Inner electrons of heavy atoms are relativistic; the effects reach the outer shells and change chemistry.',
-          explain: t`$\beta = ${fmt(b, 4)}$ and $\gamma = ${fmt(ans, 4)}$. ${Z >= 79 ? 'A heavier effective mass shrinks the s orbitals (by roughly 1/γ in this crude estimate); the contracted 6s and expanded 5d levels of gold shift its absorption into the blue, which is why gold is yellow while silver is white — a well-established result of relativistic quantum chemistry.' : 'The correction is modest here, which is one reason the lighter coinage metals look silvery.'}`,
+          explain: t`$\beta = ${fmt(b, 4)}$ and $\gamma = ${fmt(ans, 4)}$. ${Z >= 79 ? 'A heavier effective mass shrinks the s orbitals (by roughly 1/γ in this crude estimate); the contracted 6s and expanded 5d levels of gold shift its absorption into the blue, which is why gold is yellow while silver is white — a well-established result of relativistic quantum chemistry.' : el === 'silver' ? 'The correction is modest here, which is one reason silver is white rather than yellow.' : 'The correction is modest here: copper’s reddish colour owes little to relativity.'}`,
         };
       },
     }),
@@ -204,7 +204,7 @@ It is perfectly Lorentz-invariant, and as a theory of one particle it fails: it 
         return {
           prompt: t`Dirac’s energy levels for hydrogen are $E_{nj} = mc^2\Bigl[1 + \Bigl(\dfrac{\alpha}{n - \delta_j}\Bigr)^2\Bigr]^{-1/2}$ with $\delta_j = j + \tfrac12 - \sqrt{(j + \tfrac12)^2 - \alpha^2}$. Compute the splitting between $n = 2$, $j = 3/2$ and $n = 2$, $j = 1/2$, ${unit === 'GHz' ? 'as a frequency in GHz' : 'in μeV'}. (Ignore the reduced mass; $m_ec^2 = 510\,998.950$ eV, $\alpha = 1/137.036$.)`,
           visual: { type: 'graph', params: { x: [0, 3], y: [-0.4, 1.4], aspect: 'wide', xlabel: '', ylabel: '', xticks: 0, yticks: 0, axes: false, grid: false, curves: [{ param: ['0.4 + 1.2*t', '0'], t: [0, 1], color: 'accent', width: 3 }, { param: ['0.4 + 1.2*t', '1'], t: [0, 1], color: 'violet', width: 3 }], points: [{ x: 1.7, y: 1, r: 0, label: 'n = 2, j = 3/2', color: 'violet', labelDx: 4, labelDy: 0 }, { x: 1.7, y: 0, r: 0, label: 'n = 2, j = 1/2', color: 'accent', labelDx: 4, labelDy: 0 }], arrows: [{ from: [1, 0.05], to: [1, 0.95], color: 'gold' }] }, caption: 'The two n = 2 fine-structure levels of hydrogen (spacing schematic).' },
-          answer: ans, units: unit === 'GHz' ? 'GHz' : 'ueV', tol: { rel: 0.003 },
+          answer: ans, units: unit === 'GHz' ? 'GHz' : 'ueV', tol: { rel: 0.005 },
           errors: [],
           hints: [t`Compute $\delta_{1/2} = 1 - \sqrt{1 - \alpha^2}$ and $\delta_{3/2} = 2 - \sqrt{4 - \alpha^2}$, then the two energies; subtract carefully (keep many digits — the difference is $10^{-10}$ of $mc^2$).`, t`To leading order the answer is $\alpha^4mc^2/32$.`],
           teach: 'Dirac’s equation gives hydrogen’s fine structure in closed form; the leading term α⁴mc²/32 for n = 2 is about 45 μeV, 10.9 GHz.',

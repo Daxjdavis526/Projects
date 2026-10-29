@@ -9,7 +9,7 @@ import { tn, curvesPic } from './_wv.js';
 
 const t = String.raw;
 
-// the worked example: the ringdown of GW150914 (Abbott et al. 2016: 251 ± 8 Hz, 4.0 ± 0.3 ms)
+// the worked example: the ringdown of GW150914 (Abbott et al., PRL 116, 221101 (2016): 251 ± 8 Hz, 4.0 ± 0.3 ms)
 const EX = (() => {
   const f1 = 251, tau = 4.0e-3, gamma = 1 / tau;
   const dw = 2 * gamma, df = dw / (2 * Math.PI), Q = f1 / df, cyc = f1 * tau;
@@ -54,7 +54,7 @@ $\tilde f(\omega)$ is the **complex amplitude per unit angular frequency**: how 
     caption: t`The profile (top) and its Fourier transform (bottom). Exact transforms; the window shows $|x| < 6$ and $|k| < 10$ only.`,
   },
   example: {
-    prompt: t`After two black holes merged to make GW150914, the new hole “rang down”: LIGO measured a dominant oscillation at $f_1 = ${EX.f1}$ Hz whose amplitude decayed with time constant $\tau = ${EX.tau * 1e3}$ ms. Model the ringdown as $f(t) = e^{-t/\tau}e^{-i\omega_1t}$ for $t \ge 0$. What does its spectrum look like, and how sharp is the line?`,
+    prompt: t`After two black holes merged to make GW150914, the new hole “rang down”: LIGO’s analysis found a dominant oscillation at $f_1 = ${EX.f1}$ Hz whose amplitude decayed with time constant $\tau = ${EX.tau * 1e3}$ ms. Model the ringdown as $f(t) = e^{-t/\tau}e^{-i\omega_1t}$ for $t \ge 0$. What does its spectrum look like, and how sharp is the line?`,
     steps: [
       { label: 'Transform', text: t`$\tilde f(\omega) = \int_0^\infty e^{-t/\tau}e^{i(\omega - \omega_1)t}\,dt = \dfrac{1}{1/\tau - i(\omega - \omega_1)}$: one integral of an exponential.` },
       { label: 'Power spectrum', text: t`$|\tilde f|^2 = \dfrac{1}{(1/\tau)^2 + (\omega - \omega_1)^2}$, a **Lorentzian** peaked at $\omega_1$. It falls to half its peak where $|\omega - \omega_1| = 1/\tau$.` },
@@ -225,6 +225,6 @@ $\tilde f(\omega)$ is the **complex amplitude per unit angular frequency**: how 
   ],
   sources: [
     { label: 'Torre, Foundations of Wave Phenomena, ch. 8–9 (DigitalCommons@USU)', url: 'https://digitalcommons.usu.edu/foundation_wave/1/' },
-    { label: 'Abbott et al. (LIGO–Virgo), Observation of Gravitational Waves from a Binary Black Hole Merger, PRL 116, 061102 (2016): ringdown 251 ± 8 Hz, 4.0 ± 0.3 ms', url: 'https://arxiv.org/abs/1602.03837' },
+    { label: 'Abbott et al. (LIGO–Virgo), Tests of General Relativity with GW150914, PRL 116, 221101 (2016): least-damped ringdown mode 251 ± 8 Hz, 4.0 ± 0.3 ms', url: 'https://arxiv.org/abs/1602.03841' },
   ],
 });

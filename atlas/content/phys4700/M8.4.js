@@ -158,7 +158,7 @@ $g_J$ is the **Landé g-factor**. With no spin ($s = 0$) it is 1 and every line 
         return {
           prompt: t`What is the Landé g-factor of an atomic level with term $${term}$ ($L = ${L}$, $S = ${fmt(S, 2)}$, $J = ${fmt(J, 2)}$)?`,
           visual: vecPic(L, S, J, t`The vector model of $${term}$ (lengths $\sqrt{L(L+1)}$ and so on, in units of $\hbar$): $\vec L$ and $\vec S$ add to $\vec J$. Spin counts double in the magnetic moment, so the moment is not along $\vec J$.`),
-          answer: ans, tol: { rel: 0.002 },
+          answer: ans, tol: { rel: 0.005 },
           errors: [{ value: 1, feedback: t`$g = 1$ is the orbital-only value. With $S \ne 0$ the spin’s double weight changes it.` }, { value: 1 + (J * (J + 1) + L * (L + 1) - S * (S + 1)) / (2 * J * (J + 1)), feedback: t`Swap $L$ and $S$ in the numerator: $g_J = 1 + \dfrac{J(J+1) - L(L+1) + S(S+1)}{2J(J+1)}$.` }].filter((e) => Math.abs(e.value - ans) > 0.01),
           hints: [t`$g_J = 1 + \dfrac{J(J+1) - L(L+1) + S(S+1)}{2J(J+1)}$.`, t`Here $J(J+1) = ${fmt(J * (J + 1), 4)}$, $L(L+1) = ${L * (L + 1)}$, $S(S+1) = ${fmt(S * (S + 1), 4)}$.`],
           teach: 'Landé’s g weighs spin twice and orbit once, projected on J.',

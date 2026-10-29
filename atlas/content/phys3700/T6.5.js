@@ -53,7 +53,7 @@ $$F = -kT\ln Z.$$
     title: 'When is a gas classical?',
     lead: t`The Boltzmann counting $Z_1^N/N!$ works only if molecules rarely compete for the same state: each needs much more room than $v_Q$. The curves are $\log_{10}$ of the room per molecule, $V/N$, over $v_Q$, for monatomic gases. Drop the temperature or raise the pressure and watch for the line where the ratio reaches 1.`,
     tasks: [
-      'At room temperature and 1 atm every gas has (V/N)/v(Q) near 10⁵–10⁷: wildly classical.',
+      'At room temperature and 1 atm every gas has (V/N)/v(Q) between about 10⁵ (helium) and 10⁸ (xenon): wildly classical.',
       'Follow helium down: near 4 K (where it liquefies anyway) its ratio is only about 7 — on the edge of quantum behaviour.',
       'Raise the pressure: every curve slides down by the same amount. Lighter gases hit the quantum line first, because v(Q) grows as $m^{-3/2}$.',
     ],
@@ -119,7 +119,7 @@ $$F = -kT\ln Z.$$
       prompt: t`Why does $Z = Z_1^N/N!$ hold for $N$ molecules of a gas, while an Einstein solid of $N$ oscillators uses $Z = Z_1^N$ with no $N!$?`,
       choices: ['The solid’s oscillators sit at fixed lattice sites, so they are distinguishable by position; gas molecules roam, and swapping two identical ones gives the same state', 'Solids are cold, so the N! is close to 1', 'Gas molecules interact and solid atoms do not', 'The N! is a classical correction that quantum oscillators do not need'],
       answer: 0,
-      why: { 1: 'N! is enormous for any N — about $10^{10^{24}}$ for a mole — whatever the temperature.', 2: 'Both are treated as non-interacting here; the difference is about labelling, not forces.', 3: 'It is the other way round: the N! is a quantum statement (identical particles cannot be labelled). The oscillators are distinguishable because their sites are.' },
+      why: { 1: 'N! is enormous for any N — about $10^{1.4\\times10^{25}}$ for a mole — whatever the temperature.', 2: 'Both are treated as non-interacting here; the difference is about labelling, not forces.', 3: 'It is the other way round: the N! is a quantum statement (identical particles cannot be labelled). The oscillators are distinguishable because their sites are.' },
       hints: ['Ask: if you swap two particles, is that a different microstate?', 'Atom 7 of a crystal is “the atom at site 7” — you can name it.'],
       teach: 'Divide by N! for identical, freely moving particles; not for particles labelled by their place.',
       explain: t`$Z_1^N$ counts every assignment of states to labelled particles. For a gas of identical molecules each physical state is counted $N!$ times (once per relabelling), provided the molecules are almost never in the same state — the dilute limit $V/N \gg v_Q$. A crystal’s atoms are labelled by their sites, so nothing is overcounted.`,

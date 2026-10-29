@@ -2,7 +2,7 @@
 // smooth V is linear, the Schrödinger equation becomes Airy's, and matching
 // Ai(z) to the WKB forms on both sides gives
 //   (2D/√p) cos(∫ₓ^{x₂} p dx/ħ − π/4) ⟷ (D/√|p|) e^{−∫_{x₂}^x |p| dx/ħ}:
-// each soft turning point costs a quarter wavelength of phase. Hence
+// each soft turning point costs an eighth of a wavelength of phase. Hence
 // ∫p dx = (n + ½)πħ between two soft turning points (exact for the
 // oscillator), (n − ¼)πħ with one wall (n = 1, 2 …; the half oscillator, exact
 // again; the bouncer), nπħ between walls (M5.1). Worked example: V = α|x|
@@ -41,7 +41,7 @@ export default lesson({
 
 $$\begin{gathered} \frac{2D}{\sqrt{p}}\cos\!\Bigl(\frac1\hbar\int_x^{x_2}p\,dx' - \frac\pi4\Bigr) \;\longleftrightarrow\; \frac{D}{\sqrt{|p|}}\,e^{-\frac1\hbar\int_{x_2}^{x}|p|\,dx'} \end{gathered}$$
 
-The $-\pi/4$ is the point: **each soft turning point costs a quarter wavelength** of phase, so between two of them $\int p\,dx = (n + \tfrac12)\pi\hbar$ — the Bohr–Sommerfeld rule with its famous half.`,
+The $-\pi/4$ is the point: **each soft turning point costs an eighth of a wavelength** of phase, so between two of them $\int p\,dx = (n + \tfrac12)\pi\hbar$ — the Bohr–Sommerfeld rule with its famous half.`,
   symbols: [
     { tex: 'x_2', text: 'a turning point, where V(x₂) = E, with the allowed region to its left and the forbidden region to its right' },
     { tex: 'p,\\ |p|', text: 'the classical momentum √(2m(E − V)) on the allowed side, and the magnitude √(2m(V − E)) on the forbidden side' },
@@ -93,7 +93,7 @@ The $-\pi/4$ is the point: **each soft turning point costs a quarter wavelength*
         3: t`Nothing here is relativistic; and the $\tfrac12$ matters most for the *lowest* levels.`,
       },
       hints: [t`Compare the WKB cosine near a turning point: $\cos(\int p\,dx/\hbar - \pi/4)$.`],
-      teach: 'Each soft turning point removes a quarter wavelength of phase (π/4), so two of them add ½ to the quantum number.',
+      teach: 'Each soft turning point removes an eighth of a wavelength of phase (π/4), so two of them add ½ to the quantum number.',
       explain: t`A hard wall forces $\psi = 0$ exactly there. A sloping wall lets the wave run on, decaying, past the turning point, so the oscillating part effectively ends $\pi/4$ of phase early. Two such ends give $\pi/2$, which is the $\tfrac12$ in $(n + \tfrac12)\pi\hbar$.`,
     }),
     num({
@@ -137,7 +137,7 @@ The $-\pi/4$ is the point: **each soft turning point costs a quarter wavelength*
         return {
           prompt: t`A “half oscillator”: $V = \tfrac12m\omega^2x^2$ for $x > 0$ and an impenetrable wall at $x = 0$, with $\hbar\omega = ${hw}$ meV. One end is a wall and the other a soft turning point, so $\int_0^a p\,dx = (n - \tfrac14)\pi\hbar$ with $n = 1, 2, \dots$ Find the WKB energy of level $n = ${n}$, in meV.`,
           visual: potPic({ x: [-0.5, 2.5], y: [0, 3.2], curves: [{ fn: 'x^2/2', domain: [0, 2.5] }], walls: [0], E: { from: 0, to: 1.87, y: 1.75 }, points: [label(1.87, 1.75, 'a', 'gold', 4, 12)], xlabel: 'x (scaled)', ylabel: 'V (scaled)', xticks: 0, yticks: 0, caption: 'Half a harmonic well: a hard wall at x = 0 and a soft turning point at a. Schematic scales.' }),
-          answer: ans, units: 'meV', tol: { rel: 0.003 },
+          answer: ans, units: 'meV', tol: { rel: 0.005 },
           errors: [{ value: (n + 0.5) * hw, feedback: t`$\int_0^a p\,dx$ is only half the full oscillator’s $\pi E/\omega$: it is $\pi E/2\omega$.` }, { value: (2 * n - 1) * hw, feedback: t`One soft turning point costs $\tfrac14$, not $\tfrac12$: the rule is $(n - \tfrac14)\pi\hbar$.` }].filter((e) => Math.abs(e.value - ans) > 0.01 * ans),
           hints: [t`$\int_0^a p\,dx$ is a quarter of the phase-space ellipse: $\pi E/2\omega$.`, t`$\pi E/2\omega = (n - \tfrac14)\pi\hbar$ gives $E = (2n - \tfrac12)\hbar\omega$.`],
           teach: t`A wall plus a soft turning point gives $(n - \tfrac14)\pi\hbar$; for the half oscillator that is exact.`,

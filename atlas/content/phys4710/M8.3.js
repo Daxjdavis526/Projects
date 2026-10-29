@@ -172,7 +172,7 @@ Once the environment’s two records are nearly orthogonal, $\langle E_1|E_0\ran
           errors: [{ value: lth / dx, feedback: 'Square the ratio.' }],
           hints: [t`$\lambda_T = \hbar/\sqrt{2mkT}$ with $k = ${tex(KB, 7)}$ J/K.`, t`Then square $\lambda_T/\Delta x$.`],
           teach: 'Decoherence of spatial superpositions is fast beyond imagining for anything macroscopic — an order-of-magnitude estimate, but a telling one.',
-          explain: t`$\lambda_T = ${tex(lth, 3)}$ m, so $\tau_D/\tau_R = ${tex(ans, 3)}$. ${ans < 1e-10 ? 'Even if thermal relaxation took the age of the universe, the superposition would last a vanishing fraction of a second.' : 'For small particles and small separations the two times become comparable, which is where quantum effects can be seen.'} (This is a model estimate with a simple linear coupling; real environments differ in detail.)`,
+          explain: t`$\lambda_T = ${tex(lth, 3)}$ m, so $\tau_D/\tau_R = ${tex(ans, 3)}$. ${ans * 4.35e17 < 0.01 ? 'Even if thermal relaxation took the age of the universe, the superposition would last a vanishing fraction of a second.' : ans < 0.01 ? 'Decoherence still wins by orders of magnitude, though by far less than for a big object far apart.' : 'For small particles and small separations the two times become comparable, which is where quantum effects can be seen.'} (This is a model estimate with a simple linear coupling; real environments differ in detail.)`,
         };
       },
     }),

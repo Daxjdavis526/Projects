@@ -150,7 +150,7 @@ export default lesson({
     }),
     mcq({
       id: 'universal', difficulty: 2,
-      prompt: t`Taylor's pendulum doubles its period at drive strengths $\gamma_1 = ${D[0].toFixed(4)}$, $\gamma_2 = ${D[1].toFixed(4)}$, $\gamma_3 = ${D[2].toFixed(4)}$ and $\gamma_4 = ${D[3].toFixed(4)}$. Which property does it share with the logistic map?`,
+      prompt: t`Taylor's pendulum doubles its period at drive strengths $\gamma_1 = ${D[0].toFixed(6)}$, $\gamma_2 = ${D[1].toFixed(6)}$, $\gamma_3 = ${D[2].toFixed(6)}$ and $\gamma_4 = ${D[3].toFixed(6)}$. Which property does it share with the logistic map?`,
       visual: pendPic({ gamma: 1.07, panels: ['bif'], bif: [1.06, 1.086], bifN: 160, marks: false }, t`The pendulum's bifurcation diagram for $1.06 \le \gamma \le 1.086$: $\phi$ once per drive period after a long transient.`),
       choices: [t`The ratio of successive gaps, about 4.67 — Feigenbaum's $\delta$`, t`The values of the doubling parameters themselves`, t`The period-2 formula $x_\pm = [r + 1 \pm \sqrt{(r - 3)(r + 1)}]/2r$`, t`Nothing: a pendulum and a population model have different equations`],
       answer: 0,

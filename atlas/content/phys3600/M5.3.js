@@ -68,7 +68,7 @@ export default lesson({
     tasks: [
       t`$\vec E$ inside is uniform and **weaker** than outside, but only by $3/(\varepsilon_r + 2)$, not $1/\varepsilon_r$: at $\varepsilon_r = 4$, half the outside field, not a quarter. Some $\vec E$ lines end on the bound charge at the surface.`,
       t`Switch to $\vec D$: its lines never end (no free charge) and **crowd into** the sphere — $D$ inside is $3\varepsilon_r/(\varepsilon_r + 2)$ of the outside value. A dielectric draws in $\vec D$ the way a lens draws in light.`,
-      t`Push $\varepsilon_r$ to 100: the inside field nearly vanishes and the outside equipotentials meet the surface almost at right angles — the conducting sphere of [M4.4](#/lesson/phys3600.M4.4). Set $\varepsilon_r = 1$: the sphere disappears.`,
+      t`Push $\varepsilon_r$ to 100: the inside field nearly vanishes and the outside field lines meet the surface almost at right angles (the equipotentials hug it) — the conducting sphere of [M4.4](#/lesson/phys3600.M4.4). Set $\varepsilon_r = 1$: the sphere disappears.`,
     ],
     params: {
       P: `${OUT}*3*${K}*x*y/${R2}^2.5`,

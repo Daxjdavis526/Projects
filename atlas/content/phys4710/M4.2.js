@@ -99,7 +99,7 @@ For helium ($Z = 2$) that is $\zeta = \tfrac{27}{16}$ and $E = -(27/16)^2E_h = $
         return {
           prompt: t`Use the effective-charge trial for the two-electron ion ${name} ($Z = ${Z}$): $\langle\hat H\rangle = (\zeta^2 - 2Z\zeta + \tfrac58\zeta)E_h$. Minimize over $\zeta$ and give the ground-state energy bound, in eV.`,
           visual: { type: 'graph', params: { x: [0.3, Z + 1.4], y: [r6(-Z * Z * EH * 1.05), 0], aspect: 'wide', xlabel: 'effective charge ζ', ylabel: '⟨H⟩ (eV)', xticks: 6, yticks: 4, axesAt: 'edge', curves: [{ fn: zExpr(Z), color: 'accent', width: 2.4 }] }, caption: 'The trial energy against ζ for this ion.' },
-          answer: ans, units: 'eV', tol: { rel: 0.002 },
+          answer: ans, units: 'eV', tol: { rel: 0.0025 },
           errors: [{ value: Ev(Z, Z), feedback: 'That is the value at ζ = Z (first order). Minimize: ζ = Z − 5/16.' }, { value: -((Z - 5 / 16) ** 2) * EH / 2, feedback: t`The minimum is $-\zeta^2$ hartree, and one hartree is $27.2$ eV, not $13.6$.` }],
           hints: [t`$d\langle H\rangle/d\zeta = 0$ gives $\zeta = Z - \tfrac{5}{16}$.`, t`At the minimum $\langle\hat H\rangle = -\zeta^2E_h$.`],
           teach: 'For any two-electron ion, the best effective charge is Z − 5/16 and the energy −(Z − 5/16)² hartree.',
@@ -161,7 +161,7 @@ For helium ($Z = 2$) that is $\zeta = \tfrac{27}{16}$ and $E = -(27/16)^2E_h = $
   checkpoint: [
     num({
       id: 'cp-oxygen', difficulty: 3, transfer: true,
-      prompt: t`X-ray telescopes such as Chandra and XRISM see lines from helium-like oxygen, O$^{6+}$ ($Z = 8$, two electrons), in hot gas between galaxies. Using the effective-charge trial, what is the ground-state energy of O$^{6+}$ relative to the bare nucleus and two free electrons, in keV?`,
+      prompt: t`X-ray telescopes such as Chandra and XRISM see lines from helium-like oxygen, O$^{6+}$ ($Z = 8$, two electrons), in hot gas between galaxies. Using the effective-charge trial, what is the ground-state energy of O$^{6+}$ relative to the bare nucleus and two free electrons, in keV? Give five significant figures.`,
       visual: { type: 'graph', params: { x: [5, 9.5], y: [-1800, -1200], aspect: 'wide', xlabel: 'effective charge ζ', ylabel: '⟨H⟩ (eV)', xticks: 5, yticks: 3, axesAt: 'edge', curves: [{ fn: zExpr(8), color: 'accent', width: 2.4 }] }, caption: 'The trial energy against ζ for Z = 8.' },
       answer: Emin(8) / 1000, units: 'keV', tol: { rel: 0.0005 }, sigfigs: 5,
       errors: [{ value: Ev(8, 8) / 1000, feedback: 'That is first order (ζ = Z). Minimize: ζ = Z − 5/16.' }, { value: -64 * EH / 1000, feedback: 'Include the repulsion: the bound is −(Z − 5/16)² hartree.' }],

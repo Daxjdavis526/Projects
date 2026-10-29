@@ -127,7 +127,7 @@ Absorption and stimulated emission come from the golden rule with the light’s 
           errors: [{ value: ans * 3, feedback: t`The matrix element given is already $|\langle1s|\vec r|np\rangle|^2$ — do not multiply by 3 for the three components.` }, { value: ans / (4 / 3), feedback: t`Keep the prefactor $4\alpha/3c^2$.` }],
           hints: [t`$\omega = \hbar\omega/\hbar$: find $\omega$ in rad/s first.`, t`$A = \dfrac{4\alpha}{3c^2}\omega^3\times${fmt(z2n(n), 4)}\times(${fmt((A0 / MU) * 1e12, 5)}\times10^{-12}\ \text{m})^2$.`],
           teach: 'Spontaneous rates scale as ω³|d|²: the frequency helps, the shrinking overlap hurts.',
-          explain: t`$\omega = ${tex(wn(n), 5)}\ \text{s}^{-1}$, so $A = ${tex(ans, 4)}\ \text{s}^{-1}$. ${n === 2 ? 'The 2p state has no other way down, so τ = 1/A = 1.60 ns.' : `The ${n}p state also decays to lower s and d levels, so its lifetime is shorter than 1/A.`}`,
+          explain: t`$\omega = ${tex(wn(n), 5)}\ \text{s}^{-1}$, so $A = ${tex(ans, 4)}\ \text{s}^{-1}$. ${n === 2 ? 'The 2p state has no other way down, so τ = 1/A = 1.60 ns.' : `The ${n}p state also decays ${n === 3 ? 'to 2s (Balmer-α)' : 'to lower s and d levels'}, so its lifetime is shorter than 1/A.`}`,
         };
       },
     }),
@@ -203,7 +203,7 @@ Absorption and stimulated emission come from the golden rule with the light’s 
           errors: [{ value: f, feedback: t`$A \propto \omega^3|d|^2$: cube the frequency ratio.` }, { value: f * f, feedback: t`It is $\omega^3$, not $\omega^2$: one power from the photon’s energy and two from the density of photon states.` }],
           hints: [t`$A = \dfrac{\omega^3|d|^2}{3\pi\epsilon_0\hbar c^3}$.`],
           teach: 'Spontaneous emission grows as ν³: ultraviolet and X-ray transitions are fast, radio ones extremely slow — which is why X-ray lasers are so hard to build.',
-          explain: t`The frequency ratio is ${f}, so $A$ grows by $${f}^3 = ${ans}$. The same $\nu^3$ is why masers came before lasers, and X-ray lasers needed free-electron machines.`,
+          explain: t`The frequency ratio is ${f}, so $A$ grows by $${f}^3 = ${ans}$. The same $\nu^3$ is why masers came before lasers, and hard-X-ray lasers needed free-electron machines.`,
         };
       },
     }),
@@ -257,7 +257,7 @@ Absorption and stimulated emission come from the golden rule with the light’s 
           errors: [{ value: ans * Math.LN2, feedback: 'That is a half-life; the lifetime is 1/A.' }],
           hints: [t`$\tau = 1/A$.`],
           teach: 'The lifetime is the inverse of the total decay rate.',
-          explain: t`$\tau = 1/${tex(Aly(n), 4)} = ${fmt(ans, 4)}$ ns. ${n > 2 ? `The real ${n}p lifetime is a little shorter, because it can also decay to lower s and d levels.` : 'For 2p this is the true lifetime, 1.60 ns.'}`,
+          explain: t`$\tau = 1/${tex(Aly(n), 4)} = ${fmt(ans, 4)}$ ns. ${n > 2 ? `The real ${n}p lifetime is a little shorter, because it can also decay ${n === 3 ? 'to 2s (Balmer-α)' : 'to lower s and d levels'}.` : 'For 2p this is the true lifetime, 1.60 ns.'}`,
         };
       },
     }),

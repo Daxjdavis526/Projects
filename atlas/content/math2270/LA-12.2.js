@@ -237,7 +237,7 @@ print(s[:8])
       },
       hints: ['Eckart–Young.'],
       teach: 'The truncated SVD is the best low-rank approximation in both the spectral and the Frobenius norm.',
-      explain: t`Eckart–Young: $\|A - B\| \ge \sigma_2$ for every rank-1 $B$, with equality for $B = \sigma_1\mathbf u_1\mathbf v_1${T}$. For symmetric positive semidefinite matrices the SVD and the eigendecomposition coincide, so the last choice is right only there.`,
+      explain: t`Eckart–Young: $\|A - B\| \ge \sigma_2$ for every rank-1 $B$, with equality for $B = \sigma_1\mathbf u_1\mathbf v_1${T}$. For symmetric positive semidefinite matrices the SVD and the eigendecomposition coincide, so the eigenvector layer $\lambda_1\mathbf x_1\mathbf x_1^{\mathsf T}$ is right only there.`,
       visual: imagePic('blocks', 1, 'A picture made of three rectangles and its best rank-1 approximation: one layer already places the largest block.'),
     }),
   ],

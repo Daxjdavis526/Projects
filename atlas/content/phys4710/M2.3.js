@@ -163,7 +163,7 @@ Discrete symmetries have no generator and give no conservation law in the Noethe
           errors: [{ value: ans / 2, feedback: t`The spin’s two states differ in energy by $2d_nE$ (it flips from along to against $\vec E$), so the frequency shifts by $2d_nE/h$.` }, { value: ans * 1000, feedback: 'Convert kV/cm to V/cm: an e·cm times a V/cm is an eV.' }],
           hints: [t`$d_nE$ in eV is $(${tex(DN, 2)}\ \text{cm})\times(${E}\times10^3\ \text{V/cm})$.`, t`Then $\Delta\nu = 2d_nE/h$ with $h$ in eV s; convert Hz to nHz.`],
           teach: 'An electric dipole moment along the spin would violate P and T; searching for it means measuring a precession frequency to nanohertz.',
-          explain: t`$d_nE = ${tex(DN * E * 1e3, 2)}$ eV, so $2d_nE/h = ${fmt(ans, 3)}$ nHz — one extra turn in a few years. Many extensions of the Standard Model predict EDMs near this limit, because they add the extra time-reversal violation needed to explain why the universe has more matter than antimatter.`,
+          explain: t`$d_nE = ${tex(DN * E * 1e3, 2)}$ eV, so $2d_nE/h = ${fmt(ans, 3)}$ nHz — one extra turn in about ${fmt(1 / (ans * 1e-9) / 86400, 2)} days. Many extensions of the Standard Model predict EDMs near this limit, because they add the extra time-reversal violation needed to explain why the universe has more matter than antimatter.`,
         };
       },
     }),

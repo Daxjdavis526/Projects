@@ -185,7 +185,7 @@ One time derivative against two space derivatives makes $\omega \propto k^2$: th
           errors: [{ value: tau, feedback: t`That is when $\sigma = \sqrt2\,\sigma_0$. Doubling needs $t = \sqrt3\,\tau$.` }, { value: Math.sqrt(3) * tau * 1e12, feedback: t`Convert $\sigma_0$ to metres before squaring: $1\ \mu\text{m} = 10^{-6}$ m.` }],
           hints: [t`$m = 86.909 \times 1.6605\times10^{-27}$ kg and $\sigma_0 = ${s0}\times10^{-6}$ m.`, t`Doubling: $t = \sqrt3\,\tau$.`],
           teach: t`The spreading time $2m\sigma_0^2/\hbar$ grows with mass and the square of the initial width.`,
-          explain: t`$\tau = ${tn(tau)}$ s and $t = \sqrt3\,\tau = ${tn(t2)}$ s. A gravimeter’s drop lasts a fraction of a second, so at this width a single atom’s packet spreads only modestly; the cloud as a whole spreads faster, because of its temperature — a velocity spread this model leaves out.`,
+          explain: t`$\tau = ${tn(tau)}$ s and $t = \sqrt3\,\tau = ${tn(t2)}$ s. A gravimeter’s drop lasts a fraction of a second — many times $\tau$ — so even a single atom’s packet ends up tens to hundreds of times wider than it started; the cloud as a whole spreads faster still, because of its temperature — a velocity spread this model leaves out.`,
         };
       },
     }),

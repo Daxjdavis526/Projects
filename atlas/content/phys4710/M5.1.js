@@ -177,7 +177,7 @@ This is the **WKB approximation** (Wentzel, Kramers and Brillouin, 1926). It tur
       errors: [{ answer: '2*pi*E/omega', feedback: 'That is the whole ellipse, ∮p dx; between the turning points you get half of it.' }, { answer: 'pi*E/(2*omega)', feedback: t`The semi-axes are $a = \sqrt{2E/m\omega^2}$ and $\sqrt{2mE}$; half the ellipse is $\tfrac12\pi ab$.` }],
       hints: [t`The ellipse has semi-axes $a = \sqrt{2E/(m\omega^2)}$ and $p_{\max} = \sqrt{2mE}$, and area $\pi\,a\,p_{\max}$.`, t`$\int_{-a}^{a}p\,dx$ is the upper half: $\tfrac12\pi\,a\,p_{\max}$.`],
       teach: t`$\int p\,dx$ is an area in phase space; for the oscillator it is $\pi E/\omega$, so phase-space area counts energy in units of $\hbar\omega$.`,
-      explain: t`$\tfrac12\pi\sqrt{2E/m\omega^2}\sqrt{2mE} = \pi E/\omega$; $m$ cancels. Setting this to $n\pi\hbar$ would give $E = n\hbar\omega$ — close to the truth, but missing the $\tfrac12$. Soft turning points are not hard walls: each one costs a quarter wavelength of phase, and with that correction (lesson M5.3) WKB gives $(n + \tfrac12)\hbar\omega$ exactly.`,
+      explain: t`$\tfrac12\pi\sqrt{2E/m\omega^2}\sqrt{2mE} = \pi E/\omega$; $m$ cancels. Setting this to $n\pi\hbar$ would give $E = n\hbar\omega$ — close to the truth, but missing the $\tfrac12$. Soft turning points are not hard walls: each one costs an eighth of a wavelength of phase, and with that correction (lesson M5.3) WKB gives $(n + \tfrac12)\hbar\omega$ exactly.`,
     }),
   ],
   checkpoint: [

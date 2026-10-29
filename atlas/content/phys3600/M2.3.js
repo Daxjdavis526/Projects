@@ -108,7 +108,7 @@ export default lesson({
           ],
           hints: [t`$W = k\sum_{\text{pairs}}\dfrac{q_iq_j}{r_{ij}}$ over the 6 distinct pairs, with $k = 8.988\times10^9$ N·m²/C².`, t`Four sides ($r = a$) and two diagonals ($r = a\sqrt2$): $W = \dfrac{kq^2}{a}\left(${alt ? '-4' : '4'} + \dfrac{2}{\sqrt2}\right)$.`],
           teach: 'The assembly energy of point charges is a sum over distinct pairs, each counted once.',
-          explain: t`$W = \dfrac{kq^2}{a}\left(${alt ? '-4' : '4'} + \sqrt2\right) = \dfrac{(8.988\times10^9)(${q}\times10^{-9})^2}{${a / 100}}\times${nice(sf(alt ? -4 + Math.SQRT2 : 4 + Math.SQRT2, 4))} \approx ${nice(sf(ans * 1e6, 3))}\ \mu\text{J}$.${alt ? ' Negative: the alternating square holds itself together, and you would have to supply energy to pull it apart.' : ''}`,
+          explain: t`$W = \dfrac{kq^2}{a}\left(${alt ? '-4' : '4'} + \sqrt2\right) = \dfrac{(8.988\times10^9)(${q}\times10^{-9})^2}{${a / 100}}\times${alt ? '(' : ''}${nice(sf(alt ? -4 + Math.SQRT2 : 4 + Math.SQRT2, 4))}${alt ? ')' : ''} \approx ${nice(sf(ans * 1e6, 3))}\ \mu\text{J}$.${alt ? ' Negative: the alternating arrangement is bound — you would have to supply energy to pull it apart.' : ''}`,
         };
       },
     }),

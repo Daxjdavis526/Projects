@@ -115,13 +115,13 @@ export default lesson({
         const cs = [[qa, za], [-qa - 1, 0], [1, zb]];
         const p = mom(cs)[1];
         return {
-          prompt: t`Charges sit on the $z$-axis: $${qa}q$ at $z = ${za}d$, $${-qa - 1}q$ at the origin and $+q$ at $z = ${zb}d$. What is the dipole moment, in units of $qd$?`,
+          prompt: t`Charges sit on the $z$-axis: $${qa === 1 ? '' : qa}q$ at $z = ${za}d$, $${-qa - 1}q$ at the origin and $+q$ at $z = ${zb}d$. What is the dipole moment, in units of $qd$?`,
           visual: chargesPic(cs.map(([q, z]) => [q, z * 0.6]), 'The three charges on the axis (not to scale). Their total is zero.'),
           answer: p, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: qa * za, feedback: 'Every charge contributes q·z, including the one below the origin (negative z).' }].filter((e) => e.value !== p),
           hints: [t`$p = \sum_iq_iz_i$.`, t`$p = ${qa}\cdot${za} + (${-qa - 1})\cdot0 + 1\cdot(${zb})$, in units of $qd$.`],
           teach: 'The dipole moment of point charges is Σ qᵢ rᵢ; when the total charge is zero it does not depend on the origin.',
-          explain: t`$p = ${qa * za} + 0 + (${zb}) = ${p}\,qd$, along $${p >= 0 ? '+' : '-'}\hat z$. The total charge is zero, so this is the same about any origin.`,
+          explain: t`$p = ${qa * za} + 0 + (${zb}) = ${p}\,qd$${p === 0 ? '' : t`, along $${p > 0 ? '+' : '-'}\hat z$`}. The total charge is zero, so this is the same about any origin.`,
         };
       },
     }),

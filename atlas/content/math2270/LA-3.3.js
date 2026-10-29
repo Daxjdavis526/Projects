@@ -114,7 +114,7 @@ export default lesson({
       },
       hints: [t`Write each step as $R_i \leftarrow R_i - \ell_{ij}R_j$ and read off $\ell_{ij}$.`, t`$R_3 + 2R_1$ is $R_3 - (-2)R_1$.`],
       teach: 'L holds each multiplier ℓᵢⱼ, with its sign as subtracted, in row i and column j, below a diagonal of 1s.',
-      explain: t`$\ell_{21} = 3$, $\ell_{31} = -2$ and $\ell_{32} = 4$ go below a diagonal of 1s. (The matrix in the second choice, with the signs flipped, is $L^{-1}$ for the first two steps — the elimination matrix itself.)`,
+      explain: t`$\ell_{21} = 3$, $\ell_{31} = -2$ and $\ell_{32} = 4$ go below a diagonal of 1s. (Flipping every sign does not give $L^{-1}$, the elimination matrix, either: its row 3, column 1 entry is $14$, because the last step subtracts 4 times a row 2 that already contains $-3R_1$.)`,
     }),
     mcq({
       id: 'why-LU', difficulty: 2,

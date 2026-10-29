@@ -119,7 +119,7 @@ Read it as a [plane wave](#/lesson/phys3750.W7.1): $\omega = v|\vec k|$ with $\v
     {
       type: 'point', id: 'k-lattice', difficulty: 2,
       gen(r) {
-        const asp = r.pick([1.5, 2, 0.5]), m = r.int(1, 3), n = r.int(1, 3);
+        const asp = r.pick([1.5, 2, 0.5]), m = r.int(1, 3), n = r.int(1, asp < 1 ? 2 : 3); // keep n/asp on the plotted range (y ≤ 5.9)
         return {
           prompt: t`A membrane has $b = ${asp}a$. In the plane of wave vectors, with both axes in units of $\pi/a$, drag the point to the wave vector of mode $(m, n) = (${m}, ${n})$.`,
           visual: latticePic(asp, 4.6, t`The plane of wave vectors, in units of $\pi/a$ (the arc is $|\vec k| = 4.6\pi/a$, for scale).`, { points: false, params: { drag: [{ key: 'p', x: 0.3, y: 0.3, snap: 0.05 }] } }),

@@ -93,7 +93,7 @@ export default lesson({
           errors: [{ value: (EPS0 * R) * 1e6, feedback: t`An isolated sphere has $C = 4\pi\varepsilon_0R$: you lost the $4\pi$.` }],
           hints: [t`$V = Q/(4\pi\varepsilon_0R)$ for an isolated sphere, so $C = 4\pi\varepsilon_0R$.`],
           teach: 'An isolated conducting sphere has capacitance 4πε₀R: about 111 pF per metre of radius.',
-          explain: t`$C = 4\pi\varepsilon_0R = 4\pi(8.854\times10^{-12})(${tex(R, 5)}) \approx ${nice(sf(C * 1e6, 3))}\ \mu\text{F}$ — a whole planet, less than a millifarad. The farad is a huge unit.`,
+          explain: t`$C = 4\pi\varepsilon_0R = 4\pi(8.854\times10^{-12})(${tex(R, 5)}) \approx ${nice(sf(C * 1e6, 3))}\ \mu\text{F}$ — a whole world, less than a millifarad. The farad is a huge unit.`,
         };
       },
     }),

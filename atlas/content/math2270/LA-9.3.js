@@ -65,7 +65,7 @@ The powers are the payoff: $A^k = (PDP^{-1})(PDP^{-1})\cdots$ and every inner $P
       hints: ['Diagonalizable means: enough independent eigenvectors to make a basis.', t`For $${matTeX([[2, 1], [0, 2]])}$, solve $(A - 2I)\mathbf v = \mathbf 0$: how many free variables?`],
       teach: 'A matrix is diagonalizable exactly when it has a full basis of eigenvectors; a repeated eigenvalue may or may not provide enough.',
       explain: t`$${matTeX([[2, 1], [0, 2]])} - 2I = ${matTeX([[0, 1], [0, 0]])}$ forces $v_2 = 0$: one line of eigenvectors, not two. No basis of eigenvectors, so no $P$. (Such matrices need Jordan form; in differential equations they produce the $te^{\lambda t}$ solutions of DE-4.)`,
-      visual: map2d([[2, 1], [0, 3]], { eigen: true, view: 2.6, caption: 'The third matrix, [[2, 1], [0, 3]]: two eigenvector lines (violet), so its eigenvectors form a basis.' }),
+      visual: map2d([[2, 1], [0, 3]], { eigen: true, view: 2.6, caption: 'The choice [[2, 1], [0, 3]]: two eigenvector lines (violet), so its eigenvectors form a basis.' }),
     }),
     num({
       id: 'power', difficulty: 2,

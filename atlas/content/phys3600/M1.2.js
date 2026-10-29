@@ -72,9 +72,9 @@ export default lesson({
             ...(be + ga !== 0 ? [{ value: (EPS0 * k * al) / 1e-9, feedback: t`That is $\varepsilon_0\,\partial_xE_x$ alone. The divergence adds all three: $\partial_xE_x + \partial_yE_y + \partial_zE_z$.` }] : []),
             { value: (k * (al + be + ga)) / EPS0 / 1e-9, feedback: t`Gauss’s law is $\nabla\cdot\vec E = \rho/\varepsilon_0$, so $\rho = \varepsilon_0\nabla\cdot\vec E$ — multiply by $\varepsilon_0$, do not divide.` },
           ],
-          hints: [t`$\rho = \varepsilon_0\,\nabla\cdot\vec E$.`, t`$\nabla\cdot\vec E = k(${al} + ${be} + ${ga}) = ${k * (al + be + ga)}\ \text{V/m}^2$.`],
+          hints: [t`$\rho = \varepsilon_0\,\nabla\cdot\vec E$.`, t`$\nabla\cdot\vec E = k(${al} ${be < 0 ? '-' : '+'} ${Math.abs(be)} ${ga < 0 ? '-' : '+'} ${Math.abs(ga)}) = ${k * (al + be + ga)}\ \text{V/m}^2$.`],
           teach: t`Gauss’s law in differential form reads the charge density off a field: $\rho = \varepsilon_0\nabla\cdot\vec E$.`,
-          explain: t`$\rho = \varepsilon_0 k(${al} + ${be} + ${ga}) = (8.854\times10^{-12})(${k * (al + be + ga)}) \approx ${nice(sf(ans, 3))}$ nC/m³, the same everywhere in the region${al + be + ga < 0 ? ' (negative charge)' : ''}.`,
+          explain: t`$\rho = \varepsilon_0 k(${al} ${be < 0 ? '-' : '+'} ${Math.abs(be)} ${ga < 0 ? '-' : '+'} ${Math.abs(ga)}) = (8.854\times10^{-12})(${k * (al + be + ga)}) \approx ${nice(sf(ans, 3))}$ nC/m³, the same everywhere in the region${al + be + ga < 0 ? ' (negative charge)' : ''}.`,
         };
       },
     }),

@@ -77,7 +77,7 @@ $$${augTeX(M)}$$`,
           errors: Math.abs(M[0][0] / M[i][0] - ell) > 1e-9 && M[i][0] !== 0 ? [{ value: M[0][0] / M[i][0], feedback: 'Upside down: divide the entry you are clearing by the pivot, not the pivot by it.' }] : [],
           hints: [t`The pivot is $a_{11} = ${M[0][0]}$; the entry to clear is $a_{${i + 1}1} = ${M[i][0]}$.`, t`$\ell = a_{${i + 1}1}/a_{11}$.`],
           teach: 'The multiplier is the entry to be cleared divided by the pivot above it.',
-          explain: t`$\ell_{${i + 1}1} = ${M[i][0]}/${M[0][0]} = ${qt(ell)}$. Subtracting $${qt(ell)}$ times row 1 turns $${M[i][0]}$ into $${M[i][0]} - ${qt(ell)}\cdot${M[0][0]} = 0$.`,
+          explain: t`$\ell_{${i + 1}1} = ${M[i][0]}/${M[0][0]} = ${qt(ell)}$. Subtracting $${qt(ell)}$ times row 1 turns $${M[i][0]}$ into $${M[i][0]} - ${ell < 0 ? `\\left(${qt(ell)}\\right)` : qt(ell)}\cdot${M[0][0]} = 0$.`,
           visual: rr(M, { view: 4, caption: 'The augmented matrix and its rows as planes. Drag the picture to rotate.' }),
         };
       },

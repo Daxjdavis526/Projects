@@ -80,7 +80,7 @@ export default lesson({
           errors: distinct([{ value: (g / (2 * K)) * Math.tan((th * DEG) / 2), feedback: t`It is $\cot(\theta/2)$: larger angles need *smaller* impact parameters.` }, { value: (g / K) / Math.tan((th * DEG) / 2), feedback: t`$b = (\gamma/2E)\cot(\theta/2)$: you dropped the 2.` }, { value: (T[1] * KE2 / (2 * K)) / Math.tan((th * DEG) / 2), feedback: t`An alpha has charge $2e$: $\gamma = zZe^2/4\pi\epsilon_0$ with $z = 2$.` }], key),
           hints: [t`$\gamma = 2Z\times1.440$ MeV fm.`, t`$b = \dfrac{\gamma}{2E}\cot\dfrac{\theta}{2}$.`],
           teach: t`In Rutherford scattering, $b = (\gamma/2E)\cot(\theta/2)$: the harder the turn, the closer the aim.`,
-          explain: t`$\gamma = ${sci(g, 4)}$ MeV fm; $b = \dfrac{${sci(g, 4)}}{2\times${K}}\cot ${th / 2}^\circ = ${sci(key, 3)}$ fm — a few times the nuclear radius${th >= 120 ? ', inside the region where the nucleus fills a tiny fraction of the atom' : ''}.`,
+          explain: t`$\gamma = ${sci(g, 4)}$ MeV fm; $b = \dfrac{${sci(g, 4)}}{2\times${K}}\cot ${th / 2}^\circ = ${sci(key, 3)}$ fm — tens of thousands of times smaller than the atom: to turn that far, the alpha must be aimed almost at the nucleus itself.`,
           visual: still({ K: Math.min(10, Math.max(2, K)), target: T[0], b: +Math.min(110, key).toFixed(2), beam: true, hide: ['theta', 'b'], range: 100 }, t`Alphas on Coulomb hyperbolas past this nucleus; the highlighted one's angle and impact parameter are hidden.`),
         };
       },

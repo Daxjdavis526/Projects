@@ -50,7 +50,7 @@ which tends to $3Nk$ (Dulong–Petit) when hot and to $\tfrac{12\pi^4}{5}Nk(T/T_
     title: 'Fit copper',
     lead: t`Copper’s measured molar heat capacity (gold; NIST’s fit to data, 4–300 K) on log–log axes, against Debye’s prediction (blue). Adjust $T_D$ until they agree; then switch on the conduction electrons’ $\gamma T$ (Sommerfeld, T7.3) and look below 10 K.`,
     tasks: [
-      'With T(D) near 343 K, Debye matches the data from about 30 K up to room temperature, where both approach 3R = 24.9 J/(mol·K).',
+      'With T(D) near 343 K, Debye matches the data to within about 10 % from 100 K up to room temperature, where both approach 3R = 24.9 J/(mol·K); between about 15 and 70 K it runs up to 20 % low, because copper’s real phonon spectrum is not Debye’s.',
       'Below about 5 K the lattice alone falls short: add the electrons’ γT and the curve meets the data. Their heat capacity falls only as T, so it wins in the deep cold.',
       'Move T(D) away from 343 K: the low-temperature mismatch grows as (343/T(D))³ — the T³ law makes θ easy to measure.',
     ],

@@ -151,7 +151,7 @@ Picture it as the limit of ever taller, narrower spikes that keep **area 1**. In
           ],
           hints: [t`Substitute $u = ${k}x$: then $dx = du/${k}$. Or use $\delta(kx - c) = \tfrac{1}{|k|}\,\delta(x - c/k)$.`, t`The spike is at $x = ${nice(x0)}$; evaluate $x^2 + 1$ there and divide by $|${k}|$.`],
           teach: t`$\delta(kx) = \delta(x)/|k|$: squeezing the argument makes the spike narrower, so its area shrinks by $|k|$.`,
-          explain: t`$\delta(${arg}) = \tfrac{1}{${Math.abs(k)}}\delta(x - ${nice(x0)})$, so the integral is $\tfrac{(${nice(x0)})^2 + 1}{${Math.abs(k)}} = ${nice(sf(ans, 4))}$. This is why $\delta$ carries units: $\delta(x)$ with $x$ in metres is in $\text{m}^{-1}$, so that $\int\delta(x)\,dx = 1$.`,
+          explain: t`$\delta(${arg}) = \tfrac{1}{${Math.abs(k)}}\delta(x ${x0 < 0 ? '+' : '-'} ${nice(Math.abs(x0))})$, so the integral is $\tfrac{(${nice(x0)})^2 + 1}{${Math.abs(k)}} = ${nice(sf(ans, 4))}$. This is why $\delta$ carries units: $\delta(x)$ with $x$ in metres is in $\text{m}^{-1}$, so that $\int\delta(x)\,dx = 1$.`,
         };
       },
     }),
@@ -170,7 +170,7 @@ Picture it as the limit of ever taller, narrower spikes that keep **area 1**. In
           ],
           hints: [t`$\delta(g(x)) = \sum_i \dfrac{\delta(x - x_i)}{|g'(x_i)|}$, summed over the zeros $x_i$ of $g$.`, t`Zeros at $\pm${nice(b)}$ with $|g'| = ${nice(2 * b)}$ at both. Evaluate $f(${nice(b)}) + f(-${nice(b)})$ and divide by $${nice(2 * b)}$.`],
           teach: t`$\delta(g(x))$ is a spike at every zero of $g$, each weighted by $1/|g'|$ there.`,
-          explain: t`$\tfrac{f(${nice(b)}) + f(-${nice(b)})}{${nice(2 * b)}} = \tfrac{${nice(f(b))} + ${nice(f(-b))}}{${nice(2 * b)}} = ${nice(sf(ans, 4))}$. The odd part, $x^3$, cancels between the two spikes. The same rule turns $\delta(r - R)$ in a shell into the right weights in other coordinates.`,
+          explain: t`$\tfrac{f(${nice(b)}) + f(-${nice(b)})}{${nice(2 * b)}} = \tfrac{${nice(f(b))} ${f(-b) < 0 ? '-' : '+'} ${nice(Math.abs(f(-b)))}}{${nice(2 * b)}} = ${nice(sf(ans, 4))}$. The odd part, $x^3$, cancels between the two spikes. The same rule turns $\delta(r - R)$ in a shell into the right weights in other coordinates.`,
         };
       },
     }),

@@ -12,7 +12,7 @@ import { KB, H, AMU, ZETA32, becTc, vQ, r4, texNum, apart, occPic } from './_sta
 const t = String.raw;
 const M = { Rb87: 86.909180531, Na23: 22.98976928, K41: 40.96182526, He4: 4.00260325413, H1: 1.00782503223 };   // u (AME2020)
 const COEF = ZETA32 ** (-2 / 3);                  // 0.527
-const EX = { rho: 145, m: M.He4 };                // liquid helium at its boiling point, kg/m³
+const EX = { rho: 145, m: M.He4 };                // liquid helium just above its λ point, kg/m³
 EX.n = EX.rho / (EX.m * AMU); EX.Tc = becTc(EX.n, EX.m * AMU);
 
 /** Condensate fraction against T/T_c for a box (and optionally a harmonic trap). */
@@ -79,7 +79,7 @@ which is just the condition $N/V = 2.612/v_Q$: about one particle per quantum vo
     caption: 'Ideal, non-interacting bosons with very many atoms. In a trap the density of states grows faster with energy, hence the steeper (T/T(c))³. Real atoms interact weakly, which shifts T(c) by a few per cent and changes the condensate’s shape.',
   },
   example: {
-    prompt: t`Liquid helium-4 has density $${EX.rho}$ kg/m³ at its boiling point. Treating its atoms as an ideal Bose gas, at what temperature should it condense? Compare with the 2.17 K at which it actually turns superfluid.`,
+    prompt: t`Liquid helium-4 has density $${EX.rho}$ kg/m³ just above 2.17 K (at its 4.2 K boiling point it is less dense, 125 kg/m³). Treating its atoms as an ideal Bose gas, at what temperature should it condense? Compare with the 2.17 K at which it actually turns superfluid.`,
     visual: fracPic({ trap: false, caption: 'The ideal-gas condensate fraction in a box against T/T(c). Liquid helium is not ideal, but its superfluid fraction behaves similarly.' }),
     steps: [
       { label: 'Density', text: t`$n = \rho/m = ${EX.rho}/(4.0026\times1.6605\times10^{-27}) = ${texNum(EX.n, 3)}\ \text{m}^{-3}$.` },

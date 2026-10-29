@@ -215,7 +215,7 @@ print(b_best, E_best)
       id: 'cp-hydrogen-gauss', difficulty: 3,
       prompt: t`Try a Gaussian for hydrogen: $\psi = (2b/\pi)^{3/4}e^{-br^2}$ (atomic units, $\hbar = m_e = e^2/4\pi\epsilon_0 = 1$). Then $\langle T\rangle = \tfrac32b$ and $\langle V\rangle = -2\sqrt{2b/\pi}$ hartree. Minimize and give the bound on the ground-state energy, in eV (1 hartree $= 2\times${fmt(RYD, 9)}$ eV).`,
       visual: { type: 'graph', params: { x: [0, 5], y: [0, 0.7], aspect: 'wide', xlabel: 'r (units of a₀)', ylabel: 'P(r) (per a₀)', xticks: 5, yticks: 3, axesAt: 'edge', curves: [{ fn: '4*x^2*exp(-2*x)', color: 'gold', width: 2.6, label: 'exact 1s', labelAt: 2.4, labelDy: -10 }, { fn: `4*pi*x^2*(${r6(2 * (8 / (9 * Math.PI)) / Math.PI)})^1.5*exp(-${r6(2 * (8 / (9 * Math.PI)))}*x^2)`, color: 'accent', width: 2.2, dash: [6, 4], label: 'best Gaussian', labelAt: 0.7, labelDx: -100, labelDy: -6 }] }, caption: 'Radial probability densities of the exact 1s state and the best Gaussian trial.' },
-      answer: (-4 / (3 * Math.PI)) * 2 * RYD, units: 'eV', tol: { rel: 0.002 },
+      answer: (-4 / (3 * Math.PI)) * 2 * RYD, units: 'eV', tol: { rel: 0.005 },
       errors: [{ value: -RYD, feedback: 'That is the exact energy; a Gaussian cannot reach it.' }, { value: (-4 / (3 * Math.PI)) * RYD, feedback: 'The minimum is −4/3π hartree; one hartree is 27.2 eV, twice 13.6 eV.' }],
       hints: [t`$dE/db = \tfrac32 - \sqrt{2/\pi}\,b^{-1/2} = 0$ gives $b = \tfrac{8}{9\pi}$.`, t`Then $E = -\tfrac{4}{3\pi}$ hartree.`],
       teach: 'A trial function of the wrong shape still gives a rigorous upper bound — here 15% above hydrogen’s true energy.',
