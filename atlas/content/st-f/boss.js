@@ -66,7 +66,7 @@ export function cancelCase(r) {
 const TP = orbitOf(11, 27);
 /** Proper time of a fall from rest at R to r₁ by the midpoint rule with n panels, and its exact value. */
 export function quadCase(r) {
-  const R = r.pick([8, 10, 12]), r1 = r.pick([0.4, 0.5]) * R, n = r.pick([50, 100]);
+  const R = r.pick([8, 10, 12]), r1 = +(r.pick([0.4, 0.5]) * R).toPrecision(12), n = r.pick([50, 100]);
   const f = (x) => 1 / Math.sqrt(2 / x - 2 / R);
   const mid = (m) => { const h = (R - r1) / m; let s = 0; for (let i = 0; i < m; i++) s += f(r1 + (i + 0.5) * h); return s * h; };
   const exact = cycloid(R).tau(Math.acos((2 * r1) / R - 1));

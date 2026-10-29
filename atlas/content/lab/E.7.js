@@ -136,7 +136,7 @@ export default lesson({
           errors: [{ value: ans * (1 - beta0), feedback: t`Divide by $1 - \beta$: the far sphere weakened the torque, so the uncorrected $G$ is low.` }, { value: ans * 3600, feedback: 'The period must be in seconds: 1 min = 60 s, and it is squared.' }],
           hints: [t`$G = \pi^2b^2d\,\Delta S/(MLT_0^2)$, all in SI units, then $\div (1 - \beta)$.`, t`$T_0 = ${T0.toFixed(2)} \times 60$ s; $\Delta S = ${(dS / 100).toFixed(4)}$ m.`],
           teach: 'G comes from a shift, a period and four lengths and a mass — every one of them in SI units.',
-          explain: t`$\pi^2(0.0465)^2(0.050)(${(dS / 100).toFixed(4)})/(1.5 \times 5.00 \times ${(T0 * 60).toFixed(1)}^2) = ${tex(ans * (1 - beta0), 4)}$; divided by $${(1 - beta0).toFixed(4)}$, $G = ${tex(ans, 4)}$.`,
+          explain: t`$\pi^2(0.0465)^2(0.050)(${(dS / 100).toFixed(4)})$ $/\,(1.5 \times 5.00 \times ${(T0 * 60).toFixed(1)}^2)$ $= ${tex(ans * (1 - beta0), 4)}$; divided by $${(1 - beta0).toFixed(4)}$, $G = ${tex(ans, 4)}$.`,
         };
       },
     }),

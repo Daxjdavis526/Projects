@@ -238,7 +238,7 @@ $\tilde H$ is conserved to all orders in $h$ for exponentially long times, so $H
           },
           answer: ans, tol: { rel: 0.01 },
           errors: [{ value: h * h * ((p * p * Math.cos(q)) / 12 + Math.sin(q) ** 2 / 24), feedback: 'Mind the sign of the second term: −h²V′²/24.' }, { value: h * ((p * p * Math.cos(q)) / 12 - Math.sin(q) ** 2 / 24), feedback: 'The correction is proportional to h², not h.' }].filter((e) => Math.abs(e.value - ans) > 0.02 * Math.abs(ans)),
-          hints: [t`$V'' = \cos ${q} = ${Math.cos(q).toFixed(4)}$, $V' = \sin ${q} = ${Math.sin(q).toFixed(4)}$.`, t`$\tfrac{${h * h}}{12}(${Math.cos(q).toFixed(4)})(${p})^2 - \tfrac{${h * h}}{24}(${Math.sin(q).toFixed(4)})^2$.`],
+          hints: [t`$V'' = \cos ${q} = ${Math.cos(q).toFixed(4)}$, $V' = \sin ${q} = ${Math.sin(q).toFixed(4)}$.`, t`$\tfrac{${n12(h * h)}}{12}(${Math.cos(q).toFixed(4)})(${p})^2 - \tfrac{${n12(h * h)}}{24}(${Math.sin(q).toFixed(4)})^2$.`],
           teach: 'The shadow Hamiltonian differs from H by O(h²) terms built from the potential’s derivatives; it is what the numerical points actually conserve.',
           explain: t`$\tilde H - H = ${tex(ans, 3)}$. Because the correction changes sign along an orbit, $H$ itself must rise and fall as the numerical state moves along a level curve of $\tilde H$ — the wobble of the Explore.`,
         };
@@ -349,7 +349,7 @@ print(spread_H, spread_Ht, spread_H / max(spread_Ht, 1e-300))`,
           errors: [{ value: ans, feedback: 'Semi-axes go like the square roots of the coefficients: take √(1 − h²ω²/4).' }, { value: 1 / Math.sqrt(ans), feedback: 'Inverted: the q semi-axis is the longer one (where p = 0, the smaller q coefficient allows a larger q).' }],
           hints: [t`At $p = 0$: $q_{\max}^2 \propto 1/\left(1 - \tfrac14h^2\omega^2\right)$; at $q = 0$: $(p/\omega)_{\max}^2 \propto 1$.`, t`Ratio $= \sqrt{1 - \tfrac14(h\omega)^2}$.`],
           teach: 'The shadow’s level set is an ellipse flattened by √(1 − (hω)²/4): the visible signature of the O(h²) energy wobble.',
-          explain: t`$\sqrt{1 - ${hw * hw}/4} = ${Math.sqrt(ans).toFixed(4)}$.${hw >= 2 ? '' : ' At hω = 2 the ellipse collapses to a line: the stability limit of F10.1.'}`,
+          explain: t`$\sqrt{1 - ${n12(hw * hw)}/4} = ${Math.sqrt(ans).toFixed(4)}$.${hw >= 2 ? '' : ' At hω = 2 the ellipse collapses to a line: the stability limit of F10.1.'}`,
         };
       },
     }),

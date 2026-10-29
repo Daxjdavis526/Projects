@@ -302,7 +302,7 @@ print(np.linalg.cond(A), loss_cgs, loss_mgs, loss_hh)`,
           errors: [{ value: s2, feedback: 'That ignores the correlation: l₂₂ = √(σγ² − l₂₁²), and l₂₁ = ρσγ.' }, { value: s2 * (1 - rho * rho), feedback: 'Take the square root: l₂₂ = σγ√(1 − ρ²).' }],
           hints: [t`$l_{11} = \sigma_v$ and $l_{21} = \rho\sigma_v\sigma_\gamma/l_{11} = \rho\sigma_\gamma$.`, t`$l_{22} = \sqrt{\sigma_\gamma^2 - l_{21}^2} = \sigma_\gamma\sqrt{1 - \rho^2}$.`],
           teach: 'Cholesky turns independent standard normals into correlated ones: the first row of L sets the shared part, the diagonal the independent remainder.',
-          explain: t`$l_{21} = ${rho}\times${s2} = ${(rho * s2).toFixed(3)}^\circ$ and $l_{22} = ${s2}\sqrt{1 - ${rho * rho}} = ${ans.toFixed(4)}^\circ$. So $\gamma$-error $= ${(rho * s2).toFixed(3)}z_1 + ${ans.toFixed(4)}z_2$ (in degrees): part of it moves with the speed error, the rest is independent. This is how dispersion tools generate correlated inputs.`,
+          explain: t`$l_{21} = ${rho}\times${s2} = ${(rho * s2).toFixed(3)}^\circ$ and $l_{22} = ${s2}\sqrt{1 - ${n12(rho * rho)}} = ${ans.toFixed(4)}^\circ$. So $\gamma$-error $= ${(rho * s2).toFixed(3)}z_1 + ${ans.toFixed(4)}z_2$ (in degrees): part of it moves with the speed error, the rest is independent. This is how dispersion tools generate correlated inputs.`,
         };
       },
     }),

@@ -166,7 +166,7 @@ Each step is a **similarity transform**, so the eigenvalues never change, while 
           },
           answer: ans, tol: { rel: 0.01 },
           errors: [{ value: b ** 3, feedback: t`Divide by $(a - c)^2 + b^2$, the squared distance between the diagonal entries (plus $b^2$).` }, { value: (b * b) / ((a - c) ** 2 + b * b), feedback: 'The numerator is b³, not b².' }],
-          hints: [t`$(a - c)^2 + b^2 = ${(a - c) ** 2} + ${b * b}$.`, t`$b' = ${b}^3/${(a - c) ** 2 + b * b}$.`],
+          hints: [t`$(a - c)^2 + b^2 = ${n12((a - c) ** 2)} + ${n12(b * b)}$.`, t`$b' = ${b}^3/${n12((a - c) ** 2 + b * b)}$.`],
           teach: 'With the Rayleigh shift the off-diagonal entry of a symmetric matrix is cubed (divided by the squared eigenvalue gap) at every step.',
           explain: t`$b' = ${tex(b ** 3, 3)}/${+((a - c) ** 2 + b * b).toFixed(4)} = ${tex(ans, 3)}$. Another step (the diagonal barely moves) would give about $${tex(rqMap(a, c, b1), 2)}$: the number of correct digits triples each time. Unshifted, the factor per step would be about $${(a / c).toFixed(2)}$.`,
         };

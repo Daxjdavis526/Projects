@@ -133,7 +133,7 @@ The middle row is the centred difference; the edge rows are one-sided. Each row 
         const a = r.pick([0.1, 0.25, 0.5, 1]), d = r.pick([8, 10, 12]);
         const rho = a + Math.sqrt(1 + a * a), ans = d / lg(rho);
         return {
-          prompt: t`The function $1/(x^2 + ${a * a})$ has poles at $x = \pm${a}i$, so its Chebyshev derivative error falls roughly like $\rho^{-N}$ with $\rho = ${a} + \sqrt{1 + ${a}^2}$. Roughly what $N$ brings $\rho^{-N}$ down to $10^{-${d}}$?`,
+          prompt: t`The function $1/(x^2 + ${n12(a * a)})$ has poles at $x = \pm${a}i$, so its Chebyshev derivative error falls roughly like $\rho^{-N}$ with $\rho = ${a} + \sqrt{1 + ${a}^2}$. Roughly what $N$ brings $\rho^{-N}$ down to $10^{-${d}}$?`,
           visual: {
             type: 'graph',
             params: { x: [-1.6, 1.6], y: [-1.2, 1.2], equal: true, aspect: 'wide', axesAt: 'edge', xlabel: 'Re x', ylabel: 'Im x',

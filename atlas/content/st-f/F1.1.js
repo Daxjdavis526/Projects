@@ -194,7 +194,7 @@ IEEE 754 demands the same of arithmetic: $+$, $-$, $\times$, $\div$ and $\sqrt{\
       },
       hints: [t`Write the sum in units of $2^{-53}$: it is $1 + 3$ units, and the floats sit at even numbers of units.`, t`It lies exactly between $1 + 2\cdot2^{-53}$ and $1 + 4\cdot2^{-53}$. IEEE 754 breaks ties toward the float whose last bit is 0. Which of the two is that?`],
       teach: 'Round to nearest, ties to even: a sum exactly halfway between two floats goes to the one whose last significand bit is 0, so ties do not all push the same way.',
-      explain: t`The sum is $1 + 1.5\varepsilon$, a tie between $1 + \varepsilon$ (last bit 1) and $1 + 2\varepsilon$ (last bit 0). Ties to even picks $1 + 2\varepsilon = 1 + 2^{-51} = 1.0000000000000004$. Always rounding ties *up* would bias long sums upward; ties-to-even rounds up half the time and down half the time.`,
+      explain: t`The sum is $1 + 1.5\varepsilon$, a tie between $1 + \varepsilon$ (last bit 1) and $1 + 2\varepsilon$ (last bit 0). Ties to even picks $1 + 2\varepsilon = 1 + 2^{-51}$, printed as \`1.0000000000000004\`. Always rounding ties *up* would bias long sums upward; ties-to-even rounds up half the time and down half the time.`,
     }),
     mcq({
       id: 'subnormal', difficulty: 3,

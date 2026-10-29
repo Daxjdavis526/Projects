@@ -148,10 +148,10 @@ export function gradeNumeric(item, input) {
     const note = sigfigNote(q.numberText, item.sigfigs);
     return ok(note, { value });
   }
-  // known errors first, then generic slips
-  for (const e of item.errors || []) {
-    if (near(value, e.value)) return no(e.feedback, { value, known: true });
-  }
+  // known errors first (the nearest, when two overlap within tolerance), then generic slips
+  const hit = (item.errors || []).filter((e) => near(value, e.value))
+    .sort((p, q) => Math.abs(value - p.value) - Math.abs(value - q.value))[0];
+  if (hit) return no(hit.feedback, { value, known: true });
   return no(genericNumericSlip(value, target, rel, abs), { value });
 }
 

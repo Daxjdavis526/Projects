@@ -36,7 +36,7 @@ const visFn = (shape, dl, lam) => {
 };
 const visPic = (shape, dl, lam, caption, x = [-3, 1], extra = {}) => ({
   type: 'graph', caption,
-  params: { x, y: [0, 1.1], xlog: true, aspect: 'wide', xlabel: 'path difference (mm)', ylabel: 'visibility', yticks: 2,
+  params: { x, y: [0, 1.1], xlog: true, axesAt: 'edge', aspect: 'wide', xlabel: 'path difference (mm)', ylabel: 'visibility', yticks: 2,
     curves: [{ fn: visFn(shape, dl, lam), color: 'gold', width: 2.4, samples: 2000 }], ...extra },
 });
 
@@ -46,14 +46,13 @@ const baselinePic = (caption, ring = false) => ({
   params: { x: [-5, 5], y: [-2.2, 2.6], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [
       { param: ['-0.6 + 0.6*cos(t)', '2 + 0.42*sin(t)'], t: [0, 6.2832], color: ring ? 'gold' : 'ink3', width: ring ? 3 : 1 },
-      ...(ring ? [] : [{ param: ['-0.6 + 0.3*cos(t)', '2 + 0.3*sin(t)'], t: [0, 6.2832], color: 'gold', width: 8 }]),
       { param: ['-3 + 0.5*cos(t)', '-1.4 + 0.25*sin(t)'], t: [3.1416, 6.2832], color: 'accent', width: 2.4 },
       { param: ['2 + 0.5*cos(t)', '-1.4 + 0.25*sin(t)'], t: [3.1416, 6.2832], color: 'accent', width: 2.4 },
       { param: ['-0.6 + t*(-2.4)', '2 + t*(-3.15)'], t: [0, 1], color: 'ink3', width: 1, dash: [4, 4] },
       { param: ['-0.6 + t*2.6', '2 + t*(-3.15)'], t: [0, 1], color: 'ink3', width: 1, dash: [4, 4] },
       { param: ['-3 + t*5', '-1.95'], t: [0, 1], color: 'ink2', width: 1.4 },
     ],
-    points: [{ x: -0.6, y: 2.55, r: 0, label: ring ? 'ring-shaped source' : 'distant source, angular size θ', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }, { x: -0.5, y: -2.15, r: 0, label: 'baseline d', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }],
+    points: [...(ring ? [] : [{ x: -0.6, y: 2, r: 13, color: 'gold' }]), { x: -0.6, y: 2.55, r: 0, label: ring ? 'ring-shaped source' : 'distant source, angular size θ', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }, { x: -0.5, y: -2.15, r: 0, label: 'baseline d', color: 'ink2', labelAlign: 'center', labelDx: 0, labelDy: 0 }],
   },
 });
 
@@ -80,7 +79,7 @@ export default lesson({
       t`Switch to a doublet $0.6$ nm apart (sodium): the visibility falls to zero and comes back, over and over — beats between two colours.`,
     ],
     params: {
-      x: [-3, 1], y: [0, 1.1], xlog: true, aspect: 'wide', xlabel: 'path difference (mm)', ylabel: 'visibility', yticks: 2,
+      x: [-3, 1], y: [0, 1.1], xlog: true, axesAt: 'edge', aspect: 'wide', xlabel: 'path difference (mm)', ylabel: 'visibility', yticks: 2,
       sliders: [
         { key: 'dl', label: 'Line width (or doublet spacing) $\\Delta\\lambda$', min: 0.01, max: 50, value: 0.6, logScale: true, unit: '\\mathrm{nm}', explain: 'The spectrum’s full width at half maximum, or the gap between the two lines of a doublet.' },
         { key: 'lam', label: 'Centre wavelength $\\lambda$', min: 400, max: 1000, step: 1, value: 589, unit: '\\mathrm{nm}', explain: 'The middle of the spectrum.' },
@@ -111,11 +110,11 @@ export default lesson({
     num({
       id: 'doublet-null', difficulty: 2,
       gen(r) {
-        const [l1, l2, nm] = r.pick([[576.96, 579.07, 'mercury’s yellow lines'], [656.272, 656.285, 'two fine-structure components of hydrogen’s H-alpha line'], [766.49, 769.90, 'potassium’s red doublet']]);
+        const [l1, l2, nm] = r.pick([[576.96, 579.07, 'mercury’s yellow pair'], [780.24, 794.98, 'rubidium’s two D lines'], [766.49, 769.90, 'potassium’s red doublet']]);
         const lam = (l1 + l2) / 2, D = lam ** 2 / (2 * (l2 - l1)) * 1e-6;
         return {
-          prompt: t`A Michelson is lit by ${nm}, $${l1}$ and $${l2}$ nm, of equal strength. At what path difference do the fringes first vanish, in millimetres?`,
-          visual: visPic('doublet', l2 - l1, lam, t`Visibility for two equal narrow lines: it vanishes and returns periodically. (The null is the question.)`, [-3, 2], { yticks: 2 }),
+          prompt: t`A Michelson is lit by ${nm}, $${l1}$ and $${l2}$ nm. Treating the two lines as equally strong and very narrow, at what path difference do the fringes first vanish, in millimetres?`,
+          visual: visPic('doublet', l2 - l1, lam, t`Visibility for two equal narrow lines: it vanishes and returns periodically. (The null is the question.)`, [-3, 0]),
           answer: D, units: 'mm', tol: { rel: 0.01 },
           errors: [{ value: 2 * D, feedback: t`At $\Delta = \lambda^2/\Delta\lambda$ the two patterns are back in step; they are half a fringe apart at half that.` }],
           hints: [t`Null when the two fringe systems are half a fringe apart: $\Delta(1/\lambda_1 - 1/\lambda_2) = \tfrac12$.`, t`$\Delta = \lambda^2/(2\Delta\lambda)$.`],
@@ -147,7 +146,7 @@ export default lesson({
         const ds = 1 / L, dlam = (lam * 1e-4) ** 2 * ds * 1e7;     // cm⁻¹; Δλ in nm
         return {
           prompt: t`A Fourier-transform infrared spectrometer scans its moving mirror so that the path difference runs up to $${L}$ cm. Its resolution in wavenumber is about $1/\Delta_{\max}$. What spectral width does that correspond to at $${lam}\ \mu$m, in nanometres?`,
-          visual: visPic('gauss', 0.05, lam * 1000 > 1000 ? 1000 : lam * 1000, t`What a spectrometer records: the light’s coherence against path difference (here for a single line). Its Fourier transform is the spectrum; a longer scan resolves finer detail.`, [-2, 2]),
+          visual: visPic('lorentz', 0.5, 800, t`What a spectrometer records: the light’s coherence against path difference (here for a single line). Its Fourier transform is the spectrum; a longer scan resolves finer detail.`, [-2, 2]),
           answer: dlam, units: 'nm', tol: { rel: 0.01 },
           errors: [{ value: dlam / 2, feedback: t`Resolution $\delta\sigma \approx 1/\Delta_{\max}$, then $\delta\lambda = \lambda^2\delta\sigma$.` }],
           hints: [t`$\delta\sigma = 1/\Delta_{\max} = ${sf(ds, 3)}\ \text{cm}^{-1}$.`, t`$\sigma = 1/\lambda$, so $\delta\lambda = \lambda^2\,\delta\sigma$.`],

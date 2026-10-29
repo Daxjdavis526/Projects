@@ -86,10 +86,10 @@ They are **assumptions**, not laws of nature. Dark energy breaks the strong cond
       { label: 'Energy density', text: t`$\pi^2\hbar c/(720 d^4) = 9.870\times1.0546\times10^{-34}\times2.998\times10^{8}/(720\times10^{-24}) = ${sci(-casimirRho(1e-6))}$ J/m³, so $\rho c^2 = ${sci(casimirRho(1e-6))}$ J/m³ — **negative**: less energy than empty space outside.` },
       { label: 'Pressure', text: t`Across the plates $p = 3\rho c^2 = ${sci(-casimirP(1e-6))}$ Pa: a tension, which pulls the plates together with ${sci(casimirP(1e-6) * 1e3, 2)} mPa. That attraction — the Casimir effect — has been measured since 1997.` },
       { label: 'Null condition', text: t`For light crossing between the plates, $\rho c^2 + p = 4\rho c^2 < 0$: the null condition **fails**. Quantum fields really do break energy conditions.` },
-      { label: 'But how much?', text: t`A 1 m wormhole throat needs $c^4/(8\pi G r_0^2) = ${sci(throat(1), 2)}$ J/m³ of negative energy density — $${sci(throat(1) / -casimirRho(1e-6), 1)}$ times more. Even plates 10 nm apart, at $${sci(-casimirRho(1e-8), 2)}$ J/m³, fall short by a factor of $${sci(throat(1) / -casimirRho(1e-8), 1)}$.` },
+      { label: 'But how much?', text: t`A wormhole throat of radius 1 m needs $c^4/(8\pi G r_0^2) = ${sci(throat(1), 2)}$ J/m³ of negative energy density — $${sci(throat(1) / -casimirRho(1e-6), 1)}$ times more. Even plates 10 nm apart, at $${sci(-casimirRho(1e-8), 2)}$ J/m³, fall short by a factor of $${sci(throat(1) / -casimirRho(1e-8), 1)}$.` },
       { label: 'And for how long', text: t`Quantum inequalities add a second limit: the more negative the energy density a field produces, the shorter the time, and the thinner the region, it can last.` },
     ],
-    answer: t`$\rho c^2 = ${sci(casimirRho(1e-6))}$ J/m³, pressure across the plates $${sci(-casimirP(1e-6))}$ Pa; the null condition fails — but by about 46 orders of magnitude less than a 1 m wormhole needs.`,
+    answer: t`$\rho c^2 = ${sci(casimirRho(1e-6))}$ J/m³, pressure across the plates $${sci(-casimirP(1e-6))}$ Pa; the null condition fails — but by about 46 orders of magnitude less than a throat of radius 1 m needs.`,
   },
   practice: [
     mcq({
@@ -277,7 +277,7 @@ They are **assumptions**, not laws of nature. Dark energy breaks the strong cond
         const r0 = r.pick([1, 100]);
         const x = throat(r0) / -casimirRho(d);
         return {
-          prompt: t`A propulsion concept proposes using the Casimir effect to supply the negative energy for a wormhole throat ${r0} m across. Plates ${dtxt} apart give $|\rho c^2| = \pi^2\hbar c/(720 d^4)$; the throat needs about $c^4/(8\pi G r_0^2)$. By what factor does the Casimir effect fall short (needed ÷ available)? ($G = 6.674\times10^{-11}$ SI)`,
+          prompt: t`A propulsion concept proposes using the Casimir effect to supply the negative energy for a wormhole throat of radius $r_0 = ${r0}$ m. Plates ${dtxt} apart give $|\rho c^2| = \pi^2\hbar c/(720 d^4)$; the throat needs about $c^4/(8\pi G r_0^2)$. By what factor does the Casimir effect fall short (needed ÷ available)? ($G = 6.674\times10^{-11}$ SI)`,
           answer: x, tol: { rel: 0.015 },
           errors: [{ value: 1 / x, feedback: 'That is available ÷ needed. The question asks how many times more is needed.' }],
           hints: [t`Needed: $c^4/(8\pi G r_0^2) = ${sci(throat(r0))}$ J/m³.`, t`Available: $\pi^2\hbar c/(720 d^4) = ${sci(-casimirRho(d))}$ J/m³; divide.`],

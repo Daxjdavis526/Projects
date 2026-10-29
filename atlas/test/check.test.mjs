@@ -244,5 +244,10 @@ check('arcsec graded against a degree answer', grade({ type: 'numeric', answer: 
 
 check('a power just before a closing bracket: J/(K m^3)', describeDims(parseUnit('J/(K m^3)').dims) === describeDims(parseUnit('J K^-1 m^-3').dims) && parseUnit('m^(1/2)').dims[0] === 0.5);
 
+{
+  const item = { type: 'numeric', answer: 10, tol: { rel: 0.02 }, errors: [{ value: 20, feedback: 'far' }, { value: 20.3, feedback: 'near' }] };
+  check('overlapping known errors: the nearest one answers', grade(item, '20.3').feedback === 'near' && grade(item, '20').feedback === 'far');
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

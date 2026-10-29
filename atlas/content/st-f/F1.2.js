@@ -20,6 +20,7 @@ const TRUE = 0.5 - X ** 2 / 24 + X ** 4 / 720;   // the series, accurate to doub
 const REL_NAIVE = Math.abs(NAIVE - TRUE) / TRUE;
 const AMP = (1 + COS) / DIFF;                    // (|a| + |b|)/|a − b|
 const COS_THRESH = 2 ** -26.5;                   // below it cos x rounds to exactly 1
+const grp = (x) => String(x).replace(/(?<=\.\d*)(\d{3})(?=\d)/g, '$1\\,');   // digits in threes (0.999\,999\,999\,95), for reading
 
 // ── a clock advanced by t += 0.1 s, as an orbit propagator might ──
 const DRIFT = {};
@@ -105,7 +106,7 @@ plt.show()`,
     caption: 'Real float64 arithmetic. The stable formula serves as the reference because it is accurate to a few u; the bound assumes fl(cos x) is off by at most u.',
   },
   example: {
-    prompt: t`Predict, then explain, the error of \`(1 - math.cos(x)) / x**2\` at $x = 10^{-5}$, where the true value is $\tfrac12 - \tfrac{x^2}{24} + \ldots = 0.4999999999958333$.`,
+    prompt: t`Predict, then explain, the error of \`(1 - math.cos(x)) / x**2\` at $x = 10^{-5}$, where the true value is $\tfrac12 - \tfrac{x^2}{24} + \ldots = 0.499\,999\,999\,995\,833\,3$.`,
     visual: {
       type: 'graph',
       params: { x: [-9.3, -0.7], y: [-16.5, 0.4], xlog: true, ylog: true, aspect: 'wide', axesAt: 'edge', xlabel: 'x', ylabel: 'relative error of the naive formula',
@@ -115,10 +116,10 @@ plt.show()`,
     },
     steps: [
       { label: 'Find the subtraction', text: t`$\cos(10^{-5}) = 1 - 5\times10^{-11} + \ldots$, so $1 - \cos x$ subtracts two numbers that agree in their first ten digits.` },
-      { label: 'Error coming in', text: t`\`math.cos\` returns $\hat b = ${COS}$, correct to within $u$ relative, so $\lvert\delta_b\rvert \le u \approx 1.1\times10^{-16}$. The 1 is exact, $\delta_a = 0$.` },
+      { label: 'Error coming in', text: t`\`math.cos\` returns $\hat b = ${grp(COS)}$, correct to within $u$ relative, so $\lvert\delta_b\rvert \le u \approx 1.1\times10^{-16}$. The 1 is exact, $\delta_a = 0$.` },
       { label: 'Amplify', text: t`The factor is $\dfrac{1 + \cos x}{1 - \cos x} \approx \dfrac{2}{5\times10^{-11}} = ${tex(AMP, 2)}$, so the result may be wrong by up to $${tex(AMP, 2)} \times 1.1\times10^{-16} \approx ${tex(AMP * U, 2)}$ relative: about **six** of sixteen digits are at risk before anything else happens.` },
-      { label: 'Measure', text: t`Python prints $${NAIVE}$: a relative error of $${tex(REL_NAIVE, 2)}$, inside the bound. The subtraction $1 - \hat b = ${tex(DIFF, 16)}$ was **exact** (Sterbenz's lemma: if $b/2 \le a \le 2b$, $a - b$ is a float), and so was the division up to $u$; every lost digit was lost in $\hat b$ and merely exposed.` },
-      { label: 'Remove it', text: t`Since $1 - \cos x = 2\sin^2(x/2)$, compute \`2 * math.sin(x/2)**2 / x**2\`: no subtraction, five operations each adding at most $u$, so the error is a few $u$. It prints $${STABLE}$, correct to every digit.` },
+      { label: 'Measure', text: t`Python prints $${grp(NAIVE)}$: a relative error of $${tex(REL_NAIVE, 2)}$, inside the bound. The subtraction $1 - \hat b = ${tex(DIFF, 16)}$ was **exact** (Sterbenz's lemma: if $b/2 \le a \le 2b$, $a - b$ is a float), and so was the division up to $u$; every lost digit was lost in $\hat b$ and merely exposed.` },
+      { label: 'Remove it', text: t`Since $1 - \cos x = 2\sin^2(x/2)$, compute \`2 * math.sin(x/2)**2 / x**2\`: no subtraction, five operations each adding at most $u$, so the error is a few $u$. It prints $${grp(STABLE)}$, correct to every digit.` },
       { label: 'Sense check', text: t`Below $x = 2^{-26.5} \approx ${tex(COS_THRESH, 4)}$, $\cos x$ rounds to exactly 1 and the naive formula returns 0: a 100% error from an answer that should be $\tfrac12$.` },
     ],
     answer: t`Up to $\sim${tex(AMP * U, 1)}$ relative error is predicted, $${tex(REL_NAIVE, 2)}$ is measured; the rewrite $2\sin^2(x/2)/x^2$ is accurate to full precision.`,
