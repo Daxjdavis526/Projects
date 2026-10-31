@@ -5,7 +5,8 @@ biomes, caves and ores, flowing water, day and night, weather, eight original
 creatures, tools in five tiers, armour, a hunting bow, cooking, smelting,
 farming, storage, building, lumen circuits that switch lamps and doors, and a
 world that saves and loads. Every texture, model, sound, piece of music, name
-and line of code was made for this project. No assets, code or names come from
+and line of code was made for this project (the one picture that was not is
+the showcase world's Gallery painting, below). No assets, code or names come from
 any other block game, and none of it is a clone of one.
 
 **This one is a desktop game, not a web page.** Unlike everything else in this
@@ -178,11 +179,11 @@ pour straight down any drop. Cut the source and the flow drains away. A
 one-block gap between two sources refills with a new source, so a hole dug in
 a lake heals over. Water washes away plants it runs into.
 
-## The showcase world: Castle Vorhaal and the launch complex
+## The showcase world: Castle Vorhaal, the launch complex and the Gallery
 
 ![Castle Vorhaal at sunset from the watchtower; the rocket floodlit on its pad at night; T-1, the engine lit under the clamps; lift-off; a launch botched on purpose, with the assist off; and how that ends](doc/showcase.jpg)
 
-**Create Showcase World** on the title screen makes a world with two large
+**Create Showcase World** on the title screen makes a world with three large
 builds laid into it by the generator. Everything else about the world (seed,
 biomes, creatures, survival) is normal. You arrive on a watchtower above a dead
 village, looking up at the castle.
@@ -213,6 +214,19 @@ with a flame trench, a 40 m launch tower with a crew arm, a fuel farm, a water
 tower, a 44 m assembly building, a launch control bunker with blast-slit
 windows, floodlight and lightning masts, roads and a parking lot. A rocket
 stands on the pad, fuelled and clamped down.
+
+**The Gallery** stands north of the castle: a block painting 360 blocks
+wide and 240 tall, as tall as a 256-block world allows, framed in dark
+stone. Every block of it is a single flat colour. The picture (a rocket's
+engines at lift-off, from a photograph the owner supplied, not a texture
+made for the game) is reduced to 64 colours by `tools/painting.py`, and each
+colour is a **Pigment Block** you can also mine and build with. To fit that
+height, the site digs a sunken viewing bowl into the plain in front of it:
+its floor starts at the painting's foot, 54 blocks below the plain, and
+climbs back up to the plain over 140 blocks, so you can walk right up to
+the bottom of the picture or stand back on the rim and take in the whole of
+it. Any other picture can replace it: run
+`python3 strata/tools/painting.py <picture>` and rebuild.
 
 ## Flying the rocket
 

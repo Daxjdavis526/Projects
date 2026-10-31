@@ -132,6 +132,7 @@ public static class Blocks
     public static ushort Ladder;       // base of 4
     public static ushort Door;         // base of 16: (lower/upper) x (closed/open) x facing
     public static ushort Grain, Emberroot, Frostleaf; // crop bases (4 stages)
+    public static ushort PigmentFirst;                // the Gallery painting's colours: PigmentFirst + palette index
     public static ushort WaterFalling, WaterLast;     // flowing water: falling, then levels 7..1
 
     /// <summary>Any kind of water: the still source or a moving level.</summary>
@@ -597,6 +598,19 @@ public static class Blocks
         Grain = Crop("grain", "Goldgrain", 4, 0.035f, "grain", 1, 3, "grain_seeds", 1, 2);
         Emberroot = Crop("emberroot", "Emberroot", 4, 0.03f, "emberroot", 2, 4, null, 0, 0);
         Frostleaf = Crop("frostleaf", "Frostleaf", 4, 0.04f, "frostleaf", 1, 2, "frostleaf_seeds", 1, 2);
+
+        // --- pigments: flat colour, one per colour of the Gallery painting (Gen/Landmarks/PaintingData.cs) ---
+        PigmentFirst = (ushort)All.Count;
+        for (int i = 0; i < PaintingData.Palette.Length; i++)
+        {
+            int k = i;
+            var c = Pixel.Hex(PaintingData.Palette[i]);
+            Add($"pigment_{i:D2}", $"Pigment Block #{PaintingData.Palette[i]:X6}", b =>
+            {
+                b.Faces(Tex.Get($"pigment_{k:D2}")); b.Hardness = 1.2f; b.Tool = ToolKind.Pick; b.Sound = SoundKind.Stone;
+                P(b, c.R, c.G, c.B);
+            });
+        }
 
         ById = All.ToArray();
         foreach (var b in All) if (b.Base == 0) b.Base = b.Id;

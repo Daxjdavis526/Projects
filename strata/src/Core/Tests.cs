@@ -132,6 +132,7 @@ public static partial class Tests
         Test("rocket: mass burns off, steering turns it, flight arcs", RocketFlight);
         Test("rocket: hard landings, topples and blasts", RocketCrash);
         Test("rocket: a rough flight stays finite", RocketRough);
+        Test("the Gallery: a block painting as tall as the world allows", GalleryPainting);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;

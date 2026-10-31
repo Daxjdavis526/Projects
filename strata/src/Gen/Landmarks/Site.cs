@@ -5,9 +5,10 @@ namespace Strata;
 
 /// <summary>
 /// The showcase landmarks of a world created with them: Castle Vorhaal on
-/// its crag above a dead village, and the launch complex out on the plain to
-/// the east. The site reshapes the terrain under both (a mountain with sheer
-/// cliffs, a rock spur for the approach road, a gorge, a flat plain) and
+/// its crag above a dead village, the launch complex out on the plain to
+/// the east, and the Gallery's block painting to the north. The site
+/// reshapes the terrain under them (a mountain with sheer cliffs, a rock spur
+/// for the approach road, a gorge, a flat plain, a sunken viewing bowl) and
 /// stamps the buildings into every column it touches as that column is
 /// generated. Everything is laid out once, deterministically, the first time
 /// a column needs it, so any load order builds the same world.
@@ -47,7 +48,7 @@ public sealed class LandmarkSite
         _n3 = new Simplex(gen.Seed * 7 + 103);
         (Ox, Oz) = ChooseOrigin(gen);
         _minCx = (Ox - 260) >> V.Shift; _maxCx = (Ox + 420) >> V.Shift;
-        _minCz = (Oz - 260) >> V.Shift; _maxCz = (Oz + 260) >> V.Shift;
+        _minCz = (Oz + Gallery.WallZ - 80) >> V.Shift; _maxCz = (Oz + 260) >> V.Shift;
     }
 
     /// <summary>Somewhere on dry land with dry land all around, searched outward from the world's centre.</summary>
@@ -81,7 +82,7 @@ public sealed class LandmarkSite
         float castle = 1f - Smooth.Step(185f, 235f, Dist(lx, lz, 0, 40));
         float complex = 1f - Smooth.Step(125f, 170f, Dist(lx, lz, ComplexCentre.X, ComplexCentre.Y));
         float corridor = 1f - Smooth.Step(60f, 100f, SegDist(lx, lz, 20, 130, ComplexCentre.X - 60, ComplexCentre.Y + 20));
-        return Math.Max(castle, Math.Max(complex, corridor));
+        return Math.Max(Math.Max(castle, Gallery.Weight(lx, lz)), Math.Max(complex, corridor));
     }
 
     /// <summary>The castle's crag: 0 on the plateau, rising past 1 down its cliffs, with a ragged edge.</summary>
@@ -137,6 +138,9 @@ public sealed class LandmarkSite
             float side = Smooth.Step(0f, 6f, Math.Min(lz - 54, 84 - lz));
             h = MathF.Min(h, Smooth.Lerp(h, bed, side));
         }
+        // The Gallery's viewing bowl: dug down to the painting's foot, climbing back to the plain.
+        int bowl = Gallery.BowlFloor(lx, lz);
+        if (bowl >= 0) return Math.Clamp(Math.Min((int)MathF.Floor(h), bowl), 5, V.Height - 20);
         return Math.Clamp((int)MathF.Floor(h), 5, V.Height - 20);
     }
 
@@ -170,6 +174,7 @@ public sealed class LandmarkSite
                     new Surroundings(this, c, rng).Build();
                     new Castle(this, c, new Rng(Hash.Of(Gen.Seed, 0xCA571E, 0, 0))).Build();
                     new LaunchComplex(this, c, new Rng(Hash.Of(Gen.Seed, 0x1A0C4, 0, 0))).Build();
+                    new Gallery(c).Build();
                     _canvas = c;
                     GD.Print($"landmarks laid out: {c.Cells} blocks in {c.Columns.Count} columns, {sw.ElapsedMilliseconds} ms, at {Ox}, {Oz}");
                 }
@@ -257,10 +262,11 @@ public sealed class LandmarkSite
         int hx = Height(x + 1, z), hz = Height(x, z + 1), hx0 = Height(x - 1, z), hz0 = Height(x, z - 1);
         int slope = Math.Max(Math.Max(Math.Abs(hx - hx0), Math.Abs(hz - hz0)), 0);
         bool steep = slope >= 3;
+        bool bowl = Gallery.BowlFloor(x, z) >= 0;     // dug below sea level, but dry
         for (int y = 4; y < V.Height - 1 && (y < clearTo + 2 || y < ground + 2); y++)
         {
             int i = (y << 8) | ci;
-            if (y >= ground) { b[i] = y <= V.SeaLevel ? Blocks.Water : Blocks.Air; continue; }
+            if (y >= ground) { b[i] = y <= V.SeaLevel && !bowl ? Blocks.Water : Blocks.Air; continue; }
             int depth = ground - 1 - y;
             ushort id;
             if (crag)

@@ -81,6 +81,13 @@ public static class Textures
     private static void Paint(string name, Pixel p)
     {
         if (PaintLandmark(name, p)) return;
+        if (name.StartsWith("pigment_"))
+        {
+            // One flat colour: a pigment block is a pixel of the Gallery painting.
+            var c = Pixel.Hex(PaintingData.Palette[int.Parse(name.AsSpan(8))]);
+            p.Fill((x, y) => c);
+            return;
+        }
         switch (name)
         {
             case "rootstone":

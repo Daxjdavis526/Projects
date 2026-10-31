@@ -137,6 +137,11 @@ public partial class ShotDirector : Node3D
         _shots.Add(("village", L(-30, 80, 170), L(0, 72, 140), 0.12f, 1f));
         _shots.Add(("complex", L(170, 110, 110), L(236, 80, 34), 0.24f, 1f));
         _shots.Add(("complex_night", L(190, 90, 90), L(236, 90, 34), 0.72f, 1f));
+        float gx = Gallery.X0 + (Gallery.X1 - Gallery.X0) / 2f, gy = (Gallery.Bottom + Gallery.Top) / 2f;
+        _shots.Add(("gallery", L(gx, 84, Gallery.WallZ + 210), L(gx, gy, Gallery.WallZ), 0.2f, 1f));
+        _shots.Add(("gallery_rim", L(gx - 60, 72, Gallery.WallZ + Gallery.BowlDepth), L(gx, gy - 20, Gallery.WallZ), 0.24f, 1f));
+        _shots.Add(("gallery_floor", L(gx + 40, Gallery.Bottom + 2, Gallery.WallZ + 40), L(gx - 20, Gallery.Top - 40, Gallery.WallZ), 0.22f, 1f));
+        _shots.Add(("gallery_aerial", L(gx + 260, 230, Gallery.WallZ + 260), L(gx, gy, Gallery.WallZ), 0.26f, 1f));
     }
 
     private void BuildTour(WorldGen gen, int sx, int sz)
