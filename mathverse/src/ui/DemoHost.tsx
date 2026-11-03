@@ -27,6 +27,9 @@ interface Props {
   /** keys of parameters currently animating (sweeping through their ranges) */
   animating: Set<string>;
   onParam: (key: string, value: number) => void;
+  onChoice?: (key: string, value: string) => void;
+  onToggle?: (key: string, value: boolean) => void;
+  onInput?: (text: string) => void;
   onTime: (t: number) => void;
   onOutputs: (o: HostOutputs) => void;
   apiRef: React.MutableRefObject<HostApi | null>;
@@ -34,7 +37,7 @@ interface Props {
   generation: number;
 }
 
-export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, onTime, onOutputs, apiRef, generation }: Props) {
+export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, onChoice, onToggle, onInput, onTime, onOutputs, apiRef, generation }: Props) {
   const mainRef = useRef<HTMLDivElement>(null);
   const sideRef = useRef<HTMLDivElement>(null);
   const instRef = useRef<DemoInstance | null>(null);
@@ -42,8 +45,8 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
   const outRef = useRef<HostOutputs>({ readouts: [], steps: [], note: '', warning: '', error: '' });
   const pendingOut = useRef(false);
   const [crash, setCrash] = useState('');
-  const live = useRef({ playing, speed, animating, onParam, onTime, ws });
-  live.current = { playing, speed, animating, onParam, onTime, ws };
+  const live = useRef({ playing, speed, animating, onParam, onChoice, onToggle, onInput, onTime, ws });
+  live.current = { playing, speed, animating, onParam, onChoice, onToggle, onInput, onTime, ws };
 
   const flush = useCallback(() => {
     if (pendingOut.current) return;
@@ -81,6 +84,9 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
       time: { t: ws.t || 0, playing: live.current.playing, speed: live.current.speed },
       dark,
       setParam: (k, v) => { params[k] = v; live.current.onParam(k, v); },
+      setChoice: (k, v) => { choices[k] = v; live.current.onChoice?.(k, v); },
+      setToggle: (k, v) => { toggles[k] = v; live.current.onToggle?.(k, v); },
+      setInput: (text) => { ctx.input = text; live.current.onInput?.(text); },
       setReadouts: (rows) => { outRef.current.readouts = rows; flush(); },
       setSteps: (rows) => { outRef.current.steps = rows; flush(); },
       setNote: (text) => { outRef.current.note = text; flush(); },

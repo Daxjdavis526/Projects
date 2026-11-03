@@ -45,6 +45,11 @@ export interface DemoCtx {
   input: string;
   /** move a slider from inside the demo (a dragged point, an animation) */
   setParam(key: string, value: number): void;
+  /** change a choice or switch from inside the demo (a preset button, a mode change) */
+  setChoice(key: string, value: string): void;
+  setToggle(key: string, value: boolean): void;
+  /** replace the demo's expression field (e.g. a preset matrix) */
+  setInput(text: string): void;
   setReadouts(rows: Readout[]): void;
   setSteps(rows: StepRow[]): void;
   /** a short explanation (Markdown-ish: **bold**, $TeX$, line breaks) shown under the viewport */

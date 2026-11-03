@@ -34,7 +34,7 @@ export interface SurfaceHandle extends Handle {
   mesh: THREE.Mesh;
 }
 export interface CurveHandle extends Handle { set(points: V3[]): void }
-export interface ArrowHandle extends Handle { set(origin: V3, vec: V3): void; setColor(c: string): void }
+export interface ArrowHandle extends Handle { set(origin: V3, vec: V3): void; setColor(c: string): void; setLabel(html: string): void }
 export interface PointHandle extends Handle { set(p: V3): void; get(): V3 }
 export interface FieldHandle extends Handle { update(F: (p: V3) => V3 | null): void }
 export interface ParticlesHandle extends Handle { set(positions: Float32Array, count: number): void }
@@ -153,7 +153,18 @@ export class Viewport3D {
 
   // ── camera ────────────────────────────────────────────────────────────────
   /** Set the region the axes cover and the camera frames. */
-  setBounds(b: Bounds) { this.bounds = b; this.buildAxes(); this.resize(); this.dirty = true; }
+  /** Set the region the axes cover. With { frame: true } the camera also re-frames it (keeping its direction). */
+  setBounds(b: Bounds, opts: { frame?: boolean } = {}) {
+    this.bounds = b; this.buildAxes(); this.resize();
+    if (opts.frame) {
+      const c = this.center(), dir = this.camera.position.clone().sub(this.controls.target).normalize();
+      this.controls.target.copy(c);
+      this.camera.position.copy(c).addScaledVector(dir, this.span() * 2.6);
+      if (this.camera === this.ortho) { this.ortho.zoom = 1; this.ortho.updateProjectionMatrix(); }
+      this.controls.update();
+    }
+    this.dirty = true;
+  }
   getBounds(): Bounds { return this.bounds; }
 
   private center(): THREE.Vector3 {
@@ -360,7 +371,7 @@ export class Viewport3D {
         const flush = () => { if (run.length >= 2) group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(run), Math.min(1200, run.length * 2), opts.radius ?? span * 0.008, 8, false), mat)); run = []; };
         for (let i = 0; i < good.length; i++) {
           const p = new THREE.Vector3(...good[i]);
-          if (run.length && p.distanceTo(run[run.length - 1]) > span * 0.5) flush();
+          if (run.length && good.length > 8 && p.distanceTo(run[run.length - 1]) > span * 0.5) flush();
           run.push(p);
         }
         flush();
@@ -380,10 +391,11 @@ export class Viewport3D {
     const g = new THREE.Group();
     g.add(shaft, head);
     let label: CSS2DObject | null = null;
-    if (opts.label) {
-      const el = document.createElement('div'); el.className = 'v3-label'; el.innerHTML = opts.label; el.style.color = `#${color.getHexString()}`;
+    const makeLabel = (html: string) => {
+      const el = document.createElement('div'); el.className = 'v3-label'; el.innerHTML = html; el.style.color = `#${color.getHexString()}`;
       label = new CSS2DObject(el); g.add(label);
-    }
+    };
+    if (opts.label) makeLabel(opts.label);
     const r0 = opts.radius ?? this.span() * 0.012;
     const set = (o: V3, v: V3) => {
       const len = Math.hypot(...v);
@@ -399,7 +411,12 @@ export class Viewport3D {
       this.dirty = true;
     };
     set(origin, vec);
-    return this.track<ArrowHandle>(g, { set, setColor: (c: string) => { mat.color.set(c); this.dirty = true; } });
+    let last: [V3, V3] = [origin, vec];
+    return this.track<ArrowHandle>(g, {
+      set: (o: V3, v: V3) => { last = [o, v]; set(o, v); },
+      setColor: (c: string) => { mat.color.set(c); this.dirty = true; },
+      setLabel: (html: string) => { if (label) (label as CSS2DObject).element.innerHTML = html; else { makeLabel(html); set(...last); } this.dirty = true; },
+    });
   }
 
   /** A sphere marker; draggable when drag options are given. */

@@ -67,20 +67,37 @@ export function oneSidedLimit(f: (x: number) => number, a: number, side: 1 | -1,
     return { kind: 'oscillates', value: NaN, error: NaN, samples };
   }
 
-  // Aitken Δ² near the sweet spot; fall back to the last good sample with the step envelope as error
-  const last = Math.min(n - 1, kStop + 1);
-  let best = v[last], err = env[kStop] + 4 * Number.EPSILON * scaleV;
-  const A: number[] = [];
-  for (let k = Math.max(0, kStop - 6); k + 2 <= last; k++) {
-    const d0 = v[k + 1] - v[k], d1 = v[k + 2] - v[k + 1], den = d1 - d0;
-    A.push(den !== 0 && Math.abs(d1) > 1e-15 * scaleV ? v[k + 2] - (d1 * d1) / den : v[k + 2]);
+  const floor = 8 * Number.EPSILON * scaleV;
+  // locally constant (a step function's flat side): exact
+  if (d.slice(-15).every((t) => t === 0)) return { kind: 'finite', value: v[n - 1], error: floor, samples };
+
+  // the asymptotic regime: steps that keep their sign and shrink steadily. Rounding
+  // noise at tiny h breaks this pattern (zero steps, sign flips), so it ends the regime.
+  const smooth = (k: number) => d[k] !== 0 && d[k + 1] !== 0 && Math.sign(d[k]) === Math.sign(d[k + 1]) && Math.abs(d[k + 1]) < 0.95 * Math.abs(d[k]);
+  let k1 = -1, k2 = -1;
+  for (let k = 0; k + 1 < d.length;) {
+    if (!smooth(k)) { k++; continue; }
+    let e = k;
+    while (e + 1 < d.length && smooth(e)) e++;
+    if (e - k > k2 - k1) { k1 = k; k2 = e; }
+    k = e + 1;
   }
-  for (let i = 1; i < A.length; i++) {
-    const e = Math.abs(A[i] - A[i - 1]);
-    // accept an accelerated value only if it stays near the samples (erratic data fools Aitken)
-    if (Number.isFinite(e) && e < err && Math.abs(A[i] - v[last]) <= 10 * env[kStop] + 1e-12 * scaleV) { err = e + 8 * Number.EPSILON * scaleV; best = A[i]; }
+  if (k2 - k1 >= 4) {
+    // Aitken Δ² inside the regime; the sweet spot is where three consecutive values agree best
+    const A: number[] = [];
+    for (let k = k1; k + 2 <= k2 + 1 && k + 2 < n; k++) {
+      const d0 = v[k + 1] - v[k], d1 = v[k + 2] - v[k + 1], den = d1 - d0;
+      A.push(den !== 0 ? v[k + 2] - (d1 * d1) / den : v[k + 2]);
+    }
+    let best = NaN, err = Infinity;
+    for (let k = 0; k + 2 < A.length; k++) {
+      const w = Math.max(Math.abs(A[k + 1] - A[k]), Math.abs(A[k + 2] - A[k + 1]));
+      if (w < err) { err = w; best = A[k + 2]; }
+    }
+    if (Number.isFinite(best)) return { kind: 'finite', value: best, error: err + floor, samples };
   }
-  return { kind: 'finite', value: best, error: err, samples };
+  // no clean regime (x·sin(1/x)): the sample at the smallest step envelope, with that envelope as the error
+  return { kind: 'finite', value: v[Math.min(n - 1, kStop + 1)], error: 2 * env[kStop] + floor, samples };
 }
 
 export type PointKind = 'continuous' | 'removable' | 'jump' | 'infinite' | 'oscillating' | 'undefined';

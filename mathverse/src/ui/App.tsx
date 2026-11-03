@@ -285,7 +285,10 @@ export default function App() {
     : place.kind === 'fidget' ? <FidgetGallery onOpen={(id) => openDemo(id)} />
     : place.kind === 'companion' ? <Companion dark={dark} compact={compact} onCompact={setCompact} onOpenDemo={(id, input) => openDemo(id, input, true)} />
     : demo && ws ? <DemoHost key={`${ws.demoId}:${project.active}`} demo={demo} ws={ws} dark={dark} playing={playing} speed={speed} animating={animating}
-        onParam={onParam} onTime={onTime} onOutputs={onOutputs} apiRef={apiRef} generation={generation} />
+        onParam={onParam} onTime={onTime} onOutputs={onOutputs} apiRef={apiRef} generation={generation}
+        onChoice={(k, v) => updateWs((w) => ({ choices: { ...w.choices, [k]: v } }))}
+        onToggle={(k, v) => updateWs((w) => ({ toggles: { ...w.toggles, [k]: v } }))}
+        onInput={(text) => updateWs({ input: text })} />
     : <div className="home"><p className="muted">This demonstration could not be opened.</p></div>;
 
   const showInspector = place.kind === 'demo' && !!demo && settings.rightOpen && !maximized;

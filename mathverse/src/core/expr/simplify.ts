@@ -101,6 +101,18 @@ function step(n: Node): Node {
       if (a.t === 'div') return div(a.a, mul(a.b, b));
       if (b.t === 'div') return div(mul(a, b.b), b.a);
       if (a.t === 'mul' && isNum(a.a) && isNum(b) && Number.isInteger(a.a.v / b.v)) return mul(num(a.a.v / b.v), a.b);
+      // reduce integer fractions: 16x/64 → x/4, 6/8 → 3/4
+      if (isNum(b) && Number.isInteger(b.v) && b.v !== 0) {
+        const top = isNum(a) ? a.v : a.t === 'mul' && isNum(a.a) ? a.a.v : NaN;
+        if (Number.isInteger(top)) {
+          const g = gcd(Math.abs(top), Math.abs(b.v)) * Math.sign(b.v);
+          if (Math.abs(g) > 1 || b.v < 0) {
+            const nt = num(top / g), nb = b.v / g;
+            const numer = isNum(a) ? nt : top / g === 1 ? (a as { b: Node }).b : mul(nt, (a as { b: Node }).b);
+            return nb === 1 ? numer : div(numer, num(nb));
+          }
+        }
+      }
       return div(a, b);
     }
     case 'pow': {
@@ -115,3 +127,5 @@ function step(n: Node): Node {
     }
   }
 }
+
+function gcd(a: number, b: number): number { while (b) { [a, b] = [b, a % b]; } return a; }

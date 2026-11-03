@@ -26,7 +26,10 @@ export function cumulativeIntegral(f: (x: number) => number, a: number, lo: numb
   const piece = (p: number, q: number): number => {
     const r = integrate(f, p, q, tol, 4000);
     error += r.error;
-    if (r.warning && /not finite|finite value/.test(r.warning)) { if (badAt === null) badAt = (p + q) / 2; return NaN; }
+    // a non-finite value, or an error estimate that will not come down, is a non-integrable singularity
+    // (an integrable one such as 1/√x still converges to a small error and is kept)
+    const bad = !Number.isFinite(r.value) || (!r.ok && r.error > 1e-5 * (1 + Math.abs(r.value)));
+    if (bad) { if (badAt === null) badAt = (p + q) / 2; return NaN; }
     return r.value;
   };
   // the grid index just at or below a (clamped), and A there

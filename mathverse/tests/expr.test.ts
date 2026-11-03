@@ -116,3 +116,11 @@ describe('printing', () => {
     expect(compile(simplify(n), ['x', 'y', 'z'])(vals)).toBeCloseTo(compile(n, ['x', 'y', 'z'])(vals), 14);
   });
 });
+
+describe('fraction reduction', () => {
+  it('reduces integer fractions in derivatives', () => {
+    expect(toText(derivative(parse('x^2/8'), 'x'))).toBe('x/4');
+    expect(toText(simplify(parse('6/8')))).toBe('3/4');
+    expect(toText(simplify(parse('4x/(-6)')))).toBe('(-2)*x/3');
+  });
+});

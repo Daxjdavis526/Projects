@@ -9,7 +9,7 @@ import { Node, num, neg, add, sub, mul, div, pow, call, freeSymbols, equal, sym 
 import { FUNCTIONS } from '../core/expr/functions';
 import { simplify } from '../core/expr/simplify';
 import { derivative, NotDifferentiable } from '../core/expr/diff';
-import { toTeX, symbolTeX } from '../core/expr/print';
+import { toTeX, toText, symbolTeX } from '../core/expr/print';
 import { compile } from '../core/expr/compile';
 
 export type DiffRule =
@@ -241,7 +241,7 @@ export function flattenDiff(t: DiffNode, x: string, partial = false, depth = 0, 
   if (!t.children.length || !nontrivialKids.length) {
     // a leaf: one step does it (constants, x itself, x^n, sin x, c·x …)
     out.push({
-      ...base, phase: 'leaf', title: t.trivial ? `${t.name}` : `${t.name}`,
+      ...base, phase: 'leaf', title: t.trivial ? (t.rule === 'variable' ? `The variable itself` : 'A constant') : `Differentiate ${short(t.expr)}`,
       tex: `${lhs} = ${t.assembled === resultTeX || t.trivial ? resultTeX : `${t.assembled} = ${resultTeX}`}`,
       detail: t.formula ? `Rule: $${t.formula}$${t.parts.length ? `, with $${partsTeX(t.parts)}$` : ''}.` : '',
       hint: `Look at $${toTeX(t.expr)}$: it is ${describeOp(t.expr, x)}. Which rule applies?`,
@@ -249,14 +249,14 @@ export function flattenDiff(t: DiffNode, x: string, partial = false, depth = 0, 
     return out;
   }
   out.push({
-    ...base, phase: 'plan', title: `${t.name}`,
+    ...base, phase: 'plan', title: cap(describeOp(t.expr, x)),
     tex: t.formula,
-    detail: `$${toTeX(t.expr)}$ is ${describeOp(t.expr, x)}${t.parts.length ? `, so take $${partsTeX(t.parts)}$` : ''}. ${planNeeds(t, x)}`,
+    detail: `$${toTeX(t.expr)}$ is ${describeOp(t.expr, x)}${t.parts.length ? `, so take $${partsTeX(t.parts)}$` : ''}. ${planNeeds(t, x, partial)}`,
     hint: `The outermost operation in $${toTeX(t.expr)}$ is ${describeOp(t.expr, x)}. Which rule handles it?`,
   });
   for (const c of t.children) flattenDiff(c, x, partial, depth + 1, out);
   out.push({
-    ...base, phase: 'combine', title: `Combine: ${t.name.toLowerCase()}`,
+    ...base, phase: 'combine', title: `Combine the pieces of ${short(t.expr)}`,
     tex: `${lhs} = ${t.assembled}${t.assembled === resultTeX ? '' : ` = ${resultTeX}`}`,
     detail: 'Substitute the derivatives just found into the rule, then simplify.',
     hint: 'Put the pieces back into the rule and simplify.',
@@ -264,9 +264,12 @@ export function flattenDiff(t: DiffNode, x: string, partial = false, depth = 0, 
   return out;
 }
 
-function planNeeds(t: DiffNode, x: string): string {
-  const v = symbolTeX(x);
-  const needs = t.children.filter((c) => !c.trivial).map((c) => `$\\frac{d}{d${v}}\\left[${toTeX(c.expr)}\\right]$`);
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** a short plain-text form of an expression for a step title */
+function short(n: Node): string { const s = toText(n).replace(/\*/g, '·'); return s.length > 28 ? s.slice(0, 26) + '…' : s; }
+
+function planNeeds(t: DiffNode, x: string, partial: boolean): string {
+  const needs = t.children.filter((c) => !c.trivial).map((c) => `$${dOp(x, partial)}\\left[${toTeX(c.expr)}\\right]$`);
   return needs.length ? `It needs ${needs.join(' and ')}.` : '';
 }
 
