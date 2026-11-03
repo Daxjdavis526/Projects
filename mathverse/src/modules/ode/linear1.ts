@@ -131,7 +131,7 @@ function linear1Inst(ctx: DemoCtx): DemoInstance {
       { title: 'Divide by μ', tex: L.tex, detail: 'The term multiplying the exponential decay is the transient (it remembers y(0)); the rest is the response to the input.' },
     ]);
     ctx.setNote(kind === 'sin'
-      ? `**An RC circuit on AC.** With $k = 1/RC$ and $q = V_{in}(t)/RC$, $y$ is the capacitor voltage. After the transient $e^{-kt}$ dies, the response is a sinusoid of amplitude $A/(k^2+\\omega^2)^{1/2} = ${tx(Math.abs(A) / Math.hypot(k, w))}$, lagging by $\\arctan(\\omega/k) = ${tx(Math.atan2(w, k))}$ rad.`
+      ? `**An RC circuit on AC.** With $k = 1/RC$ and $q = V_{in}(t)/RC$, $y$ is the capacitor voltage. After the transient $e^{-kt}$ dies, the response is a sinusoid of amplitude $A/\\sqrt{k^2+\\omega^2} = ${tx(Math.abs(A) / Math.hypot(k, w))}$, lagging by $\\arctan(\\omega/k) = ${tx(Math.atan2(w, k))}$ rad.`
       : kind === 'const' ? `**Charging and cooling.** $y$ relaxes to $A/k$ with time constant $1/k$: a capacitor charging to its supply, a cup reaching room temperature, a falling body reaching terminal velocity $v' + (c/m)v = g$.`
         : `The exact solution (blue) and the ${method === 'rk4' ? 'RK4' : method} approximation with step $h = ${tx(h)}$ (gold). Drag $y(0)$ on the left.`);
   }

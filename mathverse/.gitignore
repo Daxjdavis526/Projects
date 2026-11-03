@@ -4,3 +4,5 @@ public/pyodide/
 src-tauri/target/
 src-tauri/gen/
 *.log
+*.tsbuildinfo
+.ode-smoke/

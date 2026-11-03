@@ -102,30 +102,6 @@ export function changed(): (key: string) => boolean {
 }
 
 /**
- * Prose for the shell's Markup renderer. KaTeX draws \sqrt as an SVG path that
- * contains newlines, and Markup turns newlines into <br>, which breaks the
- * path; so inside prose \sqrt{X} becomes √(X) drawn with the \surd glyph.
- */
-export function md(text: string): string {
-  let out = '', i = 0;
-  while (i < text.length) {
-    const j = text.indexOf('\\sqrt', i);
-    if (j < 0) { out += text.slice(i); break; }
-    out += text.slice(i, j);
-    let k = j + 5;
-    while (text[k] === ' ') k++;
-    if (text[k] === '{') {
-      let depth = 0, e = k;
-      for (; e < text.length; e++) { if (text[e] === '{') depth++; else if (text[e] === '}' && --depth === 0) break; }
-      const inner = text.slice(k + 1, e);
-      out += /^[A-Za-z0-9]$|^\\[a-zA-Z]+$/.test(inner) ? `\\surd ${inner}` : `\\surd(${inner})`;
-      i = e + 1;
-    } else { out += '\\surd'; i = k; }
-  }
-  return out;
-}
-
-/**
  * At most `max` points of a polyline (every k-th, keeping the last). Plot2D
  * reads the canvas size for every point it paints, so animated demos keep
  * their per-frame point count modest.

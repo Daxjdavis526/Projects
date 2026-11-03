@@ -169,7 +169,7 @@ function ivpInst(ctx: DemoCtx): DemoInstance {
     ctx.setReadouts(rows);
     ctx.warn('');
     ctx.setNote(nonLip
-      ? `$f(y) = ${eq === 'sqrt' ? '|y|^{1/2}' : '3|y|^{2/3}'}$ is continuous, so solutions exist (Peano), but $\\partial f/\\partial y$ is unbounded at $y = 0$, so it is not Lipschitz there and uniqueness fails: a solution may rest on $y = 0$ and leave it at **any** time. Drag the ${y0 >= 0 ? 'green' : ''}${y0 === 0 ? ' and ' : ''}${y0 <= 0 ? 'violet' : ''} handle${y0 === 0 ? 's' : ''}. Physically: a tank that is empty now could have emptied at any earlier moment (Torricelli).`
+      ? `$f(y) = ${eq === 'sqrt' ? '\\sqrt{|y|}' : '3|y|^{2/3}'}$ is continuous, so solutions exist (Peano), but $\\partial f/\\partial y$ is unbounded at $y = 0$, so it is not Lipschitz there and uniqueness fails: a solution may rest on $y = 0$ and leave it at **any** time. Drag the ${y0 >= 0 ? 'green' : ''}${y0 === 0 ? ' and ' : ''}${y0 <= 0 ? 'violet' : ''} handle${y0 === 0 ? 's' : ''}. Physically: a tank that is empty now could have emptied at any earlier moment (Torricelli).`
       : eq === 'tan' ? 'Picard–Lindelöf guarantees a unique solution only on **some** interval around $t_0$. Here $y = \\tan(t + C)$ runs to infinity a distance $\\pi/2 \\mp \\arctan y_0$ away: the superlinear growth of $1 + y^2$ beats any time span.'
         : 'Globally Lipschitz: there is exactly one solution, it exists for all $t$, and two solutions approach each other like $e^{-t}$. Picard iteration $y_{n+1}(t) = y_0 + \\int_{t_0}^t f(s, y_n(s))\\,ds$ converges to it — the existence proof made visible.');
   }

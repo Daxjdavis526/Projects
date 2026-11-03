@@ -124,3 +124,11 @@ describe('fraction reduction', () => {
     expect(toText(simplify(parse('4x/(-6)')))).toBe('(-2)*x/3');
   });
 });
+
+describe('more simplification', () => {
+  it('ln e, exp(ln x), a·(1/b)', () => {
+    expect(toText(simplify(parse('ln(e)')))).toBe('1');
+    expect(toText(simplify(parse('exp(ln(x))')))).toBe('x');
+    expect(toText(simplify(parse('x*(1/y)')))).toBe('x/y');
+  });
+});

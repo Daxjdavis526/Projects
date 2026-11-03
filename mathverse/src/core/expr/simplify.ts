@@ -39,6 +39,8 @@ function step(n: Node): Node {
         if ((n.fn === 'cos' || n.fn === 'cosh' || n.fn === 'exp') && isNum(args[0], 0)) return num(1);
         if (n.fn === 'sqrt' && args[0].t === 'num' && Number.isInteger(Math.sqrt(args[0].v))) return num(Math.sqrt(args[0].v));
       }
+      if ((n.fn === 'ln' || n.fn === 'log') && args[0].t === 'sym' && args[0].name === 'e') return num(1);
+      if (n.fn === 'exp' && args[0].t === 'call' && (args[0].fn === 'ln' || args[0].fn === 'log')) return args[0].args[0];
       return { t: 'call', fn: n.fn, args };
     }
     case 'neg': {
@@ -73,6 +75,8 @@ function step(n: Node): Node {
       const a = step(n.a), b = step(n.b);
       if (isNum(a) && isNum(b)) return num(a.v * b.v);
       if (isNum(a, 0) || isNum(b, 0)) return num(0);
+      if (b.t === 'div' && isNum(b.a, 1)) return div(a, b.b);                          // a·(1/b) → a/b
+      if (a.t === 'div' && isNum(a.a, 1)) return div(b, a.b);
       if (isNum(a, 1)) return b;
       if (isNum(b, 1)) return a;
       if (isNum(a, -1)) return neg(b);

@@ -49,7 +49,7 @@ function fourierDemo(ctx: DemoCtx): DemoInstance {
   const plot = ctx.plot!, plot2 = ctx.plot2!;
   plot.opts.xLabel = 'x'; plot.opts.yLabel = 'f, S_N';
   plot2.opts.xLabel = 'log₁₀ n'; plot2.opts.yLabel = 'log₁₀ |coefficient|';
-  let key = '', A = new Float64Array(NMAX + 1), B = new Float64Array(NMAX + 1), qerr = 0, qok = true, f: (x: number) => number = TARGETS.square.f, fname = '', inputError = '', norm2 = 0;
+  let key = '', A: Float64Array = new Float64Array(NMAX + 1), B: Float64Array = new Float64Array(NMAX + 1), qerr = 0, qok = true, f: (x: number) => number = TARGETS.square.f, fname = '', inputError = '', norm2 = 0;
 
   const ext = (x: number) => {
     const k = ctx.choices.kind as Kind, y = x - 2 * PI * Math.round(x / (2 * PI));
@@ -125,7 +125,7 @@ function fourierDemo(ctx: DemoCtx): DemoInstance {
       g.text([2.3, base - 4.6], '1/n²', { color: c.muted, font: '11px Inter, sans-serif' }, 4, 0);
       for (const p of pts) g.point([p.x, p.y], p.on ? 3 : 2, { fill: p.on ? (p.cos ? c.cyan : c.gold) : alpha(c.muted, 0.6) });
       g.line([Math.log10(Math.max(N, 1)), y0], [Math.log10(Math.max(N, 1)), y1], { color: alpha(c.orange, 0.7), width: 1.4, dash: [3, 3] });
-      g.text([-0.1, y1 - 0.2], '● |aₙ| (cosine)   ● |bₙ| (sine)   — lit: included in the sum', { color: c.muted, font: '11px Inter, sans-serif', baseline: 'top' });
+      g.text([0.05, y0 + 0.15], '● |aₙ| (cosine)   ● |bₙ| (sine)   — lit: included in the sum', { color: c.muted, font: '11px Inter, sans-serif', baseline: 'bottom' });
     });
     // Parseval: ‖f − S_N‖² = ‖f‖² − π(a₀²/2 + Σ aₙ² + bₙ²) (full period of length 2π)
     let sum = A[0] * A[0] / 2;
@@ -136,7 +136,7 @@ function fourierDemo(ctx: DemoCtx): DemoInstance {
       { label: 'Gibbs constant (for a jump)', value: GIBBS.toFixed(6) },
       { label: 'rms error ‖f − S_N‖ (Parseval)', value: fej ? '(for S_N only)' : fmt(l2, 4) },
       { label: 'coefficient decay (fitted slope, n ≥ 20)', value: Number.isFinite(slope) ? fmt(slope, 3) : 'faster than any power' },
-      { label: 'first coefficients', value: Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (ctx.choices.kind === 'cosine' || (ctx.choices.kind === 'full' && Math.abs(A[n]) > Math.abs(B[n])) ? `a${n}=${fmt(A[n], 3)}` : `b${n}=${fmt(B[n], 3)}`)).join('  ') },
+      { label: 'first coefficients', value: Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (ctx.choices.kind === 'cosine' || (ctx.choices.kind === 'full' && Math.abs(A[n]) > Math.abs(B[n])) ? `a${n}=${fmt(Math.abs(A[n]) < 1e-12 ? 0 : A[n], 3)}` : `b${n}=${fmt(Math.abs(B[n]) < 1e-12 ? 0 : B[n], 3)}`)).join('  ') },
       { label: 'quadrature error (all coefficients)', value: fmt(qerr, 2), tone: qok ? 'good' : 'warn' },
     ];
     ctx.setReadouts(rows);

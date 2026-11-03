@@ -325,7 +325,7 @@ async function taskExtrema(ctx: RunCtx): Promise<Work> {
   return {
     task: 'extrema', engine: 'Step differentiator + SymPy solve; checked in MathVerse’s core', steps,
     answer: found.length ? { label: 'Critical points', tex: found.map((c) => `${symbolTeX(x)} = ${fmt(c.x, 8)}\\ \\text{(${c.kind})}`).join(',\\quad ') } : scan.length ? { label: 'Critical points (numerical)', tex: scan.map((c) => `${fmt(c.x, 8)}\\ (\\text{${c.kind}})`).join(',\\ ') } : { label: 'Critical points', tex: '\\text{none found}' },
-    check: found.length ? worst(...checks) : scan.length ? numerical('Only numerical critical points were found.') : unv('No critical points found.'),
+    check: found.length ? (worst(...checks).status === 'verified' ? ok(`f′ is verified, and f′ = 0 at each of the ${found.length} point${found.length === 1 ? '' : 's'} SymPy found (checked numerically).${missing.length ? '' : ' The numerical scan finds no others in [−10, 10].'}`) : worst(...checks)) : scan.length ? numerical('Only numerical critical points were found.') : unv('No critical points found.'),
     marks: { points: (found.length ? found.map((c) => c.x) : scan.map((c) => c.x)).map((v) => ({ at: [v, F ? F(v) : 0] })) }, notes: [],
   };
 }
@@ -1077,6 +1077,7 @@ function taskSeparate(ctx: RunCtx): Work {
       return { task: 'separate', engine: '—', steps: [{ title: 'Poisson’s equation', detail: 'A particular solution depends on the source; open the PDE demonstration for the numerical solution.' }], answer: null, check: unv('No closed form here.'), notes: [] };
   }
   const vars = pde.dims === 1 || pde.family === 'laplace' ? (pde.family === 'laplace' ? ['x', 'y'] : ['x', 't']) : ['x', 'y', 't'];
+  u = simplify(u);
   const R = simplify(residual(u));
   const zero = agree(R, num(0), vars, fixed);
   const check = zero.ok ? ok(`Substituted into the PDE (exact derivatives): the residual vanishes at ${zero.points} sample points.`) : bad(`The residual is not zero (relative ${fmt(zero.maxErr, 2)}).`);

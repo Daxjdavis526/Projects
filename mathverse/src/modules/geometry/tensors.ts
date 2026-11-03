@@ -70,7 +70,9 @@ function nonzero(T: CurvatureTensors, names: string[]): { rows: StepRow[]; list:
     const x = R[a][b][c][d];
     if (Math.abs(x) <= 1e-11 * big) continue;
     const t = `R_{${nm(a)}${nm(b)}${nm(c)}${nm(d)}} = ${tx(x, 8)}`;
-    list.push(t); rows.push({ title: `R_${names[a]}${names[b]}${names[c]}${names[d]}`, tex: t });
+    const U: Record<string, string> = { chi: 'χ', theta: 'θ', phi: 'φ' };
+    const un = (i: number) => U[names[i]] ?? names[i];
+    list.push(t); rows.push({ title: `R_${un(a)}${un(b)}${un(c)}${un(d)}`, tex: t });
   }
   return { rows, list };
 }
@@ -82,9 +84,10 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
   let b: Built = surfaceFromCtx(ctx);
   const st: { id?: string; pu?: number; pv?: number } = {};
   let pt: Pt | null = null, ring: Curve | null = null, lastSpace = '';
+  const plotCache: { key: string; samples: [number, number][]; exact: [number, number][]; xl: string; yl: string } = { key: '', samples: [], exact: [], xl: '', yl: '' };
   const update = () => {
     const sp = spaceBy.get(ctx.choices.space) ?? SPACES[0];
-    if (sp.id !== lastSpace) { lastSpace = sp.id; mesh.reset(); }
+    if (sp.id !== lastSpace) { lastSpace = sp.id; mesh.reset(); pt?.dispose(); pt = null; }
     const a = ctx.params.a, M = ctx.params.b;
     let metric: Metric, x: number[];
     let K2 = NaN, detg = NaN;
@@ -176,6 +179,8 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
       }
       for (let i = 0; i <= 300; i++) { const c = rng[0] + ((rng[1] - rng[0]) * i) / 300; const q = pnt(c); exact.push([c, localGeometry(b.S, q[0], q[1]).K]); }
       plotX = along === 0 ? x[0] : x[1];
+    } else if (plotCache.key === `${sp.id}|${a}|${M}`) {
+      samples.push(...plotCache.samples); exact.push(...plotCache.exact); xl = plotCache.xl; yl = plotCache.yl;
     } else if (sp.id === 'schw4' || sp.id === 'schw3') {
       xl = 'r'; yl = sp.id === 'schw4' ? 'log₁₀ Kretschmann' : 'R_rr';
       const r0 = 2 * M * 1.02, r1 = Math.max(12, 8 * M);
@@ -196,6 +201,7 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
       const ex = sp.id === 's3' ? 6 / (a * a) : sp.id === 'hyper' ? -2 / (a * a) : 0;
       exact.push([lo, ex], [hi, ex]);
     }
+    if (sp.id !== 'surface') Object.assign(plotCache, { key: `${sp.id}|${a}|${M}`, samples: samples.slice(), exact: exact.slice(), xl, yl });
     const ys = [...samples, ...exact].map((p) => p[1]).filter(Number.isFinite);
     let y0 = Math.min(0, ...ys), y1 = Math.max(0, ...ys);
     if (y1 - y0 < 1e-9) { y0 -= 1; y1 += 1; }
@@ -208,7 +214,7 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
       for (const p of samples) if (Number.isFinite(p[1])) G.point(p, 3.2, { color: SERIES[1] });
       const cx = sp.id === 'surface' ? plotX : sp.id === 'schw4' ? x[1] : sp.id === 'schw3' ? x[0] : sp.id === 's3' ? x[0] : sp.id === 'hyper' ? x[1] : x[0];
       G.line([cx, y0 - pad], [cx, y1 + pad], { color: COLORS.vec, width: 1.4, dash: [5, 4] });
-      G.text([Math.min(...xs), y1 + pad], sp.id === 'surface' ? ' line: K from II (extrinsic) · dots: R₁₂₁₂/det g from the metric (intrinsic)' : ' line: exact formula · dots: computed from the metric', { color: ctx.dark ? '#c9cfdb' : '#2a3040', baseline: 'top' }, 4, 4);
+      G.text([Math.min(...xs), y0 - pad], sp.id === 'surface' ? ' line: K from II (extrinsic) · dots: R₁₂₁₂/det g from the metric (intrinsic)' : ' line: exact formula · dots: computed from the metric', { color: ctx.dark ? '#c9cfdb' : '#2a3040', baseline: 'bottom' }, 4, -6);
     });
     ctx.warn(b.error && sp.id === 'surface' ? b.error : big > 1e12 ? 'The curvature is enormous here — close to a singularity.' : '');
     ctx.setNote(`${sp.id === 'surface' ? 'For a surface' : `For ${sp.describe}`}: the Riemann tensor is built from the metric and its first two derivatives only — a creature inside the space could measure it (parallel transport around small loops, geodesic deviation). ${n === 2 ? 'In 2D it has one independent component: $R_{1212} = K\\det g$, hence $R_{ab} = K g_{ab}$ and $R = 2K$.' : n === 3 ? 'In 3D it has 6 independent components — exactly as many as Ricci, which therefore determines it.' : 'In 4D it has 20 independent components; Ricci holds 10 of them. Einstein’s vacuum equations $R_{ab} = 0$ fix Ricci but leave the other 10 (the Weyl tensor: tides and gravitational waves) free — which is why empty space around a star can still be curved.'} The Steps tab lists every nonzero independent component.`);

@@ -184,7 +184,7 @@ export class Plot2D {
   private panning: { x: number; y: number; v: View } | null = null;
   onViewChange?: (v: View) => void;
   /** called with math coordinates on a click that was not a drag (place a solution, a point) */
-  onClick?: (p: P) => void;
+  onClick?: (p: P, e?: { shift: boolean; ctrl: boolean; alt: boolean }) => void;
 
   constructor(host: HTMLElement, opts: PlotOpts = {}) {
     this.host = host;
@@ -337,7 +337,7 @@ export class Plot2D {
       const wasDrag = this.dragging, wasClick = downAt && Math.hypot(x - downAt.x, y - downAt.y) < 4;
       this.dragging = null; this.panning = null; downAt = null;
       el.style.cursor = '';
-      if (!wasDrag && wasClick && this.onClick) this.onClick(this.toMath(x, y));
+      if (!wasDrag && wasClick && this.onClick) this.onClick(this.toMath(x, y), { shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey });
     };
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', () => { this.dragging = null; this.panning = null; downAt = null; });

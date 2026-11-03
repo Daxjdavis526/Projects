@@ -225,7 +225,7 @@ function createLightcones(ctx: DemoCtx): DemoInstance {
     };
     const norm = (p: P2): P2 => { const l = Math.hypot(p[0], p[1]); return [p[0] / l, p[1] / l]; };
     let view: { x0: number; x1: number; y0: number; y1: number }, xl: string, yl: string;
-    if (cs === 'kruskal') { view = { x0: -2.6, x1: 2.6, y0: -1.4, y1: 2.4 }; xl = 'X'; yl = 'T'; }
+    if (cs === 'kruskal') { view = { x0: -2.6, x1: 5, y0: -1.6, y1: 3.4 }; xl = 'X'; yl = 'T'; }
     else { view = { x0: 0, x1: 10, y0: -4, y1: 8 }; xl = 'r'; yl = cs === 'schw' ? 't' : cs === 'mink' ? 't' : 't̃'; }
     plot.setView(view);
     plot.opts.xLabel = xl; plot.opts.yLabel = yl;
@@ -238,14 +238,14 @@ function createLightcones(ctx: DemoCtx): DemoInstance {
         G.parametric((s) => Math.sinh(s), (s) => Math.cosh(s), -1.6, 1.6, { color: SERIES[2], width: 3 });
         G.parametric((s) => Math.sinh(s), (s) => -Math.cosh(s), -1.6, 1.6, { color: SERIES[2], width: 3 });
         G.line([-3, -3], [3, 3], { color: SERIES[2], width: 1.6 }); G.line([-3, 3], [3, -3], { color: SERIES[2], width: 1.6 });
-        G.text([0.95, 1.4], 'r = 0 (singularity)', { color: SERIES[2] });
-        G.text([1.6, 1.5], 'horizon', { color: SERIES[2] });
+        G.text([0, 1.06], 'r = 0 (singularity)', { color: SERIES[2], align: 'center', baseline: 'bottom' });
+        G.text([2.3, 2.2], 'horizon r = 2M', { color: SERIES[2], baseline: 'top' }, 8, 0);
         for (const r of [1, 1.5, 2.5, 3, 4, 6]) {
           const w = (1 - r / 2) * Math.exp(r / 2);
           if (w > 0) G.parametric((s) => Math.sqrt(w) * Math.sinh(s), (s) => Math.sqrt(w) * Math.cosh(s), -1.5, 1.5, { color: ink, width: 0.8, alpha: 0.35 });
           else G.parametric((s) => Math.sqrt(-w) * Math.cosh(s), (s) => Math.sqrt(-w) * Math.sinh(s), -1.5, 1.5, { color: ink, width: 0.8, alpha: 0.35 });
         }
-        if (ctx.toggles.grid) for (let i = -5; i <= 5; i++) for (let j = -3; j <= 5; j++) {
+        if (ctx.toggles.grid) for (let i = -5; i <= 10; i++) for (let j = -3; j <= 7; j++) {
           const p: P2 = [i * 0.45, j * 0.45];
           if (p[1] * p[1] - p[0] * p[0] >= 1) continue;
           G.polygon([p, [p[0] - 0.14, p[1] + 0.14], [p[0] + 0.14, p[1] + 0.14]], { fill: 'rgba(106,169,255,0.28)', color: 'rgba(106,169,255,0.7)', width: 1 });

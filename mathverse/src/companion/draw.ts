@@ -59,10 +59,16 @@ export function initialView(c: DrawCtx, visual: Visual | null): View {
   switch (an.kind) {
     case 'function': case 'equation': {
       const fn = an.kind === 'equation' ? [f1(an.equation!.lhs, x, fixed), f1(an.equation!.rhs, x, fixed)] : [f1(an.exprs[0], x, fixed)];
-      const pts = (c.work?.marks?.points ?? []).map((p) => p.at[0]).filter(Number.isFinite);
-      const lo = Math.min(-6, ...pts.map((p) => p - 1)), hi = Math.max(6, ...pts.map((p) => p + 1));
-      if (c.viz === 'zero' && an.equation) return fitView([f1(an.equation.F, x, fixed)!].filter(Boolean), lo, hi);
-      return fitView(fn.filter((f): f is (t: number) => number => !!f), Math.max(lo, -12), Math.min(hi, 12));
+      const fns = (c.viz === 'zero' && an.equation ? [f1(an.equation.F, x, fixed)] : fn).filter((f): f is (t: number) => number => !!f);
+      const pts = (c.work?.marks?.points ?? []).map((p) => p.at[0]).filter((v) => Number.isFinite(v) && Math.abs(v) < 12);
+      // the widest window (from ±6 down to ±2) in which the graph is not too steep to read: height ≤ 6 × width
+      const need = pts.length ? Math.max(...pts.map(Math.abs)) + 1 : 0;
+      for (const h of [6, 5, 4, 3, 2]) {
+        const half = Math.max(h, need);
+        const v = fitView(fns, -half, half);
+        if ((v.y1 - v.y0) <= 6 * 2 * half || h === 2) return v;
+      }
+      return fitView(fns, -6, 6);
     }
     case 'curve2d': case 'polar': {
       const comps = an.kind === 'polar' ? null : an.exprs.map((e) => f1(e, x, fixed));
@@ -245,7 +251,7 @@ export function drawDefault(g: Graphics, c: DrawCtx) {
         const div = compile({ t: 'add', a: derivative(an.exprs[0], an.vars[0]), b: derivative(an.exprs[1], an.vars[1]) }, an.vars, fixed);
         const { x0, x1, y0, y1 } = g.view;
         let m = 1e-9; for (let i = 0; i < 20; i++) for (let j = 0; j < 20; j++) { const v = div([x0 + ((x1 - x0) * i) / 19, y0 + ((y1 - y0) * j) / 19]); if (Number.isFinite(v)) m = Math.max(m, Math.abs(v)); }
-        g.heatmap((u, v) => div([u, v]), [-m, m], 'coolwarm', 100);
+        g.heatmap((u, v) => div([u, v]), [-1.8 * m, 1.8 * m], 'coolwarm', 100);
       } catch { /* no divergence picture */ }
       g.field((u, v) => [P([u, v]), Q([u, v])], 20, 'plasma');
       const px = values.x0 ?? 1, py = values.y0 ?? 0.5;
