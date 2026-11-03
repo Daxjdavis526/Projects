@@ -345,16 +345,18 @@ async function taskLimit(ctx: RunCtx): Promise<Work> {
     if (Number.isFinite(v)) steps.push({ title: 'Try direct substitution', rule: 'Continuity', tex: `f(${aTeX}) = ${fmt(v)}`, detail: 'If f is continuous at the point, the limit is simply its value there (the numerical table below confirms it).', hint: 'Start by plugging the point in.' });
     else {
       steps.push({ title: 'Direct substitution fails', rule: 'Indeterminate form', tex: `f(${aTeX}) \\text{ is undefined}`, detail: 'The point is not in the domain — look at how f behaves nearby.', hint: 'Plug the point in — what goes wrong?' });
-      if (f.t === 'div') {
-        const N = tryCompile1(f.a, x, fixed), Dn = tryCompile1(f.b, x, fixed);
-        const nv = N ? N(A.value) : NaN, dv = Dn ? Dn(A.value) : NaN;
-        if (Math.abs(nv) < 1e-12 && Math.abs(dv) < 1e-12) {
-          try {
-            const dn = derivative(f.a, x), dd = derivative(f.b, x);
-            const r = tryCompile1(div(dn, dd), x, fixed)?.(A.value);
-            steps.push({ title: 'L’Hôpital’s rule (0/0)', rule: 'L’Hôpital', tex: `${lim} \\frac{${T(f.a)}}{${T(f.b)}} = ${lim} \\frac{${T(dn)}}{${T(dd)}}${r !== undefined && Number.isFinite(r) ? ` = ${fmt(r)}` : ''}`, detail: 'Numerator and denominator both tend to 0, so the limit equals the limit of the ratio of their derivatives (when that exists). The derivatives are exact, from MathVerse’s differentiator.', hint: 'Both top and bottom go to zero — which rule helps with 0/0?' });
-          } catch { /* not differentiable */ }
-        }
+      // L'Hôpital, repeated while the quotient is still 0/0 (up to three times)
+      let num_ = f.t === 'div' ? f.a : null, den = f.t === 'div' ? f.b : null;
+      for (let round = 1; num_ && den && round <= 3; round++) {
+        const nv = tryCompile1(num_, x, fixed)?.(A.value) ?? NaN, dv = tryCompile1(den, x, fixed)?.(A.value) ?? NaN;
+        if (!(Math.abs(nv) < 1e-12 && Math.abs(dv) < 1e-12)) break;
+        let dn: Node, dd: Node;
+        try { dn = derivative(num_, x); dd = derivative(den, x); } catch { break; }
+        const r = tryCompile1(div(dn, dd), x, fixed)?.(A.value);
+        const done = r !== undefined && Number.isFinite(r);
+        steps.push({ title: round === 1 ? 'L’Hôpital’s rule (0/0)' : 'Still 0/0: apply it again', rule: 'L’Hôpital', tex: `${lim} \\frac{${T(num_)}}{${T(den)}} = ${lim} \\frac{${T(dn)}}{${T(dd)}}${done ? ` = ${fmt(r!)}` : ''}`, detail: round === 1 ? 'Numerator and denominator both tend to 0, so the limit equals the limit of the ratio of their derivatives (when that exists). The derivatives are exact, from MathVerse’s differentiator.' : 'The new quotient is again 0/0 at the point.', hint: round === 1 ? 'Both top and bottom go to zero — which rule helps with 0/0?' : 'Still 0/0?' });
+        if (done) break;
+        num_ = dn; den = dd;
       }
     }
   }
@@ -417,9 +419,25 @@ async function taskDefinite(ctx: RunCtx): Promise<Work> {
   const a = params.lo ?? 0, b = params.hi ?? 1;
   const r = await (ctx.integrate ?? integrateSymbolic)(f, x, fixed, a, b);
   const steps = integralSteps(r);
-  const d = r.definite!;
-  const head = `\\int_{${fmt(a, 6)}}^{${fmt(b, 6)}} ${T(f)}\\,d${symbolTeX(x)}`;
-  if (r.antiderivative) steps.push({ title: 'Evaluate the antiderivative at the limits', rule: 'Fundamental Theorem of Calculus', tex: `${head} = \\Big[${r.antiderivative.tex}\\Big]_{${fmt(a, 6)}}^{${fmt(b, 6)}}`, detail: `F(b) − F(a), with F′ = f ${r.antiderivative.verified ? '(verified)' : '(not verified)'}.`, hint: 'F(b) − F(a).' });
+  const d = { ...r.definite! };
+  // limits typed exactly (∫_0^pi …) and not moved since: ask SymPy again with the exact limits, so the value is exact
+  const it = ctx.an.intent;
+  let A = fmt(a, 6), B = fmt(b, 6);
+  if (it.loText && it.hiText && it.lo === a && it.hi === b && !(/^-?[\d.]+$/.test(it.loText) && /^-?[\d.]+$/.test(it.hiText))) {
+    try {
+      const lo = parse(it.loText), hi = parse(it.hiText);
+      const names = namesOf(f); if (!names.includes(x)) names.push(x);
+      const ex = (await ctx.cas.call<{ definite: CasOut | null }>('integrate', { expr: toSympy(f), names, var: x, a: toSympy(lo), b: toSympy(hi) })).definite;
+      A = T(lo); B = T(hi);
+      if (ex) {
+        const v = ex.value ?? null;
+        d.exactTex = ex.latex; d.value = v;
+        d.agrees = v === null ? null : Math.abs(v - d.numeric) <= Math.max(1e-6 * Math.abs(d.numeric), 10 * d.numericError, 1e-9);
+      }
+    } catch { /* keep the decimal-limit result */ }
+  }
+  const head = `\\int_{${A}}^{${B}} ${T(f)}\\,d${symbolTeX(x)}`;
+  if (r.antiderivative) steps.push({ title: 'Evaluate the antiderivative at the limits', rule: 'Fundamental Theorem of Calculus', tex: `${head} = \\Big[${r.antiderivative.tex}\\Big]_{${A}}^{${B}}${d.exactTex !== null ? ` = ${d.exactTex}` : ''}`, detail: `F(b) − F(a), with F′ = f ${r.antiderivative.verified ? '(verified)' : '(not verified)'}.`, hint: 'F(b) − F(a).' });
   const vis: Visual = { k: 'curves', x, items: [{ node: f, label: 'f', tone: 0 }], shade: { node: f, lo: Math.min(a, b), hi: Math.max(a, b) } };
   steps.push({ title: 'Numerical check', rule: 'Adaptive Gauss–Kronrod quadrature', tex: `${head} \\approx ${fmt(d.numeric, 12)} \\pm ${fmt(d.numericError, 2)}`, detail: d.warning ? `Quadrature warning: ${d.warning}` : 'Signed area: regions below the axis count negative.', check: numerical('Quadrature with an error estimate.'), visual: vis });
   let check: Check;

@@ -221,12 +221,22 @@ export class Plot2D {
 
   private X(x: number) { return ((x - this.view.x0) / (this.view.x1 - this.view.x0)) * this.wPx(); }
   private Y(y: number) { return this.hPx() - ((y - this.view.y0) / (this.view.y1 - this.view.y0)) * this.hPx(); }
-  private wPx() { return this.host.clientWidth || 1; }
-  private hPx() { return this.host.clientHeight || 1; }
+  // While painting, the size is read once (clientWidth forces layout; per point it dominated
+  // the frame time of animated demos); outside paint it is read live.
+  private size: [number, number] | null = null;
+  private wPx() { return this.size ? this.size[0] : this.host.clientWidth || 1; }
+  private hPx() { return this.size ? this.size[1] : this.host.clientHeight || 1; }
   toMath(px: number, py: number): P { return [this.view.x0 + (px / this.wPx()) * (this.view.x1 - this.view.x0), this.view.y0 + (1 - py / this.hPx()) * (this.view.y1 - this.view.y0)]; }
 
   private paint() {
-    const w = this.wPx(), h = this.hPx(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.size = null;
+    const w = this.wPx(), h = this.hPx();
+    this.size = [w, h];
+    try { this.paintSized(w, h); } finally { this.size = null; }
+  }
+
+  private paintSized(w: number, h: number) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
     this.fixAspect();
     if (this.canvas.width !== Math.round(w * dpr) || this.canvas.height !== Math.round(h * dpr)) {
       this.canvas.width = Math.round(w * dpr); this.canvas.height = Math.round(h * dpr);
@@ -360,6 +370,11 @@ export class Plot2D {
   toSVG(): string {
     const g = this.last;
     const w = this.wPx(), h = this.hPx();
+    this.size = [w, h];
+    try { return this.svgOf(g, w, h); } finally { this.size = null; }
+  }
+
+  private svgOf(g: Graphics | null | undefined, w: number, h: number): string {
     const out: string[] = [`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`, `<rect width="100%" height="100%" fill="${this.dark ? '#0d1017' : '#f7f8fa'}"/>`];
     const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     for (const cmd of g?.cmds ?? []) {

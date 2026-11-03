@@ -266,8 +266,10 @@ describe.skipIf(!have)('worked solutions with SymPy (Pyodide)', () => {
     const w = await runTask(ctxFor('x e^x', 'integral', {}, '0', py));
     expect(w.check.status).toBe('verified');
     expect(w.steps.some((s) => s.rule === 'Parts')).toBe(true);
-    const d = await runTask(ctxFor('∫_0^pi sin(x) dx', 'definite', { lo: 0, hi: Math.PI }, '0', py));
+    const d = await runTask(ctxFor('∫_0^pi sin(x)^2 dx', 'definite', {}, '0', py));
     expect(d.check.status).toBe('verified');
+    expect(d.answer!.tex).toContain('\\frac{\\pi}{2}');                          // typed limits stay exact
+    expect(d.answer!.label).toBe('Exact value');
   }, 60000);
   it('solves, factors and checks each root', async () => {
     const w = await runTask(ctxFor('x^2 - 5x + 6 = 0', 'solve', {}, '0', py));

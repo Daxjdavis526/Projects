@@ -98,3 +98,21 @@ describe('roots and critical points', () => {
     expect(findRoots((x) => 1 / x, -1, 1)).toEqual([]);   // a pole is not a root
   });
 });
+
+describe('adaptive solver end point', () => {
+  it('a round-off-sized final step is not reported as a step-size collapse', async () => {
+    const { solveAdaptive } = await import('../src/core/numeric/ode');
+    // y' = 0 makes every step error-free, so steps march at maxStep and the last one is a
+    // remainder of 5e-14 — which the old code mistook for a collapsing step size
+    const grid = solveAdaptive(() => [0], [1], 0, 1, { maxStep: 1e-3 }).t;
+    const T = grid[500] + 5e-14;
+    const r0 = solveAdaptive(() => [0], [1], 0, T, { maxStep: 1e-3 });
+    expect(r0.ok, r0.warning).toBe(true);
+    expect(r0.t[r0.t.length - 1]).toBe(T);
+    for (const t1 of [1, 0.1 + 0.2, 10 / 3, 7.000000000000001, 2 * Math.PI]) {
+      const r = solveAdaptive((_t, y) => [y[1], -y[0]], [0, 1], 0, t1);
+      expect(r.ok, `t1 = ${t1}: ${r.warning}`).toBe(true);
+      expect(r.t[r.t.length - 1]).toBeCloseTo(t1, 12);
+    }
+  });
+});

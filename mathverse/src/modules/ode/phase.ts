@@ -81,7 +81,7 @@ function phaseInst(ctx: DemoCtx): DemoInstance {
     const lab = (at: P, s: string, col: string) => label(g, at, s, col, { align: 'center', size: 12, bold: true });
     lab([-2.6, 4.4], 'stable spiral', c.violet); lab([2.6, 4.4], 'unstable spiral', c.violet);
     lab([-3.2, 1.2], 'stable node', c.blue); lab([3.2, 1.2], 'unstable node', c.blue);
-    lab([0, -1.8], 'saddle', c.orange); label(g, [0.12, 3.4], 'center (τ = 0)', c.green, { size: 12, bold: true });
+    lab([0, -1.8], 'saddle', c.orange); label(g, [0.12, 4.65], 'center (τ = 0)', c.green, { size: 12, bold: true });
     label(g, [3.6, para(3.6)], 'Δ = τ²/4', c.violet, { align: 'right', dx: -8, dy: -2, size: 11 });
   }
 

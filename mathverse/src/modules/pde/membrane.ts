@@ -182,7 +182,7 @@ function membraneDemo(ctx: DemoCtx): DemoInstance {
     const modeTex = shape === 'rect'
       ? `\\sin\\tfrac{${Math.max(1, mm)}\\pi x}{a}\\,\\sin\\tfrac{${nn}\\pi y}{b}\\,\\cos\\omega t`
       : `J_{${mm}}\\!\\left(${fmt(zeros(mm)[nn - 1], 5)}\\,\\tfrac rR\\right)${mm ? `\\cos ${mm === 1 ? '' : mm}\\theta` : ''}\\,\\cos\\omega t`;
-    ctx.setNote(`Mode: $u = ${modeTex}$.${shape === 'rect' && mm === 0 ? ' (m = 0 would be identically zero on a fixed rectangle; m = 1 is shown.)' : ''}${p.mix > 0 ? (deg ? ' The two modes share one frequency, so their sum is again a standing wave with its own nodal pattern.' : ' The two modes have different frequencies: the sum is not a standing wave, and its zero set moves (nodal lines are shown only for single modes and degenerate pairs).') : ' White lines are the nodal lines, where the drumhead never moves.'}`);
+    ctx.setNote(`Mode: $u = ${modeTex}$.${shape === 'rect' && mm === 0 ? ' (m = 0 would be identically zero on a fixed rectangle; m = 1 is shown.)' : ''}${p.mix > 0 ? (deg ? ' The two modes share one frequency, so their sum is again a standing wave with its own nodal pattern.' : ' The two modes have different frequencies: the sum is not a standing wave, and its zero set moves (nodal lines are shown only for single modes and degenerate pairs).') : (ctx.toggles.nodal && (mm > (shape === 'rect' ? 1 : 0) || nn > 1) ? ' White lines are the nodal lines, where the drumhead never moves.' : '')}`);
   };
 
   return {

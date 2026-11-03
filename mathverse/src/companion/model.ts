@@ -146,7 +146,7 @@ export interface TaskDef { id: string; label: string; cas: boolean; subjects: Su
 export interface VizDef { id: string; label: string; dim: 2 | 3 }
 
 /** The typed intent of a homework phrasing ("d/dx", "∫ … dx", "lim"). */
-export interface Intent { task?: string; var?: string; lo?: number; hi?: number; at?: string }
+export interface Intent { task?: string; var?: string; lo?: number; hi?: number; at?: string; /** the limits as typed (pi, 1/2 …), kept exact */ loText?: string; hiText?: string }
 
 export interface Analysis {
   kind: Kind;
@@ -249,7 +249,7 @@ export function readIntent(src: string): { body: string; intent: Intent } {
   m = /^(?:∫|int(?:egrate)?\b)\s*(?:_\s*\{?([^}^\s]+)\}?\s*\^\s*\{?([^}\s]+)\}?)?\s*(.+?)\s*d([a-z])\s*$/i.exec(s);
   if (!intent.task && m) {
     intent.var = m[4]; s = m[3];
-    if (m[1] !== undefined && m[2] !== undefined) { intent.task = 'definite'; intent.lo = num_(m[1]); intent.hi = num_(m[2]); } else intent.task = 'integral';
+    if (m[1] !== undefined && m[2] !== undefined) { intent.task = 'definite'; intent.lo = num_(m[1]); intent.hi = num_(m[2]); intent.loText = m[1]; intent.hiText = m[2]; } else intent.task = 'integral';
   }
   m = /^lim(?:it)?\s*_?\s*\{?\s*([a-z])\s*(?:->|→|to)\s*([^\s}]+)\s*\}?\s*(.+)$/i.exec(s);
   if (!intent.task && m) { intent.task = 'limit'; intent.var = m[1]; intent.at = m[2].replace(/∞/g, 'inf'); s = m[3]; }
@@ -341,7 +341,7 @@ export function analyze(src: string, chosen: Subject = 'auto'): Analysis {
     kind, classified: c, exprs: c.exprs, vars, dependent: c.dependent, params,
     originalTeX: intent.task === 'diff' ? `\\frac{d}{d${vars[0] ?? 'x'}}\\left[${toTeX(c.exprs[0])}\\right]`
       : intent.task === 'integral' ? `\\int ${toTeX(c.exprs[0])}\\,d${vars[0] ?? 'x'}`
-        : intent.task === 'definite' ? `\\int_{${fmt(intent.lo ?? 0)}}^{${fmt(intent.hi ?? 1)}} ${toTeX(c.exprs[0])}\\,d${vars[0] ?? 'x'}`
+        : intent.task === 'definite' ? `\\int_{${limTeX(intent.loText, intent.lo ?? 0)}}^{${limTeX(intent.hiText, intent.hi ?? 1)}} ${toTeX(c.exprs[0])}\\,d${vars[0] ?? 'x'}`
           : intent.task === 'limit' ? `\\lim_{${vars[0] ?? 'x'} \\to ${intent.at === 'inf' ? '\\infty' : intent.at === '-inf' ? '-\\infty' : intent.at}} ${toTeX(c.exprs[0])}`
             : c.tex,
     rearranged, describe: c.describe, demoInput: kind === 'value' ? null : body, warnings: c.warnings,
@@ -349,6 +349,7 @@ export function analyze(src: string, chosen: Subject = 'auto'): Analysis {
 }
 
 const fmt = (v: number) => String(+v.toPrecision(6));
+const limTeX = (text: string | undefined, v: number) => { if (text) { try { return toTeX(parse(text)); } catch { /* fall through */ } } return fmt(v); };
 
 // ── task parameters (sliders a task or picture adds) ────────────────────────
 

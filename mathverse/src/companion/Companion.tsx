@@ -105,7 +105,6 @@ export function Companion({ dark, compact, onCompact, onOpenDemo }: CompanionPro
   const token = useRef(0);
   const relevant = an ? [...an.params.map((q) => q.key), ...(TASK_KEYS[task] ?? [])] : [];
   const runKey = JSON.stringify([p.input, p.subject, task, p.at, relevant.map((k) => values[k]), nonce]);
-  console.warn("RUNKEY", runKey); // TEMP
   useEffect(() => {
     if (!an || !task) { setRun({ key: runKey, status: 'idle', work: null, error: '', started: 0 }); return; }
     const id = ++token.current;

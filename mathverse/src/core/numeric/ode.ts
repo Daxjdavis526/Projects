@@ -69,7 +69,10 @@ export function solveAdaptive(f: Rhs, y0: number[], t0: number, t1: number, opts
   let k1 = f(t, y);
   while (dir * (t1 - t) > 1e-14 * Math.max(1, Math.abs(t1))) {
     if (steps + rejected > maxSteps) return { t: T, y: Y, ok: false, steps, rejected, warning: 'Stopped: too many steps (the equation may be stiff)' };
-    if (dir * (t + h - t1) > 0) h = t1 - t;
+    // the last step is cut short to land on t1; its size says nothing about the solution
+    const hFree = h;
+    const truncated = dir * (t + h - t1) > 0;
+    if (truncated) h = t1 - t;
     const k: number[][] = [k1];
     for (let s = 1; s < 7; s++) {
       const ys = y.map((v, i) => { let acc = v; for (let j = 0; j < s; j++) acc += h * A[s][j] * k[j][i]; return acc; });
@@ -93,7 +96,8 @@ export function solveAdaptive(f: Rhs, y0: number[], t0: number, t1: number, opts
       if (y.some((v) => Math.abs(v) > 1e12)) return { t: T, y: Y, ok: false, steps, rejected, warning: `The solution grows without bound near t = ${+t.toPrecision(5)}` };
     } else rejected++;
     const factor = errNorm === 0 ? 5 : Math.min(5, Math.max(0.2, 0.9 * Math.pow(errNorm, -1 / 5)));
-    h = dir * Math.min(hmax, Math.abs(h * factor));
+    h = dir * Math.min(hmax, Math.abs((truncated && errNorm <= 1 ? hFree : h * factor)));
+    if (dir * (t1 - t) <= 1e-14 * Math.max(1, Math.abs(t1))) break;
     if (Math.abs(h) < 1e-12 * Math.max(1, Math.abs(t))) return { t: T, y: Y, ok: false, steps, rejected, warning: `The step size collapsed near t = ${+t.toPrecision(5)} — a singularity or a stiff equation` };
   }
   return { t: T, y: Y, ok: true, steps, rejected };
