@@ -122,6 +122,122 @@ npx vitest run              # mathematics, parser security, solvers, SymPy (Pyod
 npx vite build && node e2e/smoke.mjs   # every demonstration opened in a real browser
 ```
 
+## What is inside
+
+121 demonstrations (113 in the seven modules, 8 Fidget playgrounds), 55 of
+them with a step-by-step tutorial (marked ★). Every demonstration has
+sliders with editable ranges, an explanation, experiments to try, an accuracy
+note, and PNG/CSV export.
+
+**Calculus I** (14, 5★) — limits and continuity as the ε–δ game · the
+derivative as a limit (secant → tangent, Δx slider)★ · f, f′ and f″ together
+(concavity, inflection) · product/quotient/power rules · the chain rule★ ·
+implicit differentiation · related rates · critical points and extrema ·
+optimization★ · Fermat's fastest path · Riemann sums (left/right/mid/trapezoid,
+click to add a divider, click one to remove it, drag to resize)★ ·
+accumulation functions · the Fundamental Theorem★ · position, velocity,
+acceleration.
+
+**Calculus II** (17, 16★) — by parts as a picture · trigonometric integrals ·
+trigonometric substitution · partial fractions (exact) · improper integrals ·
+numerical integration with measured orders · arc length · surface area of
+revolution · disks/washers and cylindrical shells (rotatable 3D solids,
+cut-away sections, a draggable slice, build animation) · parametric curves ·
+polar curves and areas · sequences and series · convergence tests · Taylor and
+Maclaurin series (order slider, error bound, radius) · power series and the
+interval of convergence · the pendulum as a Taylor approximation.
+
+**Calculus III** (18, 6★) — Cartesian/cylindrical/spherical coordinates · dot and
+cross products, lines and planes · vector-valued functions (velocity,
+acceleration, curvature) · partial and directional derivatives · gradient,
+level curves and tangent plane★ · the multivariable chain rule · critical
+points and the second-derivative test · Lagrange multipliers★ · double
+integrals over chosen regions · triple integrals in three systems · change of
+variables and the Jacobian★ · 3D vector fields with particles · divergence and
+curl with a paddle wheel · line integrals along a draggable path · flux ·
+Green's★, Stokes'★ and the divergence theorem★ (both sides computed
+independently).
+
+**Linear Algebra** (18, 7★) — vectors · span and independence · change of
+basis · 2D transformations★ · 3×3 transformations · multiplication as
+composition · the determinant as signed area/volume★ · inverses · linear
+systems with animated row reduction · rank, null and column space ·
+eigenvectors★ · diagonalization · the SVD★ · projection★ · least squares★ ·
+Gram–Schmidt★ · inertia tensors · normal modes.
+
+**ODE** (16, 6★) — direction fields★ · separable equations · linear first-order
+equations · existence and uniqueness · characteristic roots · the
+mass–spring–damper in 3D★ · nonhomogeneous equations · resonance★ · phase
+portraits and the trace–determinant plane★ · stability and linearization ·
+the pendulum★ · Lotka–Volterra · van der Pol · the Lorenz attractor · Euler
+vs Runge–Kutta★ · adaptive steps on an orbit.
+
+**PDE** (14, 5★) — classification · the heat equation on a rod (exact series vs
+FTCS / BTCS / Crank–Nicolson)★ · boundary conditions side by side · heat on a
+plate (3D, draggable hot spots) · waves on a string★ · drum modes
+(rectangular and circular)★ · Laplace's equation as a soap film★ · Poisson's
+equation · diffusion as random walkers · separation of variables by shooting ·
+Fourier series and Gibbs · Jacobi/Gauss–Seidel/SOR · von Neumann stability
+and CFL★ · heat vs Schrödinger.
+
+**Differential Geometry** (16, 6★) — space curves (κ, τ, arc length) · a curve
+rebuilt from κ(s), τ(s)★ · surfaces and tangent spaces★ · first and second
+fundamental forms · Gaussian and mean curvature (Gauss–Bonnet)★ · Theorema
+Egregium · manifolds and charts · the metric tensor (Tissot ellipses) ·
+covariant derivative and Christoffel symbols · geodesics on 11 surfaces or
+your own★ · flat vs curved triangles and circles · geodesic deviation and
+tides · parallel transport and holonomy★ · Riemann, Ricci and scalar curvature
+(up to the 4D Schwarzschild metric) · embedding diagrams (Flamm's paraboloid,
+labelled as an analogy) · light cones in curved spacetime★.
+
+**Fidget** (8, 4★) — Vector Playground★ · Surface Sculptor · Derivative
+Explorer · Taylor Builder★ · Eigenvector Machine★ · Curvature Explorer★ · Wave
+Laboratory · Flow Field.
+
+**Homework Companion** — type a problem (`d/dx …`, `∫_0^pi … dx`,
+`lim x→0 …`, `solve …`, `taylor …`, a matrix, an ODE, a system); every
+answer carries a status (Verified, Numerical, Not verified, Check failed);
+derivatives and row reduction come with every step and its rule; integrals,
+limits, series, solving, `dsolve` and eigenvalues come from SymPy and are
+re-checked. Explore mode reveals one hint/step at a time. Tabs, notes with
+LaTeX preview, a saved-problem library, exports, and a compact 420 px mode
+with always-on-top for working beside a PDF.
+
+**Examples** — five example projects (`examples/*.mathverse`), openable from
+the home page or the command palette.
+
 ## Known limitations
 
-See the end of this file (kept current as the project grows).
+Honest list, kept current:
+
+- **Windows installer is built by CI, not on this machine.** The development
+  environment is Linux; the installer exists only as a GitHub Actions artifact
+  (see *Getting it*). It is unsigned, so Windows SmartScreen will warn on first
+  run ("More info → Run anyway").
+- **SymPy is slow to start**: the first symbolic request loads Python in
+  WebAssembly (a few seconds on a desktop, up to ~30 s on a weak machine).
+  Everything numerical works before it is ready, and the Companion shows a
+  progress bar with Cancel. Cancel stops *all* pending SymPy jobs, not only
+  the Companion's.
+- **The timeline cannot run backwards.** "Rewind" resets to t = 0; simulations
+  step forward and are not stored, so there is no scrubbing back.
+- **No dedicated "functions" demonstration** in Calculus I — functions are
+  explored by typing them (the Explore view); the module starts at limits.
+- **Trigonometric integrals** is the one Calculus II demonstration without a
+  tutorial; Calculus III, ODE, PDE and Geometry have tutorials for the central
+  demonstrations only (see ★ above).
+- **3D surfaces are drawn at true scale** — there is no vertical exaggeration,
+  so some surfaces look very tall or flat; adjust the parameters or the view.
+- **Numerical torsion**: `calc3.vecfn` computes torsion from a numerical third
+  derivative (Geometry's curve demonstrations use exact derivatives).
+- **Geometry, Riemann demo**: one set of sliders is shared between spaces (for
+  Schwarzschild "shape b" is the mass M); the 4D Schwarzschild computation takes
+  a few seconds the first time on software rendering.
+- **Integrator errors** in the geodesic and transport demonstrations are shown as
+  measured drift (of conserved quantities), not as rigorous error bounds.
+- **Companion pictures**: no picture yet for 3×3 matrix transformations (it
+  links to the full demonstration) or for implicit 3D level surfaces.
+- **SVG export** is for 2D plots; 3D views export as PNG.
+- **Desktop only**: built and tested for Windows 10/11 through Tauri; the
+  same interface runs in a browser for development, but there is no
+  supported web or phone version.

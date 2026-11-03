@@ -389,3 +389,24 @@ See [spotter/README.md](spotter/README.md) to run it,
 [spotter/CAPABILITIES.md](spotter/CAPABILITIES.md) for what each platform
 allows, and [spotter/ARCHITECTURE.md](spotter/ARCHITECTURE.md) for how it
 works.
+
+## mathverse/
+
+**MATHVERSE** — an interactive 3D mathematics laboratory for Windows: Calculus
+I–III, Linear Algebra, ODEs, PDEs and Differential Geometry as 113 live
+demonstrations you can grab — drag a point along a curve and its tangent
+follows, drag basis vectors and watch space transform, launch geodesics across
+a torus, poke a drum and watch its modes ring — plus 8 Fidget playgrounds, 55
+step-by-step tutorials, a Homework Companion that shows and checks its working,
+and a bar that turns anything you type (`z = A sin(Bx) cos(Cy)`,
+`y'' + c y' + 4y = 0`, `A = [[2,1],[1,2]]`) into a picture with a slider for
+every parameter. Exact symbolic mathematics comes from real SymPy running in
+WebAssembly inside the app; numerical results say so.
+
+A **desktop application** (Tauri 2 + React + three.js), so there is no live
+link: GitHub Actions builds the Windows installers (NSIS `.exe` and `.msi`) on
+every change and test-installs them — download them from the latest *MathVerse*
+run's artifacts.
+
+See [mathverse/README.md](mathverse/README.md) for what is inside, how to build
+it, and its known limitations.
