@@ -24,6 +24,10 @@ sonicline/src/*.egg-info/  pip metadata (untracked) — do not read
 spotter/node_modules/    npm dependencies (untracked) — do not read
 spotter/.next/           Next.js build output (untracked) — do not read
 spotter/.data/           embedded dev database and dev secrets (untracked) — do not read
+mathverse/node_modules/  npm dependencies (untracked) — do not read
+mathverse/public/pyodide/  copied Python runtime (untracked) — do not read
+mathverse/dist/          Vite build output (untracked) — do not read
+mathverse/src-tauri/target/  Rust build output (untracked) — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -59,15 +63,17 @@ touching the others.
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
 | `sonicline/` | SONICLINE — propulsion CFD for nitrogen cold-gas thrusters: a Python desktop application driving OpenFOAM as an external solver. Not a web page. Plan and decisions in `sonicline/DESIGN.md`; tests in `.github/workflows/sonicline.yml` |
+| `mathverse/` | MATHVERSE — an interactive 3D mathematics laboratory: a Windows desktop app (Tauri 2 + React + TypeScript + three.js; SymPy via Pyodide in a worker). Seven modules (Calc I–III, Linear Algebra, ODE, PDE, Differential Geometry), Fidget playgrounds, a Homework Companion, tutorials. Not a web page. DOM-free mathematics in `src/core` (`npx vitest run`); demos follow `mathverse/AUTHORING.md`; Windows installers come from GitHub Actions (`.github/workflows/mathverse.yml`) |
 | `spotter/` | SPOTTER — trend intelligence for a fitness creator: Next.js + PostgreSQL server app with OAuth connectors for YouTube, Instagram and TikTok. Not a static page: Pages serves nothing usable from it. Checks run in GitHub Actions (`.github/workflows/spotter.yml`) |
 
 ## Conventions
 
 - **No build step** for the browser projects. Everything is static files
   served as-is. No bundler, no npm install, no transpilation.
-  `python3 -m http.server` is the dev loop. The four exceptions, `wormsign/`,
-  `strata/`, `sonicline/` (a pip-installable Python package) and `spotter/`
-  (npm, Next.js) keep their builds to themselves; their READMEs say how.
+  `python3 -m http.server` is the dev loop. The five exceptions, `wormsign/`,
+  `strata/`, `sonicline/` (a pip-installable Python package), `spotter/`
+  (npm, Next.js) and `mathverse/` (npm, Vite, Tauri) keep their builds to
+  themselves; their READMEs say how.
 - **Vendor dependencies locally**, do not hotlink a CDN — these pages should
   keep working when a CDN does not.
 - **Prefer the minified build** when vendoring. `three.module.min.js` plus
@@ -95,6 +101,9 @@ enforces it): `pip install -e ./sonicline[dev] && python -m pytest
 sonicline/tests`, run by CI on Linux and Windows. `spotter/` keeps its engine
 under `src/core` free of React and Next.js: `cd spotter && npm test` runs it
 all headlessly, including the whole pipeline on an in-memory PostgreSQL.
+`mathverse/` keeps its mathematics in `src/core`, free of React and three.js:
+`cd mathverse && npx vitest run` (SymPy is tested for real, under Pyodide in
+Node), and `node e2e/smoke.mjs` opens every demonstration in a browser.
 
 For visual verification, drive a headless Chromium (Playwright is available)
 and screenshot the page — several rendering bugs in this repo were only ever

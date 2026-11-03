@@ -19,13 +19,16 @@ export function Label({ text }: { text: string }) {
   return <>{parts.map((p, i) => (p.startsWith('$') ? <Tex key={i} tex={p.slice(1, -1)} /> : <span key={i}>{p}</span>))}</>;
 }
 
-export function ParamSlider({ spec, value, range, animating, onChange, onRange, onAnimate, sound }: {
+export function ParamSlider({ spec, value, range, animating, onChange, onRange, onAnimate, sound, link, onLink }: {
   spec: ParamSpec; value: number; range?: [number, number]; animating: boolean; sound: boolean;
   onChange: (v: number) => void; onRange: (r: [number, number]) => void; onAnimate: () => void;
+  /** this parameter follows an expression in the others (e.g. 2*A) */
+  link?: string; onLink?: (expr: string | null) => void;
 }) {
   const [lo, hi] = range ?? [spec.min, spec.max];
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
+  const [linking, setLinking] = useState<string | null>(null);
   const step = spec.step || (hi - lo) / 400;
   return (
     <div className={`param ${animating ? 'animating' : ''}`}>
@@ -44,11 +47,18 @@ export function ParamSlider({ spec, value, range, animating, onChange, onRange, 
         ) : (
           <button className="param-value" title="Type an exact value" onClick={() => { setText(String(value)); setEditing(true); }}>{fmt(value)}</button>
         )}
+        {onLink && <button className={`mini ${link ? 'on' : ''}`} title={link ? `Linked: = ${link} (click to unlink)` : 'Link: make this parameter follow the others, e.g. 2*A'} onClick={() => (link ? onLink(null) : setLinking(''))}><Icon name="link" size={13} /></button>}
         <button className={`mini ${animating ? 'on' : ''}`} title={animating ? 'Stop animating' : 'Animate: sweep through the range'} onClick={onAnimate}><Icon name={animating ? 'pause' : 'play'} size={13} /></button>
       </div>
+      {linking !== null && (
+        <form className="link-edit" onSubmit={(e) => { e.preventDefault(); if (linking.trim()) onLink?.(linking.trim()); setLinking(null); }}>
+          <span>{spec.key} =</span><input autoFocus value={linking} onChange={(e) => setLinking(e.target.value)} onBlur={() => setLinking(null)} placeholder="e.g. 2*A + 1" spellCheck={false} />
+        </form>
+      )}
+      {link && <div className="link-note">= {link}</div>}
       <div className="param-row">
         <RangeEdit value={lo} onCommit={(v) => v < hi && onRange([v, hi])} />
-        <input type="range" min={lo} max={hi} step={step} value={Math.min(hi, Math.max(lo, value))}
+        <input type="range" min={lo} max={hi} step={step} value={Math.min(hi, Math.max(lo, value))} disabled={!!link}
           onChange={(e) => onChange(Number(e.target.value))}
           onPointerUp={() => sound && blip(0.4 + 0.5 * (value - lo) / (hi - lo || 1))}
           aria-label={spec.label} />

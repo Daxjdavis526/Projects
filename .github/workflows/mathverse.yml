@@ -1,0 +1,94 @@
+# Builds MathVerse (mathverse/, a Tauri 2 desktop app) whenever it changes:
+# type-checks and runs the test suite (including SymPy under Pyodide), runs a
+# browser smoke test of the built interface, then builds the Windows installers
+# (NSIS .exe and WiX .msi) on Windows, installs and uninstalls the .exe as a
+# smoke test, and keeps both installers as downloadable artifacts.
+name: MathVerse
+
+on:
+  push:
+    paths:
+      - 'mathverse/**'
+      - '.github/workflows/mathverse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mathverse
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mathverse/package-lock.json
+      - run: npm ci
+      - name: Bundle the Python runtime (from atlas/vendor)
+        run: npm run pyodide
+      - name: Type-check
+        run: npx tsc -b
+      - name: Unit tests (mathematics, parser security, solvers, SymPy, project files)
+        run: npx vitest run
+      - name: Build the interface
+        run: npx vite build
+      - name: Browser smoke test
+        run: |
+          npx --yes playwright@1.63.0 install --with-deps chromium
+          npm i --no-save playwright@1.63.0
+          node e2e/smoke.mjs
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mathverse
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mathverse/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mathverse/src-tauri
+      - run: npm ci
+      - name: Build the installers (NSIS and MSI)
+        run: npx tauri build
+      - name: Installer smoke test (silent install, launch check, uninstall)
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          Write-Host "Installing $($exe.Name)"
+          Start-Process -FilePath $exe.FullName -ArgumentList '/S' -Wait
+          $app = Get-ChildItem -Path "$env:LOCALAPPDATA" -Recurse -Filter 'mathverse.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $app) { throw 'mathverse.exe was not installed' }
+          Write-Host "Installed at $($app.FullName)"
+          $p = Start-Process -FilePath $app.FullName -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) { throw "MathVerse exited immediately (code $($p.ExitCode))" }
+          Stop-Process -Id $p.Id -Force
+          $un = Get-ChildItem -Path $app.DirectoryName -Filter 'uninstall.exe' | Select-Object -First 1
+          if ($un) { Start-Process -FilePath $un.FullName -ArgumentList '/S' -Wait; Start-Sleep -Seconds 3 }
+          if (Test-Path $app.FullName) { throw 'The uninstaller left mathverse.exe behind' }
+          Write-Host 'Install, launch and uninstall: OK'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MathVerse-windows-installer-exe
+          path: mathverse/src-tauri/target/release/bundle/nsis/*.exe
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MathVerse-windows-installer-msi
+          path: mathverse/src-tauri/target/release/bundle/msi/*.msi
+          retention-days: 90

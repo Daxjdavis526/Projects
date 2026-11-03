@@ -9,6 +9,7 @@ const P: Record<string, string> = {
   pen: 'M4 20l4-1 11-11-3-3L5 16zM14 6l3 3', x: 'M6 6l12 12M18 6 6 18', plus: 'M12 5v14M5 12h14', check: 'M5 12l5 5L20 7', warn: 'M12 3 2 20h20zM12 9v5M12 17h.01',
   sound: 'M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11', mute: 'M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6', cap: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5',
   layers: 'M12 3 2 8l10 5 10-5zM2 13l10 5 10-5M2 18l10 5 10-5', compact: 'M15 4h5v16h-5zM4 4h8v16H4z', down: 'M12 4v12M6 11l6 6 6-6M5 20h14', clipboard: 'M9 4h6v3H9zM7 5H5v15h14V5h-2',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
   wand: 'M4 20 16 8M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM19 11l.7 1.3L21 13l-1.3.7L19 15l-.7-1.3L17 13l1.3-.7z',
 };
 export function Icon({ name, size = 18 }: { name: keyof typeof P | string; size?: number }) {

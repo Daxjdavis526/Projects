@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MathVerse",
+  "version": "0.1.0",
+  "identifier": "app.mathverse.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run pyodide && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "MathVerse",
+        "width": 1480,
+        "height": 920,
+        "minWidth": 380,
+        "minHeight": 560,
+        "resizable": true,
+        "center": true,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' ipc: http://ipc.localhost; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost blob: data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "category": "Education",
+    "shortDescription": "An interactive 3D mathematics laboratory",
+    "longDescription": "MathVerse turns mathematics into something you can touch: surfaces, vector fields, transformations, differential equations, PDEs and curved geometry you can grab, rotate and experiment with, plus a homework companion and guided tutorials. Everything runs locally.",
+    "copyright": "MathVerse",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "fileAssociations": [
+      { "ext": ["mathverse"], "name": "MathVerse project", "description": "MathVerse project", "role": "Editor", "mimeType": "application/x-mathverse" }
+    ],
+    "windows": {
+      "webviewInstallMode": { "type": "embedBootstrapper" },
+      "nsis": { "installMode": "currentUser", "displayLanguageSelector": false },
+      "wix": { "language": "en-US" }
+    }
+  }
+}

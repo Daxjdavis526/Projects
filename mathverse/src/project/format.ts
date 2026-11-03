@@ -11,6 +11,8 @@ export interface Workspace {
   input: string;                          // the expression field
   params: Record<string, number>;
   paramRanges: Record<string, [number, number]>;
+  /** linked parameters: key = expression in the other parameters (e.g. B = 2*A) */
+  links: Record<string, string>;
   choices: Record<string, string>;
   toggles: Record<string, boolean>;
   camera?: { position: [number, number, number]; target: [number, number, number]; projection: 'perspective' | 'orthographic'; zoom: number };
@@ -59,6 +61,7 @@ function workspace(v: unknown): Workspace {
     title: str(v.title, 200),
     input: str(v.input, 4000),
     params: rec(v.params, (x) => (typeof x === 'number' && Number.isFinite(x) ? x : undefined)),
+    links: rec(v.links, (x) => (typeof x === 'string' && x.length < 200 ? x : undefined)),
     paramRanges: rec(v.paramRanges, (x) => (Array.isArray(x) && x.length === 2 && x.every((y) => typeof y === 'number' && Number.isFinite(y)) && x[0] < x[1] ? [x[0], x[1]] as [number, number] : undefined)),
     choices: rec(v.choices, (x) => (typeof x === 'string' && x.length < 100 ? x : undefined)),
     toggles: rec(v.toggles, (x) => (typeof x === 'boolean' ? x : undefined)),
@@ -91,5 +94,5 @@ export function writeProject(p: Project): string {
 }
 
 export function emptyWorkspace(demoId: string, title = ''): Workspace {
-  return { demoId, title, input: '', params: {}, paramRanges: {}, choices: {}, toggles: {}, display: { wireframe: false, opacity: 1, axes: true, grid: true, lighting: 1 }, notes: '', t: 0 };
+  return { demoId, title, input: '', params: {}, paramRanges: {}, links: {}, choices: {}, toggles: {}, display: { wireframe: false, opacity: 1, axes: true, grid: true, lighting: 1 }, notes: '', t: 0 };
 }

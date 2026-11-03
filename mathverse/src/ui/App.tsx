@@ -22,6 +22,26 @@ import { saveProject, openProject, exportFile, isDesktop } from '../project/io';
 import { Companion } from '../companion/Companion';
 import { cas, CasStatus } from '../cas/client';
 import { blip } from './sound';
+import { parse, compile, freeSymbols } from '../core/expr';
+
+// the list of demonstrations, for the end-to-end smoke test
+(window as unknown as { __MV_DEMOS: string[] }).__MV_DEMOS = DEMOS.map((d) => d.id);
+
+/** Recompute linked parameters (key = expression of the others), a few passes so chains settle. */
+function withLinks(params: Record<string, number>, links: Record<string, string>): Record<string, number> {
+  const keys = Object.keys(links);
+  for (let pass = 0; pass < 3 && keys.length; pass++) {
+    for (const k of keys) {
+      try { const n = parse(links[k]); const v = compile(n, [], params)([]); if (Number.isFinite(v)) params[k] = v; } catch { /* a link to a missing parameter is skipped */ }
+    }
+  }
+  return params;
+}
+
+interface Preset { name: string; params: Record<string, number>; choices: Record<string, string>; toggles: Record<string, boolean>; links: Record<string, string> }
+const PRESETS_KEY = 'mathverse:presets';
+const loadPresets = (): Record<string, Preset[]> => { try { return JSON.parse(localStorage.getItem(PRESETS_KEY) || '{}'); } catch { return {}; } };
+const savePresets = (p: Record<string, Preset[]>) => { try { localStorage.setItem(PRESETS_KEY, JSON.stringify(p)); } catch { /* storage unavailable */ } };
 
 const newProject = (): Project => ({ format: 'mathverse', version: 1, name: 'Untitled', created: new Date().toISOString(), modified: '', tabs: [], active: 0 });
 
@@ -241,7 +261,13 @@ export default function App() {
   }, [tutorialStep, bottomTab, tutorial, updateWs]);
   const stepDone = (() => { const st = tutorial?.[tutorialStep]; const ctx = apiRef.current?.ctx; try { return !!(st?.done && ctx && st.done(ctx)); } catch { return false; } })();
 
-  const onParam = useCallback((k: string, v: number) => updateWs((w) => ({ params: { ...w.params, [k]: v } })), [updateWs]);
+  const onParam = useCallback((k: string, v: number) => updateWs((w) => ({ params: withLinks({ ...w.params, [k]: v }, w.links ?? {}) })), [updateWs]);
+  const onLink = useCallback((k: string, expr: string | null) => {
+    if (expr) {
+      try { const n = parse(expr); const free = [...freeSymbols(n)].filter((s) => s !== k); compile(n, free, {}); } catch (e) { flash(`That link is not a valid expression: ${(e as Error).message}`); return; }
+    }
+    updateWs((w) => { const links = { ...(w.links ?? {}) }; if (expr) links[k] = expr; else delete links[k]; return { links, params: withLinks({ ...w.params }, links) }; });
+  }, [updateWs]);
   const onTime = useCallback((t: number) => updateWs({ t }), [updateWs]);
   const onOutputs = useCallback((o: HostOutputs) => setOutputs(o), []);
 
@@ -354,6 +380,9 @@ export default function App() {
               onParam={onParam}
               onRange={(k, r) => updateWs((w) => ({ paramRanges: { ...w.paramRanges, [k]: r } }))}
               onAnimate={(k) => setAnimating((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
+              onLink={onLink}
+              onReset={() => { updateWs({ params: {}, paramRanges: {}, links: {}, choices: {}, toggles: {} }); setAnimating(new Set()); }}
+              onApplyPreset={(p) => updateWs({ params: { ...p.params }, choices: { ...p.choices }, toggles: { ...p.toggles }, links: { ...p.links } })}
               onChoice={(k, v) => updateWs((w) => ({ choices: { ...w.choices, [k]: v } }))}
               onToggle={(k, v) => updateWs((w) => ({ toggles: { ...w.toggles, [k]: v } }))}
               onDisplay={(d) => updateWs((w) => ({ display: { ...w.display, ...d } }))}
@@ -380,7 +409,8 @@ function Resizer({ side, onResize }: { side: 'left' | 'right' | 'bottom'; onResi
   );
 }
 
-function Inspector({ demo, ws, animating, sound, onInput, onParam, onRange, onAnimate, onChoice, onToggle, onDisplay, readouts, api }: {
+function Inspector({ demo, ws, animating, sound, onInput, onParam, onRange, onAnimate, onChoice, onToggle, onDisplay, readouts, api, onLink, onReset, onApplyPreset }: {
+  onLink: (k: string, expr: string | null) => void; onReset: () => void; onApplyPreset: (p: Preset) => void;
   demo: DemoDef; ws: Workspace; animating: Set<string>; sound: boolean; onInput: (s: string) => void; onParam: (k: string, v: number) => void;
   onRange: (k: string, r: [number, number]) => void; onAnimate: (k: string) => void; onChoice: (k: string, v: string) => void; onToggle: (k: string, v: boolean) => void;
   onDisplay: (d: Partial<Workspace['display']>) => void; readouts: HostOutputs['readouts']; api: React.MutableRefObject<HostApi | null>;
@@ -404,7 +434,9 @@ function Inspector({ demo, ws, animating, sound, onInput, onParam, onRange, onAn
       )}
       {demo.params.length > 0 && <div className="insp-section"><h3>Parameters</h3>
         {demo.params.map((p) => <ParamSlider key={p.key} spec={p} value={ws.params[p.key] ?? p.value} range={ws.paramRanges[p.key]} animating={animating.has(p.key)} sound={sound}
-          onChange={(v) => onParam(p.key, v)} onRange={(r) => onRange(p.key, r)} onAnimate={() => onAnimate(p.key)} />)}
+          onChange={(v) => onParam(p.key, v)} onRange={(r) => onRange(p.key, r)} onAnimate={() => onAnimate(p.key)}
+          link={ws.links?.[p.key]} onLink={demo.params.length > 1 ? (e) => onLink(p.key, e) : undefined} />)}
+        <Presets demoId={demo.id === 'explore' ? `explore:${ws.input}` : demo.id} ws={ws} onApply={onApplyPreset} onReset={onReset} />
       </div>}
       {(demo.choices?.length || demo.toggles?.length) ? <div className="insp-section"><h3>Show</h3>
         {demo.choices?.map((c) => <ChoiceControl key={c.key} spec={c} value={ws.choices[c.key] ?? c.value} onChange={(v) => onChoice(c.key, v)} />)}
@@ -426,6 +458,24 @@ function Inspector({ demo, ws, animating, sound, onInput, onParam, onRange, onAn
           <div className="btn-row"><button onClick={() => { const p = api.current?.plot; if (p) p.setView({ x0: -5, x1: 5, y0: -3.5, y1: 3.5 }); }}>Reset view</button><span className="muted small">Drag to pan · scroll to zoom</span></div>
         )}
       </div>
+    </div>
+  );
+}
+
+function Presets({ demoId, ws, onApply, onReset }: { demoId: string; ws: Workspace; onApply: (p: Preset) => void; onReset: () => void }) {
+  const [all, setAll] = useState(loadPresets);
+  const [naming, setNaming] = useState<string | null>(null);
+  const mine = all[demoId] ?? [];
+  const store = (list: Preset[]) => { const n = { ...all, [demoId]: list }; setAll(n); savePresets(n); };
+  return (
+    <div className="presets">
+      <button onClick={onReset} title="Every parameter back to its default">Reset</button>
+      {mine.map((p, i) => <span key={i}><button onClick={() => onApply(p)} title="Apply this preset">{p.name}</button><button className="del" title="Delete preset" onClick={() => store(mine.filter((_, j) => j !== i))}>×</button></span>)}
+      {naming === null
+        ? <button onClick={() => setNaming('')} title="Save the current parameters as a preset">+ Preset</button>
+        : <form onSubmit={(e) => { e.preventDefault(); if (naming.trim()) store([...mine, { name: naming.trim(), params: { ...ws.params }, choices: { ...ws.choices }, toggles: { ...ws.toggles }, links: { ...(ws.links ?? {}) } }]); setNaming(null); }}>
+            <input autoFocus value={naming} onChange={(e) => setNaming(e.target.value)} onBlur={() => setNaming(null)} placeholder="Preset name" />
+          </form>}
     </div>
   );
 }
