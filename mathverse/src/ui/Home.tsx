@@ -3,13 +3,14 @@ import { MODULES } from '../modules/types';
 import { DEMOS } from '../modules/registry';
 import { Tex } from './tex';
 import { Icon } from './icons';
+import { EXAMPLES as PROJECTS } from '../project/examples';
 
 const EXAMPLES = [
   'f(x) = x^3 - 4x', 'z = A sin(Bx) cos(Cy)', 'r(t) = (cos(t), sin(t), t/4)', 'F(x,y) = (-y, x - 0.3y)',
   'A = [[2,1],[1,2]]', 'dy/dt = y(1 - y) - h', "y'' + c y' + 4y = 0", 'x^2/4 + y^2 = 1', 'r = 1 + 2cos(3θ)',
 ];
 
-export function Home({ onTry, onOpen, recent, onOpenRecent, completed }: { onTry: (s: string) => void; onOpen: (id: string) => void; recent: { name: string; path?: string }[]; onOpenRecent: (path: string) => void; completed: string[] }) {
+export function Home({ onTry, onOpen, recent, onOpenRecent, onExample, completed }: { onTry: (s: string) => void; onOpen: (id: string) => void; recent: { name: string; path?: string }[]; onOpenRecent: (path: string) => void; onExample: (id: string) => void; completed: string[] }) {
   const tutorials = DEMOS.filter((d) => d.tutorial?.length);
   const fidget = DEMOS.filter((d) => d.module === 'fidget');
   return (
@@ -42,6 +43,12 @@ export function Home({ onTry, onOpen, recent, onOpenRecent, completed }: { onTry
         <section>
           <h2><Icon name="cap" /> Tutorials</h2>
           <div className="cards">{tutorials.slice(0, 9).map((d) => <button key={d.id} className="card" onClick={() => onOpen(d.id + '#tutorial')}><b>{d.title}{completed.includes(d.id) && <span className="done-badge"><Icon name="check" size={13} /></span>}</b><span>{d.tutorial!.length} steps · {MODULES.find((m) => m.id === d.module)?.title ?? 'Fidget'}</span></button>)}</div>
+        </section>
+      )}
+      {PROJECTS.length > 0 && (
+        <section>
+          <h2><Icon name="open" /> Example projects</h2>
+          <div className="cards">{PROJECTS.map((e) => <button key={e.id} className="card" onClick={() => onExample(e.id)}><b>{e.name}</b><span>{e.project().tabs.map((t) => t.title).join(' · ')}</span><small>{e.tabs} tabs</small></button>)}</div>
         </section>
       )}
       {recent.length > 0 && (

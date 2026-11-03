@@ -30,7 +30,7 @@ const flammDemo: DemoDef = {
     { key: 'L', label: 'orbit: angular momentum L/M', value: 3.9, min: 2, max: 6, step: 0.005 },
     { key: 'turns', label: 'orbit: proper time (orbits)', value: 3, min: 0.5, max: 10, step: 0.05 },
   ],
-  choices: [{ key: 'picture', label: 'Picture', value: 'flamm', options: [['flamm', "Flamm's paraboloid — exact spatial geometry"], ['rubber', 'Rubber sheet — a cartoon of the Newtonian potential']] }],
+  choices: [{ key: 'picture', label: 'Picture', value: 'flamm', options: [['flamm', "Flamm's paraboloid (exact space)"], ['rubber', 'Rubber sheet (a cartoon)']] }],
   toggles: [{ key: 'orbit', label: 'A real orbit (timelike geodesic of spacetime)', value: true }, { key: 'spatial', label: 'A geodesic of the curved space (same start)', value: true }, { key: 'rings', label: 'Rings every 1 M in r', value: true }],
   experiments: [
     'Read the proper radial distance between r and r + 1M: always more than 1M, enormously more near r_s = 2M. That stretching is what the paraboloid’s slope shows.',

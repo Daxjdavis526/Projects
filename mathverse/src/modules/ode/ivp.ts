@@ -85,7 +85,7 @@ function ivpInst(ctx: DemoCtx): DemoInstance {
         for (let i = 0; i < 7; i++) {
           const cf = freeF ? (y0 < 0 ? cB : t0) + i * 0.75 : cF;
           const cb = freeB ? (y0 > 0 ? cF : t0) - i * 0.75 : cB;
-          curves.push({ pts: sampleT(sol(cf, cb)), color: c.faint, width: 1.4 });
+          curves.push({ pts: sampleT(sol(cf, cb)), color: c.muted, width: 1.4 });
         }
       }
       curves.push({ pts: sampleT(sel), color: c.blue, width: 3.2 });
@@ -102,7 +102,7 @@ function ivpInst(ctx: DemoCtx): DemoInstance {
     } else if (eq === 'tan') {
       const C = Math.atan(y0) - t0, a = -Math.PI / 2 - C, b = Math.PI / 2 - C;
       sel = (t) => (t > a && t < b ? Math.tan(t + C) : NaN);
-      if (ctx.toggles.family) for (let i = -3; i <= 3; i++) { const Ci = C + i * 0.45; if (i) curves.push({ pts: sampleT((t) => Math.tan(t + Ci), v.x0, v.x1, 1200), color: c.faint, width: 1.3 }); }
+      if (ctx.toggles.family) for (let i = -3; i <= 3; i++) { const Ci = C + i * 0.45; if (i) curves.push({ pts: sampleT((t) => Math.tan(t + Ci), v.x0, v.x1, 1200), color: c.muted, width: 1.4 }); }
       curves.push({ pts: sampleT(sel, Math.max(v.x0, a + 1e-3), Math.min(v.x1, b - 1e-3), 1200), color: c.blue, width: 3.2 });
       vlines.push(a, b);
       rows.push(
@@ -116,7 +116,7 @@ function ivpInst(ctx: DemoCtx): DemoInstance {
       const yp = (t: number) => (Math.sin(t) - Math.cos(t)) / 2;
       const C = (y0 - yp(t0)) * Math.exp(t0);
       sel = (t) => yp(t) + C * Math.exp(-t);
-      if (ctx.toggles.family) for (let i = -4; i <= 4; i++) { if (!i) continue; const Ci = (y0 + i * 0.7 - yp(t0)) * Math.exp(t0); curves.push({ pts: sampleT((t) => yp(t) + Ci * Math.exp(-t)), color: c.faint, width: 1.3 }); }
+      if (ctx.toggles.family) for (let i = -4; i <= 4; i++) { if (!i) continue; const Ci = (y0 + i * 0.7 - yp(t0)) * Math.exp(t0); curves.push({ pts: sampleT((t) => yp(t) + Ci * Math.exp(-t)), color: c.muted, width: 1.4 }); }
       curves.push({ pts: sampleT(sel), color: c.blue, width: 3.2 });
       rows.push(
         { label: 'Lipschitz constant L', value: '1 (since |∂f/∂y| = 1 everywhere)', tone: 'good' },

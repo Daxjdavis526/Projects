@@ -105,6 +105,7 @@ export function Companion({ dark, compact, onCompact, onOpenDemo }: CompanionPro
   const token = useRef(0);
   const relevant = an ? [...an.params.map((q) => q.key), ...(TASK_KEYS[task] ?? [])] : [];
   const runKey = JSON.stringify([p.input, p.subject, task, p.at, relevant.map((k) => values[k]), nonce]);
+  console.warn("RUNKEY", runKey); // TEMP
   useEffect(() => {
     if (!an || !task) { setRun({ key: runKey, status: 'idle', work: null, error: '', started: 0 }); return; }
     const id = ++token.current;
@@ -216,7 +217,10 @@ export function Companion({ dark, compact, onCompact, onOpenDemo }: CompanionPro
   const exportTeX = async () => { if (!work || !an) return; const r = await exportFile(`${base}.tex`, workToTeX(problemTitle(p), an.originalTeX, work), 'application/x-tex', 'tex'); if (r) flash(`Saved ${r}`); };
   const toggleCompact = () => { const on = !compact; onCompact(on); void setWindowCompact(on); };
   const toggleOnTop = async () => { const ok = await setOnTop(!onTop); if (ok) setOnTopState(!onTop); };
-  useEffect(() => () => { if (compact) { void setWindowCompact(false); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // leaving the Companion leaves the side-panel mode too (the shell would otherwise stay narrow)
+  const compactRef = useRef(compact);
+  compactRef.current = compact;
+  useEffect(() => () => { if (compactRef.current) { onCompact(false); void setWindowCompact(false); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const drawCtx: DrawCtx | null = an ? { an, viz, values, work: work && work.task === task ? work : null, at: p.at, dark, setParam } : null;
 

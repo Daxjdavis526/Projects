@@ -66,11 +66,11 @@ const acos1 = (x: number) => Math.acos(Math.max(-1, Math.min(1, x)));
 
 export const SURFACES: SurfDef[] = [
   { id: 'sphere', label: 'Sphere', src: '(a sin(u) cos(v), a sin(u) sin(v), a cos(u))', tex: '\\mathbf r = a(\\sin u\\cos v,\\ \\sin u\\sin v,\\ \\cos u)', aMeans: 'radius', bMeans: '',
-    u: () => [0, Math.PI], v: () => [-Math.PI, Math.PI], periodicV: true, start: [1.05, 0.5], Ktex: 'K = 1/a^2', K: (_u, _v, a) => 1 / (a * a), Htex: 'H = -1/a', rot: 'v', rho: (u, _v, a) => a * Math.sin(u),
+    u: () => [0, Math.PI], v: () => [-Math.PI, Math.PI], periodicV: true, start: [1.0, -0.7], Ktex: 'K = 1/a^2', K: (_u, _v, a) => 1 / (a * a), Htex: 'H = -1/a', rot: 'v', rho: (u, _v, a) => a * Math.sin(u),
     atlas: { src: '(a cos(u), a sin(u) cos(v), a sin(u) sin(v))', inverse1: (p, a) => [acos1(p[2] / a), Math.atan2(p[1], p[0])], inverse2: (p, a) => [acos1(p[0] / a), Math.atan2(p[2], p[1])], quality: (u) => Math.sin(u) },
     closed: { chi: 2, genus: 0 } },
   { id: 'torus', label: 'Torus', src: '((a + b cos(v)) cos(u), (a + b cos(v)) sin(u), b sin(v))', tex: '\\mathbf r = ((a + b\\cos v)\\cos u,\\ (a + b\\cos v)\\sin u,\\ b\\sin v)', aMeans: 'distance to the tube centre', bMeans: 'tube radius',
-    u: () => [-Math.PI, Math.PI], v: () => [-Math.PI, Math.PI], periodicU: true, periodicV: true, start: [0.4, 0.6], Ktex: 'K = \\dfrac{\\cos v}{b(a + b\\cos v)}', K: (_u, v, a, b) => Math.cos(v) / (b * (a + b * Math.cos(v))), Htex: 'H = -\\dfrac{a + 2b\\cos v}{2b(a+b\\cos v)}', rot: 'u', rho: (_u, v, a, b) => a + b * Math.cos(v),
+    u: () => [-Math.PI, Math.PI], v: () => [-Math.PI, Math.PI], periodicU: true, periodicV: true, start: [-0.6, 0.6], Ktex: 'K = \\dfrac{\\cos v}{b(a + b\\cos v)}', K: (_u, v, a, b) => Math.cos(v) / (b * (a + b * Math.cos(v))), Htex: 'H = -\\dfrac{a + 2b\\cos v}{2b(a+b\\cos v)}', rot: 'u', rho: (_u, v, a, b) => a + b * Math.cos(v),
     closed: { chi: 0, genus: 1 } },
   { id: 'saddle', label: 'Saddle (hyperbolic paraboloid)', src: '(u, v, b (u^2 - v^2))', tex: '\\mathbf r = (u,\\ v,\\ b(u^2 - v^2))', aMeans: 'half-width of the patch', bMeans: 'steepness',
     u: (a) => [-a, a], v: (a) => [-a, a], start: [0.35, -0.25], Ktex: 'K = \\dfrac{-4b^2}{(1 + 4b^2(u^2+v^2))^2}', K: (u, v, _a, b) => (-4 * b * b) / (1 + 4 * b * b * (u * u + v * v)) ** 2 },
@@ -404,6 +404,8 @@ export function surfaceDragPoint(v: Viewport3D, ctx: DemoCtx, getBuilt: () => Bu
 /** Has the surface choice just changed (and the point not been set with it)? Then move the point to the surface's default spot. */
 export function followSurfaceChange(ctx: DemoCtx, state: { id?: string; pu?: number; pv?: number }, b: Built, keys: [string, string] = ['pu', 'pv']) {
   const [ku, kv] = keys;
+  // first showing with the generic default point: use this surface's own good spot (facing the camera)
+  if (state.id === undefined && ctx.params[ku] === 1.05 && ctx.params[kv] === 0.5) { ctx.setParam(ku, b.def.start[0]); ctx.setParam(kv, b.def.start[1]); }
   if (state.id !== undefined && state.id !== b.def.id && ctx.params[ku] === state.pu && ctx.params[kv] === state.pv) {
     ctx.setParam(ku, b.def.start[0]); ctx.setParam(kv, b.def.start[1]);
   }

@@ -175,7 +175,7 @@ function separableDemo(ctx: DemoCtx): DemoInstance {
       v.resetCamera();
       labels.forEach((l) => l.dispose());
       const oy = Math.min(hiY, Math.max(lo, 0)), oz = Math.min(zhi, Math.max(zlo, 0));
-      labels = [v.addLabel([T * 1.12, oy, oz], '= t'), v.addLabel([0, hiY + (hiY - lo) * 0.12, oz], '= y₀'), v.addLabel([0, oy, zhi + (zhi - zlo) * 0.1], '= y(t; y₀)')];
+      labels = [v.addLabel([T * 1.12, oy, oz], 't'), v.addLabel([0, hiY + (hiY - lo) * 0.12, oz], 'y₀'), v.addLabel([0, oy, zhi + (zhi - zlo) * 0.1], 'y')];
       plot.setView({ x0: -T * 0.04, x1: T * 1.04, y0: zlo - (zhi - zlo) * 0.04, y1: zhi + (zhi - zlo) * 0.04 });
     }
     if (!surf) surf = v.addSurface(fsurf, opts); else surf.update(fsurf, opts);
@@ -209,7 +209,7 @@ function separableDemo(ctx: DemoCtx): DemoInstance {
     ]);
     ctx.setSteps(S.steps(k, K, y0));
     ctx.warn(S === SEPS.torricelli && k <= 0 ? 'Torricelli’s law needs k > 0 (a tank that drains).' : '');
-    ctx.setNote(`**${S.name}.** ${S.physics} The left plot is a slice of the surface on the right at fixed $y_0$ (gold); the faint curves are other slices.`);
+    ctx.setNote(`**${S.name}.** ${S.physics} The left plot is a slice of the surface on the right at fixed $y_0$ (gold); the faint curves are other slices. (3D axes: x is $t$, y is $y_0$, z is $y$.)`);
     placeDot();
   }
 

@@ -287,3 +287,15 @@ describe('geodesic triangles and transport along geodesics', () => {
     expect(signedAngle(lg, [g.du, g.dv], g.V)).toBeCloseTo(0, 9);
   });
 });
+
+describe('a conical singularity', () => {
+  it('transport around the apex of a (flat) cone rotates a vector by the deficit angle 2π(1 − sin α)', () => {
+    const b = 1.3, S = surf('(v cos(u), v sin(u), b v)', { b });
+    const v0 = 1.1;
+    const tr = parallelTransport(S, (t) => [-t, v0, -1, 0], [0.3, 1], 0, 2 * Math.PI);
+    const ang = signedAngle(metricAt(S, 0, v0), tr.V[0], tr.V[tr.V.length - 1]);
+    const deficit = 2 * Math.PI * (1 - 1 / Math.sqrt(1 + b * b));
+    expect(Math.atan2(Math.sin(ang - deficit), Math.cos(ang - deficit))).toBeCloseTo(0, 8);
+    expect(localGeometry(S, 0.4, v0).K).toBeCloseTo(0, 12);
+  });
+});

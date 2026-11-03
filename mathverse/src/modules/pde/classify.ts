@@ -5,7 +5,7 @@
 
 import type { DemoDef, DemoCtx, DemoInstance } from '../types';
 import { classify2 } from '../../core/numeric/pde';
-import { fmt, tx, pal, alpha, heatImage, divergingLut, clamp, P } from './common';
+import { fmt, tx, pal, alpha, clamp, P } from './common';
 
 const PRESETS: Record<string, [number, number, number]> = { laplace: [1, 0, 1], heat: [1, 0, 0], wave: [1, 0, -1], skew: [1, 1.5, 1], tricomi: [0, 0, 1] };
 const BEHAVIOUR: Record<string, string> = {
@@ -44,7 +44,7 @@ function classifyDemo(ctx: DemoCtx): DemoInstance {
   const plot = ctx.plot!, plot2 = ctx.plot2!;
   plot.opts.equal = true; plot.opts.xLabel = 'x'; plot.opts.yLabel = 'y';
   plot2.opts.xLabel = 'B'; plot2.opts.yLabel = 'C';
-  let last = ctx.choices.preset, mapImg: ImageData | null = null, mapKey = '';
+  let last = ctx.choices.preset;
 
   const update = () => {
     const c = pal(ctx), p = ctx.params, preset = ctx.choices.preset;
@@ -91,22 +91,21 @@ function classifyDemo(ctx: DemoCtx): DemoInstance {
     });
 
     // the type map in the (B, C) plane for this A
-    const R = 2.2, W = 220;
-    const mk = `${A}|${ctx.dark}`;
-    if (mk !== mapKey) {
-      mapImg = heatImage(W, W, (i, j) => { const b = -R + (2 * R * (i + 0.5)) / W, cc = -R + (2 * R * (j + 0.5)) / W; const t = classify2(A, b, cc).type; return t === 'hyperbolic' ? 0.55 : t === 'elliptic' ? -0.55 : 0; }, -1, 1, divergingLut(ctx.dark), mapImg);
-      mapKey = mk;
-    }
+    const R = 2.2;
     plot2.setView({ x0: -R, x1: R, y0: -R, y1: R });
     plot2.setDraw((g) => {
-      if (mapImg) g.image(mapImg, -R, R, -R, R);
+      const par = (b: number) => clamp((b * b) / (A || 1e-300), -R, R);
+      const hyp = alpha(c.red, 0.22), ell = alpha(c.blue, 0.25);
+      if (Math.abs(A) < 1e-9) g.polygon([[-R, -R], [R, -R], [R, R], [-R, R]], { fill: hyp });
+      else if (A > 0) { g.fillBetween(() => R, par, -R, R, { fill: ell }); g.fillBetween(par, () => -R, -R, R, { fill: hyp }); }
+      else { g.fillBetween(par, () => -R, -R, R, { fill: ell }); g.fillBetween(() => R, par, -R, R, { fill: hyp }); }
       if (Math.abs(A) > 1e-9) g.fn((b) => (b * b) / A, { color: c.gold, width: 2.4 }, [-R, R]);
       else g.line([0, -R], [0, R], { color: c.gold, width: 2.4 });
       g.text([-R + 0.1, R - 0.1], `A = ${fmt(A, 3)}:  red hyperbolic · blue elliptic · gold line parabolic`, { color: c.ink, font: '12px Inter, sans-serif', baseline: 'top' });
       if (!tri) g.handle({ id: 'bc', at: [B, C], color: c.ink, label: '(B, C)', onDrag: ([b, cc]) => { ctx.setParam('B', +clamp(b, -2, 2).toFixed(3)); ctx.setParam('C', +clamp(cc, -2, 2).toFixed(3)); } });
     });
 
-    const canon = cl.type === 'elliptic' ? 'u_{\\xi\\xi} + u_{\\eta\\eta} + \\ldots = 0' : cl.type === 'parabolic' ? 'u_{\\xi\\xi} + \\ldots = 0' : cl.type === 'hyperbolic' ? 'u_{\\xi\\xi} - u_{\\eta\\eta} + \\ldots = 0\\ \\text{or}\\ u_{\\xi\\eta} + \\ldots = 0' : '\\text{—}';
+    const canon = cl.type === 'elliptic' ? 'u_{\\xi\\xi} + u_{\\eta\\eta} + \\ldots = 0' : cl.type === 'parabolic' ? 'u_{\\xi\\xi} + \\ldots = 0' : cl.type === 'hyperbolic' ? 'u_{\\xi\\xi} - u_{\\eta\\eta} + \\ldots = 0' : '\\text{—}';
     ctx.setReadouts(tri ? [
       { label: 'discriminant B² − AC', value: '−y (depends on position)' },
       { label: 'type', value: 'elliptic for y > 0, hyperbolic for y < 0' },

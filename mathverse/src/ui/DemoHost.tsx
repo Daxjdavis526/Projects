@@ -78,12 +78,15 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
     for (const c of demo.choices ?? []) choices[c.key] = ws.choices[c.key] ?? c.value;
     const toggles: Record<string, boolean> = {};
     for (const t of demo.toggles ?? []) toggles[t.key] = ws.toggles[t.key] ?? t.value;
+    let busy = false, needUpdate = false;
     const ctx: DemoCtx = {
       view3d, plot, plot2, params, choices, toggles,
       input: ws.input || demo.input?.value || '',
       time: { t: ws.t || 0, playing: live.current.playing, speed: live.current.speed },
       dark,
-      setParam: (k, v) => { params[k] = v; live.current.onParam(k, v); },
+      // A demo moving its own slider from an event (a drag) gets update() on the next
+      // frame; inside update()/tick() the demo is already redrawing, so no extra call.
+      setParam: (k, v) => { params[k] = v; live.current.onParam(k, v); if (!busy) needUpdate = true; },
       setChoice: (k, v) => { choices[k] = v; live.current.onChoice?.(k, v); },
       setToggle: (k, v) => { toggles[k] = v; live.current.onToggle?.(k, v); },
       setInput: (text) => { ctx.input = text; live.current.onInput?.(text); },
@@ -94,11 +97,12 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
     };
     ctxRef.current = ctx;
     let inst: DemoInstance | null = null;
-    try { inst = demo.create(ctx); instRef.current = inst; inst.update(); }
+    try { busy = true; inst = demo.create(ctx); instRef.current = inst; inst.update(); }
     catch (e) { console.error(e); outRef.current.error = `This demo hit an error: ${(e as Error).message}`; flush(); }
+    finally { busy = false; needUpdate = false; }
     apiRef.current = {
       view3d, plot, plot2, instance: inst, ctx,
-      resetTime: () => { ctx.time.t = 0; inst?.reset?.(); inst?.update(); live.current.onTime(0); },
+      resetTime: () => { busy = true; try { ctx.time.t = 0; inst?.reset?.(); inst?.update(); } finally { busy = false; } live.current.onTime(0); },
     };
     // the frame loop: timeline and animated parameters
     let raf = 0, last = performance.now(), sinceT = 0;
@@ -125,6 +129,8 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
           changed = true;
         }
       }
+      if (needUpdate) { changed = true; needUpdate = false; }
+      busy = true;
       if (changed && inst) { try { inst.update(); } catch (e) { outRef.current.error = (e as Error).message; flush(); } }
       if (L.playing && inst?.tick) {
         const sdt = dt * L.speed;
@@ -133,6 +139,7 @@ export function DemoHost({ demo, ws, dark, playing, speed, animating, onParam, o
         sinceT += dt;
         if (sinceT > 0.1) { sinceT = 0; L.onTime(ctx.time.t); }
       }
+      busy = false;
     };
     raf = requestAnimationFrame(loop);
     return () => {

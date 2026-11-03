@@ -1,0 +1,86 @@
+{
+  "format": "mathverse",
+  "version": 1,
+  "name": "Linear algebra",
+  "created": "2026-11-03T00:00:00Z",
+  "modified": "2026-11-03T00:00:00Z",
+  "tabs": [
+    {
+      "demoId": "explore",
+      "title": "A symmetric matrix",
+      "input": "A = [[2,1],[1,2]]",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "Eigenvalues 3 and 1; eigenvectors along the diagonals.",
+      "t": 0
+    },
+    {
+      "demoId": "linalg.transform2d",
+      "title": "Transformations",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "linalg.eigen",
+      "title": "Eigenvectors",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "linalg.svd",
+      "title": "SVD",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    }
+  ],
+  "active": 0
+}

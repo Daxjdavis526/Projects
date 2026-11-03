@@ -1,0 +1,124 @@
+{
+  "format": "mathverse",
+  "version": 1,
+  "name": "Calculus tour",
+  "created": "2026-11-03T00:00:00Z",
+  "modified": "2026-11-03T00:00:00Z",
+  "tabs": [
+    {
+      "demoId": "explore",
+      "title": "A cubic",
+      "input": "f(x) = x^3 - 4x",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "Find where f' = 0 and compare with the turning points.",
+      "t": 0
+    },
+    {
+      "demoId": "calc1.secant",
+      "title": "Secant to tangent",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "calc1.riemann",
+      "title": "Riemann sums",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "calc1.ftc",
+      "title": "Fundamental Theorem",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "calc2.taylor",
+      "title": "Taylor polynomials",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "calc2.series",
+      "title": "Series",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    }
+  ],
+  "active": 0
+}

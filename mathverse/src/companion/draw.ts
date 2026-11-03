@@ -416,7 +416,7 @@ export function build3D(view: Viewport3D, c: DrawCtx, visual: Visual | null, par
         const lo = zs.length ? zs[Math.floor(zs.length * 0.03)] : -1, hi = zs.length ? zs[Math.floor(zs.length * 0.97)] : 1;
         const zr: [number, number] = [Math.min(lo, 0), Math.max(hi, 0)];
         if (zr[1] - zr[0] < 1e-6) { zr[0] -= 1; zr[1] += 1; }
-        const pad = 0.15 * (zr[1] - zr[0]);
+        const pad = 0.06 * (zr[1] - zr[0]);
         const cut: [number, number] = [zr[0] - pad, zr[1] + pad];
         setB({ x: [-R, R], y: [-R, R], z: zr });
         keep(view.addGraph((u, v) => { const z = f([u, v]); return z >= cut[0] && z <= cut[1] ? z : NaN; }, [-R, R], [-R, R], { res: 80, colormap: 'viridis', opacity: 0.92 }));

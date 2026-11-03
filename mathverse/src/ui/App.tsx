@@ -19,6 +19,7 @@ import { Icon } from './icons';
 import { loadSettings, saveSettings, Settings } from './settings';
 import { Project, Workspace, emptyWorkspace } from '../project/format';
 import { saveProject, openProject, exportFile, isDesktop } from '../project/io';
+import { EXAMPLES } from '../project/examples';
 import { Companion } from '../companion/Companion';
 import { cas, CasStatus } from '../cas/client';
 import { blip } from './sound';
@@ -168,6 +169,13 @@ export default function App() {
       flash(`Opened ${r.project.name}`);
     } catch (e) { flash(`Could not open: ${(e as Error).message}`); }
   }, [setSettings, settings.recent]);
+  const openExample = useCallback((id: string) => {
+    const ex = EXAMPLES.find((e) => e.id === id); if (!ex) return;
+    const p = ex.project();
+    setProject(p); setProjectPath(undefined); setDirty(false);
+    setPlace({ kind: 'demo', id: p.tabs[p.active].demoId }); setGeneration((g) => g + 1);
+    flash(`Opened example: ${p.name}`);
+  }, []);
   const exportPNG = useCallback(async () => {
     const api = apiRef.current; if (!api) return;
     const url = api.view3d?.screenshot() ?? api.plot?.screenshot();
@@ -201,6 +209,7 @@ export default function App() {
     { id: 'save', group: 'File', title: 'Save project', keys: 'Ctrl+S', run: () => doSave() },
     { id: 'saveas', group: 'File', title: 'Save project as…', keys: 'Ctrl+Shift+S', run: () => doSave(true) },
     { id: 'open', group: 'File', title: 'Open project…', keys: 'Ctrl+O', run: () => doOpen() },
+    ...EXAMPLES.map((e) => ({ id: `example:${e.id}`, group: 'Examples', title: `Open example: ${e.name}`, run: () => openExample(e.id) })),
     { id: 'png', group: 'Export', title: 'Export image (PNG)', run: exportPNG },
     { id: 'svg', group: 'Export', title: 'Export plot (SVG)', run: exportSVG },
     { id: 'csv', group: 'Export', title: 'Export data (CSV)', run: exportCSV },
@@ -226,7 +235,7 @@ export default function App() {
     { id: 'tutorials', group: 'Go to', title: 'Tutorials', run: () => setPlace({ kind: 'tutorials' }) },
     { id: 'home', group: 'Go to', title: 'Home', run: () => setPlace({ kind: 'home' }) },
     ...DEMOS.map((d) => ({ id: `demo:${d.id}`, group: MODULES.find((m) => m.id === d.module)?.short ?? 'Fidget', title: d.title, hint: d.topic, run: () => openDemo(d.id) })),
-  ], [doSave, doOpen, exportPNG, exportSVG, exportCSV, exportTeX, exportParams, dark, settings, setSettings, openDemo, updateWs]);
+  ], [doSave, doOpen, openExample, exportPNG, exportSVG, exportCSV, exportTeX, exportParams, dark, settings, setSettings, openDemo, updateWs]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -280,7 +289,7 @@ export default function App() {
   });
 
   // ── render ──────────────────────────────────────────────────────────────
-  const centre = place.kind === 'home' ? <Home onTry={tryInput} onOpen={(id) => openDemo(id)} recent={settings.recent} onOpenRecent={(p) => doOpen(p)} completed={settings.completedTutorials} />
+  const centre = place.kind === 'home' ? <Home onTry={tryInput} onOpen={(id) => openDemo(id)} recent={settings.recent} onOpenRecent={(p) => doOpen(p)} onExample={openExample} completed={settings.completedTutorials} />
     : place.kind === 'tutorials' ? <TutorialList onOpen={(id) => openDemo(id)} completed={settings.completedTutorials} />
     : place.kind === 'fidget' ? <FidgetGallery onOpen={(id) => openDemo(id)} />
     : place.kind === 'companion' ? <Companion dark={dark} compact={compact} onCompact={setCompact} onOpenDemo={(id, input) => openDemo(id, input, true)} />

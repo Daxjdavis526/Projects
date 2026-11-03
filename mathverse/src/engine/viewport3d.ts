@@ -397,11 +397,17 @@ export class Viewport3D {
     };
     if (opts.label) makeLabel(opts.label);
     const r0 = opts.radius ?? this.span() * 0.012;
+    // shown = what the demo asked for (visible()); a zero-length arrow is hidden as well,
+    // and set() never overrides a demo's visible(false). The label is hidden explicitly,
+    // since CSS2D labels do not reliably inherit their parent's visibility.
+    let shown = true, nonzero = true;
+    const applyVis = () => { g.visible = shown && nonzero; if (label) (label as CSS2DObject).visible = g.visible; this.dirty = true; };
     const set = (o: V3, v: V3) => {
       const len = Math.hypot(...v);
       g.position.set(...o);
-      if (len < 1e-9) { g.visible = false; this.dirty = true; return; }
-      g.visible = true;
+      nonzero = len >= 1e-9;
+      applyVis();
+      if (!nonzero) return;
       const dir = new THREE.Vector3(...v).normalize();
       g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
       const headLen = Math.min(len * 0.35, r0 * 7), shaftLen = len - headLen;
@@ -412,11 +418,13 @@ export class Viewport3D {
     };
     set(origin, vec);
     let last: [V3, V3] = [origin, vec];
-    return this.track<ArrowHandle>(g, {
+    const h = this.track<ArrowHandle>(g, {
       set: (o: V3, v: V3) => { last = [o, v]; set(o, v); },
       setColor: (c: string) => { mat.color.set(c); this.dirty = true; },
       setLabel: (html: string) => { if (label) (label as CSS2DObject).element.innerHTML = html; else { makeLabel(html); set(...last); } this.dirty = true; },
     });
+    h.visible = (v: boolean) => { shown = v; applyVis(); };
+    return h;
   }
 
   /** A sphere marker; draggable when drag options are given. */

@@ -147,8 +147,8 @@ export class Graphics {
     for (const [p, q] of segs) this.line(p, q, s);
   }
 
-  /** A filled heat map of f over the view. */
-  heatmap(f: (x: number, y: number) => number, range: [number, number], cmap: Colormap = 'coolwarm', res = 160) {
+  /** A filled heat map of f over the view; alpha < 1 lets the grid and axes show through. */
+  heatmap(f: (x: number, y: number) => number, range: [number, number], cmap: Colormap = 'coolwarm', res = 160, alpha = 1) {
     const { x0, x1, y0, y1 } = this.view;
     const ny = Math.round(res * this.pxH / this.pxW);
     const img = new ImageData(res, ny);
@@ -158,7 +158,7 @@ export class Graphics {
       const hex = colormapCss(cmap, t);
       const k = 4 * (j * res + i);
       img.data[k] = parseInt(hex.slice(1, 3), 16); img.data[k + 1] = parseInt(hex.slice(3, 5), 16); img.data[k + 2] = parseInt(hex.slice(5, 7), 16);
-      img.data[k + 3] = Number.isFinite(v) ? 255 : 0;
+      img.data[k + 3] = Number.isFinite(v) ? Math.round(255 * Math.min(1, Math.max(0, alpha))) : 0;
     }
     this.image(img, x0, x1, y0, y1);
   }

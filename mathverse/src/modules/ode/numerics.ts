@@ -42,7 +42,7 @@ export const euler: DemoDef = {
     'Choose the stiff problem and increase h past 0.04: Euler explodes even though the true solution is perfectly calm.',
   ],
   connections: ['ode.adaptive', 'ode.linear1', 'ode.slopefield'],
-  accuracy: 'The exact solutions are closed forms, so the errors shown are the true global errors at t = T. Each point on the right is a separate fixed-step run (h adjusted so that T/h is a whole number of steps). The fitted orders are least-squares slopes over the range where 10⁻¹³ < error < 10⁻¹ (away from round-off and from instability).',
+  accuracy: 'The exact solutions are closed forms, so the errors shown are the true global errors at t = T. Each point on the right is a separate fixed-step run (h adjusted so that T/h is a whole number of steps). The fitted orders are least-squares slopes over h ≤ 0.1 where 10⁻¹³ < error < 10⁻¹ (the asymptotic range, away from round-off and from instability).',
   tutorial: [
     { text: '**Euler’s method** follows the tangent: $y_{n+1} = y_n + h f(t_n, y_n)$. Each step makes a local error of order $h^2$ (the Taylor term it ignores); over $T/h$ steps these add up to a **global error of order $h$**.', task: 'Show only Euler and drag the step size: watch the error point slide along a line of slope 1.', set: { params: { logh: -0.7 }, choices: { prob: 'cos' }, toggles: { euler: true, heun: false, rk4: false } }, done: (c) => c.params.logh < -1.5 },
     { text: '**Heun’s method** (improved Euler, RK2) takes an Euler step to predict, then averages the slopes at both ends: $y_{n+1} = y_n + \\tfrac h2[f(t_n, y_n) + f(t_{n+1}, y_n + hf_n)]$. The averaging cancels the $h^2$ term: global error $O(h^2)$.', task: 'Turn Heun on and compare slopes.', set: { toggles: { heun: false } }, done: (c) => c.toggles.heun },
@@ -79,7 +79,7 @@ function eulerInst(ctx: DemoCtx): DemoInstance {
     }
     const order = {} as Record<Method, number>;
     for (const m of METHODS) {
-      const sel = hs.map((h, i) => [h, err[m][i]]).filter(([h, e]) => e > 1e-13 && e < 1e-1 && h <= 0.11 * p.T && (!p.lambda || h * Math.abs(p.lambda) < LIMIT[m] * 0.8));
+      const sel = hs.map((h, i) => [h, err[m][i]]).filter(([h, e]) => e > 1e-13 && e < 1e-1 && h <= 0.1 && (!p.lambda || h * Math.abs(p.lambda) < LIMIT[m] * 0.8));
       order[m] = sel.length >= 3 ? fitOrder(sel.map((x) => x[0]), sel.map((x) => x[1])) : NaN;
     }
     return { hs, err, order };

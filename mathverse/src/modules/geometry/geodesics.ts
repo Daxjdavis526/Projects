@@ -52,7 +52,7 @@ const geodesicsDemo: DemoDef = {
   connections: ['geometry.compare', 'geometry.deviation', 'geometry.transport', 'geometry.charts', 'geometry.flamm'],
   accuracy: 'Numerical: classical RK4 in arc length (step 0.005 × size) on the geodesic equation with exact Christoffel symbols. The speed g(ẋ, ẋ) should stay 1; its largest drift is shown. On the sphere the integration switches to a rotated chart near the poles (an atlas), so it never meets the coordinate singularity.',
   tutorial: [
-    { text: '**Straightest curves.** Walk on a surface without ever turning left or right: your path is a geodesic. On a sphere these are the great circles — the routes aircraft fly. The gold curve starts at the white point in the direction of the orange arrow.', task: 'Drag the orange arrow tip to launch the geodesic in another direction.', set: { choices: { surface: 'sphere', color: 'K' }, params: { a: 1.5, pu: 1.1, pv: 0.3, angle: 0.6, len: 9.42 }, toggles: { fan: false, arrow: true } }, done: (c) => Math.abs(c.params.angle - 0.6) > 0.3 },
+    { text: '**Straightest curves.** Walk on a surface without ever turning left or right: your path is a geodesic. On a sphere these are the great circles — the routes aircraft fly. The gold curve starts at the white point in the direction of the orange arrow.', task: 'Drag the orange arrow tip to launch the geodesic in another direction.', set: { choices: { surface: 'sphere', color: 'K' }, params: { a: 1.5, pu: 1.1, pv: -0.7, angle: 0.6, len: 9.42 }, toggles: { fan: false, arrow: true } }, done: (c) => Math.abs(c.params.angle - 0.6) > 0.3 },
     { text: '**The geodesic equation.** In coordinates, “no sideways acceleration” reads ẍᵏ + Γᵏᵢⱼẋⁱẋʲ = 0. The Christoffel terms are needed because the coordinate lines themselves curve. The equation is solved numerically here, step by step.\n\nAt the poles the (u, v) chart breaks down, so MathVerse switches to a second, rotated chart — an atlas in action.', task: 'Aim the geodesic straight at a pole (along ±r_u, angle ≈ 0 or ±π).', done: (c) => c.choices.surface === 'sphere' && Math.abs(Math.sin(c.params.angle)) < 0.05 },
     { text: '**Positive curvature focuses.** Geodesics leaving one point in nearby directions start out diverging, but on the sphere they bend back together and meet at the antipode, a distance πa away. This is how curvature is *felt* without any outside view.', task: 'Turn on the fan.', set: { choices: { surface: 'sphere' }, params: { len: 4.71, spread: 0.5, angle: 0.3 } }, done: (c) => !!c.toggles.fan },
     { text: '**Negative curvature defocuses.** On a saddle-shaped surface (K < 0) the fan opens up faster than straight lines would — nearby geodesics separate exponentially. That is why geodesic flow on negatively curved surfaces is chaotic.', task: 'Switch to the pseudosphere (K = −1/a² everywhere) or the saddle.', set: { toggles: { fan: true }, params: { spread: 0.25 } }, done: (c) => c.choices.surface === 'pseudosphere' || c.choices.surface === 'saddle' },
@@ -163,7 +163,7 @@ const compareDemo: DemoDef = {
     'Torus: place the triangle on the outside (excess > 0) and then the inside (excess < 0).',
   ],
   connections: ['geometry.transport', 'geometry.curvature', 'geometry.metric', 'geometry.geodesics'],
-  accuracy: 'Sphere and plane edges are exact (great-circle arcs, straight lines). Other edges are found by shooting (Newton on the initial direction and length of an RK4 geodesic; residual ≤ 1e−9). Angles come from the edge tangents; ∫∫K dA is Gauss–Legendre quadrature over the triangle in the parameter plane. Circle: 120 radial geodesics; the circumference is the polygon length (relative error ~1e−4).',
+  accuracy: 'Sphere and plane edges are exact (great-circle arcs, straight lines). Other edges are found by shooting (Newton on the initial direction and length of an RK4 geodesic; residual ≤ 1e−9). Angles come from the edge tangents; ∫∫K dA is Gauss–Legendre quadrature over the triangle in the parameter plane. Circle: 120 radial geodesics; the circumference is the polygon length, Richardson-extrapolated (relative error ~1e−7).',
   create: (ctx) => createCompare(ctx),
 };
 
@@ -240,7 +240,11 @@ function createCompare(ctx: DemoCtx): DemoInstance {
         ring.push(q.p); ringUV.push([q.u, q.v]);
         if (k % 10 === 0) spk.push(r.points.map((x) => x.p));
       }
-      let C = 0; for (let k = 0; k < n; k++) C += norm3(sub3(ring[k + 1], ring[k]));
+      // polygon length, Richardson-extrapolated from n and n/2 sides (the chord error is O(1/n²))
+      let Cn = 0, Ch = 0;
+      for (let k = 0; k < n; k++) Cn += norm3(sub3(ring[k + 1], ring[k]));
+      for (let k = 0; k < n; k += 2) Ch += norm3(sub3(ring[k + 2], ring[k]));
+      const C = (4 * Cn - Ch) / 3;
       const lifted = ring.map((p, k) => { const g = localGeometry(b.S, ringUV[k][0], ringUV[k][1]); return g.regular ? lift(p, g.n, s * 0.006) : p; });
       if (!circle) circle = v.addCurve(lifted, { color: COLORS.geo, radius: s * 0.009 }); else circle.set(lifted);
       circle.visible(true);
