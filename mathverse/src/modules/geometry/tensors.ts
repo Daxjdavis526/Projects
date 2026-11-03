@@ -160,15 +160,22 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
     ctx.setSteps(steps.length ? steps : [{ title: 'Riemann tensor', tex: 'R_{abcd} = 0', detail: 'Every component vanishes: the space is flat here.' }]);
     // the plot: a curvature invariant along a line through the point, computed two ways where possible
     const samples: [number, number][] = [], exact: [number, number][] = [];
+    let plotX = NaN;
     let xl = 'u', yl = 'K';
     if (sp.id === 'surface') {
-      xl = 'u (v fixed)'; yl = 'K';
+      // sample along whichever coordinate line K varies more on
+      const spread = (which: 0 | 1) => { let lo = Infinity, hi = -Infinity; for (let i = 0; i <= 20; i++) { const c = which === 0 ? b.u[0] + ((b.u[1] - b.u[0]) * i) / 20 : b.v[0] + ((b.v[1] - b.v[0]) * i) / 20; const K = which === 0 ? localGeometry(b.S, c, x[1]).K : localGeometry(b.S, x[0], c).K; if (Number.isFinite(K)) { lo = Math.min(lo, K); hi = Math.max(hi, K); } } return hi - lo; };
+      const along: 0 | 1 = spread(1) > spread(0) * 1.01 ? 1 : 0;
+      const rng = along === 0 ? b.u : b.v;
+      const pnt = (c: number) => (along === 0 ? [c, x[1]] : [x[0], c]);
+      xl = along === 0 ? 'u (v fixed)' : 'v (u fixed)'; yl = 'K';
       for (let i = 0; i <= 60; i++) {
-        const uu = b.u[0] + ((b.u[1] - b.u[0]) * (i + 0.5)) / 61;
-        const Tm = curvatureTensors(metric, [uu, x[1]]);
-        const g = Tm.g; samples.push([uu, Tm.Rdown[0][1][0][1] / (g[0][0] * g[1][1] - g[0][1] ** 2)]);
+        const c = rng[0] + ((rng[1] - rng[0]) * (i + 0.5)) / 61;
+        const Tm = curvatureTensors(metric, pnt(c));
+        const g = Tm.g; samples.push([c, Tm.Rdown[0][1][0][1] / (g[0][0] * g[1][1] - g[0][1] ** 2)]);
       }
-      for (let i = 0; i <= 300; i++) { const uu = b.u[0] + ((b.u[1] - b.u[0]) * i) / 300; exact.push([uu, localGeometry(b.S, uu, x[1]).K]); }
+      for (let i = 0; i <= 300; i++) { const c = rng[0] + ((rng[1] - rng[0]) * i) / 300; const q = pnt(c); exact.push([c, localGeometry(b.S, q[0], q[1]).K]); }
+      plotX = along === 0 ? x[0] : x[1];
     } else if (sp.id === 'schw4' || sp.id === 'schw3') {
       xl = 'r'; yl = sp.id === 'schw4' ? 'log₁₀ Kretschmann' : 'R_rr';
       const r0 = 2 * M * 1.02, r1 = Math.max(12, 8 * M);
@@ -192,14 +199,14 @@ function createRiemann(ctx: DemoCtx): DemoInstance {
     const ys = [...samples, ...exact].map((p) => p[1]).filter(Number.isFinite);
     let y0 = Math.min(0, ...ys), y1 = Math.max(0, ...ys);
     if (y1 - y0 < 1e-9) { y0 -= 1; y1 += 1; }
-    const pad = (y1 - y0) * 0.12;
+    const pad = (y1 - y0) * 0.18;
     const xs = exact.map((p) => p[0]);
     plot.opts.xLabel = xl; plot.opts.yLabel = yl;
     plot.setView({ x0: Math.min(...xs), x1: Math.max(...xs), y0: y0 - pad, y1: y1 + pad });
     plot.setDraw((G) => {
       G.path(exact, { color: SERIES[0], width: 2.4 });
       for (const p of samples) if (Number.isFinite(p[1])) G.point(p, 3.2, { color: SERIES[1] });
-      const cx = sp.id === 'surface' ? x[0] : sp.id === 'schw4' ? x[1] : sp.id === 'schw3' ? x[0] : sp.id === 's3' ? x[0] : sp.id === 'hyper' ? x[1] : x[0];
+      const cx = sp.id === 'surface' ? plotX : sp.id === 'schw4' ? x[1] : sp.id === 'schw3' ? x[0] : sp.id === 's3' ? x[0] : sp.id === 'hyper' ? x[1] : x[0];
       G.line([cx, y0 - pad], [cx, y1 + pad], { color: COLORS.vec, width: 1.4, dash: [5, 4] });
       G.text([Math.min(...xs), y1 + pad], sp.id === 'surface' ? ' line: K from II (extrinsic) · dots: R₁₂₁₂/det g from the metric (intrinsic)' : ' line: exact formula · dots: computed from the metric', { color: ctx.dark ? '#c9cfdb' : '#2a3040', baseline: 'top' }, 4, 4);
     });

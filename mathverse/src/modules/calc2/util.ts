@@ -129,7 +129,10 @@ export function rangeOf(fs: ((x: number) => number)[], a: number, b: number, pad
  * \surd\overline{…}, which renders without SVG. Use for notes, tutorial text,
  * experiments and step details (Tex-rendered readouts and steps are fine).
  */
+const MARKUP_SAFE = true;
 export function mtex(text: string): string {
+  // The shell's Markup no longer corrupts KaTeX's SVG, so real radicals are safe; kept as a hook.
+  if (MARKUP_SAFE) return text;
   let out = '', i = 0;
   while (i < text.length) {
     const j = text.indexOf('\\sqrt{', i);
