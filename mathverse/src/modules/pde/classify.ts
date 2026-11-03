@@ -109,7 +109,7 @@ function classifyDemo(ctx: DemoCtx): DemoInstance {
     ctx.setReadouts(tri ? [
       { label: 'discriminant B² − AC', value: '−y (depends on position)' },
       { label: 'type', value: 'elliptic for y > 0, hyperbolic for y < 0' },
-      { label: 'characteristics (y < 0)', value: 'x ± ⅔(−y)^{3/2} = const' },
+      { label: 'characteristics (y < 0)', value: 'x \\pm \\tfrac23(-y)^{3/2} = \\text{const}', tex: true },
     ] : [
       { label: 'discriminant B² − AC', value: fmt(cl.disc, 6), tone: cl.type === 'hyperbolic' ? 'bad' : cl.type === 'elliptic' ? 'good' : 'warn' },
       { label: 'type', value: cl.type },

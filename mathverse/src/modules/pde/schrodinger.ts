@@ -86,9 +86,9 @@ function schrodingerDemo(ctx: DemoCtx): DemoInstance {
       g.fn(sh, { color: c.green, width: 2.2, dash: [6, 4] }, [0, tm]);
       for (const q of hist) g.point(q, 2.4, { fill: c.ink });
       const y1 = Math.max(sq(tm), sh(tm)) * 1.05;
-      g.text([0.1, y1], `━ quantum: σ₀√(1 + (t/2σ₀²)²)  ~ t`, { color: c.gold, font: '12px Inter, sans-serif', baseline: 'top' });
-      g.text([0.1, y1 * 0.92], '┅ diffusion: √(σ₀² + t)  ~ √t', { color: c.green, font: '12px Inter, sans-serif', baseline: 'top' });
-      g.text([0.1, y1 * 0.84], '● measured from the numerical |ψ|²', { color: c.ink, font: '12px Inter, sans-serif', baseline: 'top' });
+      g.text([tm * 0.05, y1], `━ quantum: σ₀√(1 + (t/2σ₀²)²)  ~ t`, { color: c.gold, font: '12px Inter, sans-serif', baseline: 'top' });
+      g.text([tm * 0.05, y1 * 0.92], '┅ diffusion: √(σ₀² + t)  ~ √t', { color: c.green, font: '12px Inter, sans-serif', baseline: 'top' });
+      g.text([tm * 0.05, y1 * 0.84], '● measured from the numerical |ψ|²', { color: c.ink, font: '12px Inter, sans-serif', baseline: 'top' });
     });
     const edge = (() => { let e = 0; for (let i = 0; i < S.n; i++) if (Math.abs(S.x[i]) > 16) e += (S.re[i] ** 2 + S.im[i] ** 2) * S.dx; return e; })();
     const rows: Readout[] = [
