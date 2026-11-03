@@ -108,11 +108,18 @@ function createTaylor(ctx: DemoCtx): DemoInstance {
     const e0 = F(x0) - P(x0), b0 = bnd(x0);
     const terms = c.slice(0, Math.min(N, 6) + 1).map((v, n) => ({ v, n })).filter((q) => Math.abs(q.v) > 1e-15);
     const shift = a === 0 ? 'x' : `(x ${a > 0 ? '-' : '+'} ${fmt(Math.abs(a), 3)})`;
-    const polyTeX = terms.map((q, i) => { const s = q.v < 0 ? '-' : i ? '+' : ''; const m = Math.abs(q.v); return `${s}${q.n === 0 || Math.abs(m - 1) > 1e-12 ? texNum(m, 5) : ''}${q.n === 0 ? '' : q.n === 1 ? shift : `${shift}^{${q.n}}`}`; }).join(' ') + (N > 6 ? ' + \\cdots' : '');
+    // coefficients as exact fractions when they are (to 1e−13) — e.g. 1/3! — otherwise as decimals marked ≈
+    let approx = false;
+    const coefTeX = (m: number, n: number) => {
+      const r = rational(m);
+      if (r) return r[1] === 1 ? (r[0] === 1 && n > 0 ? '' : String(r[0])) : `\\tfrac{${r[0]}}{${r[1]}}`;
+      approx = true; return texNum(m, 6);
+    };
+    const polyTeX = terms.map((q, i) => { const s = q.v < 0 ? '-' : i ? '+' : ''; return `${s}${coefTeX(Math.abs(q.v), q.n)}${q.n === 0 ? '' : q.n === 1 ? shift : `${shift}^{${q.n}}`}`; }).join(' ') + (N > 6 ? ' + \\cdots' : '');
     const inside = !Number.isFinite(R) || Math.abs(x0 - a) < R;
     ctx.warn(warn.join(' '));
     ctx.setReadouts([
-      { label: `P_${N}(x)`, value: polyTeX || '0', tex: true },
+      { label: `P_${N}(x)${approx ? '  (coefficients rounded)' : '  (exact coefficients)'}`, value: polyTeX || '0', tex: true },
       { label: `f(${fmt(x0, 4)})`, value: fmt(F(x0), 12) },
       { label: `P_${N}(${fmt(x0, 4)})`, value: fmt(P(x0), 12) },
       { label: 'error f − P_N', value: Number.isFinite(e0) ? (e0 === 0 ? '0' : e0.toExponential(3)) : '—', tone: Math.abs(e0) < 1e-6 ? 'good' : undefined },
@@ -129,4 +136,18 @@ function createTaylor(ctx: DemoCtx): DemoInstance {
     tick(dt) { clock += dt; if (clock < 0.6) return; clock = 0; const N = Math.round(ctx.params.N); ctx.setParam('N', N >= 25 ? 0 : N + 1); update(); },
     dispose() {},
   };
+}
+
+/** p/q with q ≤ 100000 when x equals it to 1e−13 (continued fractions), else null. */
+function rational(x: number): [number, number] | null {
+  if (!Number.isFinite(x)) return null;
+  let h0 = 0, h1 = 1, k0 = 1, k1 = 0, v = x;
+  for (let i = 0; i < 25; i++) {
+    const a = Math.floor(v);
+    [h0, h1] = [h1, a * h1 + h0]; [k0, k1] = [k1, a * k1 + k0];
+    if (k1 > 100000) return null;
+    if (Math.abs(x - h1 / k1) <= 1e-13 * Math.max(1, Math.abs(x))) return [h1, k1];
+    const f = v - a; if (f < 1e-15) return null; v = 1 / f;
+  }
+  return null;
 }

@@ -37,9 +37,15 @@ function riemannDemo(ctx: DemoCtx): DemoInstance {
   const ab = () => { const a = ctx.params.a, b = ctx.params.b; return a <= b ? [a, b] : [b, a]; };
 
   plot.onClick = ([px]) => {
-    if (ctx.choices.partition !== 'custom') return;
     const [a, b] = ab();
     if (px <= a || px >= b) return;
+    if (ctx.choices.partition !== 'custom') {
+      // a click on a uniform partition switches to the custom one, starting from it
+      pts = uniformPartition(a, b, Math.max(1, Math.round(ctx.params.n)));
+      mode = 'custom';
+      ctx.setChoice('partition', 'custom');
+      ctx.choices.partition = 'custom';
+    }
     const tolX = 9 / plot.canvas.clientWidth * (plot.view.x1 - plot.view.x0);
     const near = pts.findIndex((p, i) => i > 0 && i < pts.length - 1 && Math.abs(p - px) < tolX);
     if (near >= 0) pts.splice(near, 1);
@@ -332,7 +338,7 @@ export const integralDemos: DemoDef[] = [
     ],
     choices: [
       { key: 'rule', label: 'Sample point', options: [['left', 'Left'], ['right', 'Right'], ['mid', 'Midpoint'], ['trap', 'Trapezoid'], ['lower', 'Lower (min)'], ['upper', 'Upper (max)']], value: 'left' },
-      { key: 'partition', label: 'Partition', options: [['uniform', 'Uniform (n equal pieces)'], ['custom', 'Custom (click / drag)']], value: 'uniform' },
+      { key: 'partition', label: 'Partition', options: [['uniform', 'Uniform (n equal pieces)'], ['custom', 'Custom (click the plot / drag)']], value: 'uniform' },
     ],
     experiments: [
       'Double n a few times with the left rule: the error halves each time. With the midpoint rule it quarters.',

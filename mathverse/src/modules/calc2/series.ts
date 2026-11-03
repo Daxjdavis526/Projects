@@ -19,8 +19,8 @@ const SERIES_LIST: Record<string, Ser> = {
   geom: {
     label: 'geometric Σ rⁿ', n0: 0, a: (n, r) => Math.pow(r, n), tex: () => '\\sum_{n=0}^\\infty r^n', usesQ: true,
     sum: (r) => (Math.abs(r) < 1 ? 1 / (1 - r) : NaN), sumTeX: (r) => (Math.abs(r) < 1 ? `\\frac{1}{1-r} = ${fmt(1 / (1 - r), 8)}` : '\\text{none}'),
-    bound: (N, r) => (Math.abs(r) < 1 ? { v: Math.abs(r) ** (N + 1) / Math.abs(1 - r), why: 'exact: S − S_N = r^{N+1}/(1 − r)' } : null),
-    verdict: (r) => (Math.abs(r) < 1 ? { conv: true, why: '|r| < 1: S_N = (1 − r^{N+1})/(1 − r) and r^{N+1} → 0' } : { conv: false, why: '|r| ≥ 1: the terms do not tend to 0 (n-th term test)' }),
+    bound: (N, r) => (Math.abs(r) < 1 ? { v: Math.abs(r) ** (N + 1) / Math.abs(1 - r), why: 'exact: S − S_N = r^(N+1)/(1 − r)' } : null),
+    verdict: (r) => (Math.abs(r) < 1 ? { conv: true, why: '|r| < 1: S_N = (1 − r^(N+1))/(1 − r) and r^(N+1) → 0' } : { conv: false, why: '|r| ≥ 1: the terms do not tend to 0 (n-th term test)' }),
   },
   harmonic: {
     label: 'harmonic Σ 1/n', n0: 1, a: (n) => 1 / n, tex: () => '\\sum_{n=1}^\\infty \\frac1n', usesQ: false,
@@ -30,19 +30,19 @@ const SERIES_LIST: Record<string, Ser> = {
   p: {
     label: 'p-series Σ 1/nᵖ', n0: 1, a: (n, p) => Math.pow(n, -p), tex: () => '\\sum_{n=1}^\\infty \\frac{1}{n^p}', usesQ: true,
     sum: (p) => (p > 1 ? zeta(p) : Infinity), sumTeX: (p) => (p > 1 ? (Math.abs(p - 2) < 1e-9 ? `\\frac{\\pi^2}{6} = ${fmt(zeta(2), 9)}` : Math.abs(p - 4) < 1e-9 ? `\\frac{\\pi^4}{90} = ${fmt(zeta(4), 9)}` : `\\zeta(${fmt(p, 3)}) = ${fmt(zeta(p), 9)}`) : '\\infty'),
-    bound: (N, p) => (p > 1 ? { v: Math.pow(N, 1 - p) / (p - 1), why: 'integral test: S − S_N ≤ ∫_N^∞ x^{−p} dx' } : null),
+    bound: (N, p) => (p > 1 ? { v: Math.pow(N, 1 - p) / (p - 1), why: 'integral test: S − S_N ≤ ∫_N^∞ x^(−p) dx = N^(1−p)/(p − 1)' } : null),
     verdict: (p) => (p > 1 ? { conv: true, why: `p = ${fmt(p, 3)} > 1 (integral test / p-test)` } : { conv: false, why: `p = ${fmt(p, 3)} ≤ 1 (integral test / p-test)` }),
   },
   alt: {
     label: 'alternating Σ (−1)ⁿ⁺¹/nᵖ', n0: 1, a: (n, p) => (n % 2 ? 1 : -1) * Math.pow(n, -p), tex: () => '\\sum_{n=1}^\\infty \\frac{(-1)^{n+1}}{n^p}', usesQ: true, alt: true,
     sum: (p) => (p > 0 ? eta(p) : NaN), sumTeX: (p) => (p > 0 ? (Math.abs(p - 1) < 1e-9 ? `\\ln 2 = ${fmt(Math.LN2, 9)}` : `\\eta(${fmt(p, 3)}) = ${fmt(eta(p), 9)}`) : '\\text{none}'),
-    bound: (N, p) => (p > 0 ? { v: Math.pow(N + 1, -p), why: 'alternating series test: |S − S_N| ≤ |a_{N+1}|' } : null),
+    bound: (N, p) => (p > 0 ? { v: Math.pow(N + 1, -p), why: 'alternating series test: |S − S_N| ≤ |a_(N+1)|' } : null),
     verdict: (p) => (p > 0 ? { conv: true, why: p > 1 ? 'absolutely (Σ1/nᵖ converges)' : 'conditionally: terms alternate and decrease to 0, but Σ|a_n| diverges' } : { conv: false, why: 'terms do not tend to 0' }),
   },
   leibniz: {
     label: 'Leibniz Σ (−1)ⁿ/(2n+1)', n0: 0, a: (n) => (n % 2 ? -1 : 1) / (2 * n + 1), tex: () => '\\sum_{n=0}^\\infty \\frac{(-1)^n}{2n+1}', usesQ: false, alt: true,
     sum: () => Math.PI / 4, sumTeX: () => `\\frac{\\pi}{4} = ${fmt(Math.PI / 4, 9)}`,
-    bound: (N) => ({ v: 1 / (2 * N + 3), why: 'alternating series test: |S − S_N| ≤ |a_{N+1}|' }),
+    bound: (N) => ({ v: 1 / (2 * N + 3), why: 'alternating series test: |S − S_N| ≤ |a_(N+1)|' }),
     verdict: () => ({ conv: true, why: 'conditionally (alternating, decreasing to 0); it is arctan 1' }),
   },
   tele: {
@@ -54,7 +54,7 @@ const SERIES_LIST: Record<string, Ser> = {
   e: {
     label: 'Σ 1/n!  (= e)', n0: 0, a: (n) => Math.exp(-logFactorial(n)), tex: () => '\\sum_{n=0}^\\infty \\frac{1}{n!}', usesQ: false,
     sum: () => Math.E, sumTeX: () => `e = ${fmt(Math.E, 9)}`,
-    bound: (N) => ({ v: Math.exp(-logFactorial(N + 1)) * (N + 2) / (N + 1), why: 'tail < a_{N+1}(1 + 1/(N+2) + 1/(N+2)² + …)' }),
+    bound: (N) => ({ v: Math.exp(-logFactorial(N + 1)) * (N + 2) / (N + 1), why: 'tail < a_(N+1)·(1 + 1/(N+2) + 1/(N+2)² + …)' }),
     verdict: () => ({ conv: true, why: 'ratio test: a_{n+1}/a_n = 1/(n+1) → 0' }),
   },
   grandi: {

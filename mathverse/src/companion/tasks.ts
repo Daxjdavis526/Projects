@@ -228,6 +228,19 @@ async function casSolve(ctx: RunCtx, F: Node, x: string): Promise<{ sols: { out:
   } catch (e) { return { sols: [], error: (e as Error).message }; }
 }
 
+/** Is n (up to constant factors) a product or power of factors that depend on x — a factorization worth showing? */
+function isProduct(n: Node, x: string): boolean {
+  const dep = (m: Node) => freeSymbols(m).has(x);
+  while (true) {
+    if (n.t === 'neg') { n = n.a; continue; }
+    if (n.t === 'div' && !dep(n.b)) { n = n.a; continue; }
+    if (n.t === 'mul' && !dep(n.a)) { n = n.b; continue; }
+    if (n.t === 'mul' && !dep(n.b)) { n = n.a; continue; }
+    break;
+  }
+  return (n.t === 'mul' && dep(n.a) && dep(n.b)) || (n.t === 'pow' && dep(n.a) && n.b.t === 'num' && n.b.v > 1);
+}
+
 async function taskSolve(ctx: RunCtx): Promise<Work> {
   const { an, params } = ctx;
   const fixed = fixedOf(an, params);
@@ -245,7 +258,7 @@ async function taskSolve(ctx: RunCtx): Promise<Work> {
     const names = namesOf(F);
     const r = await ctx.cas.call<{ factored: CasOut }>('simplify', { expr: toSympy(F), names });
     const fac = readCas(r.factored, names);
-    if (r.factored.latex && fac && T(fac) !== T(F) && /\\left\(|\)\s*\(|\^\{?\d/.test(r.factored.latex)) {
+    if (fac && T(fac) !== T(F) && isProduct(fac, x)) {
       const a = agree(F, fac, namesOf(F).filter((n) => !(n in fixed)).length ? [x] : [x], fixed);
       steps.push({ title: 'Factor', rule: 'Factorization (SymPy)', tex: `${r.factored.latex} = 0`, detail: `A product is zero exactly when one of its factors is zero. ${a.ok ? 'The factored form agrees with the original at sample points.' : ''}`, hint: 'Can it be factored?', check: a.ok ? ok('Factored form agrees numerically with the original.') : unv('Could not compare the factored form numerically.') });
     }

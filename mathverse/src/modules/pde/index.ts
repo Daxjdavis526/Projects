@@ -10,5 +10,6 @@ import { poisson } from './poisson';
 import { bc } from './bc';
 import { diffusion } from './diffusion';
 import { separation } from './separation';
+import { fourier } from './fourier';
 
-export const demos: DemoDef[] = [heat1d, bc, heat2d, wave, membrane, laplace, poisson, diffusion, separation, stability];
+export const demos: DemoDef[] = [heat1d, bc, heat2d, wave, membrane, laplace, poisson, diffusion, separation, fourier, stability];

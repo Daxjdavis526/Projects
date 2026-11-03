@@ -46,15 +46,15 @@ export const pendulumDemo: DemoDef = {
 function createPendulum(ctx: DemoCtx): DemoInstance {
   const Lp = ctx.plot!, Rp = ctx.plot2!;
   Lp.opts.equal = true; Lp.opts.axes = false; Lp.opts.grid = false; Lp.opts.pan = false;
-  Lp.setView({ x0: -3, x1: 3, y0: -2.3, y1: 1.3 });
+  Lp.setView({ x0: -3.1, x1: 3.1, y0: -1.0, y1: 2.6 });
   let simT = 0, y = [0, 0], key = '';
   let traj: Trajectory | null = null;
   const draw = () => {
     const th0 = (ctx.params.amp * Math.PI) / 180, L = ctx.params.L, w0 = Math.sqrt(G / L);
     const thE = y[0], thL = th0 * Math.cos(w0 * simT);
-    const t = ink(ctx), Ls = 1.9;
+    const t = ink(ctx), Ls = 1.3;
     Lp.setDraw((g) => {
-      const piv: [number, number][] = [[-1.45, 0.9], [1.45, 0.9]];
+      const piv: [number, number][] = [[-1.5, 1.2], [1.5, 1.2]];
       const items = [{ p: piv[0], th: thE, col: BLUE, lab: 'exact:  θ″ = −(g/L) sin θ' }, { p: piv[1], th: thL, col: GOLD, lab: 'linearised:  θ″ = −(g/L) θ' }];
       for (const it of items) {
         // swing arc and the amplitude marks
@@ -66,11 +66,11 @@ function createPendulum(ctx: DemoCtx): DemoInstance {
         g.line(it.p, bob, { color: t, width: 2 });
         g.point(it.p, 4, { fill: t });
         g.point(bob, 13, { fill: it.col, color: t, width: 1.5 });
-        g.text([it.p[0], it.p[1] + 0.22], it.lab, { color: it.col, font: FONT, align: 'center' });
-        g.text([it.p[0], it.p[1] - Ls - 0.42], `θ = ${fmt((it.th * 180) / Math.PI, 4)}°`, { color: it.col, font: FONT, align: 'center' });
+        g.text([it.p[0], 2.45], it.lab, { color: it.col, font: FONT, align: 'center' });
+        g.text([it.p[0], -0.55], `θ = ${fmt((it.th * 180) / Math.PI, 4)}°`, { color: it.col, font: FONT, align: 'center' });
       }
-      g.line([-2.9, 0.9], [2.9, 0.9], { color: muted(ctx), width: 3 });
-      g.text([0, -2.2], `t = ${fmt(simT, 4)} s`, { color: muted(ctx), font: FONT, align: 'center' });
+      g.line([-3, 1.2], [3, 1.2], { color: muted(ctx), width: 3 });
+      g.text([0, -0.85], `t = ${fmt(simT, 4)} s`, { color: muted(ctx), font: FONT, align: 'center' });
     });
   };
   const update = () => {
@@ -89,9 +89,9 @@ function createPendulum(ctx: DemoCtx): DemoInstance {
         for (let m = 1; m <= 4; m++) g.fn((d) => (d >= 0 && d <= 180 ? seriesRatio((d * Math.PI) / 180, m) : NaN), { color: rgba(VIOLET, m === terms ? 1 : 0.3), width: m === terms ? 2.2 : 1.2, dash: [5, 3] }, [0, 180]);
         g.fn((d) => (d > 0 && d < 180 ? pendulumPeriod((d * Math.PI) / 180, 1, 1) / (2 * Math.PI) : NaN), { color: BLUE, width: 2.8 }, [0.5, 179.9]);
         g.point([ctx.params.amp, T / T0], 6, { fill: GREEN });
-        g.text([g.view.x0, g.view.y1], 'blue: exact T/T₀ (elliptic integral)', { color: BLUE, font: FONT }, 50, 22);
-        g.text([g.view.x0, g.view.y1], `violet: series with ${terms} correction term${terms === 1 ? '' : 's'} (bold)`, { color: VIOLET, font: FONT }, 50, 40);
-        g.text([g.view.x0, g.view.y1], 'gold: small-angle T₀', { color: GOLD, font: FONT }, 50, 58);
+        g.text([g.view.x0, g.view.y1], 'blue: exact T/T₀ (elliptic integral)', { color: BLUE, font: FONT }, 50, 40);
+        g.text([g.view.x0, g.view.y1], `violet: series with ${terms} correction term${terms === 1 ? '' : 's'} (bold)`, { color: VIOLET, font: FONT }, 50, 58);
+        g.text([g.view.x0, g.view.y1], 'gold: small-angle T₀', { color: GOLD, font: FONT }, 50, 76);
       });
     } else if (plot === 'motion') {
       Rp.opts.xLabel = 't (s)'; Rp.opts.yLabel = 'θ (°)';
