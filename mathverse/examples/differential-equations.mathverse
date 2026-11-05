@@ -1,0 +1,107 @@
+{
+  "format": "mathverse",
+  "version": 1,
+  "name": "Differential equations",
+  "created": "2026-11-03T00:00:00Z",
+  "modified": "2026-11-03T00:00:00Z",
+  "tabs": [
+    {
+      "demoId": "explore",
+      "title": "Damped oscillator",
+      "input": "y'' + c y' + 4 y = 0",
+      "params": {
+        "c": 0.5
+      },
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "Raise c through 4: underdamped → critical → overdamped.",
+      "t": 0
+    },
+    {
+      "demoId": "ode.phase",
+      "title": "Phase portraits",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "ode.lorenz",
+      "title": "Lorenz attractor",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "pde.heat1d",
+      "title": "Heat equation",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "pde.membrane",
+      "title": "Vibrating membrane",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    }
+  ],
+  "active": 0
+}

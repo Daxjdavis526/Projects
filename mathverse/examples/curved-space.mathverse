@@ -1,0 +1,105 @@
+{
+  "format": "mathverse",
+  "version": 1,
+  "name": "Curved space",
+  "created": "2026-11-03T00:00:00Z",
+  "modified": "2026-11-03T00:00:00Z",
+  "tabs": [
+    {
+      "demoId": "geometry.curvature",
+      "title": "Gaussian curvature",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "geometry.geodesics",
+      "title": "Geodesics",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "geometry.transport",
+      "title": "Parallel transport",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "geometry.flamm",
+      "title": "Embedding diagram (an analogy)",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "geometry.lightcones",
+      "title": "Light cones",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    }
+  ],
+  "active": 0
+}

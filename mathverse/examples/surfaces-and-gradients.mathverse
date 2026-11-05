@@ -1,0 +1,90 @@
+{
+  "format": "mathverse",
+  "version": 1,
+  "name": "Surfaces and gradients",
+  "created": "2026-11-03T00:00:00Z",
+  "modified": "2026-11-03T00:00:00Z",
+  "tabs": [
+    {
+      "demoId": "explore",
+      "title": "Saddle with parameters",
+      "input": "z = A sin(B x) cos(C y)",
+      "params": {
+        "A": 1.2,
+        "B": 1,
+        "C": 1
+      },
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "Drag A, B, C. Then link C to B (🔗, C = B) and animate B.",
+      "t": 0
+    },
+    {
+      "demoId": "explore",
+      "title": "Paraboloid",
+      "input": "z = x^2 + y^2 - 2",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "Every level curve is a circle; the gradient points straight out from the centre.",
+      "t": 0
+    },
+    {
+      "demoId": "calc3.gradient",
+      "title": "Gradient demo",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    },
+    {
+      "demoId": "calc3.lagrange",
+      "title": "Lagrange multipliers",
+      "input": "",
+      "params": {},
+      "paramRanges": {},
+      "links": {},
+      "choices": {},
+      "toggles": {},
+      "display": {
+        "wireframe": false,
+        "opacity": 1,
+        "axes": true,
+        "grid": true,
+        "lighting": 1
+      },
+      "notes": "",
+      "t": 0
+    }
+  ],
+  "active": 0
+}
