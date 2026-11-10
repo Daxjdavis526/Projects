@@ -144,7 +144,6 @@ fn card(
     cursor: Query<&CursorOptions, With<PrimaryWindow>>,
     settings: Res<Settings>,
     fate: Res<Fate>,
-    pack: Res<crate::caller::Pack>,
     mut stats: ResMut<Stats>,
     mut vtime: ResMut<Time<Virtual>>,
     mut card: Query<&mut Visibility, With<Card>>,
@@ -178,14 +177,13 @@ fn card(
     let s = format!(
         "{lead}\n\n\
          WASD move   shift run   space jump   C crouch   hold Q sandwalk\n\
-         T plant or lift a worm caller ({} carried)   V first / third person   K cinematic\n\
+         T plant or lift a worm caller (as many as you like)   V first / third person   K cinematic\n\
          mouse L / R throw hooks (Z / X)   R / F reel   E let go   G brace / walk\n\
-         riding, braced: A / D pry to turn   W drive   S ease off   space jump clear\n\n\
+         riding: A / D steer   W drive   S ease off   E let go\n\n\
          Worms hunt by vibration. Rhythm carries; stillness is safe; sandwalking\n\
          breaks your rhythm. Rock is refuge. A caller drums them in.\n\n\
          [1 / 2] look sensitivity {:.1}x    [3 / 4] camera shake {:.0}%    [5 / 6] field of view {:.0}\n\n\
          rides {}   longest {:.1} km   ridden {:.1} km   walked {:.1} km   taken {}",
-        pack.thumpers,
         settings.sensitivity,
         settings.shake * 100.0,
         settings.fov,

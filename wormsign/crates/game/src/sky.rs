@@ -20,9 +20,9 @@ use crate::world::Phase;
 
 /// Direction *toward* the sun.
 pub fn sun_dir() -> Vec3 {
-    let elev = 26f32.to_radians();
-    let azim = 2.1f32;
-    Vec3::new(azim.cos() * elev.cos(), elev.sin(), azim.sin() * elev.cos())
+    // One sun for everything: the baked dune shadows use the same one.
+    let s = wormsign_core::shade::sun_dir();
+    Vec3::new(s[0] as f32, s[1] as f32, s[2] as f32)
 }
 
 /// Linear colours.
@@ -42,10 +42,12 @@ pub struct SkyPlugin;
 
 impl Plugin for SkyPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ClearColor(Color::linear_rgb(HORIZON.x, HORIZON.y, HORIZON.z)))
+        app.insert_resource(bevy::light::DirectionalLightShadowMap { size: 4096 })
+            .insert_resource(ClearColor(Color::linear_rgb(HORIZON.x, HORIZON.y, HORIZON.z)))
             .insert_resource(GlobalAmbientLight {
-                color: Color::linear_rgb(0.75, 0.70, 0.62),
-                brightness: 520.0,
+                // Shade on sand is lit by the blue sky, so it reads cool.
+                color: Color::linear_rgb(0.62, 0.70, 0.86),
+                brightness: 480.0,
                 affects_lightmapped_meshes: true,
             })
             .add_systems(Startup, setup)
@@ -72,7 +74,7 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials
     commands.spawn((
         DirectionalLight {
             color: Color::linear_rgb(1.0, 0.90, 0.78),
-            illuminance: 22_000.0,
+            illuminance: 30_000.0,
             // `?noshadow` is for headless software-rendered test runs.
             shadow_maps_enabled: !crate::web::has_flag("noshadow"),
             ..default()
@@ -83,8 +85,8 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials
         CascadeShadowConfigBuilder {
             num_cascades: 1,
             minimum_distance: 0.3,
-            maximum_distance: 420.0,
-            first_cascade_far_bound: 420.0,
+            maximum_distance: 800.0,
+            first_cascade_far_bound: 800.0,
             overlap_proportion: 0.2,
         }
         .build(),

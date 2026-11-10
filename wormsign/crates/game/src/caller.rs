@@ -22,24 +22,30 @@ use crate::world::{Desert, Phase, SimSet, Tick, WorldPos};
 
 /// Seconds between planting and the first blow.
 const WIND_UP: f64 = 2.0;
-/// How many the player carries.
-pub const CARRIED: u32 = 2;
+/// Callers are unlimited; past this many in the ground, the oldest goes.
+const MAX_PLANTED: usize = 8;
 
 pub struct CallerPlugin;
 
 impl Plugin for CallerPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Pack { thumpers: CARRIED })
+        app.init_resource::<Pack>()
             .add_systems(Startup, setup)
             .add_systems(Update, plant.in_set(Phase::Simulate).before(SimSet))
-            .add_systems(Update, (drum, taken).chain().in_set(Phase::Simulate).in_set(SimSet).after(crate::worms::simulate))
+            // Emitters must run before the worms listen: this frame's events
+            // are gone by the next one. (Running `drum` after the worms once
+            // meant no worm ever heard a caller.)
+            .add_systems(Update, drum.in_set(Phase::Simulate).in_set(SimSet).before(crate::worms::simulate))
+            .add_systems(Update, taken.in_set(Phase::Simulate).in_set(SimSet).after(crate::worms::simulate))
             .add_systems(Update, animate.in_set(Phase::View));
     }
 }
 
-#[derive(Resource)]
+/// Callers the player has planted, for the figure to animate.
+#[derive(Resource, Default)]
 pub struct Pack {
-    pub thumpers: u32,
+    /// Set when one goes into the ground this frame.
+    pub planted_now: bool,
 }
 
 #[derive(Component)]
@@ -95,13 +101,20 @@ fn plant(
     // Next to one already? Pick it up.
     if let Some((e, _)) = thumpers.iter().find(|(_, t)| (t.pos - p).length() < 2.5) {
         commands.entity(e).despawn();
-        pack.thumpers += 1;
         return;
     }
-    if pack.thumpers == 0 || !pb.0.grounded {
+    if !pb.0.grounded {
         return;
     }
-    pack.thumpers -= 1;
+    // As many as you like; the oldest goes quiet past a handful.
+    let mut planted: Vec<(Entity, f64)> = thumpers.iter().map(|(e, t)| (e, t.planted_at)).collect();
+    if planted.len() >= MAX_PLANTED {
+        planted.sort_by(|a, b| a.1.total_cmp(&b.1));
+        for (e, _) in &planted[..planted.len() + 1 - MAX_PLANTED] {
+            commands.entity(*e).despawn();
+        }
+    }
+    pack.planted_now = true;
     // A pace ahead of you.
     let yaw = look.yaw as f64;
     let at = DVec3::new(p.x - yaw.sin() * 1.2, 0.0, p.z - yaw.cos() * 1.2);

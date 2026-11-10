@@ -28,14 +28,13 @@ made for headphones.
 | V | first / third person |
 | K | cinematic camera: a slow orbit, for watching |
 | mouse wheel | third-person distance |
-| T | plant a worm caller, or pick one up again |
+| T | plant a worm caller (as many as you like), or pick one up again |
 | left / right mouse (or Z / X) | throw a hook, or let that hook go |
 | R / F (hold) | reel in / pay out |
 | E | let go of both hooks |
 | G | switch between bracing on the ropes and walking the back |
-| riding, braced: A / D | pry to turn left / right |
-| riding, braced: W / S | drive it on / ease off |
-| riding: Space | jump clear |
+| riding: A / D | steer left / right |
+| riding: W / S | drive it on / ease off |
 | 1 / 2, 3 / 4, 5 / 6 | look sensitivity, camera shake, field of view |
 
 ## How to play
@@ -57,7 +56,8 @@ on rock barely couple into the ground. A worm hunting someone on a rock
 circles it.
 
 **A worm caller** (T) drums the sand at a steady beat. Worms many kilometres
-away hear it. The build-up as one comes: a low rumble you feel before you
+away hear it, and one that locks onto it comes at full speed: from the usual
+couple of kilometres, expect it in a minute or so. The build-up as one comes: a low rumble you feel before you
 hear, the ground starting to shake, a plume of dust on the horizon, and then
 the mound of sand racing toward the caller. It rears up, takes the caller,
 and lopes on past with its back out of the sand. That is your chance.
@@ -68,13 +68,15 @@ set the second hook. Landing on something moving that fast is a slide, not a
 landing — the hooks are what keep you on. The back is curved and slick: past
 about 26° you slide, and a rolling worm sweeps you toward its flank.
 
-**Riding.** Braced on the ropes (G switches), A and D pry at the rings on one
-side and it turns that way — slowly, through its own enormous inertia; it
-never turns like a car. Hooks near the head give more leverage, and a hook on
-the side you are turning toward does most of the work. W drives it on, S lets
-it ease off. Leave it alone and after a while it starts to go down, and a
-diving worm tears your hooks out. Pry too hard for too long and it gets
-angry, and rolls to throw you off. Crouching grips better.
+**Riding.** Once you are hooked in, A and D steer: the worm answers within
+a second and swings round at up to about 20° a second, the long body
+sweeping along behind the head. Let go of the key and it holds the line it
+is on. Hooks near the head give more leverage, and a hook on the side you
+are turning toward helps. W drives it on, S lets it ease off, E lets go
+(G switches to walking about on its back). Leave it alone and after a while
+it starts to go down, and a diving worm tears your hooks out. Drive and
+wrench it flat out for too long and it gets angry, and rolls to throw you
+off. Crouching grips better.
 
 **Being eaten** is not a fade to black. It is on screen, in slow motion.
 
@@ -85,7 +87,8 @@ The game is two crates:
 - **`crates/core`** — everything that decides what happens, with no engine
   in it: the desert's height function, the terrain level-of-detail plan,
   the player's body, footstrikes, the vibration model, the worm's body and
-  brain, hooks, the ragdoll. 68 tests, run with `cargo test -p wormsign_core`,
+  brain, hooks, the figure's animation and cloak, the ragdoll, the baked dune
+  shadows, the skinning. 87 tests, run with `cargo test -p wormsign_core`,
   including whole-game scenarios on the real terrain: a sprinter gets eaten,
   a sandwalker walks past a worm unnoticed, someone standing still is left
   alone, and a scripted player runs alongside a worm, hooks it, climbs on and
@@ -138,8 +141,70 @@ then bring the open mouth down to ground level on where it thinks you are),
 the pass, searching, and being ridden. It looks ahead along the arc it would
 actually fly and steers off any that would clip rock.
 
+The mouth is a thick folded lip, five petals with serrated, toothed edges
+and hooked teeth down their inner faces that close into a blunt cone and
+peel right back to strike, and a ribbed gullet six body-radii deep lined
+with rings of curved, back-raked teeth, fading to black.
+
 The sand heaped over a shallow worm is the same function for drawing and for
 standing on: you can be lifted by the mound of a passing worm.
+
+### The sand
+
+The sun is fixed, low (18°), so dunes throw long shadows. The shadow map only
+reaches 800 m (WebGL2 gets one cascade), so beyond that each terrain vertex's
+view of the sun is baked when its tile is built — a march toward the sun over
+the height function, reusing a shared lattice of samples so a tile costs a few
+milliseconds — and the sand shader darkens by it. Up close the shader adds
+what a flat colour cannot: wind ripples at two scales (about 0.3 m and 1.9 m)
+running across the wind and fading out on slip faces, which avalanche smooth;
+colour mottling at 2, 19 and 230 m; paler crests and darker, redder troughs
+from the surface's curvature; strata on rock; and the odd glinting grain.
+All of it is anchored to world coordinates, so nothing swims as the render
+origin moves.
+
+### The figure
+
+A Fremen in a stillsuit, built from lofted meshes — each segment a sweep of
+elliptical sections, tapering and flattening like the body does — to Drillis
+& Contini's segment proportions for a person 1.78 m tall. The segments are
+drawn as one skin: near every joint a vertex follows both bones (linear
+blend skinning, done on the CPU each frame), so knees, elbows, hips and
+shoulders bend as one surface instead of hinged pieces. The suit is ribbed,
+with catchpockets on the thighs, a catchtube from the collar to a mask over
+mouth and nose, boots and gloves; a belt with pouches and a crysknife; a
+harness with the caller and two maker hooks on the back (they leave it when
+thrown); a hood; and a long cloak that is a simulated cloth, pinned round the
+shoulders, pushed off the body and legs, lifted by the wind. The costume is an
+original design from the novel's description, not any film's.
+
+It is animated procedurally, from what the simulation is doing, with no
+canned clips. One gait cycle runs at the cadence of the real footstrikes (the
+same ones the worm hears), nudged into step by each of them. A planted foot
+stays exactly where it landed — no skating — and rolls up onto its ball as
+the body passes; the swinging foot is aimed at where it will land, predicted
+from the body's velocity, on the real ground height. Two-bone IK does the
+legs. Walking vaults over a stiff leg; running loops the heel up toward the
+seat and drives the knee through, with both feet off the ground between
+steps; sandwalking is low and wary; crouching creeps. The hips bob, sway and
+sink to let a leg reach, the spine leans and counter-twists, arms swing
+against the legs, the head looks where you look. Throwing a hook winds up and
+whips; planting a caller reaches down; riding braces wide with both hands on
+the ropes. First person sees out of the figure's own head. When a worm takes
+you, the ragdoll takes over this same figure, torn limbs and all.
+
+`cargo run -p wormsign_core --example gait_svg > gaits.svg` draws every gait
+side-on, for looking at the animation without a browser.
+
+### Sound
+
+All synthesised with Web Audio. The wind is two voices, one each side of your
+head, made from brown and pink noise: a low body, a resonant band that sweeps
+up in gusts (the whistle over a crest), and sand-grain hiss that only comes in
+with the strongest gusts. Gusts are a slow random process with occasional
+fronts; the wind is louder up on crests, rushes past you when riding, and
+ducks under a worm's rumble. Parameters change a few times a second with
+bounded automation, so the audio graph stays small however long you play.
 
 ## What is physical and what is not
 
@@ -165,6 +230,22 @@ Blunt, as usual.
   weight, and "prying" is a designed control, not a force on real tissue.
 - **The ragdoll** is a Verlet particle skeleton. It is thrown, dragged and
   torn plausibly; it has no muscles and no mass distribution to speak of.
+- **The figure's animation** is procedural kinematics, not dynamics or motion
+  capture. Proportions are real (Drillis & Contini); the gait timings (stance
+  about 60% of a walking stride, under a third of a running one, a flight
+  phase when running) are in the right range; nothing balances, and the body
+  has no mass. Feet plant on the height function, so they sit on slopes, but
+  there is no deformation of the sand under them beyond the footprint decals.
+- **The skin** is linear blend skinning: at a sharp bend a joint thins a
+  little (the classic "candy wrapper"), as it does in most games.
+- **The cloak** is a coarse Verlet cloth (13 × 11 particles) with no
+  self-collision; it can fold through itself in a hard turn. The wind on it is
+  a simple drag toward a gusting wind velocity.
+- **Dune shadows** past the shadow map are per-vertex, so they are soft and a
+  little coarse at a distance, and the sun never moves. The ripples are
+  shading on a smooth surface, not geometry: they vanish at grazing angles.
+- **The wind** is filtered noise shaped to sound like wind, not a recording
+  and not a model of air over sand.
 - **The sky** is painted, not scattered. Bevy's physical atmosphere needs
   compute shaders, which WebGL2 does not have.
 - **Missing**: heat haze, sandstorms, day and night, a photo mode, a gamepad, and sound
@@ -187,7 +268,9 @@ URL flags for testing: `?debug` (state readout, vibration rings, no title
 card), `?noshadow`, `?ride` (start on a worm's back, hooked in),
 `?worm=<m>` (put a worm that far ahead; with `wormattack` it is already
 lunging at you, `wormhold=speed,depth,mouth` pins it), `?dist`, `?pitch`,
-`?yaw`, `?view=first`.
+`?yaw`, `?view=first`, `?go=walk|run|sandwalk|crouch` (keep moving
+forward in that gait), `?camyaw` (swing the third-person camera round the
+figure without turning it).
 
 ## Repository note
 

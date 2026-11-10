@@ -28,10 +28,11 @@ impl Plugin for PlayerPlugin {
         app.init_resource::<Look>()
             .init_resource::<Controls>()
             .init_resource::<Shake>()
+            .init_resource::<StepEvents>()
             .add_systems(Startup, spawn)
             .add_systems(Update, (grab_pointer, read_input).chain().in_set(Phase::Simulate).before(SimSet))
             .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet))
-            .add_systems(Update, (camera, show_body).chain().in_set(Phase::View));
+            .add_systems(Update, camera.in_set(Phase::View));
     }
 }
 
@@ -124,28 +125,21 @@ pub struct PlayerBody(pub Player);
 #[derive(Component)]
 pub struct Feet(pub Stride);
 
-#[derive(Component)]
-struct BodyMesh;
+/// What happened underfoot during this frame's substeps, for the figure's
+/// animation: which foot struck, a landing, and how the ground is moving.
+#[derive(Resource, Default)]
+pub struct StepEvents {
+    pub strike: Option<bool>,
+    pub landed: Option<f64>,
+    pub ground_vel: DVec3,
+}
 
-pub fn spawn(mut commands: Commands, desert: Res<Desert>, mut meshes: ResMut<Assets<Mesh>>, mut mats: ResMut<Assets<StandardMaterial>>) {
+pub fn spawn(mut commands: Commands, desert: Res<Desert>) {
     let (x, z) = spawn_point(&desert);
     let y = desert.0.height(x, z) as f64;
     let body = Player::new(DVec3::new(x, y + 0.5, z));
-    commands
-        .spawn((PlayerBody(body), Feet(Stride::new(0xF007)), WorldPos(DVec3::new(x, y, z)), OriginAnchor, Transform::default(), Visibility::default()))
-        .with_children(|p| {
-            // A stand-in figure: cloak-coloured capsule. Real model later.
-            p.spawn((
-                BodyMesh,
-                Mesh3d(meshes.add(Capsule3d::new(0.26, 1.25))),
-                MeshMaterial3d(mats.add(StandardMaterial {
-                    base_color: Color::srgb(0.22, 0.18, 0.15),
-                    perceptual_roughness: 0.9,
-                    ..default()
-                })),
-                Transform::from_xyz(0.0, 0.885, 0.0),
-            ));
-        });
+    // The figure itself is drawn by the avatar module.
+    commands.spawn((PlayerBody(body), Feet(Stride::new(0xF007)), WorldPos(DVec3::new(x, y, z)), OriginAnchor, Transform::default(), Visibility::default()));
     commands.spawn((
         Camera3d::default(),
         Projection::Perspective(PerspectiveProjection {
@@ -237,6 +231,16 @@ pub fn read_input(
     // Latched until the simulation consumes it, so a tap between substeps
     // is never lost.
     i.jump |= keys.just_pressed(KeyCode::Space);
+    // Scripted runs can hold a gait: ?go=walk|run|sandwalk|crouch.
+    if let Some(g) = web::flag_value("go") {
+        i.forward = 1.0;
+        match g.as_str() {
+            "run" => i.run = true,
+            "sandwalk" => i.sandwalk = true,
+            "crouch" => i.crouch = true,
+            _ => {}
+        }
+    }
 }
 
 /// Sand, rock, any worm mound under (x, z) — or a worm's back, if one is
@@ -268,6 +272,7 @@ pub fn simulate(
     fate: Res<crate::death::Fate>,
     mut riding: ResMut<crate::rider::Riding>,
     look: Res<Look>,
+    mut steps: ResMut<StepEvents>,
 ) {
     if !fate.alive() {
         return;
@@ -296,6 +301,7 @@ pub fn simulate(
         // Sandwalk speed is judged against the gait, not the lurch.
         let gait_speed = if p.gait == Gait::Sandwalk { speed / f.max(0.1) } else { speed };
         if let Some(s) = feet.0.update(p.gait, gait_speed, tick.dt) {
+            steps.strike = Some(s.left);
             quakes.emit(VibrationEvent {
                 pos: p.pos,
                 energy: s.energy,
@@ -306,6 +312,7 @@ pub fn simulate(
             });
         }
         if let Some(v) = report.landed {
+            steps.landed = Some(v);
             if v > 1.0 {
                 quakes.emit(VibrationEvent {
                     pos: p.pos,
@@ -319,6 +326,8 @@ pub fn simulate(
         }
     }
     wp.0 = body.0.pos;
+    let p = &body.0;
+    steps.ground_vel = if p.grounded { ground_at(&desert, &worms, p.pos.x, p.pos.z, p.pos.y).velocity } else { DVec3::ZERO };
 }
 
 pub fn camera(
@@ -331,6 +340,7 @@ pub fn camera(
     mut shake: ResMut<Shake>,
     fate: Res<crate::death::Fate>,
     riding: Res<crate::rider::Riding>,
+    figure: Res<crate::avatar::Figure>,
     mut ride_ease: Local<f32>,
 ) {
     let (Ok((body, feet)), Ok((mut t, mut proj))) = (body.single(), cam.single_mut()) else { return };
@@ -351,7 +361,10 @@ pub fn camera(
         return;
     }
     let p = &body.0;
-    let rot = Quat::from_euler(EulerRot::YXZ, look.yaw, look.pitch, 0.0);
+    // `camyaw` swings the third-person camera round the figure without
+    // turning it, for looking at it from the front or side in scripted runs.
+    let cam_yaw = if look.view == View::Third { web::flag_f32("camyaw").unwrap_or(0.0) } else { 0.0 };
+    let rot = Quat::from_euler(EulerRot::YXZ, look.yaw + cam_yaw, look.pitch, 0.0);
     let dt = time.delta_secs();
 
     // Head bob follows the actual footstrikes: lowest as a foot lands,
@@ -385,7 +398,9 @@ pub fn camera(
         return;
     }
     let world = match look.view {
-        View::First => eye,
+        // Seeing out of the figure's own head: the bob, the lean into a
+        // run and the dip of a crouch all come from the animated body.
+        View::First => figure.eye().unwrap_or(eye),
         View::Third => {
             let target = p.pos + DVec3::new(0.0, 1.55 + 1.5 * *ride_ease as f64, 0.0);
             let dist = look.distance + (look.distance.max(16.0) - look.distance) * *ride_ease;
@@ -404,15 +419,4 @@ pub fn camera(
     };
     t.translation = origin.to_render(world) + jolt;
     t.rotation = rot * Quat::from_rotation_z(roll);
-}
-
-fn show_body(look: Res<Look>, fate: Res<crate::death::Fate>, mut q: Query<&mut Visibility, With<BodyMesh>>) {
-    // Hidden in first person. (So is its shadow; a proper model that can
-    // cast a shadow without being drawn comes with the polish pass.)
-    for mut v in &mut q {
-        let want = if look.view == View::First || !fate.alive() { Visibility::Hidden } else { Visibility::Inherited };
-        if *v != want {
-            *v = want;
-        }
-    }
 }
