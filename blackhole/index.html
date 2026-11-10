@@ -241,7 +241,7 @@
   <div class="panel" id="hint">
     <span class="kbd">WASD</span> move &nbsp; <span class="kbd">MOUSE</span> look &nbsp;
     <span class="kbd">SCROLL</span> speed &nbsp; <span class="kbd">SHIFT</span> boost &nbsp;
-    <span class="kbd">Q/E</span> vertical &nbsp; <span class="kbd">H</span> hide UI
+    <span class="kbd">Q/E</span> vertical &nbsp; <span class="kbd">F</span> fullscreen &nbsp; <span class="kbd">H</span> hide UI
   </div>
 
   <div class="panel" id="caption"></div>
@@ -887,6 +887,7 @@ addEventListener('keydown', e => {
   if(e.code === 'KeyH') toggleUI();
   if(e.code === 'KeyP') togglePause();
   if(e.code === 'KeyT') startTour();
+  if(e.code === 'KeyF') toggleFullscreen();
   if(e.code === 'Escape'){
     if(tour) endTour();
     else if(move.mode !== 'free'){
@@ -1260,14 +1261,25 @@ $('btnModel').addEventListener('click', () => $('modal').style.display = 'flex')
 $('modalClose').addEventListener('click', () => $('modal').style.display = 'none');
 $('modal').addEventListener('click', e => { if(e.target === $('modal')) $('modal').style.display = 'none'; });
 
-function toggleUI(){
-  state.uiHidden = !state.uiHidden;
-  ['brand','tabs','status','controls','data'].forEach(id => {
+function setUIHidden(hidden){
+  state.uiHidden = hidden;
+  ['brand','tabs','status','controls','data','hint'].forEach(id => {
     const el = $(id);
     el.style.visibility = state.uiHidden ? 'hidden' :
       (id==='data' && state.mode==='cinematic') ? 'hidden' : 'visible';
   });
 }
+function toggleUI(){ setUIHidden(!state.uiHidden); }
+function toggleFullscreen(){
+  if(document.fullscreenElement){
+    document.exitFullscreen().catch(()=>{});
+  } else {
+    document.documentElement.requestFullscreen().then(()=> setUIHidden(true)).catch(()=>{});
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  if(!document.fullscreenElement && state.uiHidden) setUIHidden(false);
+});
 let hintHidden = false;
 function hideHint(){
   if(hintHidden) return; hintHidden = true;
