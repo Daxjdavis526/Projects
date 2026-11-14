@@ -76,25 +76,6 @@ public static partial class Tests
         var pc = new Chunk(V.FloorToInt(pad.X + 3) >> 4, V.FloorToInt(pad.Z + 3) >> 4);
         w.Gen.Generate(pc);
         Check(Blocks.Get(pc.Blocks[V.Index(V.FloorToInt(pad.X + 3) & 15, LaunchComplex.Deck - 1, V.FloorToInt(pad.Z + 3) & 15)]).Solid, "the launch pad's deck is there");
-        // The billboard beside the rocket: a steel backing under the whole picture, open deck in front of it.
-        int bz = LandmarkSite.PadCentre.Y + LaunchComplex.BoardZ, backed = 0, open = 0, cells = 0;
-        for (int y = LaunchComplex.BoardY0; y <= LaunchComplex.BoardY1; y++)
-            for (int x = LaunchComplex.BoardX0; x <= LaunchComplex.BoardX1; x++)
-            {
-                int wx = site.Ox + LandmarkSite.PadCentre.X + x, wz = site.Oz + bz;
-                var bc = new Chunk(wx >> 4, wz >> 4);
-                var fc = new Chunk(wx >> 4, (wz + 1) >> 4);
-                w.Gen.Generate(bc);
-                if (fc.Key != bc.Key) w.Gen.Generate(fc); else fc = bc;
-                cells++;
-                if (bc.Blocks[V.Index(wx & 15, y, wz & 15)] == Blocks.SteelPlate) backed++;
-                if (fc.Blocks[V.Index(wx & 15, y, (wz + 1) & 15)] == Blocks.Air) open++;
-            }
-        Check(backed == cells && open == cells, $"the billboard is backed with steel and clear in front ({backed}, {open} of {cells})");
-        var (face, fsize) = LaunchComplex.BoardFace(site);
-        Check(Math.Abs(face.Y - (LaunchComplex.Deck + 9f)) < 1e-4f && fsize == new Vector2(9, 14), "its picture is 9 by 14 blocks, two above the deck");
-        Check(new Vector2(face.X - pad.X, face.Z - pad.Z).Length() < 20f, "standing beside the rocket");
-
         // No castle where the showcase world would have one.
         var cc = new Chunk(site.Ox >> 4, (site.Oz - 20) >> 4);
         w.Gen.Generate(cc);
@@ -200,6 +181,71 @@ public static partial class Tests
         var proj = plane.ToProjection();
         var viaGpu = proj * new Vector4(1, 0, 0, 0);
         Check((viaGpu - turned).Length() < 1e-6f, "handed to a shader, the matrix turns points the same way");
+    }
+
+    /// <summary>The mosaic by the launch pad: every pixel a pigment block in the world, and the picture true to the photo.</summary>
+    private static void Mosaic()
+    {
+        Check(Pigments.Blocks.Length == Pigments.All.Length && Array.TrueForAll(Pigments.Blocks, b => b != 0 && Blocks.Get(b).Solid && Items.Id(Blocks.Get(b).Key) != 0),
+            $"{Pigments.All.Length} pigment blocks, each solid and each an item");
+        Check(Portrait.Top < V.Height - 1 && Portrait.H >= 120 && Portrait.W >= 80, $"the mosaic is {Portrait.W} × {Portrait.H} blocks, its top at y {Portrait.Top}");
+
+        foreach (bool gargantua in new[] { true, false })
+        {
+            var w = new World(Hash.StringSeed("mosaic"), landmarks: !gargantua, gargantua: gargantua);
+            var site = w.Gen.Landmarks;
+            var cols = new System.Collections.Generic.Dictionary<long, Chunk>();
+            Chunk At(int wx, int wz)
+            {
+                long k = V.Key(wx >> 4, wz >> 4);
+                if (!cols.TryGetValue(k, out var c)) { c = new Chunk(wx >> 4, wz >> 4); w.Gen.Generate(c); cols[k] = c; }
+                return c;
+            }
+            int right = 0, open = 0;
+            for (int row = 0; row < Portrait.H; row++)
+                for (int col = 0; col < Portrait.W; col++)
+                {
+                    var (x, y, z) = Portrait.Cell(row, col);
+                    int wx = site.Ox + x, wz = site.Oz + z;
+                    if (At(wx, wz).Blocks[V.Index(wx & 15, y, wz & 15)] == Portrait.BlockAt(row, col)) right++;
+                    if (At(wx - 1, wz).Blocks[V.Index((wx - 1) & 15, y, wz & 15)] == Blocks.Air) open++;
+                }
+            int n = Portrait.W * Portrait.H;
+            string kind = gargantua ? "Gargantua" : "showcase";
+            Check(right == n, $"{kind} world: every one of the {n} pixels is its pigment block in the generated world ({right})");
+            Check(open == n, $"{kind} world: nothing stands in front of the picture ({open} of {n} open)");
+            // On legs, with the launch complex's fuel and water pipes still running underneath.
+            var (fx, _, fz) = Portrait.Cell(Portrait.H - 1, 0);
+            int lx = site.Ox + fx, lz = site.Oz + fz - 1;
+            Check(At(lx, lz).Blocks[V.Index(lx & 15, LandmarkSite.Valley, lz & 15)] == Blocks.SteelTruss, $"{kind} world: it stands on steel legs");
+            int pz = site.Oz + LandmarkSite.PadCentre.Y + 5, wz2 = site.Oz + LandmarkSite.PadCentre.Y + 26;
+            Check(At(lx, pz).Blocks[V.Index(lx & 15, LandmarkSite.Valley + 1, pz & 15)] == Blocks.SteelPlate
+                && At(lx, wz2).Blocks[V.Index(lx & 15, LandmarkSite.Valley, wz2 & 15)] == Blocks.SteelPlate, $"{kind} world: the fuel and water pipes still pass under it");
+        }
+
+        // True to the photo: averaged over 5 × 5 patches, the dithered blocks come out close to the picture's own colours.
+        var src = Convert.FromBase64String(PortraitData.Rgb);
+        float worst = 0f, total = 0f;
+        int patches = 0;
+        var used = new System.Collections.Generic.HashSet<int>();
+        foreach (int i in Portrait.Indices) used.Add(i);
+        for (int py = 0; py + 5 <= Portrait.H; py += 5)
+            for (int px = 0; px + 5 <= Portrait.W; px += 5)
+            {
+                float sr = 0, sg = 0, sb = 0, br = 0, bg = 0, bb = 0;
+                for (int y = py; y < py + 5; y++)
+                    for (int x = px; x < px + 5; x++)
+                    {
+                        int i = y * Portrait.W + x;
+                        sr += src[i * 3] / 255f; sg += src[i * 3 + 1] / 255f; sb += src[i * 3 + 2] / 255f;
+                        var c = Pigments.All[Portrait.Indices[i]].Color;
+                        br += c.R; bg += c.G; bb += c.B;
+                    }
+                float d = MathF.Sqrt((sr - br) * (sr - br) + (sg - bg) * (sg - bg) + (sb - bb) * (sb - bb)) / 25f;
+                worst = Math.Max(worst, d); total += d; patches++;
+            }
+        Check(total / patches < 0.04f && worst < 0.15f, $"dithered, the picture keeps the photo's colours (mean patch error {total / patches:0.000}, worst {worst:0.000})");
+        Check(used.Count >= 15, $"built from {used.Count} different pigments");
     }
 }
 

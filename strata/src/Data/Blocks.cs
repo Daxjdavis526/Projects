@@ -593,6 +593,17 @@ public static class Blocks
             P(b, 0.4f, 0.45f, 0.5f);
         });
 
+        // --- pigments: plain coloured blocks for pictures (the mosaic by the pad) ---
+        Pigments.Blocks = new ushort[Pigments.All.Length];
+        for (int i = 0; i < Pigments.All.Length; i++)
+        {
+            var pg = Pigments.All[i];
+            Pigments.Blocks[i] = Add("pigment_" + pg.Key, pg.Name + " Pigment", b =>
+            {
+                b.Faces(Tex.Get(Pigments.TextureName(pg))); b.Hardness = 0.8f; b.Sound = SoundKind.Cloth; b.Particle = pg.Color;
+            });
+        }
+
         // --- crops -----------------------------------------------------------
         Grain = Crop("grain", "Goldgrain", 4, 0.035f, "grain", 1, 3, "grain_seeds", 1, 2);
         Emberroot = Crop("emberroot", "Emberroot", 4, 0.03f, "emberroot", 2, 4, null, 0, 0);

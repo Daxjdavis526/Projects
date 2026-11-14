@@ -97,7 +97,6 @@ public sealed partial class Game : Node3D
         AddChild(Mobs);
         Vehicles = new VehicleManager { Name = "Vehicles", Game = this };
         AddChild(Vehicles);
-        if (World.Gen.Landmarks is LandmarkSite pad) AddChild(PadBillboard.Make(pad));
         Weather = new Weather { Name = "Weather", State = Meta.WeatherState, Timer = Meta.WeatherTimer, Intensity = Meta.Rain };
         AddChild(Weather);
         Overlay = new BlockOverlay { Name = "Overlay" };
@@ -148,6 +147,13 @@ public sealed partial class Game : Node3D
                 Player.Spawn = World.Gen.Landmarks.Spawn;
                 Player.Teleport(Player.Spawn + new Vector3(0, 1, 0));
                 FaceGargantua(0.45f);
+                // The hole is drawn at any distance, but the mosaic and the complex are terrain: keep them out of the fog.
+                if (Settings.RenderDistance < 14)
+                {
+                    Settings.RenderDistance = 14;
+                    Settings.Save();
+                    _renderNote = true;
+                }
             }
             else if (World.Gen.Landmarks is LandmarkSite site)
             {
@@ -291,6 +297,7 @@ public sealed partial class Game : Node3D
             {
                 Hud.Toast("Gargantua hangs over the northern sky: a black hole of a hundred million suns, its disk lensed over and under its shadow.", UiStyle.TextDim);
                 Hud.Toast("A rocket stands on the pad to the north-east; the console here can roll out another. Fly it through the event horizon" + (Creative ? ", or fly yourself." : "."), UiStyle.TextDim);
+                if (_renderNote) Hud.Toast("Render distance raised to 14 to show the complex (Settings to change it)", UiStyle.TextDim);
             }
             else if (Meta.Landmarks)
             {

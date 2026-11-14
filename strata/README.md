@@ -5,9 +5,9 @@ biomes, caves and ores, flowing water, day and night, weather, eight original
 creatures, tools in five tiers, armour, a hunting bow, cooking, smelting,
 farming, storage, building, lumen circuits that switch lamps and doors, and a
 world that saves and loads. Every texture, model, sound, piece of music, name
-and line of code was made for this project, apart from one photograph on a
-billboard. No assets, code or names come from any other block game, and none
-of it is a clone of one.
+and line of code was made for this project, apart from one photograph, which
+a giant block mosaic at the launch complex is built from. No assets, code or
+names come from any other block game, and none of it is a clone of one.
 
 **This one is a desktop game, not a web page.** Unlike everything else in this
 repository it is a Godot 4 project written in C#, so there is no GitHub Pages
@@ -214,11 +214,24 @@ in masonry, age and state of repair.
 with a flame trench, a 40 m launch tower with a crew arm, a fuel farm, a water
 tower, a 44 m assembly building, a launch control bunker with blast-slit
 windows, floodlight and lightning masts, roads and a parking lot. A rocket
-stands on the pad, fuelled and clamped down, and beside it on the deck a
-billboard, 9 by 14 blocks on a steel frame with two floodlights, shows a
-photograph (`art/billboard.png`, drawn by `src/Render/PadBillboard.cs` and
-lit like the blocks round it: bright by day, floodlit by night). The launch
-complex is the same in both kinds of world, so the billboard is too.
+stands on the pad, fuelled and clamped down.
+
+Right behind the launch tower towers **the mosaic**: a photograph built out of
+blocks, 90 wide and 140 high (one block to a pixel, the top 211 blocks up),
+facing west toward the rocket and the observatory. It stands on steel legs,
+with the fuel and water pipes running underneath, in a steel frame with
+scaffolding behind it and floodlights up its sides. It is made of **pigment
+blocks**: 56 plain colours (greys, skin and earth tones, golds, reds, greens,
+blues, purples), each a block of its own that you can mine, and that creative
+mode has in its palette for pictures of your own. The photograph is stored as
+90 × 140 pixels (`src/Gen/Landmarks/PortraitData.cs`, made from the original
+by `tools/portrait.py`), and the generator picks a pigment for each pixel
+(`src/Gen/Landmarks/Portrait.cs`): the nearest colour, with what it misses by
+spread to the pixels round it (Floyd–Steinberg error diffusion), so shades
+between two pigments come out as a fine mix of both, the way pixel art
+dithers. The launch complex is the same in both kinds of world, so the mosaic
+is too. Being blocks, it is lit like everything else: at night only the edges
+near its floodlights show.
 
 ## Flying the rocket
 
@@ -699,7 +712,7 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 730 checks, in a few seconds
+    godot --headless --path . -- --test                # 739 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
     godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
     godot --path . -- --tesseracttest OUTDIR           # into Gargantua, through the tesseract and back, then by rocket
@@ -738,7 +751,11 @@ hole swallowed whole, a dead one at 5M falling in, a rocket flown from the
 pad by stick alone getting there, and the four-dimensional geometry (every
 orientation a true rotation, a hypercube's 16 corners, 32 equal edges and
 four edges to a corner, its projection, and the matrix reaching the shader
-the right way round).
+the right way round). The mosaic is checked block for pixel: in both kinds of
+world all 12,600 of its blocks are the pigment chosen for their pixel, with
+nothing standing in front of the picture and the pipes still running under
+it, and averaged over 5 × 5 patches the dithered blocks keep the photograph's
+colours.
 
 `--selftest` starts a real world with real rendering and plays the core loop
 with scripted input, the way a person would: hear a title piece start and fade
@@ -804,7 +821,7 @@ their shapes, the ore ladder with starmetal and lumen crystal, the textures,
 sounds and music, and every algorithm's implementation. Crafting is a recipe
 list rather than a pattern grid. Nothing was ported, decompiled, traced or
 copied. The one picture not painted by the game's own code is the photograph
-on the launch pad's billboard, which was supplied for it.
+the launch complex's mosaic is built from, which was supplied for it.
 
 ## What is approximated
 
