@@ -76,6 +76,25 @@ public static partial class Tests
         var pc = new Chunk(V.FloorToInt(pad.X + 3) >> 4, V.FloorToInt(pad.Z + 3) >> 4);
         w.Gen.Generate(pc);
         Check(Blocks.Get(pc.Blocks[V.Index(V.FloorToInt(pad.X + 3) & 15, LaunchComplex.Deck - 1, V.FloorToInt(pad.Z + 3) & 15)]).Solid, "the launch pad's deck is there");
+        // The billboard beside the rocket: a steel backing under the whole picture, open deck in front of it.
+        int bz = LandmarkSite.PadCentre.Y + LaunchComplex.BoardZ, backed = 0, open = 0, cells = 0;
+        for (int y = LaunchComplex.BoardY0; y <= LaunchComplex.BoardY1; y++)
+            for (int x = LaunchComplex.BoardX0; x <= LaunchComplex.BoardX1; x++)
+            {
+                int wx = site.Ox + LandmarkSite.PadCentre.X + x, wz = site.Oz + bz;
+                var bc = new Chunk(wx >> 4, wz >> 4);
+                var fc = new Chunk(wx >> 4, (wz + 1) >> 4);
+                w.Gen.Generate(bc);
+                if (fc.Key != bc.Key) w.Gen.Generate(fc); else fc = bc;
+                cells++;
+                if (bc.Blocks[V.Index(wx & 15, y, wz & 15)] == Blocks.SteelPlate) backed++;
+                if (fc.Blocks[V.Index(wx & 15, y, (wz + 1) & 15)] == Blocks.Air) open++;
+            }
+        Check(backed == cells && open == cells, $"the billboard is backed with steel and clear in front ({backed}, {open} of {cells})");
+        var (face, fsize) = LaunchComplex.BoardFace(site);
+        Check(Math.Abs(face.Y - (LaunchComplex.Deck + 9f)) < 1e-4f && fsize == new Vector2(9, 14), "its picture is 9 by 14 blocks, two above the deck");
+        Check(new Vector2(face.X - pad.X, face.Z - pad.Z).Length() < 20f, "standing beside the rocket");
+
         // No castle where the showcase world would have one.
         var cc = new Chunk(site.Ox >> 4, (site.Oz - 20) >> 4);
         w.Gen.Generate(cc);

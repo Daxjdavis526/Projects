@@ -5,8 +5,9 @@ biomes, caves and ores, flowing water, day and night, weather, eight original
 creatures, tools in five tiers, armour, a hunting bow, cooking, smelting,
 farming, storage, building, lumen circuits that switch lamps and doors, and a
 world that saves and loads. Every texture, model, sound, piece of music, name
-and line of code was made for this project. No assets, code or names come from
-any other block game, and none of it is a clone of one.
+and line of code was made for this project, apart from one photograph on a
+billboard. No assets, code or names come from any other block game, and none
+of it is a clone of one.
 
 **This one is a desktop game, not a web page.** Unlike everything else in this
 repository it is a Godot 4 project written in C#, so there is no GitHub Pages
@@ -213,7 +214,11 @@ in masonry, age and state of repair.
 with a flame trench, a 40 m launch tower with a crew arm, a fuel farm, a water
 tower, a 44 m assembly building, a launch control bunker with blast-slit
 windows, floodlight and lightning masts, roads and a parking lot. A rocket
-stands on the pad, fuelled and clamped down.
+stands on the pad, fuelled and clamped down, and beside it on the deck a
+billboard, 9 by 14 blocks on a steel frame with two floodlights, shows a
+photograph (`art/billboard.png`, drawn by `src/Render/PadBillboard.cs` and
+lit like the blocks round it: bright by day, floodlit by night). The launch
+complex is the same in both kinds of world, so the billboard is too.
 
 ## Flying the rocket
 
@@ -694,7 +699,7 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 727 checks, in a few seconds
+    godot --headless --path . -- --test                # 730 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
     godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
     godot --path . -- --tesseracttest OUTDIR           # into Gargantua, through the tesseract and back, then by rocket
@@ -798,7 +803,8 @@ the creatures (their look, their names and how they behave), the recipes and
 their shapes, the ore ladder with starmetal and lumen crystal, the textures,
 sounds and music, and every algorithm's implementation. Crafting is a recipe
 list rather than a pattern grid. Nothing was ported, decompiled, traced or
-copied.
+copied. The one picture not painted by the game's own code is the photograph
+on the launch pad's billboard, which was supplied for it.
 
 ## What is approximated
 

@@ -344,7 +344,7 @@ tesseract, an endless lattice sliced from four-dimensional space.
 Unlike everything else here, this one is a **desktop game** — a Godot 4 project
 in C# — so there is no live link. Open `strata/project.godot` in Godot 4.7
 (.NET edition), or export a standalone build for Windows or Linux with the
-included presets. 727 headless checks plus scripted play-throughs: the whole
+included presets. 730 headless checks plus scripted play-throughs: the whole
 survival loop, a rocket flight, and a trip through Gargantua and back.
 
 See [strata/README.md](strata/README.md) for controls, how to build and play,

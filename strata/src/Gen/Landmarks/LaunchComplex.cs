@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 namespace Strata;
 
@@ -20,13 +21,27 @@ namespace Strata;
 ///   a crawlerway ramp from the west, up from the assembly building's doors;
 ///   a fuel farm and a water tower feeding pipes to the tower;
 ///   a launch control bunker with blast slits facing the pad, and parking;
-///   floodlight masts, lightning masts and warning lamps for the night.
+///   floodlight masts, lightning masts and warning lamps for the night;
+///   a billboard on the deck south-west of the rocket, its picture facing
+///   south (the frame is blocks; the picture is drawn by <see cref="PadBillboard"/>).
 /// </summary>
 public sealed class LaunchComplex
 {
     /// <summary>The first air above the launch pad's deck: the rocket's fins stand at this height.</summary>
     public const int Deck = LandmarkSite.Valley + 6;
     public const int ArmFloor = Deck + 23;       // the crew arm's floor: its top face is level with the hatch sill
+
+    // The billboard's picture: columns BoardX0..BoardX1 and rows BoardY0..BoardY1 (relative to the pad's
+    // centre column, inclusive), on the south face of a steel backing in row BoardZ: 9 × 14 blocks.
+    public const int BoardX0 = -14, BoardX1 = -6, BoardZ = 12;
+    public const int BoardY0 = Deck + 2, BoardY1 = Deck + 15;
+
+    /// <summary>Where the billboard's picture is in the world: the centre of its face, and its width and height.</summary>
+    public static (Vector3 centre, Vector2 size) BoardFace(LandmarkSite site) => (
+        new Vector3(site.Ox + LandmarkSite.PadCentre.X + (BoardX0 + BoardX1 + 1) / 2f,
+            (BoardY0 + BoardY1 + 1) / 2f,
+            site.Oz + LandmarkSite.PadCentre.Y + BoardZ + 1.01f),
+        new Vector2(BoardX1 - BoardX0 + 1, BoardY1 - BoardY0 + 1));
 
     private readonly LandmarkSite _site;
     private readonly Canvas _c;
@@ -54,6 +69,7 @@ public sealed class LaunchComplex
         WaterTower();
         Bunker();
         Masts();
+        Billboard();
     }
 
     private void Set(int x, int y, int z, ushort id) => _c.Set(x, y, z, id);
@@ -150,6 +166,26 @@ public sealed class LaunchComplex
             }
         }
         _c.Carve(Px - 10, Deck, Pz + 16, Px - 8, Deck + 2, Pz + 16);
+    }
+
+    /// <summary>
+    /// The billboard beside the rocket: a steel backing for the picture, a
+    /// frame round it on two truss legs standing on the deck, and two
+    /// floodlights on arms over its face.
+    /// </summary>
+    private void Billboard()
+    {
+        int z = Pz + BoardZ, x0 = Px + BoardX0, x1 = Px + BoardX1;
+        Fill(x0, BoardY0, z, x1, BoardY1, z, Blocks.SteelPlate);
+        Fill(x0 - 1, Deck, z, x0 - 1, BoardY1 + 1, z, Blocks.SteelTruss);
+        Fill(x1 + 1, Deck, z, x1 + 1, BoardY1 + 1, z, Blocks.SteelTruss);
+        Fill(x0, BoardY0 - 1, z, x1, BoardY0 - 1, z, Blocks.SteelPlate);
+        Fill(x0, BoardY1 + 1, z, x1, BoardY1 + 1, z, Blocks.SteelPlate);
+        foreach (int x in new[] { x0 + 1, x1 - 1 })
+        {
+            Set(x, BoardY1 + 2, z, Blocks.SteelTruss);
+            Set(x, BoardY1 + 2, z + 1, Blocks.FloodLamp);
+        }
     }
 
     /// <summary>The deck is blackened most near the hole, fading outward.</summary>
