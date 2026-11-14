@@ -126,6 +126,24 @@ public partial class TesseractTest : Node
         await Shot("deck_day");
         G.View.Sky.Time = 0.74;
 
+        // The billboard beside the rocket on the pad.
+        var (face, size) = LaunchComplex.BoardFace(site);
+        var board = G.GetNodeOrNull<MeshInstance3D>("Billboard");
+        Check(board != null && (board.GlobalPosition - face).Length() < 0.01f && board.Mesh is QuadMesh q && q.Size == size, "the billboard's picture hangs on its frame");
+        var rocket = G.Vehicles.OnPad();
+        Check(rocket != null && new Vector2(face.X - rocket.Origin.X, face.Z - rocket.Origin.Z).Length() < 20f, "right beside the rocket");
+        var foot = new Vector3(face.X + 6f, LandmarkSite.Valley, face.Z + 24f);
+        P.Flying = true;
+        P.Teleport(foot);
+        P.Flying = true;
+        await Frames(4);
+        await Until(() => G.View.Chunks.AreaReady(foot, 3) && G.View.Chunks.Jobs.Pending == 0, 120f);
+        Aim(new Vector3(rocket?.Origin.X ?? face.X, face.Y + 4f, rocket?.Origin.Z ?? face.Z));
+        G.View.Sky.Time = 0.2;
+        await GameSeconds(1f);
+        await Shot("billboard_and_rocket", ui: false);
+        G.View.Sky.Time = 0.74;
+
         // Up to it, flying: within its reach it pulls, and close in nothing can fly away.
         P.Flying = true;
         var dirOut = (deck - bh.Centre).Normalized();

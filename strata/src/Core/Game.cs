@@ -97,6 +97,7 @@ public sealed partial class Game : Node3D
         AddChild(Mobs);
         Vehicles = new VehicleManager { Name = "Vehicles", Game = this };
         AddChild(Vehicles);
+        if (World.Gen.Landmarks is LandmarkSite pad) AddChild(PadBillboard.Make(pad));
         Weather = new Weather { Name = "Weather", State = Meta.WeatherState, Timer = Meta.WeatherTimer, Intensity = Meta.Rain };
         AddChild(Weather);
         Overlay = new BlockOverlay { Name = "Overlay" };
