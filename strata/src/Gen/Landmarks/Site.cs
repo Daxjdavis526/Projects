@@ -205,6 +205,7 @@ public sealed class LandmarkSite
                         new Castle(this, c, new Rng(Hash.Of(Gen.Seed, 0xCA571E, 0, 0))).Build();
                     }
                     new LaunchComplex(this, c, new Rng(Hash.Of(Gen.Seed, 0x1A0C4, 0, 0))).Build();
+                    new Portrait(c).Build();
                     if (!HasCastle) new Observatory(this, c, new Rng(Hash.Of(Gen.Seed, 0x0B5E7, 0, 0))).Build();
                     _canvas = c;
                     GD.Print($"landmarks laid out: {c.Cells} blocks in {c.Columns.Count} columns, {sw.ElapsedMilliseconds} ms, at {Ox}, {Oz}");

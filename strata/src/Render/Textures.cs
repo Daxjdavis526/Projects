@@ -81,6 +81,7 @@ public static class Textures
     private static void Paint(string name, Pixel p)
     {
         if (PaintLandmark(name, p)) return;
+        if (PaintPigment(name, p)) return;
         switch (name)
         {
             case "rootstone":
@@ -516,6 +517,19 @@ public static class Textures
 
     private static readonly Color[] DuskPal = { C(0x1c1a20), C(0x242228), C(0x2c2a31), C(0x35323a), C(0x3e3b44), C(0x48444e) };
     private static readonly Color Clear0 = new(0, 0, 0, 0);
+
+    /// <summary>A pigment block: its colour with a faint mottle that averages back to exactly that colour.</summary>
+    private static bool PaintPigment(string name, Pixel p)
+    {
+        foreach (var pg in Pigments.All)
+        {
+            if (Pigments.TextureName(pg) != name) continue;
+            var c = pg.Color;
+            p.Fill((x, y) => Pixel.Shade(c, 0.96f + 0.08f * p.Hash(x, y, 131)));
+            return true;
+        }
+        return false;
+    }
 
     private static bool PaintLandmark(string name, Pixel p)
     {

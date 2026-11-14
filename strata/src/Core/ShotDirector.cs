@@ -54,7 +54,6 @@ public partial class ShotDirector : Node3D
         AddChild(_cam);
         _world = new World(_seed, landmarks, gargantua);
         Gargantua.Publish(_world.Gargantua);
-        if (_world.Gen.Landmarks is LandmarkSite pad) AddChild(PadBillboard.Make(pad));
         _view = new WorldView();
         AddChild(_view);
         _view.Init(_world, null, _cam, radius);
@@ -148,7 +147,7 @@ public partial class ShotDirector : Node3D
         _shots.Add(("village", L(-30, 80, 170), L(0, 72, 140), 0.12f, 1f));
         _shots.Add(("complex", L(170, 110, 110), L(236, 80, 34), 0.24f, 1f));
         _shots.Add(("complex_night", L(190, 90, 90), L(236, 90, 34), 0.72f, 1f));
-        BillboardShots(site);
+        PortraitShots(site);
     }
 
     /// <summary>Gargantua from the observatory's deck by day and night, then on the way in.</summary>
@@ -171,18 +170,18 @@ public partial class ShotDirector : Node3D
         _shots.Add(("photon_sphere", c - toward * 3.2f * m, c, 0.75f, 1f));
         _shots.Add(("looking_out_at_2_3M", c - toward * 2.3f * m, c - toward * 10f * m, 0.75f, 1f));
         _shots.Add(("deck_day_toward_pad", eye, new Vector3(site.PadWorld.X, site.PadWorld.Y + 20, site.PadWorld.Z), 0.2f, 1f));
-        BillboardShots(site);
+        PortraitShots(site);
     }
 
-    /// <summary>The billboard beside the rocket, from the foot of the pad's stairs by day and at night, and from further off.</summary>
-    private void BillboardShots(LandmarkSite site)
+    /// <summary>The mosaic east of the pad: from the observatory's side by day, from in front, and at night.</summary>
+    private void PortraitShots(LandmarkSite site)
     {
-        var (face, _) = LaunchComplex.BoardFace(site);
-        var pad = site.PadWorld;
-        var near = new Vector3(face.X + 6f, LandmarkSite.Valley + 1.62f, face.Z + 24f);
-        _shots.Add(("billboard_day", near, new Vector3(pad.X - 3f, face.Y + 2f, pad.Z), 0.2f, 1f));
-        _shots.Add(("billboard_night", near, new Vector3(pad.X - 3f, face.Y + 2f, pad.Z), 0.72f, 1f));
-        _shots.Add(("billboard_far", new Vector3(face.X - 30f, LandmarkSite.Valley + 14f, face.Z + 60f), new Vector3(pad.X, pad.Y + 12f, pad.Z), 0.22f, 1f));
+        Vector3 L(float x, float y, float z) => new(site.Ox + x, y, site.Oz + z);
+        var (cx, _, cz) = Portrait.Cell(Portrait.H / 2, Portrait.W / 2);
+        float mid = Portrait.Y0 + Portrait.H * 0.55f;
+        _shots.Add(("portrait_front", L(cx - 120, mid, cz), L(cx, mid, cz), 0.22f, 1f));
+        _shots.Add(("portrait_with_rocket", L(LandmarkSite.PadCentre.X - 70, LandmarkSite.Valley + 30, LandmarkSite.PadCentre.Y + 60), L(cx, mid - 20, cz), 0.22f, 1f));
+        _shots.Add(("portrait_night", L(cx - 120, mid, cz), L(cx, mid, cz), 0.72f, 1f));
     }
 
     private void BuildTour(WorldGen gen, int sx, int sz)

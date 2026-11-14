@@ -126,22 +126,30 @@ public partial class TesseractTest : Node
         await Shot("deck_day");
         G.View.Sky.Time = 0.74;
 
-        // The billboard beside the rocket on the pad.
-        var (face, size) = LaunchComplex.BoardFace(site);
-        var board = G.GetNodeOrNull<MeshInstance3D>("Billboard");
-        Check(board != null && (board.GlobalPosition - face).Length() < 0.01f && board.Mesh is QuadMesh q && q.Size == size, "the billboard's picture hangs on its frame");
+        // The mosaic beside the rocket: from the plain west of it, by day, with the rocket in view.
         var rocket = G.Vehicles.OnPad();
-        Check(rocket != null && new Vector2(face.X - rocket.Origin.X, face.Z - rocket.Origin.Z).Length() < 20f, "right beside the rocket");
-        var foot = new Vector3(face.X + 6f, LandmarkSite.Valley, face.Z + 24f);
+        var (mx, my, mz) = Portrait.Cell(Portrait.H / 2, Portrait.W / 2);
+        var mid = new Vector3(site.Ox + mx, my, site.Oz + mz);
+        int checkedPx = 0, rightPx = 0;
+        var view = new Vector3(rocket?.Origin.X - 70f ?? mid.X - 140f, LandmarkSite.Valley + 30f, (rocket?.Origin.Z ?? mid.Z) + 60f);
         P.Flying = true;
-        P.Teleport(foot);
+        P.Teleport(view);
         P.Flying = true;
         await Frames(4);
-        await Until(() => G.View.Chunks.AreaReady(foot, 3) && G.View.Chunks.Jobs.Pending == 0, 120f);
-        Aim(new Vector3(rocket?.Origin.X ?? face.X, face.Y + 4f, rocket?.Origin.Z ?? face.Z));
+        await Until(() => G.View.Chunks.AreaReady(view, 3) && G.View.Chunks.Jobs.Pending == 0 && W.IsReady((int)mid.X, (int)mid.Z), 120f);
+        for (int row = 0; row < Portrait.H; row += 7)
+            for (int col = 0; col < Portrait.W; col += 7)
+            {
+                var (cx, cy, cz) = Portrait.Cell(row, col);
+                checkedPx++;
+                if (W.GetBlock(site.Ox + cx, cy, site.Oz + cz) == Portrait.BlockAt(row, col)) rightPx++;
+            }
+        Check(checkedPx > 0 && rightPx == checkedPx, $"the mosaic stands in the world, block for pixel ({rightPx} of {checkedPx} sampled)");
+        Check(rocket != null && new Vector2(mid.X - rocket.Origin.X, mid.Z - rocket.Origin.Z).Length() < 40f, "beside the rocket");
+        Aim(mid + new Vector3(0, -25f, 0));
         G.View.Sky.Time = 0.2;
-        await GameSeconds(1f);
-        await Shot("billboard_and_rocket", ui: false);
+        await GameSeconds(1.5f);
+        await Shot("mosaic_and_rocket", ui: false);
         G.View.Sky.Time = 0.74;
 
         // Up to it, flying: within its reach it pulls, and close in nothing can fly away.

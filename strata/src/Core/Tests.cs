@@ -135,6 +135,7 @@ public static partial class Tests
         Test("Gargantua: the shadow, the bending, the disk over the top", GargantuaLight);
         Test("Gargantua world: the site, the pull, clocks, air, a rocket swallowed", GargantuaWorld);
         Test("the tesseract's four-dimensional geometry", FourDimensions);
+        Test("the mosaic by the launch pad, block for pixel", Mosaic);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;
